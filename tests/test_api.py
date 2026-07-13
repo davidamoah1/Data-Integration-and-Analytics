@@ -40,7 +40,7 @@ def test_root_endpoint(client):
     response = client.get("/")
     assert response.status_code == 200
     data = response.json()
-    assert data["name"] == "DataFlow — Enterprise Data Intelligence API"
+    assert data["name"] == "ETL Data Intelligence API"
 
 
 def test_health_check(client):
