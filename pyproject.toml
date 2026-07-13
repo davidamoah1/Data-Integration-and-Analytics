@@ -1,0 +1,24 @@
+[project]
+name = "etl-project"
+version = "1.0.0"
+description = "ETL Pipeline Automation for Business Reporting"
+requires-python = ">=3.10"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "SIM"]
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["etl", "database", "pipeline", "scheduler", "dashboard", "config"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
