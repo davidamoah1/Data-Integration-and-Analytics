@@ -34,7 +34,10 @@ jobs:
         run: black --check .
 
       - name: Run tests
-        run: pytest tests/ -v --tb=short
+        run: |
+          pytest tests/ -v --tb=short --timeout=300 --maxfail=5 -x
         env:
           API_KEY: test-ci-key
           DB_TYPE: sqlite
+          PYTHONUNBUFFERED: 1
+        timeout-minutes: 10
