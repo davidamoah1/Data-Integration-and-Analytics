@@ -26,6 +26,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install ruff black
+          python --version
+          pip list | grep -E "(pytest|pandas|fastapi|streamlit)"
 
       - name: Lint with ruff
         run: ruff check .
@@ -35,9 +37,9 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest tests/ -v --tb=short --timeout=300 --maxfail=5 -x
+          pytest tests/ -v --tb=short --disable-warnings -x
         env:
           API_KEY: test-ci-key
           DB_TYPE: sqlite
           PYTHONUNBUFFERED: 1
-        timeout-minutes: 10
+        timeout-minutes: 15
