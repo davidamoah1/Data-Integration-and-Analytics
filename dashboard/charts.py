@@ -29,13 +29,15 @@ def _close_container():
     st.markdown("</div>", unsafe_allow_html=True)
 
 
-def render_revenue_over_time(df: pd.DataFrame):
+def render_revenue_over_time(df: pd.DataFrame, labels: dict | None = None):
     """Render an area chart showing revenue over time.
 
     Args:
         df: Filtered DataFrame with 'order_date' and 'sales' columns.
     """
-    _chart_container("Revenue Over Time")
+    lbl = labels or {}
+    revenue_word = lbl.get("revenue", "Revenue")
+    _chart_container(f"{revenue_word} Over Time")
     if "order_date" in df.columns and df["order_date"].notna().any():
         df = df.copy()
         df["order_date"] = pd.to_datetime(df["order_date"], errors="coerce")
@@ -45,9 +47,9 @@ def render_revenue_over_time(df: pd.DataFrame):
             .sum()
             .reset_index()
         )
-        trend.columns = ["Month", "Revenue"]
+        trend.columns = ["Month", revenue_word]
         fig = px.area(
-            trend, x="Month", y="Revenue", color_discrete_sequence=["#667eea"], template="none"
+            trend, x="Month", y=revenue_word, color_discrete_sequence=["#667eea"], template="none"
         )
         fig.update_traces(
             fill="tozeroy",
@@ -62,22 +64,25 @@ def render_revenue_over_time(df: pd.DataFrame):
     _close_container()
 
 
-def render_revenue_by_category(df: pd.DataFrame):
+def render_revenue_by_category(df: pd.DataFrame, labels: dict | None = None):
     """Render a horizontal bar chart of revenue by category.
 
     Args:
         df: Filtered DataFrame with 'category' and 'sales' columns.
     """
-    _chart_container("Revenue by Category")
+    lbl = labels or {}
+    revenue_word = lbl.get("revenue", "Revenue")
+    cat_word = lbl.get("category_label", "Category")
+    _chart_container(f"{revenue_word} by {cat_word}")
     if "category" in df.columns:
         cat_data = df.groupby("category")["sales"].sum().sort_values(ascending=True).reset_index()
-        cat_data.columns = ["Category", "Revenue"]
+        cat_data.columns = [cat_word, revenue_word]
         fig = px.bar(
             cat_data,
-            x="Revenue",
-            y="Category",
+            x=revenue_word,
+            y=cat_word,
             orientation="h",
-            color="Revenue",
+            color=revenue_word,
             color_continuous_scale=["#4338ca", "#667eea", "#a78bfa"],
             template="none",
         )
@@ -89,20 +94,22 @@ def render_revenue_by_category(df: pd.DataFrame):
     _close_container()
 
 
-def render_profit_by_region(df: pd.DataFrame):
+def render_profit_by_region(df: pd.DataFrame, labels: dict | None = None):
     """Render a donut pie chart of profit by region.
 
     Args:
         df: Filtered DataFrame with 'region' and 'profit' columns.
     """
-    _chart_container("Profit by Region")
+    lbl = labels or {}
+    profit_word = lbl.get("profit", "Profit")
+    _chart_container(f"{profit_word} by Region")
     if "region" in df.columns and "profit" in df.columns:
         reg = df.groupby("region")["profit"].sum().reset_index()
-        reg.columns = ["Region", "Profit"]
+        reg.columns = ["Region", profit_word]
         fig = px.pie(
             reg,
             names="Region",
-            values="Profit",
+            values=profit_word,
             color_discrete_sequence=COLORS,
             hole=0.45,
             template="none",
@@ -119,14 +126,17 @@ def render_profit_by_region(df: pd.DataFrame):
     _close_container()
 
 
-def render_top_products(df: pd.DataFrame, n: int = 10):
+def render_top_products(df: pd.DataFrame, n: int = 10, labels: dict | None = None):
     """Render a horizontal bar chart of top N products by revenue.
 
     Args:
         df: Filtered DataFrame with 'product_name' and 'sales' columns.
         n: Number of top products to show.
     """
-    _chart_container(f"Top {n} Products by Revenue")
+    lbl = labels or {}
+    product_word = lbl.get("product_label", "Products")
+    revenue_word = lbl.get("revenue", "Revenue")
+    _chart_container(f"Top {n} {product_word} by {revenue_word}")
     if "product_name" in df.columns:
         top = (
             df.groupby("product_name")["sales"]
@@ -135,14 +145,14 @@ def render_top_products(df: pd.DataFrame, n: int = 10):
             .head(n)
             .reset_index()
         )
-        top.columns = ["Product", "Revenue"]
+        top.columns = ["Product", revenue_word]
         top["Label"] = top["Product"].str[:30] + "..."
         fig = px.bar(
             top,
-            x="Revenue",
+            x=revenue_word,
             y="Label",
             orientation="h",
-            color="Revenue",
+            color=revenue_word,
             color_continuous_scale=["#11998e", "#38ef7d"],
             template="none",
         )
@@ -164,13 +174,17 @@ def render_top_products(df: pd.DataFrame, n: int = 10):
     _close_container()
 
 
-def render_sales_vs_profit_scatter(df: pd.DataFrame):
+def render_sales_vs_profit_scatter(df: pd.DataFrame, labels: dict | None = None):
     """Render a scatter plot of sales vs profit, colored by category.
 
     Args:
         df: Filtered DataFrame with 'sales', 'profit', and 'category' columns.
     """
-    _chart_container("Sales vs Profit by Category")
+    lbl = labels or {}
+    revenue_word = lbl.get("revenue", "Revenue")
+    profit_word = lbl.get("profit", "Profit")
+    cat_word = lbl.get("category_label", "Category")
+    _chart_container(f"{revenue_word} vs {profit_word} by {cat_word}")
     if "profit" in df.columns and "sales" in df.columns:
         samp = df.dropna(subset=["sales", "profit"]).sample(min(500, len(df)), random_state=42)
         fig = px.scatter(
@@ -189,13 +203,16 @@ def render_sales_vs_profit_scatter(df: pd.DataFrame):
     _close_container()
 
 
-def render_profit_margin_by_category(df: pd.DataFrame):
+def render_profit_margin_by_category(df: pd.DataFrame, labels: dict | None = None):
     """Render a bar chart of profit margin percentage by category.
 
     Args:
         df: Filtered DataFrame with 'sales', 'profit', and 'category' columns.
     """
-    _chart_container("Profit Margin by Category")
+    lbl = labels or {}
+    profit_word = lbl.get("profit", "Profit Margin")
+    cat_word = lbl.get("category_label", "Category")
+    _chart_container(f"{profit_word} by {cat_word}")
     if "profit" in df.columns and "sales" in df.columns and "category" in df.columns:
         mdata = (
             df.groupby("category")
@@ -223,13 +240,16 @@ def render_profit_margin_by_category(df: pd.DataFrame):
     _close_container()
 
 
-def render_heatmap_sales_region_category(df: pd.DataFrame):
+def render_heatmap_sales_region_category(df: pd.DataFrame, labels: dict | None = None):
     """Render a heatmap of sales by region and category.
 
     Args:
         df: Filtered DataFrame with 'region', 'category', and 'sales' columns.
     """
-    _chart_container("Sales Heatmap: Region x Category")
+    lbl = labels or {}
+    revenue_word = lbl.get("revenue", "Revenue")
+    cat_word = lbl.get("category_label", "Category")
+    _chart_container(f"{revenue_word} Heatmap: Region x {cat_word}")
     if "region" in df.columns and "category" in df.columns and "sales" in df.columns:
         pivot = df.groupby(["region", "category"])["sales"].sum().reset_index()
         fig = go.Figure(
@@ -252,7 +272,8 @@ def render_heatmap_sales_region_category(df: pd.DataFrame):
 
 
 def render_kpi_cards(
-    total_sales: float, total_profit: float, total_orders: int, avg_order: float, margin_pct: float
+    total_sales: float, total_profit: float, total_orders: int, avg_order: float, margin_pct: float,
+    labels: dict | None = None,
 ):
     """Render the 4 KPI cards.
 
@@ -265,32 +286,38 @@ def render_kpi_cards(
     """
     from dashboard.utils import fmt_currency, fmt_number
 
+    lbl = labels or {}
+    revenue_label = lbl.get("revenue", "Total Revenue")
+    profit_label = lbl.get("profit", "Profit")
+    orders_label = lbl.get("orders", "Total Orders")
+    avg_label = lbl.get("avg_order", "Avg Order Value")
+
     k1, k2, k3, k4 = st.columns(4)
     with k1:
         st.markdown(
             f'<div class="kpi-card kpi-card-sales"><span class="kpi-icon">💰</span>'
             f'<div class="kpi-value">{fmt_currency(total_sales)}</div>'
-            f'<div class="kpi-label">Total Revenue</div></div>',
+            f'<div class="kpi-label">{revenue_label}</div></div>',
             unsafe_allow_html=True,
         )
     with k2:
         st.markdown(
             f'<div class="kpi-card kpi-card-profit"><span class="kpi-icon">📈</span>'
             f'<div class="kpi-value">{fmt_currency(total_profit)}</div>'
-            f'<div class="kpi-label">Total Profit ({margin_pct:.1f}% margin)</div></div>',
+            f'<div class="kpi-label">{profit_label} ({margin_pct:.1f}% margin)</div></div>',
             unsafe_allow_html=True,
         )
     with k3:
         st.markdown(
             f'<div class="kpi-card kpi-card-orders"><span class="kpi-icon">🛒</span>'
             f'<div class="kpi-value">{fmt_number(total_orders)}</div>'
-            f'<div class="kpi-label">Total Orders</div></div>',
+            f'<div class="kpi-label">{orders_label}</div></div>',
             unsafe_allow_html=True,
         )
     with k4:
         st.markdown(
             f'<div class="kpi-card kpi-card-avg"><span class="kpi-icon">✨</span>'
             f'<div class="kpi-value">{fmt_currency(avg_order)}</div>'
-            f'<div class="kpi-label">Avg Order Value</div></div>',
+            f'<div class="kpi-label">{avg_label}</div></div>',
             unsafe_allow_html=True,
         )

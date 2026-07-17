@@ -224,6 +224,8 @@ def render_industry_pack_selector():
         pack_key = pack_names[pack_labels.index(selected)]
         pack = get_pack(pack_key)
         if pack:
+            st.session_state["active_industry_pack"] = pack_key
+            st.session_state["active_industry_pack_name"] = pack["name"]
             st.caption(pack["description"])
             dashboards = pack.get("dashboards", [])
             st.markdown(f"**{len(dashboards)} dashboards** included")
@@ -231,6 +233,63 @@ def render_industry_pack_selector():
                 st.markdown(f"- {d['name']}")
             if len(dashboards) > 3:
                 st.caption(f"...and {len(dashboards) - 3} more")
+    else:
+        st.session_state["active_industry_pack"] = None
+        st.session_state["active_industry_pack_name"] = None
+
+
+INDUSTRY_LABELS = {
+    "sme": {
+        "revenue": "Revenue", "profit": "Profit", "orders": "Orders",
+        "avg_order": "Avg Order Value", "performance": "Sales Performance",
+        "breakdown": "Profit and Regional Breakdown", "deep_dive": "Deep Dive Analysis",
+        "regional": "Regional Analysis", "category_label": "Category",
+        "product_label": "Top Products", "region_label": "Region",
+    },
+    "education": {
+        "revenue": "Tuition Revenue", "profit": "Net Revenue", "orders": "Transactions",
+        "avg_order": "Avg Payment", "performance": "Enrollment & Revenue Performance",
+        "breakdown": "Department and Regional Breakdown", "deep_dive": "Deep Dive Analysis",
+        "regional": "Regional Analysis", "category_label": "Program Type",
+        "product_label": "Top Departments", "region_label": "Region",
+    },
+    "healthcare": {
+        "revenue": "Billing Amount", "profit": "Net Billing", "orders": "Transactions",
+        "avg_order": "Avg Bill Amount", "performance": "Billing Performance",
+        "breakdown": "Department and Regional Breakdown", "deep_dive": "Deep Dive Analysis",
+        "regional": "Regional Analysis", "category_label": "Service Type",
+        "product_label": "Top Departments", "region_label": "Region",
+    },
+    "government": {
+        "revenue": "Spending Amount", "profit": "Net Spending", "orders": "Projects",
+        "avg_order": "Avg Project Cost", "performance": "Spending Performance",
+        "breakdown": "Department and Regional Breakdown", "deep_dive": "Deep Dive Analysis",
+        "regional": "Regional Analysis", "category_label": "Project Type",
+        "product_label": "Top Departments", "region_label": "Region",
+    },
+    "church": {
+        "revenue": "Offerings", "profit": "Net Offerings", "orders": "Transactions",
+        "avg_order": "Avg Offering", "performance": "Offerings Performance",
+        "breakdown": "Department and Regional Breakdown", "deep_dive": "Deep Dive Analysis",
+        "regional": "Regional Analysis", "category_label": "Event Type",
+        "product_label": "Top Departments", "region_label": "Region",
+    },
+    "ngo": {
+        "revenue": "Donations", "profit": "Net Donations", "orders": "Transactions",
+        "avg_order": "Avg Donation", "performance": "Donations Performance",
+        "breakdown": "Program and Regional Breakdown", "deep_dive": "Deep Dive Analysis",
+        "regional": "Regional Analysis", "category_label": "Program Type",
+        "product_label": "Top Programs", "region_label": "Region",
+    },
+}
+
+
+def get_industry_labels() -> dict:
+    """Get label overrides for the currently selected industry pack."""
+    pack_key = st.session_state.get("active_industry_pack")
+    if pack_key and pack_key in INDUSTRY_LABELS:
+        return INDUSTRY_LABELS[pack_key]
+    return INDUSTRY_LABELS["sme"]
 
 
 def render_onboarding():

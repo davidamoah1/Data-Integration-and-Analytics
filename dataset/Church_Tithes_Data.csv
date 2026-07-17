@@ -1,0 +1,643 @@
+Transaction ID,Date,Member Name,Department,Event Type,Region,Amount,Discount,Quantity,Total,Payment Method
+CHC40479,2022/04/05,Member_0397,Administration,Conference,East,1836.44,0,2,3672.87,Cash
+CHC40433,17 Dec 2024,Member_0592,Youth Ministry,Sunday Service,South,-196.08681341481596,0,N/A,784.35,Cheque
+CHC40584,05-11-2023,Member_0409,Main Sanctuary,Conference,Central,1359.31,$0.00,1,1359.31,Cheque
+CHC40140,"January 20, 2024",Member_0355,Youth Ministry,Conference,South,1874.41,0,1,1874.41,Bank Transfer
+CHC40060,06-10-2024,Member_0544,Music Ministry,Building Fund,South,3031.94,0,1,3031.94,Cash
+CHC40578,06 Nov 2022,Member_0246,Youth Ministry,null,South,$387.82,0,2,775.64,Cheque
+CHC40397,"October 21, 2022",Member_0241,Administration,Midweek Service,West,438.63,0,4,unknown,Cheque
+CHC40176,"June 04, 2024",Member_0588,Administration,Conference,East,2842.12,0,1,2842.12,Cash
+CHC40439,30 May 2023,Member_0529,Youth Ministry,Sunday Service,Central,238.16,0,1,238.16,MOBILE MONEY
+CHC40409,03/07/2024,Member_0175,administration,Conference,East,317.4,0,2,634.79,Cheque
+CHC40431,2024/08/02,Member_0301,Main Sanctuary,Conference,Central,2659.86, 0 ,1,,BANK TRANSFER
+CHC40345,16-11-2023,Member_0502,ADMINISTRATION, Sunday Service,east, 260.8292957873027 ,0,1,260.83,
+CHC40499,"September 27, 2023",Member_0427,Children's Church,Midweek Service,East,447.2,0,1,447.2,Cash
+CHC40319,0000-00-00,member_0547,Main Sanctuary,None,Central,4784.29,,1,4784.29,Mobile Money
+CHC40420,2023-01-28,Member_0449,Main Sanctuary,TBD,East,7040.44,$0.00,4,28161.74,cheque
+CHC40593,26 Jun 2022,Member_0309,Music Ministry,,South,449.73,0,3,1349.18,Mobile Money
+CHC40263,18-08-2024,  Member_0449  ,Youth Ministry,Special Program,West,1305.61,0,3,-3916.8184729667064,Bank Transfer
+CHC40252,01/04/2023,Member_0475,Main Sanctuary,OUTREACH,  North  ,254,0,1,N/A,Mobile Money
+CHC40084,08/27/24,Member_0540,Children's Church,Sunday Service,North,157.1,0,4,628.41,Cheque
+CHC40284,"October 14, 2024", Member_0193,  Outreach  ,Conference,West,1568,0,2,3135,Cash
+CHC40318,"August 07, 2024",Member_0585,Outreach,Outreach,East,570.2,0,2,1140.41,
+CHC40511,2022/11/24,Member_0445,Main Sanctuary,Midweek Service,Central,179.74,0,1,179.74,Mobile Money
+CHC40026,10/27/24,Member_0427,Administration,Conference,Central,2647.05,0,1,2647.05,Bank Transfer
+CHC40521,06/15/2024,Member_0254,Youth Ministry,Conference,East,375.31,0,2,750.62,mobile money
+CHC40469,23-03-2024,Member_0098,Music Ministry,Conference,East,1176.61,0,3,3529.84,Bank Transfer
+CHC40195,"August 19, 2023",Member_0309,Music Ministry,Sunday Service,East,184.82,0,4,,Bank Transfer
+CHC40065,2022-08-18,Member_0392,Music Ministry,Outreach,  ,212.01,0,3.0,636.04,Cheque
+CHC40402,12/23/2023,Member_0309,Administration,Conference,East,417.84,0,3,1253.52,Cheque
+CHC40147,2024/03/12,Member_0111, Main Sanctuary,Sunday Service,South,$296.36,0,3,889.09,Cash
+CHC40139,01/04/2024,Member_0568,Outreach,building fund,West,579.27,0,3,,  Cash  
+CHC40002,20-06-2023,Member_0011,Outreach,Sunday Service,Central,242.69,0,3,728.08,Mobile Money
+CHC40151,23-06-2023,Member_0167,Outreach,Midweek Service,South,13.64,0,2,27.29,Mobile Money
+CHC40519,2023-05-23,Member_0030,Outreach,Outreach,Central,928.4,0,2,1856.8,Bank Transfer
+CHC40325,2024-08-12,member_0385,Children's Church,Sunday Service,north,491.88,0,3,1475.64,Mobile Money
+CHC40024,05/16/2024,Member_0210,Outreach,Special Program,East,3024,0,2,6048.92,Cheque
+CHC40598,07/16/22,Member_0426,administration,Conference,West,2438.99,0,1,2438.99,Cash
+CHC40551,TBD,Member_0393, Children's Church,Building Fund,West,"$7,178.52",0,1,7178.52,mobile money
+CHC40585,19 Nov 2022,Member_0391,Children's Church,Building Fund,North,9724.69,0,4,38898.77,Bank Transfer
+CHC40560,"October 07, 2024",Member_0140,Outreach,Conference,South,1401.57,0,3,4204.71,Mobile Money
+CHC40532,08/04/2024,Member_0307,Music Ministry,Building Fund,TBD,6787.6,0,1,6787.6,Bank Transfer
+CHC40400,2023-04-05,Member_0135,Administration,Midweek Service,South,175.36,0,3,526.07,Bank Transfer
+CHC40165,2022/03/16,Member_0479,Music Ministry,  Midweek Service  ,TBD,275.89,0,2,551.78,Mobile Money
+CHC40103,08/04/23,Member_0013,Children's Church,Midweek Service,Central,394.26,0,1,394.26,Mobile Money
+CHC40196,2023/12/30,Member_0391,Youth Ministry,Building Fund,West,9448.54,0,1,9448.54,MOBILE MONEY
+CHC40506,2022-10-08,,Youth Ministry,Special Program,West,4344.51,0,1,4344.51,  Mobile Money  
+CHC40478,2024/03/30,member_0234,  Children's Church  ,  Special Program  ,Central,1334.8,$0.00,4,5339.19,Mobile Money
+CHC40250,06/04/23,Member_0420,Main Sanctuary,Conference,East,1013.29,0,1,1013.29,Mobile Money
+CHC40188,11 Sep 2023,Member_0107,Children's Church,Building Fund,North,2870.85,0,1,2870.85,Bank Transfer
+CHC40591,07/27/22,Member_0187,Music Ministry,Sunday Service,West,212.1,0,2,424.2,Bank Transfer
+CHC40552,2022/07/30,Member_0328,Outreach,Midweek Service, South,198.1,TBD,1,198.1,Bank Transfer
+CHC40388,03/24/23,Member_0260,Children's Church,Midweek Service,West,332.24,0,-4,1328.95,Cash
+CHC40143,2023-01-26,Member_0385,Outreach,Building Fund,North,-8107.827129396835,0,1,8107.83, Cheque
+CHC40586,"May 25, 2024",Member_0599,Children's Church,Conference,North,686.71,0,1,686.71,Mobile Money
+CHC40368,01 Oct 2023,N/A,Administration,Building Fund,North,1964.25,0,3,5892.74,Bank Transfer
+CHC40558,"August 15, 2023",Member_0558,Children's Church,Sunday Service,None,159.9,0,4,639.61,N/A
+CHC40152,03/15/24,null,,Special Program,Central,2113.39,0,4,8453.55,Mobile Money
+CHC40101,28 Sep 2024,Member_0437,Children's Church,Sunday Service,West,127.25,0,2,-254.5036391886541,Cheque
+CHC40422,"November 05, 2024",Member_0457,Children's Church,Sunday Service,SOUTH,315.71,0,3,947.12,Cheque
+CHC40043,08 Jan 2022,Member_0529,Administration,Midweek Service,East,118.56,0,3,355.68,Cash
+CHC40185,09-04-2024,Member_0087,Outreach,Sunday Service,Central,198.75,0,1,198.75,Cash
+CHC40599,12 Feb 2022,,Outreach,Sunday Service,Central,345.58,0,2,691.16,Mobile Money
+CHC40163,08/12/22,Member_0306,Children's Church,Special Program,West,1936.79,0,1,1937,  Mobile Money  
+CHC40329,TBD,,Outreach,,West,719.43,0,2,1438.86,Bank Transfer
+CHC40334,"December 23, 2024",MEMBER_0117,Administration,Conference,North,472.88,0,2,945.76,Cash
+CHC40055,19-10-2023,Member_0576,Outreach,Building Fund,West,9484.31,0,2,18968.62,Cash
+CHC40185,09-04-2024,Member_0087,Outreach,Sunday Service,Central,198.75,0,1,198.75,Cash
+CHC40080,2024/03/17,Member_0456,Youth Ministry,outreach,East,189.67,0,2,379.34,Cheque
+CHC40239,05 Jun 2022,Member_0585,Administration,Conference,Central,1742.2,0,1,1742.2,
+CHC40339,2022/04/30,Member_0485,Youth Ministry,Sunday Service,Central,60.21,0,2,120.42,cheque
+CHC40113,04/02/2023,Member_0346,Outreach,Conference,  West  ,1184.36,0,1,1184.36,Cash
+CHC40378,01/31/23,Member_0296,Children's Church,Conference,  West  ,1600.46,0,3,4801.37,Mobile Money
+CHC40372,02/13/23,  ,Music Ministry,Midweek Service,North,75.56,0,1,,Mobile Money
+CHC40087,27-06-2022,Member_0440,Children's Church,Special Program,Central,4169.92,$0.00,2,8339.84,Bank Transfer
+CHC40015,08 May 2023,Member_0560,Administration,Sunday Service,Central,74.46,0,3,223.38,Cash
+CHC40023,2023/12/27,Member_0079,Main Sanctuary,Sunday Service,East,19.52,0,2,39.05,Cheque
+CHC40544,2023/04/30,Member_0182,Children's Church,Midweek Service,East,429.04,0,4,1716.14,Cash
+CHC40449,28 Feb 2022,Member_0251,Outreach,Building Fund,North,8828.12,0,4,35312.5,Bank Transfer
+CHC40356,09/28/2022,Member_0361,Children's Church,Special Program,South,3332.47,0,1,3332.47,Cash
+CHC40579,05/19/2022,Member_0020,Outreach,Midweek Service,South,170.6,0,2,341.21,Cash
+CHC40226,2022/11/22,Member_0427,Children's Church,Special Program,east,3484.49,0,1,3484,Cheque
+CHC40445,10/09/24,,Outreach,Special Program,South,1593.0,0,2,3186.01,BANK TRANSFER
+CHC40361,2022-01-07,Member_0129,  Youth Ministry  ,Special Program,Central,1641.16,0,3,-4923.46784782608,Cash
+CHC40090,0000-00-00,Member_0385,Main Sanctuary,Conference,Central,2597.83,0,3,7793.5,  Mobile Money  
+CHC40408,"October 05, 2024",Member_0506,  Outreach  ,Outreach,North,148,0,2,296.59,Cash
+CHC40441,2024/03/19,Member_0166,  Children's Church  ,Building Fund,South,3208.31,0,2,6416.61,Bank Transfer
+CHC40483,11/13/2023,Member_0141,Music Ministry,Conference,Central,1418.11,0,4.0,5672.43, Bank Transfer
+CHC40581,2024/02/07,  Member_0501  ,main sanctuary,Outreach,West,633.48,N/A,2,1266.97,Bank Transfer
+CHC40066,20-02-2024,Member_0139,Outreach,Midweek Service, West,283.73, 0 ,2,567.47,Bank Transfer
+CHC40389,0000-00-00,Member_0500,Music Ministry,Sunday Service,East,417.06,0,2,834.12,Mobile Money
+CHC40283,2023/12/14,Member_0239,Outreach,Special Program,North,3104.67,0,1,3104.67,Cheque
+CHC40462,04/15/23,Member_0245,Administration,Building Fund,South,9973.67,0,3,29921.02,Bank Transfer
+CHC40437,2022-06-15,Member_0062,Outreach,Outreach,East,495.43,0,4,1981.74,Bank Transfer
+CHC40572,09/01/2023,Member_0028,Main Sanctuary,Sunday Service,West,436.72,,1,436.72,  Bank Transfer  
+CHC40468,16 Jun 2023,Member_0116,Youth Ministry,Outreach,,814.25,0,1, 814.2528385966563 ,Mobile Money
+CHC40338,2022/11/07,Member_0263,,Conference,North,1232.09,0,4,,Mobile Money
+CHC40326,2023-11-19,Member_0488,Music Ministry,Sunday Service,central,315.74,0,4,1262.96,Cash
+CHC40160,09/22/23,,Music Ministry,Building Fund,Central, 5056.669664258096 ,0,1,5056.67,Cash
+CHC40351,"February 15, 2023",Member_0367,Administration, Outreach,Central,814.55,0,3,2443.65,Bank Transfer
+CHC40306,2022-09-03,Member_0173,Outreach, Outreach,,,0,4,1759.7,Bank Transfer
+CHC40530,2022/04/13,Member_0411,Main Sanctuary,Special Program,South,1261.2,0,4,5044.81,Cash
+CHC40470,03/19/2023,Member_0310,Children's Church,Special Program,East,4683.34,0,4,18733.36,Mobile Money
+CHC40293,2024-04-04,Member_0369,Music Ministry,Outreach,  South  ,906.61,0,3,2719.84,Bank Transfer
+CHC40594,02/25/22,Member_0111,Main Sanctuary,Special Program,West,439.0,0,4,,Mobile Money
+CHC40095,2024/11/01,Member_0389,Main Sanctuary,  Special Program  ,,2310.96,0,3,6932.87,
+CHC40039,"January 02, 2022",Member_0350,Youth Ministry,Midweek Service,East,120.8,0,3,362.39,Bank Transfer
+CHC40052,16 Dec 2022,Member_0045,Music Ministry,Special Program,East,4701.46,$0.00,2,9402.93,Unknown
+CHC40394,06-12-2022,Member_0590,Youth Ministry,Conference,North,1606.16,0,1,1606.16,Cash
+CHC40452,28-08-2022,Member_0416,Children's Church,Building Fund,East,2023.86,0,4,8095.45,Cheque
+CHC40451,2024/04/02,Member_0391,Main Sanctuary,Special Program,  North  ,"$4,042.66",0,1,4042.66,Cash
+CHC40514,23 Jun 2023,Member_0012,Main Sanctuary,,central,2728.93,,2,"$5,457.86",
+CHC40458,07/07/2023,Member_0419,Main Sanctuary,Outreach,East,839.39,0,4,3357.56,Cheque
+CHC40112,02/12/2022,Member_0192,  Children's Church  ,Building Fund,North,9828.65,0,3,29485.94,Cash
+CHC40533,2024/04/22,Member_0158,Administration,Building Fund,Central,4107.02,0,1,4107.02,Cheque
+CHC40348,2024-07-10,Member_0413,Children's Church,Midweek Service,South,153.35,0,2,306.7,Cheque
+CHC40430,"May 30, 2022",Member_0476,Administration,outreach,South,980.59,0,2,,Cash
+CHC40380,21-07-2023,Member_0237,Children's Church,N/A,Central,,0,3,335.89,Cheque
+CHC40110,12/30/23,Member_0595,Main Sanctuary,Outreach,West,633.21,0,-4,2532.84,Cash
+CHC40535,2022-04-15,Member_0068,Youth Ministry,Midweek Service,North,477.19,0,,954.39, Cheque
+CHC40102,"March 16, 2023",Member_0113,MUSIC MINISTRY,Conference,Central,1915.52,0,3,5746.56,Bank Transfer
+CHC40398,"March 04, 2024",Member_0070,Children's Church,Midweek Service,West,454.82,0,2,909.64,Mobile Money
+CHC40094,08/25/23,Member_0355,Outreach,Conference,South,2768.81,0,1,2768.81,Cheque
+CHC40157,2024-03-13,Member_0320,Youth Ministry,Outreach,South,849.34,$0.00,1,849.34,Cash
+CHC40286,2022/05/01,Member_0173,Children's Church,Sunday Service,East,$439.47,0,1,439.47,bank transfer
+CHC40200,03/23/2024,Member_0424,Youth Ministry,Sunday Service,North,341.12,0,2,682.25,Mobile Money
+CHC40324,2022-11-01,Member_0482,,Midweek Service,North,117.28,0,2,234.57,Cheque
+CHC40512,"May 02, 2024",Member_0204,,Conference,North,1458.22,0,2,2916.43,Mobile Money
+CHC40273,2024/05/25,Member_0169,Youth Ministry,Midweek Service,South,,0,2,338.62,Cheque
+CHC40217,12-05-2023,Member_0440,Main Sanctuary,Special Program,  -  ,4811,0,1,4811.13,Mobile Money
+CHC40486,2022/10/20,Member_0144,Youth Ministry,Building Fund,SOUTH,5608.5,0,1,5608.5,Bank Transfer
+CHC40565,"November 23, 2022",Member_0446,Music Ministry,Outreach,West,35.52,0,2,71.04,Bank Transfer
+CHC40120,12/20/23,Member_0053,Children's Church,Conference,West,1237.29,0,4,4949.16,Mobile Money
+CHC40474,10/21/22,Member_0511,ADMINISTRATION,Conference,West,1889.71,0,3,5669.12,Cheque
+CHC40540,"April 19, 2024",Member_0045,administration,Sunday Service,North,255.5,0,1,255.5,  Cash  
+CHC40559,2022/01/02,Member_0509,  Youth Ministry  ,Sunday Service,Central,488.2,,1,488.2,Bank Transfer
+CHC40289,04/05/2023,Member_0535,Administration,Building Fund,Central,6798.34,0,1,6798.34,Bank Transfer
+CHC40199,10/27/2024,Member_0009,Music Ministry,,West,86.23,,3,258.68,Cash
+CHC40218,2022/06/07,Member_0204,Outreach,Outreach,West,776.04,0,4,3104.17,Mobile Money
+CHC40264,07/27/23,Member_0542,Outreach,SPECIAL PROGRAM,North,,0,4,6482.41, Cheque
+CHC40534,05/25/2024,Member_0385, Children's Church,Conference,,2223.84,0,,,mobile money
+CHC40498,"March 01, 2022",Member_0154,Outreach,Sunday Service,West, 347.3705610133168 ,0,3,1042.11,Cash
+CHC40313,2024-02-06,Member_0591,Children's Church,,Central,3330.65,0,2,6661.3,Bank Transfer
+CHC40124,"April 04, 2024",,Administration,Building Fund,West,5896.81,0,2,11793.63,Cheque
+CHC40413,2023-11-20,Member_0584,Children's Church,Building Fund,East,4380.15,0,2,"$8,760.29",  -  
+CHC40464,10/15/2022,Member_0187,Administration,Conference,TBD,,0,4,10605.47,Cash
+CHC40194,2022-02-20,Member_0205,Youth Ministry,Building Fund,West,1325.65,0,-2,2651.3,  Bank Transfer  
+CHC40444,12/14/24,Member_0383,Administration,Outreach,South,924.62,0,4,3698.48,Cheque
+CHC40142,"June 10, 2024",Member_0379,Main Sanctuary,Sunday Service,South, 245.99603009594657 ,0,3,737.99,Cheque
+CHC40577,05/23/2022,Member_0027,Main Sanctuary, Building Fund,North,7890.56,0,4,31562.24,cash
+CHC40489,06/15/2022,Member_0160,Youth Ministry,Building Fund,West,3107.67,0,1,3107.67,BANK TRANSFER
+CHC40032,2023-11-13,member_0103,Children's Church,Midweek Service,Central,66.97,0,2,,Bank Transfer
+CHC40386,2022/07/12,Member_0522,Youth Ministry,Outreach,South,455.81,0,1,455.81,BANK TRANSFER
+CHC40321,05/08/2022,Member_0416,Outreach,Sunday Service,South,60.37,0,4,241.49,Bank Transfer
+CHC40531,"March 29, 2023",  Member_0190  ,Outreach,Conference,North,2288.86,0,3,6866.58,Cheque
+CHC40567,2022/04/27,Member_0168,Youth Ministry, Special Program,West,1933.01,0,4,7732.02,Mobile Money
+CHC40107,04/23/2023,Member_0385,Administration,Conference,TBD,1932.14,0,2,3864.28,Cash
+CHC40071,08 Jun 2024,Member_0320,  Outreach  ,Conference,North,191.77,0,2,383.55,Mobile Money
+CHC40279,01/01/22,Member_0023,Outreach,Building Fund,North,4908.86,0,3,14727,Bank Transfer
+CHC40332,"June 24, 2022",Member_0374,Administration,Special Program,East,3468.36,0,2,6936.73,Cash
+CHC40343,04/29/2024,Member_0569,Children's Church,special program,Central,3500.51,0,2,7001.01,bank transfer
+CHC40190,06/21/22,Member_0290, Children's Church,Special Program,Central,676.14,0,1,676.14,Bank Transfer
+CHC40202,2024-07-15,Member_0176,Music Ministry,Conference,Central,"$1,883.64",0,2,3767,mobile money
+CHC40425,2024-13-45,Member_0334,Youth Ministry,Special Program,East,672.63,-,2,1345.27,Bank Transfer
+CHC40153,06-10-2023,Member_0227,Administration,Special Program,West,4332.53,unknown,1,4332.53,Mobile Money
+CHC40208,"June 15, 2024",Member_0161,Main Sanctuary,Conference, South,1698.75,0,4,6795.02,mobile money
+CHC40358,"November 20, 2022",Member_0578,Outreach,Outreach,,105.47,0,2,210.94,
+CHC40385,"July 10, 2023",Member_0171,Youth Ministry,Outreach,South,229.99,0,1,229.99,Cash
+CHC40049,04/22/23,Member_0026,Music Ministry,Building Fund,Central,1047.04,0,2,2094.07,Bank Transfer
+CHC40267,2022-12-19,Member_0080,Outreach,Midweek Service,N/A,102.56,0,3,-307.6925040356188,Unknown
+CHC40212,30 Jul 2023,Member_0271,Main Sanctuary,Building Fund,West,9654.43,0,2,19308.86,Cash
+CHC40446,2024/11/08,Member_0105,Outreach,  Conference  ,East,,0,3,804.76,Cheque
+CHC40379,01/04/22,Member_0179, Youth Ministry,Conference,South,1859.01,0,2,,Cheque
+CHC40171,2023/08/14,Member_0178,Main Sanctuary,Special Program,Central,3600.07,0,2,7200.14,Bank Transfer
+CHC40435,04-03-2024,Member_0279,  Music Ministry  ,Midweek Service,Central,472.44,0,1,472.44,Mobile Money
+CHC40557,06/04/23,Member_0410,Children's Church,Midweek Service,Central,427.05,0,3,1281.15,Cash
+CHC40209,07/09/2023,Member_0025,Youth Ministry,Special Program,North,3447.18,0,4,13788.72,Cash
+CHC40203,01 May 2024,Member_0043,Outreach,Building Fund,South,4704.67,0,4,18818.68,Cheque
+CHC40309,01-08-2022,Member_0458,Main Sanctuary,Building Fund,South,9309.69,0,1,-9309.691121979175,Mobile Money
+CHC40328,"September 24, 2024",Member_0339,Main Sanctuary,Outreach,East,632.87,0,1,-,Bank Transfer
+CHC40436,"February 24, 2023",Member_0559,Main Sanctuary,  Sunday Service  ,,12.22,0,1,12.22,None
+CHC40210,2024-11-18,Member_0065,Main Sanctuary,Building Fund,South,4502.62,0,1,4502.62,Cash
+CHC40137,09/25/24,Member_0588,Music Ministry,Outreach,South,574.03,0,1,574,Mobile Money
+CHC40484,31 Jan 2024,Member_0449,Children's Church,Building Fund,South,411.6,0,4,1646.4,  Cheque  
+CHC40307,04/28/24,MEMBER_0585,Music Ministry,Building Fund,Central,6301.44,0,3,18904.33,Bank Transfer
+CHC40091,2022-06-21,Member_0328,Administration,Special Program,North,4116.97,0,2,8233.94,Cash
+CHC40211,2023-02-04,Member_0346,Music Ministry,Building Fund,  East  ,4492.54,0,4,17970.15,Bank Transfer
+CHC40136,"July 02, 2023",Member_0030,Music Ministry,Special Program,Central,3465.93,0,3,10397.78,Cheque
+CHC40348,2024-07-10,Member_0413,Children's Church,Midweek Service,South,153.35,0,2,306.7,Cheque
+CHC40149,27 Mar 2022,Member_0196,YOUTH MINISTRY,Special Program,Central,2463.19,0,,-4926.387185147917,Bank Transfer
+CHC40229,23 Nov 2024,Member_0196,Children's Church,Conference,South,290.18,0,4,1160.73,Cash
+CHC40051,2024/07/14,Member_0394,Youth Ministry,Midweek Service,West,226.07,0,3,678.22,Mobile Money
+CHC40300,01/11/2023,Member_0212,Children's Church,  Special Program  ,East,1853,0,3,,Bank Transfer
+CHC40257,"March 29, 2022",Member_0177,Outreach,Midweek Service,North,50,$0.00,3,150.7,Cash
+CHC40105,01-05-2024,Member_0429,Music Ministry,Building Fund,West,3916.6,0,1.0,3916.6,Bank Transfer
+CHC40440,2024-09-16,Member_0041,Youth Ministry,Special Program,West,3196.6,0,1,3196.6,Bank Transfer
+CHC40475,"May 13, 2022",Member_0600,Administration,Sunday Service,East,-181.86319081671738,0,3,545.59,Cash
+CHC40016,11/27/2023,Member_0137,Music Ministry,Special Program,South,1153.06,null,3.0,3459.19,Cheque
+CHC40576,12/03/24,Member_0516,  Outreach  ,Conference,South,"$2,516.45",0,2,5032.9,Bank Transfer
+CHC40505,2023/05/31,Member_0246,Youth Ministry,  Outreach  ,Central,807.74,0,3,2423.22,Cheque
+CHC40510,"June 21, 2022",Member_0234,N/A,Outreach,,213.38,0,3,640.13,Mobile Money
+CHC40377,2023/01/22,  Member_0513  ,  Administration  ,Outreach,Central,872.43,0,,2617.29,N/A
+CHC40105,01-05-2024,Member_0429,Music Ministry,Building Fund,West,3916.6,0,1.0,3916.6,Bank Transfer
+CHC40390,10/24/2024,Member_0511,Outreach,Midweek Service,Central,120.88,0,3,362.64,Cash
+CHC40472,2022/12/04,Member_0104,Administration,Building Fund,South,7801.17,0,2,15602.35,BANK TRANSFER
+CHC40082,03-10-2023,Member_0053,Children's Church,Special Program,Central,3557.95,0,2,7115.91,Cheque
+CHC40331,08/03/22,Member_0385,Main Sanctuary,Sunday Service,Central,194.0,0,1,194.0,Mobile Money
+CHC40076,2023/03/29,,Youth Ministry,Building Fund,  West  ,3812.16,0,2,7624.32,CASH
+CHC40242,2023/01/02,Member_0575,,Midweek Service,north,20.65,0,1,20.65,Cheque
+CHC40517,03-04-2023,Member_0352,Outreach,Midweek Service,West,455.66,0,1,455.66,  Bank Transfer  
+CHC40365,09-06-2024,,ADMINISTRATION,Conference,south,278.45,0,4,1113.81,Cheque
+CHC40168,03/02/2023,Member_0396,Children's Church,Conference,South,1878.01,0,3,5634.04,Mobile Money
+CHC40123,22 Sep 2023,Member_0090,Outreach,Special Program,East,2146.99,0,3,6440.96,
+CHC40280,"October 04, 2023",Member_0442,Children's Church,Midweek Service,Central,433.14,0,1, 433.13571075057416 ,Mobile Money
+CHC40369,18 Jun 2023,Member_0143,Main Sanctuary,Sunday Service,  East  ,235.65,0,2,471.29,Cheque
+CHC40240,18 Mar 2023,Member_0360,Youth Ministry,Outreach,  South  ,384.78,0,1,384.78,Cash
+CHC40206,17 Dec 2024,Member_0372,Children's Church,Midweek Service,South,22.01,0,2,44.03,Cash
+CHC40017,05/16/2024,Member_0215,Main Sanctuary,Sunday Service,North,$70.03,0,3,210.08,Mobile Money
+CHC40109,11 Jun 2024,MEMBER_0369,Outreach,Building Fund,Central,305.49,0,4,1221.98,Mobile Money
+CHC40178,09/17/2022,Member_0420, Administration,Special Program,south,4560.55,0,1,4560.55,Cash
+CHC40568,27 Jun 2023,Member_0204,Outreach,Sunday Service,East,259.0,0,2,518.0,Bank Transfer
+CHC40428,07/04/22,,Administration,Midweek Service,East,376.28,0,4,1505.11,Bank Transfer
+CHC40352,"April 18, 2024",Member_0447,Music Ministry,Special Program,South,2667.58,0,1, 2667.5832338019645 ,Cheque
+CHC40062,12/13/22,Member_0317,MAIN SANCTUARY,,West,798.76,0,4,"$3,195.05",  Cheque  
+CHC40258,"February 24, 2024",TBD,Main Sanctuary,Sunday Service,South,493.98,,3,1481.95,Cheque
+CHC40497,25 May 2024,Member_0547,Youth Ministry,Outreach,North,618.76,0,1,618.76,  Cash  
+CHC40414,08/28/2024,Member_0143,Children's Church,Special Program,N/A,4329.57,0,4, 17318.288775212797 ,Bank Transfer
+CHC40213,05/26/2024,Member_0136,Main Sanctuary,,East,771.36,$0.00,1,771.36,Bank Transfer
+CHC40447,"May 18, 2023",Member_0393,Youth Ministry,Midweek Service,North,68.9,0,3,206.7,Mobile Money
+CHC40494,2023-09-07,Member_0508,Outreach,Special Program,North,1278.36,0,3,3835,Cash
+CHC40177,02/11/2022,Member_0184, Administration,Building Fund,east,9118,0,1,9118.04,Bank Transfer
+CHC40516,"October 25, 2022",Member_0547,MUSIC MINISTRY,Special Program,North,154.22,0,2,,Bank Transfer
+CHC40355,01/24/24,Member_0144,OUTREACH, Sunday Service,North,352.83,0,2.0,705.65,Bank Transfer
+CHC40416,01/23/22,Member_0328,Music Ministry,,West,387.66,0,4,1550.64,Cash
+CHC40072,13-04-2024,Member_0480,Main Sanctuary,Special Program,west,3207.85,0,3,9623.56,Bank Transfer
+CHC40304,12-03-2022,member_0597,Youth Ministry,Midweek Service,East,80.94,0,4,323.77,Cash
+CHC40070,"September 28, 2024",Member_0012,Youth Ministry,TBD,Central,null,0,2,1773.46,Cheque
+CHC40500,08/03/23,Member_0216,Outreach,Sunday Service,West,-458.04027525364006,0,2,916.08,Mobile Money
+CHC40013,09-08-2024,Member_0001,Administration,,Central,360.85, 0 ,1,360.85,Cash
+CHC40407,"July 09, 2024",Member_0592,Youth Ministry,Sunday Service, West,209.94,0,4,839.75,Cheque
+CHC40314,0000-00-00,Member_0434,,Sunday Service,South,374.51,0,4,1498.02,Mobile Money
+CHC40243,"July 26, 2023",Member_0198,Youth Ministry,Building Fund,West,8367.78,0,2,16735.55,Cheque
+CHC40569,06/27/2022, Member_0237,Main Sanctuary,  Special Program  ,West,4331.43,0,2,8662.86,Bank Transfer
+CHC40030,2022-11-29,Member_0084,Children's Church,Outreach,West,132.91,0,4,532,Cheque
+CHC40374,05/08/2024,member_0454,Children's Church,  Conference  ,NORTH,2231.46,0,4,8925.83,Bank Transfer
+CHC40391,"August 03, 2022",Member_0173,Administration,outreach,North,736.78,0,4,2947.11,Mobile Money
+CHC40100,2022/08/08,Member_0414,Children's Church,SUNDAY SERVICE,West,173.56,0,2,347.12,Mobile Money
+CHC40138,01/23/2022,Member_0472,  Administration  ,Midweek Service,West,475.4,0,1,475.4,Bank Transfer
+CHC40550,30-12-2022,Member_0232,Administration,Conference,South,302.95,0,2, 605.8913398318043 ,null
+CHC40290,20 Nov 2022,Member_0469,,Conference,West,2082.17,0,1,2082.17,Cheque
+CHC40089,11 May 2024,Member_0547,Administration,Midweek Service,West, 10.096649569404608 ,0,2,20.19,Cash
+CHC40179,06/21/24,Member_0564,Main Sanctuary,Sunday Service,North,419.02, 0 ,4,1676.09,Bank Transfer
+CHC40434,2022-02-04,  Member_0145  ,Outreach,Special Program,North,1863.54,0,3,5590.63,Mobile Money
+CHC40227,2024-10-09,Member_0108,,Sunday Service,Central,485.86,0,1,485.86,Bank Transfer
+CHC40224,"July 13, 2023",Member_0302,Music Ministry,Outreach,  South  ,92.89,$0.00,-1,92.89,Cheque
+CHC40383,invalid,Member_0177,,Midweek Service, Central,15.58,0,1,,Bank Transfer
+CHC40207,2024-01-06,Member_0109,Youth Ministry,Midweek Service,Central,192.13,0,2,384.26,Cheque
+CHC40046,08/13/24,  Member_0400  ,Administration,Special Program, West,1518.95,0,,TBD,Cheque
+CHC40215,2022/08/06,Member_0195,  Outreach  ,Conference,North,2485.28,0,3,7455.85,Mobile Money
+CHC40406,09/14/2024,Member_0455,Music Ministry,Building Fund,East,3630.15,0,3,10890.45,Cash
+CHC40104,2022-12-29,Member_0131,Children's Church,Outreach,West,N/A,0,4,$638.25,Cash
+CHC40216,2022-04-19,Member_0293,Youth Ministry,Sunday Service,South,279.95,0,1,279.95,CASH
+CHC40146,16 Apr 2022,Member_0382,Music Ministry,Special Program,East,2322.33,,2,4644.65,Mobile Money
+CHC40323,2023/10/26,MEMBER_0497,Outreach,Building Fund,  West  ,8253.76,0,3,24761.28,Cash
+CHC40459,28 May 2023,Member_0356,Outreach,Sunday Service,North,411.04,0,4,1644.17,BANK TRANSFER
+CHC40059,invalid,Member_0252,Youth Ministry,,East,189.46,0,2,378.91,Bank Transfer
+CHC40310,02/08/2024,,Outreach,Midweek Service,West,408.25,0,1,-408.25387239105305,Bank Transfer
+CHC40092,"September 08, 2022",Member_0334,Youth Ministry,CONFERENCE,East,824.49,0,2,1648.97,Bank Transfer
+CHC40427,03/17/24,Member_0446,Children's Church,Building Fund,,,0,1,,Cash
+CHC40294,"November 17, 2022",Member_0355,Music Ministry,Outreach,North,534.78,0,1,534.78,Cash
+CHC40058,12/17/2022,Member_0450,Main Sanctuary,Conference,Central,1498.77,0,2,2997.55,Cheque
+CHC40555,07/15/2022,Member_0543,Music Ministry,Conference,East,2464.02,0,N/A,7392.07,Mobile Money
+CHC40312,16-03-2023,  Member_0276  ,Children's Church,Special Program,North,3498.15,0,4,13992.58,Bank Transfer
+CHC40005,2022-10-17,Member_0458,children's church,Special Program,Central,3880.27,0,3,11640.81,Cheque
+CHC40303,06/28/2023,Member_0360,Main Sanctuary,Special Program,West,1119.56,0,1,1119.56,MOBILE MONEY
+CHC40067,03/15/2022,Member_0283,Youth Ministry,SPECIAL PROGRAM,Central,4276.3,0,4,17105.21,Cash
+CHC40098,10/25/22,Member_0084,Outreach,Building Fund,Central, 2323.963516990803 ,0,1,2323.96,Cash
+CHC40448,08-06-2024,Member_0550,Youth Ministry,Conference,East,1985.52,0,2,3971.04,Cash
+CHC40342,invalid,Member_0409,,Special Program,Central,4318.09,0,2, 8636.177853372394 ,Cash
+CHC40590,2024-06-04,Member_0589,Outreach,Conference,east,1133.56,0,2,2267.12,Mobile Money
+CHC40223,01/28/24,Member_0146,Children's Church,Special Program,North,1309.34,0,3,3928.01,
+CHC40384,02/12/2022,Member_0328,Youth Ministry,Midweek Service,South,69.26,0,1,69.26,Cheque
+CHC40513,N/A,Member_0257,outreach,Midweek Service,Central,371.03,0,2,742.05,Bank Transfer
+CHC40281,"July 13, 2022", Member_0414,Music Ministry,Midweek Service,West,255.78,0,4,1023.13,Mobile Money
+CHC40262,11 Dec 2022,,outreach,outreach,East,621.18,0,-2,1242.35,Bank Transfer
+CHC40121,"May 15, 2022",Member_0585,Administration,Conference,North,1441.22,0,4,5764.88,Cheque
+CHC40418,"July 30, 2023",  Member_0308  ,Administration,Sunday Service,South,335.99,0,TBD,-1007.9830528667492,Bank Transfer
+CHC40288,02/06/2023,Member_0407,Outreach,Outreach,North,891.7,0,3,2675.09,Cash
+CHC40254,25-05-2023,Member_0526,Outreach,Outreach,West,815.53,0,3,2446.6,Mobile Money
+CHC40256,2022/10/29,Member_0436,Administration,Conference,Central,1620.93,0,1,1620.93,Mobile Money
+CHC40336,"June 21, 2024",MEMBER_0362,  Music Ministry  ,Special Program,,4378.84,0,3,13136.51,Cash
+CHC40502,19 Jun 2022,Member_0379,Main Sanctuary,Sunday Service,Central,223.95,0,N/A,895.82,Mobile Money
+CHC40069,2022-11-13,MEMBER_0411,Youth Ministry,Conference,North,2834.77,0,2,5669.54,Cheque
+CHC40520,"April 05, 2022",Member_0587,Children's Church,CONFERENCE,North,1943.73,0,3,5831.19,Cash
+CHC40539,2024-07-24,Member_0330,N/A,Special Program,West,2860.99,0,3,8582.97,Mobile Money
+CHC40006,30 May 2023,Member_0543,,Outreach,,620.05,0,2,1240.1,  Cash  
+CHC40204,"January 23, 2022",Member_0390,Administration,Building Fund,Central,4158.93,0,3,12476.78,Cash
+CHC40148,2024/11/13,Member_0370,Administration,Special Program,Central,194.01,0,3,582.04,Cash
+CHC40222,2022/10/05,Member_0032,Outreach,Special Program,Central,4281.28,0,3,12843.85,Bank Transfer
+CHC40174,07 Mar 2023,Member_0269,Children's Church,Building Fund,East,9663.12,0,4,38652.5,Bank Transfer
+CHC40042,03/18/2023,Member_0299,Youth Ministry,Conference,North,470.09,0,1,470.09,bank transfer
+CHC40125,07-05-2024,,outreach, Midweek Service,South,12.09,,2.0,24.17,Cheque
+CHC40167,11/17/24,Member_0237,Main Sanctuary,Building Fund,West,7292.49,0,1,7292.49,Cheque
+CHC40412,13 Sep 2023,Member_0105,Administration,Building Fund,North,5443.37,$0.00,3,16330.1,Mobile Money
+CHC40141,06/21/2022,Member_0586,ADMINISTRATION,Midweek Service,Central,57.0,$0.00,3,171.0,Mobile Money
+CHC40232,2023/01/31,Member_0535,Children's Church,Outreach, West,861.57,0,1.0,861.57,Cheque
+CHC40268,"April 11, 2022",Member_0585,Children's Church,  Outreach  ,west,724.13,0,4,2896.53,Bank Transfer
+CHC40485,02/13/22,Member_0292,Main Sanctuary,None,East,279.42,0,3,838.27,Bank Transfer
+CHC40491,"October 17, 2023",Member_0111,  Administration  ,Special Program,Central,4431.83,0,4,17727.31,Bank Transfer
+CHC40228,07/31/24,Member_0081,Administration,Conference,South,629.02,0,3,1887.06,Cash
+CHC40053,2023-03-31,Member_0112,Main Sanctuary,Special Program,South,4259.84,0,4,17039,Mobile Money
+CHC40442,15-09-2024,Member_0031,Main Sanctuary,Sunday Service,East,137,0,4,549.74,cheque
+CHC40515,06/13/2024,Member_0074,Youth Ministry,Special Program,East,"$1,899.85",0,4,7599.41,Cheque
+CHC40366,2024/03/23,Member_0565,Children's Church,Special Program,Central,1906.15,0,2,3812.29,  Cheque  
+CHC40566,TBD,Member_0536,Music Ministry,Midweek Service,North,384.18,0,,768.36,  Cash  
+CHC40005,2022-10-17,Member_0458,children's church,Special Program,Central,3880.27,0,3,11640.81,Cheque
+CHC40033,10-06-2023,Member_0279,Administration,Sunday Service,West,422.51,0,3,1267.52,Mobile Money
+CHC40170,23 Jan 2022,MEMBER_0322,Administration,outreach,West,712.46,0,2,1424.91,Cheque
+CHC40571,03/13/2024,Member_0086,Children's Church,TBD,North,2823.89,0,1,2823.89,Cheque
+CHC40376,2022-04-20,Member_0092,Main Sanctuary,Special Program,East,2879.48,0,1,2879.48,CHEQUE
+CHC40554,19-11-2023,Member_0556,Outreach,outreach,North,452.79,0,2,905.58,Mobile Money
+CHC40588,18 Aug 2024,Member_0135,Children's Church,SUNDAY SERVICE, North,177.74,0,4,710.96,Cheque
+CHC40228,07/31/24,Member_0081,Administration,Conference,South,629.02,0,3,1887.06,Cash
+CHC40022,09/27/2022,Member_0426,administration,Midweek Service,Central,247.35,0,1,,Bank Transfer
+CHC40411,"August 13, 2024",,Main Sanctuary,Conference,  East  ,2009.7,0,4,8039,Cheque
+CHC40337,02/06/2024,Member_0113,Youth Ministry,Building Fund,West,3146.86,0,4,12587.42,Cash
+CHC40467,2024/10/03,Member_0323,Youth Ministry,MIDWEEK SERVICE,Central,302.27,0,4,1209.09,Mobile Money
+CHC40508,24 Jul 2022,Member_0032,Administration,conference,West,2385.82,0,4,9543.28,Cash
+CHC40562,2024/11/19,,Administration,Special Program,,1540.36,0,3,4621.08,cheque
+CHC40144,invalid,Member_0192,Main Sanctuary,  Outreach  ,None,962.54,0,2, 1925.0730505644008 ,Cash
+CHC40130,10/01/2024, Member_0369,Outreach,,Central,2443.98,0,2,4887.96,Mobile Money
+CHC40184,2024-08-27,Member_0134,Outreach,Conference,West,711.15,0,2,1422.31,Mobile Money
+CHC40299,,Member_0196,music ministry,Sunday Service,North,128.72,0,4,514.9,Cash
+CHC40341,06/17/2023,Member_0464,MAIN SANCTUARY,Conference, Central,385.91,0,3,1157.72,  Cash  
+CHC40172,12/09/2022,  Member_0334  ,Music Ministry,Outreach,South,332.81,0,3,998.43,Bank Transfer
+CHC40330,12/11/22,Member_0395,Administration,null,North,52.02,0,4,208.09,Cash
+CHC40476,TBD,Member_0084,Youth Ministry,Midweek Service,Central,448.06,0,3,1344.18,Cash
+CHC40129,12/20/2024,Member_0354,Music Ministry,Outreach,West, 522.1210806522224 ,0,4,2088.48,Bank Transfer
+CHC40134,N/A,Member_0374,Youth Ministry,Sunday Service,South,113.62,0,3,340.87,  -  
+CHC40461,2022/01/16,Member_0571,Music Ministry,Conference,South,961.68,,2,1923.37,Mobile Money
+CHC40322,22-02-2023,Member_0235,Outreach,Outreach,Central,437.55,0,3,1312.66,Bank Transfer
+CHC40456,"May 17, 2022",Member_0551,Youth Ministry,Outreach,East,698.06,0,4,2792.24,Cash
+CHC40473,11/20/24,Member_0459,Children's Church,Building Fund,West,986.61,0,,"$3,946.45",Cash
+CHC40417,08/17/22,Member_0400,Main Sanctuary,  Conference  ,East,,0,2,4377.47,Mobile Money
+CHC40595,"November 19, 2023",Member_0187,Youth Ministry,Building Fund,North,5190.23,0,4,20760.93,Cheque
+CHC40158,08-02-2023,member_0442,Main Sanctuary,Sunday Service,South,318.67,0,1,318.67,Bank Transfer
+CHC40166,2022/02/17,Member_0033,Main Sanctuary,Conference,West,2169.2,0,2,4338.41,Cash
+CHC40269,09/24/2024,None,Music Ministry,Conference,Central,2490.88,0,1,2490.88,Bank Transfer
+CHC40097,"June 11, 2024",Member_0291,Youth Ministry,Building Fund,  West  ,,$0.00,3,8597.45,cheque
+CHC40175,2024/02/01,Member_0294,Outreach,Outreach,South,971.17,0,2,1942.34,Mobile Money
+CHC40317,06/17/2022,Member_0051,Music Ministry,Midweek Service,Central,321.25,0,3.0,,Bank Transfer
+CHC40370,2024/11/15,TBD,Outreach,midweek service,East,,0,4,1220.12,Mobile Money
+CHC40126,"January 07, 2022",Member_0288,Children's Church,Midweek Service,West,349.19,0,3,1047.56,Bank Transfer
+CHC40556,03/11/24,Member_0567,Outreach,conference,  East  ,2584.24,0,3,7752.71,
+CHC40543,2023-10-25,Member_0181,Outreach,Building Fund,East,6211.79,$0.00,2,12423.59,Cash
+CHC40189,2023-06-06,Member_0188,Music Ministry, Building Fund,East,4135.09,0,2,8270.17,
+CHC40515,06/13/2024,Member_0074,Youth Ministry,Special Program,East,"$1,899.85",0,4,7599.41,Cheque
+CHC40509,2024/08/08,Member_0329,Music Ministry, Midweek Service,Central,328.75,0,2,657.51,null
+CHC40311,06/10/2022,Member_0349,Children's Church, Conference,Central,679.86,0,2,1359.72,Mobile Money
+CHC40018,15 Jul 2024,  Member_0276  ,Administration,Conference,Central,1941.82,0,1,1941.82,BANK TRANSFER
+CHC40234,2023-06-27,Member_0142,Youth Ministry,Building Fund,,6218.31,0,1,6218.31,Cash
+CHC40236,N/A,Member_0284,Administration,Building Fund,South,990.79,0,2,1981.57,
+CHC40487,03/17/23,Member_0048,Main Sanctuary,Special Program,West,3231.24,0,4,12924.97,Cheque
+CHC40145,"December 17, 2024",Member_0432,Outreach,  Conference  ,East,,0,3,764.37,Cheque
+CHC40219,11/25/2024,Member_0097,  Administration  ,Sunday Service,Central,495.03,0,1,495.03,
+CHC40477,"June 28, 2022",Member_0581,,Special Program,Central,2291.8,N/A,3,6875.41,Bank Transfer
+CHC40235,27 Dec 2024,Member_0395,Outreach,Midweek Service,North,140.1,0,1,140.1,Cheque
+CHC40548,2022/09/10,Member_0009,Youth Ministry,Building Fund,None,4294.83,0,3,12884.48,Bank Transfer
+CHC40248,08 Nov 2023,Member_0032,Children's Church,Building Fund,West,7870.89,0,2,15741.78,Cash
+CHC40008,08/14/24,Member_0440,Outreach,Sunday Service,South,400.41,0,2,800.82,Mobile Money
+CHC40004,12/17/2022,Member_0571,Children's Church,Building Fund,  North  ,3139.49, 0 ,4,12557.97,Mobile Money
+CHC40301,2023-11-13,Member_0056,Children's Church,Midweek Service,East,,0,3.0,783.42,Cheque
+CHC40012,"February 13, 2024",Member_0512,Main Sanctuary,Conference,East,108.06,,2,216.11,Bank Transfer
+CHC40259,21 Nov 2022,,Youth Ministry,Sunday Service,Central,311.1,0,1,311.1,Mobile Money
+CHC40522,26 Apr 2022,Member_0461, Outreach,Building Fund,South,3664.29,0,4,14657.15,Cash
+CHC40582,2024/06/08,Member_0097,Music Ministry,Sunday Service,East,136.08,0,4,544.32,Cash
+CHC40241,2022/02/19,Member_0057,Children's Church,Outreach,West,,0,3,2923.39,Cheque
+CHC40260,03/04/2023,Member_0224,Outreach,Building Fund,East,2348.53,0,1,"$2,348.53",Mobile Money
+CHC40553,03/27/2022,Member_0527,Main Sanctuary,Sunday Service,N/A,133.99,0,3,-401.96597182307124,Mobile Money
+CHC40073,2022/12/22,Member_0480,Music Ministry,Conference,Central,-2332.2840334731336,0,2,4664.57,Mobile Money
+CHC40155,2024/04/29,Member_0145,Music Ministry,Sunday Service,East,11.83,0,4,47.31,Cheque
+CHC40021,2024/01/18,Member_0103,Outreach,Building Fund,South,4352.9,0,3,13058.7,Mobile Money
+CHC40108,2023-07-18,Member_0252,Outreach,Building Fund,North,738.7,0,1,738.7,Cash
+CHC40038,03/31/22,Member_0305,Outreach,Midweek Service,,122.5,0,4,489.98,Cheque
+CHC40423,,Member_0534,Children's Church,Conference,Central,2778.64,0,4,11114.55,Bank Transfer
+CHC40231,01/01/2022,Member_0361,,Special Program,  Central  ,259.79,0,3,,Cheque
+CHC40570,"April 12, 2024",Member_0368,Youth Ministry,Special Program,West,4618,0,1,4618.14,Cash
+CHC40092,"September 08, 2022",Member_0334,Youth Ministry,CONFERENCE,East,824.49,0,2,1648.97,Bank Transfer
+CHC40242,2023/01/02,Member_0575,,Midweek Service,north,20.65,0,1,20.65,Cheque
+CHC40266,2024-10-07,Member_0388,Children's Church,Conference,North,2929.99,0,3,8789.97,Bank Transfer
+CHC40277,2023/09/03,Member_0112,Children's Church,Sunday Service,West,129.83,0,-3,389.49,Cheque
+CHC40291,08/08/24,Member_0445,Administration,Outreach,,460.92,0,3,1382.76,Bank Transfer
+CHC40527,2023/11/20,Member_0399,Main Sanctuary,Outreach, West,938.27,0,3,2814.8,Bank Transfer
+CHC40237,2023/02/06,Member_0367,Youth Ministry,Conference,West,613.01,0,4,2452.03,Mobile Money
+CHC40546,19 Oct 2022,Member_0472,Music Ministry,Unknown,Central,929.44,0,2,1858.88,Mobile Money
+CHC40583,02/13/24,Member_0313,Youth Ministry,Sunday Service,  South  ,164.81,0,2,329.61,Mobile Money
+CHC40438,2023/08/04,Member_0097,Main Sanctuary,Outreach,West,74.05,0,3,222.16,Cheque
+CHC40119,04/06/2023,Member_0281,Administration,Building Fund,Central,9345,0,4,37380.39,MOBILE MONEY
+CHC40247,2022-06-08,  Member_0198  ,Outreach,Conference,South,2354.91,0,4,9419.65,Cheque
+CHC40563,2023-11-17,Member_0311,,Conference,West,1505.35,0,4,6021.4,
+CHC40542,2023/06/13,Member_0027,  Main Sanctuary  ,Building Fund,West,1264.37,0,1,1264.37,Cheque
+CHC40086,"January 12, 2024",Member_0502,Main Sanctuary,MIDWEEK SERVICE,  North  ,61.7,0,3,185.1,Bank Transfer
+CHC40305,2024-13-45,Member_0098,Youth Ministry,Midweek Service,South,327.08,0,3,981.25, Bank Transfer
+CHC40265,01/19/23,Member_0073,Music Ministry,midweek service,North,343.82,0,4,1375.27,Cash
+CHC40362,2024-13-45,Member_0156,Youth Ministry,TBD,North,260.15,0,2,N/A,Cheque
+CHC40466,"September 15, 2023",Member_0073,Music Ministry,Midweek Service,North,209.48,0,3,628.43,Mobile Money
+CHC40347,22 Jan 2024,Member_0492,Main Sanctuary,Building Fund,East,1536.1,0,2,3072.2,N/A
+CHC40047,30 Aug 2024,Member_0243,Music Ministry,Outreach,North,361.84,0,3,"$1,085.51",Cheque
+CHC40127,"February 17, 2023",Member_0156,  Outreach  ,Building Fund,TBD,2681.72,0,4,10726.88,Cheque
+CHC40169,08/16/2024,Member_0313,Main Sanctuary,Midweek Service,Central,35.69,0,3,107.06,Cash
+CHC40401,04 Sep 2022,Member_0273,Main Sanctuary,Building Fund,South,9717.25,0,2,19434.49,Bank Transfer
+CHC40488,"September 23, 2022",Member_0133,  Main Sanctuary  ,Special Program,North,3005.43,0,1,,  -  
+CHC40131,08/07/2024,Member_0158,Administration,Outreach,North,730.21,0,1,730.21,Cheque
+CHC40275,09/20/22,Member_0399,YOUTH MINISTRY,Midweek Service,East,478.96,N/A,1,478.96,Mobile Money
+CHC40547,04/21/2022,Member_0583,Music Ministry,Special Program,South,4806.07,0,4,19224,Bank Transfer
+CHC40296,21-11-2022,Member_0542,Outreach,Conference,West,1515.17,0,null,1515.17,Cheque
+CHC40536,04/28/24,N/A,Outreach, Outreach,,190.69,0,4,762.77,Cheque
+CHC40327,01/10/22,Member_0254,Youth Ministry,Outreach,South,555.88,0,1,555.88,Cash
+CHC40116,05/16/2022,null,Outreach,Building Fund,North,5848.54,0,3,17545.61,Mobile Money
+CHC40364,08/25/2022,Member_0093,Children's Church,  Conference  ,South,637.33,0,3,1912.0,Cheque
+CHC40156,"December 23, 2023",Member_0047,Youth Ministry,Conference,South,1334.12, 0 ,3,4002.37,Cheque
+CHC40045,2023-03-08,Member_0093,Outreach,Outreach,east,591.25,0,-1, 591.2488779123053 ,  Cash  
+CHC40297,01-01-2023,Member_0012,Music Ministry,Building Fund,NORTH,7020.16,0,4,28080.62,Cheque
+CHC40402,12/23/2023,Member_0309,Administration,Conference,East,417.84,0,3,1253.52,Cheque
+CHC40392,2022/08/26,Member_0461,Music Ministry,  Special Program  ,  North  ,3302.25,0,4,13209.01,Cheque
+CHC40010,26-12-2022,Member_0428,Outreach,Conference,East,2553.32,0,4,10213.27,Cheque
+CHC40541,30-05-2024,Member_0134, Youth Ministry,Midweek Service,South,16.73, 0 ,2,33.45,Cheque
+CHC40429,2022/10/30,Member_0303,Youth Ministry,Building Fund, South,4965.36, 0 ,4,19861.44,Cheque
+CHC40587,09 Apr 2023,,Music Ministry,Outreach,East,435.24,0,3,1305.72,Cheque
+CHC40007,2023/12/01,Member_0459,Children's Church,midweek service,West,$455.46,$0.00,4,1821.84,Bank Transfer
+CHC40106,2022-06-28,Member_0435,Music Ministry, Midweek Service,Central,324.19,0,2,648.38,Cash
+CHC40274,2022-04-14,Member_0020,OUTREACH,Conference,Central,2996.2,0,4,11984.8,Bank Transfer
+CHC40009,12/19/23,  Member_0164  ,Youth Ministry,Building Fund,TBD,6301.12,$0.00,3,18903.36,Bank Transfer
+CHC40050,2023/04/01,Member_0079,Main Sanctuary,Conference,Central,"$1,076.33",0,3,3229.0,Mobile Money
+CHC40083,"July 27, 2024",Member_0570,Outreach,Midweek Service,East,329.33,,3,987.99,
+CHC40214,10/31/2023,Member_0369,Outreach,Building Fund,West,3479.1,$0.00,3,10437.31,Mobile Money
+CHC40011,04/18/22,Member_0476,Outreach,Sunday Service,  East  ,167.56,0,4,-670.2515616306554,Mobile Money
+CHC40403,2023/08/18,Member_0411, Outreach,OUTREACH,West,513.89,0,1,513.89,Cash
+CHC40020,02/24/23,Member_0379,Music Ministry,Special Program,West,641.18,0,1,641.18,CHEQUE
+CHC40041,01/05/22,Member_0262,Administration,Sunday Service,East,253.49,0,2,506.98,Cash
+CHC40150,04/12/2023,member_0083,Administration, Special Program,West,-2510.595303048709,0,3,7531.79,Cash
+CHC40191,,Member_0562,Main Sanctuary,Conference,West,1559.03,0,2,3118.06,
+CHC40075,25-05-2023,Member_0341,Youth Ministry,Outreach,South,188.76,0,2,377.51,Mobile Money
+CHC40154,2024/11/30,Member_0118,Administration,Building Fund,East,9213.5,0,3,27640.5,Cash
+CHC40028,"November 29, 2023",,Administration,Sunday Service,South,403,N/A,2,805.19,Bank Transfer
+CHC40580,14 Feb 2022,Member_0409,,Sunday Service,North,38.01,0,3,114.04,Cash
+CHC40419,12 Nov 2024,Member_0416,Outreach,Sunday Service,North,50.18,0,4,200.74,Mobile Money
+CHC40457,10/20/2024,Member_0263,Youth Ministry,Special Program,North,4515.3,,1,4515.3,cheque
+CHC40244,"August 25, 2023",Member_0290,Administration,Special Program,Central,1062.3,0,2,2124.61,Mobile Money
+CHC40561,2024/11/08,Member_0267,,Midweek Service,West,78.55,0,3,235.66,Cash
+CHC40198,07 May 2023,Member_0227,Main Sanctuary,Conference,West,1130.33,0,4,4521.32,Cash
+CHC40048,"June 09, 2022",Member_0163,Youth Ministry,Sunday Service,South, 463.682752224916 ,0,1,463.68,Bank Transfer
+CHC40251,01-10-2022,Member_0396,Children's Church,Midweek Service,Central,100.15,0,3,300.45,mobile money
+CHC40197,10/05/2022,Member_0143,Administration,Special Program,East,1657.87,0,2,3315.73,Mobile Money
+CHC40471,16 Jan 2024,MEMBER_0444,Children's Church,Sunday Service,South,177.65,0,4,710.6,Cheque
+CHC40371,09/22/23,Member_0107,Administration,Conference,Central,1615.87,0,1,"$1,615.87",Cheque
+CHC40481,2024/11/27,Member_0547,Administration,midweek service,West,196.96,0,1,196.96,Cheque
+CHC40592,2023-02-13,Member_0579,Outreach,Midweek Service,Central,$195.85,0,unknown,391.7,Cheque
+CHC40093,"August 19, 2023",Member_0297,Children's Church,Outreach,,955.66,0,1,955.66,Cheque
+CHC40027,18-09-2023,Member_0532,Administration,Outreach,Central,939.47,0,2,1878.94,Mobile Money
+CHC40492,04 Dec 2023,Member_0536,Youth Ministry,Midweek Service,North,-,0,4,164.45,Cash
+CHC40528,"May 14, 2022",Member_0095,Music Ministry,Building Fund,North,4880.74,0,1,4880.74,Mobile Money
+CHC40333,invalid,Member_0572,Administration,Conference,NORTH,1599.91,0,1,1599.91,Cash
+CHC40044,"June 03, 2024",TBD,Main Sanctuary,Sunday Service,South,456.25,0,2,912.5,Cash
+CHC40074,23 Jan 2023,Member_0031,Youth Ministry,Building Fund,South,3192.47,0,3,9577.41,Bank Transfer
+CHC40545,13-06-2023,  Member_0593  ,Main Sanctuary,Midweek Service,West,119.28,0,4,477.14,Cheque
+CHC40496,03/09/2024,  Member_0109  ,Music Ministry,Special Program,Central,764.48,0,1,764.48,Cheque
+CHC40036,"May 02, 2023",Member_0101,Music Ministry,Sunday Service,West,243.07,0,3,729.22,Bank Transfer
+CHC40426,"March 08, 2023",Member_0534,Youth Ministry,MIDWEEK SERVICE,Central,247.58,0,3,742.73,Bank Transfer
+CHC40455,2023/05/30,Member_0210,Main Sanctuary,Outreach,North,620.9,0,1,620.9,Cash
+CHC40493,16-10-2024,Member_0451,MAIN SANCTUARY,Midweek Service,East,,0,2,164.96,Mobile Money
+CHC40460,17-09-2022,Member_0182,Youth Ministry,Sunday Service,East,217.54,0,4,870.17,Cash
+CHC40037,11/07/2022,member_0264,Children's Church,Conference,North,2239.66,0,3,6719,Mobile Money
+CHC40465,10-09-2023,Member_0216,Main Sanctuary, Building Fund,East,8309.86,0,4,33239.46,Mobile Money
+CHC40415,08 Aug 2023,Member_0584,Children's Church,Midweek Service,North,479.8,0,2,959.59,Cheque
+CHC40518,09/17/22,Member_0063,Children's Church,Midweek Service,West,107.71,0,2,215.42,Bank Transfer
+CHC40388,03/24/23,Member_0260,Children's Church,Midweek Service,West,332.24,0,-4,1328.95,Cash
+CHC40276,03 Apr 2023, Member_0565,Youth Ministry,Sunday Service,Central,474.0,0,2,,Bank Transfer
+CHC40316,0000-00-00,Member_0515,Outreach,Outreach,South,858.23,0,2, 1716.453470082977 ,Mobile Money
+CHC40480,2022-12-26,Member_0153,Outreach,Conference,South,unknown,0,3,2758.43,Cheque
+CHC40488,"September 23, 2022",Member_0133,  Main Sanctuary  ,Special Program,North,3005.43,0,1,,  -  
+CHC40382,2023-10-31,Member_0355,Music Ministry,Conference,North,1838.45,0,3,5515.36,Bank Transfer
+CHC40524,17-02-2023,Member_0237,YOUTH MINISTRY,Conference,North,2511.96,$0.00,2,5023.92,Cash
+CHC40574,05/28/2022,Member_0552,Administration,Midweek Service, North,246.51,0,3,739.54,Cheque
+CHC40135,06 Nov 2024,Member_0364,,Midweek Service,Central,280.85,0,3,842.55,Mobile Money
+CHC40538,2024-13-45,Member_0122,Music Ministry,  Building Fund  ,West,7354.56,0,3,22063.69,Bank Transfer
+CHC40001,13 Jul 2024,Member_0190,Youth Ministry,Sunday Service,West,306.8,0,2,613.61,  Bank Transfer  
+CHC40308,06-03-2023,MEMBER_0212,Children's Church,Building Fund,Central,3397.46,0,1,3397.46,Cash
+CHC40596,"June 19, 2022",Member_0003,Children's Church,,West,155.48,0,2,$310.97,
+CHC40295,21 Jan 2023,Member_0086,Children's Church,Building Fund,  Central  ,6091.91,0,1,,Mobile Money
+CHC40381,2023-07-25,Member_0158,Youth Ministry, Outreach,West,511.58,0,2,1023.16,Mobile Money
+CHC40335,03/07/24,Member_0446,  Main Sanctuary  ,Outreach,South,862.47,0,3,2587.4,Bank Transfer
+CHC40432,2023/10/16,Member_0232,Music Ministry,midweek service,West,480.61,0,2,961.23,mobile money
+CHC40246,02-03-2023,MEMBER_0111,Music Ministry,Special Program,East,$764.73,0,4,3058.92,Cheque
+CHC40454,invalid,Member_0486,Youth Ministry,Midweek Service,Central,-253.33022137041775,0,1,253.33,Bank Transfer
+CHC40495,invalid,Member_0246,Music Ministry,Sunday Service,South,302.61,0,1,302.61,Bank Transfer
+CHC40501,2022/04/22,Member_0180,  Main Sanctuary  ,Midweek Service,,123.06,0,2,-246.1131897952568,Mobile Money
+CHC40373,06 Oct 2023,Member_0591,Outreach,Building Fund,West,6044.43,0,3,18133.29,Cheque
+CHC40253,09/22/2024,Member_0298,Youth Ministry,Building Fund,  Central  ,-3287.4368890546557,0,3,9862.31,Bank Transfer
+CHC40014,2024/02/22,Member_0138,Music Ministry,Building Fund,North,7269.57,0,3,21808.72,Cash
+CHC40245,2024/03/18,Member_0307,Administration,Special Program,West,2671.79,0,4,10687.18,MOBILE MONEY
+CHC40162,28 Jun 2022,None,Children's Church,outreach,East,266.08,0,1,266.08,CASH
+CHC40096,04/07/22,Member_0526,Children's Church,Special Program, South,3573.59,0,4, 14294.361432865715 ,  Mobile Money  
+CHC40298,09/01/22,,Children's Church,Sunday Service,Central,40.88,0,1.0,40.88,Cash
+CHC40573,03/06/23,Member_0291,Music Ministry,Midweek Service,South,312.2,0,4,1248.78,Bank Transfer
+CHC40393,0000-00-00,Member_0465,Children's Church,Conference,Central,818.61,-,1,-818.6081027111559,Cheque
+CHC40292,"April 04, 2023",Member_0245,Children's Church,Building Fund,South,2632.23,0,4,"$10,528.93",Bank Transfer
+CHC40187,"June 21, 2023",Member_0284,Youth Ministry,Special Program,Central,1058.86,0,2,2117.72,Cash
+CHC40221,2024-01-16,Member_0089,Main Sanctuary,Special Program,West,$85.80,,3, 257.39668837594456 ,Cheque
+CHC40115,10/20/23,Member_0070,Administration,Building Fund,East,9412.35,0,2,18824.7,Mobile Money
+CHC40383,invalid,Member_0177,,Midweek Service, Central,15.58,0,1,,Bank Transfer
+CHC40031,11/18/2024,Member_0109,,Sunday Service,West,320.6,0,4,1282.39,Bank Transfer
+CHC40238,2023/05/25,Member_0183,Administration,null,East,2014.0,0,3,6042.0,  Bank Transfer  
+CHC40367,"February 13, 2023",Member_0154,Outreach,Midweek Service,West,82.91,0,3,248.73,Mobile Money
+CHC40061,24 May 2023,,music ministry,Conference,West,325.08,0,2,650.16,Cash
+CHC40159,2024-02-18,Member_0418,Youth Ministry,Building Fund,Central,1921.97,0,1,1921.97,Mobile Money
+CHC40272,,Member_0113,Music Ministry,Building Fund,East,5149,0,1,5149.27,Bank Transfer
+CHC40154,2024/11/30,Member_0118,Administration,Building Fund,East,9213.5,0,3,27640.5,Cash
+CHC40201,06/06/24,Member_0314,Administration,Conference,Central,1312.72,,4,5250.88,Bank Transfer
+CHC40453,2022/11/08,Member_0416,Youth Ministry,Sunday Service,Central,178.22,0,2,,Bank Transfer
+CHC40315,26-11-2024,Member_0599,music ministry,Special Program,Central,2762.32,0,,11049.28,Bank Transfer
+CHC40570,"April 12, 2024",Member_0368,Youth Ministry,Special Program,West,4618,0,1,4618.14,Cash
+CHC40349,"October 01, 2022",Member_0166,Main Sanctuary,Midweek Service,Central,$459.74,0,1,459.74,Cash
+CHC40205,01/31/2022,Member_0057,Youth Ministry,Outreach,West,348.29,0,1,$348.29, Cash
+CHC40597,26 Feb 2022, Member_0572,Music Ministry,Building Fund,North,4404.75,0,unknown,17618.99,Bank Transfer
+CHC40507,"June 05, 2022",Member_0194,OUTREACH,Midweek Service,TBD,unknown,0,3,1434.73,
+CHC40003,invalid,Member_0493,Youth Ministry,Building Fund,West,7865.59,0,1,7865.59,Cash
+CHC40526,2023-09-03,Member_0171,Outreach,Midweek Service,North,58.69,0,1,58.69,Cheque
+CHC40463,01/13/2023,Member_0459,Children's Church,Special Program,North,4251.09,0,2,8502.19,Cash
+CHC40117,23-02-2023,Member_0153,Children's Church,Midweek Service,Central,401.13,0,2,$802.26,Cheque
+CHC40424,26 May 2022,Member_0330,Youth Ministry,  Conference  ,North,2147.48,0,3,6442.43,Cash
+CHC40040,2024-01-27,Member_0063,Children's Church,Sunday Service,Central,268.45,0,3,805,Mobile Money
+CHC40057,"January 12, 2022",Member_0414,Outreach,Special Program,Central, 1201.2167076080907 ,0,1,1201.22,Bank Transfer
+CHC40180,2023/12/29,Member_0276,Unknown,Midweek Service,Central,356,0,4,1424.28,Cheque
+CHC40525,2023-05-06,Member_0051,Children's Church,Outreach,West,924.83,0,4,3699.34,Bank Transfer
+CHC40079,2022-01-31,Member_0143, Youth Ministry,,West,5866.83,0,3,17600.49,Cash
+CHC40353,30-04-2023,Member_0465,Administration,Sunday Service,North,91.43,0,3,274.3,Cash
+CHC40092,"September 08, 2022",Member_0334,Youth Ministry,CONFERENCE,East,824.49,0,2,1648.97,Bank Transfer
+CHC40387,06/12/23,Member_0135,Main Sanctuary,Special Program,Central,1756.46,0,3,5269.38,Mobile Money
+CHC40395,"February 06, 2023",  Member_0199  ,Youth Ministry,Building Fund,North,3267.21,0,1,3267.21,bank transfer
+CHC40287,2024/08/12,Member_0504,Children's Church,Building Fund,West,6435.13,$0.00,1,6435.13,Mobile Money
+CHC40175,2024/02/01,Member_0294,Outreach,Outreach,South,971.17,0,2,1942.34,Mobile Money
+CHC40495,invalid,Member_0246,Music Ministry,Sunday Service,South,302.61,0,1,302.61,Bank Transfer
+CHC40471,16 Jan 2024,MEMBER_0444,Children's Church,Sunday Service,South,177.65,0,4,710.6,Cheque
+CHC40077,31 Dec 2023,member_0542,Music Ministry,Special Program,East,4389.41,0,1,4389.41,Cheque
+CHC40181,29-11-2023,Member_0141,Outreach,Midweek Service,South,,0,1,354.57,Cash
+CHC40225,2022-10-02,Member_0559,Outreach,Outreach,Central,923.24,0,2,1846.48,Mobile Money
+CHC40302,09/09/24,Member_0520,Youth Ministry,Sunday Service,East,405.46,0,4,1621.85,Cash
+CHC40122,2024/05/18,Member_0165,Children's Church,Sunday Service,East,,0,4,288.84,Cash
+CHC40346,15-09-2023,Member_0351,Music Ministry,Building Fund,Central,963.94,0,1,963.94,Cash
+CHC40357,"August 01, 2024",Member_0028,Outreach,Conference,West,1380.06,0,2,2760.12,Bank Transfer
+CHC40173,"February 18, 2023",Member_0193,Music Ministry,Outreach,North,679.73,$0.00,3,"$2,039.19",Bank Transfer
+CHC40193,2024-08-28,Member_0545,Children's Church,Special Program,West,4481.79,0,2,8963.58, Cheque
+CHC40068,N/A,Member_0302,Children's Church, Conference,South,2847.84,0,3,8543.51,Mobile Money
+CHC40396,"July 09, 2023",Member_0528,Administration,Building Fund,Central,5797.73,0,1,5797.73,Bank Transfer
+CHC40285,2024-06-13,Member_0511,Music Ministry,Sunday Service,West,$95.51,0,4,,
+CHC40395,"February 06, 2023",  Member_0199  ,Youth Ministry,Building Fund,North,3267.21,0,1,3267.21,bank transfer
+CHC40503,18 Aug 2022,Member_0516,Children's Church,Special Program,West,1138.19,0,3,3414.56,  Bank Transfer  
+CHC40054,06/19/2023,Member_0477,Main Sanctuary,Midweek Service,,134.98,0,1,134.98,Mobile Money
+CHC40138,01/23/2022,Member_0472,  Administration  ,Midweek Service,West,475.4,0,1,475.4,Bank Transfer
+CHC40132,"May 19, 2022",Member_0047,Outreach,Building Fund,Central,7177.64,0,4,28710.56,Cheque
+CHC40182,"June 10, 2022",,Administration,Outreach,Central,248.07,0,4,992.27,Cash
+CHC40354,17-08-2023,Member_0465,Administration,Midweek Service,Central,90.04,0,3,270.13,Mobile Money
+CHC40088,2023/12/18,Member_0286,Youth Ministry,Building Fund,West,6756.66,0,1,6756.66,Cash
+CHC40443,10-02-2022,Member_0277,Main Sanctuary,,Central,408.9,0,null,408.9,  Cash  
+CHC40410,,Member_0172, Administration,Unknown,  ,199.93,0,3,599.78,Cheque
+CHC40029,06-03-2023,Member_0036,Main Sanctuary,Sunday Service,West,126.89,0,4,507.57,Bank Transfer
+CHC40270,2023-12-15,Member_0158,,Midweek Service, South,69.35,0,-1,69.35,Mobile Money
+CHC40261,2023/07/23,Member_0350,Outreach,Outreach,East,190.54,0,4,762.17,Mobile Money
+CHC40598,07/16/22,Member_0426,administration,Conference,West,2438.99,0,1,2438.99,Cash
+CHC40183,31-07-2024,member_0399,Youth Ministry,BUILDING FUND,TBD,1409,0,3,4225.95,Cheque
+CHC40271,2023/06/11,Member_0322,Children's Church,Special Program,West,4578.69,0,4,18314.78,Cash
+CHC40186,23 Apr 2022,Member_0148,Outreach,Conference,Central,1536.28,0,1,1536.28,Mobile Money
+CHC40408,"October 05, 2024",Member_0506,  Outreach  ,Outreach,North,148,0,2,296.59,Cash
+CHC40118,2022-12-30,Member_0036, Music Ministry,Conference,Central,1856,0,3.0,5568.22,Mobile Money
+CHC40363,14 Feb 2024,Member_0419,Main Sanctuary,,North,351.4,0,2,702.81,Mobile Money
+CHC40099,01/12/24,Member_0432,Main Sanctuary,Sunday Service,West,57.69,0,1,57.69,Mobile Money
+CHC40056,10/31/23,Member_0528,Music Ministry,Special Program,North,1104.33,0,2,2208.66,Cheque
+CHC40128,"March 07, 2024",Member_0490,Administration,Building Fund,South,4706.28,0,2,9412.56,Cheque
+CHC40320,28-08-2022,Member_0087,Youth Ministry,Midweek Service,West,,0,1,478.15,Mobile Money
+CHC40529,2022/02/19,Member_0287,Youth Ministry,Special Program,West,1363.43,0,4,-5453.7372427695145,Cheque
+CHC40255,22-10-2022,Member_0307,Outreach,Conference,Central,410.38,0,2,820.77,Cash
+CHC40025,2022-06-29,Member_0237,Music Ministry,Sunday Service,South,285,0,1,284.97,
+CHC40344,12/02/24,Member_0065,Youth Ministry,Midweek Service,North,-412.0423089324792,0,4,1648.17,Cash
+CHC40399,2022-06-17,Member_0109,Administration,Special Program,South,2953.69,0,1,2953.69,Cash
+CHC40085,2022-01-18,Member_0131,Administration,Midweek Service,East,126.09,0,3,378.26,Cheque
+CHC40161,2023-11-05,Member_0089,Outreach,Outreach,North,900.25,0,3,2700.74,Cheque
+CHC40111,2023-12-27,Member_0022,Administration,Outreach,South,714.3,0,2,1428.61,Cheque
+CHC40282,10-11-2022,Member_0352,  Youth Ministry  ,Midweek Service,East,94.55,0,4,378.18,Bank Transfer
+CHC40589,10/19/2024,Member_0592,Outreach,Sunday Service,East,203.2,0,3,609.61,Cash
+CHC40191,,Member_0562,Main Sanctuary,Conference,West,1559.03,0,2,3118.06,
+CHC40504,"November 26, 2023",Member_0084,Children's Church,Sunday Service,South,116.33,0,1,116.33,Cash
+CHC40421,23-09-2024,Member_0344,Children's Church,Midweek Service,Central,216.7,0,1,216.7,Cheque
+CHC40360,17-09-2023,Member_0372,CHILDREN'S CHURCH,Midweek Service,East,161.78,0,,161.78,Bank Transfer
+CHC40404,2022-02-17,Member_0494,Music Ministry,Outreach,North,911.75,0,1,911.75,  Mobile Money  
+CHC40450,08/15/24,Member_0118,Music Ministry,Outreach,NORTH,857.15,0,2,1714.29,Cash
+CHC40564,"June 30, 2024",Member_0351,Administration,Special Program,South,4625.44,0,-1,4625.44,CASH
+CHC40081,08/21/2023,None,Administration,Special Program,West,588.45,0,2,1176.91,Cash
+CHC40114,2024-09-05,Member_0309,Youth Ministry,Outreach,West,285.06,0,2,570.13,bank transfer
+CHC40233,26-07-2024,Member_0190,Administration,Building Fund,East,9674.0,0,1,9674.0,Mobile Money
+CHC40490,03/23/2023,Member_0576,Youth Ministry,Outreach,South,33.61,0,1,33.61,  Cheque  
+CHC40164,2024-09-24,Member_0588,administration,Conference,east,1569.8,0,1,1569.8,Mobile Money
+CHC40359,27-06-2022, Member_0425,Outreach,Sunday Service,West,201.69,0,1,201.69,Cheque
+CHC40063,03/26/24,Member_0074,MUSIC MINISTRY,Outreach,East,231.1,unknown,-3,,Cash
+CHC40600,28-06-2024,Member_0016,Music Ministry,Building Fund,South,9845.89, 0 ,2,19691.78,Cheque
+CHC40375,02-12-2022,Member_0417,Children's Church,Conference,EAST,-441.24035051319396,0,4,1764.96,Bank Transfer
+CHC40575,2024-10-31,Member_0597,Main Sanctuary,Outreach,South,608.3,0,3,1824.9,Cash
+CHC40394,06-12-2022,Member_0590,Youth Ministry,Conference,North,1606.16,0,1,1606.16,Cash
+CHC40034,01/09/24,Member_0237,,Special Program,West,4958.57,0,1,4958.57,Mobile Money
+CHC40133,2022-08-29,Member_0242,Children's Church,Building Fund,West,4359.77,0,3,13079.31,Cheque
+CHC40199,10/27/2024,Member_0009,Music Ministry,,West,86.23,,3,258.68,Cash
+CHC40011,04/18/22,Member_0476,Outreach,Sunday Service,  East  ,167.56,0,4,-670.2515616306554,Mobile Money
+CHC40249,06/25/2022,Member_0066,Main Sanctuary,Conference, Central,2586.91,0,1,-,Cheque
+CHC40085,2022-01-18,Member_0131,Administration,Midweek Service,East,126.09,0,3,378.26,Cheque
+CHC40192,"February 01, 2022",Member_0446,Children's Church,sunday service,East,$307.91,0,4, 1231.6417563946945 , Cash
+CHC40482,30-08-2022,Member_0385,Children's Church,Building Fund,Central,8050.94,0,unknown,32203.75,Mobile Money
+CHC40405,01/11/2023,  Member_0326  ,OUTREACH,Outreach,Central,494.97,0,1,494.97,Mobile Money
+CHC40090,0000-00-00,Member_0385,Main Sanctuary,Conference,Central,2597.83,0,3,7793.5,  Mobile Money  
+CHC40523,06-07-2024,Member_0325,Children's Church,Sunday Service,Central,300.78,0,,601.56,Bank Transfer
+CHC40350,07/11/22,  Member_0252  ,  ,TBD,null,7044.33,0,1,7044.33,Cheque
+CHC40278,TBD,Member_0198,Children's Church,Conference,Central,2017.2,0,1.0,TBD,Cheque
+CHC40019,2023/08/26,Member_0092,Youth Ministry,Building Fund,West,3136.94,0,1,3136.94,null
+CHC40041,01/05/22,Member_0262,Administration,Sunday Service,East,253.49,0,2,506.98,Cash
+CHC40064,"March 21, 2024",Member_0224,  ,Midweek Service, North,74.88,$0.00,1,74.88,Cash
+CHC40220,08/31/2023,Member_0336,Youth Ministry,Special Program,North,1580.21,0,4,6320.85,Bank Transfer
+CHC40549,2022-12-09,Member_0066,Music Ministry,Conference,East,1619.25,0,2,3238.5,mobile money
+CHC40537,"January 07, 2024",Member_0444,Youth Ministry,Building Fund,West,4249.67,0,1,4249.67,Bank Transfer
+CHC40230,2023-03-21,,  -  ,Sunday Service,West,41.63,0,2,83.26,cash
+CHC40118,2022-12-30,Member_0036, Music Ministry,Conference,Central,1856,0,3.0,5568.22,Mobile Money
+CHC40078,07 Jul 2024,,Music Ministry,Outreach, South,780.27,$0.00,4,3121.07,  Cash  
+CHC40340,14-04-2023,Member_0185,MAIN SANCTUARY,Conference,West,1303.87,0,-2,2607.74,Bank Transfer
+CHC40035,24-11-2022,Member_0138,Outreach,Outreach,West,86.86,,3,260.57,Cash
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,

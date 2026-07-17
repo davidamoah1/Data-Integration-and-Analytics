@@ -1,0 +1,696 @@
+Transaction ID,Date,Donor Name,Program Type,Region,Amount,Discount,Quantity,Total,Funding Source
+NGO50071,10-03-2023,Donor_070,Food Aid,South,37076.53,-,6,211667.23,Corporate
+NGO50338,07-08-2023,Donor_191,Shelter,West,70482.18,0,10,704821.82,Individual
+NGO50157,08-02-2023,Donor_072,Education Support,West,43027.65,1520.49,7,290550.17,Corporate
+NGO50644,2022/11/08,Donor_177,Health Outreach,North,TBD,2204.46,8,338671.26,
+NGO50277,2023-05-10,  Donor_148  ,Skills Training,West,35709.54,1180.49,3,"$103,587.16",Individual
+NGO50466,2024/07/11,Donor_054,  Water Project  ,International,104919.25,0,6,629515.5,Corporate
+NGO50075,12/31/22,donor_030,Education Support,North,8860.74,0,7,62025.16,Individual
+NGO50449,"October 18, 2023",Donor_157, Food Aid,  Central  ,85273.41,0,8, 682187.2428017596 ,Individual
+NGO50604,2023-10-16,  -  ,Food Aid,West,13750.08,645.76,2,26208.65,Government
+NGO50132,05/26/24,donor_199,Skills Training,  International  ,"$8,277.25",0,6,"$49,663.48",Corporate
+NGO50347,"June 01, 2023",Donor_025,Shelter,Central,,,1,63562.68, Individual
+NGO50014,23 Jun 2023,Donor_031,Shelter,International,154142.39,5856.96,N/A,148285.42,International Aid
+NGO50526,09/10/23,,Shelter,North,107720.12,0,1,107720.12,  Grant  
+NGO50609,"March 14, 2023",Donor_009,Health Outreach,West,144654.26,226.35,5,722139.58,Corporate
+NGO50031,2024-09-09,  Donor_112  ,Food Aid,East,56588.45,1637.55,2,109901.81,Individual
+NGO50639,03/01/22,Donor_079,Health Outreach,East,9751.58,0,9,87764.22,Corporate
+NGO50495,2023-11-20,Donor_144,Water Project,North,14472.4,0,8,115779.18,Government
+NGO50199,19 Aug 2024,Donor_031,,South, 9367.607253576174 ,195.35,7,-64205.7807577428,Corporate
+NGO50425,10/07/22,Donor_019,Food Aid,,26616.98,$0.00,10,266169.77,Government
+NGO50396,2022-05-14,Donor_192,Emergency Relief,,703379.09,0,1,703379.09,International Aid
+NGO50153,2024/12/02,Donor_082,Education Support,South,61292.15,0,1,61292.15,International Aid
+NGO50266,2023-09-13,Donor_043,Education Support,  East  ,"$67,130.71",0,1,67130.71,  Grant  
+NGO50341,01 Feb 2023,Donor_055,Skills Training,,6740.02,0,5,33700.12,Unknown
+NGO50225,03/07/2022,Donor_197,Food Aid,International,21014.31,0,5,105071.53,Government
+NGO50547,21 Feb 2024,Donor_008,Skills Training,south,43972.76,0,9,395754.81,Government
+NGO50619,09/24/2022,Donor_155,,Central,73993.79,0,-9,665944.15,International Aid
+NGO50123,07/07/22,Donor_186,Emergency Relief,West,944691.57,0,-7,"$6,612,840.98",Corporate
+NGO50084,"November 21, 2022",Donor_151,Food Aid,International,-29496.932306964056,0,6,176981.59,International Aid
+NGO50371,12/18/2023,DONOR_159,Education Support,South,22600.11,0,3,67800.33,Individual
+NGO50421,02-08-2022,donor_034,Food Aid,Central,25729.1,0,3,77187.31,Individual
+NGO50610,19 Oct 2024,Donor_135,Skills Training,North,47577.1,130.58,,474465.18,International Aid
+NGO50274,12/11/22,Donor_103,Water Project,Central,185657,2276.13,5,916904.35,Corporate
+NGO50275,16-10-2023,Donor_047,Health Outreach,Central,30725.91,1412.95,5,146564.78,International Aid
+NGO50309,05-10-2024, Donor_042,Emergency Relief,South,852632.1,0,6,5115792.59,
+NGO50040,05-08-2023,Donor_052,Food Aid,International,91295,0,3,273885.39,International Aid
+NGO50109,"June 07, 2023",,Education Support,Central,15253.76,518.91,5,73674.25,Individual
+NGO50536,07/05/2024,Donor_171,Skills Training,West,,0,3,81336.62,Grant
+NGO50302,10 Jan 2022,Donor_113,Shelter,North,-45739.91711709228,$0.00,4,,Government
+NGO50092,2023/03/25,Donor_095,Emergency Relief,Central,519362.45,0,1,519362,Government
+NGO50602,2023-09-14,DONOR_138,Food Aid,West,65196.42,1478.62,4,254871.2,Government
+NGO50579,2024-12-10,Donor_164,EMERGENCY RELIEF,North,552133.47,0,3,1656400.42,Individual
+NGO50099,"January 17, 2023",Donor_132,Education Support,North,42982.86,0,-9,386845.73,GRANT
+NGO50310,28-12-2024,Donor_022,Emergency Relief,East,793090.21,0,7,5551631.46,International Aid
+NGO50481,"November 25, 2024",Donor_004,Shelter,North,348471.74,9948.27,2,677046.95,Corporate
+NGO50166,12-07-2022,Donor_045,Health Outreach,International,47655.53,2372.74,8,362262.29,Corporate
+NGO50345,2024-02-19,Donor_107, Education Support,South,19338.78,0,10,193387.8,Grant
+NGO50324,2024/07/26,Donor_173,Skills Training,International, 32363.698695352603 ,null,8,249612.14,Individual
+NGO50288,2022-06-23,Donor_131,education support,East,15464.0,0,6,92784.01,Corporate
+NGO50062,03/08/23,Donor_073,Education Support,  West  ,35294.9,0,7,247064.29,Corporate
+NGO50489,2023/09/08,Donor_170,Education Support,International,67196.43,0,7,470374.98,Government
+NGO50090,08/26/2022,Donor_028,Shelter,West,468224.86,22860.17,10,4453646.93,Grant
+NGO50229,2022-07-20, Donor_110,Health Outreach,International,21947.74,0,6,131686.41,individual
+NGO50354,2024-05-18,Donor_120,Emergency Relief,South,772406.14,0,5,3862030.71,Corporate
+NGO50572,2024/08/17,Donor_066,Skills Training,International,11838.41,0,7,82868.87,Individual
+NGO50591,02/18/22,Donor_023,Shelter,North,303134.89,0,6,1818809.33,Individual
+NGO50030,2022/12/26,Donor_125,Health Outreach,International,110587.21,0,-3,331761.63,Grant
+NGO50563,"October 03, 2022",Donor_044,Emergency Relief,South,922599.02,0,5,"$4,612,995.11",Government
+NGO50626,2023-09-01,Donor_027,Shelter,West,473257.42,0,4,1893029.68,Corporate
+NGO50085,13 Mar 2024,Donor_038,Emergency Relief,International,600095.52,0,10,6000955.22,International Aid
+NGO50013,03-09-2022,donor_070,Emergency Relief,West,261913.66,4237.59,10,2576760.76,Individual
+NGO50461,2023/05/27,Donor_001,Water Project,North,184742.87,0,5,923714.37,Individual
+NGO50555,"September 17, 2024",Donor_157,Shelter, West,334204.06,0,9,3007836.57,Corporate
+NGO50427,07 Apr 2023,Donor_109,Emergency Relief,North,"$770,862.80",29001.31,10.0,7418614.9,Government
+NGO50203,2024/06/21,Donor_092,Skills Training,International,,0,1,29028.07,Individual
+NGO50404,31 Dec 2022,Donor_012,Health Outreach,West,108771.21,0,7,761398.49,Individual
+NGO50191,07-07-2022,Donor_100,Skills Training,South,44883.77,0,7,314186.39,International Aid
+NGO50646,03 Apr 2024,Donor_024,Education Support,Central,38305.36,0,3,114916.08,Individual
+NGO50625,03/01/24,Donor_198,Skills Training,South,10137,155.81,,39925.96,Grant
+NGO50594,2023-02-14,Donor_181,Education Support,International,33605.7,0,9,302451.28,Corporate
+NGO50314,2022-06-20,Donor_060,Water Project,,153634.07,0,4,614536,Government
+NGO50605,18-07-2023,Donor_062,Health Outreach,East,51091.11,806.56,2,100569.09,Grant
+NGO50419,04/11/22,Donor_076,Health Outreach,North,"$55,341.15",0,7,387388.08,Grant
+NGO50316,2024/11/09,Donor_116,Food Aid,North,81054.29,2250.03,7,551629.82,Individual
+NGO50628,07 Jan 2024,Donor_024,Health Outreach,Central,114627.26,0,2,229254.51,Corporate
+NGO50028,04/04/2023,Donor_128,Emergency Relief,East,246277.49,0,,1723942.42,Individual
+NGO50193,04/17/24,Donor_147,Water Project,South,104206.91,0,2,208413.83,Corporate
+NGO50496,08-02-2024,DONOR_057, Education Support,North,70562.58,,10,705625.76,International Aid
+NGO50430,2024/04/22,  Donor_114  ,Health Outreach,East,110023.27,0,3,330069.81, Government
+NGO50148,2023/11/27,Donor_151,Water Project,East,174421.79,0,4,697687.16,
+NGO50172,2022-06-09,Donor_033,Education Support,International,18723.57,0,10,187235.74,Corporate
+NGO50035,2024/05/21,Donor_187,Emergency Relief,North,593188.6,27816.89,2,1130743.42,  Individual  
+NGO50635,06/18/2022,Donor_143,Health Outreach,West,144695.38,0,7,1012867.67,International Aid
+NGO50038,0000-00-00,Donor_087,Education Support,Central,79905.95,0,4,319623.81,  International Aid  
+NGO50139,05 Jan 2023,Donor_032,Skills Training,East,49278.32,0,10.0, 492783.18349660834 ,Individual
+NGO50459,13 Nov 2024,Donor_121,Food Aid,South,34596.88,0,10,345968.83,Government
+NGO50480,09/23/2024,Donor_172,Shelter,  Central  ,124904.66,0,8,999237.31,International Aid
+NGO50545,"November 18, 2023",Donor_058,Health Outreach, International,91732.96,0,4,,Corporate
+NGO50518,21-07-2024,DONOR_134,Food Aid,South,40664.27,2012.91,7,270559.51,Government
+NGO50069,11/18/2024,Donor_081,,East, 20639.262847648148 ,0,1,20639.26,Individual
+NGO50589,"November 02, 2022",Donor_048,Skills Training,International,24150.28,800.85,7,"$163,445.99",Government
+NGO50324,2024/07/26,Donor_173,Skills Training,International, 32363.698695352603 ,null,8,249612.14,Individual
+NGO50066,2022/03/28, Donor_024,Food Aid,West,91817.88,0,2,183635.76,Government
+NGO50529,2022-06-01,,Education Support,North,74276.82,0,4,297107.3,Government
+NGO50426,09-08-2023,Donor_050,Emergency Relief,Central,676200.91,0,3,2028602.73,Individual
+NGO50282,TBD,Donor_143,Emergency Relief,South,483953.79,"$7,894.92",1,476058.88,Individual
+NGO50541,02/28/24,Donor_053,Food Aid,CENTRAL,82308.72,0,,411543.59,Corporate
+NGO50076,12 Feb 2023,Donor_028,Water Project,North,68523.86,0,8,548190.87,Government
+NGO50374,2023-09-12,Donor_032,Shelter,International,156255.56,0,10,1562555.57,Corporate
+NGO50106,01/04/2024,Donor_040,Education Support,North,36906.75,0,7,258347.27,Corporate
+NGO50454,14 Jan 2023,Donor_194,Education Support,  International  ,55096,0,1,55096.36,Grant
+NGO50013,03-09-2022,donor_070,Emergency Relief,West,261913.66,4237.59,10,2576760.76,Individual
+NGO50250,2022-01-22,Donor_071,Food Aid,East,52392.71,0,4,209570.84,Corporate
+NGO50573,2024/05/01,Donor_194,Education Support,South,,0,1,28985.78,Individual
+NGO50370,2022-05-17,Donor_012,Emergency Relief,West,838054.0,0,6,5028323.99,Grant
+NGO50129,02 Oct 2022,Donor_084,Skills Training,International,43947.9,0,2,87895.8,Grant
+NGO50463,TBD,Donor_147,food aid,South,86292.68,0,9,776634.12,Grant
+NGO50486,03/03/22,Donor_004,Shelter,International,323931.14,12106.62,7,2182771.65,Government
+NGO50221,2023/03/19,Donor_196,Emergency Relief,International,858410.63,37674.64,5,4103679.97,Individual
+NGO50296,17-08-2023,donor_116,Food Aid,East,48611.9,0,4,194447.59,Government
+NGO50567,2024/06/07,Donor_004,Food Aid,International,50870.96,0,2,101741.91,Corporate
+NGO50351,12 Dec 2024,Donor_075,Education Support,West,63152.44,0,3,"$189,457.31",Grant
+NGO50042,22-05-2024,Donor_190,  Education Support  ,north,55988.64,,10,542927.35,Government
+NGO50049,11/25/2022,Donor_090,Shelter,International,204102.65,0,7,1428718.57,International Aid
+NGO50189,2022-12-03,Donor_031,Skills Training,International,49463.75,1808.29,3,142966,Government
+NGO50064,27 Mar 2023,Donor_068,Emergency Relief,West,237252.65,0,8,1898021.2,Grant
+NGO50546,04-03-2024,Donor_086,Education Support,South,40918.17,1368.98,10,395491.84,International Aid
+NGO50224,2024-10-17,donor_067,Education Support,Central,44432.85,0,7,311029.95,Individual
+NGO50007,04/08/24,  Donor_010  ,Health Outreach,,25395.35,726.32,5,123345.14,International Aid
+NGO50056,04 Jan 2024,Donor_154,Water Project,Central,72327.23,2877.37,3,208349.55,Grant
+NGO50054,N/A,Donor_104,Health Outreach,N/A,94233.25,0,2,188466.5,Corporate
+NGO50476,2022-01-26,Donor_191,Unknown,West,"$85,109.18",0,4,340436.72,International Aid
+NGO50230,27 Aug 2022,Donor_081,Skills Training,North,45450.34,0,2,90900.68,Government
+NGO50097,14 Dec 2023,Donor_109,Skills Training,East,41689.44,0,3,125068.31,Corporate
+NGO50330,06/15/24,,Health Outreach,North,31268.54,0,7,218879.76, Corporate
+NGO50233,15 Aug 2024,Donor_087,Skills Training,Central,13301.02,$448.49,8,102820.27,Corporate
+NGO50346,2024/02/06,DONOR_131,Health Outreach,East,29153,0,5,145764.24,international aid
+NGO50260,invalid,Donor_110,Health Outreach,Central,27122.39,0,3,81367,Individual
+NGO50125,18 Jul 2022,  Donor_128  ,Food Aid,,60162.2,0,9,541459.84,
+NGO50110,27 Sep 2023,Donor_099,Health Outreach,North,121933.86,0,8,975470.91,Individual
+NGO50600,invalid,Donor_050,Food Aid,North,68062.64,0,4,272250.56,  Grant  
+NGO50640,30-05-2022,Donor_170,Shelter,North,461168.13,0,4,1844672.52,Grant
+NGO50284,2023/12/03,Donor_132,Education Support,International,64752.17,1468.7,8,506267.71,grant
+NGO50542,invalid,  Donor_051  ,  Education Support  ,International,50955.81,2125.28,7,341813.7,Corporate
+NGO50513,2024/04/12,Donor_155,Emergency Relief,International,693975.76,0,3,2081927.27,International Aid
+NGO50272,03/09/2022,Donor_006,Skills Training,International,20107.16,0,3,"$60,321.49",International Aid
+NGO50434,04/24/22,Donor_073,Education Support,Central,12335.05,0,9.0,,Grant
+NGO50375,2024-07-13,Donor_175,Water Project,  Central  ,164547.64,1008.79,7,1144771.97,Government
+NGO50490,2023/01/16,Donor_036,Emergency Relief,International,-48730.736823871935,0,8,389845.89,government
+NGO50630,2024/02/26,Donor_038,Shelter,West,44019.9,0,4,176079.59,Government
+NGO50256,08/02/24,Donor_192,Shelter,Central,318079.03,0,9,"$2,862,711.27",Individual
+NGO50289,01/20/22,Donor_188,Shelter,West,43579.59,981.71,4,-170391.5361485936,Government
+NGO50315,2022/03/22,Donor_102,Emergency Relief,Central,549267.16,0,,3844870.11,International Aid
+NGO50020,2022-09-12,Donor_175,  -  ,West,227380.0,7966.42,2,438827.16,Government
+NGO50356,2023-04-12,Donor_182,,Unknown,368774.81,12696.43,9,3204705.49,Corporate
+NGO50556,30 Jan 2023,N/A,Shelter,,-15101.075714301682,0,4,60404.3,N/A
+NGO50415,01 Jul 2024,Donor_002,Food Aid,North,67122.64,2527.76,9,,Corporate
+NGO50047,12/06/23,Donor_025,Shelter,International,106223.18,3508.55,unknown,719002.37,Grant
+NGO50180,"August 26, 2022",Donor_047,Shelter,International,218411.99,0,9,1965707.92,
+NGO50568,19-10-2024,donor_018,Water Project,Central,135048.01,2693.07,10,1323549.4,Corporate
+NGO50582,12/05/2022,,Water Project,International,78675.29,1043.98,3,232893.94,International Aid
+NGO50429,"March 31, 2023",Donor_148,Skills Training,West,16100.52,583.59,6,93101.55,Corporate
+NGO50263,10/11/22,  ,Health Outreach,North,35712.51,0,,107137.52,International Aid
+NGO50487,04 Mar 2023,Donor_100,Skills Training,  International  ,,0,6,,Corporate
+NGO50307,2024-02-15,Donor_198,Emergency Relief,South,262484.0,0,4,1049936.0,Grant
+NGO50598,2024-11-11,Donor_019,Education Support,South,null,2414.11,8,556392.85,Government
+NGO50637,12 Sep 2024,Donor_034,Shelter,North,364652.1,0,9,3281868.86,International Aid
+NGO50564,"July 07, 2023",Donor_192,Food Aid,Central,81138.43,1222.66,8,639326.17,Corporate
+NGO50327,11/15/24,Donor_191,Emergency Relief,South,229857.05,0,7,1608999.36,Grant
+NGO50643,09/07/24,Donor_075,Food Aid,central,49273.86,0,5,246369.28,Grant
+NGO50280,"March 07, 2022",Donor_004,Health Outreach,South, 31053.60456512025 ,823.99,8,241836.88,International Aid
+NGO50321,2023-05-18,Donor_006,Skills Training,Central,10298.59,0,5,51492.93,Individual
+NGO50154,2022-10-16,Donor_096, Skills Training,International,45922,1131.48,9,403116.02,Corporate
+NGO50503,12/19/2024,null,Shelter,  East  ,303714.91,0,6,1822289.47,Grant
+NGO50236,2022/01/26,Donor_081,Emergency Relief,,-756422.3833375396,TBD,2,1512844.77,Grant
+NGO50045,2022-07-06,Donor_098,Education Support,West,32518.29,1298.07,6,"$187,321.33",grant
+NGO50340,"January 13, 2022",Donor_136,Food Aid,North,94346.84,0,1,94346.84,Corporate
+NGO50500,2023-08-15,Donor_144,Skills Training,North,16049.91,$385.15,6,93988.54,Grant
+NGO50312,08-03-2024,donor_056,Water Project,West,23012.39,0,2,46024.78,Grant
+NGO50101,26 Aug 2024,Donor_019,Education Support,South,34752.04, 0 ,1,34752.04,Grant
+NGO50394,2024/03/28,Donor_056,Emergency Relief,South,601766.8,,1,579324.82,Grant
+NGO50043,09/04/22,  Donor_125  ,Education Support,West,27345.98,1251.07,10,260949.06,International Aid
+NGO50045,2022-07-06,Donor_098,Education Support,West,32518.29,1298.07,6,"$187,321.33",grant
+NGO50368,"August 21, 2022",Donor_107,Skills Training,International,,272.72,5,77761.73,Grant
+NGO50512,05/15/2023,Donor_135,Emergency Relief,West,282341.54,,8,2258732.29,Corporate
+NGO50271,06/23/22,Donor_006,Shelter,West,280789.2,0,6,1684735.18,Individual
+NGO50431,21-10-2024,Donor_147,Education Support,International,26505.58,$0.00,6,159033.5,Grant
+NGO50433,2024-01-01,Donor_195,Education Support,INTERNATIONAL,N/A,0,8,548421.39,Corporate
+NGO50627,2023-08-01,Donor_138,Food Aid,Central,12124.12,0,3,36372.35,Grant
+NGO50247,2024-12-29,Donor_186,Water Project,West,69598.44,0,10,695984.4,International Aid
+NGO50502,09/22/24,Donor_129,Emergency Relief,South,403416.95,0,4,1613667.82,Corporate
+NGO50337,01/09/2024,Donor_047,Emergency Relief,North,37387.47,0,,112162.42,Corporate
+NGO50194,12/14/2024,Donor_128,Health Outreach,West,"$76,976.83",0,7,538837.81,individual
+NGO50179,07/11/2024,Donor_083,Water Project,International,142495.83,0,6,854974.98,
+NGO50308,2024/11/04,DONOR_179,Water Project,North,137947.7,0,8,1103581.57,Corporate
+NGO50034,"November 24, 2023",Donor_032,EMERGENCY RELIEF,North,665705.44,0,5,3328527.21,INTERNATIONAL AID
+NGO50241,28 Oct 2024,  Donor_119  ,Food Aid,North,15622.58,0,9, 140603.2311321719 ,Individual
+NGO50528,2022-04-26,Donor_074,Emergency Relief,  ,371153.99,5862.68,7,2557039.15,TBD
+NGO50082,2023/02/08,Donor_182,Water Project,International,100430.52,0,3,301291.56,Corporate
+NGO50130,11/14/2023,Donor_192,Health Outreach,International,132933.26,0,7.0,930532.82,Government
+NGO50532,2023-12-12,Donor_120,Health Outreach,SOUTH,30875.8,641.66,5,151170.67,International Aid
+NGO50435,02/19/24,Donor_106,Education Support,North,22643.85,353.86,1,22289.99,Corporate
+NGO50138,2023-03-14,Donor_090,Food Aid,International, 85962.84395931261 ,-1087.379322819565,4,339501.86,Corporate
+NGO50590,02/26/24,Donor_168,,NORTH,31167.85,0,7,218174.96,Government
+NGO50018,08/13/23,Donor_007,Education Support,East,10734.61,0,10,107346.07,Corporate
+NGO50642,08 Oct 2022,Donor_140,Skills Training,South,39019.23,0,10,-390192.26287818654,Individual
+NGO50244,06 Feb 2022,Donor_095,Emergency Relief,International,899370.13,0,3,2698110.39,Corporate
+NGO50624,N/A,Donor_091, Shelter,West,,0,4,980528.32,Corporate
+NGO50437,09/11/24,Donor_043, Food Aid,South,-60916.91147225653,1304.1,10,596128.08,Government
+NGO50389,15 Jun 2022,Donor_035,Shelter,North,"$216,080.01",0,2,432160.02,Grant
+NGO50265,"March 12, 2022",  Donor_148  ,Water Project,International,39802.49,,6,228421.04,Individual
+NGO50212,06/12/24,Donor_079,Food Aid,East,4911.18,211.45,10,46997.31,Government
+NGO50319,2023-11-26,Donor_192,Skills Training,International,28346.36,600.8,2,55491.12,International Aid
+NGO50016,2024-10-25,Donor_156,Shelter,West,200595.23,$0.00,5,1002976.17,Grant
+NGO50376,03/08/24,Donor_156,,West,463941.71,9667.15,8,3634196.47,Individual
+NGO50093,08/12/2024,Donor_060,Skills Training,North,13934.08,0,6,83604.49,Grant
+NGO50444,2023-01-30,Donor_140,Water Project,South,67699.58,0,1,67699.58,International Aid
+NGO50577,07/07/2023,Donor_119,Emergency Relief,,279565.57,6736.46,9,2455461.96,International Aid
+NGO50118,"October 14, 2023",Donor_169,Emergency Relief,North,777122.8,0,10,7771228.03,Government
+NGO50603,08 Aug 2024,DONOR_014,Shelter,East,158636.05,6596.43,3,456118.85,Government
+NGO50023,"May 18, 2023",Donor_073,Food Aid,South,96379.78,2538.13,5,469208,Grant
+NGO50072,2023-10-21,Donor_049,HEALTH OUTREACH,International,104198.69,322.72,9,934883.7,Grant
+NGO50322,09/13/22,Donor_009,,Central,14347.22,0,4,57388.88,Corporate
+NGO50313,27 Jun 2022,Donor_139,Education Support,South,28992.77,0,2,57985.53, Individual
+NGO50206,10/19/22,Donor_146,Health Outreach,East,76749.27,0,9,690743.39,
+NGO50001,2022-10-02,Donor_031,Emergency Relief,Central,879116.55,0,2,,GOVERNMENT
+NGO50485,08-01-2023,Donor_095,Food Aid,,74866.77,0,3,224600.31,International Aid
+NGO50281,N/A,Donor_022,Water Project,International,92380.13,0,6,554280.79,  Grant  
+NGO50065,,Donor_072,Emergency Relief,International,817764.65,4067.34,5,4068486.56,Grant
+NGO50175,"September 08, 2022",Donor_147,Skills Training,Central,43382.7,0,10,433827.03,individual
+NGO50176,2022-04-17,Donor_171,Water Project,North,161361.57,0,7,1129530.97,Corporate
+NGO50456,24 Jun 2022,Donor_123,Water Project,West, 31819.18616591653 ,317.6,4,126006.33,Government
+NGO50355,15-05-2022,Donor_048,  Water Project  ,East,36925.13,390.1,4,146140.15,Individual
+NGO50297,07/09/22,donor_128,FOOD AID,Central,69318.8,0,3,207956.39,International Aid
+NGO50417,25-03-2022,Donor_137,Education Support,International,19426.28,0,8,155410.25,Government
+NGO50201,29 Nov 2024,,Water Project,South,184066.77,0,9,1656600.9,Individual
+NGO50220,2024/05/17,Donor_003,Skills Training,International,29907.04,0,8,239256.34,Grant
+NGO50423,09-07-2024,Donor_081,Health Outreach,None,36109.27,0,6,216655.61,  Grant  
+NGO50078,06/12/23,Donor_096,Education Support,,28113.56, 0 ,10,281135.64,Grant
+NGO50402,31 Aug 2023,Donor_017,Skills Training,,13282.12,0,2,26564.23,Corporate
+NGO50505,2024-06-07,Donor_015, Shelter,West, 307750.17682733136 ,0,3, 923250.5304819942 ,Individual
+NGO50269,2023/09/09,Donor_122,Education Support,North,65507.12,0,7,458549.81,Grant
+NGO50213,2024-03-08,Donor_105,FOOD AID,International,70699.61,0,7,494897.29,Individual
+NGO50553,10-06-2022,Donor_128,Health Outreach,West,127635.64,0,6,765813.85,International Aid
+NGO50597,2024-05-10,Donor_066,Skills Training,CENTRAL,20947.0,0,9,188523.01,Corporate
+NGO50060,"March 13, 2022",Donor_034,Education Support,Central,13361.4,0,5,66807.02,International Aid
+NGO50292,"January 20, 2024",N/A,Food Aid,CENTRAL,"$43,469.80",0,6,260818.79,Corporate
+NGO50208,04/22/2024,Donor_113,Food Aid,North,22997.62,0,9,206978.61,Grant
+NGO50584,29-05-2022,Donor_188,Education Support,North,7935.39,0,7,55547.7,Government
+NGO50405,01 Sep 2022,,Shelter,South,278541.23,0,2,557082.45,Grant
+NGO50292,"January 20, 2024",N/A,Food Aid,CENTRAL,"$43,469.80",0,6,260818.79,Corporate
+NGO50506,04-08-2024,Donor_049,Food Aid,West,76580.57,3492.68,8,584703.16,corporate
+NGO50621,2022/10/25,Donor_144,Emergency Relief,south,835020.32,0,4,3340081,Corporate
+NGO50571,10/04/22,Donor_104,Health Outreach,International,144649.83,1064.45,4,574341.52,Grant
+NGO50454,14 Jan 2023,Donor_194,Education Support,  International  ,55096,0,1,55096.36,Grant
+NGO50447,"November 12, 2024",Donor_004,Education Support,Central,55324.45,0,2,110648.91,Grant
+NGO50222,07-05-2022,Donor_162,Skills Training,East,-19975.442515872277,0,8,159803.54,international aid
+NGO50253,10 Jun 2024,Unknown,Shelter,West,183770.42,4713.22,10,-1790571.9765395976,Corporate
+NGO50632,08 May 2024,Donor_129,Water Project,International,78685.35,0,4,314741.41,Individual
+NGO50131,,Donor_009,Water Project,  International  ,5645.63,0,-2,11291.26,International Aid
+NGO50117,2024/07/27,Donor_160,Food Aid,Central,27951,0,3,83852,Individual
+NGO50339,01-04-2024,Donor_065,Emergency Relief,N/A,718537.04,$0.00,6,4311222.25,Corporate
+NGO50238,01/24/23,Donor_013,  Food Aid  ,North,88384.01,0,8,707072.08,Grant
+NGO50478,2023/05/31,Donor_158,Education Support,Central, 69621.27575338277 ,1968.62,8,541221.24,Corporate
+NGO50378,17-03-2023,Donor_074,Water Project,Central,105019.69,0,2,210039.39,corporate
+NGO50088,2022-07-17,Donor_139,Skills Training,  ,12138.18,250.8,8,95099.03,CORPORATE
+NGO50086,2022/01/31,Donor_050,Food Aid,Central,29303.81,0,7,205126.67,International Aid
+NGO50353,TBD,Donor_134,Water Project,  East  ,29254.44,0,10,292544.37,Corporate
+NGO50558,"July 29, 2024",Donor_137,Education Support,International,31267.05,465,3,92407.11,Government
+NGO50398,"September 03, 2022",Donor_101,Skills Training,International,13133.89,0,2,26267.78,  Grant  
+NGO50400,2022/05/14,Donor_078,Skills Training,Central,36711.59,0,9,330404.32,government
+NGO50146,01/25/2023,Donor_067,Water Project,Central,"$52,125.99",0,3,156377.97,Government
+NGO50052,05/24/22,Donor_055,Food Aid,  -  ,16598.55,0,10,165985.46,International Aid
+NGO50336,10/10/24,Donor_147,Skills Training,North,4027.34,0,3,12082.01,Government
+NGO50183,02-04-2023,Donor_092,Education Support,,14450.01,0,6,86700.06,Corporate
+NGO50523,,Donor_019,,West,327131.32,0,3,981393.97,Government
+NGO50254,2023-05-15,Donor_140,Food Aid,East,61642.6,0,1,61642.6,Grant
+NGO50141,03 Nov 2024,Donor_031,Emergency Relief,South,762975.04,0,9,6866775.32,Corporate
+NGO50475,"February 22, 2023",Donor_118,Water Project,North,8979.51,0,4,35918.05,Corporate
+NGO50393,2023/12/28,,Emergency Relief,North,506090.43,,2,"$1,012,180.87",Government
+NGO50565,2023/01/19,Donor_054,FOOD AID,west,36465.91,0,4,145863.65,International Aid
+NGO50145,11/09/24,Donor_107,Skills Training,North,30733.18,254.82,7,213348.51,Grant
+NGO50592,05/02/2022,Donor_164,Water Project,North,79397.59,0,8, 635180.6911203823 ,Grant
+NGO50288,2022-06-23,Donor_131,education support,East,15464.0,0,6,92784.01,Corporate
+NGO50629,24-11-2024,Donor_043,Shelter,East,,0,-1,236976.78,Individual
+NGO50291,10-09-2022,Donor_194,Shelter,South,271285.77,0,6,1627714.64,Government
+NGO50332,2023-12-09,Donor_162,Food Aid,West,67159.88,0,5,335799.41,Government
+NGO50177,21 Jan 2023,Donor_046,Food Aid,East,27711.94,0,1,27711.94,Grant
+NGO50050,03/24/22,Donor_102,Health Outreach,Central,29643.7,0,3,,Government
+NGO50025,12-04-2022,Donor_025,EDUCATION SUPPORT,International,39804.88,0,6,238829.3,Grant
+NGO50320,2022-02-08,,Water Project,North,185787.5,N/A,3,540661.54,International Aid
+NGO50482,2024-13-45,  Donor_123  ,Education Support,Central,,0,8,31509.02,Individual
+NGO50100,2024-07-12,Donor_061,Emergency Relief,Central,386210.6,10874.73,3,1126007.6,Individual
+NGO50243,2022/10/18,Donor_118,Education Support,West,74173.36,0,10,-741733.6236437609,corporate
+NGO50105,invalid,DONOR_191,Education Support,,43691.13,471.04,5,216100.46,Corporate
+NGO50258,2022/10/09,Donor_142,Water Project,West,170448.47,7260,9,1468694.16,Government
+NGO50326,2024-02-02,Donor_149,Food Aid,East,81497,0,8,651973.95,Grant
+NGO50531,12/07/2022,Donor_044,  Food Aid  ,Central,29594.89,955.99,6,171833.39,Corporate
+NGO50366,08/10/2022,Donor_160,Education Support,International,53350.2,219.41,10,531307.84,
+NGO50127,19 May 2022,Donor_075,Skills Training,West,2754.3,119.96,6,15806.05,Individual
+NGO50032,2023-09-24,Donor_079,Food Aid,,87557.73,3051.54,3,253518.59,International Aid
+NGO50242,04/02/22,Donor_168,Water Project,East,N/A,0,10,,International Aid
+NGO50008,"January 30, 2024",  Donor_077  ,Shelter,Central,58095.74,0,,522861.62,International Aid
+NGO50562,"February 19, 2024",Donor_175,  Education Support  ,East,79156.76,$0.00,7,554097.34,Individual
+NGO50239,"July 16, 2024",Donor_066,Water Project,North,50560.13,1332.55,3,147682.75,Grant
+NGO50063,invalid,Donor_143,Education Support,West,21085.62,0,5,,Individual
+NGO50439,09/17/2024,  Donor_070  ,Education Support,Central,40101.07,1772.05,8,306632.17,Corporate
+NGO50164,03/20/24,Donor_074,Water Project,West,159096.51,1277.4,7,1104733.73,
+NGO50504,10/08/2022,Donor_032,Health Outreach,International,21743.34,0,1,21743.34,Corporate
+NGO50492,14 Feb 2023,Donor_200,Shelter,WEST,113690.24,0,-2,227380.48,International Aid
+NGO50606,30 Sep 2022,DONOR_009,Emergency Relief,Central,449161.61,17086.22,9,3888678.51,Corporate
+NGO50163,26 Apr 2023,Donor_063,Emergency Relief,North,36050.66,1221.81,10,348288.5,CORPORATE
+NGO50122,07-03-2023,Donor_177,Education Support,East,73771.63,0,8,590173.03,Grant
+NGO50317,25-01-2023,Donor_004,Health Outreach,West,-93892.44896597453,2514.42,4,365512.11,Government
+NGO50057,27-03-2024,Donor_043,,West,27310.98,0,4,109243.93,Government
+NGO50301,2024-12-04,Donor_060,Water Project,North,138114.55,0,2,276229.09,Grant
+NGO50192,2024-03-15,Donor_109,Health Outreach,International,57176.46,0,5,285882.32,Corporate
+NGO50381,11/24/22,Donor_116,  Education Support  ,International,43716.4,0,6,262298.39,Corporate
+NGO50202,2023-11-04,Donor_154,Emergency Relief,  West  ,263477.08,12935.38,1,250541.7,International Aid
+NGO50250,2022-01-22,Donor_071,Food Aid,East,52392.71,0,4,209570.84,Corporate
+NGO50023,"May 18, 2023",Donor_073,Food Aid,South,96379.78,2538.13,5,469208,Grant
+NGO50384,04/01/24,DONOR_126,Food Aid,West,79123.1,2390.48,2,153465.23,Individual
+NGO50460,09/03/2023,Donor_091,  Food Aid  , North,84274.4,2558.15,6,490298, Corporate
+NGO50279,2023-06-24,Donor_114,Emergency Relief,North,515429.22,19823.63,8,3964844.77,Individual
+NGO50559,"April 12, 2023",Donor_074,Food Aid,NORTH,28316.87,0,4,113267.5,Grant
+NGO50205,06-09-2024,Donor_175,Shelter,West,395346.28,0,6,"$2,372,077.66",Grant
+NGO50087,"August 06, 2023",Donor_034, Shelter,International,65841.15,2114.91,7,446083.63,grant
+NGO50137,2023/06/08,Donor_033,Skills Training,North,45952.01,0,5,229760.03,Grant
+NGO50251,02/16/23,Donor_038,Health Outreach,West,-135705.37857923086,5775.63,10,1299297.44,Individual
+NGO50311,04/19/2023,Donor_065,Food Aid,International,92298.74,0,9,830688.67,Corporate
+NGO50113,2022-09-29,Donor_105,SKILLS TRAINING,West,34279.31,,,308513.8,International Aid
+NGO50305,24 Jul 2023,  Donor_012  ,Shelter,South,339331.22,0,9,3053981.01,Corporate
+NGO50107,25-03-2023,Donor_163,Shelter,South,287499.02,0,6,1724994.15,Grant
+NGO50228,2024-13-45,,Education Support,South,41372.68,0,2,82745.35,Government
+NGO50329,15-03-2023,Donor_037,Health Outreach,East,-140056.12059161527,0,9.0,-1260505.0853245375,Grant
+NGO50622,"December 06, 2022",Donor_085,Health Outreach,South,115481.63,5116.01,1,110365.62,
+NGO50379,06/09/2022,Donor_108,Health Outreach,South,136622.49,843.37,,814674.73,Individual
+NGO50465,2024-05-11,Donor_151,Education Support,International,64988.98,0,-6,389933.9,
+NGO50259,2023/12/12,Donor_122,Skills Training,INTERNATIONAL,38925.27,457.03,8,307745.91,Unknown
+NGO50167,"April 05, 2024",Donor_198,Shelter,Central,86887.05,0,1,86887.05,Corporate
+NGO50414,04/23/2022,Donor_025,Food Aid,Central,TBD,,6,505806.73,Government
+NGO50174,2022-07-08,Donor_085,Education Support,East,48377.39,0,4,193509.55,Individual
+NGO50458,2023-01-17,Donor_007,Skills Training,North,49659.28,0,6,297956,International Aid
+NGO50010,07/08/2023,DONOR_006,Water Project, West,9944.32,0,8,79554.52,Individual
+NGO50501,2024-04-15,Donor_183,Shelter,North,396100.37,0,9,3564903.37,CORPORATE
+NGO50143,20 Dec 2024,Donor_163,Water Project,,60322.93,0,4,241291.72,Individual
+NGO50472,08 Oct 2024,Donor_015,Water Project,West,"$48,039.57",104.8,2,95869.54,Corporate
+NGO50074,11-08-2023,Donor_179, Health Outreach,Central,"$104,998.79",0,7.0,734991.53, International Aid
+NGO50543,23-06-2024,Donor_021,Shelter,East,299606.47,5208.52,5,1471989.78,
+NGO50422,07/25/2022,,Food Aid,Central,5864.84,136.75,10,57280.92,International Aid
+NGO50044,01/23/2024,Donor_168,Education Support,East,"$58,786.41",0,4,235145.63,Individual
+NGO50147,29 Nov 2024,Donor_069,  Education Support  ,International,76233.5,1181.51,7,525363.9,government
+NGO50587,19-04-2024,Donor_121,Skills Training,None,30141.09,0,10,301410.87,Corporate
+NGO50446,"December 23, 2024",Donor_061, Water Project,Central, 48649.759941885975 ,0,5,243248.8,Government
+NGO50599,2024-07-25,Donor_063,Water Project,South,18165.15,0,8,145321.19,Corporate
+NGO50237,01-06-2023,Donor_057,Education Support,Central,50636.92,0,6,303821.5,Grant
+NGO50510,25 May 2024,Donor_067,Education Support,West,20273.22,0,2,40546.45,International Aid
+NGO50328,2022-03-08,Donor_055,Shelter,central,138058.42,0,10,1380584.2,Corporate
+NGO50448,07 Mar 2024,Donor_053,Food Aid,West,"$45,908.38",0,8,367267.02,Individual
+NGO50104,25 Jan 2022,Donor_144,Skills Training,North,43095.37,0,-7,301667.57,Individual
+NGO50040,05-08-2023,Donor_052,Food Aid,International,91295,0,3,273885.39,International Aid
+NGO50017,12-09-2022,Donor_046,Education Support,North,15398.32,0,8,123186.54,Individual
+NGO50561,04/15/2023,Donor_025,Skills Training,International,44987.5,N/A,2,89975.01,Government
+NGO50173,01/18/23,Donor_060,Shelter,North,164200.45,7294.58,2.0,313811.74,Individual
+NGO50115,02 Apr 2022,Donor_127,Emergency Relief,International,293361.44,0,9,2640252.94,Government
+NGO50235,08/15/2024,Donor_092,education support,SOUTH,61666.65,535.08,5,305657.84,Grant
+NGO50021,"April 05, 2024",Donor_199,Emergency Relief,International,957622.92,28835.27,2,1857575.3,Corporate
+NGO50022,2024-12-26,Donor_170,Education Support,East,N/A,154.0,-4,140383.18,International Aid
+NGO50350,03-10-2022,Donor_106,Education Support,South,"$32,877.40",0,5,164387.01,Individual
+NGO50467,2024/03/27,Donor_122,Food Aid,North,11653.34,0,9,104880.07,Individual
+NGO50070,04/10/23,Donor_106,Food Aid,Central,unknown,1019.05,2,115888.13,Individual
+NGO50178,23 Apr 2024,Donor_188,Skills Training,West,35444.82,185.91,6,211553.49,International Aid
+NGO50283,21 May 2024,Donor_121,Emergency Relief,West,160415.13,0,1,160415.13,Government
+NGO50196,2024-03-15,Donor_131,Shelter,Central,363281.97,,1,353424.78,Government
+NGO50276,2023-02-24,Donor_030,Emergency Relief,International,654185.75,$0.00,1,654185.75,International Aid
+NGO50520,03/04/22,Donor_165,Skills Training,North,48508.79,0,10,485087.87,Grant
+NGO50537,2024-04-06,Donor_025,Shelter,International,49452.8,1690.03,10,"$477,627.68",Government
+NGO50026,2022/01/07,Donor_066,Emergency Relief,,-,0,7,3016412.35,Grant
+NGO50053,06/20/24,Donor_010,Health Outreach,South,88009.64,0,1,88009.64,Individual
+NGO50083,12/21/23,Donor_095,Skills Training,,"$38,839.37",1777.68,9,333555.24,Government
+NGO50257,16 Mar 2023,Donor_063,Emergency Relief,South,304645.54,14392.05,2,580506.98,Individual
+NGO50583,21 Mar 2022,Donor_036,Health Outreach,  International  ,88116.88,0,8,704935.03,Corporate
+NGO50114,07-08-2022,Donor_062,Shelter,South,329845.1,15160.94,7,2202789.16,  Corporate  
+NGO50613,17 Dec 2022,Donor_199,Health Outreach,North,55226.25,0,,220904.99,Corporate
+NGO50300,"November 29, 2023",  Donor_147  ,Shelter,East,288255.95,7777.44,2,560957.02,Grant
+NGO50073,12-03-2024,Donor_083,Health Outreach,north,137213,573.98,8,1093108.35,Unknown
+NGO50171,14-04-2024,Donor_001,Water Project,East,133010.9, 0 ,2,266021.79,Corporate
+NGO50299,03/31/22,Donor_144,Education Support,Central,35838.36,0,7,250868.53, Corporate
+NGO50207,10/23/2023,  Donor_102  ,Emergency Relief,East,739906.02,0,1,739906.02,Government
+NGO50617,2024-02-06,Donor_029,Water Project,International,9689.03,0,4,38756.13,Grant
+NGO50080,2023/11/29,Donor_134,,,218636.96,-,2,437273.92,Corporate
+NGO50081,06/24/2024,Donor_026,Skills Training,Central,33968.69,0,7,237780.8,International Aid
+NGO50575,05-02-2024,Donor_012,Education Support,East,58829.81,1253.45,8,"$460,610.85",Government
+NGO50648,04/21/2024,Donor_090,Food Aid,North,96520.32,0,4,386081.26,Individual
+NGO50451,06/26/2022,Donor_014,Skills Training,South,N/A,0,10,334389.39,Individual
+NGO50303,01-09-2024,Donor_044,  Shelter  ,  North  ,486843.64,,1,462739.55,Government
+NGO50162,2022/03/07,Donor_200,Health Outreach,Central,N/A,0,7,528724.64,International Aid
+NGO50094,03/10/2022,Donor_094,Water Project,East,35529.29,0,10,-355292.87685180287,Individual
+NGO50333,"May 26, 2024",Donor_041,Shelter,International,169736.7,0,7,1188156.88,Government
+NGO50391,10/08/22,Donor_173,Food Aid,  -  ,"$22,748.05",0,4,90992.2,Government
+NGO50614,10/03/24,Donor_188,Education Support,International,18225.29,0,3,54675.86,
+NGO50160,11/01/24,Donor_116,Water Project,East,114878.62,N/A,7,"$804,150.34",Individual
+NGO50365,2022/11/01,Donor_125,Education Support,,37652.88,1837.34,4,-143262.18857711193,Individual
+NGO50255,11/08/23,Donor_163,Water Project,North,"$119,156.47",0,N/A,119156.47,Government
+NGO50559,"April 12, 2023",Donor_074,Food Aid,NORTH,28316.87,0,4,113267.5,Grant
+NGO50158,02/22/22, Donor_019,Skills Training,West,37459.57,0,2,74919.14,Corporate
+NGO50144,10 Nov 2022,Donor_068,Shelter,North,29802.1,0,5,149010.49,Government
+NGO50462,2024-02-28,Donor_013,Emergency Relief,North, 832826.453204474 ,0,2,1665652.91,Government
+NGO50428,27 May 2023,Donor_024,Water Project,South,55502.85,0,6,333017.1,Government
+NGO50121,"April 05, 2024",Donor_135,Shelter,Central,169051.3,0,7.0,"$1,183,359.12",Corporate
+NGO50305,24 Jul 2023,  Donor_012  ,Shelter,South,339331.22,0,9,3053981.01,Corporate
+NGO50409,2023/01/13,Donor_106,Skills Training,,49527.79,-1603.9694677981408,8,383390.6,Corporate
+NGO50406,2022-05-13,Donor_080, Food Aid,Central,98343.72,3429.14,2,189829.16,
+NGO50464,2024-06-25,Donor_082,Shelter,Central,24466.87,0,8,195734.94,International Aid
+NGO50362,2024-11-25,Donor_072,Skills Training,International,32950.98,0,9,296558.83,Individual
+NGO50544,2022/09/30,Donor_175,Emergency Relief,International,,,2,1525541.21,Government
+NGO50550,09/10/2023,Donor_175,,West,,0,4,1894642.07,Corporate
+NGO50295,2024-01-20,Donor_165,Education Support,West,40131.15,1917.39,2,76427.5,Government
+NGO50607,2023-10-21,Donor_098, Shelter,North,368365.68,0,9,3315291,Grant
+NGO50373,05/30/2022,Donor_042,Emergency Relief,East,856656.69,8147.57,10,8485091.28,Unknown
+NGO50161,07/29/24,,Emergency Relief,West,691391.32,19982.68,9,6042677.73,International Aid
+NGO50408,"June 21, 2023",Donor_137,Emergency Relief,West,568118.81,0,4,2272475.24,International Aid
+NGO50425,10/07/22,Donor_019,Food Aid,,26616.98,$0.00,10,266169.77,Government
+NGO50124,08/28/2022,Donor_192,Education Support,International,21323.29,0,5,106616.43,International Aid
+NGO50315,2022/03/22,Donor_102,Emergency Relief,Central,549267.16,0,,3844870.11,International Aid
+NGO50484,20 Jul 2022,Donor_127,Food Aid,East,86373.31,3965.94,2,,Individual
+NGO50551,16-01-2022,Donor_063,Water Project,South,,,10,1924345.13,Individual
+NGO50364,06 Jan 2024,Donor_122,Emergency Relief,East,801558.61,9331.47,-7,5545589.97,Government
+NGO50441,"July 11, 2023",Donor_190,Unknown,N/A,99210.54,0,4,396842.16,  Grant  
+NGO50349,20 Aug 2022,Donor_146,Education Support,International,78397.54,3177.97,1,75219.57,Government
+NGO50530,04/15/2024,Donor_143,Education Support,North,4577.81,0,1, 4577.812237419073 ,International Aid
+NGO50380,N/A,Donor_074,Water Project,North, 80303.30932258743 ,0,5,401516.55,Government
+NGO50133,15-05-2022,Donor_043,Water Project,International,151695,1617.91,2,300153.97, Individual
+NGO50552,2023-12-01,Donor_012,Water Project,International,26256.74,0,10, 262567.44380463916 ,Government
+NGO50298,,Donor_080,Food Aid,East,22892.35,0,8,183138.77,Individual
+NGO50294,"February 15, 2024",Donor_062,Health Outreach,North,143799.65,7021.97,10,1367776.76,Corporate
+NGO50168,08-04-2022,,Education Support,South,39297.36,0,10,392973.61,Individual
+NGO50488,2024-13-45,Donor_017,Emergency Relief,Central,300183.81,2823.84,4,1189439.9,Corporate
+NGO50608,25 Apr 2022,Donor_176,  Education Support  ,West,19790.11,423.95,2,38732.31,Corporate
+NGO50538,05/07/23,Donor_179,Shelter,NORTH,126375.2,0,4,"$505,500.79",
+NGO50638,2022/12/03,Donor_099,water project,  West  ,190387.91,0,8,1523103.31,Government
+NGO50027,"December 13, 2024",Donor_092,Health Outreach,East,139276.79,0,5,696383.94,
+NGO50219,2024/12/03,Donor_109,Water Project,North,150260.14,0,1,150260.14,Corporate
+NGO50298,,Donor_080,Food Aid,East,22892.35,0,8,183138.77,Individual
+NGO50388,25 Oct 2022,Donor_092,Health Outreach,International,114625.44,$0.00,9,1031629.0,International Aid
+NGO50498,2022-05-05,Donor_120,Water Project,  ,32427.77,0,2,64855.54, International Aid
+NGO50304,01/09/2024,Donor_050,Water Project,Central,23255.78,0,1,23255.78,Corporate
+NGO50424,07-09-2023,Donor_034,Education Support,North,76327.78,$0.00,10,763277.76,Individual
+NGO50390,26 May 2024,Donor_161,Water Project,South,42267.27,1241.19,4,164104.32,Government
+NGO50209,2022/05/03,Donor_030,Unknown,East,13244.6,421.1,6,76941.02,Grant
+NGO50372,"August 02, 2023",Donor_044,Skills Training,East,44220.55,0,7,309543.82,Corporate
+NGO50346,2024/02/06,DONOR_131,Health Outreach,East,29153,0,5,145764.24,international aid
+NGO50540,08/19/23,Donor_150,Emergency Relief,West,35421.81,-1289.6242472857432,7,238925.29,Government
+NGO50077,10-06-2022,Donor_059,Food Aid,,14557.47,$0.00,7,101902.29,Individual
+NGO50585,02 Nov 2022,Donor_107,Skills Training,international,29906.57,1118.22,10,"$287,883.48",
+NGO50418,"January 12, 2023",Donor_103,Food Aid,Central,22396.33,0,4,"$89,585.30",Individual
+NGO50331,14 Feb 2023,,Shelter,West,162474.84,8082.83,9,1389528.05,Corporate
+NGO50119,2022/03/03,Donor_125,Health Outreach,International,22254.02,0,10,222540.23,Individual
+NGO50387,2024-08-20,Donor_028,Food Aid,Central, 12375.259462087508 ,482.01,8,95146.04,International Aid
+NGO50574,2024-13-45,Donor_116,Skills Training,South,21016.11,0,5,105080.53,Government
+NGO50357,"March 05, 2023",Donor_118,Water Project,East,,0,10,726375.25,International Aid
+NGO50182,"June 17, 2024",Donor_017,Water Project,North,69803.76,2286.28,9,607657.39,Government
+NGO50636,10/24/23,Donor_185,Food Aid,Central,52679.29,463.7,10,522155.92,International Aid
+NGO50197,20 Feb 2023,Donor_044, Water Project,West,88674.31,0,7,620720.15,Individual
+NGO50359,2024-11-10,Donor_023,Shelter,North,82405.79,0,2, 164811.5782252959 ,International Aid
+NGO50631,09/09/2024,Donor_119,Health Outreach,East,123585.01,0,,741510.08,Grant
+NGO50641,31-10-2022,  Donor_016  ,Skills Training,West,40365.47,0,4,N/A,Individual
+NGO50293,"September 06, 2023",Donor_142,Water Project,International,"$85,926.98",0,2,171853.96, Corporate
+NGO50348,12/06/2022,Donor_068,Food Aid,International,85866.11,$0.00,10,858661.1,Government
+NGO50245,28-07-2022,Donor_184,Education Support,None,78846.87,0,5,394234.36,corporate
+NGO50184,2022-11-09,Donor_165,Education Support,Central,78520.57,0,-9,706685.12,Grant
+NGO50399,10/10/2022,Donor_110,Education Support,International,57275.19,0,1,-57275.18759941866,Corporate
+NGO50096,06/02/22,Donor_022,Emergency Relief,East,639237.97,0,4,2556951.89,International Aid
+NGO50102,2023-01-13,Donor_030,  Water Project  ,South,127746.37,0,9,1149717.34,corporate
+NGO50382,,Donor_102,Food Aid,South,10116.28,0,3,30348.84,International Aid
+NGO50268,2022/09/05,Donor_127,Education Support,North,24936.33,393.38,9,220886.52,Grant
+NGO50397,23-07-2022,Donor_194,Health Outreach,International,45175.45,148.78,8,360213.31,Grant
+NGO50051,11/23/2024,Donor_002,Health Outreach,South,72478.56,1000.09,1,"$71,478.47",International Aid
+NGO50596,02/18/2024,Donor_173,None,  West  ,396795.69,0,-5,1983978.46,GOVERNMENT
+NGO50200,"June 22, 2023",Donor_023,Shelter,International,355709.54,0,8,"$2,845,676.30",International Aid
+NGO50232,11-03-2023,Donor_166,Shelter,Central,449806.84,12239.63,8,,International Aid
+NGO50410,07/10/22,Donor_012,Emergency Relief,West,163100.52,5267.41,9,1420497.99,GOVERNMENT
+NGO50443,2024/12/14,Donor_017,Health Outreach,East,27430.61,0,5,137153.06,Corporate
+NGO50453,2024-04-04,Donor_038,Skills Training,West,21063.48,347.96,10,207155.22,Corporate
+NGO50112,08/20/2024,Donor_023,Emergency Relief,North,879568.24,"$34,091.76",3,,Grant
+NGO50497,2022-10-06,Donor_134,Water Project,Central,101123.77,0,9,910113.97,
+NGO50267,09/20/2024,,Shelter,North,99035.43,0,4, 396141.7288686902 ,null
+NGO50593,2022-03-15,Donor_187,  Water Project  ,International,130352.75,0,10,1303527.54,Individual
+NGO50377,04/24/22,Donor_190,Skills Training,West,34298.63,320.14,1,33978.5,Government
+NGO50033,"December 15, 2022",Donor_140,Food Aid,North,6551.14,294.54,3,18769.82,Government
+NGO50468,N/A,Donor_075,Emergency Relief,International,780271.35,14486.06,5,3828926.5,International Aid
+NGO50133,15-05-2022,Donor_043,Water Project,International,151695,1617.91,2,300153.97, Individual
+NGO50469,10-07-2022,Donor_184,Food Aid,South,-71336.83262173337,1277.71,10,700591.18,Grant
+NGO50623,19-12-2022,Donor_092,Education Support,Central,,0,1,61813.23,Individual
+NGO50511,24-12-2023,Donor_003,Education Support,East,48463.78,,9,436174.04,GOVERNMENT
+NGO50204,01/08/22,Donor_052,Education Support,South,32285.15,1062.96,2,62444.38,Individual
+NGO50169,2023-09-25,Donor_158,Emergency Relief,South,734489.62,7086.19,1,727403.43,Government
+NGO50586,"January 27, 2022",  Donor_106  ,Skills Training,Central,11414.88,252.58,3,33486.9,Corporate
+NGO50095,08/15/2022,Donor_154,Skills Training,International,48886.09,0,3,146658.26,Corporate
+NGO50403,2023-03-23,DONOR_153,Skills Training,  International  ,17051.4,0,3,51154.21,Grant
+NGO50151,05/29/2023,Donor_050,,International,"$54,333.90",0,8, 434671.2086112434 ,Corporate
+NGO50285,11/15/2024,Donor_021,Education Support,  West  ,70247.94,3500.99,2,133493.89,Government
+NGO50457,04/16/2024,  Donor_081  , Emergency Relief,East,41103.83,0,5,205519.15,Individual
+NGO50335,09/20/2024,Donor_173,Water Project,North,185537.97,8023.47,9,1597630.5,Individual
+NGO50165,"August 13, 2023",Donor_143,Water Project,East,131492.12,3117.57,,-1155370.9994814794,International Aid
+NGO50278,2024-03-19,Donor_086,Health Outreach,West,,0,7,672763.94,Grant
+NGO50353,TBD,Donor_134,Water Project,  East  ,29254.44,0,10,292544.37,Corporate
+NGO50155,2024/06/16,Donor_184,Skills Training,Central,15867.24,155.18,9,"$141,408.55",Grant
+NGO50098,04/21/2022,Donor_099,Health Outreach,North,63831.34,852.31,7,,Corporate
+NGO50344,01-07-2024,donor_200,Health Outreach,International,64226.73,0,6,385360.39,Individual
+NGO50190,2022-01-01,Donor_175,Emergency Relief,South,381464.17,4326.42,7.0,2639964.21,
+NGO50108,"April 10, 2024",Donor_162,Skills Training,Central,46369.63,2250.31,5,220596.62,Government
+NGO50273,08/27/22,,Food Aid,East,54563.51,0,-9,491071.59,INTERNATIONAL AID
+NGO50356,2023-04-12,Donor_182,,Unknown,368774.81,12696.43,9,3204705.49,Corporate
+NGO50185,2023/05/15,Donor_156,Skills Training,East,31189.23,632.12,8,244456.87,International Aid
+NGO50386,06/15/2023,Donor_111,Food Aid,North,48535.72,2034.85,10,465008.74, Individual
+NGO50006,08/30/2024,Donor_196,Food Aid,North,6353.9,0,4,25415.58,Government
+NGO50004,2024/04/09,Donor_039,Education Support,South,18595.42,0,2,37190.84,International Aid
+NGO50581,2022/08/03,Donor_181,Emergency Relief,International,534446.68,5677.0,3,1586309.04,Corporate
+NGO50494,14-04-2022,Donor_035,Shelter,South,376998.59,14925.88,,1086218.12,Grant
+NGO50181,17 Oct 2023,donor_016,Health Outreach,International,62293.81,0,9, 560644.254703878 ,Individual
+NGO50036,10-08-2023,,  Skills Training  ,West, 29697.488495001293 ,0,6,178184.93,Corporate
+NGO50516,19-10-2024,Donor_165,Health Outreach,Central,96625.41,0,9,869628.71,Government
+NGO50535,11 Sep 2022,Donor_002,Shelter,North,149426.71,6923.43,7,997522.97,International Aid
+NGO50091,2023/03/22,Donor_199,Emergency Relief,North,731504.45,0,2,1463008.89,
+NGO50522,18 Nov 2022,Donor_099,Shelter,North,176438,0,8,1411503.89,International Aid
+NGO50210,2024-07-04,Donor_199,,East,68386.38,0,4,273545.54,Individual
+NGO50601,04/18/2022,Donor_041,Skills Training,International,"$27,452.71",813.9,3,79916.44,Grant
+NGO50058,04/14/24,Donor_022,Food Aid,NORTH,37458.34,N/A,5,179538.65,Individual
+NGO50306,08/28/2024,Donor_152,Skills Training,East,24831.24,-147.34558468519094,4,98735.56,Government
+NGO50079,26-06-2024,Donor_029,Skills Training,West,12983.56,335.39,5,63240.82,International Aid
+NGO50223,"November 03, 2024",DONOR_052,Shelter,East,13261.58,0,10,132615.76,Grant
+NGO50649,10-02-2022,Donor_149,Emergency Relief,North,300195.71,4715.64,4,1181920.29,  Government  
+NGO50009,04-08-2024,Donor_095,Skills Training,North,14334.63,N/A,10,143346.29,Corporate
+NGO50367,07/08/2022,Donor_015,Water Project,East,182113.49,0,2,364226.99,Government
+NGO50507,"December 13, 2022",Donor_185,,International,173967.06,8605.13,8.0,1322895.45,Grant
+NGO50068,2023/09/10,Donor_037,Shelter,International,384559.78,0,1,384559.78,Grant
+NGO50442,2023-07-19,Donor_129,Shelter,,428440.14,0,5,2142200.68,Individual
+NGO50019,2023/01/25,Donor_185,Education Support,East,33805.27,0,6,202831.61,International Aid
+NGO50612,,Donor_192,Skills Training,,36625.66,1724.93,6,209404.36,Grant
+NGO50411,13 Jun 2023,Donor_163,Food Aid,North,11119.92,0,1,11119.92,  -  
+NGO50249,2022/03/12,Donor_041,Education Support,Central,73756.35, 1610.528151242672 ,1,72145.83,Government
+NGO50514,04-10-2024, Donor_048,Water Project,East,48232.64,0,4,192930.57,Government
+NGO50318,2022/01/27,Donor_102,Skills Training,South,33359.91,0,4,133439.62,Individual
+NGO50450,"February 27, 2023",Donor_173,Emergency Relief,South,unknown,0,4,3229572.91,Government
+NGO50363,08/16/24,donor_162,Skills Training,north,47316.57,N/A,10,,International Aid
+NGO50385,2022-10-15, Donor_091,Health Outreach,West,148460.77,0,8,1187686.18,corporate
+NGO50521,12 Sep 2022,Donor_049,Emergency Relief,,805919.71,0,8,6447357.69,Corporate
+NGO50595,07/13/2022,Donor_082,Food Aid,International,88175.43,0,7,617228.04,Individual
+NGO50343,21-01-2023,Donor_069,Emergency Relief,International,251735,909.31,5,1254130.06,International Aid
+NGO50134,2023/05/07,Donor_055,Education Support,North,TBD,0,3,80705.29,International Aid
+NGO50218,08 Sep 2024,Donor_066,TBD,South,N/A,529.25,9,327661.49,International Aid
+NGO50436,09/29/23,Donor_093,Shelter,,488147.97,0,10,4881479.7,Corporate
+NGO50272,03/09/2022,Donor_006,Skills Training,International,20107.16,0,3,"$60,321.49",International Aid
+NGO50041,"April 06, 2023",Donor_189,,International,346734.89,,9,3120614.01,International Aid
+NGO50002,09 May 2024,Donor_014,Education Support,South,28778.3,0,5,143891.5,Government
+NGO50135,03-08-2024,Donor_112,Emergency Relief,International,965012.87,,4,3860051.46,N/A
+NGO50560,"August 27, 2023",Donor_066,Food Aid,  International  ,82029.03,0,8,656232.27,Individual
+NGO50216,06/26/23,Donor_097,Skills Training,West,19495.97,-581.500352626822,8,151315.75,Government
+NGO50515,2023-03-07,donor_065,,East,389793.06,0,5,1948965.32,  Individual  
+NGO50261,12 Nov 2024,Donor_002,Shelter,Central,353712.42,0,10,"$3,537,124.22",Individual
+NGO50572,2024/08/17,Donor_066,Skills Training,International,11838.41,0,7,82868.87,Individual
+NGO50600,invalid,Donor_050,Food Aid,North,68062.64,0,4,272250.56,  Grant  
+NGO50195,03-04-2022,Donor_055,Food Aid,North,94975.11,0,7,664826,Grant
+NGO50126,2024/05/17,Donor_101,Emergency Relief,Central,570245.79,0,3,1710737.36,Individual
+NGO50483,07/21/24,Donor_198,Shelter,,152846.43,0,TBD,1069925.04,Corporate
+NGO50517,2023/10/25,Donor_010,Education Support, South,"$37,665.73",0,7,263660.14,Individual
+NGO50576,08/03/24,donor_056,Health Outreach,West,139936.02,0,9,1259424.16,International Aid
+NGO50499,"May 04, 2024",donor_002,,South,20745.32,501.52,1,20243.79,Government
+NGO50416,15-12-2024,donor_090,Shelter,Unknown,369526.3,0,5,1847632,Individual
+NGO50159,11-02-2022,donor_174,Food Aid,East,26027.62,0,8.0,208220.96,Corporate
+NGO50452,2022/09/27,Donor_169,Food Aid,,65365.79,"$2,865.16",4,250002.53,  Government  
+NGO50369,26 Jan 2022,Donor_117,Emergency Relief,South,817446.56,0,-2,1634893.12,Grant
+NGO50412,11/08/23,Donor_036,Food Aid,International,84715.47,0,6,508292.82,Individual
+NGO50420,"May 20, 2023",N/A,Food Aid,South,85782.84,0,3,257348.52,Corporate
+NGO50620,25-04-2024,Donor_108,Skills Training,Central,42577.85,0,10,425778.52,International Aid
+NGO50156,12/12/2024,Donor_190,Emergency Relief,West,753253.13,0,2,1506506.26,Grant
+NGO50455,2024-04-25,Donor_120,Education Support,North,79472.46,0,1,-79472.46419042742,Grant
+NGO50516,19-10-2024,Donor_165,Health Outreach,Central,96625.41,0,9,869628.71,Government
+NGO50557,21-12-2022,Donor_061,Skills Training,North,21307.97,0,9,191771.74,Individual
+NGO50067,15 Feb 2024,Donor_109,Shelter,West,239112.85,0,6,1434677.1,Individual
+NGO50645,2023-08-14,Donor_041,TBD,South,113653.28, 0 ,3,340959.84,International Aid
+NGO50580,05/23/2023,Donor_099,Water Project,East,115893.32,0,10,1158933.16,Government
+NGO50136,29-02-2024,Donor_150,  Emergency Relief  ,South,350756.46,17371.06,1,333385.41,Grant
+NGO50342,2024/06/08,Donor_156,Food Aid,West,,560.03,1,,Grant
+NGO50039,2022/07/10,Donor_113,Food Aid,East,93305.92,0,6,559835.54,Individual
+NGO50477,27-01-2023,Donor_161,Shelter,International,-113365.82441804845,3915.55,-6,656701.64,International Aid
+NGO50140,03/13/2023,  ,Education Support,International,75621.57,2121.92,1,73499.64,Individual
+NGO50509,21 Dec 2022,Donor_052,Food Aid,South,86308.66,$0.00,2,172617.32,Government
+NGO50334,2023/08/19,Donor_081,Food Aid,East,62222.92,2365.99,N/A,538712.35,Government
+NGO50325,03/16/23,Donor_084,Emergency Relief,  West  ,794171.52,0,3,2382514.57,
+NGO50470,07 Apr 2022,Donor_083,Food Aid,Central,87974.82,0,1,87974.82,Corporate
+NGO50217,2024/06/04,Donor_069,Education Support,North,19964.87,0,8,159718.95,Grant
+NGO50383,2023-03-11,Donor_122,Food Aid,North,57173.62,0,2, 114347.23882457458 ,Government
+NGO50246,28 Jan 2023,Donor_090,Food Aid,West,69384.18,0,6,416305.07,International Aid
+NGO50188,TBD,Donor_114,Education Support,International,68320.31,0,6,409921.88,
+NGO50170,12/21/2024, Donor_169,Health Outreach,East,28763.58,0,unknown,28763.58,Individual
+NGO50566,07/23/24,N/A,Shelter,International,337255.98,2379.41,3,1004629.7,Grant
+NGO50215,2023/11/08,Donor_026,Water Project,Central,147423.74,0,3.0,"$442,271.21",Grant
+NGO50152,20 Aug 2024,Donor_035,Emergency Relief,East,974599.03,0,2,1949198.06,Corporate
+NGO50159,11-02-2022,donor_174,Food Aid,East,26027.62,0,8.0,208220.96,Corporate
+NGO50533,19 Jul 2024,Donor_052,Food Aid,Central,52229.77,1914.89,7,352204.15,International Aid
+NGO50240,2024/08/25,DONOR_140,Skills Training,East,32481.77,1042,2,62880.5,International Aid
+NGO50227,2023-12-14,Donor_154,Emergency Relief,International,889412.68,39987.02,2,1698851.32,International Aid
+NGO50037,2023-08-23,Donor_072,Water Project,East,96615.69,0,1,96615.69,Grant
+NGO50438,2022-03-18,Donor_141,Health Outreach,Central,-52987.66256132732,0,2,105975.33,International Aid
+NGO50015,2023-12-30,Donor_136,Emergency Relief,South,506947.22,17761.36,1,489185.86,Corporate
+NGO50634,22-07-2022,Donor_135,Shelter,East,405144.52,0,1.0,"$405,144.52",Grant
+NGO50432,2022-08-03,Donor_193,Shelter,South,292850.33,11524.76,6,1687953.42,Individual
+NGO50012,13-08-2024,Donor_148,Food Aid,Central,11756.6,203.39,2,23106.41,Grant
+NGO50401,2023/04/01,Donor_175,Food Aid,East,62068.98,0,2,124137.96,Government
+NGO50264,06-10-2022,Donor_161,Shelter,International,332136.44,0,3,996409,TBD
+NGO50395,07 Mar 2024,Donor_047,  Health Outreach  ,International,108836.38,0,8,870691.03,Grant
+NGO50226,2022/10/25,donor_025,Food Aid,South,40326.75,0,1,40326.75,International Aid
+NGO50534,"September 15, 2023",Donor_122,Food Aid,International,44774.05,0,,"$179,096.22",Individual
+NGO50198,04/25/22,Donor_175,  -  ,South,39953.57,0,7,279674.99,Grant
+NGO50474,2024-11-18,Donor_029,Water Project,null,69842.12,0,8,558736.99,Individual
+NGO50287,"September 07, 2024",Donor_041,Water Project,East,110463.67,3211.21,2,214504.93,Grant
+NGO50524,16-11-2023,Donor_137,Skills Training,International,47597.26,0,7,,  Individual  
+NGO50588,01/02/22,Donor_084,emergency relief,East,,13370.72,6,2074598.28,CORPORATE
+NGO50024,2022-02-06,Donor_053,Skills Training,,46875.36,1269.46,7,319241.29,  Government  
+NGO50358,2022/04/17,donor_193,Emergency Relief,  West  ,295485.73,0,1,295485.73,Corporate
+NGO50569,2024-10-05,Donor_094,Emergency Relief,Central,864304.77,0,5,4321523.84,Grant
+NGO50392,27 Feb 2022,Donor_081,Water Project,North,98761.2,3553.03,5,476040.87,Corporate
+NGO50618,2023-05-09,Donor_063,Food Aid,West,,0,6,379606.29,Government
+NGO50142,2024-13-45,Donor_135,Health Outreach,International,132816.83,2515.25,9,1172714.27,  International Aid  
+NGO50539,05/18/22,Donor_076,Skills Training,Central,7944.24,0,2,15888.48,Corporate
+NGO50286,2024/11/10,Donor_062,Food Aid,North,98520.49,1839.78,2,193361.44,Individual
+NGO50120,27 Feb 2024,Donor_099,Education Support,South,78090.5,540.82,7,542847.7,Grant
+NGO50650,2022/04/18,Donor_110,Shelter,Central,,112.73,8,1391893.7,Individual
+NGO50048,2024/11/29,Donor_114,Skills Training,International,null, 325.0751634724754 ,1,7821.69,Individual
+NGO50158,02/22/22, Donor_019,Skills Training,West,37459.57,0,2,74919.14,Corporate
+NGO50187,18 Nov 2023,Donor_129,Water Project,East,182308.31,1756.53,4,722207.15,Government
+NGO50615,2022/01/28,Donor_187,Skills Training,West,36327.89,0,8,290623.13,Corporate
+NGO50059,2022-07-27,Donor_150,Education Support,International,8997.16,0,7,62980.1,Government
+NGO50110,27 Sep 2023,Donor_099,Health Outreach,North,121933.86,0,8,975470.91,Individual
+NGO50150,25 Jan 2022,Donor_010,Health Outreach,West,66543.57,0,unknown,665435.68,International Aid
+NGO50570,2024-13-45,Donor_117,Water Project,Central,199341.14,0,5,996705.72,Grant
+NGO50231,18 Apr 2023,Donor_184,Education Support,International,TBD,0,10,null,Corporate
+NGO50248,2024-08-25,Donor_096,Skills Training,,42284.39,0,4,169137.57,Corporate
+NGO50493,2022-06-22,Donor_004,Shelter,East,,0,3,475219.46,
+NGO50571,10/04/22,Donor_104,Health Outreach,International,144649.83,1064.45,4,574341.52,Grant
+NGO50647,"November 24, 2022",Donor_090,Water Project,International,78254.66,1576.09,7,536749.99,Individual
+NGO50445,2024/10/22,Donor_054,Health Outreach,South,144321.6,0,6,865929.59,Government
+NGO50116,2023/10/15,Donor_149,Education Support,Central,8695.32,0,-4,34781.28,
+NGO50479,20-05-2023,,Shelter,International,459090.3,0,3,1377270.89,International Aid
+NGO50519,"July 03, 2024",donor_110,Health Outreach,North,61320.0,0,7,429240.01,Government
+NGO50440,03/22/2022,Donor_105, Skills Training,Central,41080.07,0,8,328640.58,Individual
+NGO50527,01/29/2022,Donor_118,  Water Project  ,Central,22647.41,0,8,181179.24,International Aid
+NGO50270,31-01-2023,Donor_188,Education Support,West,64601.4,-,2,124253.22,International Aid
+NGO50005,12/06/2023,Donor_014,Emergency Relief,North,107375.05,0,2,214750.11,Government
+NGO50262,2024-12-13,Donor_180,Skills Training,Central,44616.2,0,6,267697.18,Government
+NGO50128,2024-08-21,Donor_171,Emergency Relief,International,333732.66,0,,"$667,465.31",Government
+NGO50413,"January 15, 2022", Donor_087,Emergency Relief,North,350432.6,0,-10,3504325.95,Corporate
+NGO50473,05/28/24,Donor_067,Water Project,West,191693.27,0,10,1916932.67,Grant
+NGO50029,2024/02/09,Donor_008,Health Outreach,South,39860.77,0,3,119582.31,grant
+NGO50361,05/21/22,Donor_035,Education Support,South,4963.92,122.24,8,38733.45,Individual
+NGO50611,09/13/2024,Donor_027,Food Aid,Unknown,34386.28,0,1.0,34386.28,
+NGO50323,TBD,DONOR_194,Health Outreach,North,13080.04,568.8,2,25022.48,Individual
+NGO50003,2024/02/29,Donor_071,Shelter,East,268067.26,0,5,1340336.29,Corporate
+NGO50111,19 Jul 2022,Donor_166,Food Aid,north,unknown,,1,42041.63,Grant
+NGO50221,2023/03/19,Donor_196,Emergency Relief,International,858410.63,37674.64,5,4103679.97,Individual
+NGO50407,18 Nov 2023,Donor_028,Skills Training,East,13359.52,0,3,40078.55,Government
+NGO50011,01/07/24,Donor_117,Health Outreach,east,46676.13,0,10,-,Government
+NGO50055,05/05/2022,Donor_199,,west,597444.4,6508.26,9,5318425.26,Grant
+NGO50089,01 Oct 2022,Donor_170,Shelter,International,395057.77, 2267.0431522935896 ,3,1178372.19,Grant
+NGO50548,06/19/24,Donor_039,Water Project,International,170565.52,8372.47,9,1459737.48,Government
+NGO50214,"March 22, 2022",Donor_023,Food Aid,South,50706.22,0,8,TBD,International Aid
+NGO50290,06/30/24,Donor_024,Shelter,South,97574.06,3011.22,3,TBD,
+NGO50046,25 Jul 2022,Donor_098,Water Project,South,124888.42,0,8,999107.34,Corporate
+NGO50578,"June 24, 2023",Donor_143,Health Outreach,South,-,0,1,18800.48,Grant
+NGO50525,0000-00-00,Donor_109,Education Support,West, 29161.43980598911 ,0,5,145807.2,Grant
+NGO50616,23 May 2022,Donor_019,Water Project,North,137245.28,0,4.0,548981.13,Government
+NGO50633,0000-00-00,  Donor_194  ,,East,4930.34,0,1,4930.34,International Aid
+NGO50491,"November 26, 2023",Donor_027,Food Aid,North,12801.75,0,9,115215.73,Government
+NGO50508,"July 01, 2022",Donor_022,Health Outreach,central,111484.98,0,9,1003364.82,Grant
+NGO50103,09/18/2022,Donor_194,Emergency Relief,East,"$444,938.10",13842.36,2,,Government
+NGO50393,2023/12/28,,Emergency Relief,North,506090.43,,2,"$1,012,180.87",Government
+NGO50061,10/03/2024,Donor_197,Water Project,West,-33873.75019581759,0,2,67747.5,International Aid
+NGO50549,03 Feb 2022,Donor_194,Skills Training,south,15678.29,0,9,141104.63,Corporate
+NGO50540,08/19/23,Donor_150,Emergency Relief,West,35421.81,-1289.6242472857432,7,238925.29,Government
+NGO50211,18-10-2022,Donor_095,Health Outreach,East,81021.46, 0 ,9,729193.16,International Aid
+NGO50471,2024-13-45,Donor_121,Skills Training,North,37854.56,541.1,3,111940.36,Individual
+NGO50234,02/20/23,Donor_053,Emergency Relief,West,147506.71,0,4,590026.85,Grant
+NGO50402,31 Aug 2023,Donor_017,Skills Training,,13282.12,0,2,26564.23,Corporate
+NGO50149,"August 13, 2023",Donor_169,Skills Training,International,15743.89,0,5,78719.46,Government
+NGO50352,21 Nov 2023,Donor_141,Shelter,International,-20718.66910359725,357.36,7,-142529.18608216828,Individual
+NGO50360,"June 01, 2022",Donor_143,,West,127050.91,$0.00,8,1016407.25,Grant
+NGO50077,10-06-2022,Donor_059,Food Aid,,14557.47,$0.00,7,101902.29,Individual
+NGO50252,2022/07/17,Donor_037,Skills Training,Central,44937.02,0,-1,44937.02,Individual
+NGO50186,19-01-2024,DONOR_155,Emergency Relief,  South  ,157310,5429.42,6,911286.2,International Aid
+NGO50501,2024-04-15,Donor_183,Shelter,North,396100.37,0,9,3564903.37,CORPORATE
+NGO50554,27-05-2024,Donor_023,Shelter,International,430254.45,15259.06,8,3319963.16,Corporate
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,

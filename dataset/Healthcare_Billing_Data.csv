@@ -1,0 +1,964 @@
+Transaction ID,Date,Patient Name,Department,Service Type,Region,Amount,Discount,Quantity,Total,Insurance Type
+HCR20356,2024/05/17,Patient_0494,,Imaging,West,1067.59, 0 ,1,1067.59,Corporate
+HCR20405,21-05-2023,Patient_0246,Emergency,Consultation,Central,197.02,30.72,2,332.59,Corporate
+HCR20768,06/20/2023,,Oncology,Therapy,North,422.07,124.46,3,892.83,Corporate
+HCR20612,2024/04/25,Patient_0372,Radiology,Therapy,South,144.93,32.64,2,-224.58131988592487,Corporate
+HCR20421,04/22/23,Patient_0418,Pediatrics,Consultation,North,189.42,0,2,378.85,Corporate
+HCR20282,TBD,Patient_0012,General,Vaccination,East, 20.527584500344805 ,8.47,,48.23,Private
+HCR20564,"July 05, 2023",Patient_0663,General,Vaccination,South, 41.754846285056374 ,0,4,167.02,Self-Pay
+HCR20160,"March 25, 2024",Patient_0067,Orthopedics,Imaging,Central,222.67,37.22,2,370.91,  Self-Pay  
+HCR20557,26 Feb 2022,N/A, Orthopedics,Lab Test,  ,179.85,11.31,4,674.15,Corporate
+HCR20415,04/14/24,Patient_0374,Emergency,Surgery,East,4107.24,1225.96,2,5762.57,Private
+HCR20551,"February 18, 2024",Patient_0879,,Vaccination,Central,12.23,0,3,36.68,NHIS
+HCR20212,"February 27, 2024",Patient_0685,Emergency,Imaging,West,,0,4,5798.45,Corporate
+HCR20650,08-05-2024,Patient_0516,Orthopedics,Surgery,,11691.93,0,3,35075.8,Self-Pay
+HCR20275,"November 06, 2023",Patient_0727,Cardiology,Emergency Care,  -  ,3422.54,0,3, 10267.610233470201 ,Self-Pay
+HCR20642,,Patient_0482,Orthopedics,Vaccination,East,50.63,0,1,50.63,Private
+HCR20812,12/29/2023,Patient_0258,TBD,Surgery,Central,12738.52,0,3,-38215.55806333606,Private
+HCR20667,13 Nov 2023,Patient_0066,Emergency,Consultation,South,,64.72,2,316.2,Self-Pay
+HCR20302,14 Mar 2023,Patient_0159,General,Surgery,South,4859.29,15.47,3,14531.46,Corporate
+HCR20510,10 Nov 2023, Patient_0227,Radiology,,Central,289.33,0,1,289.33,Corporate
+HCR20448,2024-10-31,  Patient_0046  ,Orthopedics,Lab Test,West,N/A,0,2,640.42,nhis
+HCR20134,04/30/22,Patient_0317, General,Consultation,None,76.0,0,3,227.99,Corporate
+HCR20851,2023/09/29,Patient_0138,Radiology,Therapy,Central,300.43,74.09,4,905.37,Corporate
+HCR20614,05/15/2023,Patient_0231,  Radiology  ,Vaccination,South,64.85,-10.625221912720303,4,216.92,Corporate
+HCR20664,2022-10-16,Patient_0875,Pediatrics,Lab Test,Central,282.39,22.25,,260.14,Private
+HCR20640,14 Nov 2023,N/A,ORTHOPEDICS,Surgery,South,22796.37,0,2,45592.74,Self-Pay
+HCR20636,2023/06/02,Patient_0820,Cardiology,None,Central,432.1,0,3,1296.29,Self-Pay
+HCR20472,"December 10, 2022",Patient_0356,Emergency,Surgery,North,13046.55,2786.21,4,41041.38,NHIS
+HCR20393,13 Aug 2023,Patient_0377,Cardiology,Lab Test,,273.89,-46.899461711904515,2,453.98,Self-Pay
+HCR20459,2022-10-04, Patient_0503,Pediatrics,Imaging,East,1352.15,240.12,1,1112.03,NHIS
+HCR20014,"February 22, 2024",Patient_0570,Cardiology,Vaccination,North,15.86,7.57,1,8.29,Private
+HCR20060,04/03/2022,Patient_0361,Radiology,Lab Test,  South  ,409.25,0,1,409.25,Self-Pay
+HCR20334,03/07/2024, Patient_0745,Radiology,Imaging,East,1374.53,130.66,4,4975.48,NHIS
+HCR20786,29 Jul 2022,Patient_0755,Orthopedics,Surgery,,6314.87,0,3,18944.62,NHIS
+HCR20555,2023-09-18,Patient_0140,Orthopedics,Surgery,North,9843.54,1592.44,3,24753.3,Self-Pay
+HCR20089,2023-05-06,Patient_0465, Pediatrics,Lab Test,Central,296.34,41.33,2,510.03,Self-Pay
+HCR20673,2022/12/10,Patient_0632,General,CONSULTATION,South,132.08,,2,264.17,Corporate
+HCR20185,"August 11, 2024",Patient_0838,,Vaccination,South,41.78,0,4,167.12,  
+HCR20559,09-02-2022,Patient_0081,Orthopedics,Consultation,North,,0,1,156.78,NHIS
+HCR20321,2024/12/20,PATIENT_0783,Emergency,Imaging,South,664.0,0,1,664.0,NHIS
+HCR20368,,Patient_0606,Radiology,Therapy,East,376.51,0,1,376.51,Private
+HCR20626,2024-13-45,Patient_0295,Radiology,,East,239,34.17,1,205.25,Private
+HCR20147,2024-07-28,Patient_0407,Emergency,  Surgery  ,Central,4720.15,0,2,9440.31,NHIS
+HCR20117,2022-08-09,Patient_0309,Oncology,Surgery,West,9130.63,,4,36522.52,Self-Pay
+HCR20837,10/16/2023,Patient_0359,  Radiology  ,Surgery,West,3705.77,0,2,7411.55,Self-Pay
+HCR20640,14 Nov 2023,N/A,ORTHOPEDICS,Surgery,South,22796.37,0,2,45592.74,Self-Pay
+HCR20222,,Patient_0704,General,Vaccination,South,40.11,0,3,120.34,Corporate
+HCR20770,06-03-2023,Patient_0808,Cardiology,Surgery,North,13243.81,"$1,837.86",4,45623.77,NHIS
+HCR20832,04-05-2023,Patient_0885,Emergency,Imaging,Central,467.0,0,4,1867.99,NHIS
+HCR20771,01/29/2023,Patient_0623,Radiology,Vaccination,North,,12,4.0,186.82,Self-Pay
+HCR20230,"February 25, 2023",Patient_0501,Radiology,Vaccination,West,39.8,0,3,,Corporate
+HCR20596,"April 18, 2024",Patient_0566,Orthopedics,Emergency Care,South,4750.47,0,-3, 14251.401512685843 ,NHIS
+HCR20346,,Patient_0055,Cardiology,Vaccination,East,16.49,0,2,32.98,Private
+HCR20899,08 Apr 2023,Patient_0567,Radiology,TBD,West,122.01,0,3,366.02,Private
+HCR20287,08/30/23,Patient_0744,  General  ,Imaging,South,1049.37,$0.00,3,3148.11,NHIS
+HCR20494,2023-08-01,Patient_0018,Radiology,Emergency Care,South,1651.74,0,3,4955,Corporate
+HCR20828,03/28/23,,  Radiology  ,Imaging,,817.55,0,N/A,817.55,Private
+HCR20100,"December 10, 2023",Patient_0687,Emergency,Therapy,South,88.78,0,3,266.34,Self-Pay
+HCR20556,2024/12/01,Patient_0011,Pediatrics,Imaging,South,,0,1,1191.82,Self-Pay
+HCR20467,07/10/22,Patient_0411,Cardiology,Imaging,Central,776.84,0,3,-2330.5116867379456,Corporate
+HCR20438,2023/10/03,Patient_0701,Oncology,Lab Test, West,65.01,0,3,195.02,Corporate
+HCR20232,01/14/2022,Patient_0251,Cardiology,Surgery,East,22671.3, 0 ,2,45342.6,Self-Pay
+HCR20374,"July 29, 2022",Patient_0295,Radiology,Consultation,North,81.91,0,1,81.91,NHIS
+HCR20645,07-05-2022,Patient_0695,,Surgery,South,7338.0,310.0,2,14056.0,Corporate
+HCR20826,2023/08/30,Patient_0364,Radiology,Therapy,East,450.96,0,1,450.96,NHIS
+HCR20782,05/23/2023,Patient_0872,Orthopedics,Imaging,Central,473.07,139.74,4,"$1,333.33",Self-Pay
+HCR20010,03/31/2024,Patient_0117,,Consultation,East,253.25,0,4,1013.0,Self-Pay
+HCR20618,01/14/2022,Patient_0638,Radiology,Consultation,West,104.09,0,1,104.09,Self-Pay
+HCR20061,05/04/22,Patient_0883,Emergency,Therapy,West,477.25,0,2,954.5,Private
+HCR20156,09-07-2022,Patient_0459,Pediatrics,Consultation,South,162.16,0,1,162.16,self-pay
+HCR20354,05-04-2023,Patient_0278,Radiology,Lab Test,Central,247.91,20.08,4, 911.318468569912 ,Private
+HCR20394,05 May 2024,Patient_0505,Orthopedics,Surgery,Central,20823.74,348.28,2,40950.92, NHIS
+HCR20620,21 Aug 2023,Patient_0871,,Vaccination,East,51.67,0,2,103.34,Private
+HCR20699,2023-06-29,Patient_0403,GENERAL,Unknown,North,241.82,0,4,967.3,NHIS
+HCR20690,2023/09/11,Patient_0370,Cardiology,therapy,Central,TBD,$0.00,4,2297.64,PRIVATE
+HCR20037,25-12-2022, Patient_0131,Emergency,Lab Test,East,487.38,0,3,-,Corporate
+HCR20662,"May 26, 2022",Patient_0257,Oncology,Consultation,East,74.29,$0.00,3,222.88,NHIS
+HCR20135,28 Mar 2024,Patient_0319,Cardiology,Lab Test,South,269.97,65.09,4,819.56,Private
+HCR20530,03-10-2023,PATIENT_0697,Radiology,Vaccination,East,34.27,10.01,2,48.53,Corporate
+HCR20694,2024/06/19,Patient_0032,General,Emergency Care,  South  ,3424.82,0,,10274.47,Self-Pay
+HCR20894,"September 24, 2022",Patient_0488,Pediatrics,Therapy,Central,188.99,20.88,2,336.22,Self-Pay
+HCR20063,2023-10-27,Patient_0044,Radiology,,central,18771.29,0,3,56313.87,CORPORATE
+HCR20405,21-05-2023,Patient_0246,Emergency,Consultation,Central,197.02,30.72,2,332.59,Corporate
+HCR20320,09 Jan 2024,Patient_0562,Emergency,Emergency Care,West,1254.96,365.89,1,889.07,Private
+HCR20083,07 Feb 2023,Patient_0314,Orthopedics,Emergency Care,,1422.73,283.44,4,-4557.146429389718,Private
+HCR20059,24-04-2024,Patient_0135,Pediatrics,Surgery,West,20341,3189.64,2,34303.36,Corporate
+HCR20570,2023/01/13,Patient_0187,Cardiology,Vaccination,East,39.89,,,$39.89, Self-Pay
+HCR20625,2024/05/14,Patient_0804,Oncology,Therapy,,95.67,,4,297.34,NHIS
+HCR20103,2023-07-03,Patient_0080,Radiology,Lab Test,North,292.96,0,3,878.89,Self-Pay
+HCR20149,2024-04-05,Patient_0607,General,Consultation,North,61.81,0,4,247.24,Private
+HCR20872,2024/07/21,Patient_0144,Cardiology,,Central,22.19,$0.00,1,22.19,corporate
+HCR20518,02-02-2022,Patient_0251,None,Imaging,East,246.06,0,3,738.17,NHIS
+HCR20267,"February 08, 2022",Patient_0093,Orthopedics,Vaccination,,22.83,0,2,45.67,NHIS
+HCR20654,12/08/2024,Patient_0127,General,Imaging,Central,1457.18,0,1,1457,Corporate
+HCR20829,2024/10/02,Patient_0508,Cardiology,Imaging,South,1033.48,0,4,4133.92,Corporate
+HCR20294,2022/11/12,Patient_0432,,Lab Test,North,280.05,$0.00,3,840.14,NHIS
+HCR20779,14-06-2023,,Oncology,Lab Test,Central,unknown,80.17,3,797.57,Private
+HCR20802,2023/12/31,Patient_0008,General,EMERGENCY CARE,Central,4856.42,962.12,4.0,15577,Self-Pay
+HCR20589,07/19/22,,General,Imaging,Central,662.05,,2,1131.23,Self-Pay
+HCR20110,23-05-2024,Patient_0241,General,Lab Test,Central,72.86,16.27,4,226.34,Self-Pay
+HCR20168,2022-09-09,Patient_0291,Orthopedics,Vaccination,South,48.39,0,1,48.39,Private
+HCR20652,"November 18, 2024",Patient_0622,Orthopedics,Imaging,  Central  ,1185.61,28.27,1,1157.34,NHIS
+HCR20689,08/27/2022,Patient_0027,EMERGENCY,Imaging,South,222.06,,2,444.12,NHIS
+HCR20316,11/21/2023,Patient_0569,Orthopedics,Emergency Care,,4254.24,TBD,2,6408.58,Corporate
+HCR20805,08/04/23,PATIENT_0533,General,Vaccination,West,50.28,0,2,100.56,Private
+HCR20660,2022/07/01,Patient_0815,Emergency,Consultation,Central,235.89,0,3.0,707.66,NHIS
+HCR20035,09/19/2022,  Patient_0896  ,Emergency,Therapy,West,87.81,17.76,4,-280.2060920783899,Corporate
+HCR20592,2024/11/23,Patient_0645,General,Vaccination,  East  ,43.21,null,3,129.62,Private
+HCR20303,2024-09-06,Patient_0822,Orthopedics,  Therapy  ,West,443.92,14.16,4,1719.04,Private
+HCR20728,29-10-2023,Patient_0580,Orthopedics,Surgery,South,9139.65,2349.91,2,13579.47,
+HCR20152,2024/06/12, Patient_0490,Oncology,Imaging, South,,0,3,895.41,Self-Pay
+HCR20234,2023/07/06,PATIENT_0277,  Emergency  ,Vaccination,Central,76.64,0,1,76.64,NHIS
+HCR20020,13-04-2022,Patient_0045,Orthopedics,Therapy,North,158.23,37.21,null,484.07,Private
+HCR20255,05/19/2023,Patient_0028,Radiology,Consultation,West,106.97,0,4,-427.89361853814034,Private
+HCR20453,2024/04/02,Patient_0850,General,Emergency Care,North,2243.15,397.59,1,1845.56,Corporate
+HCR20813,17-04-2024,patient_0643,Orthopedics,Vaccination,  ,61.7,0,1,61.7,Corporate
+HCR20821,21 Mar 2024,Patient_0272,Emergency,Emergency Care,East,719.71,0,N/A,1439.42,NHIS
+HCR20261,24-01-2024,Patient_0622,Pediatrics,Imaging,East,938.34,$0.00,4,3753.36,NHIS
+HCR20488,02 Jan 2024,Patient_0519,Radiology,Consultation,South,192.74,0,4,770.98,Self-Pay
+HCR20671,04-09-2023,Patient_0638,Pediatrics,Emergency Care,East,427.93,0,3,,Private
+HCR20179,2023/09/04,Patient_0148,Cardiology,Therapy,South,292,0,1,,Corporate
+HCR20527,2022/11/15,Patient_0544,Pediatrics,lab test,South,419.77,0,4,1679.1,Self-Pay
+HCR20876,2022-09-06,Patient_0697,Cardiology,Emergency Care,East,2953.33,0,3,8859.99,SELF-PAY
+HCR20485,03/14/24,Patient_0552,Cardiology,Imaging,Central,342.28,0,4,1369.13,Self-Pay
+HCR20180,03/28/24,Patient_0712,Cardiology,Consultation,null,221.89,22.17,1,199.72,  Private  
+HCR20706,03/03/24,Patient_0590,Orthopedics,Consultation,West,126.22,0,3,378.66,Private
+HCR20628,01/31/23,Patient_0664,Pediatrics,Vaccination,North,32.01,0,3,96.03,Self-Pay
+HCR20840,2022/11/15,Patient_0868,Emergency,Therapy,East,495.84,80.06,1, 415.78171560186536 ,Self-Pay
+HCR20269,2023/07/12,Patient_0899,Emergency,Emergency Care,Central,4719.83,0,4,18879.3,Corporate
+HCR20084,21 Apr 2024,Patient_0141,Radiology,Imaging,East,1334.89,0,2,2669.78,NHIS
+HCR20105,12/07/24,  Patient_0221  ,Oncology,Imaging,North,1368.31,258.43,4,4439.54,NHIS
+HCR20427,04-11-2022,,Radiology,Vaccination,North,11.5,0,,11.5,Self-Pay
+HCR20310,01/28/24,Patient_0314,Emergency,Therapy,East,105.73,0,3,317.18,Self-Pay
+HCR20099,2023/06/13,Patient_0413,Pediatrics,Imaging,South,1032.71,262.39,3,2310.97,Private
+HCR20219,01/16/23,Patient_0304,General,Consultation,West,104.13,0,2,208.26,Corporate
+HCR20299,2022/12/02,Patient_0405,Oncology,Emergency Care,South,2143.39,0,2,4286.78,Private
+HCR20203,2023/11/20,Patient_0653,Pediatrics,Imaging,South,1330.19,0,1,1330.19,Self-Pay
+HCR20672,2023/10/10,Patient_0629,Emergency,Consultation,East,284.54,78.95,4,822.36,Self-Pay
+HCR20533,23 Jan 2022,Patient_0053,Radiology,Emergency Care,West,4445.31,0,1,4445.31,Self-Pay
+HCR20769,"February 02, 2024",Patient_0265,Emergency,Therapy,South,129.32,0,3,387.96,Self-Pay
+HCR20440,06/02/2024,Patient_0021,Orthopedics,Consultation,North,197.29,$55.89,2,282.8,Private
+HCR20861,22 Jun 2024,Patient_0325,Oncology,Emergency Care,  South  ,3795.81,0,1,3795.81,NHIS
+HCR20868,2024/07/23,Patient_0742,Cardiology,Consultation,North,196.73,25.64,1,171.09,NHIS
+HCR20647,03/09/22,Patient_0447,Orthopedics,Surgery,North,2889.48,0,3,8668.43,NHIS
+HCR20745,03 Mar 2024,Patient_0111,Oncology,TBD,N/A,422,0,TBD,422.21,NHIS
+HCR20463,"November 13, 2023",Patient_0231,Oncology,Vaccination,South,24.7,0,3,74.1,Self-Pay
+HCR20150,"April 17, 2022",Patient_0780,Radiology,Therapy,Central,425.78,0,N/A,1703.13,Private
+HCR20781,2022/04/04,Patient_0756,Oncology,Imaging,Central,405.79,0,1,405.79,Corporate
+HCR20154,03/18/2024,Patient_0675,Cardiology,  Surgery  ,West,4337.43,0,1,4337.43,Corporate
+HCR20460,07/13/22,Patient_0205,Orthopedics,Consultation,East,158.17,0,4,632.67,Corporate
+HCR20086,06/18/2023,Unknown,  Cardiology  ,Surgery,Central,,0,2,44892.32,Corporate
+HCR20017,06/21/22,Patient_0023,Emergency,Emergency Care,East,3153.01,490.08,2,5325.86,Corporate
+HCR20858,20-12-2023,Patient_0099,Orthopedics,Surgery,,20794.03,0,3,62382.09,Corporate
+HCR20633,02/25/2023,Patient_0389,Emergency,  Consultation  ,Central,249.5,0,2.0,499.0,
+HCR20075,07/13/22,Patient_0109,Emergency,Therapy,East,489,81.32,1,407.23,Corporate
+HCR20263,08/23/22,Patient_0056,Orthopedics,Vaccination,West,55.99,0,4,223.96,NHIS
+HCR20376,29-06-2024,Patient_0246,Oncology,,East,12687.16,0,2,25374.32,Self-Pay
+HCR20074,2022-09-16,patient_0456,General,Lab Test,,269.92,15.52,4,1017.6,  Private  
+HCR20531,24 Jan 2024,Patient_0815,Emergency,, West,32.5,9.75,4,90.99,Private
+HCR20278,2022/06/26,Patient_0590,Orthopedics,Vaccination,East,25.26,0,1,25.26,Corporate
+HCR20288,2024/09/22,Patient_0397,Orthopedics,Therapy,East,256.26,0,4,1025.03,Private
+HCR20236,21 Apr 2023, Patient_0411,Oncology,Surgery,East,11097.03,0,1,11097.03,Private
+HCR20071,"January 12, 2023",Patient_0063,Radiology,Surgery,South,22673.41,0,4,,NHIS
+HCR20808,"February 06, 2023",,Orthopedics,Emergency Care,Central,1769.77,430.96,3,4016.45,Corporate
+HCR20707,09/19/23,Patient_0594,Pediatrics,Consultation,South,78.06,0,4,312.25,Private
+HCR20392,09/26/2024,Patient_0287,Pediatrics,Emergency Care,South,4408.76,0,1,4408.76,Corporate
+HCR20824,2024-08-21,Patient_0460,General,Emergency Care,North,3187.52,0,2,6375,Private
+HCR20426,2024/01/10,,Emergency,Consultation,South,260.38,31.0,1,229.37,NHIS
+HCR20833,06/05/23,Patient_0656,Orthopedics,Surgery,CENTRAL,19779.49,0,1,19779.49,NHIS
+HCR20221,12/19/24,Patient_0740,Oncology,Imaging,North,766.24,0,2,1532.49,Private
+HCR20123,2024-04-27,Patient_0638,Emergency,Consultation,  East  ,257.92,42.09,3,647.5,Private
+HCR20692,2022/02/16,Patient_0255,General,Lab Test,North,$410.31,0,2,820.61,NHIS
+HCR20106,02 Mar 2023,Patient_0702,Radiology,Lab Test,CENTRAL,353.82,102.67,4,1004.6,Self-Pay
+HCR20889,03/04/23,Patient_0884,Orthopedics,surgery,West,23430.83,-,2,-,Corporate
+HCR20770,06-03-2023,Patient_0808,Cardiology,Surgery,North,13243.81,"$1,837.86",4,45623.77,NHIS
+HCR20366,18-06-2022,Patient_0224,Oncology,Vaccination,South,23.66,0,1,23.66,Self-Pay
+HCR20749,0000-00-00,Patient_0878, Oncology,Therapy, West,124.5,0,2,249.0, NHIS
+HCR20732,29-04-2024,Patient_0790,Radiology,Imaging,,1212.94,0,2,2425.89,Corporate
+HCR20605,01 Mar 2024,Patient_0115,Emergency,Emergency Care,south,3011.2,170.91,3,8520.88,Private
+HCR20122,11/30/2022,Patient_0678,  Pediatrics  ,Imaging,West,195.34,0,1,195.34,Corporate
+HCR20735,2023/09/03,Patient_0896,Pediatrics,Lab Test,South,208.78, 0 ,3,TBD,  Corporate  
+HCR20187,"February 18, 2022",Patient_0768,General,Imaging,central,,0,3,4496,None
+HCR20341,02/23/2022,Patient_0879,General,,South,1291.13,$0.00,3,3873.39,Self-Pay
+HCR20823,06/24/2023,Patient_0462,Cardiology,Vaccination,,88.35,0,-1,88.35,Self-Pay
+HCR20563,,Patient_0580,Emergency,Consultation,,-205.24019977872783,$0.00,3, 615.7205993361835 ,Private
+HCR20089,2023-05-06,Patient_0465, Pediatrics,Lab Test,Central,296.34,41.33,2,510.03,Self-Pay
+HCR20655,06 Jan 2022,Patient_0122,Radiology,Consultation,West,194.2,0,unknown,194.2,NHIS
+HCR20593,"March 10, 2022",Patient_0571,Orthopedics,Imaging,West,838.09,0,4,3352.34,Self-Pay
+HCR20629,2023/11/07,Patient_0163,Pediatrics,Vaccination,South,27.86,0,1,N/A,Corporate
+HCR20016,21 Nov 2022,Patient_0682,Radiology,Emergency Care,North,4539.57,0,1,4540,Self-Pay
+HCR20241,2022-12-19,Patient_0758,Oncology,Therapy,South,169.33,41.61,4,510.88,SELF-PAY
+HCR20235,07/24/2023,Patient_0068,Oncology,Imaging,East,662.08,24.19,3,1913.67,NHIS
+HCR20012,25-07-2022,Patient_0339,Cardiology,Imaging,North,126.57,0,4,-,Self-Pay
+HCR20004,2024/10/13,Patient_0018,Orthopedics,vaccination,East,68.96,0,3,206.89,Private
+HCR20011,2022/11/17,Patient_0830,Oncology,Surgery,West,4771.42,0,-2,9542.83,Private
+HCR20461,"March 09, 2023",Patient_0874,Emergency,Therapy,North,293.47,0,N/A,293.47,NHIS
+HCR20379,2024/07/30,Patient_0858,Orthopedics,Vaccination,North,45.86,12.31,3,100.67,Private
+HCR20193,27 Jan 2024,Patient_0266,Orthopedics,Consultation,East,,0,3,847.18,NHIS
+HCR20523,24 Jun 2023,Patient_0813,Radiology,Lab Test,West,299.53, 0 ,3,898.58,Private
+HCR20273,06/23/2022,Patient_0130,,  Therapy  ,  -  ,502.81,0,2,1005.62,NHIS
+HCR20249,2023-01-10,Patient_0173,Orthopedics,Emergency Care,  East  ,4261.91,0,2,8523.82,Private
+HCR20777,02/23/2024,Patient_0154,General,Surgery,East,24835.77,0,4,99343.06,Corporate
+HCR20489,2022/01/28,Patient_0038,Cardiology,Surgery,  North  ,21893.14,863.41,4,84118.93,Self-Pay
+HCR20385,25-01-2024,Patient_0615,Radiology,Surgery,South,21358.79,0,4,85435.14,Private
+HCR20565,2022-12-04,Patient_0807,General,Consultation,North,157.34,17.85,1,139.49,Private
+HCR20172,29-03-2022,,Orthopedics,Lab Test,East,324.61,0,4,1298.44,NHIS
+HCR20215,07 Apr 2024,Patient_0814,Radiology,Lab Test,East,457.56,0,4,1830.26,Self-Pay
+HCR20729,01/24/2024,Patient_0077,Emergency,N/A,,372.7,0,4,1490.79,Corporate
+HCR20734,10/26/2024,Patient_0456,General,None,Central,4490.86,TBD,1,"$3,491.09",None
+HCR20130,,Patient_0409,Cardiology,Imaging,North,546.47,0,2,1092.94,NHIS
+HCR20544,24-11-2023,Patient_0387,General,Lab Test,North,235.34,0,1,235.34,Private
+HCR20616,04/01/2023,Patient_0048,Cardiology,Vaccination,East,58.79,0,1,58.79,NHIS
+HCR20301,2023/10/20,Patient_0087,Pediatrics, Therapy,  West  ,387.31,0,4,1549.26,NHIS
+HCR20708,2024-06-30,Patient_0477, Cardiology,Vaccination,East,56.29,0,1.0,56.29,NHIS
+HCR20709,08/14/2023,Patient_0641,Radiology,Emergency Care,East,4995.55,0,3,14986.66,Private
+HCR20895,2022-02-07,  Patient_0623  ,Orthopedics,Emergency Care,WEST,4496.58,0,4,17986.34,Self-Pay
+HCR20062,08-04-2022,  Patient_0343  ,General,Surgery,North,9312.15,0,4.0,37248.59,Private
+HCR20663,2024-12-25,Patient_0899,Orthopedics,Surgery,East,3203.25,0,3,-9609.757300411631,Self-Pay
+HCR20184,18 Oct 2022,Patient_0681,Emergency,Imaging,West,121.56,0,3,364.67,Private
+HCR20684,01/22/2024,Patient_0829,Oncology,Therapy,Central,196.61,0,3,589.84,PRIVATE
+HCR20820,TBD,Patient_0280,Radiology,Lab Test,North,403.73,0,-2,807.46,Self-Pay
+HCR20043,05-05-2022,Patient_0323, Radiology,Vaccination,East,44.74,12.13,2,65.22,Corporate
+HCR20882,0000-00-00,Patient_0734,Cardiology,Consultation,West,134.02,37.97,3,288.13,Self-Pay
+HCR20340,09/20/22,  Patient_0224  ,Emergency,Imaging,West,1238.98,49.8,2,2378.35,Corporate
+HCR20119,01/07/23,Patient_0770,General,Surgery,South,5725.7,0,4,, NHIS
+HCR20718,2022/09/29,  Patient_0153  ,Oncology,Therapy,  South  ,-262.0129874483946,0,2,524.03,Self-Pay
+HCR20272,2024/09/04,Patient_0410,Oncology,Vaccination,South,64.29,,2,128.58,TBD
+HCR20724,2022-10-23,Patient_0377,Radiology,Vaccination,Central,66.51,TBD,3,199.52,Corporate
+HCR20578,2023-12-09,Patient_0358,Orthopedics,Emergency Care,East,4100.78,0,1, 4100.775052389859 ,Corporate
+HCR20593,"March 10, 2022",Patient_0571,Orthopedics,Imaging,West,838.09,0,4,3352.34,Self-Pay
+HCR20733,27 Apr 2022,Patient_0790,Radiology,Emergency Care,,1640.71,0,2,3281,Private
+HCR20286,03/28/2024,Patient_0191,Cardiology,Consultation,East,133.82,0,1,,Private
+HCR20038,2022-06-07,Patient_0144,Orthopedics,Vaccination,East,43.07,0,2,86.14,NHIS
+HCR20686,2022/07/07,Patient_0173,Pediatrics,Surgery,South,20918.29,0,2,41836.58,NHIS
+HCR20580,30-05-2022,Patient_0043,Cardiology,Vaccination,West,48.93,0,1,48.93,NHIS
+HCR20687,04-12-2022,Patient_0490,Emergency,Consultation,East,94.01,0,3.0,282.02,Private
+HCR20108,10-07-2024,Patient_0092,Orthopedics,Therapy,North,426.0,,3,1094.18,Private
+HCR20717,2023/07/05,Patient_0349, Oncology,Surgery,East,16161,1691.84,3, 43407.12420847357 ,Self-Pay
+HCR20207,2023-07-20,Patient_0014,Oncology,Therapy,West,510.6,0,1,510.6,NHIS
+HCR20396,N/A,Patient_0666,ORTHOPEDICS,Emergency Care,South,2694.81,0,4,10779.25,Self-Pay
+HCR20721,03/25/23,Patient_0691,Pediatrics,Therapy,North,570.71,0,2,1141.42,
+HCR20192,03/06/2024,  Patient_0042  ,Emergency,Emergency Care,Central,4764.58,1348.19,4,13665.57,Private
+HCR20623,TBD,  ,Emergency,Vaccination,East,-75.75960531422052,0,1,TBD,
+HCR20848,"September 01, 2023",Patient_0076,Orthopedics,Imaging, Central,965.58,150.73,4,3259.39,NHIS
+HCR20054,03-04-2022,Patient_0446,,Consultation,South,255.83,0,3,,  NHIS  
+HCR20401,2022-05-20,  Patient_0289  ,  Orthopedics  ,Consultation,Central,104.18,0,3,312.55,NHIS
+HCR20760,06/24/2023,Patient_0004,,Vaccination,East,68.94,0,1,68.94,Self-Pay
+HCR20756,11/30/22,Patient_0353,Emergency,Vaccination,West,11.39,9.72,2,3.35,Self-Pay
+HCR20877,19-05-2023,Patient_0248,Oncology,Emergency Care,South,798.55,0,4,3194.21,Self-Pay
+HCR20056,07/15/2024, Patient_0093,  Oncology  ,Consultation,Central,171.37,0,2,$342.74,Self-Pay
+HCR20546,14-03-2024,Patient_0554,General,Lab Test,East,55.38,11.68,1,43.7,Corporate
+HCR20409,2024-13-45,,Cardiology,N/A,East,17945.76,2593.32,2,30704.89,NHIS
+HCR20101,"August 23, 2022",Patient_0057,Radiology,Vaccination,,14.44,7.79,2,13.29,NHIS
+HCR20704,2024-07-12,Patient_0809,,Therapy,CENTRAL,200.51,0,N/A,$601.54,Corporate
+HCR20065,2022-05-02,Patient_0162,General,Consultation,North,216.72,0,3,650.15,Self-Pay
+HCR20446,26-04-2022,Patient_0281,Cardiology,Imaging,South,1000.86,0,3,3002.57,NHIS
+HCR20414,04/05/24,PATIENT_0584,Pediatrics,Therapy,Central,451.14,0,2,902.28,
+HCR20002,11/22/2023,,Orthopedics,Therapy,East, 468.3220078008926 ,0,2, 936.6440156017852 ,
+HCR20024,"August 20, 2022",Patient_0775,Orthopedics,Therapy,Central,513.17,0,2,1026.34,Private
+HCR20266,2023/10/30,Patient_0610,Radiology,Imaging,Central,372.47,0,3.0,,Self-Pay
+HCR20659,2024-01-21,Patient_0193,General,Consultation,West,151.12,0,4,604.46,Corporate
+HCR20765,08 Jan 2022,Patient_0461, Radiology,Imaging,Central,-125.19831143060395,21.1,3,312.3, Private
+HCR20018,"December 31, 2023",Patient_0526,Orthopedics,Lab Test,Central,276.85,0,-4,,NHIS
+HCR20091,2022-09-04,Patient_0378,ONCOLOGY,Vaccination,East,71.76,0,2,143.53,Private
+HCR20096,10/31/2022,Patient_0155,General,Lab Test,Central,81.35,0,,162.71,Corporate
+HCR20216,08-09-2022,Patient_0484,Pediatrics,Imaging, North,463.41,138.2,4,1300.83, NHIS
+HCR20816,2024-05-26,Patient_0012,Orthopedics,Vaccination,North,53.56,0,1,53.56,corporate
+HCR20044,04/28/2023,Patient_0582,Orthopedics,Surgery,Central,8159.39,0,4,32637.56,Private
+HCR20423,2024-03-24,Patient_0405,Pediatrics,Imaging,Central,708.97,0,,1417.95,Private
+HCR20289,2024-07-07,Patient_0222,Emergency,Consultation,North,unknown,0,3,704.9,Private
+HCR20569,10/11/2022,Patient_0375,Orthopedics,Imaging,Central,681.28,0,4,2725.12,NHIS
+HCR20626,2024-13-45,Patient_0295,Radiology,,East,239,34.17,1,205.25,Private
+HCR20162,2024/11/19,Patient_0530,General,Lab Test,Central,454.21,0,4,1816.84,Corporate
+HCR20870,05/11/24,Patient_0009,Cardiology,Vaccination,North,60.72,12.07,2,$97.30,Self-Pay
+HCR20764,0000-00-00,Patient_0212,Pediatrics,Surgery,Central,22031.71,0,4,88126.82,Corporate
+HCR20434,07-10-2023,Patient_0651,Pediatrics,Vaccination,North,52.07,$11.28,2,81.58,self-pay
+HCR20227,"August 20, 2023",Patient_0204,Oncology,Imaging,East,1341.93, 0 ,1,1341.93,Self-Pay
+HCR20076,11/27/2023,Patient_0491,General,Vaccination,North,18.48,0,1,18.48,Private
+HCR20597,08/26/22,Patient_0895,Cardiology,Lab Test,Central,,0,2,924.76,Corporate
+HCR20058,05 Oct 2023,,Oncology,Therapy,North,150.81,11.55,1,139.26,Private
+HCR20231,"July 31, 2022",Patient_0863,N/A,Emergency Care,East,2181.36,0,1,,NHIS
+HCR20875,2022/05/03,Patient_0219,Cardiology,Lab Test,Central,423.25,87.13,3,1008.35,Private
+HCR20023,26 Dec 2024,Patient_0514,Cardiology, Therapy,East,145.03,0,3,435.09,NHIS
+HCR20561,04/15/2022,Patient_0889,Cardiology,Imaging,East,1053.32,0,3,,Self-Pay
+HCR20306,08-06-2022,Patient_0614,Emergency,Surgery,Central,24561.62,,3,58224.5,Private
+HCR20111,22 Sep 2023,Patient_0264,General,Imaging,West,447.22,0,3,1341.66,Self-Pay
+HCR20680,13-05-2024,Patient_0033,Cardiology,Surgery,  South  ,-17579.97477161946,0,3,52739.92,NHIS
+HCR20243,2023-07-15,Patient_0295,Orthopedics,Vaccination,Central,11.14,0,2,unknown,
+HCR20229,06/28/2022,patient_0587,Oncology,Surgery,East,4926.07,1038.52,2,7775.1,Corporate
+HCR20326,2022/10/02,,General,Therapy,West,416.46,72.07,1,null,Private
+HCR20506,28 Mar 2024,Patient_0622,Cardiology,,North,1196.45,305.62,3,2672.49,Self-Pay
+HCR20259,07 May 2024,Patient_0331,General,Therapy,WEST,504.53,141.53,1,363.0,Self-Pay
+HCR20170,2024/03/01,Patient_0385,Oncology,Vaccination,north,96.01,0,1,TBD,Private
+HCR20474,06 Jun 2023,Patient_0039,General,Imaging,South,619.3,175.08,4,1776.88,Self-Pay
+HCR20242,2022/01/18,Patient_0109,Pediatrics,Therapy,West,283.73,0,2,567.46,Self-Pay
+HCR20588,18-08-2023,,Cardiology,Consultation,North,85.89,null,3,257.68,Private
+HCR20344,09/10/2024,Patient_0088,EMERGENCY,SURGERY,North,3190.65,0,1, 3190.6530936240883 ,NHIS
+HCR20611,13 Sep 2023,Patient_0385,  Emergency  ,Consultation,Central,61.72,0,2,$123.44,Self-Pay
+HCR20292,31 Jul 2023,Patient_0293,Orthopedics, Vaccination,North,-38.951265388735095,0,1,38.95,Private
+HCR20128,2024/06/25,Patient_0019,General,Consultation,Central,,0,3,,Self-Pay
+HCR20529,02/22/2022,Patient_0624,,Surgery,Central,13484.22,N/A,1,unknown,Corporate
+HCR20131,13-10-2023,Patient_0776,Emergency,Emergency Care,West,4784.24,0,1,4784.24,Self-Pay
+HCR20886,02 Aug 2022,Patient_0489,Cardiology,Imaging, South,$889.13,0,3,2667.4,Self-Pay
+HCR20051,,Patient_0136,Radiology,Therapy,Central,316.32,0,,632.65,NHIS
+HCR20031,13-04-2022,Patient_0809,,Lab Test,East,397.05,90.81,4,1224.97,NHIS
+HCR20785,2024-08-21,PATIENT_0493,General,Surgery,North,19492.11,179.25,4,77251.41,Private
+HCR20613,10 May 2022,Patient_0645,Radiology,,South,181.57,0,1,181.57,Private
+HCR20538,06/26/2024,Patient_0555,,,West,6561.5,0,1,null,NHIS
+HCR20027,25-06-2024,Patient_0424,Cardiology,Vaccination,Central,10.26,0,1,10.26,Private
+HCR20687,04-12-2022,Patient_0490,Emergency,Consultation,East,94.01,0,3.0,282.02,Private
+HCR20548,20-10-2024,Patient_0890,,Emergency Care,Central,2216.95,552.88,3,4992.22,Private
+HCR20571,09/20/2023,Patient_0162,Radiology,Therapy,East,494.54,0,3,1483.61,NHIS
+HCR20155,"October 20, 2023",Patient_0333,Emergency,Therapy, East,414.12, 0 ,3,1242.36,Corporate
+HCR20661,03 Apr 2022,Patient_0365,Pediatrics,Surgery,Central,23988.06,5737.31,2,36501.49,Corporate
+HCR20296,18 Oct 2023,Patient_0479,Pediatrics, Imaging,North,1456.08,0,2,2912.16,Self-Pay
+HCR20436,2022-07-25,Patient_0146,Pediatrics,Emergency Care,South,2559.06,0,2,5118.12,Corporate
+HCR20761,2024-09-07, Patient_0831,General,Imaging,South,536.64,0,1,536.64,
+HCR20638,10/06/23,Patient_0520,Radiology,Therapy,  Central  ,446.1,80.87,3,1095.7,NHIS
+HCR20174,2023/05/01,Patient_0852,Emergency,Therapy, West,316.26,0,3,948.78,NHIS
+HCR20462,02/03/23,Patient_0124,  Orthopedics  ,Imaging,Central,1487.55,0,-,1487.55,NHIS
+HCR20220,07/07/24,Patient_0439,Cardiology,Imaging,South,1473.77,0,3,4421.31,Private
+HCR20817,09/16/22,Patient_0289,Cardiology,Imaging,East,TBD,0,3.0,1304.67,Self-Pay
+HCR20200,2024-05-13,Patient_0503,Emergency,Lab Test,North,-256.07268397335156,0,3,768.22,NHIS
+HCR20093,17-08-2022,Patient_0064,Cardiology,Imaging,East,660.43,0,-2,1320.85,Self-Pay
+HCR20359,2024-03-08,Patient_0174,General,therapy,South,196.58,0,1,197,Private
+HCR20361,"August 03, 2023",Patient_0671,Radiology,Consultation,North,68.48,0,1,null,Corporate
+HCR20607,03/10/22,Patient_0007,Emergency,Surgery,South,20193.71,-5420.3168755986,4,-59093.5745769012,Private
+HCR20055,04/19/22,Patient_0176,Orthopedics,Imaging,South,407.38,0,4,1629.52,
+HCR20357,2023/07/24,Patient_0148,General,Therapy,East,479.47,114.8,4, 1458.6949704053136 ,Private
+HCR20891,05/10/24,Patient_0494,Orthopedics,Surgery,East,20242.26,0,4,80969.03,Private
+HCR20730,01/16/2023,Patient_0748,Emergency,Vaccination,Central,97.57,16.76,4,323.22,NHIS
+HCR20483,N/A,Patient_0397,  Orthopedics  ,Vaccination,West,54.08,12.18,4,167.58,Corporate
+HCR20116,03/23/24,PATIENT_0227,Orthopedics,Lab Test,North,358.79,0,3,1076.38,Unknown
+HCR20869,"January 30, 2023",Patient_0109,Emergency,Vaccination,West,,15.03,3,199.64,Private
+HCR20459,2022-10-04, Patient_0503,Pediatrics,Imaging,East,1352.15,240.12,1,1112.03,NHIS
+HCR20228,08 Mar 2022,Patient_0408,Pediatrics,Imaging,East,1470.44,0,2,2940.89,Private
+HCR20420,2022-06-30,Patient_0358,Orthopedics,Lab Test,North,389.17,0,2,778.34,Self-Pay
+HCR20727,2024-08-22,Patient_0892,Emergency,Emergency Care,South,376.75,0,3.0,1130.26,Private
+HCR20402,2023-02-08,Patient_0640,Cardiology,Vaccination,East,29.55,0,3,88.66,NHIS
+HCR20204,"June 14, 2022",Patient_0151,Cardiology,Vaccination,East,83.65,0,4,334.61,Private
+HCR20662,"May 26, 2022",Patient_0257,Oncology,Consultation,East,74.29,$0.00,3,222.88,NHIS
+HCR20132,25 Feb 2022,Patient_0685,Cardiology,Surgery,South,2983.14,,3,8949.43,Private
+HCR20176,"January 26, 2022",Patient_0116,Pediatrics,Imaging,West,729.31,0,2,1458.62,Private
+HCR20182,2024-08-25,Patient_0671,Orthopedics,,East,5685.7,195.1,1,5490.6,corporate
+HCR20224,2023-01-05,Patient_0724,Radiology,surgery,North,12967.71,0,4,51870.83,corporate
+HCR20884,03/02/23,Patient_0474,General,Therapy,East,305.88,88.52,3,652.1, Private
+HCR20113,2022-08-01,Patient_0779,  Orthopedics  ,Vaccination,West,83.58,0,1,83.58,Self-Pay
+HCR20675,29 Jun 2023,Patient_0649,General,Consultation,East,289.15,0,2,578.29,Corporate
+HCR20323,2023/07/29,Patient_0478,Emergency,Lab Test,West,439.0,96.95,1,342.05,NHIS
+HCR20244,2023-01-15,Patient_0489,Unknown,Emergency Care,North,4481,0,3,13442.71, Private
+HCR20251,22 Nov 2023,Patient_0321,Pediatrics,Consultation,East,294.81,0,2,N/A,Private
+HCR20067,13 Aug 2023,Patient_0637,Pediatrics,,central,17327.82,0,TBD,17327.82,  Self-Pay  
+HCR20790,invalid,Patient_0845,Oncology,Surgery,North,24349.51,0,4,97398.03,Corporate
+HCR20169,"April 01, 2024",Patient_0252,Orthopedics,  Imaging  ,North,295.81,0,3,887.42,CORPORATE
+HCR20634,"September 08, 2024",Patient_0881,Orthopedics,Imaging,East,493.07,0,2,986.14,Corporate
+HCR20700,12-06-2022,Patient_0450,Cardiology,Therapy,West,$236.99,0,3,710.98,NHIS
+HCR20775,,Patient_0698,Radiology,Vaccination,West,49.95,10.97,4,155.92,NHIS
+HCR20286,03/28/2024,Patient_0191,Cardiology,Consultation,East,133.82,0,1,,Private
+HCR20343,"July 26, 2024",Patient_0530,General,  Emergency Care  ,North,1150.27,0,3,3450.81,CORPORATE
+HCR20050,01 Dec 2024,patient_0580,Emergency,Therapy,West,$318.74,N/A,4,1274.96,Corporate
+HCR20547,28-09-2023,Patient_0672,Emergency,Emergency Care,South,3402.71,0,4,13610.84,Private
+HCR20856,2024/08/19,,Oncology,Vaccination,Central,27.21,9.54,1,17.66,Corporate
+HCR20711,2024/12/04,Patient_0609,Radiology,Surgery, Central,22321.22, 0 ,4,89284.89,Self-Pay
+HCR20485,03/14/24,Patient_0552,Cardiology,Imaging,Central,342.28,0,4,1369.13,Self-Pay
+HCR20372,,Patient_0040,Emergency,Therapy,North,180.15, 0 ,1,180.15,NHIS
+HCR20818,11/03/22,Patient_0468,Cardiology,Consultation,West,154.63,15.3,3,,Self-Pay
+HCR20104,07-02-2022,Patient_0173,Orthopedics,  Imaging  ,WEST,600.85,41,1,559.38,Private
+HCR20155,"October 20, 2023",Patient_0333,Emergency,Therapy, East,414.12, 0 ,3,1242.36,Corporate
+HCR20499,2024-04-02,Patient_0202,Pediatrics,Surgery,South,12860.18,0,N/A,12860.18,
+HCR20656,02/16/24,Patient_0717,Pediatrics,Lab Test,East,48,10.99,3,,  Corporate  
+HCR20136,"June 03, 2023",Patient_0223,Cardiology,Surgery,Central,6209.5,0,1,6209,Corporate
+HCR20072,"April 27, 2024",Patient_0260,Orthopedics,vaccination,West,90.55,0,3,271.66,Self-Pay
+HCR20013,15-05-2022,Patient_0804,Pediatrics,Therapy,Central,479.5,0,1,479.5,Corporate
+HCR20239,21 Oct 2023,Patient_0553,Emergency,Surgery,North,24327.2,0,3,72981.6,Private
+HCR20312,12/06/24,Patient_0331,General,Lab Test,North,371.58,79.45,3,,Corporate
+HCR20508,2022-02-17,Patient_0101,General,Vaccination,East,96.31,0,2,192.62,NHIS
+HCR20573,10/27/24,Patient_0256,Radiology,Emergency Care,North,2375.76,0,3,7127.27,Private
+HCR20589,07/19/22,,General,Imaging,Central,662.05,,2,1131.23,Self-Pay
+HCR20552,06/25/24,Patient_0468,Pediatrics,Surgery,South,23424.22,5496.01,1,17928.21,Private
+HCR20688,12 Sep 2023,Patient_0748,Pediatrics,Lab Test,  West  ,165.19,0,1,165.19,Corporate
+HCR20095,03/13/2022,Patient_0125,Emergency,Surgery,Central,19550.47,0,4,78201.87,Corporate
+HCR20127,2024/01/09,Patient_0297,Cardiology,Imaging,East,1147.81,93.51,2,2108.61,Private
+HCR20378,10/22/22,PATIENT_0425,Orthopedics,Emergency Care,East,1512.17,0,1,,Self-Pay
+HCR20431,25 Dec 2023,Patient_0561,Radiology,Emergency Care,West,1484.81,0,2,2969.61,NHIS
+HCR20308,,Patient_0187,Oncology,Lab Test, South,289.94,0,1,289.94,Corporate
+HCR20674,11/24/2023,Patient_0483,Oncology,Surgery,South,20115.9,5609.83,4,58024.3,Self-Pay
+HCR20413,10/03/22,Patient_0358,Radiology,Vaccination,West,84.59,0,1,84.59,Self-Pay
+HCR20189,12/07/2022,Patient_0762,Radiology,Imaging,North,362.49,0,2,,
+HCR20609,22 Jul 2022,Patient_0554,Oncology,Surgery,South,-15783.894915126173,0,4,63135.58,Private
+HCR20250,2023/08/24,Patient_0549,Orthopedics,Imaging,West,-,0,2,1803.28,  Self-Pay  
+HCR20815,12-02-2022, Patient_0868,Cardiology,Lab Test,Central,240.38,0,4,961.53,
+HCR20740,"June 16, 2022",Patient_0444,  Oncology  ,,North,77.99,0,4,311.96,
+HCR20386,2024/12/30,Patient_0078,Oncology,Consultation,South,290.59, 60.23434653728964 ,4,921.44,Private
+HCR20791,29-03-2024,Patient_0272,,Surgery,central,2490.61,0,2,4981.22,Corporate
+HCR20762,13-10-2024,Patient_0757,Radiology,Consultation,West,237.5,0,2,475.0,  Corporate  
+HCR20526,10/06/2023,Patient_0244,Emergency,Imaging,,847.55,0,4,3390.22,Corporate
+HCR20534,05/20/2022,Patient_0519,Emergency,Vaccination,NORTH,-47.35725008961269,-13.773527859969107,3,100.75,NHIS
+HCR20651,03/22/23,Patient_0564,Pediatrics,Vaccination,Central,66.49,0,2,132.97,Self-Pay
+HCR20847,"January 24, 2023",Patient_0124,Orthopedics,Consultation,North,237.77,unknown,4,N/A,Self-Pay
+HCR20471,"April 25, 2022",Patient_0845,  General  ,Emergency Care,,3254.18,0,1,3254.18,N/A
+HCR20457,04/29/22,Patient_0338,  Pediatrics  ,Surgery,North,19927.68,0,2,39855.36, Private
+HCR20492,22 Apr 2023,,Orthopedics,Therapy,West,384.81,0,3,1154.42,Corporate
+HCR20034,29-12-2022,Patient_0727,Cardiology,Surgery,Central,19567.6,3603.95,1,15963.65,NHIS
+HCR20630,2024/12/28,,General,therapy,Central,89.71,0,3,269.14,Private
+HCR20584,03 Apr 2023,Patient_0742,Cardiology,Surgery,West,12536.33,0,1,12536.33,self-pay
+HCR20388,22 May 2022,Patient_0117,Radiology,Consultation,North,151.69,0,2,303.39,Private
+HCR20305,01 Jan 2024,Patient_0868,Oncology,Consultation,West,260.69,26.72,2,467.95,private
+HCR20788,2022/01/15,Patient_0299, Emergency,Emergency Care,North,1886.09,0,3,5658.28,Private
+HCR20484,01/30/24,Patient_0696,Oncology,Vaccination,North,32.01,0,2,64.03,Self-Pay
+HCR20668,24-05-2022,Patient_0420, Oncology, Imaging,South,$945.66,0,4,3782.64,Self-Pay
+HCR20330,2024-06-28,Patient_0333,Oncology,Surgery,  Central  ,-,0,2,48977.74,NHIS
+HCR20887,"July 30, 2024",Patient_0587,Radiology,Vaccination,West,63.77,0,3,191.32,Self-Pay
+HCR20433,18-09-2023,  Patient_0819  ,N/A,Vaccination,West,40.35,,1,40.35,Private
+HCR20693,07/29/2024,  Patient_0232  ,Oncology,Imaging,,735.29,0,3,2205.88,NHIS
+HCR20713,10/11/24,  Patient_0005  ,Emergency, Surgery,South,7547.03,2264.09,3,15848.85,NHIS
+HCR20774,2022-12-22,Patient_0373,Oncology,Emergency Care,South,1069.88,0,4,4279.53,Self-Pay
+HCR20845,01/26/2022,Patient_0531,Emergency,  Surgery  ,West,7021.63,423.13,3,19795.51,Self-Pay
+HCR20345,10/18/23, Patient_0309,General,  Therapy  ,Central,,0,4,481.44,Private
+HCR20124,2022/03/24,Patient_0599,Pediatrics,Imaging,East,980.49,0,2,1960.98,Private
+HCR20166,05/20/24,Patient_0600,General,IMAGING,East,755.21,,2,1510.43,NHIS
+HCR20830,0000-00-00,Patient_0461,Pediatrics,Emergency Care,Central,3729.2,0,4,14916.78,NHIS
+HCR20197,2024-03-25,  Patient_0033  ,Emergency,  Emergency Care  ,West,"$3,231.42",0,3,9694.27,
+HCR20498,21-12-2022,patient_0161,Emergency,Consultation,South,254.78,0,3, 764.3431789699994 ,NHIS
+HCR20825,2024/01/14,PATIENT_0604,Oncology,Emergency Care,South,"$2,901.46",0,1,2901.46,
+HCR20475,2024/12/07,Patient_0637,Emergency,Imaging,West,476.58,0,3,1429.75,Corporate
+HCR20635,11/14/24,Patient_0525,Emergency,Therapy,South,431.85,0,-3,1295.54,NHIS
+HCR20080,12/30/23,PATIENT_0599,Emergency,Vaccination,North,98.59,0,4,394.37,NHIS
+HCR20268,10/14/2023,Patient_0865,Radiology,Imaging,South,1008.64,0,3.0,3025.91,Corporate
+HCR20056,07/15/2024, Patient_0093,  Oncology  ,Consultation,Central,171.37,0,2,$342.74,Self-Pay
+HCR20242,2022/01/18,Patient_0109,Pediatrics,Therapy,West,283.73,0,2,567.46,Self-Pay
+HCR20487,14-06-2022,Patient_0612,Orthopedics,  Emergency Care  ,West,921.43,265.32,4,"$2,624.44",NHIS
+HCR20109,08/09/24,patient_0081,Radiology,Consultation,Central,197.22,0,4,788.86,NHIS
+HCR20773,09/12/2024,Patient_0544,Cardiology,Vaccination,Central,64.5,0,3,-,corporate
+HCR20898,18-07-2022,  -  ,Orthopedics,Emergency Care,Central,2526.05,0,1,2526.05,NHIS
+HCR20406,"September 20, 2024",Patient_0890,General,Consultation,South,66.63,0,4,266.54,Corporate
+HCR20691,08 Sep 2023,Patient_0713,ONCOLOGY,Surgery,South,7370.61,959,4,25647.25,Corporate
+HCR20646,28-06-2024,Patient_0346,oncology,Therapy,North,89.03,0,2,$178.07,Self-Pay
+HCR20540,11/28/22,Patient_0866,Pediatrics,Vaccination,West, 36.982392439752985 ,0,1,36.98,Private
+HCR20469,2023/08/31,Patient_0567,Pediatrics,Consultation,North,73.54,0,3,,Self-Pay
+HCR20585,12-06-2022,Patient_0397,None,Lab Test,Central,186.41,$0.00,4,745.62,NHIS
+HCR20520,10/15/24,Patient_0349, Emergency,Emergency Care,West,3966.41,0,2,7932.81,Self-Pay
+HCR20049,2023/07/05,Patient_0634,Emergency,Surgery,Central,24695.98,21.73,3,74022.73,Corporate
+HCR20019,24-06-2022,Patient_0610,General,LAB TEST,South,247.17,0,2,494.34,Corporate
+HCR20078,10 Dec 2024,  Patient_0113  ,Pediatrics,Consultation,North,119.36,0,2,238.71,NHIS
+HCR20094,31 Dec 2022,  Patient_0132  ,Orthopedics,Therapy,south,,0,2,844.62,NHIS
+HCR20222,,Patient_0704,General,Vaccination,South,40.11,0,3,120.34,Corporate
+HCR20078,10 Dec 2024,  Patient_0113  ,Pediatrics,Consultation,North,119.36,0,2,238.71,NHIS
+HCR20139,29 Dec 2024,Patient_0443,Oncology,Therapy,South,168.88,0,1,168.88,Corporate
+HCR20515,05/24/2024,,Unknown,Imaging,Central,$534.95, 26.793066588889683 ,4,2032.64,NHIS
+HCR20853,2024/08/04,Patient_0141,Orthopedics,Vaccination,North,83.29,21.31,2,123.98,Private
+HCR20157,2023/08/16,Patient_0618,Pediatrics,Emergency Care,North,-4251.701395317701,0,4.0,17006.81,Private
+HCR20424,11/08/22,Patient_0331,General,Therapy,Central,358.44,0,4,,NHIS
+HCR20088,08-08-2023,Patient_0023,Cardiology,Consultation,Central,157.73,0,1,157.73,Private
+HCR20196,01-04-2023,,PEDIATRICS,Imaging,Central,418.36,0,4,1673.45,NHIS
+HCR20408,"April 04, 2023",Patient_0886,Orthopedics,Therapy,West,560.41,0,4,2241.62,Self-Pay
+HCR20375,"September 21, 2022",Patient_0038,Radiology,Lab Test,Central,158.2,30.81,3,382.15,NHIS
+HCR20181,"September 01, 2024",  ,Oncology,Lab Test,Central,,0,1,114,NHIS
+HCR20517,N/A,Patient_0202,,Vaccination,East,14.44,0,3,43.31,Corporate
+HCR20554,2024-02-16,Patient_0807,Radiology,Emergency Care,West,1360.91,0,2,,Self-Pay
+HCR20583,"December 27, 2022",,Orthopedics,Vaccination,North,63.21, 12.99419000217754 ,2,100.43,Corporate
+HCR20293,"December 10, 2022",Patient_0814, Orthopedics,Emergency Care,North,4257.29,,4,13126.32,Corporate
+HCR20835,"April 05, 2024",Patient_0876,Orthopedics,Imaging,West,455.01,0,2,910.03,Corporate
+HCR20327,13 Nov 2024,Patient_0870,Pediatrics,Emergency Care,North,904.33,154.98,2,1498.7,Corporate
+HCR20188,2022/09/19,Patient_0203,Orthopedics,Therapy,West,463.23,TBD,4,1852.91,Corporate
+HCR20582,"May 13, 2023",patient_0536,Emergency,Surgery,EAST,2880.09,692.58,1,2187.51,Self-Pay
+HCR20441,07/24/2022,Patient_0779,General,Surgery,Central,null,4866.35,4,72657.51,  Private  
+HCR20867,2022/09/21,Patient_0219,Cardiology,Lab Test,Central,435.09,36.24,4,1595.38,NHIS
+HCR20612,2024/04/25,Patient_0372,Radiology,Therapy,South,144.93,32.64,2,-224.58131988592487,Corporate
+HCR20478,2024/09/10,Patient_0368,Radiology,Surgery,North,20363.68,1600.1,1,18763.58,Self-Pay
+HCR20758,12/15/2024,Patient_0524,,Lab Test,West,42.11,0,TBD,126.33,Corporate
+HCR20657,,Patient_0153,Pediatrics,Consultation,South,174.09,N/A,2,348.18,Corporate
+HCR20778,04-05-2023,Patient_0875,Pediatrics,Lab Test,South,413.25,82.15,1,331.1,NHIS
+HCR20233,07 Aug 2023,Patient_0803,Orthopedics,Emergency Care,South,3645.98,0,4,-14583.9394592691,NHIS
+HCR20339,2024-04-06,Patient_0281,Emergency,Emergency Care,  East  ,2371.23,0,3,7113.69,Private
+HCR20864,2022-09-20,Patient_0287,Pediatrics,Consultation,South,-120.38721361732483,,-1,N/A,Self-Pay
+HCR20097,05/16/24,Patient_0090,Cardiology,EMERGENCY CARE,North,4493.13,0,2,8986.26,NHIS
+HCR20888,08/26/2022,Patient_0460,radiology,Vaccination,East,90.63,0,4, 362.50635599765116 , Private
+HCR20739,09-07-2022,  Patient_0573  ,Radiology,Emergency Care,Central,1612.66,177.64,1,1435.02,null
+HCR20798,08/29/2022,Patient_0223,Orthopedics,Lab Test,South,198.61,unknown,-3,595.83,Self-Pay
+HCR20834,"March 16, 2024",Patient_0136,Radiology,Consultation,South,111.33,0,1,$111.33,Self-Pay
+HCR20839,2022/05/04,  Patient_0735  ,Pediatrics,Therapy,Central,474.69,0,3,1424.07,nhis
+HCR20681,04/04/2023,Patient_0365,  Emergency  ,Surgery,Central,"$18,590.84",0,, 74363.34171123552 ,Private
+HCR20369,2022/09/30,Patient_0670,,Surgery,North,12309.86,2678,2,19263.77,self-pay
+HCR20439,02/07/24,Patient_0737,General,Consultation,East,299.42,0,3,898.27,Corporate
+HCR20161,2024-13-45,Patient_0568,Orthopedics,Therapy,South,379.06,0,1,379,Corporate
+HCR20682,invalid,Patient_0672,Orthopedics,Lab Test,East,422.1,33.06,4,1556.15,Self-Pay
+HCR20752,2024/12/06,Patient_0635,Oncology,Lab Test,North,417.35,0,1,417.35,Private
+HCR20348,09/25/2022,Patient_0681,Pediatrics,Emergency Care,North,855.82,0,2, 1711.6487224966538 ,Private
+HCR20030,04/25/22,,Cardiology,Vaccination,East,68.29,0,3,unknown,Corporate
+HCR20695,2022/10/08,Patient_0254,  Oncology  ,Therapy,East,,,2,749.57,Self-Pay
+HCR20505,2024/11/14,,Orthopedics,Lab Test,,109.41,0,,328.22,Private
+HCR20040,2023-02-03,Patient_0396,General,Imaging,Central,1447.24,0,3,4341.73,
+HCR20753,04-02-2022,Patient_0628,Emergency,Emergency Care,South,620.75,0,,1862,Private
+HCR20541,15-04-2023,Patient_0134,Radiology,Consultation,Central,$146.73,0,4,586.9,NHIS
+HCR20525,22 Jun 2023,Patient_0550,Orthopedics,Surgery,Central,19629.49,0,2,39258.99,Corporate
+HCR20419,"February 20, 2022",Patient_0808,Orthopedics,Imaging,West,694.58,58.09,4,2545.93,Corporate
+HCR20477,invalid,Patient_0110,General,,West,581,0,4,2323,NHIS
+HCR20336,"September 21, 2022",Patient_0830,Orthopedics,Lab Test,South,412.3,,4,1516.72,Self-Pay
+HCR20068,"November 21, 2023",Patient_0632,Emergency,Therapy,South,235.94,0,unknown,$471.89,NHIS
+HCR20218,2022-07-28,Patient_0472,General, Imaging,West,1182.43,0,3,3547.29,Corporate
+HCR20759,25-08-2024,  Patient_0213  ,General,Vaccination,West,72.67, 0 ,2,145.33, Corporate
+HCR20417,2024/05/11,Patient_0672,Oncology,Vaccination,South,28,$0.00,2,56.53,  Private  
+HCR20047,2024/04/16,Patient_0603,Radiology,Unknown,North,3878.88,0,,7757.77,Self-Pay
+HCR20719,2024/08/03,Patient_0794,General,Lab Test,South,477.17,0,1,477.17,Corporate
+HCR20454,15 Aug 2023,Patient_0390,Pediatrics,Emergency Care,West,4965.21,0,,9930.43,  NHIS  
+HCR20311,06/29/2024,Patient_0207,  Cardiology  ,Emergency Care,Central,2056.74,0,1,2057,Self-Pay
+HCR20705,16 Dec 2024,Patient_0258,Orthopedics,Emergency Care,None,1446.18,0,2,2892.37,Self-Pay
+HCR20731,11/12/22,Patient_0317,General,Lab Test,Central,283.38,0,4,1133.53,SELF-PAY
+HCR20290,2022-09-05,Patient_0881,Cardiology,Vaccination,North,17.9,,1,,Self-Pay
+HCR20247,10-06-2024,Patient_0141,RADIOLOGY,Consultation,east,53.11,0,3,159.32,Corporate
+HCR20223,"August 28, 2024",Patient_0610,Oncology,Emergency Care,South,$242.41,0,,969.62,Self-Pay
+HCR20098,2024-10-03,Patient_0160,Pediatrics,Emergency Care,Central,960.3,247.36,1,712.94,NHIS
+HCR20442,invalid,Patient_0149,General,lab test, East,311.75,0,3,935.24,nhis
+HCR20497,12/31/2022,Patient_0551,GENERAL,Emergency Care,Central,2690.38,0,4,N/A,Private
+HCR20120,03/26/2023,Patient_0260,  Oncology  ,Imaging,West,903.06,0,1,903.06,Corporate
+HCR20624,12/19/2024,Patient_0003,Orthopedics,Imaging,East,288.5,0,2,576.99,Private
+HCR20627,07 Feb 2022,Patient_0625,Oncology,Therapy,WEST,147.39,0,1,147.39,Self-Pay
+HCR20141,02 Aug 2024,Patient_0615,Cardiology,Surgery,North,4280.44,0,3,N/A,Self-Pay
+HCR20794,"June 23, 2022",Patient_0161,General,Vaccination,South,39.66,0,1,39.66,Self-Pay
+HCR20567,"August 05, 2024",Patient_0508,General,Vaccination,East,37.51,0,3,112.54,NHIS
+HCR20201,24-09-2022,Patient_0079,Emergency,Emergency Care,West,2207.87,0,4,8831.47,Corporate
+HCR20173,"February 14, 2022",Patient_0422,Cardiology,Lab Test,Central,344.69,,3,1034.06,Self-Pay
+HCR20432,08/19/2023,Patient_0163,Radiology,Emergency Care,Central,2411.47,270.35,1,2141.12,Corporate
+HCR20741,2022-10-15,Patient_0781,Emergency,Vaccination,North,19.13,0,2,38.25,Private
+HCR20314,N/A,Patient_0857,Oncology,Emergency Care,,4270.54,266.41,4,16016.52,Self-Pay
+HCR20543,2024-11-19,Patient_0145,Emergency,Vaccination,East,93.63,10.45,3,249.53,
+HCR20271,"April 21, 2024", Patient_0635,Oncology,  Consultation  ,West,287.83,24.2,2,527.26,Private
+HCR20133,2022/12/21,Patient_0079,Pediatrics,Surgery,North,3477.34,0,2,6954.69,Corporate
+HCR20641,04/20/2022,Patient_0144,Orthopedics,Vaccination,East,39.79,10.23,2,59.12,Self-Pay
+HCR20698,"February 27, 2023",Patient_0728,Oncology,Therapy,South,528.2,,4,2112.82,Self-Pay
+HCR20849,03 Nov 2022,Patient_0117,Cardiology,LAB TEST,North,479.16,0,3,1437.49,Private
+HCR20827,01/09/23,Patient_0114,General,,South,351.9,0,4,1407.59, NHIS
+HCR20792,2023-10-31,Patient_0023,  Orthopedics  ,Surgery,South,2592.39,0,2,5184.78,NHIS
+HCR20335,07/12/22,Patient_0579,Radiology,Imaging,North,104.11,0,2,208.22,NHIS
+HCR20897,2023-08-03,Patient_0477,Orthopedics,Surgery,North,2316.49,null,4,9265.98,Self-Pay
+HCR20697,17 Oct 2022,Patient_0383,Pediatrics,Consultation,North,260.18,0,3,780.55,Private
+HCR20325,"May 03, 2023",Patient_0409,orthopedics,Consultation,,265.31,76.77,4,754.15,NHIS
+HCR20747,2023/11/12,N/A,Radiology,Therapy,West,535.15,14.49,1,520.65,Self-Pay
+HCR20766,2023/06/20, Patient_0451,Pediatrics,Emergency Care,South,,1200.37,2,6907.4,Corporate
+HCR20364,"December 02, 2024",Patient_0823,PEDIATRICS, Emergency Care,Central,277.87,19.93,1,257.94,NHIS
+HCR20209,18 Dec 2024,Patient_0889,Emergency,Lab Test,West,$274.45,0,4,1097.81,
+HCR20598,,Patient_0269,Pediatrics,Lab Test,East,337.08,0,1,337.08,Self-Pay
+HCR20885,27 Dec 2023,Patient_0203,CARDIOLOGY,Emergency Care,Central,1419.99,0,3,4259.96,Self-Pay
+HCR20435,17 Feb 2022,Patient_0190,Cardiology,Consultation, North,219.15,0,3,657.44,Private
+HCR20407,05/06/2022, Patient_0328,Emergency,Therapy,North,,0,1,501.78,NHIS
+HCR20879,2024/05/18,Patient_0449,Orthopedics,Consultation,South,140.12,0,3,-420.36063301084516,corporate
+HCR20337,01/22/23,Patient_0387,Cardiology,Vaccination,West,12.66,,2,14.33,Private
+HCR20880,2024/04/26,PATIENT_0719,Pediatrics,Vaccination,South,38.14,0,3,114.42,Private
+HCR20863,2023-06-02,PATIENT_0558, Cardiology,Vaccination,  West  ,13.37,0,2,26.74,Private
+HCR20468,18 Dec 2022,Patient_0175,PEDIATRICS,Vaccination,South,$36.44,0,3,109.31,Corporate
+HCR20579,"December 22, 2022",Patient_0647,Pediatrics,, West,191.81,55.14,4.0,546.7,Self-Pay
+HCR20205,09-04-2024,Patient_0887,Pediatrics,Therapy,North,348.74,65.51,1,283.23,SELF-PAY
+HCR20464,2023-07-12,Patient_0854,Radiology,Surgery,North,15886.4,0,3,47659.21,Corporate
+HCR20844,05-12-2022,patient_0649,Pediatrics,Vaccination,North,78.63,0,1,78.63,Self-Pay
+HCR20325,"May 03, 2023",Patient_0409,orthopedics,Consultation,,265.31,76.77,4,754.15,NHIS
+HCR20094,31 Dec 2022,  Patient_0132  ,Orthopedics,Therapy,south,,0,2,844.62,NHIS
+HCR20575,2024-11-12,Patient_0227,Oncology,Imaging,  South  ,881.11,66.57,2,1629.08,Self-Pay
+HCR20466,2023/11/23,None,Radiology,Consultation,Central,-200.77693619273867,10.44,4,761.36,Private
+HCR20355,05 Apr 2023,PATIENT_0513,Oncology,Imaging,South,926,0,4,3705.33,Private
+HCR20260,2023-04-26,Patient_0691,Pediatrics,Surgery,Central, 11320.178214521573 ,0,2,22640.36,
+HCR20883,"July 15, 2023",Patient_0400,Emergency,Vaccination,East,N/A,15.88,3,171.71,Private
+HCR20422,"June 04, 2024",Patient_0539,Radiology,SURGERY,West,17138.65,0,4,68554.59,Private
+HCR20198,2024-05-24,PATIENT_0360,Cardiology,Vaccination,Central,,0,2,178.22,Self-Pay
+HCR20284,2023/02/28,Patient_0209,Pediatrics, Surgery,North,15985.85,1627.33,3,,NHIS
+HCR20077,10/10/2022,Patient_0740,,Lab Test,South,179.22,0,1,179.22,  Private  
+HCR20665,2023-01-05,Patient_0269,Oncology,Consultation,North,170.44,0,4,681.78,Corporate
+HCR20107,12/16/23,Patient_0827,Pediatrics,Consultation,East,86.18,,3,258.55,Corporate
+HCR20403,15 Dec 2024,Patient_0573,Orthopedics,therapy,north,99.34,0,4,397.38,corporate
+HCR20158,11/16/24,Patient_0519,Orthopedics,Vaccination,East,56.9,0,,227.62,Corporate
+HCR20365,05/27/2024,  Patient_0620  ,Emergency,  Therapy  ,West,190.83,0,4,763.3,Self-Pay
+HCR20710,"October 04, 2024", Patient_0569,N/A,Imaging,East,336.57,58.66,3,833.75,Self-Pay
+HCR20137,18 Nov 2024,patient_0204,,Emergency Care,West,,0,1,,NHIS
+HCR20381,03/13/2023,Patient_0673,General,Imaging,East,120.92,0,4,483.7,Private
+HCR20328,2024-07-02,Patient_0820,Orthopedics,Emergency Care,south,3702.11,0,3,11106.32,Corporate
+HCR20814,09/21/2022,Patient_0210,Cardiology,Imaging,Central,"$1,094.30",75.19,,1019.11,NHIS
+HCR20536,2022-06-06,PATIENT_0534,General,Lab Test,EAST,356.03,0,3,,Self-Pay
+HCR20352,05/03/24,patient_0308,Oncology,Imaging,South,1444.62,0,1,1444.62,Self-Pay
+HCR20332,"December 29, 2023",Patient_0511,Radiology,Surgery,South,16102.59,2322.84,2,27559.49,Private
+HCR20545,01/25/2022,Patient_0348,General,SURGERY,WEST,6356.16,,unknown,25424.65,NHIS
+HCR20637,2022/03/05,Patient_0752,Pediatrics,Surgery,South,8847.52,0,1,8847.52,NHIS
+HCR20679,"January 01, 2023",  Patient_0869  ,Radiology,Lab Test,East,378.14,0,,756.28,Corporate
+HCR20363,07/24/2022,Patient_0557,Cardiology,Vaccination,North, 53.024982593154036 ,0,4,212,Self-Pay
+HCR20838,05/05/2024,Patient_0627,Orthopedics,Vaccination,West,80.85,0,4,323.4,
+HCR20022,0000-00-00,Patient_0524,Cardiology,Imaging,east,637.22,0,4,2548.89,Corporate
+HCR20270,"August 07, 2024",Patient_0795,Emergency,Surgery,South,24096.79,0,4,96387.18, Private
+HCR20521,18 Jun 2022,Patient_0801,Radiology,imaging,  Central  ,103.54,0,4,414.16,Self-Pay
+HCR20115,"December 31, 2023",Patient_0724,Orthopedics,Emergency Care,West,751.03,168.0,3,1749.09,Private
+HCR20787,25-05-2024,Patient_0042,Oncology,Vaccination,East,82.24,0,1,,Self-Pay
+HCR20081,01-03-2022,Patient_0254,Radiology,Imaging,Central,1311.26,0,2,2622.53,NHIS
+HCR20865,20-11-2023,Patient_0342,Oncology, Consultation,West,66.41,0,2,132.82,Self-Pay
+HCR20248,2023/03/03,Patient_0258,Orthopedics,TBD,West,1431.43,0,4,5725.72,NHIS
+HCR20784,10/21/23,Patient_0883,Pediatrics,Surgery,Central,21849.97,0,3,65549.9,Private
+HCR20581,2022-03-19,  Patient_0046  ,Pediatrics,Vaccination,North,29.42,0,1,29.42,NHIS
+HCR20195,11/17/24,Patient_0611,Pediatrics,Vaccination,West,79.3,0,2.0,158.6,Self-Pay
+HCR20558,11/29/24,Patient_0208,  Radiology  ,Therapy,East,483.36,99.35,4,1536.02,Corporate
+HCR20092,02 Feb 2023,Patient_0168,General,Therapy,West,494.71,45.95,1,448.75, Corporate
+HCR20199,05/08/2024,Patient_0873,Oncology,,CENTRAL,14.14,0,2,28.28,Private
+HCR20057,"January 03, 2022",Patient_0183,general,Vaccination,North,72.82,0,,72.82,  Corporate  
+HCR20809,10/26/2022,Patient_0681,Radiology,Vaccination,East,99.64,0,-2,199.28,Private
+HCR20264,2023/08/30,Patient_0307,Pediatrics,,West,310.31,23.76,2,573.1,Corporate
+HCR20090,2023/09/09,Patient_0325,Orthopedics,  Therapy  ,Central,181.61,0,4,726.46,
+HCR20167,2022-09-06,Patient_0590,  Emergency  ,Vaccination, Central,38.66,10.2,1,28.46, Self-Pay
+HCR20842,12/14/2022,Patient_0680,,Surgery,North,24114.8,0,3,72344.41,NHIS
+HCR20039,03/04/2022,Patient_0889,Emergency,Emergency Care,North,2111.09,,2,4222.18,NHIS
+HCR20599,12/11/24,Patient_0004,Orthopedics,imaging,South,1115.9,0,4.0,4463.61,Corporate
+HCR20846,"September 15, 2023",Patient_0183,General,therapy,North,168.63,0,2,337.25,self-pay
+HCR20615,2023/10/20,Patient_0881,Orthopedics,Consultation,West,93.7,0,4,374.8,Corporate
+HCR20622,"October 10, 2022",Patient_0482,  Radiology  ,Imaging,South,287.23,14.88,1,272.35,NHIS
+HCR20871,03/15/22,Patient_0778,Emergency,Vaccination,West,41.34,0,3,124.03,Private
+HCR20658,14-05-2024,Patient_0610,Oncology,Therapy,South,491.09,75.01,3,1248.25,  Private  
+HCR20491,29 Jul 2023,Patient_0473,Oncology,Consultation,West,177.68,43.09,4,538.37,Self-Pay
+HCR20866,07 Jun 2022,Patient_0536,Emergency,Emergency Care,Central,4978.53,0,4,19914.12,Corporate
+HCR20648,TBD,,Cardiology,Surgery,North,15293.8,0,1,15293.8,Corporate
+HCR20036,2022-12-04,Patient_0209,Orthopedics,Emergency Care,East,987.73,0,2,1975.46,NHIS
+HCR20631,2023-01-06,Patient_0334,Pediatrics,Surgery,West,10463.45,0,3,31390.36,Corporate
+HCR20693,07/29/2024,  Patient_0232  ,Oncology,Imaging,,735.29,0,3,2205.88,NHIS
+HCR20539,2024-02-04,Patient_0495,Oncology,  Vaccination  ,West,70,0,4,279.4,Corporate
+HCR20238,04-08-2022,Patient_0244,Cardiology,Lab Test,Central,-65.16183115567843,0,1,65.16,Self-Pay
+HCR20479,"June 09, 2024",Patient_0530,Pediatrics,Vaccination,East,71.48,0,3,214.43,Self-Pay
+HCR20550,12-01-2024,Patient_0690,Oncology,Imaging,Central,1434.71,252.21,3,3547.49,Self-Pay
+HCR20610,11/01/23,Patient_0076,General,Consultation,East,51.77,0,1,52,NHIS
+HCR20754,22 Jul 2023,Patient_0657,Pediatrics,Therapy,Central,220.85,0,1,220.85,Private
+HCR20425,04-03-2024,Patient_0495,Orthopedics,Vaccination,South,94.71,15.36,1,79.35,CORPORATE
+HCR20042,03/22/23,Patient_0722,,Emergency Care,East,2752.34,0,1,2752.34,Self-Pay
+HCR20801,03-08-2023,Patient_0345,General,Vaccination,East,66.49,12.75,1,-53.73733599950812,Private
+HCR20568,08 Feb 2022, Patient_0304,Oncology,Therapy,North,556.21,0,,"$1,668.63",Self-Pay
+HCR20079,16-10-2024,Patient_0871,Radiology,Vaccination,N/A,72.63,0,2,145.26,Corporate
+HCR20442,invalid,Patient_0149,General,lab test, East,311.75,0,3,935.24,nhis
+HCR20006,23 Dec 2024,Patient_0110,Pediatrics,Emergency Care,North,3035.9,0,2,-6071.801616362122,Self-Pay
+HCR20171,12/04/2023,Patient_0303,Cardiology,Surgery,North,12509.52,"$3,211.12",4,37193.62,Corporate
+HCR20873,17 Feb 2022,Patient_0319,Oncology,Imaging,East,613.89,0,3,1841.66,  Corporate  
+HCR20283,03/23/2022,Patient_0527,General,Emergency Care,East,2790.21,,4,8868.02,Private
+HCR20307,"April 01, 2023",Patient_0264, Cardiology,Imaging,Central,1185.11,0,2,2370.22,NHIS
+HCR20370,11/14/24,Patient_0797,,Surgery,West,2117.15,521.63,2,3191.05,NHIS
+HCR20480,2024-06-09,Patient_0483,Emergency,Surgery, West,20970.95,0,2,41941.9,Private
+HCR20148,"May 01, 2023",Patient_0610,Pediatrics,Therapy,North,378.03,0,,1134.09,Corporate
+HCR20796,29 Oct 2023,Patient_0032,Orthopedics,Vaccination,null,,0,1,78.6,Self-Pay
+HCR20767,TBD,Patient_0557,ORTHOPEDICS,Vaccination,East,78.44,22.18,4,225.05,nhis
+HCR20572,01 Dec 2022,Patient_0309,General,Surgery,North,21850.03,0,2,43700.05,NHIS
+HCR20608,16-03-2024,Patient_0411,Emergency,Imaging,north,1076.48,0,3,3229.44,NHIS
+HCR20138,2022-07-17,Patient_0330,Pediatrics,Surgery,Central,19203.9,,4,76815.61,Corporate
+HCR20542,30-08-2022,  Patient_0253  ,Orthopedics,Therapy,South,153.94,0,4,615.78,NHIS
+HCR20507,"March 28, 2023",Patient_0573,Emergency,Consultation,West,275.15,0,4,1100.58,NHIS
+HCR20532,"April 07, 2022",Patient_0480,Pediatrics,Emergency Care,Central,711.06,0,1,711.06,Corporate
+HCR20855,21-04-2023,Patient_0468,  Orthopedics  ,Imaging,East,$822.36,0,3,2467.09,Private
+HCR20639,2024-03-05,Patient_0703,Orthopedics,,North,28.95,0,4,115.79,Self-Pay
+HCR20587,2023-05-11,Patient_0694,Oncology,Emergency Care,North,3996.83,295.64,4,14804.77,
+HCR20295,10/10/23,Patient_0056,Oncology,Vaccination,South,$75.33,21.98,4,213.37,  Self-Pay  
+HCR20064,21 Apr 2022,Patient_0720,,Vaccination,East,11.72,0,4,46.87,Private
+HCR20701,2022/02/15,Patient_0341,Radiology,Imaging,East,206.58,0,4,826.32,Self-Pay
+HCR20857,"May 02, 2023",Patient_0012,Emergency,Lab Test,East,238.91,41.12,2,395.59,Self-Pay
+HCR20702,2023/07/01,Patient_0028,General,Emergency Care,East,4860.59,1446.11,4,13657.93,
+HCR20893,20-05-2022,Patient_0366,Cardiology,Therapy,North,426.57,$0.00,2,N/A,  Self-Pay  
+HCR20329,28-07-2023,Patient_0046,Emergency,consultation,North,139.37,30.48,-2,217.78,NHIS
+HCR20338,27-03-2023,Patient_0629,  Cardiology  ,Emergency Care,West,4760.62,0,2,9521.25,NHIS
+HCR20319,"October 22, 2024",Patient_0773,General,Consultation,Central,178.37,0,2,356.74,Private
+HCR20447,10/27/24,Patient_0464,Cardiology,Vaccination,,94.61,0,2,189.22,Corporate
+HCR20601,2023-08-15,Patient_0063,Pediatrics,Emergency Care,Central,654.18,70.0,1,584.19,Self-Pay
+HCR20144,"October 07, 2022",Patient_0883,Oncology,Surgery,Central,15853.91,0,-4,63415.65,Corporate
+HCR20657,,Patient_0153,Pediatrics,Consultation,South,174.09,N/A,2,348.18,Corporate
+HCR20636,2023/06/02,Patient_0820,Cardiology,None,Central,432.1,0,3,1296.29,Self-Pay
+HCR20759,25-08-2024,  Patient_0213  ,General,Vaccination,West,72.67, 0 ,2,145.33, Corporate
+HCR20009,2022/03/04,patient_0738,Pediatrics,Therapy,South,86.83, 0 ,-4,347.31,  Self-Pay  
+HCR20836,22 Jul 2023,Patient_0739,Oncology,Therapy,North,304.38,0,2,608.76,NHIS
+HCR20362,03/23/2022,Patient_0299,General,Consultation,East,151.05,0,-1,151.05,NHIS
+HCR20576,07/28/2024,Patient_0057,  ,Lab Test,South,-30.386624217776177,0,,60.77,Self-Pay
+HCR20850,05/31/23,Patient_0179,Oncology,Surgery,,-8665.85370309433,0,2,17331.71,Self-Pay
+HCR20669,26 Sep 2022,Patient_0134,Pediatrics,  Therapy  ,West,95.73,0,1,95.73,  Corporate  
+HCR20493,12/25/24,  -  ,Pediatrics,Surgery,Central,3543,0,2,7085.93,Self-Pay
+HCR20258,02/26/2023,  Patient_0860  ,Cardiology,Emergency Care,North,573.2,149.98,1,423.21,NHIS
+HCR20712,25-07-2024,Patient_0820,Radiology,Vaccination,West,17.36,0,1,17.36,Self-Pay
+HCR20395,06-02-2023,Patient_0506,General,Consultation,North,125.29,0,1,125.29,Private
+HCR20444,23 Aug 2022,Patient_0479,Oncology,Vaccination,North,67.83,13.32,2,109.02,NHIS
+HCR20486,2023/12/27,Patient_0195,Oncology,Vaccination,North,35.82,0,3,107.45,
+HCR20382,07/05/22,PATIENT_0162,Pediatrics,Surgery,,3060,0,4,12240.29,NHIS
+HCR20410,2024-05-24,Patient_0695,Radiology,Vaccination,Central,53.51,14.97,4,154.14,Corporate
+HCR20461,"March 09, 2023",Patient_0874,Emergency,Therapy,North,293.47,0,N/A,293.47,NHIS
+HCR20504,2022-03-04,Patient_0661,General,Emergency Care,West,836.81,0,2,-1673.624531121364,SELF-PAY
+HCR20411,01/21/2024,Patient_0166,General, Surgery,West,6479.74,0,1,6479.74, Private
+HCR20669,26 Sep 2022,Patient_0134,Pediatrics,  Therapy  ,West,95.73,0,1,95.73,  Corporate  
+HCR20900,03/10/22,Patient_0570,Emergency,Lab Test,Central,71.18,18.9,4,209.1,Self-Pay
+HCR20380,09-11-2023,Patient_0253,Oncology,Consultation,East,241.7,27.12,2,429.15,Corporate
+HCR20318,02/05/22,Patient_0196,  ,Consultation,West,138.44,0,3,415.33,NHIS
+HCR20412,12 Jan 2024,Patient_0292,Orthopedics,Consultation,East,194.86, 0 ,1,194.86,None
+HCR20811,2022-01-05,Patient_0362,General,Imaging,West,1027.63,0,4,4110.52,Corporate
+HCR20087,04 Jul 2023,Patient_0791,Radiology,Therapy,South,431.07,69.59,4,1445.94,Corporate
+HCR20737,09 Apr 2024,Patient_0321,Emergency,Surgery,North,6080.64,N/A,2,-12161.288405406833,Private
+HCR20237,2024-13-45,Patient_0163,Emergency,Therapy,South,301.38,0,-1,301.38,Self-Pay
+HCR20297,03-02-2023,Patient_0731,Pediatrics,Imaging,West,,123.4,TBD,789.63,Corporate
+HCR20562,01/22/22,Patient_0051,General,Imaging,Central,-298.4622244754553,0,4,1193.85,Self-Pay
+HCR20428,02/02/22,Patient_0173,Cardiology,Surgery,,-5727.171661126795,1463.61,2,8527.13, Corporate
+HCR20324,"April 29, 2022",Patient_0595,Emergency,Vaccination,West,28.91,0,1,28.91,Corporate
+HCR20304,09/28/22,,Radiology,Consultation,East,231.98,12.24,3,659.22,Corporate
+HCR20864,2022-09-20,Patient_0287,Pediatrics,Consultation,South,-120.38721361732483,,-1,N/A,Self-Pay
+HCR20400,invalid,,Cardiology,Lab Test,North,386.53,0,3,1159.58,NHIS
+HCR20389,2024/02/15,Patient_0652,Pediatrics,Imaging,South,272,0,1,272.35,Unknown
+HCR20666,09-11-2023,Patient_0286,Pediatrics,Emergency Care,North,,622.48,4,-6524.9393793177,Private
+HCR20476,06/14/23,Patient_0128,Emergency,null, East,9422.47,280.76,4,36566.82,Corporate
+HCR20114,,Patient_0044,Emergency,Emergency Care,North,2181.43,0,2,4362.87,self-pay
+HCR20273,06/23/2022,Patient_0130,,  Therapy  ,  -  ,502.81,0,2,1005.62,NHIS
+HCR20683,TBD,Patient_0332,Orthopedics,Imaging,Central,577, 0 ,3,1730.63,Self-Pay
+HCR20896,09/27/2022,  Patient_0215  ,Pediatrics,Surgery,Central,15712.81,0,4,62851.23,NHIS
+HCR20073,2023-01-17,Patient_0176,Emergency,Imaging,Unknown,567.72,150.51,3,,Private
+HCR20164,19-12-2024,Patient_0269,GENERAL,Emergency Care,South,2368.9,0,3,7106.69,NHIS
+HCR20465,06 Sep 2022,Patient_0556,Emergency,Consultation,North,254.73,0,4,1019,Corporate
+HCR20430,03-06-2023,Patient_0225,  Radiology  ,Vaccination,West,44.24,0,3,132.72,Private
+HCR20360,25 Feb 2023,Patient_0281,Cardiology,Lab Test,Central,123.41,34.8,4,354.46,Corporate
+HCR20736,02/21/24,Patient_0001,Emergency,Therapy,West,363.87,0,4,-1455.4753989995588,NHIS
+HCR20524,09-05-2023,patient_0886,Orthopedics,Vaccination,North,10.24, 0 ,4,40.96,Corporate
+HCR20280,2022/05/27,Patient_0483,Radiology,Consultation,EAST,280.75,75.68,4,820.29,  Self-Pay  
+HCR20297,03-02-2023,Patient_0731,Pediatrics,Imaging,West,,123.4,TBD,789.63,Corporate
+HCR20772,"October 19, 2024",Patient_0161,Pediatrics,Consultation,,126.95,0,4,507.82,Self-Pay
+HCR20678,12 May 2024,Patient_0804,Oncology,Imaging,Central,767.35,0,3,,Self-Pay
+HCR20142,"June 03, 2022",Patient_0131,Oncology,surgery,Central,2144.3,0,3,6432.9,Private
+HCR20217,11/13/22,Patient_0875,Cardiology,Therapy,West,273.5,,3,820.5,Self-Pay
+HCR20722,03/11/2022,Patient_0761,Pediatrics,Vaccination,South,62.57,0,3,187.7,Self-Pay
+HCR20716,invalid,Patient_0036,Emergency,Vaccination,Central,78.73,0,2,157.47,Corporate
+HCR20473,01-11-2022,Patient_0003,Radiology,Emergency Care,East,1306.38,0,3,3919.13,Private
+HCR20113,2022-08-01,Patient_0779,  Orthopedics  ,Vaccination,West,83.58,0,1,83.58,Self-Pay
+HCR20025,TBD,Patient_0329,Cardiology,Vaccination,North,46.69,0,2,93.37, Self-Pay
+HCR20577,08 Nov 2022,Patient_0838,Pediatrics,Lab Test,  North  ,276.47,0,1,276,Self-Pay
+HCR20322,09/01/22,Patient_0640,,Surgery,South,7418.03,0,N/A,14836.06,Corporate
+HCR20126,2023-12-23,Patient_0602,Emergency,Consultation,Central,265.74,0,2,531.48,Private
+HCR20164,19-12-2024,Patient_0269,GENERAL,Emergency Care,South,2368.9,0,3,7106.69,NHIS
+HCR20763,11/11/22,Patient_0622,Oncology,Vaccination, Central,99.64,0,TBD,99.64,Private
+HCR20600,12-07-2024,Patient_0240,Radiology,  -  ,West,51.08,N/A,2,102.15,Self-Pay
+HCR20591,2024-04-07,Patient_0005,Unknown,Emergency Care,None,2012.44,0,4,8049.77,Private
+HCR20225,"April 07, 2024",Patient_0567,Pediatrics,surgery,West,,0,1,3315.74,Private
+HCR20210,20 Feb 2023,Patient_0611,Emergency,Vaccination,West,-56.078714132280176,15.32,2,81.52,Corporate
+HCR20140,04/04/2024,Patient_0408,Orthopedics,Surgery,,"$6,933.27",0,3,20799.82,Private
+HCR20165,2022/08/22,Patient_0084,Emergency,Vaccination,  Central  ,29.59,0,,118.35,Private
+HCR20649,10/26/23,Patient_0753,Oncology,Lab Test,  South  ,107.28,0,3,321.84,NHIS
+HCR20789,29-11-2024,Patient_0765,General,Emergency Care,East,2071.81,0,1,2071.81,
+HCR20177,12/31/23, Patient_0473,Pediatrics,  Lab Test  ,North,52.55,0,1,53,Private
+HCR20586,09/14/2023,PATIENT_0769,Cardiology,Lab Test,South,190.08,0,4,760.3,Self-Pay
+HCR20703,11/03/2022,Patient_0536,Emergency,Consultation,South,262.81,16.38,2,492.85,Private
+HCR20365,05/27/2024,  Patient_0620  ,Emergency,  Therapy  ,West,190.83,0,4,763.3,Self-Pay
+HCR20726,2024/02/06,Patient_0596,Oncology,Consultation,North,223.35,0,,223.35,Corporate
+HCR20213,23 Apr 2022,Patient_0119,Pediatrics,Consultation,North,,0,N/A,222.95,Self-Pay
+HCR20429,2023-08-14,Patient_0715,Oncology,Vaccination,East,82.44,0,4,329.77,Corporate
+HCR20178,2023-09-26,Patient_0650,Orthopedics,Lab Test,,498.96,0,1,498.96,Self-Pay
+HCR20482,10/17/22,Patient_0563,Emergency,Therapy,Central,,0,1,262.41,Private
+HCR20513,"November 07, 2023",Patient_0644,Emergency,Surgery,Central,10220.53,623,3,28791.78,Self-Pay
+HCR20783,2024/09/16,patient_0547,General,consultation,East,63.34,0,4,253.37,Private
+HCR20619,13-07-2024,PATIENT_0699,Cardiology,Emergency Care,West,2978.57,0,2,5957.14,Self-Pay
+HCR20744,"January 02, 2024",Patient_0896,General,Therapy,  South  ,518.75,0,1,518.75,Self-Pay
+HCR20112,2024/12/12,Patient_0693,Radiology,Imaging,North,499.12,0,4,1996.5,Private
+HCR20257,TBD,Patient_0818,Pediatrics,Emergency Care,East,-1011.967815031132, 161.209966207117 ,4,3403.03,Corporate
+HCR20066,TBD,Patient_0045,ONCOLOGY,Vaccination,South,71.77,16.78,3,164.97,Self-Pay
+HCR20643,2023-10-28,Patient_0449,Cardiology,Therapy,South,128.49,28.12,1,,Corporate
+HCR20890,2022-09-09,,Orthopedics,Lab Test,Central,67.66,11.68,2,111.96,Self-Pay
+HCR20371,2022-08-16,Patient_0360,Radiology,Therapy,Central,153.17,0,,306.35,Self-Pay
+HCR20881,2023/01/10, Patient_0197,Pediatrics,Therapy,East,271.75,0,3,815.24,Private
+HCR20501,01-07-2023,  Patient_0157  ,Pediatrics,Therapy,,465.83,0,2,931.66,Corporate
+HCR20175,"March 03, 2023",Patient_0516,Cardiology,Emergency Care,West,2041.99,0,1,2041.99,Corporate
+HCR20281,"December 27, 2023",Patient_0002,Emergency,Lab Test,North,204.09,0,1,204.09,Self-Pay
+HCR20069,2022-05-01,Patient_0560,Oncology,Unknown,West,897.15,0,4,3588.61,Private
+HCR20315,13 Nov 2023,Patient_0050,Radiology,TBD,North,13791.97,,1,13791.97,Corporate
+HCR20512,"October 11, 2024",Patient_0019,Oncology,Imaging,South,849.25,82.95,4,3065.2,Self-Pay
+HCR20860,08/18/2022,PATIENT_0529,Cardiology,Surgery,Central,22320.95,0,2,44641.91,Corporate
+HCR20862,2023/11/16,Patient_0596,Radiology,,CENTRAL,342.01,0,1,342.01,Self-Pay
+HCR20298,"July 25, 2022",Patient_0191,Emergency,Emergency Care,South,3708.98,0,1,3708.98,Private
+HCR20153,29-10-2023,Patient_0612,Oncology,CONSULTATION,South,114.65,17.5,3.0,-291.4734954168818,Self-Pay
+HCR20537,"May 28, 2024",Patient_0309,Emergency,Surgery,West,14710.19,0,2,29420.38,Self-Pay
+HCR20125,2022-06-26,Patient_0123,null,Imaging,Central,902.76,0,1,902.76,NHIS
+HCR20440,06/02/2024,Patient_0021,Orthopedics,Consultation,North,197.29,$55.89,2,282.8,Private
+HCR20780,17-02-2024,Patient_0759,Radiology,Lab Test,North,463.96,$0.00,1,463.96,
+HCR20514,2022/09/04,Patient_0767,General,Imaging,East,1057.47,0,4,"$4,229.86",Self-Pay
+HCR20384,05/14/2023,Patient_0383,Oncology,SURGERY,,3036.92,0,1,3036.92,NHIS
+HCR20262,10 Jul 2023,Patient_0228,Pediatrics,Therapy,north,138.06,0,4,552.22,Private
+HCR20333,04/10/2023,Patient_0180,Oncology,Surgery,North,14993.5,0,3,44980.51,
+HCR20757,2024/10/08,Patient_0642,Pediatrics,Imaging,East, 398.48971273111124 ,0,2,796.98,Private
+HCR20007,"September 24, 2023",Patient_0067,Emergency,Imaging,East,1439.22,248.06,3,3573.5,Private
+HCR20309,29 Oct 2024,  Patient_0504  ,Emergency,Emergency Care,South,4469.62,0,4,17878.47,  Self-Pay  
+HCR20502,2022/10/02, Patient_0758,Emergency,Consultation,South,54,0,2,108.63,Private
+HCR20725,"September 29, 2022",Patient_0570,General,Therapy,West,302.91,0,3,908.74,Private
+HCR20490,"June 27, 2022",Patient_0105,Pediatrics,Consultation,West,69.67,17.51,3,156.45,Corporate
+HCR20367,15-01-2024,Patient_0499,Cardiology,Vaccination,Central,54.72,0,1,54.72,Corporate
+HCR20799,28 Jun 2023,Patient_0866,Oncology,Therapy,Central,591.3,0,4,2365.21,Private
+HCR20191,02/17/23,Patient_0760,Radiology,Emergency Care,West,3758.64,0,2,7517.27,Self-Pay
+HCR20448,2024-10-31,  Patient_0046  ,Orthopedics,Lab Test,West,N/A,0,2,640.42,nhis
+HCR20470,11/20/23,,General,lab test,West,356.74,0,-4,1426.98,NHIS
+HCR20720,2022-02-20,Patient_0738,General,Lab Test,West,78.64,0,4,314.57, Self-Pay
+HCR20516,10/24/2022,Patient_0537,Emergency,Lab Test,Central,296.29,0,2,592.58,Self-Pay
+HCR20245,04/06/22,Patient_0022,Orthopedics,Lab Test,East,421.45,0,4,1685.8,NHIS
+HCR20391,27-05-2022,Patient_0216,  ,Vaccination,North,59.84,16.37,4,173.86,Corporate
+HCR20843,04/14/22,Patient_0052,Orthopedics,Emergency Care,  North  ,3196.27,0,4,12785.07,  Private  
+HCR20746,2024/04/13,Patient_0044,  Radiology  ,Imaging,North,1200.43,0,3,3601.3,Self-Pay
+HCR20831,24-12-2022,null,Cardiology,Lab Test,Central,212.61,56.01,3,-469.79589440799094,NHIS
+HCR20085,07 May 2023,Patient_0319,RADIOLOGY,Imaging,West,1428.8,0,4,-5715.203844930534,Self-Pay
+HCR20449,04/29/2023,Patient_0033,Radiology,Lab Test,West,96.65,0,2,193.3,Private
+HCR20574,"April 06, 2023",Patient_0202,Orthopedics,Vaccination,North,15.5,0,3,46.51,Self-Pay
+HCR20397,13 Apr 2024,Patient_0225,General,Vaccination,Central,,$18.74,1,74.28,
+HCR20202,0000-00-00,Patient_0112,Pediatrics,Consultation,East,-215.59786565535455,0,3,646.79,NHIS
+HCR20291,01/21/2024,patient_0879,Radiology,Vaccination,None,N/A,0,4,112.01,Corporate
+HCR20317,"April 02, 2023",Patient_0258,Pediatrics,Therapy,None,,0,4,2345.26,NHIS
+HCR20500,14-04-2024,Patient_0629,Radiology,Imaging,West,845.95,0,1,845.95,self-pay
+HCR20677,09-11-2022,Patient_0351,Oncology,Consultation,South,128.04,0,1,128.04,self-pay
+HCR20748,02-02-2022,Patient_0636,General,Consultation,West,171.78,0,1,171.78,Corporate
+HCR20082,03/16/24,Patient_0772,Cardiology,Consultation,SOUTH,175.27,0,4,701.09,Self-Pay
+HCR20606,2024/02/10,Patient_0338,Orthopedics,Imaging,West,1104.72,0,3,3314.16,Private
+HCR20751,2023-08-28,  Patient_0162  ,Pediatrics,Consultation,South,81.23,0,4,324.94,Private
+HCR20810,04/27/24,Patient_0309,Emergency,Therapy,  South  ,482.24,17.17,1,465.07,Self-Pay
+HCR20803,2024-02-25,Patient_0798,Radiology,Therapy,null,246.95,,2.0,453.56,Private
+HCR20053,11/30/2022,Patient_0618,Pediatrics,  Therapy  ,North,450.64,0,4,1802.56,Self-Pay
+HCR20033,invalid,Patient_0436,orthopedics,Vaccination,South,40.06,0,1,40.06,Corporate
+HCR20456,2023-04-19,Patient_0029,Orthopedics,Imaging,South,854.11,149.21,1,704.89,Private
+HCR20254,2024-13-45,Patient_0316,Radiology,Surgery,Central,12414.66,0,1,12414.66,NHIS
+HCR20246,2024-13-45,Patient_0334,Orthopedics,Imaging,West,1318.43,0,3,3955.3,Private
+HCR20878,21-11-2023,Patient_0112,Cardiology,Surgery,North,,,2,18499.31,  Private  
+HCR20285,26 Mar 2022,patient_0733,Radiology,Emergency Care,East,"$2,273.61",38.61,1,2235.0,Corporate
+HCR20102,12/24/22,  Patient_0677  ,General,Lab Test,Central,91.28,0,-2,182.56,null
+HCR20387,11 May 2024,Patient_0439,Pediatrics,Vaccination,  West  ,,26.22,4,263.58,Self-Pay
+HCR20279,28-09-2023,Patient_0867,Emergency,Imaging,West,156.44,0,3,-469.32207642111683,Private
+HCR20819,2024-13-45,Patient_0003,Cardiology,Emergency Care,North,4242,875.01,4,13465.96,Private
+HCR20026,05/02/24,  Patient_0866  ,General,Consultation,North,-157.22943082057623,0,3,471.69,NHIS
+HCR20046,10-07-2022,Patient_0064,Orthopedics,Consultation,East,52.8,0,2,unknown,Self-Pay
+HCR20437,12/18/2024,Patient_0568,Pediatrics,Emergency Care,North,3405.62,0,3,10216.87,NHIS
+HCR20045,2022/04/02,,Orthopedics,,North,560.56,0,2,1121.12,Corporate
+HCR20511,31 Dec 2024,Patient_0191,Orthopedics,Lab Test,Central,202.4, 0 ,3,607.2,null
+HCR20755,N/A,Patient_0099,Oncology,Vaccination,North,51.9,0,3,155.71,NHIS
+HCR20029,02-04-2022,  Patient_0117  ,Cardiology,Vaccination,South,80.29,0,4,321.18,Self-Pay
+HCR20452,"October 18, 2022",Patient_0405,Oncology,Emergency Care,West,"$3,284.39",0,4,13137.58,Corporate
+HCR20094,31 Dec 2022,  Patient_0132  ,Orthopedics,Therapy,south,,0,2,844.62,NHIS
+HCR20738,"April 03, 2023",Patient_0322,Cardiology,,Central,82.89,18.08,1, 64.80573333903385 ,  NHIS  
+HCR20455,29-07-2022,Patient_0191,orthopedics,Imaging,Central,682.53,0,2,,Self-Pay
+HCR20617,04/17/2022,Patient_0365,Radiology,Imaging,East,1078.04,62.31,4,4062.93,Corporate
+HCR20696,2022/03/04,Patient_0771,Emergency,Therapy,Central,298.85,0,3,896.54,Self-Pay
+HCR20632,10/20/22,Patient_0896,General,emergency care,,2831.61,0,3,8494.83,Corporate
+HCR20274,05/25/2022,patient_0308,Orthopedics,Lab Test,East,375.77,0,3,1127.32,Corporate
+HCR20549,11/29/22,Patient_0053,General,Therapy,East,128.22,0,3,384.66,nhis
+HCR20750,03/10/24,Patient_0141,Emergency,,South,4817.26,566.02,4,17004.98,Corporate
+HCR20445,05/20/23,Patient_0581,General,Vaccination,West,55.31,0,2,110.62,Corporate
+HCR20331,21-08-2023,Patient_0422,Emergency,,South,7338.78,0,3,22016.33,NHIS
+HCR20528,16-07-2022,Patient_0748,Radiology,Lab Test,South,-28.756587976267376,9.86,4,75.59,NHIS
+HCR20603,2024/05/16,Patient_0054,Pediatrics,Consultation,North,77.66,21.77,1,55.89,Corporate
+HCR20129,07/06/24,Patient_0264,Orthopedics,Imaging,South,1172.34,0,3,3517.01,Corporate
+HCR20194,"February 08, 2024",Patient_0622,Pediatrics,Lab Test,West,386.07,$39.39,-1,-346.6769544976949,NHIS
+HCR20852,2022-06-03,Patient_0460,Orthopedics,Therapy,,444.42,120.46,4,1295.82,
+HCR20347,2024-09-10,Patient_0106,Pediatrics,Vaccination,,18.6,0,1,18.6, Private
+HCR20416,2022-04-12,Patient_0312,Oncology,Consultation,,252.71,0,1,252.71,NHIS
+HCR20653,2024-10-06,Patient_0661,None,Emergency Care,West,,0,1,2012.74,Corporate
+HCR20252,20 Apr 2024,Patient_0097,Oncology,Consultation,East,115.46,0,4,461.85,Corporate
+HCR20841,2022/07/09,Patient_0858,General,Consultation,West,263.77,0,4,1055.09,
+HCR20892,2023-12-07,,,Therapy,  South  ,580.96,0,1,580.96,Corporate
+HCR20276,2022-09-27,Patient_0088,Pediatrics,Therapy,West,288.35,0,3,865.06,Corporate
+HCR20208,2023-06-14,Patient_0596,General,Emergency Care,Central,2062.18,,1,2062.18,Corporate
+HCR20032,03/01/22,Patient_0134,General,Emergency Care,West,4774.36,0,2,9548.72,nhis
+HCR20211,31 Jan 2022,Patient_0741,Pediatrics,Therapy,N/A,528.91,0,2,1057.82,Private
+HCR20715,22 Jan 2023,Patient_0763,General,Emergency Care,North,4161.32,0,1,4161.32,Corporate
+HCR20048,invalid,Patient_0048,Radiology,Vaccination,,62.95,0,3,189,NHIS
+HCR20621,03/22/22,Patient_0700,Emergency,Vaccination,West,60.28,0,2,120.55,Private
+HCR20670,12/23/23,Patient_0193,General, Imaging,North,990.04,0,4,3960.14,Corporate
+HCR20418,18-04-2023,Patient_0716,Cardiology,Imaging,Central,829.46,$0.00,1,,Private
+HCR20218,2022-07-28,Patient_0472,General, Imaging,West,1182.43,0,3,3547.29,Corporate
+HCR20551,"February 18, 2024",Patient_0879,,Vaccination,Central,12.23,0,3,36.68,NHIS
+HCR20831,24-12-2022,null,Cardiology,Lab Test,Central,212.61,56.01,3,-469.79589440799094,NHIS
+HCR20503,N/A,Patient_0647,Emergency,Imaging,,1269.92,-220.89294895252013,2,2098.06,Self-Pay
+HCR20342,"April 14, 2023",Patient_0001,General,Vaccination,East,33.02,9.95,2,46.15,Corporate
+HCR20001,2024-04-04,Patient_0133, Cardiology,Emergency Care, West,3368.88,0,1,3368.88,Private
+HCR20742,12/16/23,Patient_0159,Pediatrics,Vaccination,  North  ,16.57,5.33,3,33.73,Private
+HCR20804,2023-08-07,Patient_0034,Orthopedics,Consultation,South,77.01,0,N/A,77.01,Private
+HCR20553,04-05-2023, Patient_0127,Emergency,Emergency Care,North,3842.24,0,1,3842.24,Private
+HCR20595,25 May 2023,Patient_0588,ONCOLOGY,Imaging,North,1050.66,0,3,3151.97,Private
+HCR20008,2024-11-19,Patient_0040,General,Lab Test,Central,241.64,0,1,241.64,Corporate
+HCR20021,2023-12-27,Patient_0798,Emergency,Vaccination,West,90.44,0,3,271.32,Self-Pay
+HCR20390,05/30/2022,Patient_0147,Pediatrics,Imaging,West,1262.25,0,2,2524.5,self-pay
+HCR20398,2023/06/03,Patient_0891,Orthopedics,Emergency Care,West,435.25,0,3,1305.75,Corporate
+HCR20900,03/10/22,Patient_0570,Emergency,Lab Test,Central,71.18,18.9,4,209.1,Self-Pay
+HCR20349,01/15/2024,Patient_0530,Cardiology,Lab Test,Central,120.36,0,2,-240.7128707668339,Self-Pay
+HCR20186,2024/04/08,Patient_0720,Emergency,Consultation,East,193.74,0,2,387.49,Private
+HCR20313,2024-01-02,Patient_0425,Pediatrics,Lab Test,East,270.09,0,3,810.27,
+HCR20723,26-01-2022,Patient_0476,Cardiology,Vaccination,East,78.94, 0 ,4,315.78,Corporate
+HCR20146,2024-12-28,Patient_0390,Emergency,Surgery,,8646.43,0,2,17292.86,NHIS
+HCR20240,04/28/2022,Patient_0349,Emergency,Surgery,  East  ,19423.73,3435.77,3,47963.89,Private
+HCR20377,"May 30, 2024",TBD,Pediatrics,Consultation,Central,186.18,0,4,744.73,Private
+HCR20118,03 Jul 2022,Patient_0679,Oncology,  Surgery  ,East,TBD,0,-2,30177.72,Self-Pay
+HCR20602,2022-02-21,Patient_0467,Cardiology,Therapy,South,116.05,0,4,464.22,NHIS
+HCR20807,12-09-2023,Patient_0625,Pediatrics,Imaging,North,931.44,0,4,3725.75,Self-Pay
+HCR20358,"June 22, 2023",Patient_0867,radiology,Therapy,West,527.5,0,1,527.5,NHIS
+HCR20590,2023-07-24,Patient_0449,Emergency,Lab Test,East,316.86,0,4,1267.45,NHIS
+HCR20519,10 Nov 2022,Patient_0544,Pediatrics,Vaccination,South,28.56,N/A,1,28.56,Self-Pay
+HCR20676,01 Jan 2024,Patient_0599,Cardiology,Vaccination,South,79.04,0,2,158.08,Corporate
+HCR20469,2023/08/31,Patient_0567,Pediatrics,Consultation,North,73.54,0,3,,Self-Pay
+HCR20350,21-12-2022,Patient_0598,Oncology,Imaging,North,517.76,126.87,4,1563.58,Corporate
+HCR20800,02/12/22, Patient_0309,Orthopedics,Consultation,West,282.53,68.05,4,857.92,Self-Pay
+HCR20566,31-12-2022,Patient_0669,General,Surgery,South,10866.01,0,2,21732.03,Self-Pay
+HCR20028,"February 20, 2024",Patient_0320,GENERAL,Therapy,East,285.83,N/A,3,686.93,  Private  
+HCR20005,2024-09-13, Patient_0433,Emergency,Consultation,West,114.84,0,1,114.84,NHIS
+HCR20256,11/14/24,Patient_0521,Oncology,Emergency Care,East,2481.8,unknown,1,2481.8,Private
+HCR20874,"August 29, 2022",Patient_0475,Cardiology,Lab Test,West,290.22,0,1,290.22,Corporate
+HCR20159,12-03-2023,Patient_0747,General,Vaccination,North,15.63,9.04,3,19.79,Self-Pay
+HCR20075,07/13/22,Patient_0109,Emergency,Therapy,East,489,81.32,1,407.23,Corporate
+HCR20190,"August 16, 2022",,Emergency,Therapy, North, 275.9897495009507 ,67.75,,832.97,NHIS
+HCR20496,"September 28, 2024",Patient_0617,Emergency,  Therapy  ,Central,566.55,0,2,1133.09,Corporate
+HCR20466,2023/11/23,None,Radiology,Consultation,Central,-200.77693619273867,10.44,4,761.36,Private
+HCR20373,"December 22, 2024",Patient_0135,Cardiology,Emergency Care,North,1709.21,170.22,2,3077.97,Corporate
+HCR20145,16-10-2024,Patient_0573,Emergency,Therapy,  East  ,82.0,21.42,3,181.76,NHIS
+HCR20121,01/29/2024,  Patient_0058  ,Orthopedics,Lab Test,Central,380.43,0,,760.87,TBD
+HCR20509,12 Dec 2022,Patient_0584,Cardiology,Consultation,East,101.83,,3,305.49,Private
+HCR20795,"November 25, 2023",Patient_0043, Emergency,Lab Test,Central,195.26,32.69,1, 162.57417142136237 ,
+HCR20351,21-04-2023,Patient_0415,Cardiology,Emergency Care,West,4140.53,0,2,"$8,281.07",Corporate
+HCR20214,"August 14, 2023",Patient_0876,Cardiology,,North,8487.59,0,2,16975.19,  
+HCR20481,"September 09, 2023",  Patient_0809  ,Oncology,Emergency Care,East,3587.48,0,4,"$14,349.93",Corporate
+HCR20163,04/16/2022,  Patient_0147  ,Radiology,Vaccination,Central,61.39,0,1.0,-61.391320089754856,Private
+HCR20743,29-05-2024,Patient_0503,orthopedics,Vaccination,North,$30.66,10,3,62.12,Private
+HCR20685,2023-02-23,Patient_0809,Orthopedics,Emergency Care,Central,4556.85,,3,13670.56,Self-Pay
+HCR20226,07/05/23,  Patient_0849  ,Oncology,Therapy,West,493.25,,2,986.5,Corporate
+HCR20797,"November 07, 2024",Patient_0080,Emergency, Therapy,South,442.84,0,3,1328.52,Corporate
+HCR20793,11-12-2023,Patient_0544,Oncology,Emergency Care,West,797.34,0,1,797.34,Private
+HCR20854,"March 26, 2023",patient_0674,Emergency,Emergency Care,Central,2285.13,0,3,6855.39,Corporate
+HCR20052,11-11-2024,Patient_0121,Oncology,THERAPY,South,271.64,0,4.0,1086.57,Private
+HCR20776,2024-13-45,Patient_0352,Oncology,Therapy,West,300.49,37.28,1,263.21,Private
+HCR20143,11-02-2024,Patient_0713,Oncology,Lab Test,Central,187.97,0,2,375.95,Private
+HCR20054,03-04-2022,Patient_0446,,Consultation,South,255.83,0,3,,  NHIS  
+HCR20714,23 Apr 2024,Patient_0020,Oncology,Surgery,South,19363.89,0,4,77455.56,Corporate
+HCR20443,"June 24, 2022",Patient_0872,Radiology,Lab Test,Central,160.55,0,-,481.64,Corporate
+HCR20183,20-07-2024,Patient_0314,Cardiology,Surgery,South,14584.63,0,4,58338.5,PRIVATE
+HCR20594,03/15/2024,  Patient_0742  ,General,Consultation,East,86.19,$0.00,2, 172.37381175186735 ,NHIS
+HCR20806,07/24/2023,Patient_0746,Pediatrics,,West,18.34,8.68,4,38.66,Corporate
+HCR20404,12/03/2024,Patient_0680,  Oncology  ,Therapy,East,377.07,95.24,4,1127.32,Self-Pay
+HCR20383,01/11/22,Patient_0227,General,Unknown,North,15577.83,4206.3,2,22743.05,
+HCR20458,08/22/22,Patient_0714,Oncology,Surgery,West,8457.61,0,1,8457.61,Self-Pay
+HCR20859,10/03/2024,Patient_0509,Orthopedics,Emergency Care,West,1906.31,0,1,1906.31,NHIS
+HCR20522,29-05-2024,Patient_0635,Emergency,Emergency Care,Central,1672.73,0,2,3345.46,Self-Pay
+HCR20822,N/A,Patient_0195,General,Lab Test,West,281.3,0,1,281.3,Self-Pay
+HCR20070,0000-00-00,Patient_0503,General,Lab Test,,167.24,0,,334.49,Corporate
+HCR20353,04/15/2024,Patient_0781,General,Imaging,South,708.02,0,3,2124.07,Private
+HCR20399,"June 03, 2023",Patient_0293, Emergency,Vaccination,East,67.43,17.13,-1,50.3,Private
+HCR20206,12/17/24,Patient_0005,Orthopedics,vaccination,Central,26.78,0,-4,107.14,NHIS
+HCR20604,03-12-2023,Patient_0166,Cardiology,Surgery,South,7344.33,0,4,29377.31,Self-Pay
+HCR20644,2023/10/26,Patient_0349, Cardiology,Imaging,East,880.44,0,3,2641.32,Self-Pay
+HCR20495,21-02-2023,Patient_0079,,Emergency Care,East,4349.73,0,2,8699.46,NHIS
+HCR20041,03/22/24,Patient_0486,Emergency,Emergency Care,East,4620.0,0,1,4620.0,Self-Pay
+HCR20300,"February 14, 2022",Patient_0097,  Cardiology  ,Emergency Care,South,1823.11,0,2,3646.22,Corporate
+HCR20003,10/31/2023,Patient_0154, Oncology,Therapy,Central,435.18,0,3,1305.55,NHIS
+HCR20451,2022/02/26,Patient_0670,General,consultation,South,164.19,0,3,492.56,NHIS
+HCR20277,09/22/23, Patient_0264,Orthopedics,Emergency Care,South,3327.86,0,1,"$3,327.86",Corporate
+HCR20015,"August 22, 2022",Patient_0457,Cardiology,Surgery,South,19530.49,0,3,58591.46,NHIS
+HCR20560,12/21/24, Patient_0635,General,  Imaging  ,East,-605.1932351036401,0,1,,NHIS
+HCR20450,01/26/22,Patient_0768,Radiology,Vaccination,West,,-10.947574168921786,2,118.27,NHIS
+HCR20253,2024/03/05,Patient_0240,General,Emergency Care,East,1886.73,241,4,6582.52,NHIS
+HCR20265,2024/02/28,Patient_0113,Oncology, Consultation,N/A,68.82,15.75,1,$53.07,Private
+HCR20517,N/A,Patient_0202,,Vaccination,East,14.44,0,3,43.31,Corporate
+HCR20151,06/01/2023,Patient_0616,Cardiology,Vaccination,East,21.06,0,3,63.18,Self-Pay
+HCR20535,2024/09/28,Patient_0658,General,Vaccination,Central,24.98,7.83,1,17.15,Self-Pay
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,

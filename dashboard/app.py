@@ -34,7 +34,7 @@ from dashboard.charts import (
     render_top_products,
 )
 from dashboard.copilot import render_copilot_panel
-from dashboard.onboarding import render_onboarding, render_quick_start_checklist, render_industry_pack_selector
+from dashboard.onboarding import get_industry_labels, render_industry_pack_selector, render_onboarding, render_quick_start_checklist
 from dashboard.styles import DARK_THEME_CSS, RESPONSIVE_CSS
 from dashboard.utils import MAX_UPLOAD_SIZE_BYTES, MAX_UPLOAD_SIZE_MB, sanitize_text
 from services.dashboard_data_service import DashboardDataService
@@ -147,6 +147,7 @@ with st.sidebar:
     render_industry_pack_selector()
 
     st.markdown("---")
+
     st.markdown('<div class="sidebar-section">Data Source</div>', unsafe_allow_html=True)
     service = get_data_service()
     db_count = 0
@@ -182,6 +183,12 @@ with st.sidebar:
     """,
         unsafe_allow_html=True,
     )
+
+
+# ──────────────────────────────────────────────
+# Industry labels (from selected pack)
+# ──────────────────────────────────────────────
+labels = get_industry_labels()
 
 
 # ──────────────────────────────────────────────
@@ -431,6 +438,7 @@ render_kpi_cards(
     kpis["total_orders"],
     kpis["avg_order_value"],
     kpis["margin_pct"],
+    labels=labels,
 )
 
 st.markdown("<br>", unsafe_allow_html=True)
@@ -440,42 +448,42 @@ st.markdown("<br>", unsafe_allow_html=True)
 # Charts
 # ──────────────────────────────────────────────
 st.markdown(
-    '<div class="section-header">Sales Performance</div><hr class="section-divider">',
+    f'<div class="section-header">{labels["performance"]}</div><hr class="section-divider">',
     unsafe_allow_html=True,
 )
 c1, c2 = st.columns(2)
 with c1:
-    render_revenue_over_time(df)
+    render_revenue_over_time(df, labels=labels)
 with c2:
-    render_revenue_by_category(df)
+    render_revenue_by_category(df, labels=labels)
 
 st.markdown(
-    '<div class="section-header">Profit and Regional Breakdown</div><hr class="section-divider">',
+    f'<div class="section-header">{labels["breakdown"]}</div><hr class="section-divider">',
     unsafe_allow_html=True,
 )
 c3, c4 = st.columns(2)
 with c3:
-    render_profit_by_region(df)
+    render_profit_by_region(df, labels=labels)
 with c4:
-    render_top_products(df)
+    render_top_products(df, labels=labels)
 
 if "profit" in df.columns and "sales" in df.columns and "category" in df.columns:
     st.markdown(
-        '<div class="section-header">Deep Dive Analysis</div><hr class="section-divider">',
+        f'<div class="section-header">{labels["deep_dive"]}</div><hr class="section-divider">',
         unsafe_allow_html=True,
     )
     c5, c6 = st.columns([3, 2])
     with c5:
-        render_sales_vs_profit_scatter(df)
+        render_sales_vs_profit_scatter(df, labels=labels)
     with c6:
-        render_profit_margin_by_category(df)
+        render_profit_margin_by_category(df, labels=labels)
 
 if "region" in df.columns and "category" in df.columns and "sales" in df.columns:
     st.markdown(
-        '<div class="section-header">Regional Analysis</div><hr class="section-divider">',
+        f'<div class="section-header">{labels["regional"]}</div><hr class="section-divider">',
         unsafe_allow_html=True,
     )
-    render_heatmap_sales_region_category(df)
+    render_heatmap_sales_region_category(df, labels=labels)
 
 
 # ──────────────────────────────────────────────

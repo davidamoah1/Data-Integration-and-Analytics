@@ -1,0 +1,750 @@
+Transaction ID,Date,Contractor Name,Department,Project Type,Region,Amount,Discount,Quantity,Total
+GOV30225,27-01-2023,Contractor_020,Health,Hospital Project,South,532318.58,9898.06,2.0,1044841.04
+GOV30627,08/28/24,Contractor_062,,Water Supply,West,666607.92, 0 ,11,7332687.14
+GOV30529,01-09-2023,Contractor_034,Infrastructure,Water Supply,North,101363.45,4394.76,3,290906.07
+GOV30336,2022/04/13,Contractor_016,Agriculture,Road Construction,West,4989047.75,0,6,
+GOV30339,2023-08-16,,Energy,,East,,0,12,5513654.25
+GOV30620,2023/04/02,Contractor_010,,,Central, 654286.0407158076 ,,3,1962858.12
+GOV30048,11/15/2023,Contractor_079,Infrastructure,School Building,,"$1,383,858.37",0,,9687008.59
+GOV30334,2024-04-28,Contractor_091,Energy,Road Construction,North,1419433.47,9735.34,6,8458188.8
+GOV30084,invalid,Contractor_044,Defense,Rural Electrification,West,807567.32,32302.13,10,7752651.88
+GOV30422,2023/05/16,Contractor_018,Health,Rural Electrification,North,428647.35,0,5,
+GOV30247,07 May 2023,Contractor_004,Education,Road Construction,West,2385621,0,3,7156862.51
+GOV30666,01/24/2024,Contractor_080,Education,Road Construction,North,-1896973.7133449365,64430.91,5,9162714.01
+GOV30253,19-02-2024,Contractor_055,  Infrastructure  ,  Public Transport  ,East,-204744.03818107705,0,-6,1228464.23
+GOV30227,N/A,  Contractor_061  ,Defense,Hospital Project,South,6648693.62,0,12,79784323.44
+GOV30308,"July 18, 2024",Contractor_027,Defense,null,East,334621.08,0,11,3680831.87
+GOV30281,2022/02/16,Contractor_030,Energy,Public Transport,CENTRAL,1114125.75,0,9,10027131.71
+GOV30069,27 Feb 2023,Contractor_095,Defense,School Building,East,430175.85,0,-6,2581055.09
+GOV30290,04/12/2023,Contractor_066,Infrastructure,Rural Electrification,South,2717434.59,49737.43,5,13338485.83
+GOV30372,12/20/23,Contractor_045,Energy,Hospital Project,East,7786680.45,"$645,722.70",5,35704788.77
+GOV30021,21-02-2022,Contractor_082,ENERGY,Road Construction, Central,"$859,461.66",0,1,859461.66
+GOV30097,"April 21, 2023",  Contractor_045  ,Defense,Road Construction,West,4103726.22,$0.00,8,32829809.78
+GOV30253,19-02-2024,Contractor_055,  Infrastructure  ,  Public Transport  ,East,-204744.03818107705,0,-6,1228464.23
+GOV30051,02 Feb 2022,Contractor_078,Infrastructure,Water Supply,N/A,529099.39,$0.00,11,5820093.3
+GOV30505,"January 25, 2023",TBD,Energy,Water Supply,,664188.42,0,8,5313507
+GOV30086,"October 09, 2023",Contractor_060,  ,Rural Electrification,North,250071.65,0,5,1250358.24
+GOV30259,24 Jul 2023,Contractor_037,Transport,Road Construction,South,1407732.94,0,11,15485062.3
+GOV30246,2022-01-24,Contractor_097,Defense,Road Construction,South,3038430.48,0,1,3038430.48
+GOV30354,07/21/2022,Contractor_081,Education,Road Construction,South, 1701487.1317391917 ,0,9,15313384.19
+GOV30162,"October 02, 2022",CONTRACTOR_003,Defense,Water Supply,North,671321.57,0,3,-2013964.7107779637
+GOV30622,09/22/2023,,Transport,School Building,Unknown,1579605.24,0,-5,7898026.18
+GOV30439,2022-07-31,Contractor_098,Transport,Water Supply,Central,166584.01,4196.91,12,-1948645.1668838793
+GOV30464,04/30/24,Contractor_091,Education,Public Transport,East,666296,37016.24,4,2517120.14
+GOV30661,0000-00-00,Contractor_096, Transport,Hospital Project, North,5393512.66,0,12,64722151.92
+GOV30513,22 Mar 2023,Contractor_062,Agriculture,Road Construction,South,N/A,312288.57,10,37884929.22
+GOV30528,2023/01/08, Contractor_099,Defense,Public Transport,East, 438279.7695022358 ,0,-7,3067958.39
+GOV30605,28-08-2023,Contractor_010,Energy,  Rural Electrification  ,South,2308736.19,0,6,13852417.14
+GOV30696,18-10-2022,Contractor_032,Infrastructure,Water Supply,West,485546.35,0,3,1456639.05
+GOV30296,TBD,Contractor_036,Defense,Public Transport,North,919524.2,0,8,7356193.56
+GOV30325,invalid,Contractor_059,Infrastructure,Road Construction,,1646107.87,0,7,11522755.07
+GOV30484,2023/03/18,Contractor_077,Health,Public Transport,Central,746962.52,0,10,7469625.16
+GOV30028,08 Jun 2023,Contractor_044,Transport,Hospital Project,Central,7065986.87,0,7,
+GOV30146,2024-10-16,Contractor_047,Education,Road Construction,Central,2230313.94,0,11,-24533453.30734752
+GOV30644,02/25/22,Contractor_091,Health,School Building,East,1528023.22,0,4.0,6112092.89
+GOV30698,2023/01/09,Contractor_050,Defense,Water Supply,Central,418770.83,17038.75,2,"$803,464.15"
+GOV30621,04/08/2023,Contractor_036,Infrastructure,Rural Electrification,Central,1332008.24,0,1,1332008.24
+GOV30035,"October 02, 2024",Contractor_090,Defense,Hospital Project,East,6267791.26,,2,12535582.53
+GOV30242,2022-03-21,Contractor_095,Defense,Hospital Project,North, 8400002.615318306 ,0,9,75600023.54
+GOV30427,2023-11-24,Contractor_027,,Water Supply,  South  ,210517.77,0,11,2315695.49
+GOV30010,"September 25, 2023",Contractor_031,Education,Water Supply,west,313450.14,0,3,940350.41
+GOV30398,0000-00-00,Contractor_094,Agriculture,Rural Electrification,  Central  ,2429654,0,10,24296544.42
+GOV30154,N/A,  Contractor_082  ,Health,Road Construction,West,2084114.07, 0 ,7,14588798.52
+GOV30188,01/11/2024,Contractor_089,Agriculture,,West,3691967.58,0,4,14767870.32
+GOV30571,2022/10/01,Contractor_019,Agriculture,School Building,North,1683382.29,0,9,15150440.62
+GOV30606,"July 08, 2022",Contractor_016,agriculture,Rural Electrification,East,1943513.95,185172.61,1,1758341.34
+GOV30269,06/24/2022,contractor_042,Energy,  Road Construction  ,  South  ,,0,3,6420791.48
+GOV30432,2024/03/09,Contractor_060,Health,Water Supply,North,775847.86,10188.97,10,7656588.86
+GOV30516,2022/04/19,Contractor_096,Agriculture,School Building,North,1965507.91,188075.03,4,"$7,109,731.51"
+GOV30235,2022/07/23,Contractor_100,Infrastructure, Public Transport,North,,0,7,8331295.28
+GOV30665,14-08-2024,Contractor_016,Transport,Water Supply,East,403632.4,4376.75,9,3593300.81
+GOV30637,08 Jul 2022,Contractor_035,Agriculture,Water Supply,East,53083.88,0,7,371587.16
+GOV30460,N/A,Contractor_081,Agriculture,Water Supply,North,480247.07,0,3,1440741.22
+GOV30411,09 Nov 2024,Contractor_087,Energy,Hospital Project,West,9403507.39,0,7,65824551.75
+GOV30136,04/21/24,Contractor_081,Health,Hospital Project,East,1591620.42,135864.2,8,11646049.76
+GOV30195,04/19/24,Contractor_003,Transport,Road Construction,North,1384922,0,8,11079378.3
+GOV30348,04/06/24,Contractor_068,Energy,Rural Electrification,North,2014662.23,176661.15,,12866007.56
+GOV30320,2024/10/18,contractor_064,Infrastructure,Water Supply,North,283257.49,0,12,3399089.87
+GOV30440,2024/04/17,Contractor_062,Defense,Road Construction,South,,0,-7,27426935.88
+GOV30619,12/15/2024,Contractor_096,Defense,,North,668744.69,16319.9,9,-5871823.092697574
+GOV30081,03/27/22,,,Hospital Project,South,6877870.05,282419.63,9,59359053.84
+GOV30085,07/13/2022,Contractor_076,Defense,Rural Electrification,East,1343389.58,0,N/A,8060337.46
+GOV30413,21 Nov 2022,Contractor_042,Education,Public Transport,Central,771143.42,0,5,3855717.09
+GOV30047,03-07-2022,Contractor_074,Education,Rural Electrification,East,1084315.34,0,1,"$1,084,315.34"
+GOV30445,20-09-2023,Contractor_091,Transport,Road Construction,North,2914265.58,0,8,23314124.62
+GOV30674,,Contractor_015,Agriculture,Public Transport,North, 516502.36438160297 ,45453.15,8,-3768393.7453716574
+GOV30075,2023-05-27,Contractor_048,Defense,Hospital Project, North,4438233.66,368750.34,11,44764316.48
+GOV30643,04/27/23,Contractor_081,Health,Water Supply,East,500540.75, 0 ,7,3503785.27
+GOV30129,10/05/23,Contractor_080,N/A,Public Transport,Central,108653.53,8994.47,11,1096249.71
+GOV30442,2022-10-16,Contractor_032,Energy,Hospital Project,West,2764963.87,0,6,16589783.22
+GOV30532,23 Aug 2023,Contractor_100,Education,Road Construction,North,3241412.1,0,1,3241412.1
+GOV30392,08/19/24,Contractor_078,education,Hospital Project,East,null,75306.25,unknown,17045838.99
+GOV30561,02/24/2024,Contractor_090,Transport,public transport,East,337197.11,0,2,674394.22
+GOV30588,20-02-2024,Contractor_037,Defense,Water Supply,North,239745.73,,7,1678220.09
+GOV30144,04 Apr 2023,Contractor_022,Agriculture,Public Transport,West,,20988.26,-5,1103885.88
+GOV30143,2022/04/24,Contractor_092,Defense,Rural Electrification,East,2625458.38,0,3,7876375.14
+GOV30274,2024/06/19,Contractor_063,,Rural Electrification,East,873089.68,0,6,5238538.08
+GOV30110,"July 18, 2024",Contractor_049,Agriculture,Hospital Project,North,3407257.03,0,9.0,30665313.23
+GOV30673,2022/06/25,Contractor_039,Infrastructure,School Building,North,547392.3,0,4,2189569.18
+GOV30007,11/20/2022,  Contractor_004  ,EDUCATION,School Building,N/A,1300111.79,0,2,"$2,600,223.57"
+GOV30307,08/11/2023,Contractor_068,Defense,School Building,South,1469920.48,53155.19,-12,17001183.47
+GOV30287,26-02-2024,Contractor_023,  Health  ,Road Construction,East,4939315.02,56260.26,2,9766109.52
+GOV30545,16-02-2022,Contractor_059,Infrastructure,Public Transport,South,343266.87,0,9,3089401.83
+GOV30672,2022-04-04,Contractor_009,Transport,Hospital Project,North,5241475.08,0,11,57656225.83
+GOV30206,01/15/22,Contractor_043,Transport,Rural Electrification,North,1435024.13,5887.69,11,15720500.89
+GOV30373,"May 06, 2023",Contractor_043,Health,Rural Electrification,Central,2339300.09,97527.12,4,
+GOV30466,05-07-2023,,Health,School Building,North,461207.25,0,1,461207.25
+GOV30341,02/11/23,Contractor_006,Education,School Building,North,1716465.01,0,1,-1716465.006671432
+GOV30148,2024-01-14,Contractor_075,Agriculture,Road Construction,North,1862712.17,90406.07,8,14178448.78
+GOV30094,01/16/2023,Contractor_087,Education,Water Supply,West, 269280.0088747229 ,0,6,1615680.05
+GOV30157,22-03-2024,contractor_084,Health,Rural Electrification,South,1908502.9,0,4,7634011.6
+GOV30291,26 Jul 2024,Contractor_092,AGRICULTURE,Water Supply,East,748159.35,44971.91,3,2109562.32
+GOV30603,2022/02/12,Contractor_068,Transport,Public Transport,Central,1423465.49,0,4,5693861.95
+GOV30684,0000-00-00,Contractor_058,Defense,Unknown,South,231732.44,0,7,1622127.1
+GOV30399,11/25/22,Contractor_069,Infrastructure,Water Supply,West,unknown,40595.73,11,4575884.56
+GOV30378,2024/03/29,Contractor_019,infrastructure,Hospital Project,east,4797554.24,344849.57,3,13358113.99
+GOV30604,invalid,Contractor_004,Health,,Central,354002.63,0,6,2124015.78
+GOV30175,24 Aug 2023,Contractor_089,Defense,School Building,South,618504.74,0,, 6803552.102100071 
+GOV30414,2024-03-02,Contractor_027,  Defense  ,Public Transport,None,461735.17,45386.45,10,4163487.2
+GOV30618,2024/01/27,Contractor_054,Education,Rural Electrification,East,1392759.98,-,5,6490269.98
+GOV30106,06/16/24,Contractor_007,Agriculture,Water Supply,South,727633.97,0,11,8003973.7
+GOV30018,2022-01-16,Contractor_064,Defense,Hospital Project,West,8392389.68,285785.4,4, 32426417.138310976 
+GOV30547,2023/08/08,Contractor_062, Infrastructure,Water Supply,North,-,0,5,3443036.84
+GOV30358,12/02/22,Contractor_092,Education,Road Construction,Central,539521.03,0,2,1079042.07
+GOV30627,08/28/24,Contractor_062,,Water Supply,West,666607.92, 0 ,11,7332687.14
+GOV30475,2023/05/09,Contractor_058,Transport,Hospital Project,Central,,51544.34,7,25326536.18
+GOV30285,2022-03-18,Contractor_038,Health,Rural Electrification,West,846410.34,0,1,846410.34
+GOV30533,10/03/22,  Contractor_061  ,Defense,Hospital Project,East,5437885.98,153920.3,1,5283965.68
+GOV30690,12/20/2024,Contractor_047,Education,Public Transport,TBD,577101.02,39962.09,3,1611416.78
+GOV30424,2022-02-06,Contractor_028,Infrastructure,Hospital Project,Central,1112138,44750.18,,3202163.5
+GOV30130,08/05/2024,Contractor_030,Health,water supply,East,763252.31,0,7,5342766.14
+GOV30045,16-12-2022,Contractor_096,Health,Public Transport,NORTH,580720.1,0,6,3484320.59
+GOV30064,05/05/23,Contractor_033,Infrastructure,Rural Electrification,east,2685310.93,263275.08,4.0,9688143.38
+GOV30118,13 Sep 2024,Contractor_051,Education,School Building,South,1061073.81,0,11,11671811.9
+GOV30079,2022/02/03,Contractor_095,Infrastructure,School Building,North,1845258.23,0,6,11071549.37
+GOV30684,0000-00-00,Contractor_058,Defense,Unknown,South,231732.44,0,7,1622127.1
+GOV30653,19 Jul 2022,Contractor_052,Education,Hospital Project,East,5737994.28,0,6,34427965.65
+GOV30262,07/01/23,Contractor_094,Defense,Rural Electrification,South,1115291.86,0,9,"$10,037,626.71"
+GOV30363,2023-02-09,Contractor_064,Education,Rural Electrification,West,1754771.98,0,11,unknown
+GOV30049,12/12/24,Contractor_025,Agriculture,School Building,East,600576.5,0,9,5405188.46
+GOV30452,07/04/2023,Contractor_071,Infrastructure,Public Transport,West,106744.03, 6276.781716935323 ,9,904205.23
+GOV30531,2024/03/03,Contractor_002,Health,School Building,West,1848315.24,0,9,16634837.12
+GOV30567,17-06-2024,Contractor_068,Agriculture,null,East,283588.89,22070.11,5,1307593.93
+GOV30635,08/29/22,Contractor_055,Transport,Road Construction,East,3508556.85,0,10,35085568.53
+GOV30384,2023/07/03,Contractor_015,Agriculture,School Building,Central,1492515.5,47029.3,5,7227430.99
+GOV30089,07 Dec 2022,Contractor_074,Transport,School Building,Central,1535822.61,-,1,1443095.7
+GOV30015,2023/06/10,Contractor_022,Education,Rural Electrification,North,120472.03,0,4,481888.14
+GOV30485,04/05/2024,Contractor_053,Defense,Water Supply,  West  ,655288.53,0,8,5242308.2
+GOV30251,02 Jan 2022,Contractor_053,Health,School Building,North,942971.34,0,12,
+GOV30493,29 Jul 2023,Contractor_053,Education,Public Transport,  North  ,170237.65,0,4,680950.61
+GOV30113,2023/06/05,Contractor_002,  Transport  ,School Building,West,1804128.67,139899.09,4,6656918.34
+GOV30471,2024-04-08,,Defense,School Building,West,1094404.76,0,2,2188809.52
+GOV30024,25 Dec 2023,Contractor_076,Education,School Building,Central,712931.09,0,1,712931.09
+GOV30254,07/28/2023,Contractor_035,Education,Water Supply,North,451305.17,0,2,902610.34
+GOV30012,08/22/2022,Contractor_027,Defense,,East,2805966.81,57508.02,12,"$32,981,505.49"
+GOV30367,2022/12/02,Contractor_068,Transport,School Building,North,212735,15670.69,6,1182387.9
+GOV30337,23-10-2024,Contractor_001,Health,Hospital Project,East,2209521.48,0,3,6628564.45
+GOV30002,10/27/2022,Contractor_100,Defense,Rural Electrification,South,1482500.0,0,10,14825000.03
+GOV30179,01/25/24,Contractor_055,Transport,Public Transport,North,207945.45,0,5,1039727.25
+GOV30054,24-05-2022,Contractor_084,Health,,North,1340322.17,0,6,8041933.0
+GOV30023,03/24/2022,Contractor_020,,Water Supply,East,349289.16,0,8,2794313.28
+GOV30082,09/03/24,Contractor_029,Infrastructure,School Building,East,121672.47,11195.21,7,773340.8
+GOV30530,26-11-2024,Contractor_015,Energy,Rural Electrification,Unknown,2869492.13,0,5,14347460.65
+GOV30642,27 Dec 2024, Contractor_093,Agriculture,TBD,South,52977.05,0,1,52977.05
+GOV30014,invalid,CONTRACTOR_097,Defense,public transport,West,385449.29,0,11,4239942.17
+GOV30036,TBD,  Contractor_098  ,Defense,Road Construction,Central,737026.07,0,7,5159182.51
+GOV30039,07/14/23,Contractor_042,Energy,Hospital Project,West,5998744.77,102603.37,6,35376848.46
+GOV30303,10/18/2022,Contractor_007,,  Hospital Project  ,South,4557371.36,0,8,36458970.89
+GOV30664,28-01-2022,Contractor_094,Infrastructure,Road Construction,East,1603220.89,32818.85,12,18844824.58
+GOV30132,2024-04-08,Contractor_082,Infrastructure,School Building,Central,590683.82,56471.76,2,"$1,068,424.12"
+GOV30428,"November 24, 2023",Contractor_081,Defense,Hospital Project,North,9766908.44,0,11,107435992.81
+GOV30478,21 Sep 2022,Contractor_017,Agriculture,Water Supply,North,492840.63,39846.58,12,5435928.6
+GOV30017,"October 13, 2024",Contractor_033,Agriculture,Rural Electrification,Central,944518.87,,1,944518.87
+GOV30506,2022/04/29,Contractor_026,Defense,Rural Electrification,North,1992893.58,0,2,3985787.16
+GOV30070,2023-02-21,Contractor_028,Health,Road Construction,West,4198574.87,0,12,50382898.42
+GOV30448,11/04/24,Contractor_050,AGRICULTURE,Water Supply,null,329797.11,0,3,989391.34
+GOV30222,06/02/23,Contractor_012,TBD,Water Supply,North,48721.83,0,2,97443.66
+GOV30468,"January 20, 2022",Contractor_094,Health,,West, 219259.83615384324 ,0,10,2192598.36
+GOV30696,18-10-2022,Contractor_032,Infrastructure,Water Supply,West,485546.35,0,3,1456639.05
+GOV30517,2023-04-20,Contractor_051,Energy,School Building, West,1566368,0,5,7831840.23
+GOV30059,2022/11/16,Contractor_095,Defense,Road Construction,West,199352.84,0,3,598058.51
+GOV30580,04/25/2023,Contractor_092,Agriculture,Water Supply,  Central  ,237101.02,0,,1422606.12
+GOV30204,02/05/22,Contractor_079,Education,Rural Electrification,East,2694674.91,196802.4,1,
+GOV30301,2022-04-05,Contractor_062,Defense,School Building,South,1318707.26,0,4,-5274829.021647284
+GOV30293,08/20/2024,Contractor_058,Health,Public Transport,east,986812,0,5,-4934057.808536071
+GOV30647,20-03-2022,Contractor_094,,Road Construction,East,3629387.91,"$354,634.29",1,3274753.62
+GOV30380,2022/07/14,Contractor_060,  Energy  ,water supply,North,276984.95,0,10,2769849.5
+GOV30088,28-01-2022, Contractor_038,Energy,Rural Electrification,South,"$1,196,092.92",0,3,3588278.77
+GOV30365,27-04-2024,Contractor_018,Energy,Hospital Project,East,2829394.08,235587.33,5,12969033.76
+GOV30585,09/11/23,Contractor_005,Defense,Rural Electrification,East,2499471.8,237416.36,6,
+GOV30376,07/16/2024,Contractor_001,Defense,  School Building  ,Unknown,1870182.32,0,3,5610546.97
+GOV30253,19-02-2024,Contractor_055,  Infrastructure  ,  Public Transport  ,East,-204744.03818107705,0,-6,1228464.23
+GOV30628,02-06-2024,Contractor_024,Energy,Road Construction,South,3908799.51,0,7,
+GOV30166,09/23/2022, Contractor_034,Transport,Hospital Project,South,1853436.79,60819.97,4,7170467.26
+GOV30257,25 Oct 2023,contractor_037,Energy,Water Supply,North,606609.14,0,1,606609.14
+GOV30575,,Contractor_051,Education, Hospital Project,South,533023.11,10896.6,8,4177012.09
+GOV30552,09 Apr 2024,Contractor_034,Education,Road Construction,Central,1159612.22,0,6,6957673.29
+GOV30126,12/10/2023,Contractor_024,Agriculture,Public Transport,East,N/A,0,9,9642827.86
+GOV30508,04 Jun 2022,CONTRACTOR_050,Transport,School Building,East,302154.02,N/A,1,302154.02
+GOV30147,07 Jun 2024,Contractor_023,Health,School Building,West,752978.37,-,12,8423149.22
+GOV30114,06/07/24,Contractor_013,Health,Road Construction,South,4952824.26,316695,1,4636129.05
+GOV30169,"December 30, 2022",Contractor_044,Energy,Road Construction,East,4408277,254441.16,4,16615343.58
+GOV30541,06/22/23,Contractor_084,Agriculture,RURAL ELECTRIFICATION,WEST,1562041.2,0,9,14058370.77
+GOV30013,02/27/2024,Contractor_047,N/A,SCHOOL BUILDING,NORTH,363781.48,0,3,1091344.44
+GOV30443,2023/02/25,Contractor_078,Infrastructure,Rural Electrification,North,2395801.28,0,3,7187403.84
+GOV30318,2023/01/26,Contractor_090,Transport,Public Transport,West,657151.21,0,8,5257209.66
+GOV30430,2023/06/08,Contractor_082,Health,Public Transport,East,252213.4,0,-1,252213.4
+GOV30360,11/26/22,Contractor_019,Energy,Rural Electrification,  North  ,"$2,750,355.45",56018.44,2,5388674.03
+GOV30681,2022/08/01,contractor_034,Defense,Hospital Project,south,9702751.58,0,2,19405503.15
+GOV30288,05 Jun 2024,Contractor_036,Transport,Water Supply,West,697054.14,0,8,TBD
+GOV30458,2024-11-08,Contractor_001,Infrastructure,ROAD CONSTRUCTION,West,2386780.74,99312.52,11,25162150.41
+GOV30559,06/23/24,Contractor_074,Agriculture,PUBLIC TRANSPORT,South,1492876,null,6,8957256.25
+GOV30535,03/09/2022,Contractor_089,Defense,Road Construction,West,3044858.32,0,9,27403724.92
+GOV30345,11/11/22,Contractor_003,Infrastructure,Road Construction,Central,3854155.59,125702.82,12,unknown
+GOV30163,18 Jan 2024,Contractor_028,Transport,Water Supply,  Central  ,535221.36,0,8,4281770.89
+GOV30125,07/03/2023,Contractor_079,Agriculture,Public Transport,North,865935.25,0,8,6927482.01
+GOV30614,17-07-2023,Contractor_025,Infrastructure,Rural Electrification,Central,1770780.66,0,11,19478587.23
+GOV30292,2023/04/26,Contractor_075,Energy,Rural Electrification,Central,,78112.88,5,9687404.35
+GOV30584,24-01-2024,Contractor_095,Energy,  Public Transport  ,West,455138.0,0,12,5461655.96
+GOV30563,2023-07-23,Contractor_091,Education,Public Transport,N/A,613013.35,0,12,7356160.25
+GOV30577,01/17/2023,Contractor_068,Education,Rural Electrification,South,552979.29,0,10,5529792.86
+GOV30200,2024-08-19,Contractor_018,Education,Rural Electrification,North,749939.75,0,5,3749698.74
+GOV30573,"September 27, 2024",Contractor_013,Education,School Building,Central,603038.69,0,11,6633425.61
+GOV30397,16 Apr 2024,Contractor_031,AGRICULTURE,School Building,  Central  , 1361429.5098145222 ,106765.51,2,2509327.99
+GOV30344,04/05/2022,,Education,Rural Electrification,South,1696715.1,0,4,6786860.4
+GOV30562,2022-06-02,,Energy,School Building,East,490515.08,23328.19,,467186.89
+GOV30300,2024/05/23,,Defense,Rural Electrification,N/A,2973835.18,0,12,35686022.11
+GOV30093,07/08/24,Contractor_058, Agriculture,Road Construction,Central,-434511.2314291643,TBD,-1,434511.23
+GOV30141,"April 21, 2023",Contractor_009,Health,School Building, West,1502660.88,0,7,10518626.17
+GOV30037,26 Jun 2023,Contractor_090,Health,  -  ,Central,314358.17,6254.81,7,2156723.53
+GOV30342,"March 08, 2024",Contractor_037,Defense,Hospital Project,East,5584421.44,454814.49,4,20518427.83
+GOV30038,23-06-2022, Contractor_035,,Rural Electrification,West,2637779.47,0,11,29015574.13
+GOV30420,26-09-2024,Contractor_099,Energy,Rural Electrification, Central,2686531.38,N/A,10,26865313.84
+GOV30382,"February 24, 2024",Contractor_027,Agriculture,Rural Electrification,South,2130512.48,0,8,17044099.81
+GOV30119,2023/05/19,Contractor_017,Infrastructure,Road Construction,East,2637547.45,0,5,13187737.23
+GOV30473,02/04/22,Contractor_072,Transport,Water Supply,East,275949.75,0,5,1379748.74
+GOV30031,"December 31, 2022",Contractor_077,Defense,Water Supply,South,520511.46,0,11,5725626.03
+GOV30009,07/23/24,Contractor_082,Agriculture,,North,955515.69,0,4,"$3,822,062.78"
+GOV30624,2023/12/31,Contractor_012,Energy,Water Supply,West,"$73,010.49",0,8,584083.9
+GOV30277,2023-04-23,Contractor_013,Infrastructure,Water Supply,North,67466.08,6115.44,7,429454.48
+GOV30185,03/17/22,Contractor_012,Energy,Water Supply,Central,563638.98,0,9,5072750.85
+GOV30240,08/29/23,Contractor_099,Health,HOSPITAL PROJECT,Central,853140.14,26017.24,11,"$9,098,351.93"
+GOV30027,2023/04/08,Contractor_031,Infrastructure,Water Supply,North,336103.72,0,8,"$2,688,829.73"
+GOV30092,0000-00-00,Contractor_097,Agriculture,,North,965348.1,$0.00,12,11584177.26
+GOV30019,2022-11-19,Contractor_025,Defense,Public Transport,,856943.76,0,,"$5,141,662.58"
+GOV30438,04-10-2024,Contractor_035,Infrastructure,School Building,West,1137380.22,0,5,5686901.09
+GOV30542,11 Jul 2023,Contractor_075,  Transport  ,Hospital Project,Central,2475585.2,0,10,24755851.97
+GOV30031,"December 31, 2022",Contractor_077,Defense,Water Supply,South,520511.46,0,11,5725626.03
+GOV30391,04/26/22,Contractor_015,Infrastructure, Rural Electrification,  Central  ,686939.13,64263.59,-7,4358728.73
+GOV30504,07 Mar 2022,null,Energy,None,Central,5443867.02,0,10,
+GOV30230,10 Jan 2022,Contractor_043,Energy,Public Transport,Central,1145377.14,46788.2,5,5492944.7
+GOV30540,25 Sep 2024,Contractor_084,Health,RURAL ELECTRIFICATION,Central,585732.29,0,9,5271590.59
+GOV30022,04/03/24,Contractor_057,Infrastructure,Hospital Project,East,8298987.85,0,TBD,66391902.78
+GOV30469,06/13/2022,Contractor_017,Infrastructure,Water Supply,East,681410.93,0,-10,6814109.33
+GOV30234,N/A,Contractor_053,Energy,School Building,West,1459876.42,0,7,10219134.97
+GOV30315,2022-04-01,CONTRACTOR_001,Health,Water Supply,North,186225.81,4754.92,8,1451767.08
+GOV30158,10 Jul 2023,Contractor_071,Defense,School Building,WEST,1560840.28,0,8,12486722.26
+GOV30579,"March 28, 2023",Contractor_091,Transport,Hospital Project,East,4184769.69,282943.47,11,42920088.47
+GOV30630,2022-01-23,Contractor_072,Defense,Water Supply,Central,695171.64,25532.64,12,8035668.1
+GOV30180,02/17/24,Contractor_027,Infrastructure,Rural Electrification,North,1177973.24,0,6,7067839.44
+GOV30361,"March 16, 2022",,agriculture,Water Supply,Central,516623.58,0,2,1033247.16
+GOV30463,"January 21, 2023",Contractor_084,  Energy  ,Water Supply,Central,378169.72,15992.89,7,2535237.82
+GOV30467,04/25/23,Contractor_093,Transport,Rural Electrification,South,1710634.69,0,2,3421269.37
+GOV30321,04/02/24,Contractor_095,Transport,Public Transport,East,1195658.48,0,1,1195658.48
+GOV30685,2023-12-13,Contractor_051,Defense,school building,East,1599517.13,10411.37,1,1589105.77
+GOV30385,10/06/24,  Contractor_086  ,Health,School Building,West,,1723.31,12, 13784615.799182322 
+GOV30272,01/16/2023,Contractor_049,,School Building,Central,"$335,398.22", 0 ,7,2347787.53
+GOV30167,"August 01, 2023",Contractor_040,Infrastructure,Road Construction,Central,3308928.12,0,3,9926784.35
+GOV30273,"May 20, 2023",Contractor_001,Energy,Rural Electrification,South,974629,69910.1,9,8142467.46
+GOV30626,22 Feb 2022,  Contractor_008  ,Energy,Road Construction,Central,446127.62,0,10,4461276.15
+GOV30590,05/07/22,Contractor_022,  Energy  ,Road Construction,East,1433354.48,null,11,
+GOV30677,2024/09/25,Contractor_034,Agriculture,Water Supply,South,432321.72,0,1,"$432,321.72"
+GOV30121,invalid,Contractor_033,Agriculture,Road Construction,East,2447904.27,62294.86,1,2385609.41
+GOV30212,25 Aug 2024,,Education,water supply,EAST,"$137,973.95",5384.54,5,662947.02
+GOV30582,"September 14, 2023",Contractor_039,Defense,Rural Electrification,East,1321975.18,117566.56,7,8430860.36
+GOV30546,"May 13, 2024",Contractor_004,Agriculture,Public Transport,,1368838.69,0,12,16426064.23
+GOV30419,2024/10/12,Contractor_054,Agriculture,Road Construction,North,"$4,210,044.93",73990.89,-12,49632648.54
+GOV30686,,Contractor_087,Agriculture,Hospital Project,North,6013549.27,0,12,72162591.18
+GOV30655,"February 15, 2024",Unknown,Agriculture,Hospital Project,North,1974148.85,0,11,21715637.33
+GOV30564,07/15/22,Contractor_017,Energy,Hospital Project,North,6941090.96,0,6,41646545.74
+GOV30604,invalid,Contractor_004,Health,,Central,354002.63,0,6,2124015.78
+GOV30654,21 Jul 2022,Contractor_001,Energy,  Hospital Project  ,West,1447552.85,132055.95,,5261987.63
+GOV30100,2022/01/16,Contractor_082,Education,Rural Electrification,South,2821844.64,0,4,11287378.55
+GOV30507,07/17/23,Contractor_009,Defense,Road Construction,South,4895051.9,0,7,
+GOV30578,2023/08/20,Contractor_006,ENERGY,Road Construction,North,1954670.51,0,10,19546705.06
+GOV30176,2023/03/21,Contractor_033,Education,Road Construction,West,2952302.45,0,2,5904604.89
+GOV30676,07/30/23,Contractor_083,Health,Public Transport,North,614384.26,0,-8,4915074.11
+GOV30488,"December 01, 2022",Contractor_002,Transport,Public Transport,North,330819.41,0,5,1654097.05
+GOV30224,14-03-2024,Contractor_095,Education,Water Supply,North,125328.84,7953.64,4,469500.8
+GOV30317,2022/03/05,Contractor_005,  Health  ,Hospital Project,South,5653611.36,0,8,45228890.89
+GOV30032,2023/10/10,Contractor_016,  Energy  ,Public Transport,East,889285.67,0,1,unknown
+GOV30425,03/15/22,Contractor_064,Defense,Hospital Project,East,4187587.55,162888.08,4,16098797.88
+GOV30050,2024-02-27,Contractor_032,Transport,Hospital Project,North,1472891.47,0,8,11783131.79
+GOV30255,08 May 2022,Contractor_055, Health,  Water Supply  ,North,755250.51,11768.41,3,2230446.3
+GOV30602,"May 07, 2024",Contractor_055,Infrastructure,,,279401.9,,1,279401.9
+GOV30500,"October 30, 2022",Contractor_039,Health,Hospital Project,West,7805238.03,0,12,93662856.39
+GOV30208,2022-11-15,Contractor_037,Energy,Road Construction,South,4148322.67,,6,24429147.75
+GOV30216,2022/05/13,Contractor_098,Transport,Public Transport,East,218135.77,1798.86,4,865347.65
+GOV30329,2022/01/30,Contractor_072,Education,Water Supply,North,642125.9,0,7,-
+GOV30572,02/15/2022,Contractor_030,Transport,,North,376720.99,0,3,1130162.96
+GOV30250,29 Nov 2022,contractor_034,Health,Road Construction,East,2412886.8,0,2.0,4825773.59
+GOV30353,21 Dec 2022,Contractor_100,Transport,water supply,West,585343.22,1495.61,,2335390.44
+GOV30139,11/15/22,Contractor_074,Energy,water supply,West,294655.64,,8,2357245.11
+GOV30366,12/23/2023,Contractor_092,Agriculture,Road Construction,East,4980043.79,8392.35,6,29829908.6
+GOV30519,2023-09-22,Contractor_038,Education,Water Supply,East,436622.63,0,5,2183113.17
+GOV30076,10/31/2024,Contractor_065,Education,Rural Electrification,North,947118.77,0,9,8524068.91
+GOV30295,"February 01, 2022",Contractor_046,Transport,School Building,North,315125.48,14279.93,8,2406764.4
+GOV30494,11/15/2023,Contractor_044,Energy,Rural Electrification, West,2704732.6,0,11,29752058.62
+GOV30299,08/20/2024,Contractor_068,Energy,Hospital Project,Central,9544135.49,744993.36,-8,70393137.03
+GOV30587,"March 03, 2022",Contractor_095,Energy,  Road Construction  ,South,262902.68,2642.82,7,1821819.0
+GOV30509,"March 19, 2022",,Health,Public Transport,SOUTH,624122.42,24186.2,5,2999681.13
+GOV30515,2023-12-01,Contractor_014,Transport,Hospital Project,  South  ,8004070.62,0,4,32016282.49
+GOV30626,22 Feb 2022,  Contractor_008  ,Energy,Road Construction,Central,446127.62,0,10,4461276.15
+GOV30351,"July 11, 2023",Contractor_032,Defense,Hospital Project,West,2945410.89,0,9,"$26,508,698.04"
+GOV30238,03/12/2024,Contractor_051,,Rural Electrification,East,2691615.13,0,6,16149690.76
+GOV30456,27 Sep 2022,Contractor_021,Transport,Water Supply,  Central  ,452886.81,0,12,5434641.68
+GOV30678,2024-12-09,  Contractor_053  ,Education,Hospital Project,South,5617963.11,223770.82,8,43153538.35
+GOV30691,2024-04-19,Contractor_036,Energy,school building,East,601497.77,33547.72,7,3975650.29
+GOV30275,"January 02, 2023",Contractor_084,Agriculture,  Rural Electrification  ,South,2198274.93,146987.72,1,2051287.21
+GOV30317,2022/03/05,Contractor_005,  Health  ,Hospital Project,South,5653611.36,0,8,45228890.89
+GOV30555,2024-11-30,Contractor_014,Defense,Road Construction,East,3099193.59,$0.00,12,37190323.09
+GOV30601,06/04/24,Contractor_011,Defense,,West,4816849.47,86761.29,3,14190264.55
+GOV30523,02/05/22,Contractor_024,Transport,School Building,West,537197.47,0,2,1074394.94
+GOV30697,2024/12/01,Contractor_031,Infrastructure,School Building,South,1372788.94,0,9,12355100.46
+GOV30528,2023/01/08, Contractor_099,Defense,Public Transport,East, 438279.7695022358 ,0,-7,3067958.39
+GOV30406,N/A,Contractor_079,Infrastructure,School Building,East,398478.89,0,6,2390873.31
+GOV30077,12/11/2023,Contractor_066,Education,Road Construction,west,1268154.86,0,6,7608929.14
+GOV30108,"October 01, 2023",Contractor_007,Transport,Rural Electrification,West,2331514,0,12,27978173.83
+GOV30565,08/21/2024,Contractor_022,Health,Road Construction,None,3185827.77,239556.99,4,11785083.12
+GOV30098,2022/05/19,Contractor_075,Defense,  Rural Electrification  ,West,126811.78,$0.00,9,1141305.99
+GOV30658,2022-03-10,Contractor_005,Agriculture,Rural Electrification,North,392833.68,28197.15,7,2552455.73
+GOV30534,2023-06-01,,,Rural Electrification,Central,378723.12,0,unknown,3029784.99
+GOV30692,"February 29, 2024",Contractor_096,Health,Rural Electrification,North,1459602.99,0,11,16055632.94
+GOV30083,0000-00-00,Contractor_085,Defense,Road Construction,South,2327003.13,,12,27632216.41
+GOV30479,"December 01, 2022",Contractor_091,Energy,School Building,Central,157204.91,0,5,786024.55
+GOV30170,"May 20, 2022",Contractor_098,Transport,Rural Electrification,North,2855739.72,0,11,31413136.92
+GOV30515,2023-12-01,Contractor_014,Transport,Hospital Project,  South  ,8004070.62,0,4,32016282.49
+GOV30591,2024-07-27,Contractor_086,Energy,  Water Supply  ,East,,0,3,736641.91
+GOV30576,26-10-2022,Contractor_042,Energy,Water Supply,West,73710.86,0,7,515976.04
+GOV30210,"December 18, 2023",Contractor_046,Education,Public Transport,East,667544.09,0,8,5340352.7
+GOV30396,10-04-2024,Contractor_078,Transport,Hospital Project,South,668751.83,11499.23,3,1971757.8
+GOV30362,02 Oct 2024,Contractor_039,Energy,Road Construction,North,525626.03,0,7,3679382.19
+GOV30566,12/05/2022,  Contractor_035  ,null,Road Construction,South,1368393.02,90113.73,3,3834837.88
+GOV30394,06/01/2024,Contractor_058,Agriculture,School Building,North,965011.69,60375.11,12,10855638.97
+GOV30032,2023/10/10,Contractor_016,  Energy  ,Public Transport,East,889285.67,0,1,unknown
+GOV30183,21-04-2022,  Contractor_087  ,  Health  ,Public Transport,North,639289.14,25546.58,2,1227485.13
+GOV30539,"October 02, 2022",Contractor_085,Transport,Rural Electrification,South,272576.46,1068.49,3,814523.91
+GOV30377,02/04/23,Contractor_073,Transport,School Building,east,1430700.77,93596.68,10,13371040.96
+GOV30401,24-01-2022,Contractor_080,Defense,Road Construction,East,1744316.6,0,N/A,15698849.43
+GOV30556,06/13/2023,Contractor_088,Transport,Road Construction,Central,4337038.38,225905.4,3,12333398.95
+GOV30298,08/27/24,Contractor_097,Education,Hospital Project,East,,0,6,56226184.8
+GOV30030,09/05/2023,Contractor_081,Defense,hospital project,  East  ,2083655.42,-169578.0658869815,9,17226696.14
+GOV30387,2022-01-20,Contractor_093,Energy,Road Construction,North,,251288.64,8,22911618.35
+GOV30544,,Contractor_074,Defense,Hospital Project,Central,5592324.14,270986.89,,26606686.23
+GOV30511,"August 22, 2024",Contractor_069,energy,ROAD CONSTRUCTION,North,2322701.79,0,9,20904316.08
+GOV30226,22-12-2023,Contractor_017,Energy,Road Construction,West,4322289.04,0,1,"$4,322,289.04"
+GOV30629,"January 10, 2024",Contractor_046,Defense,Hospital Project,South,null,586003.8,,21853539.5
+GOV30520,03 Oct 2024,Contractor_062,Education,Hospital Project,North,2137747.55,-,9,19239727.97
+GOV30557,05 Jul 2022,Contractor_068,Transport,Rural Electrification,East,"$1,788,678.63",0,2.0,3577357.25
+GOV30245,11/16/2022,,DEFENSE,School Building,Central,539095.28,0,1,N/A
+GOV30538,12/07/2022,Contractor_091,Defense,Rural Electrification,North,"$281,311.40",21717.16,12,3115130.94
+GOV30633,07/13/24,Contractor_026,Transport,Rural Electrification,West,2162611.88,121109.2,1,2041502.69
+GOV30570,2024/08/19,Contractor_013,Education,Water Supply,  Central  ,206481.18,0,1,206481.18
+GOV30583,07 Oct 2022,Contractor_018,Transport,,South,-620769.6337595832,23174.46,11,6573546.88
+GOV30117,08/28/2023,Contractor_007,Energy,School Building,South,1975018.52,27698.91,10,19473196.14
+GOV30026,07/20/2024,Contractor_075,Health,Rural Electrification, East,994170.91,"$38,804.39",5,4776832.59
+GOV30699,17 Apr 2024,Contractor_003,,Road Construction,North,972757.83,0,1,972757.83
+GOV30278,04/17/23,Contractor_064,,Water Supply,West,180338.08,,5,901690.38
+GOV30120,03/09/23,Contractor_063,Infrastructure,Public Transport,East,230246.84,0,2,"$460,493.68"
+GOV30611,"December 01, 2024",contractor_046,Defense,Road Construction,West,3006532.46,185142.29,8,22571121.43
+GOV30058,18 May 2022,Contractor_091,Health,Hospital Project,East,9541136.22,367084.33,6,55044311.33
+GOV30631,2023/12/25,Contractor_089,Health,Public Transport,East,-288377.544208855,0,2,576755.09
+GOV30053,2022-08-16, Contractor_007,Agriculture,Rural Electrification,South,null,14610.0,5,2033937.86
+GOV30536,2022-03-31,,Agriculture,School Building,North,1145259.12,0,,3435777.36
+GOV30134,0000-00-00,Contractor_048,Education,Hospital Project,  North  ,521532.14,4023.66,N/A,2587542.41
+GOV30415,"November 08, 2022",  Contractor_019  ,Education,Hospital Project,,1205265.48,114689.75,9,9815181.56
+GOV30168,08/08/23,Contractor_043,Energy,Rural Electrification,Central,2632226.1,0,12,31586713.15
+GOV30172,25-12-2023,Contractor_099,Agriculture,Public Transport,CENTRAL,359316.93,32972.0,7,2284414.54
+GOV30598,28-01-2023,Contractor_091,Infrastructure,Rural Electrification,South,2604330.32,0,6,15625981.95
+GOV30062,2023/10/25,Contractor_023,Health,School Building,South,1623593.87,0,5,8117969.35
+GOV30127,2024/07/09,,Agriculture,Public Transport,North,512504.13,0,12,6150049.53
+GOV30177,2023-10-23,Contractor_027,Infrastructure,Public Transport,West,1197562.97,0,9,10778066.71
+GOV30187,"May 19, 2022",Contractor_035,Energy,  Road Construction  ,Central,1830545.34,88756,3,5225369.01
+GOV30327,11/21/22,Contractor_023,Agriculture,Hospital Project,West,2450365.6,233000.73,3,"$6,652,094.62"
+GOV30074,24-03-2023,Contractor_082,Energy,Public Transport,South,1022909.86,0,4,4091639.43
+GOV30312,05/24/23,Contractor_008,Education,Road Construction,North,2855555.22,0,4,"$11,422,220.87"
+GOV30060,31 Mar 2022,Contractor_079,Education,Public Transport,East,572242.85,3533.01,5,"$2,843,549.16"
+GOV30008,17-05-2022,,Agriculture,School Building,North,-560495.229408208,46469.26,11,5654285.64
+GOV30379,10 Jan 2024,Contractor_043,Education,  Water Supply  ,West,684764.94,"$37,666.42",8,5176788.17
+GOV30252,07/02/22,Contractor_004,Education,  ,South,3265169.04,0,7,22856183.29
+GOV30434,11/27/2023,Contractor_037,Transport,Rural Electrification,South,2939330.78,0,4,11757323.1
+GOV30383,2023-02-03,Contractor_010,Health,School Building,South,-440073.3027675911,40172.28,10,3999010.24
+GOV30461,13 May 2022,Contractor_074,  ,School Building,North,1987457.75,0,8,15899662.0
+GOV30503,05/09/2024,Contractor_086,Energy,Public Transport,South,1062393.12,0,5,5311965.6
+GOV30354,07/21/2022,Contractor_081,Education,Road Construction,South, 1701487.1317391917 ,0,9,15313384.19
+GOV30490,10 Jul 2022,Contractor_023,Transport,Hospital Project,Central,7104313.24,0,9,63938819.2
+GOV30161,2022/06/19,Contractor_023,Education, Water Supply,South,359761.04,0,7,2518327.28
+GOV30450,2022-09-12,Contractor_014,Health,Water Supply,,578282.66,46734.98,9,4783929.1
+GOV30324,08/25/2024,Contractor_086,Agriculture,Water Supply,West, 437202.307140015 ,,7,3060416.15
+GOV30283,2023-07-29,Contractor_073,infrastructure,Hospital Project,West,9270787.18,0,8,74166297.47
+GOV30228,04/18/2024,Contractor_058,Energy,School Building,Central,872748.31,0,4,3490993.24
+GOV30194,"August 25, 2022",,,Water Supply,,211001.54,0,6,1266009.25
+GOV30550,07/24/2024,Contractor_028,Transport,School Building,South,470035.94,15538.59,8,3635978.79
+GOV30482,16-11-2023,Contractor_059,Education,Hospital Project,North,7400252.41,0,2,-14800504.817520598
+GOV30522,09/25/24,Contractor_020,Agriculture,Public Transport,East,976261.71,0,1,976261.71
+GOV30316,12/09/24,Contractor_043,Energy,Public Transport,North,1041719.42,0,7,7292035.97
+GOV30518,05/28/2024, Contractor_048,Health,Road Construction,South,2845100.53,"$256,154.42",8,
+GOV30487,2023/05/24,Contractor_033,Energy,road construction,North,3899773.85,null,5,19498869.26
+GOV30613,2023/09/12,Contractor_053,Health,Road Construction,Central,888397.55,34516.57,3,2561642.92
+GOV30087,13-10-2024,Contractor_032,Transport,Hospital Project,North,4228638.68,388133.84,4,15362019.33
+GOV30459,2022/04/29,Contractor_072,Transport,School Building,CENTRAL,1243300.92,67604.02,10,11756968.97
+GOV30284,10-03-2022,Contractor_095,Infrastructure,Road Construction,  Central  ,404193.85,35857.14,2,736673.42
+GOV30046,26-05-2024,Contractor_021,Agriculture,Water Supply,Central,479411.02,$0.00,-10,4794110.21
+GOV30453,06 Nov 2024,N/A,Health,Rural Electrification,South,1635593.65,8679.23,5,8134572.1
+GOV30027,2023/04/08,Contractor_031,Infrastructure,Water Supply,North,336103.72,0,8,"$2,688,829.73"
+GOV30073,31 May 2022,Contractor_032,Transport,Water Supply,,527726.68,0,8,4221813.48
+GOV30229,"August 26, 2023",Contractor_088,Agriculture,Hospital Project,South,7742004.82,0,11,85162053.02
+GOV30660,2022/05/09,Contractor_008, Energy,Public Transport,Central,1163678.96,90937.9,9,9654669.6
+GOV30417,04 Jan 2022,Contractor_071,Transport,Hospital Project,North,2097057,111342.3,10,19857148.9
+GOV30072,12 May 2022,CONTRACTOR_014,Education,  Water Supply  ,West,TBD,51520.28,6,4334489.46
+GOV30543,16-07-2022,Contractor_043,AGRICULTURE,  Road Construction  ,Central,976156.27,58563.44,10,9175928.24
+GOV30395,2023/02/03,Contractor_098,Education,Hospital Project,  North  ,5137205.93,0,1,5137205.93
+GOV30319,12/13/2022,Contractor_040,Health,Hospital Project,East,4072227.8,0,1,4072227.8
+GOV30199,03-05-2022,,Health,school building,South,1487895.65,0,11,16366852.18
+GOV30499,03/19/2022,Contractor_098,Energy,School Building,South,128675.7,11110.84,,470259.46
+GOV30495,03-11-2024,Contractor_092,Health,Road Construction,East,2507705.49,0,4.0,10030821.96
+GOV30001,09/26/2023,Contractor_067,Education,Rural Electrification,North,994962.27,0,11,10944585.0
+GOV30592,03 Jan 2024,Contractor_015,Health,Rural Electrification,North,,0,7,-7124897.385311162
+GOV30305,,Contractor_014,Agriculture,Public Transport,North,327852.92,0,5,1639265
+GOV30393,11/13/2024,Contractor_003,Transport,Water Supply,West,665369.87,0,10,6653698.67
+GOV30418,0000-00-00,,Energy,Public Transport,Central,327676.17,31460.14,7,2073512.15
+GOV30271,09/16/2023,Contractor_075,Infrastructure,,Central,2282566.21,0,1,2282566.21
+GOV30662,,Contractor_022,Education,,West,355321.84,25265.58,1,330056.26
+GOV30233,13-07-2022,Contractor_063,TRANSPORT,School Building,,236729.14,9017.4,4,910846.97
+GOV30548,2022/11/23,Contractor_037,Defense,Water Supply,North,59481.53,0,12,713778.39
+GOV30549,invalid,Contractor_054,Energy,Road Construction,North,4726375.01,45565.24,1,4680809.77
+GOV30040,03/04/23,Contractor_057,Defense,Water Supply,North,392731.15,18958.85,11, 4111495.279436422 
+GOV30412,2022/06/04,Contractor_023,Energy,Public Transport,Central,1458950.6,49216.91,3,4229201.06
+GOV30594,13-05-2024,Contractor_002,Energy,Rural Electrification,East,-659143.4066251629,0,2,1318286.81
+GOV30192,05/24/24,Contractor_025,Transport,Hospital Project,East,2909567.82,127201.31,4,11129466.06
+GOV30446,02/03/24,Contractor_064,Health,Public Transport,South,513367.79,6861.53,11,5571568.83
+GOV30311,2023-07-31,Contractor_096,  Education  ,Rural Electrification,,,$0.00,6,7162488.66
+GOV30502,11/27/2024,Contractor_002,Infrastructure,Water Supply,East,160485.82,14078.19,4,585630.5
+GOV30003,08/15/2024,Contractor_025,Energy,Public Transport,West, 940148.6539131278 ,0,12,11281783.85
+GOV30447,"June 11, 2022",Contractor_086,Health,School Building,North,1930250.59,0,1,
+GOV30133,"January 25, 2024",Contractor_052,Infrastructure, Hospital Project,Central,2537793.09,0,2,5075586.18
+GOV30359,16 May 2024,Contractor_065,Education,Rural Electrification,  North  ,1621737.63,0,11,17839113.97
+GOV30256,03-05-2023,Contractor_089,Health,Rural Electrification,West,2445951.77,24822.74,6,14526774
+GOV30066,"September 15, 2023",Contractor_062,Transport,Hospital Project,West,5801408,0,10,58014083.06
+GOV30041,30-04-2023,Contractor_056, Transport,Road Construction,Central,3870809.7,0,10,
+GOV30558,16 Mar 2022,Contractor_004,Education, Public Transport,,531655.41,38853.09,8,-3942418.522584636
+GOV30196,"December 18, 2023",Contractor_058,Agriculture,Water Supply,East,359952.95,0,11,3959482.45
+GOV30648,02/06/2023,Contractor_014,infrastructure,Hospital Project,East,2506623.51,0,6,-15039741.04900854
+GOV30426,28-02-2023,contractor_004,Defense,School Building,East,N/A,0,4,5643195.05
+GOV30610,2022/07/02,contractor_001,Education,Road Construction,North,2318059.45,11332.0,1,2306727.45
+GOV30407,04-06-2024,Contractor_056,Infrastructure,School Building,,282406.58,0,12,3388878.97
+GOV30343,29-08-2022,Contractor_005,Agriculture,public transport,East,1456053.1,0,6,8736318.59
+GOV30386,03 Jul 2022,Contractor_069,Education,Rural Electrification,central,552559.04,0,1,552559.04
+GOV30248,06/20/24,CONTRACTOR_037,Health,School Building,North,660220.27,0,6,3961321.64
+GOV30011,2024-07-15,Contractor_018,Agriculture,Rural Electrification,  East  ,434279.88,20737.33,1,413542.55
+GOV30514,0000-00-00,,Education,School Building,East,147128.54,9390.48,3,413214.2
+GOV30232,11/19/2022, Contractor_055,Infrastructure,Rural Electrification,South,145600.09,0,9,1310400.79
+GOV30116,2024/06/21,Contractor_051,Infrastructure,Road Construction,Central,2569604.77,,6,14091600.5
+GOV30124,05/31/24,Contractor_072,Agriculture,Public Transport,North,546625.02,0,3,1639875.07
+GOV30632,05/05/2022,Contractor_079,Transport,Public Transport,North,420887.73,0,3,1262663.18
+GOV30164,04/13/22,Contractor_055,Energy,Rural Electrification,South,1350432.58,0,8,"$10,803,460.68"
+GOV30006,0000-00-00,Contractor_075,Health,Public Transport,South,414176.16,0,9,3727585.48
+GOV30623,2022/03/12,Contractor_042,Energy,Road Construction,West,2244253.41,0,6,13465520.45
+GOV30220,09/18/22,Contractor_052,Defense,Water Supply,South,200674.65,0,4,802698.59
+GOV30474,"August 25, 2022",Contractor_060,Agriculture,Public Transport,East,916125.58,0,7,6412879.05
+GOV30221,,Contractor_081,Agriculture,Public Transport,West,909792.28,0,6,5458753.7
+GOV30042,2024-03-15,Contractor_063,Infrastructure,RURAL ELECTRIFICATION,North,-1315516.991267273,47636.51,8,10143043.87
+GOV30650,2022-02-25,Contractor_054,infrastructure,RURAL ELECTRIFICATION,South,977624.18,0,1,977624.18
+GOV30435,25-01-2024,Contractor_002,,Water Supply,Central,751376.44,0,5,3756882.21
+GOV30625,2023-12-02,Contractor_057,Energy,Public Transport,West,"$301,895.44",21416.68,4,1121915.04
+GOV30355,08/16/22,Contractor_070,Education,  -  ,West,,305426.93,5,23795369.34
+GOV30575,,Contractor_051,Education, Hospital Project,South,533023.11,10896.6,8,4177012.09
+GOV30645,2023-11-30,Contractor_056,Defense,School Building,Central,606076.84,0,11,6666845
+GOV30115,06-12-2022,Contractor_097,Education,Hospital Project,South,2926943.04,0,10,29269430.41
+GOV30403,2022-03-19, Contractor_002,Transport,Hospital Project,East,8706527.87,0,6,52239167.23
+GOV30057,"January 06, 2023",Contractor_034,Transport,Hospital Project,Central,5318849.1,0,2,10637698.2
+GOV30548,2022/11/23,Contractor_037,Defense,Water Supply,North,59481.53,0,12,713778.39
+GOV30265,2024-05-28,Contractor_055,Defense,Road Construction,EAST,4131591.84,0,9,37184326.54
+GOV30112,"October 03, 2024",Contractor_070,Defense,School Building,South,1812896.85,$0.00,7,12690277.95
+GOV30103,03/13/2024,Contractor_045,Agriculture,Public Transport,Central,396546.71,20730.45,1,375816.26
+GOV30498,TBD,Contractor_033,Infrastructure,Hospital Project,south,3078920.29,0,9,27710282.57
+GOV30174,2024-06-30,Contractor_081,Energy,,,1522961.22,0,10,15229612.25
+GOV30215,2024-11-02,Contractor_087,Energy,Rural Electrification,West,2389935.55,0,7,16729548.86
+GOV30641,07 Sep 2023,Contractor_052,Transport,  School Building  ,Central,1649165.82,0,3,4947497.47
+GOV30128,06 Mar 2022,Contractor_026,,Water Supply,West,757730.19,0,2,1515460.38
+GOV30165,12/22/22,Contractor_003,Energy,Road Construction,West,2778955.94,0,12,33347471.28
+GOV30155,"July 02, 2023",Contractor_066,Transport,Hospital Project,East,5876829.17,0,3,17630487.51
+GOV30472,02/07/24,Contractor_077,AGRICULTURE,ROAD CONSTRUCTION,South,2230500.97,91124.58,3,6418129.17
+GOV30055,01-09-2023,Contractor_065,education,Water Supply,West,363212.78,0,11,3995340.57
+GOV30101,05 Aug 2024,Contractor_033,Energy,School Building,South,,100693.24,7,9508059.15
+GOV30524,06/23/2023,Contractor_036,Education,Rural Electrification,  Central  ,1651925.04,0,11,18171175.41
+GOV30553,14-03-2022,Contractor_086,Education,Water Supply,West,24721.34, 2204.587512239874 ,-12, 270200.9865504004 
+GOV30527,25 Sep 2022,Contractor_099,Agriculture,Water Supply,West,,0,6,4359046.1
+GOV30483,03/05/2022,Contractor_041,Agriculture,hospital project,North,4127383.0,0,9,
+GOV30145,2024/02/14,Contractor_057,Transport,Rural Electrification,West,192864.42,0,3,578593.27
+GOV30091,12/29/24,Contractor_037,Energy,,North,658603.68,14779.74,8,5150591.49
+GOV30381,2024-08-08,,Infrastructure,Rural Electrification,South,2336224.0,83994.1,11,24774528.91
+GOV30219,08/26/23,contractor_078,Education,Rural Electrification,North,2741988.44,0,4,10967953.78
+GOV30044,0000-00-00,Contractor_093,Energy,Water Supply,East,622848.33,47808.43,6,3450239.38
+GOV30574,2024/09/26,Contractor_049,Transport,Rural Electrification,Central,913965.5,67578.37,5,"$4,231,935.64"
+GOV30330,"December 22, 2023",Contractor_014,Defense,Water Supply,North,580250.5,0,6,3481503.0
+GOV30340,2022/10/25,Contractor_100,Agriculture,Rural Electrification,West,1850751.23,0,TBD,5552253.69
+GOV30289,29-11-2022,Contractor_040,Infrastructure,School Building,East,1431118.3,0,7,10017828.09
+GOV30615,04/20/23,Contractor_099,Infrastructure,School Building,Central,1490643.97,126443.8,11,15006201.88
+GOV30129,10/05/23,Contractor_080,N/A,Public Transport,Central,108653.53,8994.47,11,1096249.71
+GOV30352,invalid,Contractor_055,Defense,Road Construction,Central,1121929.33,75495.52,12,
+GOV30489,12/13/2022,CONTRACTOR_025, Health,Rural Electrification,East,-1336317.4087932329,0,1,1336317.41
+GOV30294,2024/03/30,Contractor_008,Infrastructure,Rural Electrification,East,1757784.46,0,8,14062275.72
+GOV30214,2023-09-09,Contractor_083, Education,Public Transport,West,1009254.85,0,5,5046274.23
+GOV30286,2022/10/18,Contractor_037,Education,Hospital Project,North,2118762.81,0,9,19068865.25
+GOV30346,"November 02, 2024",Contractor_054,Education,,South,297021.33,0,8,2376170.64
+GOV30061,invalid,Contractor_064,Energy,Unknown,North,519614.15,0,12,6235369.83
+GOV30537,2024/03/24,Contractor_068,Energy,Road Construction,  South  ,1694289.93,33863.38,3,"$4,981,279.64"
+GOV30512,02/13/2022,Contractor_094,Energy,Public Transport,Central,550079.99,0,6,3300479.96
+GOV30156,04 May 2024,Contractor_046,transport,School Building,East,525774.67,0,12,
+GOV30477,12/15/2024,Contractor_057,Energy,school building,North,209062.22,0,6,1254373.32
+GOV30263,02/20/2024,Contractor_095,Energy,Public Transport,Central,214685.96,0,-1,214685.96
+GOV30668,02/17/2024,Contractor_093,Infrastructure,Water Supply,East,422241.36,,2,"$844,482.72"
+GOV30680,"June 16, 2024",Contractor_059,Infrastructure,Hospital Project,North,3134214.01,"$240,777.37",6,17360619.79
+GOV30043,"December 09, 2023",  Contractor_038  ,Health,Public Transport,South,485711.39,0,3,1457134.18
+GOV30669,"September 06, 2024",Contractor_087,Infrastructure,Water Supply, Central,-255846.62072072682,0,5,1279233.1
+GOV30261,"March 25, 2024",Contractor_074,Health,Water Supply,East,,0,9,310159.5
+GOV30137,10/23/2023,Contractor_076,Education,Public Transport,North,425610.33,0,1,425610.33
+GOV30408,2023-08-23,Contractor_061,Agriculture,Public Transport,East,822946.52,0,9,7406518.64
+GOV30034,2024-05-01,Contractor_055,Energy,hospital project,North,2453086.95,12591.43,2,4880991.05
+GOV30514,0000-00-00,,Education,School Building,East,147128.54,9390.48,3,413214.2
+GOV30145,2024/02/14,Contractor_057,Transport,Rural Electrification,West,192864.42,0,3,578593.27
+GOV30639,2023-11-14,CONTRACTOR_057,Agriculture,Hospital Project,North,5419993.71,0,2,10839987.41
+GOV30497,07/19/2024,Contractor_082,Health,,North,523771.24,49643.54,6,2844766.21
+GOV30694,2023/07/04,Contractor_042,Transport,School Building,East,551561,0,5,2757804.03
+GOV30078,"June 24, 2023",Contractor_100,Energy,Public Transport,East,1236738.98,0,10,"$12,367,389.81"
+GOV30667,"November 14, 2022",Contractor_010,Defense,Public Transport,North,1031396.43,0,-,11345360.71
+GOV30171,18 Nov 2023,Contractor_057,Energy,Hospital Project,North,9792349.06,574025.84,2,-18436646.444672678
+GOV30688,04/03/22,Contractor_059,Education,School Building,Central,441040.91,0,5,2205204.55
+GOV30249,07-09-2022,Contractor_068,Agriculture,Rural Electrification,Central,2556416.1,126589.62,6,14578958.87
+GOV30217,TBD,Contractor_028,Energy,Public Transport,Central,431854.29,0,12,5182251.44
+GOV30267,2023-12-03,Contractor_085, Agriculture,Public Transport,East,801622.63,6185.57,10,7954370.62
+GOV30368,26 Jul 2024,Contractor_036,Transport,Public Transport,South,429458.72,0,10,4294587.18
+GOV30656,04/03/2022,,Defense,Rural Electrification,  South  ,2502477.12,81870.27,4,9682427.41
+GOV30457,2024-09-23,  Contractor_053  ,Education,Rural Electrification,West,1651293.76,,2,3302587.52
+GOV30268,"October 09, 2024",Contractor_091,Defense,Rural Electrification,West,1155994.59,79969.02,11,11836281.28
+GOV30405,09/04/24,Contractor_078,Infrastructure,Rural Electrification,North,1937407.36,0,11,21311481.0
+GOV30201,"February 11, 2022",Contractor_051,Education,School Building,North,1765886.52,0,6,10595319.11
+GOV30236,2024-12-08,Contractor_005,Agriculture,Water Supply,West,740118.87,0,12,8881426.5
+GOV30390,26-01-2022,Contractor_027,Transport,Hospital Project,North,2592862.77,$0.00,4,10371451.07
+GOV30067,01/11/2023,Contractor_098,Agriculture,Water Supply,South,509040.09,0,7,3563280.61
+GOV30080,2024/01/17,Contractor_076,Defense,School Building,Central,1897570,107519.53,unknown, 21480610.334990047 
+GOV30451,2024/05/05,Contractor_040,  Education  ,SCHOOL BUILDING,West,1492673.07,0,6,8956038.43
+GOV30659,10/29/2023,Contractor_041,Education,Rural Electrification,East,2783199.86,3327.57,10,27798722.83
+GOV30675,11/22/24,Contractor_002, Health,Rural Electrification,South,274083.41,0,6,1644500.44
+GOV30302,03/08/2024,Contractor_088,,Water Supply,West,102813.32,10223.33,unknown,185179.98
+GOV30207,19-02-2022,Contractor_011,None,Rural Electrification,North,729082.85,0,1,729082.85
+GOV30671,02/18/24,Contractor_022,Energy,Hospital Project,West,646466.61,0,5,3232333.03
+GOV30326,09/16/24,Contractor_006, Defense,HOSPITAL PROJECT,South,3944601.14,172863.71,11,41489111.72
+GOV30638,05/24/2022,Contractor_100,Health, Rural Electrification,East,1557990.5,0,10,15579904.99
+GOV30646,2022-03-25,Contractor_048,Transport,Road Construction,East,1116876.1,17716.5,10,10991596.02
+GOV30331,04/22/2022,Contractor_100,Transport,Hospital Project,South,5646031.84,224506.74,4,21686100.4
+GOV30615,04/20/23,Contractor_099,Infrastructure,School Building,Central,1490643.97,126443.8,11,15006201.88
+GOV30322,"February 08, 2022",  Contractor_069  ,Health,  School Building  ,North,1285849.26,0,12,15430191.08
+GOV30306,02-05-2022,Contractor_078,Defense,School Building,East,152239.76,0,10,1522397.55
+GOV30025,27 Nov 2023,Contractor_061,,School Building,Unknown,1276858.4,0,4,5107433.59
+GOV30568,"January 02, 2022",Contractor_087,Health,Road Construction,,2331204.61,0,7,16318432.28
+GOV30486,04/19/2024,Contractor_039,Agriculture,Rural Electrification,Central,446202.19,0,3,1338606.58
+GOV30173,,Contractor_013,Education,School Building,West,138618.02,8075.8,2,261084.44
+GOV30607,2022-07-11,Contractor_099,Defense,,North,354471.17,0,8,2835769.35
+GOV30211,02-01-2023,Contractor_089,Energy,Water Supply,Central,,0,1,395484.85
+GOV30519,2023-09-22,Contractor_038,Education,Water Supply,East,436622.63,0,5,2183113.17
+GOV30016,2023-02-09,Contractor_078,  Transport  ,School Building,North,1317361.31,,1,1313333.99
+GOV30569,21 Mar 2022,Contractor_051,Defense,Water Supply,South,290667.77,10072.34,10,
+GOV30243,N/A,Contractor_027,Transport,School Building,Central,,,9,12608954
+GOV30554,16 Jan 2024,Contractor_079,Agriculture,Water Supply,Central,525699.23,11201.74,8,4115979.87
+GOV30375,04/17/22,Contractor_008,Infrastructure,Rural Electrification,North,1565138.58,0,11,17216524.43
+GOV30181,05/28/2022,Contractor_088,Health,Hospital Project,Central,8211076.36,0,12,98532916.36
+GOV30033,2024-13-45,Contractor_012,Defense,Rural Electrification,South,597397.25,0,2,1194794.5
+GOV30104,2022-01-08,Contractor_030,,Hospital Project,South,5618336.2,0,2,11236672.41
+GOV30335,07 Oct 2023,Contractor_071,Infrastructure,,West,1458908.45,68733.36,1,1390175.09
+GOV30652,24 Sep 2023,Contractor_072,Transport,School Building,,440227.17,0,12,5282726.05
+GOV30599,"December 17, 2022",Contractor_082,Energy,Water Supply,East,717503.63,0,1,717503.63
+GOV30209,"April 15, 2024",Contractor_034,Agriculture,Rural Electrification,Central,202486.68,0,9,1822380.09
+GOV30455,2024/12/10,Contractor_095,agriculture,PUBLIC TRANSPORT,East,1493794.08,0,11,16431734.84
+GOV30264,"November 12, 2023",Contractor_018,Education,School Building,South,269157,4180.84,2,-529951.987104728
+GOV30179,01/25/24,Contractor_055,Transport,Public Transport,North,207945.45,0,5,1039727.25
+GOV30029,09/20/2023,Contractor_035,EDUCATION,hospital project,East,3956159.73,0,12,47473916.79
+GOV30095,2024-08-11,Contractor_025,Health,Water Supply,East,536664,0,6,3219986.32
+GOV30526,"December 19, 2022",contractor_043,Energy,School Building,North,842594.76,0,9,-7583352.879683488
+GOV30197,2024-03-10,Contractor_056,Agriculture,Rural Electrification,East,1652138.08,0,12,"$19,825,657.00"
+GOV30492,09/24/2024,Contractor_086,Defense,Water Supply,East,239446.71,0,9,2155020.42
+GOV30111,13-01-2022,Contractor_054,energy,Water Supply,East,603016.55,0,3,1809049.64
+GOV30135,27 Oct 2024,Contractor_043,Health,Water Supply,East,143947.39,6506.9,3,412321.47
+GOV30309,08/12/2024,Contractor_051,Energy,Public Transport,Central,979836.36,66519.58,9,8219851.05
+GOV30695,2022/05/26,  Contractor_015  ,Defense,water supply,East,590998.06,0,11,6500978.61
+GOV30102,"July 16, 2022",Contractor_025,Transport,Water Supply,Central,457008,20842.69,3,1308495.25
+GOV30149,16 May 2024,contractor_021,Health,HOSPITAL PROJECT,East,"$5,534,623.65",0,10,55346236.46
+GOV30186,08/03/2022,Contractor_017,Agriculture,Water Supply,,"$27,383.12",2141.82,4,100965.18
+GOV30220,09/18/22,Contractor_052,Defense,Water Supply,South,200674.65,0,4,802698.59
+GOV30280,19-02-2022,Contractor_092,Defense,Hospital Project,Central,-1075888.7327747429,0,3,3227666.2
+GOV30279,04/03/22,Contractor_019,Defense,School Building, East,1770326.12,0,6,10621956.7
+GOV30481,invalid,Contractor_080,Infrastructure,Hospital Project,East,1660918.49,$0.00,10,16609184.86
+GOV30480,12/02/24,Contractor_065,Agriculture,Hospital Project,Central,9581628.41,0,7,67071398.89
+GOV30510,2024-03-16,Contractor_056,Energy,Public Transport,Central,438029.7,$0.00,1, 438029.7018542798 
+GOV30123,2022/09/29,Contractor_069,Agriculture,,South,1823214.96, 0 ,,10939289.79
+GOV30616,04 Jan 2023,,Education,Water Supply,West,607927.92,7259.57,4,2402673.37
+GOV30441,14-11-2022,Contractor_060,Agriculture,Public Transport,west,1311042.28,0,4,5244169.13
+GOV30160,2024-11-10,Contractor_076,Defense,Public Transport,Central,987474.4,0,10,9874743.96
+GOV30429,2024-10-29,,Transport,water supply,South,236801.32,-,10,2368013.18
+GOV30609,2023/02/21,Contractor_042,Health,Water Supply,West,364841.02,0,, 2918728.143170667 
+GOV30679,12 May 2023,Contractor_082,Energy,Public Transport,central,494191.54,0,4,1976766.16
+GOV30651,10/06/2024,  Contractor_017  ,Transport,  ,East,6500835.95,639079.68,5,
+GOV30258,04 Apr 2022,Contractor_062,Agriculture,School Building,West,"$1,302,199.25",0,8,10417593.97
+GOV30202,09/02/2024,Contractor_060,Defense,Hospital Project,West,6512492.27,328886.44,3,18550817.51
+GOV30681,2022/08/01,contractor_034,Defense,Hospital Project,south,9702751.58,0,2,19405503.15
+GOV30670,"August 26, 2024",Contractor_075,Agriculture,School Building,East,912101.25,67799.58,8,"$6,754,413.35"
+GOV30462,03-07-2024,Contractor_065,Education,School Building,Central,"$170,581.85",0,3,-511745.5462153066
+GOV30241,2023/07/07,Contractor_055,Defense,Water Supply,South,654912.82,54602.28,3,1800931.62
+GOV30297,08-01-2024,Contractor_037,null,Road Construction, East,717107.55,26822.84,1,690284.71
+GOV30107,03/14/23,  Contractor_027  ,Education,Rural Electrification,East, 2395130.4963834123 ,0,8,19161043.97
+GOV30356,08-07-2024,Contractor_053,education,Hospital Project,West,7292335.6,0,2,14584671.21
+GOV30649,"April 07, 2022",Contractor_009,  Health  ,Road Construction,East,3804958.85,,2,7248173.67
+GOV30586,18-05-2022,Contractor_029,Infrastructure,Hospital Project,South,3071215.54,0,3,9213646.62
+GOV30314,07/08/22,Contractor_047,Infrastructure,Public Transport,North, 173158.4645933165 ,0,5,865792.32
+GOV30282,2022/06/12,Contractor_094,Health,null,  East  ,453536.34,0,12.0,5442436.1
+GOV30632,05/05/2022,Contractor_079,Transport,Public Transport,North,420887.73,0,3,1262663.18
+GOV30203,2024/10/27,Contractor_042,Infrastructure,Water Supply,East,341293.7,-,10,3214358.37
+GOV30142,02/13/22,Contractor_089,Health,Rural Electrification,North,556968.09,36737.34,4,
+GOV30189,"June 17, 2024",Contractor_079,Health,Public Transport,Central,331816.91,0,6,1990901.49
+GOV30063,"March 12, 2024",  Contractor_066  ,Health,hospital project,East,9244048.31,886981.01,1,8357067.31
+GOV30663,01/29/23,Contractor_065,Health,Public Transport,South,739875.39,0,9,6658878.54
+GOV30693,06/28/2023,Contractor_063,Infrastructure,Hospital Project,West,N/A,25710.25,1,2977897.47
+GOV30600,11 Nov 2024,Contractor_018,Infrastructure,Public Transport,EAST,627287.57,0,1,627287.57
+GOV30423,"July 03, 2022",contractor_073,Agriculture,HOSPITAL PROJECT,,1605311.32,$0.00,3,4815933.96
+GOV30389,"April 22, 2022",Contractor_039,Defense,Hospital Project,East,6335924.09,502185.9,3,17501214.55
+GOV30612,10/17/2022,Contractor_089,Defense,Rural Electrification,South,,0,12,11254749.89
+GOV30078,"June 24, 2023",Contractor_100,Energy,Public Transport,East,1236738.98,0,10,"$12,367,389.81"
+GOV30636,"June 05, 2022",Contractor_018,Defense,Public Transport, South,1119850.27,0,3,3359550.81
+GOV30364,2024-10-10,Contractor_028,,Road Construction,North,3154631.17,0,2,6309262.34
+GOV30370,2022-06-02,Contractor_005,Defense,Hospital Project,South,1476357.66,0,-8,11810861.25
+GOV30431,0000-00-00,contractor_045,Agriculture,Public Transport,West,1379097.44, 0 ,3,4137292.33
+GOV30470,11 Mar 2023,Contractor_020,Infrastructure,Hospital Project,North,4758939.39,0,5,23794696.94
+GOV30388,19-03-2024,Contractor_096,Education,Water Supply,West,561620.75,0,11,6177828.24
+GOV30065,"June 02, 2022",Contractor_020,Agriculture,Hospital Project,North,4445598.05,0,5,22227990.27
+GOV30349,11/23/22,N/A,Health,Water Supply,West,685745.1,35070.98,2,1301348.24
+GOV30521,"February 04, 2022",Contractor_046,Infrastructure,School Building,North,1347515.6,0,2,2695031.2
+GOV30595,20-09-2023,Contractor_093,Health,Road Construction,West,null,0,6,5850710.44
+GOV30444,01 Jun 2024,Contractor_061,Defense,Road Construction,North,1173635.26,0,1,1173635.26
+GOV30223,26-01-2024,Contractor_012,Transport,Public Transport,South,978678.57,0,12,11744142.84
+GOV30421,2022-08-03,Contractor_021,Health,Hospital Project,,"$4,895,202.20",293323.9,12,"$55,222,539.62"
+GOV30056,"December 23, 2022",  Contractor_037  ,Agriculture,Water Supply,South,563865.34,47263.21,8,4132817.1
+GOV30374,31 May 2022,Contractor_013,Education,Water Supply,North,183231.55,0,3,549694.66
+GOV30427,2023-11-24,Contractor_027,,Water Supply,  South  ,210517.77,0,11,2315695.49
+GOV30410,2022-05-11,Contractor_048,Education,Public Transport,North,197426.89,0,6,1184561.33
+GOV30064,05/05/23,Contractor_033,Infrastructure,Rural Electrification,east,2685310.93,263275.08,4.0,9688143.38
+GOV30551,"February 26, 2024",,Defense,Hospital Project,Central,3796933.14,0,9,34172398.29
+GOV30090,2024/03/08,None,Transport,School Building,Central,1159861.94,82606.92,7,7540785.19
+GOV30597,14 Jul 2024,Contractor_015, Agriculture,Rural Electrification,South,1872355.36,0,12,22468264.3
+GOV30122,01/11/22,Contractor_018,Defense,Water Supply,West,249141.69,0,7,1743991.84
+GOV30588,20-02-2024,Contractor_037,Defense,Water Supply,North,239745.73,,7,1678220.09
+GOV30198,2022/05/29,CONTRACTOR_080,Agriculture,School Building,West,1064419.35,0,6,6386516.12
+GOV30159,28 Jan 2022,Contractor_042,Education,Hospital Project,North,5155070.68,0,2,10310141.35
+GOV30465,21-07-2023,Contractor_065,Infrastructure,Water Supply,Central,373251.61,26953.44,6,2077789.04
+GOV30004,03/21/2024,Contractor_065,Defense,Public Transport,Central,1135977.61,0,7,7951843.3
+GOV30483,03/05/2022,Contractor_041,Agriculture,hospital project,North,4127383.0,0,9,
+GOV30218,2024-06-15,Contractor_073,Defense,Hospital Project,North,1492652.94, 2519.0641719789473 ,7,10430937.13
+GOV30689,13 Mar 2024,Contractor_083,Transport,Hospital Project,Central,2061732.48, 0 ,-2,4123464.96
+GOV30525,05/19/24,Contractor_050,Transport,School Building,,640311.57,10137.83,5,3150868.68
+GOV30096,"November 27, 2024",Contractor_019, Health,School Building,Central,N/A,0,11, 8528781.208895972 
+GOV30068,"July 05, 2022",Contractor_065,Education,Public Transport,North,1167934.47,0,4,
+GOV30491,10/19/23,Contractor_051,Infrastructure,Rural Electrification,South,1001067.53,0,9,"$9,009,607.74"
+GOV30313,,Contractor_093,Health,School Building,South,803060,72584.73,-2,-
+GOV30687,02/10/24,Contractor_076,Agriculture,Hospital Project,West,1638282,0,6,9829694.78
+GOV30416,01/08/24,Contractor_077,Energy,Road Construction,East,3763490.61,93135.59,4,14681420.06
+GOV30589,"August 17, 2023",,Defense,Public Transport,south,178243.39,0,5,891216.95
+GOV30657,"July 28, 2024",Contractor_010,Health,Hospital Project,East, 5433937.705087395 ,0,8,43471501.64
+GOV30153,30-03-2023,Contractor_083,Transport,Public Transport,Central,239474.43,0,6,1436846.58
+GOV30332,"June 18, 2024",Contractor_060,Transport,Rural Electrification,Central,2983093,0,10,29830930.71
+GOV30476,25-10-2023,Contractor_057,,Road Construction,East,3448211.58,0,5,-17241057.906615034
+GOV30350,"July 23, 2024",,,Rural Electrification,East,,0,11,5379846.31
+GOV30683,2022-11-12, Contractor_024,  Health  ,Hospital Project,Central,2552250.08,79251.54,12,"$29,675,982.49"
+GOV30437,2022/05/02,,Education,School Building,South,1688474,0,5,8442370.51
+GOV30436,2022-07-10,,Agriculture,School Building,North, 1641755.8927331052 ,113252.97,5,7642514.6
+GOV30596,2024-13-45,Contractor_095,Agriculture,  School Building  ,Central,1643875.92,0,11,"$18,082,635.14"
+GOV30205,05/19/22,Contractor_057,Agriculture,Rural Electrification,West,982439.28,0,7,6877074.93
+GOV30231,12/01/2023,Unknown,Agriculture,Public Transport,south,1183391.54,0,8,9467132.32
+GOV30109,2022-07-14,Contractor_092,Infrastructure,Public Transport,West,1084457.46,93236.55,1,991220.92
+GOV30333,0000-00-00,Contractor_042,Agriculture,Hospital Project,South,8974324.23,0,11,
+GOV30608,"December 30, 2022",  Contractor_042  ,Agriculture,Road Construction,North,1695401.87,"$76,131.04",11,17811979.15
+GOV30304,2022/12/26,Contractor_100,HEALTH,,West,253728.34,0,10, 2537283.4265772062 
+GOV30178,03/14/22,Contractor_034,Defense,Public Transport,Central,971407.18,0,7,6799850.29
+GOV30409,11/03/24,Contractor_093,Infrastructure,Public Transport, Central,721566.45,0,11,7937230.92
+GOV30560,2023-09-21,Contractor_022,Transport,Road Construction,Central,3917395.3,0,6,"$23,504,371.82"
+GOV30005,2024-01-08,Contractor_067,Agriculture,Rural Electrification,North,2692987.15,null,4,10771948.61
+GOV30433,12/10/23,Contractor_069,Transport,Public Transport,West,1423197.58,141133.24,,12820643.32
+GOV30071,20 Nov 2024,Contractor_097,Education,Public Transport,West,1108971.07,0,2,2217942.13
+GOV30347,"July 11, 2022",Contractor_075,Health,  School Building  ,West,482370.04,0,10,
+GOV30405,09/04/24,Contractor_078,Infrastructure,Rural Electrification,North,1937407.36,0,11,21311481.0
+GOV30682,29-11-2022,Contractor_014,Health,School Building,East,590832.33,0,11,6499155.61
+GOV30088,28-01-2022, Contractor_038,Energy,Rural Electrification,South,"$1,196,092.92",0,3,3588278.77
+GOV30700,"April 12, 2023",Contractor_023,Energy,School Building,Central,1628504.68,0,8,13028037.41
+GOV30371,2024/08/20,Contractor_007,Transport,School Building,  Central  ,330093.5,0,6,1980561.0
+GOV30260,2022/11/16,Contractor_047,Infrastructure,Rural Electrification,West,1485665.02,0,,13370985.18
+GOV30454,2024/06/07,  Contractor_026  ,Agriculture,WATER SUPPLY,North,46507.74,4429.34,8,336627.25
+GOV30581,2023-12-09,Contractor_066,Education,Road Construction,South,2917563.58,0,,26258072.18
+GOV30646,2022-03-25,Contractor_048,Transport,Road Construction,East,1116876.1,17716.5,10,10991596.02
+GOV30193,10/30/2022,Contractor_089,Education,Rural Electrification,North,1284429.18,0,10,12844291.82
+GOV30593,2024-03-06,Contractor_014,infrastructure,Water Supply,West,389820.61,0,6,2338923.65
+GOV30634,2024-04-12,Contractor_052,Energy,Water Supply,West,170952.47,13587.27,2,"$314,730.42"
+GOV30402,06/10/2024,Contractor_099,Health,Hospital Project,West,1112750.66, 0 ,2,2225501.32
+GOV30099,11/05/2022,Contractor_039, Health,Public Transport,  West  ,"$1,357,926.95",51792.9,4,5224536.19
+GOV30052,08/07/24,Contractor_031,Health,Water Supply,East,585396.2,0,-8,4683169.62
+GOV30328,2023/07/03,Contractor_037,Energy,Rural Electrification,Central,2065823.85,22022,1,2043801.38
+GOV30150,2024-07-09,Contractor_095,Infrastructure,,East, 2858480.333805826 ,0,11,31443283.67
+GOV30244,06/09/2024,Contractor_023,  Defense  ,Rural Electrification,North,2063816.56,0,6,12382899.35
+GOV30357,05/14/24,Contractor_059,Education,  Hospital Project  ,West,6807891.95,0,6,-
+GOV30323,2023-06-06,Contractor_053,Energy,Water Supply,North,417681.3,0,1,
+GOV30105,07/25/22,Contractor_065,Defense,ROAD CONSTRUCTION,South,1576340.89,"$70,980.54",7,10537522.48
+GOV30152,25-01-2022,Contractor_084,  ,School Building,South,115743.35,,6,694460.11
+GOV30190,20 Jul 2024,Contractor_020,education,,North,788348.28,33095.98,null,null
+GOV30184,"May 20, 2023",Contractor_054,Education,Hospital Project,South,7768903.93,0,12,93226847.13
+GOV30108,"October 01, 2023",Contractor_007,Transport,Rural Electrification,West,2331514,0,12,27978173.83
+GOV30524,06/23/2023,Contractor_036,Education,Rural Electrification,  Central  ,1651925.04,0,11,18171175.41
+GOV30138,05 Apr 2023,Contractor_003,Education,Public Transport,  ,649849.02,0,8,5198792.19
+GOV30239,08/03/2024,contractor_069,Health,Public Transport,South,838650.74,0,2,1677301.48
+GOV30501,"June 12, 2022",Contractor_065,Transport,Rural Electrification,South,2341351.76,0,10,23413517.55
+GOV30400,2024-03-07,Contractor_014,Defense,Hospital Project,East,,28597.1,7,23801817.06
+GOV30140,18 Feb 2022,Contractor_038,Agriculture,School Building,West,-1999203.7148995046,92208.8,12,22883938.92
+GOV30266,06/05/2023,Contractor_013,Health,,East,482945.23,0,12, 5795342.758256959 
+GOV30617,05/23/24,Contractor_052,Transport,Public Transport,NORTH,191358.76,0,2,382717.52
+GOV30369,08/25/24,Contractor_017,Energy,Water Supply,Central,560718.13,41282.9,1,519435.24
+GOV30496,2022/04/17,Contractor_045,Health,Hospital Project,  East  ,"$675,333.70",47493.7,3,1883519.99
+GOV30191,"November 25, 2023",Contractor_015,Health,water supply,Central,266551.76,0,1,266551.76
+GOV30131,"May 17, 2022",Contractor_019,Agriculture,Road Construction,West,4707401.74,0,12,56488820.88
+GOV30338,"June 15, 2024",Contractor_066,Transport,Road Construction, East,629478.31,0,8,5035826.48
+GOV30310,11/03/24,Contractor_062,Transport,Rural Electrification,  North  ,,6484.34,7,2263550.37
+GOV30276,24-05-2022,Contractor_055,Infrastructure,School Building,South,N/A,,6,10962592.18
+GOV30151,05/30/2023,Contractor_058,Health,Rural Electrification,North,890161.76,69159.19,10,8210025.75
+GOV30449,23-06-2024,Contractor_094,Defense,Unknown,North,842705.12,0,7,5898935.86
+GOV30182,06/08/2023,Contractor_075,Infrastructure,  School Building  ,Central,1735203.11,0,7,
+GOV30404,12/05/22,Contractor_065,Agriculture,Public Transport,East,1158903.45,0,10,11589034
+GOV30237,03/27/22,Contractor_029,  Education  ,Rural Electrification,WEST,369534.49,15069.78,,1063394.13
+GOV30213,2024/05/26,Contractor_088,Infrastructure,Rural Electrification,West,809616,0,,7286544.0
+GOV30640,02/07/2023,Contractor_052,Education,Road Construction,South,1087185.65,0,5,5435928.27
+GOV30020,07/01/22,Contractor_007,Health,Public Transport,West,746070.5,0,8,5968564.02
+GOV30270,14 Aug 2023,Contractor_094,Education,Road Construction,South,931694.34,24976.39,5,4533589.74
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,

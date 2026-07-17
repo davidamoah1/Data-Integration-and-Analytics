@@ -1,0 +1,857 @@
+Transaction ID,Date,Student Name,Department,Program Type,Region,Tuition,Discount,Quantity,Payment,Payment Method
+TXN10049,21-03-2024,Student_0009,Arts,Diploma,North,4086.65,0,1,4086.65,Bank Transfer
+TXN10634,03/25/22,student_0262,Business,Certificate,West,676.01, 0 ,3,2028.02,Loan
+TXN10069,03/04/24,Student_0794,Sciences,Certificate,  East  ,1810,0,3,5430.51,Loan
+TXN10653,02/18/22,Student_0107,Arts,Graduate,West,19330.97,967.37,4,73454.37,Cash
+TXN10764,09/12/2024,student_0192,Arts,Undergraduate,East,9916.44,1585.44,5,41655.01,Loan
+TXN10012,10-03-2024,Student_0466,Sciences,Certificate,Central,1034.37,0,2,"$2,068.74",  Loan  
+TXN10312,07/22/2024,Student_0634,Sciences,Graduate,South,12462.83,0,2,24925.66,Cash
+TXN10277,11/22/22,  Student_0394  ,Medicine,PhD,West,24219.5,0,5,121097.49,Cash
+TXN10726,2023/10/29,Student_0176,Law,,Central,18578.48,0,2,37156.96,Bank Transfer
+TXN10088,22-10-2022,Student_0736,Law,Undergraduate, West,3539.22,991.29,4,10191.71,Credit Card
+TXN10542,12/24/2022,Student_0633,Education,PhD,South,30734.71,667.17,-,60135.08,Credit Card
+TXN10387,05/14/2022,Student_0266,Business,Diploma,East,4469.27,0,1,4469.27,Credit Card
+TXN10193,04 May 2024,Student_0766,Medicine,Graduate,West,14509.9,,3,43529.69,Bank Transfer
+TXN10611,15 Nov 2023,Student_0363,Business,PhD,Central,33656.87,0,3,100970.61,Credit Card
+TXN10149,05/08/22,Student_0679,Medicine,Undergraduate,East,3860.19,440.32,1,3419.87,  Bank Transfer  
+TXN10338,11 Aug 2023,Student_0165,Arts,Certificate,North,,0,4,10601.86,Scholarship
+TXN10503,05/23/22,Student_0098,Engineering,Certificate,East,2739.57,0,3,8218.72,Scholarship
+TXN10029,"August 10, 2022",Student_0027,Business,PhD,West,27117.85,$0.00,2,54235.71,Cash
+TXN10594,10/08/23,Student_0691,Arts,Diploma,Central,1873.91,0,,5621.74,Loan
+TXN10504,2022-07-30,, Sciences,Certificate,West,2622,0,3,7865.04,Loan
+TXN10203,24-06-2022,Student_0216,Business,Diploma,West,2054.56,209.05,5,9227.52,Credit Card
+TXN10539,2022/04/27,Student_0112,Law,PhD,East,31584.79,981.34,6,183620.71,Loan
+TXN10496,11/26/2022,,Business,Undergraduate,Central, 9186.027696573467 ,0,6,55116.17,Loan
+TXN10438,24 May 2024,Student_0173,ENGINEERING,Diploma,South, 4552.4301270749165 ,0,4,18209.72,Bank Transfer
+TXN10421,28-05-2022,Student_0140,Sciences,PhD,,24273.02,1016.49,5,116282.7,Scholarship
+TXN10664,30 Sep 2022,Student_0543,Sciences,Certificate,South,2880.94,0,3,8642.81,Scholarship
+TXN10096,27-10-2022,Student_0044,Law,Diploma,West,3944.36,1812.37,3,6395.97,Loan
+TXN10784,09 Apr 2024,Student_0331,None,Diploma,North,2584.93,0,4,10339.73,Credit Card
+TXN10337,2024/12/27,Student_0630,Law,Graduate,North,19545.4,1535.97,3,54028.29,Credit Card
+TXN10579,06/13/2023,Student_0479,Medicine,Diploma,South,5234.36,0,5,26171.8,Cash
+TXN10165,07/08/2024,Student_0172,Education, Certificate,  West  ,2285.76,0,1,2285.76,Loan
+TXN10099,08-08-2022,Student_0292,Law,Graduate,South,19545.58,0,1,19545.58,Scholarship
+TXN10382,"May 17, 2024",  -  ,Business,Diploma,,5022.97,0,2,10045.93,Scholarship
+TXN10493,2024/03/13,Student_0781,Medicine,PhD,East,18169,0,5,90844.37,Cash
+TXN10255,02 Dec 2024,Student_0628,Business,PhD,Central,18034.16,0,1,18034.16,Bank Transfer
+TXN10641,"November 28, 2023",Student_0363,Law,diploma,East,1841.71,368.05,3,4420.96,Bank Transfer
+TXN10178,2024-02-04,Student_0330,Sciences,,North,2913.32,0,5,-14566.598001625414,Scholarship
+TXN10792,2023-01-08,Student_0732,Medicine,Undergraduate,South,10400.31,0,3,31200.94,Loan
+TXN10422,09/12/22,Student_0580,Sciences,PhD,East,24791.02,0,4,99164.09,Scholarship
+TXN10076,"October 20, 2024",,Sciences,Graduate,South,,0,1,15667.42,Cash
+TXN10274,22 Aug 2024,student_0052,  Engineering  ,Graduate,South,11736.53,1806.04,1,9930.49,Credit Card
+TXN10380,10/18/2023,Student_0423,Medicine,Undergraduate,  North  ,11650.11,0,3,34950.33,Loan
+TXN10010,04/13/2024,STUDENT_0097,Business,Certificate,West,"$1,848.08",1502.03,2,$692.10,Credit Card
+TXN10002,2023-11-21,Student_0095,Education,Undergraduate,East,10252.37,0,3,30757.12,Loan
+TXN10059,07-06-2023,Student_0157,Arts,CERTIFICATE,NORTH,2569,0,3,7705.64,Loan
+TXN10577,27 Jan 2023,Student_0774,Business,Undergraduate,East,8741.51,0,3,26224.53,Bank Transfer
+TXN10223,2024-13-45,Student_0044,Engineering,Undergraduate,Central,11281.69,1416.46,5,49326.16,Bank Transfer
+TXN10238,07 Jul 2022,Student_0634,Law,Certificate,  North  ,1990.53,0,2,-3981.0614196580627,Bank Transfer
+TXN10095,20-05-2023,Student_0572,Law,PhD,East,30439.8,0,5,152198.98,Credit Card
+TXN10500,N/A,Student_0331,Medicine,PhD,South,31533.73,0,4,126134.91,Cash
+TXN10713,01-11-2023,Student_0482,Arts,Certificate,Central,1661.27,0,3,4983.8,Scholarship
+TXN10564,06/01/23,Student_0319,Business,None,North,6628.76,0,1,6628.76,Bank Transfer
+TXN10648,31-05-2024,STUDENT_0512,Business,Certificate,East,2618.16,0,3,7854.49,Cash
+TXN10155,09-05-2023,Student_0547,Medicine,  Certificate  ,South,1393.58,0,2,2787.16,Bank Transfer
+TXN10341,04/25/22,Student_0547,Business,Undergraduate,West,4926.98,694.19,3,12698.38,Scholarship
+TXN10180,03/18/22,Student_0656,Business,,North,,0,1,16808.92,Loan
+TXN10204,19 Aug 2023,Student_0069,Law,Graduate,East,17595.92,1734.05,6,"$95,171.21",Bank Transfer
+TXN10367,01/14/2022,Student_0486,Arts,PHD,East,31383.22,0,4,125532.86,Loan
+TXN10120,23 Jun 2022,Student_0573,Medicine,Diploma,South,5029.97,0,3,15089.92,Bank Transfer
+TXN10446,2024-09-29,Student_0542,Education,Undergraduate,East,11330.72,0,5,56653.61,Credit Card
+TXN10562,26 Jun 2023,Student_0591,Sciences,PHD,West,25247.11,0,4,100988.45,Cash
+TXN10325,2022/07/22,Student_0593,Education,Graduate,East,14007.61,,5,70038.06,Loan
+TXN10685,04-09-2022,  Student_0752  ,Arts,PhD,Central,24693.95,0,6,,Credit Card
+TXN10774,2022/02/19,null,Education,PhD,CENTRAL,21753.63,0,1,21753.63,Loan
+TXN10314,2022/10/29,Student_0579,Medicine,Diploma,North,2990.76,-1469.8124418556865,3,4562.85,Scholarship
+TXN10491,2024-03-21,Student_0384,Business,Undergraduate,East,10707.08,0,4,,
+TXN10259,"March 27, 2022",Student_0753,Education,Certificate,Central,2042.65,1438.15,2,1208.99,Scholarship
+TXN10798,2022-01-03,Student_0684,Law,PhD,  West  ,"$32,979.88",0,4,131919.51,CASH
+TXN10629,23 May 2024,Student_0027, Law,Certificate,West,-741.2585293503977,0,1,741.26,Scholarship
+TXN10710,09/06/24,STUDENT_0220,Arts,Graduate,Central,"$19,048.78",0,2,38097.56,Cash
+TXN10597,2024-10-27,Student_0614,Sciences,,Central,1525.73,0,2,3051.47,Loan
+TXN10205,10/10/23,,Arts,Certificate,West,2040.86,0,5,10204.28,Scholarship
+TXN10024,10/30/24,Student_0562,Sciences,Undergraduate,West,4200.05,0,4,16800.21,Bank Transfer
+TXN10736,21 Jul 2022,Student_0556,Medicine,Graduate,Central,10684,0,4,42734.01,Cash
+TXN10499,"October 15, 2023",Student_0111,Law,Graduate,East,13853.98,1789.14,5,60324.19,Credit Card
+TXN10254,2022-11-18,Student_0356,Engineering,Undergraduate,Central,"$5,226.53",0,4,20906.12,Cash
+TXN10295,05/04/23,  Student_0399  ,Law,Certificate,Central,973.66,0,,5841.97,Credit Card
+TXN10132,03/08/22,Student_0270,Medicine,Certificate,North,1046.35,0,3,3139.06,Loan
+TXN10160,05/09/2024,Student_0424,Arts,Undergraduate,North,5309.92,0,1,5309.92,  Scholarship  
+TXN10073,2022/11/28,Student_0205, Sciences,Diploma,West,3577.56, 707.1891188667958 ,5,14351.85,CREDIT CARD
+TXN10680,10/15/24,Student_0163,Engineering,Graduate,South,8196.67,0,3,24590.02,Scholarship
+TXN10599,2022-05-24,None,Medicine,Certificate,  West  ,2103.45,0,2,-4206.896301774579,Loan
+TXN10574,2022-09-27,Student_0430,education,Diploma,North,1967.49,0,6,11804.96,Cash
+TXN10329,2022/10/29,student_0466,Arts,Certificate,,1689.57,1285.7,4,,Bank Transfer
+TXN10383,24-05-2022,Student_0092, Medicine, Graduate,Central,18088.21,0,6,108529.26,Credit Card
+TXN10196,2024-11-18,TBD,Arts, Graduate,Central,,0,2,,  Loan  
+TXN10270,"December 06, 2022",Student_0621,Arts,Graduate,East,18088.87,unknown,6.0,103670.37,Credit Card
+TXN10034,01/10/2024,,Education,Diploma,North,3860.87,0,2,7721.73,Cash
+TXN10573,invalid,Student_0722,Medicine,Undergraduate,North,5457.25,1364.99,4,16369.03,Scholarship
+TXN10317,11-12-2024,Student_0068,Business,Certificate,North,2588.78,0,2,5177.56,Bank Transfer
+TXN10405,"November 08, 2023",Student_0645,Arts,Diploma,West,2967.36,0,2,5934.72,Cash
+TXN10721,10/03/24,Student_0537,,Certificate,West,2037.63,0,2,4075.26,Scholarship
+TXN10368,2024/11/23,Student_0699,,Graduate,North,17621.22,$944.14,4,66708.35,Bank Transfer
+TXN10007,02/12/2023,Student_0383,Medicine,Graduate,Central,18951.53,0,6,113709.2,Credit Card
+TXN10363,11/05/2024,Student_0602,Engineering,Certificate, West,903.33,1507.18,3,-1811.53,Credit Card
+TXN10162,2023-05-02,Student_0051,Arts,Undergraduate,North,4849.95,0,6,29099.73,BANK TRANSFER
+TXN10637,23-03-2022,Student_0663,Arts,Graduate,None,14961.46,1476.75,4,53938.86,Cash
+TXN10425,2022/12/11,,  Education  ,PhD,Central,17854.27,1547.71,6,97839.33,Bank Transfer
+TXN10222,07/06/2023,Student_0765,Engineering,PhD,South,26091.03,0,3,78273.09,Loan
+TXN10350,04/01/2022,Student_0512,Engineering,Graduate,West,11807.81,0,3,35423.43,Credit Card
+TXN10786,"January 07, 2022",Student_0697,Arts,Certificate,South,"$2,323.15",0,6,13938.92,Loan
+TXN10630,2023/03/31,Student_0018,Education,Undergraduate,South,11745.12,null,2,23490.24,Loan
+TXN10273,11/02/2022,student_0281,Arts,Graduate,North,11319.79,774.47,6,63271.95,Credit Card
+TXN10767,2023-05-09,Student_0488,Arts,Undergraduate,North,11312.1,0,3,33936.31,CASH
+TXN10611,15 Nov 2023,Student_0363,Business,PhD,Central,33656.87,0,3,100970.61,Credit Card
+TXN10454,09/01/22,Student_0501,Engineering,PhD,East,18206.25,558.19,6,105888.39, Scholarship
+TXN10678,10-09-2024,Student_0512,Law,Diploma,South,5816.83,0,4,23267.33,Credit Card
+TXN10072,21-04-2024,Student_0693,Business,Certificate,West,905.62,0,6,5433.71,Bank Transfer
+TXN10740,2024-11-20,Student_0509,Business,null,South,16298.85,0,2,32597.7,Scholarship
+TXN10650,21 Jun 2024,Student_0791,Engineering,PhD,North,32441.94,0,5,-162209.7094976761,Credit Card
+TXN10129,08/28/2022,Student_0383,Medicine,PhD,South,26803.37,0,1,26803.37,Bank Transfer
+TXN10261,2024-07-12,Student_0184,Engineering,Certificate,WEST,2306.62,0,4,9226.47,CASH
+TXN10616,"March 07, 2022",Student_0335,Engineering,Diploma,North,5608.42,0,5,28042.1,Loan
+TXN10237,2022/04/17,Student_0683,medicine,Diploma,,2049.64,0,2,4099.27,Cash
+TXN10028,2022/05/21,,Arts,Certificate,North,2587.28,0,3,7761.83,Scholarship
+TXN10297,2022-08-06,Student_0510,Arts,  Undergraduate  ,South,10386.65,0,5,51933.27,Loan
+TXN10239,13-02-2024, Student_0742,Education,Diploma,West,4400.91,825.17,6,21454.41,Credit Card
+TXN10596,2023/08/10,Student_0461,Medicine,PhD,North,25712.54,905.91,4,99226.52,Scholarship
+TXN10727,05/24/2023,Student_0656,None, PhD,East,30663.15,1032.33,2,59261.64,Scholarship
+TXN10334,10-03-2024,STUDENT_0587,Arts,Certificate,South,551.01,0,3,1653.02,Credit Card
+TXN10377,26 Jun 2024,Student_0285,Law,Diploma,Central,4306.15,897.02,3,10227.39,Cash
+TXN10730,26 Oct 2022,Student_0104,  Arts  ,Certificate,West,2705.96,"$1,033.94",1,1672.02,Loan
+TXN10294,2023-11-28,Student_0471,Arts,PhD,None,28636.71,0,3, 85910.14413662019 ,Credit Card
+TXN10407,06 Sep 2024,Student_0071,Education,PhD,South,33196.25,0,2,66392.5,Credit Card
+TXN10335,2023-06-28,Student_0305,Sciences,Graduate,North,15625.33,0,5,78126.65,Loan
+TXN10152,2022-06-03,Student_0067,Business,Graduate,North,10377.6,0,unknown,"$51,887.98",Loan
+TXN10485,2022-12-27,  Student_0146  ,Business,Certificate,West,635.19,1762.44,3,-3381.73,Cash
+TXN10762,09/03/24,Student_0277,Arts,Certificate,North,1257.99,0,6,7547.94,bank transfer
+TXN10467,2022/01/20,Student_0109,Business,Undergraduate,North,5235.09,0,6,31410.52,Credit Card
+TXN10426,2023/01/10,Student_0778,Medicine,Graduate,West,19381.8,0,2,38763.6, Scholarship
+TXN10290,09/24/22,Student_0673,Medicine,Graduate,South,15656.99,0,1,15656.99,Scholarship
+TXN10393,03-01-2024,Student_0598,Business,Graduate,East,17564.31,0,5,87821.54,  Bank Transfer  
+TXN10402,12 Sep 2023,Student_0787,Arts,Undergraduate,South,3344.53,0,6,,Credit Card
+TXN10668,"December 26, 2024",Student_0420,Education,Undergraduate,East,8056.99,0,2,16113.98,SCHOLARSHIP
+TXN10701,15 Apr 2024,Student_0770,Medicine,PhD,South,33738.56,1141.62,,65193.89,Loan
+TXN10750,2022-06-26,Student_0167,Education,Certificate,Central,973.25,0,5,4866.25,Scholarship
+TXN10186,"November 29, 2024",Student_0705,EDUCATION,Diploma,South,4846.31,0,6,29077.84,  Loan  
+TXN10516,30-11-2022,Student_0499,Law,,North,867.83,0,5,,Credit Card
+TXN10632,10/15/2022,Student_0493,Law,PhD,South,26115.15,0,1,26115.15,  Credit Card  
+TXN10739,2022-06-18,,Law,PhD,West,26439.95,0,3,79319.84,Cash
+TXN10270,"December 06, 2022",Student_0621,Arts,Graduate,East,18088.87,unknown,6.0,103670.37,Credit Card
+TXN10289,2022/01/18,,EDUCATION,diploma,West,2377.17,0,null,7131,Loan
+TXN10006,24 Jan 2022,student_0739,Sciences,Certificate,east,1989.72,0,5,9948.61,Credit Card
+TXN10064,03/28/22,Student_0020,  Medicine  ,Certificate,West,2259.18,0,1,,Credit Card
+TXN10672,08-02-2024,Student_0376,Business,Certificate,West,-2761.337050611544,0,6,16568.02,Credit Card
+TXN10211,11/26/2022,Student_0645,Law,Graduate,South,18000.38,0,2,36000.76,Cash
+TXN10042,11/12/22,Student_0734,Medicine,Undergraduate,West,6671.92,0,4,26687.66,Loan
+TXN10057,03-12-2024,Student_0470,  -  ,Diploma,West,1990.74,0,6.0,11944,Loan
+TXN10127,08/04/2024,Student_0415,Law,Graduate,,10926.96,0,3,32780.87,Bank Transfer
+TXN10753,"October 02, 2023",Student_0436,Medicine,  Diploma  ,East,4766.57,0,6,28599.4,Credit Card
+TXN10266,2024-12-19,Student_0496,Medicine,Certificate,East,1024.61,0,1,1024.61,Bank Transfer
+TXN10568,30-01-2023,Student_0292,Business,Diploma,East,1800.47,0,3,5401.42,  Bank Transfer  
+TXN10323,09/14/2022,Student_0134,Law,Undergraduate,  North  ,10331.17,0,N/A,-,Loan
+TXN10693,02/27/23,Student_0738,Business,PhD,Central,25221.99,0,2,50443.98,  Bank Transfer  
+TXN10079,2022/04/08,Student_0672, Sciences,Diploma,West,2639.91,0,3,7919.74,Scholarship
+TXN10670,19-10-2023,Student_0729,Arts,Diploma,,4548.18,0,6,27289.08,Bank Transfer
+TXN10364,12/21/2022,Student_0161,medicine,Graduate,West,10486.5,N/A,6,62919.02,Bank Transfer
+TXN10053,09/16/23,STUDENT_0119,Law, Certificate,West,1255.48,0,1,1255.48,Bank Transfer
+TXN10139,13 Mar 2023,Student_0767,Engineering,Graduate,SOUTH, 14366.099318560173 ,0,4,57464.4,Scholarship
+TXN10706,12/23/22,Student_0301,null,Diploma,South,"$4,759.49",0,6,28556.93,Bank Transfer
+TXN10464,07/27/2023,Student_0263,Medicine,Certificate,central,1237.24,0,3,3711.72,Loan
+TXN10796,N/A,Student_0416,Law,Certificate,West,795,456.42,3,1014.28,Cash
+TXN10511,21-02-2023,Student_0653,Law,Graduate,North,17888.82,1445.03,2,32887.59,Bank Transfer
+TXN10345,10/17/23,Student_0490, Medicine,Graduate,Central,16562.77,0,5,82813.84,Scholarship
+TXN10692,02/26/2023,Student_0778,Education,Diploma,South,3325.61,0,-4,13302.43,Loan
+TXN10372,2024/12/28,Student_0610,Law,Diploma,Central,1523.46,0,6,9140.76,Loan
+TXN10209,12/23/22,Student_0670,Law,Undergraduate,North,11715.97,0,6,70295.84,Credit Card
+TXN10717,"July 22, 2023",Student_0582,Engineering,Undergraduate,West,4700.35,1881.42,4,11275.73,Credit Card
+TXN10709,03/23/2022,Student_0208, Sciences,PhD,North,16336.38,,5,81681.89,
+TXN10078,2023/01/09,  Student_0139  ,Medicine,PhD,East,21770.95,1357.03,6,122483.48,Scholarship
+TXN10690,invalid,Student_0714,  Education  ,Certificate,North,2085.83,,4,8343.31,Credit Card
+TXN10608,"April 13, 2024",Student_0278,Education,Certificate,Central,2106.57,1260.09,1,846.48,Loan
+TXN10246,2022-11-13,Student_0039,Engineering,PhD,Central,30430.46,0,5,152152.31,Bank Transfer
+TXN10216,17-09-2024,Student_0315,Law,PhD,South,22949.08,566.65,2,44764.87,bank transfer
+TXN10092,10/15/2023,Student_0403,Sciences,Diploma,East,2170.23,0,3,6510.7,Cash
+TXN10658,2023-06-20,student_0780,Law,PhD,North,29300.47,0,5,146502.34,cash
+TXN10026,2023/09/04,Student_0400,Education,Undergraduate,Central,10925.91,1236.24,1,9689.67,Scholarship
+TXN10044,2024-04-21,Student_0326,Education,PhD,West,18773.05,1455.5,2,34635.1,Bank Transfer
+TXN10541,2024-06-19,null,Medicine,PhD,South,28215.53,$0.00,4,112862.12,Cash
+TXN10280,2022-04-19,Student_0721,Sciences,diploma,East,5314.37,0,3,15943.1,Scholarship
+TXN10535,03/25/24, Student_0674,  Business  ,Certificate,Central,1206.49,0,3,3619.47,Scholarship
+TXN10309,03-02-2024,Student_0464,Arts, Graduate,Central,12232.54,681.24,3,34653.89,Cash
+TXN10602,"January 30, 2024",Student_0372,Engineering,Diploma,Central,4925.95,0,1,4925.95,Bank Transfer
+TXN10232,N/A,Student_0353,Arts,Certificate,West,1414.46,,1,1414.46,Bank Transfer
+TXN10481,2022-07-02,Student_0184,Business,PhD,East,33681.12,0,5,168405.6,TBD
+TXN10208,2024-01-05,Student_0225,Business,Diploma,Unknown,3507.99,0,6,21047.95,null
+TXN10524,08/04/23,Student_0124,,Certificate,Central,2244.13,393.2,4,7403.71,Scholarship
+TXN10008,2024/12/26, Student_0129,Medicine,Graduate,East,19363.39,354.18,1,19009.22,Bank Transfer
+TXN10674,"August 05, 2022",  Student_0125  , Education,PhD,North,33178.23,327,6,197109.24,  
+TXN10483,04 Aug 2024,Student_0096,Arts,Undergraduate,west,6382.4, 0 ,2,12764.79,Scholarship
+TXN10741,01 Nov 2022,,Education,graduate,North,-19815.18407289292,0,2,39630.37,Credit Card
+TXN10791,2024/09/03,Student_0684,Education,Undergraduate,Unknown,7750.29,0,3, 23250.866775206967 ,Credit Card
+TXN10305,03/10/22,Student_0544,Engineering,Diploma,North,3379.97,279.6,,18602.22, Bank Transfer
+TXN10265,2024-01-08,Student_0096,Law,Diploma,North,4611.81,$0.00,4,-18447.245125452,Credit Card
+TXN10207,01/20/24,Student_0229,Medicine,Undergraduate,South,5345.55,1809.17,6,21218.23,Loan
+TXN10300,04/28/2023,Student_0121,Medicine,Certificate,Central,2875.75,0,3,"$8,627.24",Cash
+TXN10797,2022/10/26,Student_0195,Engineering,Graduate,North,14741.53,0,6,88449.17,Credit Card
+TXN10420,2024/06/06,Student_0160,Sciences,,West,22554,1047.28,5,107535.33,Loan
+TXN10527,08/04/2022,Student_0746,Sciences,Undergraduate,  North  ,11408.11,-,6.0,68448.63,Loan
+TXN10333,05/16/2023,Student_0241,Sciences,PhD,North, 16947.0009845716 ,0,4,-,Scholarship
+TXN10718,05/16/2024,Student_0041,Engineering,,East,10624.57,0,2,21249.14,Loan
+TXN10416,07/08/24,Student_0524,Education,PhD,North,28327.41,0,5,141637.06,Bank Transfer
+TXN10572,01/27/23,Student_0384,Education,,West,24321.52,1406.07,2,45830.89,Credit Card
+TXN10321,2022-10-22,Student_0141,Arts,PhD,East,28708.87,0,5,143544.37,Loan
+TXN10284,08/18/24,Student_0525,Education,Diploma,East,4108.33,0,null,20541.64,Loan
+TXN10113,,,Sciences,Diploma,  South  ,2328.21,0,5,"$11,641.07",Loan
+TXN10619,22-05-2022,Student_0323,Business,Graduate,South,11701.78,0,2,23403.56,Bank Transfer
+TXN10319,2024/06/12,Student_0265,Sciences,PhD,North,34886.66,,5,174433.3,Bank Transfer
+TXN10141,11-05-2024,Student_0560,Engineering,Diploma,,"$3,877.29",0,N/A,11631.87,Scholarship
+TXN10342,22 Apr 2022,Student_0688,Engineering,PhD,East,27907.95,0,6,167447.71,Cash
+TXN10101,2023-04-29,student_0684,Arts,PhD,Central,26649.22,0,6,159895.29,Credit Card
+TXN10514,28 Mar 2023,Student_0146,None,Diploma,North,2007.42,0,2,4014.85,Loan
+TXN10355,04 Jun 2024,Student_0318,Business,Graduate,North,12662.03,0,1,12662.03,Loan
+TXN10489,2023-11-19,Student_0181,Sciences,Certificate,South,1525.97,833.98,5,3459.93,Credit Card
+TXN10142,09-11-2022,Student_0086,Education,Diploma,South,3369.44,0,6,20216.66,Cash
+TXN10538,"June 01, 2024",Student_0054,null,Undergraduate,Central,6443.29,0,2,12886.59,Bank Transfer
+TXN10453,2023-07-06,Student_0450,Business, PhD,,24413.97,0,4,97655.89,Bank Transfer
+TXN10501,"August 04, 2023",Student_0218,sciences,Graduate,Central,14809.63,0,5,74048.16,Scholarship
+TXN10190,26 Jan 2023,student_0347,Business,Diploma, Central,2343.95,1874.39,2,939.11,
+TXN10734,2024-10-07,Student_0082,Law,PhD,East,24653.29,318.96,2,48668.66,Credit Card
+TXN10431,08/14/2024,Student_0457,Engineering,Diploma,South,2075.38,0,6.0,12452.26,Cash
+TXN10752,02 Feb 2024,Student_0347,Engineering,Graduate,WEST,8436.55,0,1, 8436.553786955124 ,Bank Transfer
+TXN10779,"December 30, 2022",Student_0486,Medicine,Undergraduate,West,11237.11,0,6,67422.69,Cash
+TXN10131,2022/12/11,Student_0469,Education,Undergraduate,central, 9849.509566908819 ,0,2,19699.02,Cash
+TXN10428,2023/10/08,Student_0246,Education,Certificate,North,1342.57,0,,8055.45,Scholarship
+TXN10159,06/09/2022,Student_0356,Business,Diploma,North,4378.41,387.4,2,,Bank Transfer
+TXN10623,"February 01, 2024",Student_0425,Law,Graduate,Central,13637.75,0,6,81826.51,Cash
+TXN10385,2024/02/10,Student_0616,Medicine,Undergraduate, North,3278.53,1697.75,,9484.66,Credit Card
+TXN10470,2023-12-15,Student_0278,Medicine,PhD,North,18627.31,0,5,93136.55,Bank Transfer
+TXN10147,2024/10/07,Student_0795,Business,PhD,South,20831.9,,4,83327.61,Cash
+TXN10221,05/19/22,Student_0649,Law,Certificate,East,1651.8,0,4,6607.2,CREDIT CARD
+TXN10569,"December 05, 2024",Student_0661,Engineering,Graduate,Central,16767.9,0,5,83839.48,Bank Transfer
+TXN10360,02 Feb 2022,Student_0193,Education,Certificate,South,1256.64,0,2,2513.28,Scholarship
+TXN10647,2023/01/03,,Sciences,Diploma,EAST,4786.71,0,5,23933.56,Scholarship
+TXN10124,TBD,Student_0719,Sciences,Diploma,north,4120.1,1161.86,5,14791.18,Loan
+TXN10281,2024/01/08,Student_0428,Medicine,Certificate,,1028.04,0,2,2056.08,BANK TRANSFER
+TXN10161,02/08/2024,  Student_0750  ,Arts,Undergraduate,East,3180.7,0,-,3180.7,Scholarship
+TXN10656,"May 20, 2023",Student_0685,Education,Certificate,East,1070.93,1851.65,1,-780.72,Scholarship
+TXN10093,12 Apr 2023,Student_0053,Sciences,Undergraduate,Central,8253.32,0,5,41266.6,Cash
+TXN10534,2024-06-13,Student_0244,Sciences,Undergraduate,Central,4061.93,,3,12185.8,  Cash  
+TXN10783,"June 12, 2023",Student_0323, Business,PhD,South,19093,0,2,38185.59,Cash
+TXN10083,10/02/2024, Student_0126,  Law  ,PhD,West,23925.46,0,6,143552.77,Cash
+TXN10793,08/29/2023,Student_0549,Education,Certificate,Central,2451.3, 733.541005063861 ,,1717.76,Credit Card
+TXN10123,2023/08/20,  Student_0710  ,Business,Diploma, West,4567.71,1190.18,6,20265.17,  Scholarship  
+TXN10090,21-08-2024,,business, Graduate,East,15000.13,0,4,60000.52,Bank Transfer
+TXN10445,14 Aug 2022,Student_0562,Sciences,CERTIFICATE,East,564.77,0,3,1694,Bank Transfer
+TXN10308,"May 18, 2022",Student_0727, Sciences,Undergraduate,central,6290.32,0,3,18870.95,Bank Transfer
+TXN10486,09/13/24,Student_0549,Arts,Certificate,East,2908.41,0,3,8725.24,  Bank Transfer  
+TXN10456,31 Jul 2022,Student_0748,Law,PhD,Central,19947.09,0,4,79788.35,Bank Transfer
+TXN10117,11/11/23,Student_0774,Business,PhD,North,26279.16,"$1,220.05",6,150354.67,Credit Card
+TXN10646,11/06/24,Student_0148,Law,Graduate,North,"$13,425.34",0,3,40276.02,Cash
+TXN10023,10/09/24,Student_0250,Education,Diploma,North,4958.2,0,6,29749.21,Loan
+TXN10563,02/20/22,Student_0790,Arts,Certificate,East,2406.75,1486.24,2,1841.02,Scholarship
+TXN10591,15 May 2023,Student_0051,Engineering,Certificate,West,2484.11,0,5,unknown,Bank Transfer
+TXN10448,07/19/23,Student_0534,Law,Certificate,East,1644,0,4,6577.87,  Cash  
+TXN10708,23 Jun 2023,Student_0367,Sciences,Undergraduate, South,7262.92,702.02,1,6560.9,Loan
+TXN10474,"January 26, 2022",Student_0427,Education,Diploma,Central,2211.78,0,1,2211.78,Cash
+TXN10013,2022/06/14,  Student_0191  ,  Engineering  ,PhD,west,16002.85,0,1,16002.85,Scholarship
+TXN10177,29-12-2022,  Student_0650  ,Business,Certificate,South,1290.96,0,4,-5163.834576487089,Scholarship
+TXN10738,01/18/2022,Student_0554,Arts,Diploma,South,,0,1,4170.51,Credit Card
+TXN10432,10 Sep 2022,Student_0140,Sciences,PhD,East,30326.18,0,6,181957.06,Scholarship
+TXN10697,04 Jan 2022,Student_0046,Engineering,PhD,West,28424.85,0,2,56850,Credit Card
+TXN10251,2022-06-25,  Student_0758  ,Engineering,Certificate,,2810.53, 0 ,2,,Bank Transfer
+TXN10135,10 Jul 2022,Student_0470,Law,PhD,Central,33726.72,864.33,3,98587.18,Credit Card
+TXN10515,04-05-2024,Student_0317,Medicine,Certificate, Central,937.38,0,3,2812.14,Cash
+TXN10126,2024/07/21,Student_0212,Sciences,PHD,West,33410.95,0,3,100232.85,Cash
+TXN10047,12/23/24,Student_0580,Arts,Undergraduate,Central,10165.29,0,4,40661.16,Scholarship
+TXN10005,23 Jun 2023,Student_0599,Sciences,Certificate,South,2712,N/A,3,8135.12,Scholarship
+TXN10194,2023/02/22,  -  ,arts,Graduate,Central,16200.68,0,6,97204.1,Credit Card
+TXN10519,01/03/24,Student_0363,Engineering,Certificate,North,,0,5.0,4232.62,Credit Card
+TXN10048,2022-11-20,Student_0453,Arts,Certificate,West,2167.1,1818.04,3,1047.2,Cash
+TXN10492,05/30/2024,Student_0570,Education,Graduate,North,12492.87,0,3,37478.61,Bank Transfer
+TXN10293,10/01/24,Student_0447,Business,PhD,North,,0,5,145005.52,Loan
+TXN10417,03/19/2022,Student_0743,Business,Undergraduate, East,6370.71,0,N/A,25482.85,Credit Card
+TXN10103,03-12-2022,Student_0533,Medicine,Undergraduate,WEST,4009.88,0,5,20049.4,Scholarship
+TXN10065,05/14/23,Student_0604,  Sciences  ,Diploma,East,5244.12,$0.00,4,20976.47,Bank Transfer
+TXN10033,09-11-2023,Student_0720,Arts,Graduate,South,15967.52,0,4,63870.08,Scholarship
+TXN10098,2022/05/02,Student_0092,Sciences,Certificate,North,2126.35,0,3,6379.04,Scholarship
+TXN10069,03/04/24,Student_0794,Sciences,Certificate,  East  ,1810,0,3,5430.51,Loan
+TXN10595,2023-03-09,Student_0585,Sciences,Graduate,West,19054.12,0,1,19054.12,Credit Card
+TXN10279,07/04/2024,Student_0211,Education,Undergraduate,East,4320.53,0,4,17282.11,
+TXN10643,2024/01/16,Student_0270,Sciences,Diploma,South,4322.65,1799.49,6,15138.96,Bank Transfer
+TXN10733,,Student_0137,Engineering,Graduate,South,15402.49,0,1,15402.49,Bank Transfer
+TXN10537,20 Jun 2024,Student_0783,engineering,Graduate,North,12468.68,0,1,"$12,468.68",Loan
+TXN10359,01/12/22,,Law,Undergraduate,West,11839.68,0,4,47358.7,Loan
+TXN10615,04/12/23,Student_0371,Education,PhD,East,22224.59,0,2,44449.18,Scholarship
+TXN10788,14 Apr 2024,Student_0044,Engineering,PhD,East,28908.34,0,2,57816.68,Loan
+TXN10189,2024-07-15,Student_0100,Arts,Certificate,East,1900.38, 1315.5643454187518 ,6,3508.88,scholarship
+TXN10369,30-11-2024,Student_0430,Education,Certificate,East,592.73,0,5,2963.67,Loan
+TXN10606,07/23/2024,Student_0042,Business,Graduate,South,11072.86,0,2,22145.73,Bank Transfer
+TXN10443,2023-05-01,Student_0193,Medicine,PhD,South,25764.19,0,6,154585.14,Cash
+TXN10392,2023-01-30,,Engineering,Diploma,South,-3028.27413699885,0,4,12113.1,Loan
+TXN10663,TBD,None,Sciences,Graduate,South,-19989.685767043615,0,6,119938.11,Scholarship
+TXN10488,"December 07, 2022",Student_0387,Engineering,Diploma,Central,1664.19,0,4,6656.75,Cash
+TXN10212,"April 21, 2024",Student_0147,Engineering,PhD,Central,19331.87,1291.75,4,72160.49,Bank Transfer
+TXN10150,12-08-2024, Student_0417,Business,Graduate,West,17359.24, 0 ,1,17359.24,null
+TXN10226,12/28/22, Student_0512,Sciences,Diploma,Central,5353.39,0,4,21413.56,SCHOLARSHIP
+TXN10724,13-04-2022,Student_0082,Engineering,PhD,South,30214.2,0,1,30214.2,  Loan  
+TXN10628,"July 17, 2024",Student_0270,business,PhD,Central,27574.26,1670.58,4,103614.71,Scholarship
+TXN10114,"July 17, 2023",,Engineering,Certificate,south,517,0,1,516.53,Credit Card
+TXN10256,12/08/2024,Student_0441,Medicine,Diploma,Central,4578.22,0,3, 13734.656589488819 ,Credit Card
+TXN10074,2023/03/31,Student_0462,Arts,Graduate,West,13391.83,1124.03,1,,Cash
+TXN10252,17 Oct 2022,Student_0716,Business,Graduate,N/A,"$14,557.09",1550.64,5,65032.26,Scholarship
+TXN10332,06/24/23,Student_0606,Medicine,Diploma,East,,N/A,5,18070.91,
+TXN10794,05/30/24,Student_0578,Business,Graduate,North,18686.48,0,3,56059.43,Cash
+TXN10410,10/30/23,Student_0462,Education,,North,1882.06,0,1,1882.06,Bank Transfer
+TXN10700,"August 18, 2022",  ,Business,Diploma,Central,5897.54,1626.1,1,4271.44,Cash
+TXN10732,2024-11-18,Student_0683,Education,Undergraduate,North,7652.98,421.94,4,28924.17,Credit Card
+TXN10311,"April 23, 2024",Student_0352,Arts,Undergraduate,Central,4701.55,0,5,23507.73,Bank Transfer
+TXN10348,2024-07-27,Student_0011,Business,PhD,West,27353.6,0,5,136768.02,Cash
+TXN10440,09-09-2024,Student_0711,Engineering,Undergraduate,West,4098.46,0,1,4098.46,Loan
+TXN10052,"June 21, 2023",Student_0391,Engineering,certificate,South,1161.15,0,6,6966.88,Cash
+TXN10636,"September 26, 2024",Student_0622,Business,Certificate,  ,1964.46,598.5,6,8195.77,Cash
+TXN10285,08/11/23, Student_0085,  Medicine  ,Certificate, East,922.7,0,, 5536.188614315538 ,Bank Transfer
+TXN10218,01/22/2022,Student_0673,Arts,Diploma,Central,4702.23,0,6,28213.36,Cash
+TXN10521,12 Nov 2024,  Student_0735  ,Medicine,PhD, West,24629.36,0,1,24629.36,Cash
+TXN10471,09/19/2022,Student_0786,Education,Certificate,West,668.28,0,2,1336.57,Scholarship
+TXN10018,24-05-2023,Student_0164,sciences,Graduate,West,8297.44,0,4,33189.75,Bank Transfer
+TXN10477,2022/01/23,Student_0317,Engineering,PhD,South,19790.6,0,1,19790.6,  
+TXN10765,TBD,Student_0366,Engineering,PhD,South,22598.43,0,3,67795.29,Bank Transfer
+TXN10761,03 May 2022,Student_0470,Sciences,phd,East,15978.67,205.5,,31546.33,  Loan  
+TXN10702,2023/09/13,Student_0215,BUSINESS,Certificate,,2789.61,0,2,5579.22,Cash
+TXN10107,08/16/2023,Student_0750,Sciences,Undergraduate,East,6950.67,0,2,13901.33,  Credit Card  
+TXN10036,2023/09/01,Student_0603,Medicine,Diploma,Central,5058,606.24,4,17808.39,Cash
+TXN10641,"November 28, 2023",Student_0363,Law,diploma,East,1841.71,368.05,3,4420.96,Bank Transfer
+TXN10578,2023/12/16,Student_0658,Arts,PhD,None,28951.16,676.18,3,84824.95,Credit Card
+TXN10060,"August 13, 2023",Student_0320,Arts,Diploma,West, 4515.0596912953315 ,939.46,6,21453.62,Loan
+TXN10766,22 Jun 2024,Student_0139,Business,Undergraduate,North,7203.75,0,1,7203.75,Scholarship
+TXN10797,2022/10/26,Student_0195,Engineering,Graduate,North,14741.53,0,6,88449.17,Credit Card
+TXN10038,"September 22, 2023",Student_0767,Business,Diploma,West,4414.36,0,1,4414.36,Cash
+TXN10119,2022-07-07,Student_0316,Law,certificate,North,2459.73,477.7,3,,Credit Card
+TXN10301,08/07/2023,Student_0446,Sciences,Certificate,,940.81,0,1,940.81,  Cash  
+TXN10735,05/18/2023,Student_0023,Medicine,PhD,East,18111.97,0,5,90559.83,credit card
+TXN10590,07/27/22,Student_0525,  Medicine  ,Diploma,East,,0,1,3562.89,Cash
+TXN10549,09 Aug 2022,  Student_0047  ,Engineering,PhD,West,21736.17,0,5,108680.83,Bank Transfer
+TXN10457,20 Sep 2023,Student_0649,Engineering,Certificate,North,2041.17,0,4,8164.67,Credit Card
+TXN10662,03/03/24,Student_0767,Engineering,Undergraduate,West,8839.76,1839.46,3,21000.91,Credit Card
+TXN10022,14 Dec 2022,Student_0087,Law,Diploma,North,2950.12,0,5,14750.61,  -  
+TXN10021,09/18/2022,Student_0431,Medicine,PhD,South,21185.69,935.11,,121503.52,Scholarship
+TXN10418,2023/05/24,Student_0704,Education,Graduate,Central,16794.48,,5,"$83,972.39",  Bank Transfer  
+TXN10070,03/13/2024,Student_0610,ENGINEERING,PhD,East,26654.79,0,3,79964.37,LOAN
+TXN10014,26 Sep 2022,Student_0661,Medicine,Diploma,,2923.66,0,2,5847.33,Loan
+TXN10478,11 Mar 2024,Student_0365,Engineering,PHD,West,34610.83,1553.02,5,,Scholarship
+TXN10381,14 Apr 2024,Student_0240,,Undergraduate,Central,3545.69,1036.68,1,2509.01,Scholarship
+TXN10043,05-11-2024,Student_0003,Education,Graduate,West,8837.72,1590.82,3,21740.72,Scholarship
+TXN10061,2023-07-02,Student_0185,Education,Certificate,,1902.41,0,5,9512.07,CASH
+TXN10353,09/07/22,Student_0383,Law,Certificate,,735.76,0,6,4414.58,Credit Card
+TXN10156,"October 19, 2022",Student_0193,Arts,Diploma,Central,5127.95,0,6,30767.68,Loan
+TXN10757,08/21/2024,Student_0747,Business,Graduate,Central,15781.83,0,6,94690.97,Bank Transfer
+TXN10626,14 Jul 2022,Student_0414,Business,Diploma,East,2066.25,0,2,4132.5,Loan
+TXN10092,10/15/2023,Student_0403,Sciences,Diploma,East,2170.23,0,3,6510.7,Cash
+TXN10498,10/12/24,Student_0525,Business,Certificate,South,2883.07,0,4,11532.29,Loan
+TXN10800,28-07-2023,Student_0018,Sciences,Diploma,West,4389.33,0,6,26335.98,Scholarship
+TXN10429,25-05-2023,Student_0463,Engineering,Graduate,West,,0,6,91337.46,Credit Card
+TXN10460,2022-11-11,Student_0131,Medicine,Undergraduate,Central,8571.09,742.66,2,15656.87,Cash
+TXN10217,2022/01/11,Student_0094,Sciences,Diploma,  North  ,5037.37,0,unknown,10074.73,Scholarship
+TXN10756,2022-10-08,Student_0097,Arts,undergraduate,null,11269.54, 0 ,3,33808.63,BANK TRANSFER
+TXN10174,05/07/24,Student_0398,Law,PhD,South,17798.59,245.82,3,52658.31,Credit Card
+TXN10324,,Student_0127,Engineering,Certificate,South,,0,6,16627.94,Loan
+TXN10278,06/30/2024,Student_0316,  Education  ,diploma,Central,3689.84,1265.89,3,7272,Bank Transfer
+TXN10371,06/14/2023,Student_0793,Medicine,PhD,North,21814.18,0,1,21814.18,Cash
+TXN10343,11/25/22,Student_0647,Arts,Certificate,North,1252,0,3,3756.66,Credit Card
+TXN10365,04/04/23,Student_0265,Engineering,Diploma,Central,5130.67,0,5,25653.35,Cash
+TXN10262,"November 13, 2024",Student_0164,Law,Certificate,East,1407.36,1142.87,6,1586.92,Cash
+TXN10795,30 Oct 2023,Student_0679,Law,Graduate, Central,10590.88,0,5,52954.41,Cash
+TXN10551,03/08/23,Student_0532,Arts,Certificate,East, 2393.2505357715454 ,0,6,14359.5,Credit Card
+TXN10661,2024-01-29,Student_0147,Sciences,,North,7662.43,0,6,45974.55,Cash
+TXN10561,30 Oct 2024,Student_0721,Law,,Central,1501.88,0,1,1501.88,Loan
+TXN10086,28-11-2024,Student_0081,Business,Diploma,South,2868.56,0,3,8605.68,Loan
+TXN10153,19-01-2023,Student_0287,Sciences,Certificate,Central,573.71,0,3,"$1,721.12",Credit Card
+TXN10552,2024/11/07,,Medicine,PhD,Central,30069.38,0,2,60138.75,Credit Card
+TXN10633,2023/07/19,,business,PhD,North,32852.77,0,2,65705.54,Loan
+TXN10671,20-09-2023,Student_0460,Engineering,Diploma,West,3703.24,N/A,6,22219.44,
+TXN10231,06/30/2024,Student_0715,Education,PhD,Central,33305.45,1755.63,5,157749.07,Bank Transfer
+TXN10213,12/30/22,Student_0630,Engineering,Graduate,NORTH,8198.75,1140.88,2,,Scholarship
+TXN10260,04/11/2022,Student_0299,Business,Undergraduate,East,7668.32,0,-5,38341.62,Bank Transfer
+TXN10657,2024-03-20,Student_0713, Arts,Certificate,North, 2606.585612540614 ,541.09,3,6196.48,Credit Card
+TXN10455,12/02/23,Student_0612,Education,Undergraduate,WEST,3190.37,0,6,19142.22,Credit Card
+TXN10728,04/14/2024,Student_0516, Law,  ,Central,2858.21, 837.083874758277 ,3,6063.39,Credit Card
+TXN10214,20-02-2024,Student_0604,Education,PhD,CENTRAL,-15868.765666729629,0,4,63475.06,Credit Card
+TXN10220,26-08-2023,Student_0120,Medicine,Certificate,Central,511.63,0,5,2558.14,Credit Card
+TXN10397,09/17/23,Student_0246,Education,Undergraduate,Central,9097.07,0,3,"$27,291.21",Bank Transfer
+TXN10170,TBD,Student_0501,Arts,PhD,Central,31470.13,0,6,188820.76,Cash
+TXN10071,09/22/2024,Student_0232,Medicine,Certificate,North,1404.57,0,2,2809.14, Loan
+TXN10084,09/06/2022,Student_0143,Arts,PhD,Central,32027.24,0,3,96082,Credit Card
+TXN10206,"October 14, 2022",Student_0202,Sciences,  PhD  ,North,26033.44,0,3,78100.31,Loan
+TXN10673,2022/02/17,Student_0132,law,  Certificate  ,  East  ,711.99,0,5.0,"$3,559.94",Cash
+TXN10286,2023/01/06,Student_0541,Law,GRADUATE,South,13359.84,0,6,80159.03,Scholarship
+TXN10768,2024/01/01,Student_0464,Business,Diploma,,5661.65,699.81,6,29771.06,Bank Transfer
+TXN10264,2023-03-02,Student_0190,Engineering,,Central,2003.04,0,unknown,10015.21,Bank Transfer
+TXN10466,05/23/2024,Student_0466,Business,graduate, Central,17809.99,,1,17809.99,Cash
+TXN10067,24 Jun 2024,Student_0311,Arts,Diploma,North,5389.11,$0.00,4,"$21,556.44",Cash
+TXN10204,19 Aug 2023,Student_0069,Law,Graduate,East,17595.92,1734.05,6,"$95,171.21",Bank Transfer
+TXN10140,invalid,Student_0309,Business,Graduate,West,"$11,323.61",0,6,67941.67,Cash
+TXN10494,01/04/2024,Student_0246,Engineering,Diploma,South,4073.07,0,4,"$16,292.29",Cash
+TXN10245,05-06-2023,Student_0464,Education,Certificate,East,2314.67,0,4,9258.68,Bank Transfer
+TXN10513,24-07-2022,Student_0754,Law,Diploma,Central,5956.86,0,,11913.72,Credit Card
+TXN10631,2024/05/18,Student_0208,Engineering,Graduate,East,16164.76,0,6,96988.58,
+TXN10376,15-07-2024,Student_0387,Arts,Diploma,South,1804.04,280.43,5,7618.06,CREDIT CARD
+TXN10310,2023-07-20,Student_0714,Engineering,Certificate,North,700.43,0,1,700.43,Scholarship
+TXN10575,invalid,Student_0413,Law,  PhD  ,South,18384.27,0,5.0,91921.35,Credit Card
+TXN10288,2023/12/26,Student_0443,Sciences,Certificate,East,2196,0,1,2196.23,Bank Transfer
+TXN10781,03/28/2022,Student_0413,Law,PhD,Central,22797.62,0,3,,Cash
+TXN10435,"March 12, 2022",Student_0328,Law, Certificate,Central,1639.46,0,6,9836.77,Credit Card
+TXN10303,05-01-2024,Student_0208,,Diploma,North,2301.27,872.27,6,8574.0,Loan
+TXN10484,2024-09-02,Student_0286,Engineering,PhD,South,21345.7,null,2,"$38,704.22",Credit Card
+TXN10711,2023/04/07,Student_0269,Medicine,null,,4482.59,1328.49,6,18924.6,Bank Transfer
+TXN10799,"February 08, 2024",Student_0058,Education,Graduate,  Central  ,15342.68,$0.00,1,15342.68,Loan
+TXN10316,06-08-2023,Student_0360,Sciences,PhD,South,17958.92,0,4,71835.68,Scholarship
+TXN10197,"October 13, 2023",Student_0226,Education,Diploma,South,4478.51,0,1,4478.51,Credit Card
+TXN10234,16-07-2024,Student_0718,Business,,North,,0,1,-2633.70505847901,Scholarship
+TXN10091,09/01/2022,Student_0100,Engineering,PhD,East,22726.98,0,5,TBD,Credit Card
+TXN10733,,Student_0137,Engineering,Graduate,South,15402.49,0,1,15402.49,Bank Transfer
+TXN10398,2023-05-16,Student_0782,Education,Graduate,South,"$10,275.69",0,3,30827.08,Loan
+TXN10019,29 Mar 2024,Student_0550,,Graduate,East,11939.14,0,3,35817.43,Credit Card
+TXN10462,2022/01/19,Student_0526,Sciences,Certificate,East,2018.05,0,2,4036.09,Loan
+TXN10790,21 Sep 2024,Student_0497,Arts,PhD,Central,22115.91,0,4,TBD,Credit Card
+TXN10395,02 Apr 2023,Student_0236,Sciences,Undergraduate,East,10884.95,1838.98,2,,  Cash  
+TXN10771,30-06-2024,Student_0324,Arts,Diploma,North,5488.75,0,4,21955,loan
+TXN10742,27 Aug 2024,Student_0035,Sciences,Certificate,TBD,1524.7,0,6,9148.21,Credit Card
+TXN10176,05/26/22,Student_0200,Arts,Diploma,East,3586.92,0,6,21521.54,Loan
+TXN10330,2024/10/05,Student_0478,Business,PhD,East,21055.05,0,,126330.31,Scholarship
+TXN10357,"August 29, 2023",Student_0049,Arts,Certificate,Central,872,0,2,1743.03,Credit Card
+TXN10763,"May 09, 2022",Student_0110,Medicine,PhD,Central,20096.22,0,6,120577.34,
+TXN10547,14 Apr 2024,Student_0599,Business,Diploma,East,3520,0,5,17601.78,Bank Transfer
+TXN10785,2023/03/04,Student_0028,,undergraduate,west,-11646.659430162248,0,1,11646.66,Scholarship
+TXN10600,23-03-2022,Student_0410,Law,Diploma,West, 1606.7405676345902 ,0,3,4820.22,Cash
+TXN10723,12/15/2023,Student_0276,Sciences,Undergraduate,South,6926.63,1001.59,1,5925.04,Cash
+TXN10651,"November 14, 2022",Student_0346,Arts,Undergraduate,West,9147.29,0,-1,9147.29,Bank Transfer
+TXN10694,09/14/23,Student_0391,Engineering,UNDERGRADUATE,East,10674.13,0,3,"$32,022.40",Scholarship
+TXN10219,2024-11-26,Student_0755,Arts,Undergraduate,Central,10017.06,835.63,4,36725.7,Bank Transfer
+TXN10581,2023-09-07,Student_0240,Education,Certificate,West,1108.97,0,4,4435.89,Bank Transfer
+TXN10714,2023/07/10,Student_0296,Arts,Certificate,East,1831.85,0,3,5495.54,Loan
+TXN10050,22-03-2022,null,Business,PHD,East,27732.36,0,6,166394.15,Credit Card
+TXN10269,2024/08/05,Student_0424,  Law  ,Undergraduate,Central,4221.79,479.7,5,18710.45,  Credit Card  
+TXN10434,2024/01/18,Student_0696, Engineering,PhD,Central,26801.2,541.74,4,105037.81,Credit Card
+TXN10373,05/20/2024,Student_0488,  Sciences  ,PhD,West,16959.76,1480.95,1,15478.8,Scholarship
+TXN10579,06/13/2023,Student_0479,Medicine,Diploma,South,5234.36,0,5,26171.8,Cash
+TXN10215,2024-11-30,Student_0385,Sciences,Diploma,east,2660.12,0,5,13300.61,Loan
+TXN10729,2024/07/10,Student_0605,Sciences,PhD,East,18974.06,228.87,6,112471.09,Scholarship
+TXN10110,13-11-2023,Student_0016,Business,Undergraduate,West,10241.86,0,4,40967.42,Credit Card
+TXN10318,08/07/2024,Student_0028,Arts,Certificate, West,1884.67,0,5,9423.34,
+TXN10188,2024-13-45,Student_0001,Sciences,Undergraduate,East,9707.15,231.98,4,37900.66,Cash
+TXN10689,06/19/2023,  Student_0246  ,Law,,South,N/A,0,4,3549.84,Loan
+TXN10703,12/04/23,Student_0384,Sciences,Undergraduate,West,11503.87,0,6,69023.23,  -  
+TXN10772,2022-10-04,Student_0531,Engineering,Graduate,South,10756.85,0,5,53784.27,LOAN
+TXN10782,01/25/2024,Student_0570,Sciences,PhD,East,30841.88,0,2,"$61,683.75",
+TXN10104,07 Jan 2022,Student_0224,null,Diploma,Central,4527.45,$0.00,4,unknown,Bank Transfer
+TXN10451,30-08-2022,Student_0307,Business,,Central,1433.21,0,5,7166.05,Cash
+TXN10424,02 Jun 2023,Student_0310,Engineering,Diploma,Central,3833.42,539.88,2,6587,Loan
+TXN10547,14 Apr 2024,Student_0599,Business,Diploma,East,3520,0,5,17601.78,Bank Transfer
+TXN10056,2022-09-27,Student_0367,Business,Graduate,South,-14482.585482357817,0,6,"$86,895.51",Scholarship
+TXN10233,2024/03/09,Student_0388,  Arts  ,Diploma,Central,2348.57,1787.89,4,2242.71,Loan
+TXN10705,07/13/2024,Student_0629,, PhD,North,27072.17,0,3,81216.52,Scholarship
+TXN10725,05/16/2024,,Medicine,Undergraduate,  North  , 3469.3188231697777 ,0,3,-10407.956469509332,Scholarship
+TXN10046,,Student_0241,Sciences,Diploma,North,5794,1328.24,5,22326.95,Credit Card
+TXN10592,07/01/23,Student_0614,Engineering,PHD,,23143.66,$233.69,6,137459.77,Scholarship
+TXN10202,07 Oct 2022,Student_0401,Sciences,Certificate,South,1487.78,1389.3,2,196.96,Cash
+TXN10681,08/16/2023,Student_0241,Arts,Undergraduate,,11652.95,0,6,69917.73,Scholarship
+TXN10617,2024/06/01,Student_0284,Medicine,Undergraduate,South,"$11,302.47",0,1,11302.47,Scholarship
+TXN10749,07/08/2023,Student_0117,Engineering,Undergraduate,Central,-11845.322448016088,0,2,23691,Cash
+TXN10787,2022/10/13,Student_0418,Arts,Diploma,South,2516.3,$914.60,3,4805.08,  Scholarship  
+TXN10020,"January 04, 2022",Student_0552,Engineering,Diploma,South,"$3,233.38",0,1,3233.38,Cash
+TXN10407,06 Sep 2024,Student_0071,Education,PhD,South,33196.25,0,2,66392.5,Credit Card
+TXN10138,2022/09/04,Student_0433,Medicine,Graduate,North, 10714.290337512874 ,0,1,-10714.290337512874,Bank Transfer
+TXN10121,"October 12, 2024",Student_0632,arts,Certificate,West,1710.58,0,2,3421.16, Loan
+TXN10298,2022-05-10,Student_0281,Education,PhD,Central,34293.85,0,5,171469.24,Loan
+TXN10171,28-02-2023,Student_0668,,Certificate,North,-907.2685139965513,0,2,1814.54,Loan
+TXN10361,"July 09, 2024",Student_0249,Engineering,Certificate,North, 791.1470488851048 ,1824.35,4,-4132.8,Scholarship
+TXN10480,06/03/2022,Student_0581,Medicine,PhD,South,32119.05,975.62,2,62286.86,SCHOLARSHIP
+TXN10751,2024/09/17,Student_0601,  Engineering  ,Certificate,South,2518.19,1596.55,2,1843.27,Credit Card
+TXN10102,02/05/24,Student_0719,Business,Graduate,South,19488.33,1060.73,6,110565.59,Loan
+TXN10025,11/05/2022,Student_0393,Law,  Undergraduate  ,West,5571.55,$0.00,5,27857.77,Loan
+TXN10085,06/01/22,Student_0478,Medicine,Certificate,Central,1526.99,0,2,3053.98,Cash
+TXN10248,"October 16, 2023",Student_0579,Engineering,Diploma,North,4352.49,0,3,13057.48,Cash
+TXN10307,07 Jul 2023,Student_0628,Sciences,Undergraduate,North,11040.91,0,3,33122.73,Credit Card
+TXN10247,18 Mar 2022,Student_0591,Education,PhD,East,24650.66,0,5,123253.32,Bank Transfer
+TXN10570,01-01-2022,Student_0080,  Business  ,Graduate,West,9096.06,0,2,18192.12,Scholarship
+TXN10058,22-12-2024,Student_0465,Arts,Graduate,North,15491.81,0,4,61967.24,Scholarship
+TXN10427,2022-01-20,Student_0273,,Undergraduate,NORTH,3267.0,,6,15866.37,Credit Card
+TXN10770,11/19/2022,Student_0075,engineering,PhD,South,25660.59,1431.99,1,24228.6,Loan
+TXN10649,2024-12-19,Student_0005,Medicine,Undergraduate,Central,3532.32,0,1,3532.32,Bank Transfer
+TXN10654,"April 09, 2022",TBD,Arts,Undergraduate,  Central  ,11028.83,0,6,66173.0,Bank Transfer
+TXN10497,,Student_0531,Medicine,Graduate,North,,0,5.0,84501.81,Bank Transfer
+TXN10263,2023-02-20,Student_0638,,PhD,West,,0,1,30372.61,Scholarship
+TXN10458,10/21/2023,Student_0293,Arts,graduate,South,18741.27,0,1,18741.27,Loan
+TXN10533,2022/02/23,Student_0201,Sciences,PhD,North,"$24,551.85",0,1,24551.85,Scholarship
+TXN10450,17 Dec 2024,  -  ,Law,Undergraduate,Central,6824.81,0,2,13649.62,Cash
+TXN10062,2023/10/27,Student_0582,Business,Diploma,  ,3192.87,0,3,9578.62,Credit Card
+TXN10320,2023-12-31,Student_0297,Arts,  Graduate  ,South,9959.71,691,6,55613.4,Credit Card
+TXN10322,2022-06-06,Student_0135,Education,Diploma, East,3894.43,0,4,15577.72,Bank Transfer
+TXN10157,"October 30, 2022",Student_0722,Medicine,PhD,East,19029.29,0,3, 57087.86300112847 ,Credit Card
+TXN10100,2024/04/10,Student_0438,ENGINEERING,Graduate,South,16839.41,0,,33678.83,Scholarship
+TXN10004,26 Mar 2023,Student_0333,Medicine,Graduate,North,16749.52,$494.12,3,48766.19,Credit Card
+TXN10115,15 Jun 2022,Student_0666,ENGINEERING,Certificate,Central,1432.63,0,6.0,8595.77,Credit Card
+TXN10638,2024/07/24,Student_0260,Engineering,Graduate,South,15566.26,0,4,62265.02,Bank Transfer
+TXN10423,30-10-2022,Student_0620,Sciences,Graduate,Central,8414.09,0,6,50485,Scholarship
+TXN10778,"July 31, 2024",Student_0364,,Undergraduate,Central,"$7,227.92",0,N/A,28911.69,Credit Card
+TXN10540,2023-07-16,Student_0256,Sciences,Certificate,North,2364.08,0,1,2364.08,
+TXN10396,2024-01-08,Student_0031,Medicine,Undergraduate,East,4036.7,0,6,,Credit Card
+TXN10250,2022-07-03,Student_0688,Business,Diploma,East,,679.26,3,5733.47,Scholarship
+TXN10388,13-04-2024,Student_0125,Engineering,Certificate,North,2844.73,0,3,8534.18,Cash
+TXN10165,07/08/2024,Student_0172,Education, Certificate,  West  ,2285.76,0,1,2285.76,Loan
+TXN10313,12-10-2023,Student_0152,Business,Diploma, East,,0,5,17419.99,Credit Card
+TXN10009,12-05-2022,Student_0022,Law,Certificate,North,"$2,124.70",$988.58,,"$1,136.11",Bank Transfer
+TXN10167,"September 21, 2024",Student_0624,Education,Undergraduate,Central,5574.84,,4,unknown,Credit Card
+TXN10565,06/08/22,Student_0131,Medicine,Certificate,South,1887.02, 0 ,1,1887.02,Loan
+TXN10436,13-03-2024,Student_0676,Education,,West,16791.9,0,2,33583.79,Loan
+TXN10487,07/28/2024,Student_0512,medicine,Diploma,West,2150.78,0,1,2150.78,Scholarship
+TXN10198,2022-01-19,Student_0685,Business,PhD,Central,,1312.91,5, 163466.3022271624 ,Credit Card
+TXN10642,20 Jun 2024,Student_0222,Engineering,PhD,Central,24889.86,0,2,49779.72,Bank Transfer
+TXN10270,"December 06, 2022",Student_0621,Arts,Graduate,East,18088.87,unknown,6.0,103670.37,Credit Card
+TXN10502,2024-05-12,Student_0128,Business,PhD,South,18942.47,1644.91,1,17297.56,Scholarship
+TXN10665,2024-04-24,Student_0205,Business,PhD,West,22856.59,1046.42,,65430.52,Loan
+TXN10617,2024/06/01,Student_0284,Medicine,Undergraduate,South,"$11,302.47",0,1,11302.47,Scholarship
+TXN10522,2024-11-30,Student_0254,Law,Diploma,West,2403.15,0,5,12015.75,Bank Transfer
+TXN10544,"August 26, 2023",Student_0032,N/A,PhD,north,30763.29,802.97,6,179761.89,Loan
+TXN10109,10/02/22,Student_0249,Education,  Graduate  ,West,13556,303.72,4,53010.32,Loan
+TXN10517,2022-11-14,Student_0731,Engineering,Undergraduate,Central,5262.9,,5,26314.51,Scholarship
+TXN10229,14 Jan 2024,Student_0602,Law,PhD, North,20827.13,681.45,3,60437.03,Bank Transfer
+TXN10754,2024-04-13,Student_0027,Engineering,Certificate,South,2937.82,854.81,3,6249,Credit Card
+TXN10379,2022/02/19,Student_0541,Engineering,diploma,North,3711.63,0,4,14846.51,Scholarship
+TXN10530,"April 16, 2022",Student_0554,Engineering,Diploma,East,2072.37,0,1,2072.37,Loan
+TXN10543,2022-08-12,Student_0520,Law,Undergraduate,East,10604.38,0,5.0,53021.89,Credit Card
+TXN10227,17-06-2023,Student_0369,Engineering,Graduate,North,10585.61,0,4,42342.43,Loan
+TXN10414,"March 01, 2023",Student_0405, Sciences,Undergraduate,East,,0,,38062.5,  Bank Transfer  
+TXN10696,2024-02-12,Student_0039,Law,Undergraduate,North,N/A,0,2,16138.15,Scholarship
+TXN10566,"July 10, 2023",Student_0331,Sciences,Diploma,South,3297.33,734.15,3,7689.52,Loan
+TXN10399,08-11-2024,Student_0511,Law,Graduate,Central,8976.89,0,2,17953.78,Loan
+TXN10352,08/05/2023,Student_0173,Engineering,Certificate,Central,2614.6,,3,7843.79,Cash
+TXN10183,2022/07/24,Student_0179,Arts,Undergraduate,East, 8799.031124118286 ,0,3,,Bank Transfer
+TXN10495,2022-09-09,Student_0146,Law,UNDERGRADUATE,West,11863.18,0,4,47452.72,  Scholarship  
+TXN10635,2022/08/04,Student_0789,Education,Graduate,East,18199.58,1090.16,4,68437.71,cash
+TXN10610,"March 07, 2023",Student_0689,Business,Graduate,South,11686.4,749.69,1,10936.71,Loan
+TXN10669,01/13/24,Student_0599,Business,,West,10922.09,1051.06,2,19742.05,Cash
+TXN10136,2022-04-05,Student_0642,Business, Diploma,South,,0,6,24285.84,Bank Transfer
+TXN10267,08/18/2023,student_0002,Medicine,Certificate,South,2322.96,0,5,11614.81,
+TXN10208,2024-01-05,Student_0225,Business,Diploma,Unknown,3507.99,0,6,21047.95,null
+TXN10679,02/29/24,Student_0026,Sciences,Certificate,South,,0,2,5343.41,Loan
+TXN10745,"August 18, 2023",Student_0774,Medicine,,Central,2384.97,0,4,9539.9,Loan
+TXN10106,2022-08-20,Student_0677,Education,Certificate,North,"$1,074.16",0,3,3222.48,Cash
+TXN10200,10 Jun 2024,Student_0074,Education,Graduate,  ,"$16,224.86",0,5,81124.31,Bank Transfer
+TXN10228,08/10/23,Student_0647,Arts,PhD,East,21501.81,1118.8,1,"$20,383.01",Credit Card
+TXN10401,2024-02-23,Student_0184,Sciences,  PhD  ,North,24023.02,0,4.0,96092.1,BANK TRANSFER
+TXN10576,2023-12-20,Student_0350,Sciences,DIPLOMA,WEST,2278.36,0,3.0,6835.07,Cash
+TXN10546,01/12/2024,Student_0467,Arts,PhD,West,18900.47,0,3,56701.42,Credit Card
+TXN10137,18-06-2022,Student_0681,Business,PhD,East,32488.47,0,6,194931,Bank Transfer
+TXN10253,invalid,Student_0396,Engineering,Undergraduate,North,6497.81,0,1.0,6497.81,Scholarship
+TXN10580,21 Nov 2023,Student_0103,Law,Undergraduate,Central,,0,4,24919.83,Scholarship
+TXN10789,"April 24, 2022",Student_0209,Law,Undergraduate,North,4159.08,$0.00,1,4159.08,Bank Transfer
+TXN10362,09/26/2024,  Student_0732  ,,Diploma,  Central  ,3994.37,723.39,4,13083.9,Credit Card
+TXN10144,02-03-2022,Student_0440,  Business  ,PhD,Central,22437.39,0,-6,134624.33,Bank Transfer
+TXN10486,09/13/24,Student_0549,Arts,Certificate,East,2908.41,0,3,8725.24,  Bank Transfer  
+TXN10404,03-03-2022,Student_0143, Sciences,Graduate,North,17241.57,0,4,68966.29,Scholarship
+TXN10472,"May 13, 2024",Student_0592,Medicine,Certificate,North,,0,,7337.71,Bank Transfer
+TXN10688,"July 29, 2022",Student_0168,Law,Undergraduate,East,9455.43,0,1,9455.43,Loan
+TXN10583,2023-12-07,Student_0483,Sciences,Graduate,West,9082.0,0,1,9082,Bank Transfer
+TXN10755,TBD,Student_0779,Engineering,PhD,Central,18652.38,0,2,37304.76,Cash
+TXN10258,10/03/24,Student_0141,Business,Certificate,North,1755.81,0,2,3511.62,  Bank Transfer  
+TXN10660,12 Jan 2023,Student_0200,Law,,  West  ,8677.14,0,5,43385.69,  Credit Card  
+TXN10384,2023-11-04, Student_0709,Arts,Certificate,North,1114.82,0,2,2229.64,Scholarship
+TXN10351,2024-06-20,Student_0194,Arts,TBD,South,16842.43,0,5,,Loan
+TXN10181,01-12-2024,Student_0638, Business,Graduate,North,16342.3,0,4,65369.22,Loan
+TXN10598,05/06/2023,Student_0484,Medicine,Certificate,  East  ,null,0,4,7113.35,Bank Transfer
+TXN10287,2022-08-26,Student_0172,Law,Certificate,Central,2093.94,0,1,2093.94,
+TXN10172,29-07-2024,Student_0224,Law,PhD,West,,1356.93,4,131934.23,Loan
+TXN10128,2024-07-26,Student_0269,Medicine,Undergraduate,East,3915.77,0,3,11747.31,Loan
+TXN10032,N/A,Student_0088,Arts,Graduate,South,17573.99,0,5,87870,Bank Transfer
+TXN10586,01/26/2022, Student_0327,Sciences,Undergraduate,North,10256.06,0,6,61536.36,Credit Card
+TXN10666,02/10/2023,Student_0422,Law,PhD,West,28612.6,1584.63,5,135139.86,Cash
+TXN10340,11-12-2024,Student_0509,Business, Graduate,East,9343.19,0,5,46715.94,Scholarship
+TXN10391,"April 25, 2022",Student_0054,Education,UNDERGRADUATE,West,6977.27,742.65,,6234.62,Scholarship
+TXN10614,"September 05, 2023",Student_0205,Law,Graduate,Central,8887.87,1958.92,2,,Cash
+TXN10370,2024/04/08,Student_0203,SCIENCES,Certificate,West,2109.7,-1797.6435644922071,6,1872.33,Cash
+TXN10031,04-07-2023,Student_0252,LAW,Diploma,South,2715.37,1654.76,4,4242.45,Credit Card
+TXN10276,20-08-2022,Student_0491,Education,PhD,Central,32215.83,784.57,1, 31431.261898816883 ,Loan
+TXN10054,03/21/23,Student_0456,Education,UNDERGRADUATE,East,7404.12,0,1,7404.12,Cash
+TXN10378,2022-02-08,Student_0675,Medicine,,South,4095.85,0,4,16383.4,Loan
+TXN10788,14 Apr 2024,Student_0044,Engineering,PhD,East,28908.34,0,2,57816.68,Loan
+TXN10191,29 Dec 2022,Student_0593,Medicine,undergraduate,Central,11417.77,1709.87,5,48539.53,Bank Transfer
+TXN10409,11 Jan 2023,STUDENT_0583,Sciences,N/A,East,10989.62,1819.94,-4,36678.73,Bank Transfer
+TXN10691,11/12/24,Student_0164,Sciences,Graduate,South,10553.34, 0 ,3,,Loan
+TXN10537,20 Jun 2024,Student_0783,engineering,Graduate,North,12468.68,0,1,"$12,468.68",Loan
+TXN10717,"July 22, 2023",Student_0582,Engineering,Undergraduate,West,4700.35,1881.42,4,11275.73,Credit Card
+TXN10601,18-07-2022,Student_0658,Sciences,PhD,South,28130.74,0,4,112522.96,Credit Card
+TXN10040,11-10-2024,Student_0679,Arts,Certificate,WEST,1520.87, 0 ,2,3041.74,Cash
+TXN10506,09/15/2024,Student_0095,Medicine,UNDERGRADUATE,Central,7748.3,1240.19,3,19524.32,Cash
+TXN10612,09-06-2023,,Sciences,Graduate,Central,17204.58,0,2,34409.17,  Cash  
+TXN10529,12/17/24,Student_0195,Engineering,Graduate,East,12314.73,0,3,36944.2,Scholarship
+TXN10328,28 Jul 2022,  Student_0173  ,Sciences,Certificate,Central,1806.66,0,2,3613.31,Loan
+TXN10133,26-12-2024,Student_0612,Medicine,Graduate,East,9670.82,0,1,9670.82,Bank Transfer
+TXN10158,01/01/2024,Student_0682,Law,Graduate, East,19384.32,1625.32,6,106554.04,null
+TXN10510,N/A,Student_0114,  Medicine  ,TBD,  South  , 27148.96269047502 ,0,6,162893.78,Scholarship
+TXN10518,2023/10/23, Student_0593,Arts,Undergraduate,West,11281.75,0,5,56408.74,Loan
+TXN10447,20 Jan 2022,Student_0526,Medicine,Diploma,Central,"$4,175.78",1729.33,5,12232.21,Bank Transfer
+TXN10589,24 Dec 2024,Student_0406,SCIENCES,UNDERGRADUATE,South,5921.69,0,3,17765.08,Bank Transfer
+TXN10677,"May 04, 2022",Student_0774,  Arts  ,PhD,,30085.94,0,4,120343.77,Credit Card
+TXN10760,2022/09/10,Student_0378,Sciences,Undergraduate,East,3962.58,0,2,7925.17,Bank Transfer
+TXN10394,15 Feb 2023,Student_0207,Education,Diploma,West,5258.29,1745.66,3,10537.87,Scholarship
+TXN10722,04/18/23,Student_0615,Business,Certificate,Central,1044.82,0,2,2089.64,Credit Card
+TXN10545,2022-06-10,Student_0230,Sciences,Graduate,West,-17968.72123325046,0,4,71874.88,Loan
+TXN10507,11/29/2023,Student_0605,Business,Undergraduate,East,3118.15,589.04,2,-5058.2182376357905,Credit Card
+TXN10473,05/12/2024,Student_0216,  Arts  , Undergraduate,South,,0,3,18743.18,  Loan  
+TXN10066,06/09/2023,Student_0178,Arts,PhD,South,29547.58,0,2,59095.16,Loan
+TXN10080,"January 05, 2023",Student_0301,ARTS,Diploma,East,5105.17,0,4,20420.67,Credit Card
+TXN10390,2022/05/30,Student_0615,Business,Certificate, Central,2897.01,0,5,14485.03,Cash
+TXN10282,11/09/24,Student_0566,Education,Certificate,West,1640.07,1620.07,5,100.0,Scholarship
+TXN10627,12 Mar 2022,Student_0395,Education,PhD,North,N/A,0,6,,Scholarship
+TXN10027,"March 17, 2024",Student_0578,LAW,Certificate,West,912.61,0,5,4563.06,Scholarship
+TXN10764,09/12/2024,student_0192,Arts,Undergraduate,East,9916.44,1585.44,5,41655.01,Loan
+TXN10683,14 Apr 2023,Student_0608,Arts,Diploma,Central,,0,2,8194.98,Loan
+TXN10201,"August 31, 2022",Student_0007,Sciences,Certificate,  ,1627.81,0,1,1627.81,LOAN
+TXN10712,11/19/2022,Student_0614,Sciences,  Graduate  ,  ,15378.75,1622.84,6,82535.45,Cash
+TXN10400,05/20/24,Student_0586,Business,Graduate, North,18739,0,4,74954.46,Scholarship
+TXN10682,"January 27, 2024",  Student_0485  ,Business,Diploma,South,3883.37,0,6,23300.19,Scholarship
+TXN10412,21-06-2024,Student_0183,Unknown,Undergraduate,North,9673.02,0,6,58038.11,Scholarship
+TXN10719,03/27/2023,Student_0393,Medicine,PhD,North,22071.03,0,5,-110355.14387545585,Bank Transfer
+TXN10659,01/30/24,Student_0757,Education,Unknown,South,N/A,0,2,12985.15,Bank Transfer
+TXN10184,12/03/2023,Student_0117,Arts,Graduate,West,12290.33,0,6,73741.97,Bank Transfer
+TXN10366,2022/07/28,  ,Education,certificate,South,1642.84,0,1,1642.84,Cash
+TXN10094,2024/08/23,Student_0754,Arts,Certificate,Central,1546.95,0,4,6187.8,Loan
+TXN10452,2022-08-08,Student_0359,Education,Diploma,North,3697.2,840.34,3,8570.58,
+TXN10037,2023-08-20,Student_0238,Medicine,Graduate,North,8900.78,204.82,6,52175.77,Bank Transfer
+TXN10469,08/14/2022,Student_0105,Law,  Certificate  ,east,2710.56,0,4,10842.24,Bank Transfer
+TXN10640,15-06-2024,Student_0773,Education,,South,12592.36,676.42,3,35747.8,Loan
+TXN10141,11-05-2024,Student_0560,Engineering,Diploma,,"$3,877.29",0,N/A,11631.87,Scholarship
+TXN10780,02/12/2022,Student_0430, Medicine,Certificate,Central, 2194.7576086065005 ,0,4,8779.03,Cash
+TXN10356,2022-07-10,Student_0526,Education,Undergraduate,South,6802.83,0,4.0,27211.31,Cash
+TXN10291,01-06-2022,  Student_0796  ,Education,PhD,East,23539.67,0,3,70619.0,Loan
+TXN10715,2022/10/13,Student_0789,Arts,PhD,Central,26955.21,0,5, 134776.0509132207 ,Credit Card
+TXN10068,21-01-2023,Student_0620,Sciences,  Diploma  ,North,3582.2,0,4.0,14328.81,Cash
+TXN10567,2024-08-28,Student_0326,Business,  Certificate  ,North,2840.51,0,2,5681.01,Cash
+TXN10525,12/11/24,  Student_0526  ,Arts,Graduate,Central,14007.66,0,3,42022.98,Credit Card
+TXN10625,06/20/2024,Student_0618,,Undergraduate, East,11893.72,402.34,4,45965.54,Scholarship
+TXN10346,11-02-2023,Student_0719,None,Diploma,SOUTH,1593.31,0,1,1593.31,Scholarship
+TXN10621,04/30/2024,Student_0216,Engineering,Graduate,East,19288.35,,6,115730.1,Cash
+TXN10306,2024/07/29,Student_0585,,PhD,South,27952.8,363.31,6,165536.95,Cash
+TXN10134,05/27/2023,Student_0729,Engineering,Certificate,West,2981.22,0,6,17887.29,Cash
+TXN10299,08/05/23,Student_0711,Engineering,Graduate,South,18555.52,0,2,37111.05,Cash
+TXN10520,03/15/2024,Student_0413,Medicine,Diploma,Central,"$3,179.00",$0.00,1,3179.0,Credit Card
+TXN10777,09/09/2022,Student_0423,Engineering,PhD,East,,0,4,88917.34,Cash
+TXN10613,09 Mar 2024,Student_0724,Arts,Graduate,  West  ,"$16,674.19",1894.69,1,14779.5,credit card
+TXN10444,21 May 2024,Student_0147,  Sciences  ,PhD,South,27995.38,493.97,1,27501.4,Bank Transfer
+TXN10556,04-01-2023,Student_0238,Sciences,Diploma,West,4339.62,0,4,17358.47,Credit Card
+TXN10236,03/10/2022,Student_0472,ENGINEERING,Undergraduate,South,11771.39,1486.43,4,41139.83,Cash
+TXN10620,03/04/23,Student_0051,Engineering,Certificate,West,-2585.393107459204,875.21,6,10261.13, Loan
+TXN10035,2024-09-05,Student_0067,  Sciences  ,Certificate,North,1601.17,0,3.0,4803.52,Loan
+TXN10339,27 Dec 2022,Student_0044,Business,,North,4434.23,$0.00,3,13302.68,Cash
+TXN10039,2022/02/12,Student_0689,Law,Certificate,South,1305.8,0,2,2611.61,Scholarship
+TXN10130,2024-01-06, Student_0497,Arts,Certificate,Central,850.74,766.24,5,422.49,BANK TRANSFER
+TXN10163,03/25/24,Student_0501,Business,Graduate,West,15658.29,1958.7,1,13699.58,Scholarship
+TXN10017,24-09-2023,Student_0041,Medicine,Graduate,North,8432.34,0,4,33729.35,Bank Transfer
+TXN10746,15 Apr 2023,Student_0594,Education,PhD,North,26817.87,0,,N/A,Credit Card
+TXN10296,02 Nov 2022,Student_0594,  Sciences  ,Undergraduate,West,4063.68,1652.79,-,14465.38,Cash
+TXN10555,08/02/2023,Student_0204,LAW,Graduate,,"$10,348.14",1046.21,2,18603.86,Scholarship
+TXN10624,2022/02/28,Student_0027,Sciences,N/A,None,4836.69,0,3, 14510.076189516112 ,Credit Card
+TXN10639,02-07-2022,Student_0361,Law,Diploma,South,2948.47,0,2,5896.93,Loan
+TXN10441,2022/09/12,Student_0772,Sciences,undergraduate,Central,,1165.55,1,null,Bank Transfer
+TXN10241,"November 12, 2022",Student_0290,Law,undergraduate,Central,TBD,0,N/A,58522.34,None
+TXN10275,2022/07/10,Student_0716,Law,Graduate,West,17100.83,0,4,68403.32,Credit Card
+TXN10773,0000-00-00, Student_0211,Medicine,Diploma,North,1920.91,$0.00,2,3841.83,Credit Card
+TXN10605,03/09/22,STUDENT_0642,Law,  Diploma  ,Central,5578.36,0,6.0,33470.15,Scholarship
+TXN10571,03/15/2023,Student_0649,Law,Certificate,Central,1686.2,0,5,8430.98,Credit Card
+TXN10041,2024/06/24,Student_0053,Sciences,Diploma,West,3359.61,,5,16798.07,Bank Transfer
+TXN10609,11/09/24,Student_0508,  Engineering  ,Certificate,EAST,2943.07,1902.25,1,1040.82,Bank Transfer
+TXN10468,"July 30, 2022",student_0304,Engineering,Graduate,North,,0,1,14522.32,Bank Transfer
+TXN10775,25-12-2023,Student_0389,Education,Undergraduate,East,8677.61,0,6,52065.69,Loan
+TXN10582,2022-04-21,Student_0317,Law,Diploma,West,,0,2,11485.62,Cash
+TXN10691,11/12/24,Student_0164,Sciences,Graduate,South,10553.34, 0 ,3,,Loan
+TXN10143,08/26/22,Student_0627,Law,Certificate,south,2883.57,0,1,2883.57,Loan
+TXN10585,10-07-2022,Student_0394,Law,Undergraduate,West,5070.66,0,2,10141.32,Scholarship
+TXN10687,"February 08, 2024",Student_0027,Engineering,PhD,East,17478.3,1761.93,3,47149.11,Cash
+TXN10179,09-12-2024,Student_0445,Business,PhD,West,16305.74,0,4,65222.96,Bank Transfer
+TXN10667,04-10-2023,Student_0208,Engineering,Undergraduate,North,3078.02,0,3,9234.05,Bank Transfer
+TXN10536,16 Oct 2023,Student_0555,  Education  ,PhD,Central,"$26,028.12",0,5,130140.58,Credit Card
+TXN10075,08/18/24,,  Education  ,PhD,South,17920.99,268.95,6,105912.24, Credit Card
+TXN10154,02/09/22,Student_0731,Business,Certificate,Central,2106.63,0,6,12639.79,  Credit Card  
+TXN10584,27-05-2022,Student_0501,Sciences,,Central,17279.13,1816.44,5,,Loan
+TXN10707,2022-08-26, Student_0169,Arts,Undergraduate,,4644.1,812.13,2,7663.95,Credit Card
+TXN10272,2024-12-05,Student_0005,  ,Diploma,north,5967.24,0,,23868.97,Bank Transfer
+TXN10108,07 Dec 2023,Student_0688,Law,Diploma,West,5602.1,1326.79,5,21376.56,Credit Card
+TXN10569,"December 05, 2024",Student_0661,Engineering,Graduate,Central,16767.9,0,5,83839.48,Bank Transfer
+TXN10737,15-11-2023,Student_0122,Sciences,Undergraduate,West,6653.32,977.9,4,22701.68,Bank Transfer
+TXN10344,11/01/23,,  Education  ,Undergraduate,West,-4443.090120601204,0,3,13329.27,cash
+TXN10743,2023-01-12,Student_0169,Law,PhD,East,34333.94,0,5,171669.71,Bank Transfer
+TXN10375,06-02-2024,Student_0302,Engineering,Undergraduate,Central,6326.27,0,1,6326.27,
+TXN10676,04/12/2023,Student_0405,Law,Graduate,Central,9488.12,0,2,18976.25,Cash
+TXN10403,2022/11/02,Student_0408,Education,PhD,South,34936.85,0,4,139747.39,Cash
+TXN10089,2022/11/24,Student_0336,Engineering,Graduate,South,8607.26,1901.69,2,,Scholarship
+TXN10164,2024/04/27,Student_0604,  Medicine  ,PhD,Central,16232.79,0,1,16232.79,Scholarship
+TXN10336,05 Jun 2024,Student_0553,Arts,Graduate,Central,17547.82,0,,87739.1,Bank Transfer
+TXN10358,2022-04-03,Student_0427,Engineering,Diploma,West,2012.71,0,2,4025.42,Bank Transfer
+TXN10645,2022-10-30,Student_0699,Engineering,Graduate,East,14719.5,0,3,44158.51,Bank Transfer
+TXN10230,2024/12/09,student_0086,Engineering,UNDERGRADUATE,West,3574.13,0,1,-3574.131596320442,
+TXN10185,"January 07, 2023",Student_0389,Education,Undergraduate,South,4434.56,948.85,5,"$17,428.54",
+TXN10748,06/13/2023,Student_0674,Arts,Undergraduate,West,8821.59,0,1,8821.59,Loan
+TXN10675,01/17/23,Student_0295,Arts,Certificate,West,,0,6,12381.78,Loan
+TXN10087,27 Jun 2023,Student_0216,Law,Diploma,West,5559.0,0,1,5559.0,Scholarship
+TXN10148,05/03/23,Student_0504,Education,Undergraduate,EAST,8915.73,0,1,8915.73,Credit Card
+TXN10554,03/20/22,Student_0103,Arts,Diploma,Central,2742.49,-,6,16454.92,Loan
+TXN10743,2023-01-12,Student_0169,Law,PhD,East,34333.94,0,5,171669.71,Bank Transfer
+TXN10003,2023-08-16,Student_0239,Education,Diploma,East,3127.36,0,1,3127.36,Cash
+TXN10374,07/26/2024,Student_0722,Law,Certificate,West,2933.18,0,5,14665.91,Loan
+TXN10016,2022-04-15,Student_0650,Law,,South,12114.56,0,5,60572.82,cash
+TXN10151,TBD,Student_0267,Engineering,Graduate,West,16533.89,1943,5,72953.84,
+TXN10531,"August 16, 2022",Student_0483,Medicine,Diploma,North,3750.21,0,5,-18751.05768088538,Loan
+TXN10415,2024-10-20,Student_0730,Law,PhD,South,27478,0,4,109912.75,Bank Transfer
+TXN10242,2022-05-26,Student_0214,Medicine,Certificate,West,"$2,059.93",0,3,6179.78,Credit Card
+TXN10509,11/05/22,Student_0515,Sciences,Diploma,EAST,3083.81,0,3,9251.42,Scholarship
+TXN10716,02/07/2024,Student_0402,Medicine,Graduate,Central,17479.34,$0.00,6,104876.04,Loan
+TXN10063,04/04/2022,Student_0405,  Engineering  ,Diploma,South,3053.28,399.6,5,13268.38,Scholarship
+TXN10490,08/01/22,Student_0768,Engineering,UNDERGRADUATE,West,10253.46,0,5,51267.29,Scholarship
+TXN10465,07-06-2024,Student_0152,BUSINESS,Certificate,South,1310.66,567.05,2,1487.21,
+TXN10122,16-10-2023,Student_0753,Medicine,PhD,South,33945.58,0,2,67891.16,Bank Transfer
+TXN10731,26 Oct 2022,Student_0729,  Engineering  ,Certificate,Central,1381.21,0,1,1381.21,Credit Card
+TXN10413,02/07/2024,STUDENT_0205,Engineering,Certificate,East,1995.51,$287.60,2,3416,Bank Transfer
+TXN10439,20 Dec 2022,Student_0764,Business,Certificate,North,584.98,633.54,3,-145.67,
+TXN10652,2022/07/22,STUDENT_0533,Business,Certificate,Central,2485.13,0,4,9940.54, Credit Card
+TXN10322,2022-06-06,Student_0135,Education,Diploma, East,3894.43,0,4,15577.72,Bank Transfer
+TXN10603,"October 31, 2022",Student_0013,Education,PhD,Central,22684.53,0,2,45369.07,Loan
+TXN10720,01/07/2022,Student_0688,Business,Graduate,West,13514.08,0,2,27028.16,Bank Transfer
+TXN10505,06 Nov 2023,Student_0628,Arts,Undergraduate,South, 10949.874118451 ,0,3,32849.62,Scholarship
+TXN10024,10/30/24,Student_0562,Sciences,Undergraduate,West,4200.05,0,4,16800.21,Bank Transfer
+TXN10461,2023-08-17,  Student_0580  ,Medicine,Diploma,West,5058.98,0,6.0,30353.9,Loan
+TXN10747,"October 14, 2024",Student_0219,Sciences,Diploma,South,1573.55,0,5,7867.73,Cash
+TXN10235,17-10-2024,Student_0475,  ,Graduate,  South  ,9808.2,$0.00,4,39232.82,Credit Card
+TXN10347,30-06-2023,Student_0765, Education,Certificate,Central,2184.03,0,2,4368.05,
+TXN10030,2024-01-29,Student_0519,,PhD,west,28685.18,0,3,86055.54,Scholarship
+TXN10419,22 May 2024,Student_0479,Business,Graduate,South,9506.73,0,2,19013.46,SCHOLARSHIP
+TXN10327,06/28/2024,Student_0568,Arts,Undergraduate,North,7443.42,892.61,5,,Scholarship
+TXN10698,26-10-2022,Student_0753,Medicine,Certificate,East,909.74,0,6,5458.42,Scholarship
+TXN10557,21-08-2022,Student_0714, Arts,Certificate,West,1118.49,,4,4473.96,  Scholarship  
+TXN10182,10/13/2024,Student_0705,Education,,North,25462.92,563.01,3,74700,  Loan  
+TXN10528,02/14/2023,Student_0259,Business,Undergraduate,South,5890.43,1457.71,2.0,,Cash
+TXN10118,07/11/24,Student_0234,Medicine,Diploma,Central,3285,0,6,19710.98,Cash
+TXN10249,"April 11, 2022",Student_0409,Education,PhD,South,22886.45,0,4,91545.79,Loan
+TXN10553,09/03/22,Student_0443,SCIENCES, Diploma,East, 4794.402383280627 ,1137.61,3.0,10970.38,Cash
+TXN10238,07 Jul 2022,Student_0634,Law,Certificate,  North  ,1990.53,0,2,-3981.0614196580627,Bank Transfer
+TXN10437,2022/04/21,Student_0727,Law,PhD,West,33461.28,1462.0,1,31999.28,Cash
+TXN10240,09-07-2024,Student_0270,Education,PhD,Central,31626.99,,1,31626.99,Bank Transfer
+TXN10449,01/22/22,Student_0694,Engineering,Graduate,Central,9981.36,0,5,,Bank Transfer
+TXN10622,22 Jun 2022,Student_0660,Education,,East,16306.11,N/A,2,32612.22,Bank Transfer
+TXN10704,02/25/22,Student_0040,Education,CERTIFICATE,East,1848,0,6,11085.26,Scholarship
+TXN10758,23-08-2023,Student_0140,Engineering,Graduate,East,13156.68,1303.86,2,23705.63,Loan
+TXN10349,2022-04-04,Student_0260,Arts,Undergraduate, East,11379.58,TBD,5,56897.91,Credit Card
+TXN10394,15 Feb 2023,Student_0207,Education,Diploma,West,5258.29,1745.66,3,10537.87,Scholarship
+TXN10587,31-12-2024,Student_0115,Medicine,Undergraduate,West,10264,,4,41056.5,Credit Card
+TXN10176,05/26/22,Student_0200,Arts,Diploma,East,3586.92,0,6,21521.54,Loan
+TXN10430,16-06-2022,Student_0439,Law,PhD,North,23886.12,1292.17,6,135563.7,Loan
+TXN10532,14-03-2022,Student_0073,Education,PhD,North,28266.72,0,4, 113066.89018745394 ,Scholarship
+TXN10268,2023/10/26,student_0007,Law,Graduate,Central,,0,3,34138.56,Scholarship
+TXN10199,07/01/24,Student_0045,Engineering,PhD,North,33226.72,0,5,,Cash
+TXN10644,12 Apr 2023,Student_0357,Business,Diploma,South,1934.8,"$1,851.46",5,416.67,  Scholarship  
+TXN10776,"August 15, 2023",Student_0637,Sciences,PhD,Central,,0,,50888.89,Bank Transfer
+TXN10187,10/19/2023,Student_0339,  Medicine  ,Graduate,West,18186.15,0,1,18186.15,Scholarship
+TXN10550,07/17/24,Student_0329,Education,Diploma,North,5714.8,null,5,28573.98,Scholarship
+TXN10604,09/18/24,Student_0015,  Sciences  ,PhD,South,32308.17,0,5,161540.87,Credit Card
+TXN10504,2022-07-30,, Sciences,Certificate,West,2622,0,3,7865.04,Loan
+TXN10095,20-05-2023,Student_0572,Law,PhD,East,30439.8,0,5,152198.98,Credit Card
+TXN10655,02/21/23,Student_0212,Business,None,South, 3887.856610976932 ,0,6,23327.14,Credit Card
+TXN10166,2022/01/26,Student_0718,Engineering,Undergraduate,West,6492.89,0,3, 19478.67713139827 ,Cash
+TXN10015,"September 12, 2023",Student_0670,Engineering,PhD,North,-32585.404849690854, 0 ,4,130341.62,Credit Card
+TXN10020,"January 04, 2022",Student_0552,Engineering,Diploma,South,"$3,233.38",0,1,3233.38,Cash
+TXN10192,15-11-2024,Student_0719,Arts,PhD,Central,24056.91,440.07,5,118084.22,Bank Transfer
+TXN10175,14 Jun 2023,Student_0573,Education,Graduate,East,15891.38,0,1,15891.38,Credit Card
+TXN10069,03/04/24,Student_0794,Sciences,Certificate,  East  ,1810,0,3,5430.51,Loan
+TXN10353,09/07/22,Student_0383,Law,Certificate,,735.76,0,6,4414.58,Credit Card
+TXN10512,26-05-2024,Student_0022,Business,  Undergraduate  ,North,4686.1,0,1,4686.1,
+TXN10759,03 Sep 2022, Student_0255,Unknown,Undergraduate,North,-8316.636232439312,0,5,41583.18,Bank Transfer
+TXN10475,2024/03/22,Student_0434,Engineering,Graduate,East,18573.89,0,5,92869.43,Cash
+TXN10146,25 Oct 2024,Student_0054,Sciences,Graduate,  West  ,18990.26,0,5,94951.29,Loan
+TXN10111,10/15/24,Student_0101,Sciences,Certificate,East,1834.13,0,3,5502.38,
+TXN10548,2022/03/11,,Engineering,  Certificate  ,Central,916.93,953.53,6,-219.59,Loan
+TXN10482,05-10-2023,Student_0086,Sciences,Certificate,North,2642.5,0,4,10570.01,Cash
+TXN10408,"March 28, 2024",Student_0253,Law,Diploma,West,N/A,0,2,9163.52,Credit Card
+TXN10200,10 Jun 2024,Student_0074,Education,Graduate,  ,"$16,224.86",0,5,81124.31,Bank Transfer
+TXN10257,07/15/2023,Student_0798, Law,,Central,8353.8,773.64,4,30320.65,Cash
+TXN10699,05 Jan 2024,Student_0478,Arts,Certificate,North,2903.47,0,2,5806.93,Bank Transfer
+TXN10465,07-06-2024,Student_0152,BUSINESS,Certificate,South,1310.66,567.05,2,1487.21,
+TXN10463,16 Apr 2022,Student_0255,Law,undergraduate,East,4333.26,0,3,12999.77,Credit Card
+TXN10243,"March 19, 2023",student_0100,Education,Undergraduate,South,8552.4,0,3,25657.2,Scholarship
+TXN10055,05/14/2023,Student_0579,Engineering,Certificate,Central,2156.92,0,1,2156.92,Cash
+TXN10292,23 Jun 2024,student_0266,  Engineering  ,Certificate,East,,0,5,,Cash
+TXN10283,13 Sep 2024,Student_0082,Arts,Diploma,East,"$1,650.58",268.16,6.0,8294.53,Cash
+TXN10442,"January 15, 2024",Student_0176,Medicine,,TBD,5310.84,0,1,5310.84,Loan
+TXN10097,12/23/2024,Student_0654,engineering,Graduate,west,15388.12,,1,15388.12,Scholarship
+TXN10045,2024-07-24,Student_0740,Arts,Diploma,North,5413.65,1773.54,1,3640.11,Credit Card
+TXN10523,02/14/2022,Student_0146,Arts,Diploma,Central,5197.59,0,4,20790.36,Credit Card
+TXN10302,10/30/2023,student_0798,Law,Graduate,West,13337.85,1243.57,2,24188.56,Scholarship
+TXN10406,2022/03/07,Student_0706,,Certificate,West,2736.86,0,-6,"$16,421.16",
+TXN10145,2022-01-06,Student_0013,Education,PhD,South,17058.1,N/A,2,34116.2,Scholarship
+TXN10049,21-03-2024,Student_0009,Arts,Diploma,North,4086.65,0,1,4086.65,Bank Transfer
+TXN10331,N/A,Student_0571,Sciences,Undergraduate,South,-7051.0396721291,1735.17,4, 21263.463805723994 ,Scholarship
+TXN10593,2023/12/11,Student_0456,Arts,Diploma,Central,3936.56,0,N/A,11809.68,Cash
+TXN10173,2023/10/28,Student_0284,Arts,Diploma,East,2843.14,0,-3,8529.43,Loan
+TXN10744,2022-01-06,Student_0495,Engineering,Certificate,South,2427.15,0,5,12135.75,Loan
+TXN10051,2023/11/25,Student_0118,  Education  ,PhD,South,18290.89,1845.29,3,49336.8,CREDIT CARD
+TXN10607,05/30/2022,student_0490,EDUCATION,Diploma,Central,4115.72,0,,12347.15,Cash
+TXN10271,07/09/22,,Business,PhD,South,25502.01,0,1,25502.01,Cash
+TXN10315,07/24/2023,STUDENT_0024,Sciences,Graduate,North,12288.72,0,5,61443.61,Cash
+TXN10304,12/04/24,Student_0222,Business,Diploma,West,4101.55,0,1,4101.55,Loan
+TXN10559,0000-00-00,Student_0093,Medicine,Diploma,  Central  ,TBD,0,6,17901.47,Loan
+TXN10684,2023/01/31,Student_0789,Sciences,Diploma,North,3582.1,,1,3582.1,Loan
+TXN10077,31 Mar 2022,Student_0397,Engineering,,North,34068.07,0,4,136272.29, Credit Card
+TXN10459,"March 07, 2023",STUDENT_0394,arts,Graduate, Central,12326.82,0,2,24653.65,Scholarship
+TXN10224,12/24/22,Student_0124,Engineering,Graduate,North,14308.83, 0 ,5,71544.13,Bank Transfer
+TXN10195,05/30/2023,Student_0636,Sciences,Undergraduate,South,6487.99,0,5,32439.96,Loan
+TXN10125,"March 31, 2023",Student_0765,Education,Certificate,West,1328.99,0,1,1328.99,Cash
+TXN10386,08-10-2024,Student_0038,Business,PhD,,16799.33,0,6,100795.98,Loan
+TXN10208,2024-01-05,Student_0225,Business,Diploma,Unknown,3507.99,0,6,21047.95,null
+TXN10588,0000-00-00,Student_0472,Law,Diploma,East,5424.92,982.8,,13326.37,Credit Card
+TXN10560,2023-05-25,Student_0037,Arts,Graduate,Central,17615.42,0,4,70461.7,  
+TXN10508,05/16/2024,Student_0703,Education,Certificate,South, 2051.1951318655915 , 565.4373094740354 ,,2971.52,
+TXN10367,01/14/2022,Student_0486,Arts,PHD,East,31383.22,0,4,125532.86,Loan
+TXN10136,2022-04-05,Student_0642,Business, Diploma,South,,0,6,24285.84,Bank Transfer
+TXN10326,02/17/24,Student_0220,Arts,Certificate, East, 2245.3322669375793 ,0,2,4490.66,Loan
+TXN10686,10/30/22,Student_0641,Engineering,PhD,east,15576.42,1359.18,1,14217.25,Bank Transfer
+TXN10526,2024/11/04,Student_0675, Education,Undergraduate,Central,8806.21,877.74,N/A,39642.33,BANK TRANSFER
+TXN10244,"January 05, 2023",Student_0412,Arts,Diploma,Central,4535.22,1464.59,1,3070.63,Credit Card
+TXN10433,25-08-2022,student_0090,Law,Certificate,South, 2105.255506654864 ,1211.42,2,1787.67,Loan
+TXN10769,2022-03-06,Student_0744,Business,Graduate,East,9591.54,1029.54,2,17124.0,
+TXN10225,03/08/23,Student_0718,Arts,Graduate,West,-13656.144376861466,0,2,27312,Credit Card
+TXN10116,,Student_0701,Medicine,Undergraduate,North,11272.37,,3,31976.37,Scholarship
+TXN10389,06/02/2022,Student_0202,Engineering,PhD,,32601.97,,6,195611.82,Credit Card
+TXN10001,"June 28, 2022",  ,Engineering,Undergraduate,North,9673.95,0,6,58043.73,Credit Card
+TXN10168,2022/07/21, Student_0234,Arts,Undergraduate,East,10356.47,0,4,41425.89,Scholarship
+TXN10618,TBD,Student_0438,Medicine,Certificate,East,1234.53,1322.64,1,-88.11,Loan
+TXN10081,11-04-2024,Student_0526,Arts,Certificate,South,2098.67,0,1,2098.67,Credit Card
+TXN10105,30 Sep 2022,student_0357,Arts,Certificate,South,2982.14,,,8374.71,Loan
+TXN10695,2023-02-24,Student_0652,Education,  -  ,,15700,0,3,47099.57,Loan
+TXN10169,11/03/24,Student_0139,Education,Diploma,South,3182.6,0,1,3182.6,Credit Card
+TXN10210,19 Nov 2024,Student_0288,Medicine,Certificate,North,516.49,1787.66,2,-2542.33,Scholarship
+TXN10011,08/05/2024,Student_0078,Business,Undergraduate,North,4724.31,,4,18897.24,Bank Transfer
+TXN10476,2022/06/08,Student_0710,Law,Graduate,West,10542.37,0,4, 42169.48368563738 ,Cash
+TXN10082,"June 07, 2022",Student_0141,Engineering,Diploma,South,,0,3,12668.78,Cash
+TXN10558,22-04-2022,Student_0498,Arts,PhD,East,28499.78,940.21,4,110238.27,Cash
+TXN10479,04/20/2023,Student_0698,Arts,Undergraduate,Central,4451.01,0,6,26706.04,Bank Transfer
+TXN10112,"February 17, 2024",Student_0252,Medicine,Diploma,East,4106.14,0,2,8212.29,Credit Card
+TXN10411,09/19/24,STUDENT_0070,Arts,Undergraduate,West,4032.14,0,6,,Cash
+TXN10354,09/22/2022,Student_0050,Arts,Undergraduate,North,11727.93,1381,3,31040.47,SCHOLARSHIP
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
