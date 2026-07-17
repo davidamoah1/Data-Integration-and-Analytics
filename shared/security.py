@@ -180,3 +180,50 @@ def validate_sql_identifier(name: str) -> str:
     if not name or not _SQL_IDENTIFIER_RE.match(name):
         raise ValueError(f"Invalid SQL identifier: {name!r}")
     return name
+
+
+# --- API key encryption ------------------------------------------------------
+
+from cryptography.fernet import Fernet, InvalidToken  # noqa: E402
+import hashlib as _hashlib  # noqa: E402
+import base64 as _base64  # noqa: E402
+
+
+def _get_fernet_key() -> bytes:
+    """Derive a Fernet key from JWT_SECRET_KEY for symmetric encryption."""
+    secret = JWT_SECRET_KEY.encode()
+    derived = _hashlib.sha256(secret).digest()
+    return _base64.urlsafe_b64encode(derived)
+
+
+def encrypt_secret(plaintext: str) -> str:
+    """Encrypt a secret string using Fernet symmetric encryption.
+
+    Args:
+        plaintext: The secret to encrypt (e.g. an API key).
+
+    Returns:
+        Encrypted string safe for database storage.
+    """
+    if not plaintext:
+        return ""
+    f = Fernet(_get_fernet_key())
+    return f.encrypt(plaintext.encode()).decode()
+
+
+def decrypt_secret(ciphertext: str) -> str:
+    """Decrypt a Fernet-encrypted secret.
+
+    Args:
+        ciphertext: The encrypted string from the database.
+
+    Returns:
+        Decrypted plaintext string, or empty string if decryption fails.
+    """
+    if not ciphertext:
+        return ""
+    try:
+        f = Fernet(_get_fernet_key())
+        return f.decrypt(ciphertext.encode()).decode()
+    except InvalidToken:
+        return ""

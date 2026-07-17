@@ -23,11 +23,22 @@ def _get_db_session():
 def _get_user_id() -> int:
     """Return a numeric user ID for the AI gateway.
 
-    The dashboard uses simple session auth without a database user record.
-    We use a sentinel ID of 1 (typically the seeded admin user) so that
-    conversation history is still persisted per-user in the AI tables.
+    Uses the authenticated user's ID from session state if available,
+    falling back to 1 (seeded admin) only as a last resort.
     """
-    return st.session_state.get("ai_user_id", 1)
+    return st.session_state.get("user_id", st.session_state.get("ai_user_id", 1))
+
+
+def _get_user_permissions() -> list[str]:
+    """Return the current user's permissions for RBAC enforcement."""
+    user = st.session_state.get("user", {})
+    return user.get("permissions", [])
+
+
+def _get_user_roles() -> list[str]:
+    """Return the current user's roles for RBAC enforcement."""
+    user = st.session_state.get("user", {})
+    return user.get("roles", [])
 
 
 def _init_copilot_state():
@@ -51,7 +62,7 @@ def _send_message(message: str, assistant_type: str, conversation_id: int | None
             user_id=_get_user_id(),
             conversation_id=conversation_id,
             stream=False,
-            permissions=[],
+            permissions=_get_user_permissions(),
         )
         return result
     finally:

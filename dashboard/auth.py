@@ -5,20 +5,21 @@ Credentials are loaded from environment variables or a config file.
 For production, replace with a proper identity provider (Auth0, Cognito, etc.).
 """
 
-import hashlib
 import os
 
 import streamlit as st
+from passlib.context import CryptContext
 
-# Default credentials (override via env vars in production)
+_pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
+
 _DEFAULT_USERS = {
     "admin": {
-        "password_hash": hashlib.sha256(b"admin123").hexdigest(),
+        "password_hash": _pwd_context.hash("admin123"),
         "role": "admin",
         "name": "Administrator",
     },
     "viewer": {
-        "password_hash": hashlib.sha256(b"viewer123").hexdigest(),
+        "password_hash": _pwd_context.hash("viewer123"),
         "role": "viewer",
         "name": "Viewer",
     },
@@ -41,7 +42,7 @@ def _load_users() -> dict:
         password = os.getenv(env_var)
         if password:
             users[username] = {
-                "password_hash": hashlib.sha256(password.encode()).hexdigest(),
+                "password_hash": _pwd_context.hash(password),
                 "role": defaults["role"],
                 "name": defaults["name"],
             }
@@ -50,16 +51,20 @@ def _load_users() -> dict:
     return users
 
 
-def _hash_password(password: str) -> str:
-    """Hash a password using SHA-256.
+def _verify_password(password: str, password_hash: str) -> bool:
+    """Verify a password against an Argon2 hash.
 
     Args:
         password: Plain text password.
+        password_hash: Argon2 hash to compare against.
 
     Returns:
-        Hex digest of the hash.
+        True if password matches the hash, False otherwise.
     """
-    return hashlib.sha256(password.encode()).hexdigest()
+    try:
+        return _pwd_context.verify(password, password_hash)
+    except Exception:
+        return False
 
 
 def is_authenticated() -> bool:
@@ -114,24 +119,25 @@ def require_auth():
 
         if submitted:
             user = users.get(username)
-            if user and _hash_password(password) == user["password_hash"]:
+            if user and _verify_password(password, user["password_hash"]):
                 st.session_state["authenticated"] = True
                 st.session_state["username"] = username
                 st.session_state["role"] = user["role"]
                 st.session_state["user_name"] = user["name"]
+                st.session_state["user_id"] = 1 if username == "admin" else 2
+                st.session_state["permissions"] = (
+                    ["*"] if user["role"] == "admin" else ["dashboards.view", "kpis.view"]
+                )
+                st.session_state["user"] = {
+                    "username": username,
+                    "role": user["role"],
+                    "name": user["name"],
+                    "permissions": st.session_state["permissions"],
+                    "roles": [user["role"]],
+                }
                 st.rerun()
             else:
                 st.error("Invalid username or password.")
-
-    st.markdown(
-        """
-    <div style="text-align:center;color:rgba(255,255,255,0.3);font-size:0.78rem;margin-top:20px;">
-        Default credentials — admin/admin123, viewer/viewer123<br>
-        Set AUTH_ADMIN_PASSWORD and AUTH_VIEWER_PASSWORD env vars for production.
-    </div>
-    """,
-        unsafe_allow_html=True,
-    )
 
     return False
 

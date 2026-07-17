@@ -450,3 +450,45 @@ class AIDashboardResponse(BaseModel):
 
 class MessageFeedbackRequest(BaseModel):
     feedback: str = Field(..., description="positive or negative")
+
+
+# --- AI Productivity Extensions ----------------------------------------------
+
+
+class ExplainChartRequest(BaseModel):
+    chart_type: str = Field(default="unknown", max_length=50)
+    title: str = Field(default="", max_length=500)
+    data_summary: dict = Field(default_factory=dict)
+    context: str = Field(default="", max_length=2000)
+
+
+class ExplainChartResponse(BaseModel):
+    explanation: str
+    chart_type: str
+
+
+class ExplainETLFailureResponse(BaseModel):
+    job_id: int
+    explanation: str
+    suggested_fixes: list[str]
+
+
+class SummarizeReportRequest(BaseModel):
+    content: str = Field(..., min_length=1, max_length=10000)
+    report_type: str = Field(default="general", max_length=50)
+    max_points: int = Field(default=5, ge=1, le=20)
+
+
+class SummarizeReportResponse(BaseModel):
+    summary: str
+    key_findings: list[str]
+
+
+class RecommendActionsRequest(BaseModel):
+    context: str = Field(default="", max_length=2000)
+    data_summary: dict = Field(default_factory=dict)
+
+
+class RecommendActionsResponse(BaseModel):
+    recommendations: list[str]
+    full_response: str

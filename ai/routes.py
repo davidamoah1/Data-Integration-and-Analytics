@@ -79,6 +79,9 @@ from ai.schemas import (
     DocumentChatRequest,
     DocumentChatResponse,
     DocumentUploadResponse,
+    ExplainChartRequest,
+    ExplainChartResponse,
+    ExplainETLFailureResponse,
     ForecastRequest,
     ForecastResponse,
     InsightResponse,
@@ -99,8 +102,12 @@ from ai.schemas import (
     ProviderConfigCreate,
     ProviderConfigResponse,
     ProviderConfigUpdate,
+    RecommendActionsRequest,
+    RecommendActionsResponse,
     ReportGenerateRequest,
     ReportGenerateResponse,
+    SummarizeReportRequest,
+    SummarizeReportResponse,
     UsageStatsResponse,
     WorkflowCreate,
     WorkflowResponse,
@@ -110,6 +117,7 @@ from ai.usage import UsageTracker
 from ai.workflow import WorkflowEngine
 from shared.database import get_db
 from shared.dependencies import get_current_user, require_permissions
+from shared.security import decrypt_secret, encrypt_secret
 
 router = APIRouter(prefix="/ai", tags=["AI Intelligence Platform"])
 
@@ -327,7 +335,7 @@ async def create_provider(
     provider = AIProviderConfig(
         provider_name=config.provider_name,
         display_name=config.display_name,
-        api_key_encrypted=config.api_key,
+        api_key_encrypted=encrypt_secret(config.api_key),
         api_base_url=config.api_base_url,
         default_model=config.default_model,
         available_models=config.available_models,
@@ -371,7 +379,7 @@ async def update_provider(
     if config.display_name is not None:
         provider.display_name = config.display_name
     if config.api_key is not None:
-        provider.api_key_encrypted = config.api_key
+        provider.api_key_encrypted = encrypt_secret(config.api_key)
     if config.api_base_url is not None:
         provider.api_base_url = config.api_base_url
     if config.default_model is not None:
@@ -1142,3 +1150,166 @@ async def ai_dashboard(
         recent_insights=recent_insights_data,
         recent_alerts=recent_alerts_data,
     )
+
+
+# --- AI Productivity Extensions ----------------------------------------------
+
+
+@router.post("/explain/chart", response_model=ExplainChartResponse)
+async def explain_chart(
+    body: ExplainChartRequest,
+    db: DbSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Explain a chart or visualization in plain English.
+
+    Accepts chart type, data summary, and context to generate
+    a human-readable explanation of what the chart shows.
+    """
+    chart_type = body.chart_type
+    title = body.title
+    data_summary = body.data_summary
+    context = body.context
+
+    prompt = (
+        f"Explain this {chart_type} chart titled '{title}' in plain English. "
+        f"Data summary: {data_summary}. Context: {context}. "
+        "Describe what trends, patterns, or outliers are visible and what they mean for the business."
+    )
+
+    memory = AIMemory(db)
+    gateway = AIGateway(db, memory=memory)
+    try:
+        response = gateway.chat(
+            user_message=prompt,
+            assistant_type="data_analyst",
+            user_id=current_user["id"],
+        )
+        return ExplainChartResponse(
+            explanation=response.get("response", ""),
+            chart_type=chart_type,
+        )
+    except Exception as e:
+        return ExplainChartResponse(
+            explanation=f"Unable to generate explanation: {e}",
+            chart_type=chart_type,
+        )
+
+
+@router.post("/explain/etl-failure/{job_id}", response_model=ExplainETLFailureResponse)
+async def explain_etl_failure(
+    job_id: int,
+    db: DbSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Explain why an ETL job failed and suggest fixes."""
+    from etl.models import ETLJob
+
+    job = db.query(ETLJob).filter(ETLJob.id == job_id).first()
+    if not job:
+        raise HTTPException(status_code=404, detail="ETL job not found")
+
+    error_detail = job.error_message or "No error message recorded"
+    prompt = (
+        f"An ETL job (pipeline_id={job.pipeline_id}, type={job.job_type}) "
+        f"failed with status '{job.status}'. "
+        f"Error: {error_detail}. "
+        "Explain what likely went wrong and suggest specific steps to fix it."
+    )
+
+    memory = AIMemory(db)
+    gateway = AIGateway(db, memory=memory)
+    try:
+        response = gateway.chat(
+            user_message=prompt,
+            assistant_type="etl_assistant",
+            user_id=current_user["id"],
+        )
+        return ExplainETLFailureResponse(
+            job_id=job_id,
+            explanation=response.get("response", ""),
+            suggested_fixes=[],
+        )
+    except Exception as e:
+        return ExplainETLFailureResponse(
+            job_id=job_id,
+            explanation=f"Unable to analyze: {e}",
+            suggested_fixes=[],
+        )
+
+
+@router.post("/reports/summarize", response_model=SummarizeReportResponse)
+async def summarize_report(
+    body: SummarizeReportRequest,
+    db: DbSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Summarize a report or data extract into key findings."""
+    report_content = body.content
+    report_type = body.report_type
+    max_points = body.max_points
+
+    prompt = (
+        f"Summarize this {report_type} report into {max_points} key findings. "
+        f"Be concise and actionable. Report content: {report_content[:4000]}"
+    )
+
+    memory = AIMemory(db)
+    gateway = AIGateway(db, memory=memory)
+    try:
+        response = gateway.chat(
+            user_message=prompt,
+            assistant_type="data_analyst",
+            user_id=current_user["id"],
+        )
+        summary_text = response.get("response", "")
+        key_findings = [
+            line.strip().lstrip("0123456789.-) ")
+            for line in summary_text.split("\n")
+            if line.strip() and len(line.strip()) > 10
+        ][:max_points]
+        return SummarizeReportResponse(summary=summary_text, key_findings=key_findings)
+    except Exception as e:
+        return SummarizeReportResponse(summary=f"Unable to summarize: {e}", key_findings=[])
+
+
+@router.post("/recommend/actions", response_model=RecommendActionsResponse)
+async def recommend_actions(
+    body: RecommendActionsRequest,
+    db: DbSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Recommend actions based on data analysis context."""
+    context = body.context
+    data_summary = body.data_summary
+
+    prompt = (
+        f"Based on this data context: {data_summary}. "
+        f"Additional context: {context}. "
+        "Recommend 3-5 specific, actionable next steps the user should take. "
+        "Format as a numbered list with brief explanations."
+    )
+
+    memory = AIMemory(db)
+    gateway = AIGateway(db, memory=memory)
+    try:
+        response = gateway.chat(
+            user_message=prompt,
+            assistant_type="data_analyst",
+            user_id=current_user["id"],
+        )
+        recommendations_text = response.get("response", "")
+        recommendations = [
+            line.strip().lstrip("0123456789.-) ")
+            for line in recommendations_text.split("\n")
+            if line.strip() and len(line.strip()) > 10
+        ][:5]
+        return RecommendActionsResponse(
+            recommendations=recommendations,
+            full_response=recommendations_text,
+        )
+    except Exception as e:
+        return RecommendActionsResponse(
+            recommendations=[],
+            full_response=f"Unable to generate recommendations: {e}",
+        )

@@ -45,6 +45,8 @@ from shared.middleware import (
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from ai.routes import router as ai_router
+from analytics.routes import router as analytics_router
+from enterprise.routes import router as platform_router
 from api.auth import get_api_key
 from api.schemas import (
     FilterOptionsResponse,
@@ -75,11 +77,13 @@ async def lifespan(app: FastAPI):
     engine = get_engine()
     # Import all models so they register with Base.metadata
     import ai.models  # noqa: F401
+    import analytics.models  # noqa: F401
     import audit.models  # noqa: F401
     import authentication.models  # noqa: F401
     import database.db_setup  # noqa: F401
     import etl.models  # noqa: F401
     import organizations.models  # noqa: F401
+    import enterprise.models  # noqa: F401
 
     Base.metadata.create_all(engine)
 
@@ -190,6 +194,8 @@ app.include_router(dept_router)
 app.include_router(audit_router)
 app.include_router(etl_router)
 app.include_router(ai_router)
+app.include_router(analytics_router)
+app.include_router(platform_router)
 
 
 # ──────────────────────────────────────────────
@@ -483,7 +489,7 @@ async def root():
     """API root — basic info."""
     return {
         "name": "ETL Data Intelligence API",
-        "version": "1.0.0",
+        "version": "2.0.0",
         "docs": "/docs",
         "health": "/health",
     }

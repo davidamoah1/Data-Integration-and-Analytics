@@ -34,7 +34,8 @@ from dashboard.charts import (
     render_top_products,
 )
 from dashboard.copilot import render_copilot_panel
-from dashboard.styles import DARK_THEME_CSS
+from dashboard.onboarding import render_onboarding, render_quick_start_checklist, render_industry_pack_selector
+from dashboard.styles import DARK_THEME_CSS, RESPONSIVE_CSS
 from dashboard.utils import MAX_UPLOAD_SIZE_BYTES, MAX_UPLOAD_SIZE_MB, sanitize_text
 from services.dashboard_data_service import DashboardDataService
 
@@ -45,7 +46,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-st.markdown(f"<style>{DARK_THEME_CSS}</style>", unsafe_allow_html=True)
+st.markdown(f"<style>{DARK_THEME_CSS}\n{RESPONSIVE_CSS}</style>", unsafe_allow_html=True)
 
 
 # ──────────────────────────────────────────────
@@ -55,6 +56,12 @@ if not require_auth():
     st.stop()
 
 user = get_current_user()
+
+
+# ──────────────────────────────────────────────
+# Onboarding (first-time users)
+# ──────────────────────────────────────────────
+render_onboarding()
 
 
 # ──────────────────────────────────────────────
@@ -113,6 +120,10 @@ with st.sidebar:
 
     st.markdown("---")
 
+    render_quick_start_checklist()
+    render_industry_pack_selector()
+
+    st.markdown("---")
     st.markdown('<div class="sidebar-section">Data Source</div>', unsafe_allow_html=True)
     service = get_data_service()
     db_count = 0

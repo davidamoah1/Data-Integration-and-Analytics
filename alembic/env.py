@@ -13,11 +13,13 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 import ai.models  # noqa: F401, E402
+import analytics.models  # noqa: F401, E402
 import audit.models  # noqa: F401, E402
 import authentication.models  # noqa: F401, E402
 import database.db_setup  # noqa: F401, E402
 import etl.models  # noqa: F401, E402
 import organizations.models  # noqa: F401, E402
+import enterprise.models  # noqa: F401, E402
 from config import DB_TYPE, DB_URL, validate_config  # noqa: E402
 from shared.database import Base  # noqa: E402
 

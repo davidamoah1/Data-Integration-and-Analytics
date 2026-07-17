@@ -213,3 +213,69 @@ CHART_LAYOUT = dict(
 )
 
 COLORS = ["#667eea", "#f093fb", "#38ef7d", "#4facfe", "#f5576c", "#ffd200", "#00f2fe", "#a78bfa"]
+
+RESPONSIVE_CSS = """
+@media (max-width: 768px) {
+    .block-container { padding-left: 1rem !important; padding-right: 1rem !important; padding-top: 1rem !important; }
+    .hero-title { font-size: 1.5rem !important; }
+    .hero-subtitle { font-size: 0.9rem !important; }
+    .kpi-card { min-width: 140px !important; }
+    .kpi-value { font-size: 1.5rem !important; }
+    .section-header { font-size: 1.1rem !important; }
+    [data-testid="stSidebar"] { min-width: 250px !important; }
+    .stColumns > div { flex-direction: column !important; }
+}
+@media (max-width: 480px) {
+    .hero-badge { font-size: 0.7rem !important; }
+    .hero-title { font-size: 1.2rem !important; }
+    .kpi-card { min-width: 120px !important; padding: 12px !important; }
+    .kpi-value { font-size: 1.2rem !important; }
+    .kpi-label { font-size: 0.7rem !important; }
+}
+@media (pointer: coarse) {
+    .stButton button { min-height: 44px; font-size: 1rem; }
+    .stSelectbox > div > div { min-height: 44px; }
+}
+.onboarding-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    margin: 20px 0;
+}
+.success-banner {
+    background: rgba(56,239,125,0.1);
+    border: 1px solid rgba(56,239,125,0.3);
+    border-radius: 10px;
+    padding: 14px 18px;
+    color: #38ef7d;
+    font-size: 0.9rem;
+    margin: 12px 0;
+}
+.warning-banner {
+    background: rgba(245,87,108,0.1);
+    border: 1px solid rgba(245,87,108,0.3);
+    border-radius: 10px;
+    padding: 14px 18px;
+    color: #f5576c;
+    font-size: 0.9rem;
+    margin: 12px 0;
+}
+.info-banner {
+    background: rgba(79,172,254,0.08);
+    border: 1px solid rgba(79,172,254,0.2);
+    border-radius: 10px;
+    padding: 12px 18px;
+    color: rgba(255,255,255,0.7);
+    font-size: 0.85rem;
+    margin: 10px 0;
+}
+.loading-skeleton {
+    background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 8px;
+}
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+"""

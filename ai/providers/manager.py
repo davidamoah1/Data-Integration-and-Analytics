@@ -18,6 +18,7 @@ from ai.providers.gemini_provider import GeminiProvider
 from ai.providers.glm_provider import GLMProvider
 from ai.providers.local_provider import LocalLLMProvider
 from ai.providers.openai_provider import OpenAIProvider
+from shared.security import decrypt_secret
 
 # --- Provider Registry ------------------------------------------------------
 
@@ -96,7 +97,7 @@ class ProviderManager:
 
         if db_config:
             provider = cls(
-                api_key=db_config.api_key_encrypted or "",
+                api_key=decrypt_secret(db_config.api_key_encrypted) if db_config.api_key_encrypted else "",
                 base_url=db_config.api_base_url or "",
                 model=db_config.default_model or AI_DEFAULT_MODEL,
                 max_tokens=db_config.max_tokens,

@@ -66,8 +66,10 @@ def init_db():
 
     # Create application tables and seed defaults
     import ai.models  # noqa: F401
+    import analytics.models  # noqa: F401
     import audit.models  # noqa: F401
     import authentication.models  # noqa: F401
+    import enterprise.models  # noqa: F401
     import etl.models  # noqa: F401
     import organizations.models  # noqa: F401
     from authentication.services import seed_default_data
