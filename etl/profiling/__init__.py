@@ -1,9 +1,8 @@
 """Data profiling engine — computes statistics and quality metrics for a DataFrame."""
 
-from typing import Optional
+from datetime import datetime, timezone
+
 import pandas as pd
-import numpy as np
-from datetime import datetime
 
 
 class DataProfiler:
@@ -22,7 +21,7 @@ class DataProfiler:
         """
         profile = {
             "source_name": source_name,
-            "profiled_at": datetime.utcnow().isoformat(),
+            "profiled_at": datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),
             "row_count": len(df),
             "column_count": len(df.columns),
             "columns": {},

@@ -1,11 +1,12 @@
 """CSV connector — read CSV files with encoding detection and delimiter support."""
 
 import os
-from typing import Optional
-import pandas as pd
+
 import chardet
+import pandas as pd
 
 from etl.connectors.base import BaseConnector
+from shared.security import validate_sql_identifier
 
 
 class CSVConnector(BaseConnector):
@@ -45,11 +46,13 @@ class CSVConnector(BaseConnector):
         schema = []
         for col in df.columns:
             dtype = str(df[col].dtype)
-            schema.append({
-                "name": col,
-                "type": dtype,
-                "nullable": df[col].isnull().any(),
-            })
+            schema.append(
+                {
+                    "name": col,
+                    "type": dtype,
+                    "nullable": df[col].isnull().any(),
+                }
+            )
         return schema
 
 
@@ -82,11 +85,13 @@ class ExcelConnector(BaseConnector):
         schema = []
         for col in df.columns:
             dtype = str(df[col].dtype)
-            schema.append({
-                "name": col,
-                "type": dtype,
-                "nullable": df[col].isnull().any(),
-            })
+            schema.append(
+                {
+                    "name": col,
+                    "type": dtype,
+                    "nullable": df[col].isnull().any(),
+                }
+            )
         return schema
 
     def list_sheets(self) -> list[str]:
@@ -121,11 +126,13 @@ class JSONConnector(BaseConnector):
         schema = []
         for col in df.columns:
             dtype = str(df[col].dtype)
-            schema.append({
-                "name": col,
-                "type": dtype,
-                "nullable": df[col].isnull().any(),
-            })
+            schema.append(
+                {
+                    "name": col,
+                    "type": dtype,
+                    "nullable": df[col].isnull().any(),
+                }
+            )
         return schema
 
 
@@ -145,7 +152,7 @@ class XMLConnector(BaseConnector):
         record_tag = self.config.get("record_tag", "record")
         encoding = self.config.get("encoding", "utf-8")
 
-        with open(path, "r", encoding=encoding) as f:
+        with open(path, encoding=encoding) as f:
             data = xmltodict.parse(f.read())
 
         # Navigate to the record list
@@ -166,11 +173,13 @@ class XMLConnector(BaseConnector):
         schema = []
         for col in df.columns:
             dtype = str(df[col].dtype)
-            schema.append({
-                "name": col,
-                "type": dtype,
-                "nullable": df[col].isnull().any(),
-            })
+            schema.append(
+                {
+                    "name": col,
+                    "type": dtype,
+                    "nullable": df[col].isnull().any(),
+                }
+            )
         return schema
 
 
@@ -179,6 +188,7 @@ class MySQLConnector(BaseConnector):
 
     def connect(self):
         from sqlalchemy import create_engine
+
         conn_str = self.config.get("connection_string", "")
         if not conn_str:
             host = self.config.get("host", "localhost")
@@ -198,11 +208,12 @@ class MySQLConnector(BaseConnector):
         if query:
             sql = query
             if nrows:
-                sql = f"SELECT * FROM ({query}) AS sub LIMIT {nrows}"
+                sql = f"SELECT * FROM ({query}) AS sub LIMIT {int(nrows)}"
         elif table:
+            validate_sql_identifier(table)
             sql = f"SELECT * FROM `{table}`"
             if nrows:
-                sql += f" LIMIT {nrows}"
+                sql += f" LIMIT {int(nrows)}"
         else:
             raise ValueError("MySQLConnector requires either 'query' or 'table' in config")
 
@@ -213,21 +224,136 @@ class MySQLConnector(BaseConnector):
         if not table:
             df = self.extract(nrows=100)
         else:
+            validate_sql_identifier(table)
             df = pd.read_sql(f"SELECT * FROM `{table}` LIMIT 100", self._engine)
         schema = []
         for col in df.columns:
             dtype = str(df[col].dtype)
-            schema.append({
-                "name": col,
-                "type": dtype,
-                "nullable": df[col].isnull().any(),
-            })
+            schema.append(
+                {
+                    "name": col,
+                    "type": dtype,
+                    "nullable": df[col].isnull().any(),
+                }
+            )
         return schema
 
     def close(self):
         if hasattr(self, "_engine"):
             self._engine.dispose()
         super().close()
+
+
+class SQLAlchemyConnector(BaseConnector):
+    """Connector for database engines supported by SQLAlchemy drivers."""
+
+    dialect = ""
+
+    def connect(self):
+        from sqlalchemy import create_engine
+
+        connection_string = self.config.get("connection_string")
+        if not connection_string:
+            raise ValueError("Database connectors require 'connection_string'")
+        if not connection_string.startswith(f"{self.dialect}:"):
+            raise ValueError(f"Expected a {self.dialect} connection string")
+        self._engine = create_engine(connection_string, pool_pre_ping=True)
+        with self._engine.connect():
+            pass
+        self._connected = True
+
+    def extract(self, **kwargs) -> pd.DataFrame:
+        from sqlalchemy import text
+
+        query = self.config.get("query")
+        table = self.config.get("table")
+        nrows = kwargs.get("nrows")
+        if query:
+            sql = query
+        elif table:
+            validate_sql_identifier(table)
+            sql = f'SELECT * FROM "{table}"'
+        else:
+            raise ValueError("Database connectors require either 'query' or 'table'")
+        if nrows:
+            sql = f"SELECT * FROM ({sql}) AS source_query LIMIT {int(nrows)}"
+        return pd.read_sql(text(sql), self._engine)
+
+    def get_schema(self) -> list[dict]:
+        df = self.extract(nrows=100)
+        return [
+            {"name": col, "type": str(df[col].dtype), "nullable": bool(df[col].isnull().any())}
+            for col in df.columns
+        ]
+
+    def discover_metadata(self) -> dict:
+        from sqlalchemy import inspect
+
+        inspector = inspect(self._engine)
+        tables = inspector.get_table_names()
+        schema = self.get_schema() if self.config.get("table") or self.config.get("query") else []
+        return {"connector": self.name, "schema": schema, "tables": tables, "columns": schema}
+
+    def close(self):
+        if hasattr(self, "_engine"):
+            self._engine.dispose()
+        super().close()
+
+
+class PostgreSQLConnector(SQLAlchemyConnector):
+    dialect = "postgresql"
+
+
+class SQLServerConnector(SQLAlchemyConnector):
+    dialect = "mssql"
+
+
+class OracleConnector(SQLAlchemyConnector):
+    dialect = "oracle"
+
+
+class MariaDBConnector(SQLAlchemyConnector):
+    dialect = "mariadb"
+
+
+class SQLiteConnector(SQLAlchemyConnector):
+    dialect = "sqlite"
+
+
+class GraphQLConnector(BaseConnector):
+    """Connector for GraphQL endpoints returning records at an optional response path."""
+
+    def connect(self):
+        self.validate_config(("url", "query"))
+        self._connected = True
+
+    def extract(self, **kwargs) -> pd.DataFrame:
+        import requests
+
+        response = requests.post(
+            self.config["url"],
+            json={"query": self.config["query"], "variables": self.config.get("variables", {})},
+            headers=self.config.get("headers", {}),
+            timeout=self.config.get("timeout", 30),
+        )
+        response.raise_for_status()
+        payload = response.json()
+        if payload.get("errors"):
+            raise ValueError(payload["errors"])
+        data = payload.get("data", {})
+        for key in self.config.get("data_path", "").split("."):
+            if key:
+                data = data[key]
+        if isinstance(data, dict):
+            data = [data]
+        return pd.DataFrame(data).head(kwargs.get("nrows"))
+
+    def get_schema(self) -> list[dict]:
+        df = self.extract(nrows=100)
+        return [
+            {"name": col, "type": str(df[col].dtype), "nullable": bool(df[col].isnull().any())}
+            for col in df.columns
+        ]
 
 
 class RESTAPIConnector(BaseConnector):
@@ -278,11 +404,13 @@ class RESTAPIConnector(BaseConnector):
         schema = []
         for col in df.columns:
             dtype = str(df[col].dtype)
-            schema.append({
-                "name": col,
-                "type": dtype,
-                "nullable": df[col].isnull().any(),
-            })
+            schema.append(
+                {
+                    "name": col,
+                    "type": dtype,
+                    "nullable": df[col].isnull().any(),
+                }
+            )
         return schema
 
 
@@ -294,7 +422,13 @@ CONNECTOR_REGISTRY: dict[str, type[BaseConnector]] = {
     "json": JSONConnector,
     "xml": XMLConnector,
     "mysql": MySQLConnector,
+    "postgresql": PostgreSQLConnector,
+    "sqlserver": SQLServerConnector,
+    "oracle": OracleConnector,
+    "mariadb": MariaDBConnector,
+    "sqlite": SQLiteConnector,
     "api": RESTAPIConnector,
+    "graphql": GraphQLConnector,
 }
 
 
@@ -310,7 +444,9 @@ def get_connector(source_type: str, config: dict) -> BaseConnector:
     """
     source_type = source_type.lower()
     if source_type not in CONNECTOR_REGISTRY:
-        raise ValueError(f"Unknown connector type: '{source_type}'. Available: {list(CONNECTOR_REGISTRY.keys())}")
+        raise ValueError(
+            f"Unknown connector type: '{source_type}'. Available: {list(CONNECTOR_REGISTRY.keys())}"
+        )
     cls = CONNECTOR_REGISTRY[source_type]
     return cls(name=source_type, config=config)
 

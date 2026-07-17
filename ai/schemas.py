@@ -1,25 +1,26 @@
 """Pydantic schemas for Phase 6 AI Intelligence Platform API endpoints."""
 
-from datetime import datetime
-from typing import Optional, Any
 from pydantic import BaseModel, Field
-
 
 # --- Chat -------------------------------------------------------------------
 
+
 class ChatRequest(BaseModel):
     message: str = Field(..., max_length=10000)
-    assistant_type: str = Field("data_copilot", description="data_copilot, etl_copilot, dashboard_copilot, report_copilot, decision_copilot, forecast_copilot, quality_copilot, sql_copilot")
-    conversation_id: Optional[int] = None
-    context: Optional[dict] = None
+    assistant_type: str = Field(
+        "data_copilot",
+        description="data_copilot, etl_copilot, dashboard_copilot, report_copilot, decision_copilot, forecast_copilot, quality_copilot, sql_copilot",
+    )
+    conversation_id: int | None = None
+    context: dict | None = None
 
 
 class ChatResponse(BaseModel):
     conversation_id: int
     message_id: int
     response: str
-    citations: Optional[list[dict]] = None
-    confidence_score: Optional[float] = None
+    citations: list[dict] | None = None
+    confidence_score: float | None = None
     tokens_used: int
     model_used: str
     provider: str
@@ -28,10 +29,10 @@ class ChatResponse(BaseModel):
 class ConversationSummary(BaseModel):
     id: int
     assistant_type: str
-    title: Optional[str]
+    title: str | None
     is_active: bool
-    created_at: Optional[str]
-    updated_at: Optional[str]
+    created_at: str | None
+    updated_at: str | None
 
 
 class MessageSummary(BaseModel):
@@ -39,63 +40,65 @@ class MessageSummary(BaseModel):
     role: str
     content: str
     tokens_used: int
-    model_used: Optional[str]
-    provider: Optional[str]
-    confidence_score: Optional[float]
-    feedback: Optional[str]
-    created_at: Optional[str]
+    model_used: str | None
+    provider: str | None
+    confidence_score: float | None
+    feedback: str | None
+    created_at: str | None
 
 
 # --- Provider Management ----------------------------------------------------
 
+
 class ProviderConfigCreate(BaseModel):
     provider_name: str
     display_name: str
-    api_key: Optional[str] = None
-    api_base_url: Optional[str] = None
-    default_model: Optional[str] = None
-    available_models: Optional[list[str]] = None
+    api_key: str | None = None
+    api_base_url: str | None = None
+    default_model: str | None = None
+    available_models: list[str] | None = None
     is_active: bool = True
     is_default: bool = False
     max_tokens: int = 4096
     temperature: float = 0.7
-    config: Optional[dict] = None
+    config: dict | None = None
 
 
 class ProviderConfigUpdate(BaseModel):
-    display_name: Optional[str] = None
-    api_key: Optional[str] = None
-    api_base_url: Optional[str] = None
-    default_model: Optional[str] = None
-    available_models: Optional[list[str]] = None
-    is_active: Optional[bool] = None
-    is_default: Optional[bool] = None
-    max_tokens: Optional[int] = None
-    temperature: Optional[float] = None
-    config: Optional[dict] = None
+    display_name: str | None = None
+    api_key: str | None = None
+    api_base_url: str | None = None
+    default_model: str | None = None
+    available_models: list[str] | None = None
+    is_active: bool | None = None
+    is_default: bool | None = None
+    max_tokens: int | None = None
+    temperature: float | None = None
+    config: dict | None = None
 
 
 class ProviderConfigResponse(BaseModel):
     id: int
     provider_name: str
     display_name: str
-    api_base_url: Optional[str]
-    default_model: Optional[str]
-    available_models: Optional[list[str]]
+    api_base_url: str | None
+    default_model: str | None
+    available_models: list[str] | None
     is_active: bool
     is_default: bool
     max_tokens: int
     temperature: float
     has_api_key: bool
-    created_at: Optional[str]
+    created_at: str | None
 
 
 # --- NL to SQL --------------------------------------------------------------
 
+
 class NLToSQLRequest(BaseModel):
     question: str = Field(..., max_length=5000)
-    table_name: Optional[str] = None
-    schema_hint: Optional[dict] = None
+    table_name: str | None = None
+    schema_hint: dict | None = None
 
 
 class NLToSQLResponse(BaseModel):
@@ -103,28 +106,30 @@ class NLToSQLResponse(BaseModel):
     explanation: str
     is_safe: bool
     warnings: list[str] = Field(default_factory=list)
-    estimated_rows: Optional[int] = None
+    estimated_rows: int | None = None
 
 
 # --- NL to ETL --------------------------------------------------------------
 
+
 class NLToETLRequest(BaseModel):
     instruction: str = Field(..., max_length=5000)
-    file_path: Optional[str] = None
-    target_table: Optional[str] = None
+    file_path: str | None = None
+    target_table: str | None = None
 
 
 class NLToETLResponse(BaseModel):
     pipeline_steps: list[dict]
     explanation: str
-    estimated_duration: Optional[str] = None
+    estimated_duration: str | None = None
 
 
 # --- NL to Dashboard --------------------------------------------------------
 
+
 class NLToDashboardRequest(BaseModel):
     description: str = Field(..., max_length=5000)
-    data_source: Optional[str] = None
+    data_source: str | None = None
 
 
 class NLToDashboardResponse(BaseModel):
@@ -134,6 +139,7 @@ class NLToDashboardResponse(BaseModel):
 
 
 # --- AI Data Quality --------------------------------------------------------
+
 
 class AIQualityRequest(BaseModel):
     source_type: str
@@ -147,17 +153,20 @@ class AIQualityResponse(BaseModel):
     issues_found: list[dict]
     recommendations: list[str]
     fix_suggestions: list[dict]
-    auto_fixes_applied: Optional[list[dict]] = None
+    auto_fixes_applied: list[dict] | None = None
 
 
 # --- AI Report Writer -------------------------------------------------------
 
+
 class ReportGenerateRequest(BaseModel):
-    report_type: str = Field(..., description="executive, monthly, annual, department, quality, etl, performance, audit")
-    title: Optional[str] = None
-    date_from: Optional[str] = None
-    date_to: Optional[str] = None
-    department: Optional[str] = None
+    report_type: str = Field(
+        ..., description="executive, monthly, annual, department, quality, etl, performance, audit"
+    )
+    title: str | None = None
+    date_from: str | None = None
+    date_to: str | None = None
+    department: str | None = None
     format: str = "markdown"
 
 
@@ -166,18 +175,19 @@ class ReportGenerateResponse(BaseModel):
     report_type: str
     title: str
     content: str
-    summary: Optional[str]
-    sections: Optional[list[str]]
-    created_at: Optional[str]
+    summary: str | None
+    sections: list[str] | None
+    created_at: str | None
 
 
 # --- AI Decision Center -----------------------------------------------------
 
+
 class DecisionCenterRequest(BaseModel):
-    metric: Optional[str] = None
-    date_from: Optional[str] = None
-    date_to: Optional[str] = None
-    context: Optional[dict] = None
+    metric: str | None = None
+    date_from: str | None = None
+    date_to: str | None = None
+    context: dict | None = None
 
 
 class DecisionCenterResponse(BaseModel):
@@ -188,11 +198,12 @@ class DecisionCenterResponse(BaseModel):
     recommendations: list[str]
     risks: list[str]
     opportunities: list[str]
-    confidence_score: Optional[float]
-    data_sources: Optional[list[dict]]
+    confidence_score: float | None
+    data_sources: list[dict] | None
 
 
 # --- AI Forecasting ---------------------------------------------------------
+
 
 class ForecastRequest(BaseModel):
     source_type: str = Field(..., description="csv, excel, json, database")
@@ -211,12 +222,13 @@ class ForecastResponse(BaseModel):
     horizon: int
     method: str
     predictions: list[dict]
-    accuracy_score: Optional[float]
+    accuracy_score: float | None
     confidence_level: float
-    input_summary: Optional[dict]
+    input_summary: dict | None
 
 
 # --- AI Anomaly Detection ---------------------------------------------------
+
 
 class AnomalyRequest(BaseModel):
     source_type: str
@@ -234,9 +246,12 @@ class AnomalyResponse(BaseModel):
 
 # --- AI KPI Engine ----------------------------------------------------------
 
+
 class KPIRecommendRequest(BaseModel):
-    domain: Optional[str] = Field(None, description="sales, operations, finance, healthcare, education")
-    data_source: Optional[dict] = None
+    domain: str | None = Field(
+        None, description="sales, operations, finance, healthcare, education"
+    )
+    data_source: dict | None = None
 
 
 class KPIRecommendResponse(BaseModel):
@@ -251,10 +266,11 @@ class KPIMonitorResponse(BaseModel):
 
 # --- AI Dashboard Insights --------------------------------------------------
 
+
 class DashboardInsightsRequest(BaseModel):
-    dashboard_id: Optional[str] = None
-    data_source: Optional[dict] = None
-    context: Optional[dict] = None
+    dashboard_id: str | None = None
+    data_source: dict | None = None
+    context: dict | None = None
 
 
 class DashboardInsightsResponse(BaseModel):
@@ -262,29 +278,33 @@ class DashboardInsightsResponse(BaseModel):
     risks: list[str]
     opportunities: list[str]
     recommendations: list[str]
-    trend_analysis: Optional[dict]
+    trend_analysis: dict | None
 
 
 # --- AI Search --------------------------------------------------------------
 
+
 class AISearchRequest(BaseModel):
     query: str = Field(..., max_length=500)
-    search_type: Optional[str] = Field(None, description="all, jobs, reports, pipelines, data, insights")
+    search_type: str | None = Field(
+        None, description="all, jobs, reports, pipelines, data, insights"
+    )
 
 
 class AISearchResponse(BaseModel):
     results: list[dict]
     total: int
-    ai_summary: Optional[str] = None
+    ai_summary: str | None = None
 
 
 # --- AI Document Chat -------------------------------------------------------
+
 
 class DocumentUploadResponse(BaseModel):
     document_id: int
     filename: str
     file_type: str
-    page_count: Optional[int] = None
+    page_count: int | None = None
     is_indexed: bool
 
 
@@ -295,65 +315,68 @@ class DocumentChatRequest(BaseModel):
 
 class DocumentChatResponse(BaseModel):
     answer: str
-    citations: Optional[list[dict]] = None
-    confidence_score: Optional[float] = None
+    citations: list[dict] | None = None
+    confidence_score: float | None = None
 
 
 # --- AI Workflow ------------------------------------------------------------
 
+
 class WorkflowCreate(BaseModel):
     name: str
-    description: Optional[str] = None
+    description: str | None = None
     trigger_type: str = "manual"
-    trigger_config: Optional[dict] = None
+    trigger_config: dict | None = None
     steps: list[dict]
 
 
 class WorkflowResponse(BaseModel):
     id: int
     name: str
-    description: Optional[str]
+    description: str | None
     trigger_type: str
-    trigger_config: Optional[dict]
+    trigger_config: dict | None
     steps: list[dict]
     is_active: bool
-    created_at: Optional[str]
+    created_at: str | None
 
 
 class WorkflowRunResponse(BaseModel):
     id: int
     workflow_id: int
     status: str
-    step_results: Optional[list[dict]]
-    duration_seconds: Optional[int]
-    error_message: Optional[str]
-    created_at: Optional[str]
+    step_results: list[dict] | None
+    duration_seconds: int | None
+    error_message: str | None
+    created_at: str | None
 
 
 # --- AI Insights ------------------------------------------------------------
+
 
 class InsightResponse(BaseModel):
     id: int
     insight_type: str
     title: str
     summary: str
-    key_findings: Optional[list[dict]]
-    recommendations: Optional[list[str]]
-    risks: Optional[list[str]]
-    opportunities: Optional[list[str]]
-    confidence_score: Optional[float]
-    data_sources: Optional[list[dict]]
-    created_at: Optional[str]
+    key_findings: list[dict] | None
+    recommendations: list[str] | None
+    risks: list[str] | None
+    opportunities: list[str] | None
+    confidence_score: float | None
+    data_sources: list[dict] | None
+    created_at: str | None
 
 
 # --- AI Prompt Templates ----------------------------------------------------
+
 
 class PromptTemplateCreate(BaseModel):
     name: str
     assistant_type: str
     system_prompt: str
-    description: Optional[str] = None
-    variables: Optional[list[str]] = None
+    description: str | None = None
+    variables: list[str] | None = None
 
 
 class PromptTemplateResponse(BaseModel):
@@ -361,14 +384,15 @@ class PromptTemplateResponse(BaseModel):
     name: str
     assistant_type: str
     system_prompt: str
-    description: Optional[str]
-    variables: Optional[list[str]]
+    description: str | None
+    variables: list[str] | None
     is_active: bool
     is_system: bool
-    created_at: Optional[str]
+    created_at: str | None
 
 
 # --- AI Usage & Audit -------------------------------------------------------
+
 
 class UsageStatsResponse(BaseModel):
     total_requests: int
@@ -381,29 +405,31 @@ class UsageStatsResponse(BaseModel):
 
 class AuditLogResponse(BaseModel):
     id: int
-    user_id: Optional[int]
+    user_id: int | None
     action: str
-    assistant_type: Optional[str]
-    input_summary: Optional[str]
-    output_summary: Optional[str]
+    assistant_type: str | None
+    input_summary: str | None
+    output_summary: str | None
     success: bool
-    error_message: Optional[str]
-    created_at: Optional[str]
+    error_message: str | None
+    created_at: str | None
 
 
 # --- AI Plugins -------------------------------------------------------------
+
 
 class PluginResponse(BaseModel):
     id: int
     name: str
     display_name: str
-    description: Optional[str]
+    description: str | None
     plugin_type: str
     is_active: bool
     is_system: bool
 
 
 # --- AI Dashboard -----------------------------------------------------------
+
 
 class AIDashboardResponse(BaseModel):
     total_conversations: int
@@ -420,6 +446,7 @@ class AIDashboardResponse(BaseModel):
 
 
 # --- Feedback ---------------------------------------------------------------
+
 
 class MessageFeedbackRequest(BaseModel):
     feedback: str = Field(..., description="positive or negative")

@@ -5,13 +5,12 @@ data access logic from business logic.
 """
 
 from datetime import date
-from typing import Optional
 
 import pandas as pd
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session
 
-from config import DB_URL, DB_TYPE
+from config import DB_TYPE, DB_URL
 from etl.logging_config import logger
 
 
@@ -45,10 +44,10 @@ class SalesRepository:
 
     def get_sales_filtered(
         self,
-        region: Optional[str] = None,
-        category: Optional[str] = None,
-        date_from: Optional[date] = None,
-        date_to: Optional[date] = None,
+        region: str | None = None,
+        category: str | None = None,
+        date_from: date | None = None,
+        date_to: date | None = None,
     ) -> pd.DataFrame:
         """Retrieve sales records with optional filters.
 
@@ -105,21 +104,18 @@ class SalesRepository:
         """
         total = 0
         for i in range(0, len(df), batch_size):
-            batch = df.iloc[i:i + batch_size]
-            batch.to_sql(
-                "sales", con=self.engine, if_exists="append",
-                index=False, method="multi"
-            )
+            batch = df.iloc[i : i + batch_size]
+            batch.to_sql("sales", con=self.engine, if_exists="append", index=False, method="multi")
             total += len(batch)
             logger.info(f"Repository: Inserted batch {i // batch_size + 1} ({len(batch)} rows)")
         return total
 
     def get_kpis(
         self,
-        region: Optional[str] = None,
-        category: Optional[str] = None,
-        date_from: Optional[date] = None,
-        date_to: Optional[date] = None,
+        region: str | None = None,
+        category: str | None = None,
+        date_from: date | None = None,
+        date_to: date | None = None,
     ) -> dict:
         """Compute aggregate KPIs from the database.
 
@@ -200,7 +196,7 @@ class SalesRepository:
             try:
                 result = pd.read_sql(
                     "SELECT MIN(order_date) as min_date, MAX(order_date) as max_date FROM sales",
-                    conn
+                    conn,
                 )
                 row = result.iloc[0]
                 return row["min_date"], row["max_date"]
@@ -243,9 +239,7 @@ class PipelineRunRepository:
         """
         with Session(self.engine) as session:
             result = session.execute(
-                text(
-                    "INSERT INTO pipeline_runs (run_id, status) VALUES (:run_id, 'running')"
-                ),
+                text("INSERT INTO pipeline_runs (run_id, status) VALUES (:run_id, 'running')"),
                 {"run_id": run_id},
             )
             session.commit()
@@ -270,16 +264,14 @@ class PipelineRunRepository:
         """
         with Session(self.engine) as session:
             session.execute(
-                text(
-                    """UPDATE pipeline_runs
+                text("""UPDATE pipeline_runs
                        SET status = 'completed',
                            completed_at = CURRENT_TIMESTAMP,
                            rows_extracted = :re,
                            rows_transformed = :rt,
                            rows_loaded = :rl,
                            duplicates_removed = :dr
-                       WHERE run_id = :run_id"""
-                ),
+                       WHERE run_id = :run_id"""),
                 {
                     "run_id": run_id,
                     "re": rows_extracted,
@@ -299,13 +291,11 @@ class PipelineRunRepository:
         """
         with Session(self.engine) as session:
             session.execute(
-                text(
-                    """UPDATE pipeline_runs
+                text("""UPDATE pipeline_runs
                        SET status = 'failed',
                            completed_at = CURRENT_TIMESTAMP,
                            error_message = :err
-                       WHERE run_id = :run_id"""
-                ),
+                       WHERE run_id = :run_id"""),
                 {"run_id": run_id, "err": error_message[:1000]},
             )
             session.commit()
@@ -321,9 +311,7 @@ class PipelineRunRepository:
         """
         with self.engine.connect() as conn:
             return pd.read_sql(
-                text(
-                    "SELECT * FROM pipeline_runs ORDER BY started_at DESC LIMIT :limit"
-                ),
+                text("SELECT * FROM pipeline_runs ORDER BY started_at DESC LIMIT :limit"),
                 conn,
                 params={"limit": limit},
             )

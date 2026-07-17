@@ -7,12 +7,10 @@ Considers:
 - User/admin preferences
 """
 
-from typing import Tuple, Optional
 from sqlalchemy.orm import Session as DbSession
 
+from ai.config import AI_DEFAULT_MODEL, AI_DEFAULT_PROVIDER
 from ai.models import AIProviderConfig
-from ai.config import AI_DEFAULT_PROVIDER, AI_DEFAULT_MODEL
-
 
 # Task-to-model mapping recommendations
 TASK_MODEL_PREFERENCES: dict[str, list[tuple[str, str]]] = {
@@ -87,7 +85,7 @@ TASK_MODEL_PREFERENCES: dict[str, list[tuple[str, str]]] = {
 class ModelRouter:
     """Routes AI requests to the best available provider and model."""
 
-    def __init__(self, db: Optional[DbSession] = None):
+    def __init__(self, db: DbSession | None = None):
         self.db = db
 
     def route(self, assistant_type: str, user_message: str = "") -> tuple[str, str]:
@@ -102,29 +100,45 @@ class ModelRouter:
         """
         # Check if admin has configured a default provider in DB
         if self.db:
-            default_config = self.db.query(AIProviderConfig).filter(
-                AIProviderConfig.is_default == True,
-                AIProviderConfig.is_active == True,
-            ).first()
+            default_config = (
+                self.db.query(AIProviderConfig)
+                .filter(
+                    AIProviderConfig.is_default.is_(True),
+                    AIProviderConfig.is_active.is_(True),
+                )
+                .first()
+            )
             if default_config:
-                return default_config.provider_name, default_config.default_model or AI_DEFAULT_MODEL
+                return (
+                    default_config.provider_name,
+                    default_config.default_model or AI_DEFAULT_MODEL,
+                )
 
         # Get preferences for this assistant type
-        preferences = TASK_MODEL_PREFERENCES.get(assistant_type, TASK_MODEL_PREFERENCES["data_copilot"])
+        preferences = TASK_MODEL_PREFERENCES.get(
+            assistant_type, TASK_MODEL_PREFERENCES["data_copilot"]
+        )
 
         # Check which providers are available (have API keys configured)
         if self.db:
             active_providers = {
-                p.provider_name for p in self.db.query(AIProviderConfig).filter(
-                    AIProviderConfig.is_active == True,
-                ).all()
+                p.provider_name
+                for p in self.db.query(AIProviderConfig)
+                .filter(
+                    AIProviderConfig.is_active.is_(True),
+                )
+                .all()
             }
         else:
             # Fall back to environment-based availability
             from ai.config import (
-                OPENAI_API_KEY, GEMINI_API_KEY, DEEPSEEK_API_KEY,
-                GLM_API_KEY, CLAUDE_API_KEY,
+                CLAUDE_API_KEY,
+                DEEPSEEK_API_KEY,
+                GEMINI_API_KEY,
+                GLM_API_KEY,
+                OPENAI_API_KEY,
             )
+
             active_providers = set()
             if OPENAI_API_KEY:
                 active_providers.add("openai")
@@ -150,6 +164,5 @@ class ModelRouter:
         """Get model recommendations for an assistant type."""
         preferences = TASK_MODEL_PREFERENCES.get(assistant_type, [])
         return [
-            {"provider": p, "model": m, "priority": i + 1}
-            for i, (p, m) in enumerate(preferences)
+            {"provider": p, "model": m, "priority": i + 1} for i, (p, m) in enumerate(preferences)
         ]

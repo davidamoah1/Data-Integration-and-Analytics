@@ -1,15 +1,17 @@
 """Tests for ETL connectors — CSV, Excel, JSON, XML connectors."""
 
-import os
-import tempfile
-import pytest
 import pandas as pd
+import pytest
 
-from etl.connectors.connectors import (
-    CSVConnector, ExcelConnector, JSONConnector, XMLConnector,
-    get_connector, register_connector, CONNECTOR_REGISTRY,
-)
 from etl.connectors.base import BaseConnector
+from etl.connectors.connectors import (
+    CONNECTOR_REGISTRY,
+    CSVConnector,
+    JSONConnector,
+    XMLConnector,
+    get_connector,
+    register_connector,
+)
 
 
 @pytest.fixture
@@ -32,7 +34,7 @@ def sample_xml(tmp_path):
     path = tmp_path / "test.xml"
     path.write_text(
         '<?xml version="1.0"?>\n<root><record><name>Alice</name><age>30</age></record>'
-        '<record><name>Bob</name><age>25</age></record></root>'
+        "<record><name>Bob</name><age>25</age></record></root>"
     )
     return str(path)
 
@@ -97,7 +99,9 @@ class TestJSONConnector:
 
 class TestXMLConnector:
     def test_extract(self, sample_xml):
-        conn = XMLConnector("xml", {"file_path": sample_xml, "record_tag": "record", "root_path": "root"})
+        conn = XMLConnector(
+            "xml", {"file_path": sample_xml, "record_tag": "record", "root_path": "root"}
+        )
         conn.connect()
         df = conn.extract()
         assert len(df) == 2
@@ -120,9 +124,14 @@ class TestConnectorRegistry:
 
     def test_register_custom_connector(self):
         class DummyConnector(BaseConnector):
-            def connect(self): self._connected = True
-            def extract(self, **kw): return pd.DataFrame()
-            def get_schema(self): return []
+            def connect(self):
+                self._connected = True
+
+            def extract(self, **kw):
+                return pd.DataFrame()
+
+            def get_schema(self):
+                return []
 
         register_connector("dummy", DummyConnector)
         assert "dummy" in CONNECTOR_REGISTRY

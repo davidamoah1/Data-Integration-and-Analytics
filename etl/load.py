@@ -1,7 +1,7 @@
 import pandas as pd
 from sqlalchemy import create_engine
 
-from config import DB_URL, DB_TYPE
+from config import DB_TYPE, DB_URL
 from etl.logging_config import logger
 
 BATCH_SIZE = 1000
@@ -38,9 +38,19 @@ def load_data(df: pd.DataFrame) -> int:
             return 0
 
         columns_to_load = [
-            "order_id", "order_date", "ship_date", "customer_name",
-            "segment", "region", "category", "sub_category",
-            "product_name", "sales", "quantity", "discount", "profit"
+            "order_id",
+            "order_date",
+            "ship_date",
+            "customer_name",
+            "segment",
+            "region",
+            "category",
+            "sub_category",
+            "product_name",
+            "sales",
+            "quantity",
+            "discount",
+            "profit",
         ]
         cols = [c for c in columns_to_load if c in df_new.columns]
         df_new = df_new[cols]
@@ -78,7 +88,7 @@ def _batch_insert(engine, df_new: pd.DataFrame) -> int:
     """
     total = 0
     for i in range(0, len(df_new), BATCH_SIZE):
-        batch = df_new.iloc[i:i + BATCH_SIZE]
+        batch = df_new.iloc[i : i + BATCH_SIZE]
         batch.to_sql("sales", con=engine, if_exists="append", index=False, method="multi")
         total += len(batch)
         logger.info(f"Load: Inserted batch {i // BATCH_SIZE + 1} ({len(batch)} rows)")
@@ -86,11 +96,13 @@ def _batch_insert(engine, df_new: pd.DataFrame) -> int:
 
 
 if __name__ == "__main__":
-    import sys
     import os
+    import sys
+
     sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
     from etl.extract import extract_data
     from etl.transform import transform_data
+
     raw = extract_data()
     clean = transform_data(raw)
     load_data(clean)

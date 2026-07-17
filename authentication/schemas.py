@@ -1,12 +1,11 @@
 """Pydantic schemas for authentication endpoints."""
 
 from datetime import datetime
-from typing import Optional
 
-from pydantic import BaseModel, EmailStr, Field, field_validator
-
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 # --- Auth -------------------------------------------------------------------
+
 
 class LoginRequest(BaseModel):
     email: EmailStr
@@ -45,47 +44,47 @@ class VerifyEmailRequest(BaseModel):
 
 # --- User -------------------------------------------------------------------
 
+
 class UserCreate(BaseModel):
     email: EmailStr
     password: str = Field(..., min_length=8)
     full_name: str = Field(..., min_length=1, max_length=255)
-    phone: Optional[str] = None
-    organization_id: Optional[int] = None
-    department_id: Optional[int] = None
-    position: Optional[str] = None
+    phone: str | None = None
+    organization_id: int | None = None
+    department_id: int | None = None
+    position: str | None = None
     role_names: list[str] = Field(default_factory=list)
 
 
 class UserUpdate(BaseModel):
-    full_name: Optional[str] = Field(None, max_length=255)
-    phone: Optional[str] = None
-    avatar_url: Optional[str] = None
-    organization_id: Optional[int] = None
-    department_id: Optional[int] = None
-    position: Optional[str] = None
-    language: Optional[str] = None
-    timezone: Optional[str] = None
+    full_name: str | None = Field(None, max_length=255)
+    phone: str | None = None
+    avatar_url: str | None = None
+    organization_id: int | None = None
+    department_id: int | None = None
+    position: str | None = None
+    language: str | None = None
+    timezone: str | None = None
 
 
 class UserResponse(BaseModel):
     id: int
     email: str
     full_name: str
-    avatar_url: Optional[str] = None
-    phone: Optional[str] = None
-    organization_id: Optional[int] = None
-    department_id: Optional[int] = None
-    position: Optional[str] = None
-    language: Optional[str] = None
-    timezone: Optional[str] = None
+    avatar_url: str | None = None
+    phone: str | None = None
+    organization_id: int | None = None
+    department_id: int | None = None
+    position: str | None = None
+    language: str | None = None
+    timezone: str | None = None
     is_active: bool
     email_verified: bool
-    last_login_at: Optional[datetime] = None
+    last_login_at: datetime | None = None
     created_at: datetime
     roles: list[str] = Field(default_factory=list)
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UserListResponse(BaseModel):
@@ -97,84 +96,85 @@ class UserListResponse(BaseModel):
 
 # --- Role -------------------------------------------------------------------
 
+
 class RoleCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=50)
     display_name: str = Field(..., min_length=1, max_length=100)
-    description: Optional[str] = None
+    description: str | None = None
     permission_names: list[str] = Field(default_factory=list)
 
 
 class RoleUpdate(BaseModel):
-    display_name: Optional[str] = None
-    description: Optional[str] = None
-    permission_names: Optional[list[str]] = None
+    display_name: str | None = None
+    description: str | None = None
+    permission_names: list[str] | None = None
 
 
 class RoleResponse(BaseModel):
     id: int
     name: str
     display_name: str
-    description: Optional[str] = None
+    description: str | None = None
     is_system: bool
     permissions: list[str] = Field(default_factory=list)
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # --- Permission -------------------------------------------------------------
+
 
 class PermissionResponse(BaseModel):
     id: int
     name: str
     display_name: str
     module: str
-    description: Optional[str] = None
+    description: str | None = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # --- Session ----------------------------------------------------------------
 
+
 class SessionResponse(BaseModel):
     id: int
-    ip_address: Optional[str] = None
-    user_agent: Optional[str] = None
-    device: Optional[str] = None
+    ip_address: str | None = None
+    user_agent: str | None = None
+    device: str | None = None
     is_active: bool
     last_activity_at: datetime
     created_at: datetime
     expires_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # --- Login History ----------------------------------------------------------
 
+
 class LoginHistoryResponse(BaseModel):
     id: int
     email: str
-    ip_address: Optional[str] = None
-    user_agent: Optional[str] = None
+    ip_address: str | None = None
+    user_agent: str | None = None
     success: bool
-    failure_reason: Optional[str] = None
+    failure_reason: str | None = None
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # --- Profile ----------------------------------------------------------------
 
+
 class ProfileUpdate(BaseModel):
-    full_name: Optional[str] = Field(None, max_length=255)
-    phone: Optional[str] = None
-    avatar_url: Optional[str] = None
-    position: Optional[str] = None
-    language: Optional[str] = None
-    timezone: Optional[str] = None
+    full_name: str | None = Field(None, max_length=255)
+    phone: str | None = None
+    avatar_url: str | None = None
+    position: str | None = None
+    language: str | None = None
+    timezone: str | None = None
 
 
 class NotificationPreferences(BaseModel):

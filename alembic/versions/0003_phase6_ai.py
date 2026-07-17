@@ -1,17 +1,17 @@
 """Phase 6 — AI Intelligence Platform tables.
 
-Revision ID: 0003
-Revises: 0002
+Revision ID: 0003_phase6_ai
+Revises: 0002_phase5_etl
 Create Date: 2026-07-12
 """
 
-from alembic import op
 import sqlalchemy as sa
-from sqlalchemy.dialects import mysql
+
+from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "0003"
-down_revision = "0002"
+revision = "0003_phase6_ai"
+down_revision = "0002_phase5_etl"
 branch_labels = None
 depends_on = None
 
@@ -26,16 +26,32 @@ def upgrade():
         sa.Column("title", sa.String(255), nullable=True),
         sa.Column("context", sa.JSON(), nullable=True),
         sa.Column("is_active", sa.Boolean(), default=True, nullable=False),
-        sa.Column("created_at", sa.TIMESTAMP(), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-        sa.Column("updated_at", sa.TIMESTAMP(), server_default=sa.text("CURRENT_TIMESTAMP"),
-                  onupdate=sa.text("CURRENT_TIMESTAMP"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.TIMESTAMP(),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.TIMESTAMP(),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            onupdate=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
     )
 
     # --- AI Messages ---
     op.create_table(
         "ai_messages",
         sa.Column("id", sa.BigInteger(), primary_key=True, autoincrement=True),
-        sa.Column("conversation_id", sa.BigInteger(), sa.ForeignKey("ai_conversations.id"), nullable=False, index=True),
+        sa.Column(
+            "conversation_id",
+            sa.BigInteger(),
+            sa.ForeignKey("ai_conversations.id"),
+            nullable=False,
+            index=True,
+        ),
         sa.Column("role", sa.String(20), nullable=False),
         sa.Column("content", sa.Text(), nullable=False),
         sa.Column("tokens_used", sa.Integer(), default=0, nullable=False),
@@ -45,7 +61,12 @@ def upgrade():
         sa.Column("citations", sa.JSON(), nullable=True),
         sa.Column("confidence_score", sa.Float(), nullable=True),
         sa.Column("feedback", sa.String(20), nullable=True),
-        sa.Column("created_at", sa.TIMESTAMP(), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.TIMESTAMP(),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
     )
 
     # --- AI Provider Configs ---
@@ -63,9 +84,19 @@ def upgrade():
         sa.Column("max_tokens", sa.Integer(), default=4096, nullable=False),
         sa.Column("temperature", sa.Float(), default=0.7, nullable=False),
         sa.Column("config", sa.JSON(), nullable=True),
-        sa.Column("created_at", sa.TIMESTAMP(), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-        sa.Column("updated_at", sa.TIMESTAMP(), server_default=sa.text("CURRENT_TIMESTAMP"),
-                  onupdate=sa.text("CURRENT_TIMESTAMP"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.TIMESTAMP(),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.TIMESTAMP(),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            onupdate=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
     )
 
     # --- AI Usage Logs ---
@@ -81,7 +112,12 @@ def upgrade():
         sa.Column("estimated_cost_usd", sa.Float(), default=0.0, nullable=False),
         sa.Column("request_type", sa.String(50), nullable=True),
         sa.Column("duration_ms", sa.Integer(), nullable=True),
-        sa.Column("created_at", sa.TIMESTAMP(), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.TIMESTAMP(),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
     )
     op.create_index("idx_usage_user_date", "ai_usage_logs", ["user_id", "created_at"])
     op.create_index("idx_usage_provider", "ai_usage_logs", ["provider"])
@@ -100,7 +136,12 @@ def upgrade():
         sa.Column("success", sa.Boolean(), default=True, nullable=False),
         sa.Column("error_message", sa.Text(), nullable=True),
         sa.Column("ip_address", sa.String(50), nullable=True),
-        sa.Column("created_at", sa.TIMESTAMP(), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.TIMESTAMP(),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
     )
 
     # --- AI Workflows ---
@@ -114,16 +155,32 @@ def upgrade():
         sa.Column("trigger_config", sa.JSON(), nullable=True),
         sa.Column("steps", sa.JSON(), nullable=False),
         sa.Column("is_active", sa.Boolean(), default=True, nullable=False),
-        sa.Column("created_at", sa.TIMESTAMP(), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-        sa.Column("updated_at", sa.TIMESTAMP(), server_default=sa.text("CURRENT_TIMESTAMP"),
-                  onupdate=sa.text("CURRENT_TIMESTAMP"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.TIMESTAMP(),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.TIMESTAMP(),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            onupdate=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
     )
 
     # --- AI Workflow Runs ---
     op.create_table(
         "ai_workflow_runs",
         sa.Column("id", sa.BigInteger(), primary_key=True, autoincrement=True),
-        sa.Column("workflow_id", sa.BigInteger(), sa.ForeignKey("ai_workflows.id"), nullable=False, index=True),
+        sa.Column(
+            "workflow_id",
+            sa.BigInteger(),
+            sa.ForeignKey("ai_workflows.id"),
+            nullable=False,
+            index=True,
+        ),
         sa.Column("status", sa.String(20), default="queued", nullable=False),
         sa.Column("trigger_type", sa.String(30), default="manual", nullable=False),
         sa.Column("step_results", sa.JSON(), nullable=True),
@@ -131,7 +188,12 @@ def upgrade():
         sa.Column("completed_at", sa.TIMESTAMP(), nullable=True),
         sa.Column("duration_seconds", sa.Integer(), nullable=True),
         sa.Column("error_message", sa.Text(), nullable=True),
-        sa.Column("created_at", sa.TIMESTAMP(), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.TIMESTAMP(),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
     )
 
     # --- AI Insights ---
@@ -150,7 +212,12 @@ def upgrade():
         sa.Column("data_sources", sa.JSON(), nullable=True),
         sa.Column("user_id", sa.BigInteger(), nullable=True, index=True),
         sa.Column("is_archived", sa.Boolean(), default=False, nullable=False),
-        sa.Column("created_at", sa.TIMESTAMP(), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.TIMESTAMP(),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
     )
 
     # --- AI Forecasts ---
@@ -166,7 +233,12 @@ def upgrade():
         sa.Column("confidence_level", sa.Float(), default=0.95, nullable=False),
         sa.Column("input_summary", sa.JSON(), nullable=True),
         sa.Column("user_id", sa.BigInteger(), nullable=True, index=True),
-        sa.Column("created_at", sa.TIMESTAMP(), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.TIMESTAMP(),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
     )
 
     # --- AI Anomaly Alerts ---
@@ -186,7 +258,12 @@ def upgrade():
         sa.Column("resolved_by", sa.BigInteger(), nullable=True),
         sa.Column("resolved_at", sa.TIMESTAMP(), nullable=True),
         sa.Column("user_id", sa.BigInteger(), nullable=True, index=True),
-        sa.Column("created_at", sa.TIMESTAMP(), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.TIMESTAMP(),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
     )
 
     # --- AI Documents ---
@@ -201,7 +278,12 @@ def upgrade():
         sa.Column("extra_data", sa.JSON(), nullable=True),
         sa.Column("user_id", sa.BigInteger(), nullable=True, index=True),
         sa.Column("is_indexed", sa.Boolean(), default=False, nullable=False),
-        sa.Column("created_at", sa.TIMESTAMP(), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.TIMESTAMP(),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
     )
 
     # --- AI KPI Recommendations ---
@@ -220,7 +302,12 @@ def upgrade():
         sa.Column("rationale", sa.Text(), nullable=True),
         sa.Column("user_id", sa.BigInteger(), nullable=True, index=True),
         sa.Column("is_active", sa.Boolean(), default=True, nullable=False),
-        sa.Column("created_at", sa.TIMESTAMP(), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.TIMESTAMP(),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
     )
 
     # --- AI Report Generations ---
@@ -235,7 +322,12 @@ def upgrade():
         sa.Column("sections", sa.JSON(), nullable=True),
         sa.Column("format", sa.String(20), default="markdown", nullable=False),
         sa.Column("user_id", sa.BigInteger(), nullable=True, index=True),
-        sa.Column("created_at", sa.TIMESTAMP(), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.TIMESTAMP(),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
     )
 
     # --- AI Prompt Templates ---
@@ -249,9 +341,19 @@ def upgrade():
         sa.Column("variables", sa.JSON(), nullable=True),
         sa.Column("is_active", sa.Boolean(), default=True, nullable=False),
         sa.Column("is_system", sa.Boolean(), default=False, nullable=False),
-        sa.Column("created_at", sa.TIMESTAMP(), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
-        sa.Column("updated_at", sa.TIMESTAMP(), server_default=sa.text("CURRENT_TIMESTAMP"),
-                  onupdate=sa.text("CURRENT_TIMESTAMP"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.TIMESTAMP(),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.TIMESTAMP(),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            onupdate=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
     )
 
     # --- AI Plugins ---
@@ -266,7 +368,12 @@ def upgrade():
         sa.Column("config_schema", sa.JSON(), nullable=True),
         sa.Column("is_active", sa.Boolean(), default=False, nullable=False),
         sa.Column("is_system", sa.Boolean(), default=False, nullable=False),
-        sa.Column("created_at", sa.TIMESTAMP(), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.TIMESTAMP(),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
     )
 
 

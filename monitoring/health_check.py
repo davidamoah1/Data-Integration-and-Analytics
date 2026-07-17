@@ -12,7 +12,7 @@ Can be run standalone:
 
 import os
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime, timezone
 
 import pandas as pd
 
@@ -29,6 +29,7 @@ def check_database_connection() -> dict:
     """
     try:
         from database.repositories import SalesRepository
+
         repo = SalesRepository()
         count = repo.get_record_count()
         return {"connected": True, "record_count": count}
@@ -49,6 +50,7 @@ def check_data_freshness(max_age_hours: int = 48) -> dict:
     """
     try:
         from database.repositories import PipelineRunRepository
+
         repo = PipelineRunRepository()
         runs = repo.get_recent_runs(limit=1)
         if runs.empty:
@@ -56,7 +58,9 @@ def check_data_freshness(max_age_hours: int = 48) -> dict:
 
         last_run = runs.iloc[0]
         started_at = pd.Timestamp(last_run["started_at"])
-        age = (datetime.utcnow() - started_at.tz_localize(None)).total_seconds() / 3600
+        age = (
+            datetime.now(timezone.utc).replace(tzinfo=None) - started_at.tz_localize(None)
+        ).total_seconds() / 3600
 
         return {
             "fresh": age <= max_age_hours,
@@ -77,6 +81,7 @@ def check_pipeline_health() -> dict:
     """
     try:
         from database.repositories import PipelineRunRepository
+
         repo = PipelineRunRepository()
         runs = repo.get_recent_runs(limit=10)
         if runs.empty:
@@ -103,7 +108,7 @@ def run_full_health_check() -> dict:
         Dict with all health check results and an overall status.
     """
     report = {
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),
         "database": check_database_connection(),
         "data_freshness": check_data_freshness(),
         "pipeline": check_pipeline_health(),

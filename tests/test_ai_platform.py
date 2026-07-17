@@ -14,57 +14,49 @@ These tests cover:
 - AI API routes
 """
 
+import json
 import os
 import sys
-import json
-import tempfile
-import pytest
+
 import pandas as pd
-from io import BytesIO
+import pytest
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session as DbSession
-from sqlalchemy.pool import StaticPool
 
 os.environ["DB_TYPE"] = "sqlite"
 os.environ["SQLITE_DB_PATH"] = "test_ai.db"
 
-from shared.database import Base, get_db
-from shared import database as db_module
-from authentication.services import seed_default_data
-from tests.conftest import db_engine, db_session, client, admin_token, auth_headers
 
-from ai.providers.manager import ProviderManager, register_provider_class
-from ai.providers.base import BaseProvider, LLMResponse
-from ai.providers.openai_provider import OpenAIProvider
-from ai.providers.local_provider import LocalLLMProvider
-from ai.prompts.templates import PromptManager
-from ai.memory import AIMemory
-from ai.security import AISecurityLayer
+from ai.assistants.assistants import get_assistant, list_assistants
 from ai.cache import AICache
-from ai.model_router import ModelRouter
-from ai.assistants.assistants import list_assistants, get_assistant
-from ai.plugins import PluginRegistry, register_system_plugins
-from ai.models import (
-    AIConversation, AIMessage, AIProviderConfig, AIUsageLog, AIAuditLog,
-    AIWorkflow, AIWorkflowRun, AIInsight, AIForecast, AIAnomalyAlert,
-    AIDocument, AIKPIRecommendation, AIReportGeneration, AIPromptTemplate, AIPlugin,
-)
-from ai.engines.nl_to_sql import NLToSQLEngine
-from ai.engines.nl_to_etl import NLToETLEngine
-from ai.engines.nl_to_dashboard import NLToDashboardEngine
-from ai.engines.ai_quality import AIDataQualityEngine
-from ai.engines.kpi_engine import KPIEngine
-from ai.engines.ai_search import AISearchEngine
-from ai.engines.forecasting import ForecastingEngine
-from ai.engines.anomaly_detection import AnomalyDetectionEngine
-from ai.workflow import WorkflowEngine
 from ai.config import AI_COST_PER_1K
-
+from ai.engines.ai_quality import AIDataQualityEngine
+from ai.engines.ai_search import AISearchEngine
+from ai.engines.anomaly_detection import AnomalyDetectionEngine
+from ai.engines.forecasting import ForecastingEngine
+from ai.engines.kpi_engine import KPIEngine
+from ai.engines.nl_to_dashboard import NLToDashboardEngine
+from ai.engines.nl_to_etl import NLToETLEngine
+from ai.engines.nl_to_sql import NLToSQLEngine
+from ai.memory import AIMemory
+from ai.model_router import ModelRouter
+from ai.models import (
+    AIConversation,
+    AIKPIRecommendation,
+    AIMessage,
+    AIPlugin,
+)
+from ai.plugins import PluginRegistry, register_system_plugins
+from ai.prompts.templates import PromptManager
+from ai.providers.local_provider import LocalLLMProvider
+from ai.providers.manager import ProviderManager
+from ai.providers.openai_provider import OpenAIProvider
+from ai.security import AISecurityLayer
+from ai.workflow import WorkflowEngine
 
 # --- Fixtures ----------------------------------------------------------------
+
 
 @pytest.fixture
 def ai_db(db_session):
@@ -81,33 +73,44 @@ def ai_client(client):
 @pytest.fixture(autouse=True)
 def mock_ai_gateway_chat(monkeypatch):
     """Mock AIGateway.chat to avoid external LLM calls in unit tests."""
+
     def _mock_chat(self, user_message, assistant_type, **kwargs):
         # Return a generic mock response that includes valid JSON when expected
         return {
-            "response": json.dumps({
-                "risk_level": "low",
-                "issues_found": [],
-                "recommendations": ["Mock recommendation"],
-                "fix_suggestions": [{"action": "mock", "column": "a", "description": "mock", "confidence": 0.9}],
-                "key_findings": [{"finding": "Mock finding", "metric": "sales", "value": "100"}],
-                "risks": [],
-                "opportunities": [],
-                "trend_analysis": {"direction": "stable"},
-                "sql": "SELECT 1",
-                "explanation": "Mock explanation",
-                "pipeline_steps": [{"type": "extract", "config": {}}],
-                "estimated_duration": "1 minute",
-                "dashboard_config": {"title": "Mock Dashboard"},
-                "charts": [{"type": "bar", "title": "Mock Chart"}],
-                "recommendations": [
-                    {
-                        "name": "Mock KPI", "description": "Mock", "formula": "SUM(sales)",
-                        "unit": "USD", "category": "sales", "target_value": 1000,
-                        "threshold_warning": 800, "threshold_critical": 500, "rationale": "Mock",
-                    }
-                ],
-                "explanation": "Mock explanation",
-            }),
+            "response": json.dumps(
+                {
+                    "risk_level": "low",
+                    "issues_found": [],
+                    "fix_suggestions": [
+                        {"action": "mock", "column": "a", "description": "mock", "confidence": 0.9}
+                    ],
+                    "key_findings": [
+                        {"finding": "Mock finding", "metric": "sales", "value": "100"}
+                    ],
+                    "risks": [],
+                    "opportunities": [],
+                    "trend_analysis": {"direction": "stable"},
+                    "sql": "SELECT 1",
+                    "explanation": "Mock explanation",
+                    "pipeline_steps": [{"type": "extract", "config": {}}],
+                    "estimated_duration": "1 minute",
+                    "dashboard_config": {"title": "Mock Dashboard"},
+                    "charts": [{"type": "bar", "title": "Mock Chart"}],
+                    "recommendations": [
+                        {
+                            "name": "Mock KPI",
+                            "description": "Mock",
+                            "formula": "SUM(sales)",
+                            "unit": "USD",
+                            "category": "sales",
+                            "target_value": 1000,
+                            "threshold_warning": 800,
+                            "threshold_critical": 500,
+                            "rationale": "Mock",
+                        }
+                    ],
+                }
+            ),
             "tokens_used": 10,
             "model_used": "mock",
             "provider": "mock",
@@ -120,12 +123,20 @@ def mock_ai_gateway_chat(monkeypatch):
 @pytest.fixture
 def mock_engine_chat(monkeypatch):
     """Mock AI engine-level chat methods."""
+
     def _mock_chat(self, *args, **kwargs):
-        return {"response": "Mock engine response", "tokens_used": 5, "model_used": "mock", "provider": "mock"}
+        return {
+            "response": "Mock engine response",
+            "tokens_used": 5,
+            "model_used": "mock",
+            "provider": "mock",
+        }
+
     monkeypatch.setattr("ai.gateway.AIGateway.chat", _mock_chat)
 
 
 # --- Providers ---------------------------------------------------------------
+
 
 class TestProviderManager:
 
@@ -165,6 +176,7 @@ class TestProviderManager:
 
 # --- Prompts -----------------------------------------------------------------
 
+
 class TestPromptManager:
 
     def test_built_in_prompts(self, ai_db):
@@ -196,6 +208,7 @@ class TestPromptManager:
 
 
 # --- Memory ------------------------------------------------------------------
+
 
 class TestAIMemory:
 
@@ -234,6 +247,7 @@ class TestAIMemory:
 
 # --- Security ----------------------------------------------------------------
 
+
 class TestAISecurity:
 
     def test_validate_input(self, ai_db):
@@ -267,6 +281,7 @@ class TestAISecurity:
 
 # --- Cache -------------------------------------------------------------------
 
+
 class TestAICache:
 
     def test_cache_get_set(self):
@@ -287,6 +302,7 @@ class TestAICache:
 
 # --- Model Router ------------------------------------------------------------
 
+
 class TestModelRouter:
 
     def test_default_route(self, ai_db):
@@ -305,6 +321,7 @@ class TestModelRouter:
 
 # --- Assistants --------------------------------------------------------------
 
+
 class TestAssistants:
 
     def test_list_assistants(self):
@@ -322,17 +339,18 @@ class TestAssistants:
 
 # --- Plugins -----------------------------------------------------------------
 
+
 class TestPlugins:
 
     def test_register_system_plugins(self, ai_db):
         register_system_plugins(ai_db)
-        plugins = ai_db.query(AIPlugin).filter(AIPlugin.is_system == True).all()
+        plugins = ai_db.query(AIPlugin).filter(AIPlugin.is_system.is_(True)).all()
         assert len(plugins) >= 6
 
     def test_activate_deactivate_plugin(self, ai_db):
         register_system_plugins(ai_db)
         registry = PluginRegistry(ai_db)
-        plugin = ai_db.query(AIPlugin).filter(AIPlugin.is_system == True).first()
+        plugin = ai_db.query(AIPlugin).filter(AIPlugin.is_system.is_(True)).first()
         assert registry.activate_plugin(plugin.id) is True
         assert plugin.is_active is True
         assert registry.deactivate_plugin(plugin.id) is True
@@ -340,6 +358,7 @@ class TestPlugins:
 
 
 # --- NL to SQL ---------------------------------------------------------------
+
 
 class TestNLToSQL:
 
@@ -362,13 +381,14 @@ class TestNLToSQL:
     def test_extract_sql(self, ai_db):
         engine = NLToSQLEngine(ai_db)
         sql, explanation = engine._extract_sql(
-            '```sql\nSELECT sales FROM orders\n```\nThis query returns sales.'
+            "```sql\nSELECT sales FROM orders\n```\nThis query returns sales."
         )
         assert "SELECT" in sql
         assert "sales" in sql
 
 
 # --- NL to ETL ---------------------------------------------------------------
+
 
 class TestNLToETL:
 
@@ -387,6 +407,7 @@ class TestNLToETL:
 
 # --- NL to Dashboard ---------------------------------------------------------
 
+
 class TestNLToDashboard:
 
     def test_extract_dashboard(self, ai_db):
@@ -403,6 +424,7 @@ class TestNLToDashboard:
 
 # --- AI Quality --------------------------------------------------------------
 
+
 class TestAIQuality:
 
     def test_quality_on_clean_csv(self, ai_db, tmp_path):
@@ -411,13 +433,16 @@ class TestAIQuality:
         df.to_csv(path, index=False)
 
         engine = AIDataQualityEngine(ai_db)
-        result = engine.analyze("csv", {"file_path": str(path)}, user_id=1, permissions=["etl.read"])
+        result = engine.analyze(
+            "csv", {"file_path": str(path)}, user_id=1, permissions=["etl.read"]
+        )
         assert "quality_score" in result
         assert 0 <= result["quality_score"] <= 100
         assert "risk_level" in result
 
 
 # --- KPI Engine --------------------------------------------------------------
+
 
 class TestKPIEngine:
 
@@ -432,6 +457,7 @@ class TestKPIEngine:
 
 # --- AI Search ---------------------------------------------------------------
 
+
 class TestAISearch:
 
     def test_infer_search_type(self, ai_db):
@@ -443,10 +469,18 @@ class TestAISearch:
     def test_search_data(self, ai_db):
         # Add a sample sales record so search_data has something to return
         from datetime import date
+
         from database.db_setup import SalesRecord
+
         record = SalesRecord(
-            order_id="ORD-001", order_date=date(2024, 1, 1), region="East",
-            category="Technology", sales=100.0, quantity=1, discount=0, profit=20.0,
+            order_id="ORD-001",
+            order_date=date(2024, 1, 1),
+            region="East",
+            category="Technology",
+            sales=100.0,
+            quantity=1,
+            discount=0,
+            profit=20.0,
         )
         ai_db.add(record)
         ai_db.commit()
@@ -459,6 +493,7 @@ class TestAISearch:
 
 # --- Forecasting -------------------------------------------------------------
 
+
 class TestForecasting:
 
     def test_linear_forecast(self, ai_db, tmp_path):
@@ -469,8 +504,12 @@ class TestForecasting:
 
         engine = ForecastingEngine(ai_db)
         result = engine.forecast(
-            source_type="csv", source_config={"file_path": str(path)},
-            target_column="sales", date_column="order_date", horizon=5, method="linear",
+            source_type="csv",
+            source_config={"file_path": str(path)},
+            target_column="sales",
+            date_column="order_date",
+            horizon=5,
+            method="linear",
         )
         assert "predictions" in result
         assert len(result["predictions"]) == 5
@@ -478,6 +517,7 @@ class TestForecasting:
 
 
 # --- Anomaly Detection -------------------------------------------------------
+
 
 class TestAnomalyDetection:
 
@@ -489,8 +529,11 @@ class TestAnomalyDetection:
 
         engine = AnomalyDetectionEngine(ai_db)
         result = engine.detect(
-            source_type="csv", source_config={"file_path": str(path)},
-            metric_column="sales", date_column="order_date", sensitivity=3.0,
+            source_type="csv",
+            source_config={"file_path": str(path)},
+            metric_column="sales",
+            date_column="order_date",
+            sensitivity=3.0,
         )
         assert result["total_anomalies"] == 0
 
@@ -503,13 +546,17 @@ class TestAnomalyDetection:
 
         engine = AnomalyDetectionEngine(ai_db)
         result = engine.detect(
-            source_type="csv", source_config={"file_path": str(path)},
-            metric_column="sales", date_column="order_date", sensitivity=2.0,
+            source_type="csv",
+            source_config={"file_path": str(path)},
+            metric_column="sales",
+            date_column="order_date",
+            sensitivity=2.0,
         )
         assert result["total_anomalies"] >= 1
 
 
 # --- Workflow ----------------------------------------------------------------
+
 
 class TestWorkflow:
 
@@ -547,6 +594,7 @@ class TestWorkflow:
 
 
 # --- API Routes --------------------------------------------------------------
+
 
 class TestAIAPI:
 
@@ -643,7 +691,9 @@ class TestAIAPI:
         assert data["status"] == "completed"
 
     def test_kpi_recommend(self, ai_client, auth_headers):
-        response = ai_client.post("/ai/kpi/recommend", json={"domain": "sales"}, headers=auth_headers)
+        response = ai_client.post(
+            "/ai/kpi/recommend", json={"domain": "sales"}, headers=auth_headers
+        )
         assert response.status_code == 200
         data = response.json()
         assert "recommendations" in data
@@ -688,6 +738,7 @@ class TestAIAPI:
 
 
 # --- Integration: Database models -------------------------------------------
+
 
 class TestAIModels:
 

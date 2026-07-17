@@ -10,16 +10,15 @@ Detects:
 Generates alerts with severity, expected vs actual values, and deviation.
 """
 
-import json
-from datetime import datetime
+from datetime import datetime, timezone
+
 import numpy as np
 import pandas as pd
-from typing import Optional
 from sqlalchemy.orm import Session as DbSession
 
+from ai.config import AI_ANOMALY_MIN_DATA_POINTS, AI_ANOMALY_SENSITIVITY
 from ai.gateway import AIGateway
 from ai.models import AIAnomalyAlert
-from ai.config import AI_ANOMALY_SENSITIVITY, AI_ANOMALY_MIN_DATA_POINTS
 from etl.connectors.connectors import get_connector
 
 
@@ -30,10 +29,15 @@ class AnomalyDetectionEngine:
         self.db = db
         self.gateway = AIGateway(db)
 
-    def detect(self, source_type: str, source_config: dict,
-               metric_column: str, date_column: str,
-               sensitivity: float = AI_ANOMALY_SENSITIVITY,
-               user_id: Optional[int] = None) -> dict:
+    def detect(
+        self,
+        source_type: str,
+        source_config: dict,
+        metric_column: str,
+        date_column: str,
+        sensitivity: float = AI_ANOMALY_SENSITIVITY,
+        user_id: int | None = None,
+    ) -> dict:
         """Detect anomalies in the given data.
 
         Returns:
@@ -52,8 +56,11 @@ class AnomalyDetectionEngine:
         df = df.dropna(subset=[date_column, metric_column]).sort_values(date_column)
 
         if len(df) < AI_ANOMALY_MIN_DATA_POINTS:
-            return {"alerts": [], "total_anomalies": 0,
-                    "summary": f"Insufficient data. Need at least {AI_ANOMALY_MIN_DATA_POINTS} data points."}
+            return {
+                "alerts": [],
+                "total_anomalies": 0,
+                "summary": f"Insufficient data. Need at least {AI_ANOMALY_MIN_DATA_POINTS} data points.",
+            }
 
         # Aggregate by date
         ts = df.groupby(date_column)[metric_column].sum()
@@ -61,19 +68,13 @@ class AnomalyDetectionEngine:
         alerts = []
 
         # 1. Statistical anomaly detection (z-score based)
-        alerts.extend(self._detect_statistical_anomalies(
-            ts, metric_column, sensitivity, user_id
-        ))
+        alerts.extend(self._detect_statistical_anomalies(ts, metric_column, sensitivity, user_id))
 
         # 2. Trend anomaly detection
-        alerts.extend(self._detect_trend_anomalies(
-            ts, metric_column, sensitivity, user_id
-        ))
+        alerts.extend(self._detect_trend_anomalies(ts, metric_column, sensitivity, user_id))
 
         # 3. Missing records detection
-        alerts.extend(self._detect_missing_records(
-            ts, metric_column, user_id
-        ))
+        alerts.extend(self._detect_missing_records(ts, metric_column, user_id))
 
         # Generate summary
         summary = self._generate_summary(alerts, metric_column)
@@ -101,8 +102,9 @@ class AnomalyDetectionEngine:
             "summary": summary,
         }
 
-    def _detect_statistical_anomalies(self, ts: pd.Series, metric: str,
-                                      sensitivity: float, user_id: int) -> list[dict]:
+    def _detect_statistical_anomalies(
+        self, ts: pd.Series, metric: str, sensitivity: float, user_id: int
+    ) -> list[dict]:
         """Detect anomalies using z-score method."""
         alerts = []
         values = ts.values
@@ -114,28 +116,31 @@ class AnomalyDetectionEngine:
 
         z_scores = np.abs((values - mean) / std)
 
-        for i, (date, value, z) in enumerate(zip(ts.index, values, z_scores)):
+        for _, (date, value, z) in enumerate(zip(ts.index, values, z_scores, strict=False)):
             if z > sensitivity:
                 deviation = ((value - mean) / mean) * 100 if mean != 0 else 0
                 alert_type = "spike" if value > mean else "drop"
                 severity = "critical" if z > sensitivity * 2 else "warning"
 
-                alerts.append({
-                    "alert_type": alert_type,
-                    "severity": severity,
-                    "title": f"{alert_type.title()} detected in {metric}",
-                    "description": f"Value {value:.2f} on {date.date()} deviates {z:.1f} standard deviations from the mean ({mean:.2f}).",
-                    "metric_name": metric,
-                    "expected_value": round(float(mean), 2),
-                    "actual_value": round(float(value), 2),
-                    "deviation_percentage": round(float(deviation), 2),
-                    "context_data": {"date": str(date.date()), "z_score": round(float(z), 2)},
-                })
+                alerts.append(
+                    {
+                        "alert_type": alert_type,
+                        "severity": severity,
+                        "title": f"{alert_type.title()} detected in {metric}",
+                        "description": f"Value {value:.2f} on {date.date()} deviates {z:.1f} standard deviations from the mean ({mean:.2f}).",
+                        "metric_name": metric,
+                        "expected_value": round(float(mean), 2),
+                        "actual_value": round(float(value), 2),
+                        "deviation_percentage": round(float(deviation), 2),
+                        "context_data": {"date": str(date.date()), "z_score": round(float(z), 2)},
+                    }
+                )
 
         return alerts
 
-    def _detect_trend_anomalies(self, ts: pd.Series, metric: str,
-                                sensitivity: float, user_id: int) -> list[dict]:
+    def _detect_trend_anomalies(
+        self, ts: pd.Series, metric: str, sensitivity: float, user_id: int
+    ) -> list[dict]:
         """Detect trend breaks and direction changes."""
         alerts = []
         if len(ts) < 5:
@@ -162,25 +167,26 @@ class AnomalyDetectionEngine:
                 alert_type = "trend"
                 severity = "warning" if deviation < 0.5 else "critical"
 
-                alerts.append({
-                    "alert_type": alert_type,
-                    "severity": severity,
-                    "title": f"Trend anomaly in {metric}",
-                    "description": f"Value {actual:.2f} on {ts.index[i + 1].date()} breaks the expected trend ({expected:.2f}).",
-                    "metric_name": metric,
-                    "expected_value": round(float(expected), 2),
-                    "actual_value": round(float(actual), 2),
-                    "deviation_percentage": round(float(deviation * 100), 2),
-                    "context_data": {
-                        "date": str(ts.index[i + 1].date()),
-                        "rolling_mean": round(float(expected), 2),
-                    },
-                })
+                alerts.append(
+                    {
+                        "alert_type": alert_type,
+                        "severity": severity,
+                        "title": f"Trend anomaly in {metric}",
+                        "description": f"Value {actual:.2f} on {ts.index[i + 1].date()} breaks the expected trend ({expected:.2f}).",
+                        "metric_name": metric,
+                        "expected_value": round(float(expected), 2),
+                        "actual_value": round(float(actual), 2),
+                        "deviation_percentage": round(float(deviation * 100), 2),
+                        "context_data": {
+                            "date": str(ts.index[i + 1].date()),
+                            "rolling_mean": round(float(expected), 2),
+                        },
+                    }
+                )
 
         return alerts[:5]  # Limit trend alerts
 
-    def _detect_missing_records(self, ts: pd.Series, metric: str,
-                                user_id: int) -> list[dict]:
+    def _detect_missing_records(self, ts: pd.Series, metric: str, user_id: int) -> list[dict]:
         """Detect missing records (gaps in time series)."""
         alerts = []
         if len(ts) < 2:
@@ -196,21 +202,23 @@ class AnomalyDetectionEngine:
 
         for gap_date, gap_size in large_gaps.items():
             prev_date = gap_date - gap_size
-            alerts.append({
-                "alert_type": "missing",
-                "severity": "info",
-                "title": f"Missing records in {metric}",
-                "description": f"Gap of {gap_size.days} days detected between {prev_date.date()} and {gap_date.date()}.",
-                "metric_name": metric,
-                "expected_value": None,
-                "actual_value": None,
-                "deviation_percentage": None,
-                "context_data": {
-                    "gap_days": gap_size.days,
-                    "from_date": str(prev_date.date()),
-                    "to_date": str(gap_date.date()),
-                },
-            })
+            alerts.append(
+                {
+                    "alert_type": "missing",
+                    "severity": "info",
+                    "title": f"Missing records in {metric}",
+                    "description": f"Gap of {gap_size.days} days detected between {prev_date.date()} and {gap_date.date()}.",
+                    "metric_name": metric,
+                    "expected_value": None,
+                    "actual_value": None,
+                    "deviation_percentage": None,
+                    "context_data": {
+                        "gap_days": gap_size.days,
+                        "from_date": str(prev_date.date()),
+                        "to_date": str(gap_date.date()),
+                    },
+                }
+            )
 
         return alerts[:3]  # Limit missing record alerts
 
@@ -239,12 +247,9 @@ class AnomalyDetectionEngine:
 
         return " ".join(parts)
 
-    def get_alerts(self, is_resolved: Optional[bool] = False,
-                   limit: int = 50) -> list[dict]:
+    def get_alerts(self, is_resolved: bool | None = False, limit: int = 50) -> list[dict]:
         """Get anomaly alerts."""
-        query = self.db.query(AIAnomalyAlert).filter(
-            AIAnomalyAlert.is_resolved == is_resolved
-        )
+        query = self.db.query(AIAnomalyAlert).filter(AIAnomalyAlert.is_resolved == is_resolved)
         alerts = query.order_by(AIAnomalyAlert.created_at.desc()).limit(limit).all()
         return [
             {
@@ -270,6 +275,6 @@ class AnomalyDetectionEngine:
             return False
         alert.is_resolved = True
         alert.resolved_by = user_id
-        alert.resolved_at = datetime.utcnow()
+        alert.resolved_at = datetime.now(timezone.utc).replace(tzinfo=None)
         self.db.commit()
         return True

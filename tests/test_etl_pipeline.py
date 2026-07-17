@@ -1,12 +1,7 @@
 """Tests for ETL pipeline builder, executor, and job monitor."""
 
-import pytest
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session as DbSession
-from sqlalchemy.pool import StaticPool
-
-from etl.models import ETLPipeline, ETLJob, ETLPipelineVersion
-from etl.pipeline_builder import PipelineBuilder, PipelineExecutor, JobMonitor
+from etl.models import ETLJob
+from etl.pipeline_builder import JobMonitor, PipelineBuilder
 
 
 class TestPipelineBuilder:
@@ -15,7 +10,13 @@ class TestPipelineBuilder:
         pipeline = builder.create_pipeline(
             name="Test Pipeline",
             description="A test pipeline",
-            steps=[{"type": "extract", "source_type": "csv", "source_config": {"file_path": "test.csv"}}],
+            steps=[
+                {
+                    "type": "extract",
+                    "source_type": "csv",
+                    "source_config": {"file_path": "test.csv"},
+                }
+            ],
         )
         assert pipeline.id is not None
         assert pipeline.name == "Test Pipeline"
@@ -31,8 +32,13 @@ class TestPipelineBuilder:
 
     def test_update_pipeline_new_version(self, db_session):
         builder = PipelineBuilder(db_session)
-        pipeline = builder.create_pipeline(name="Version Test", steps=[{"type": "extract", "source_type": "csv", "source_config": {}}])
-        new_version = builder.update_pipeline(pipeline.id, steps=[{"type": "extract", "source_type": "json", "source_config": {}}])
+        pipeline = builder.create_pipeline(
+            name="Version Test",
+            steps=[{"type": "extract", "source_type": "csv", "source_config": {}}],
+        )
+        new_version = builder.update_pipeline(
+            pipeline.id, steps=[{"type": "extract", "source_type": "json", "source_config": {}}]
+        )
         assert new_version.version_number == 2
 
     def test_version_history(self, db_session):
@@ -46,8 +52,13 @@ class TestPipelineBuilder:
 
     def test_rollback_version(self, db_session):
         builder = PipelineBuilder(db_session)
-        pipeline = builder.create_pipeline(name="Rollback Test", steps=[{"type": "extract", "source_type": "csv", "source_config": {}}])
-        builder.update_pipeline(pipeline.id, steps=[{"type": "extract", "source_type": "json", "source_config": {}}])
+        pipeline = builder.create_pipeline(
+            name="Rollback Test",
+            steps=[{"type": "extract", "source_type": "csv", "source_config": {}}],
+        )
+        builder.update_pipeline(
+            pipeline.id, steps=[{"type": "extract", "source_type": "json", "source_config": {}}]
+        )
         rolled = builder.rollback_version(pipeline.id, 1)
         assert rolled.version_number == 1
         assert rolled.is_active == 1

@@ -5,16 +5,24 @@ Each transformation is defined by a config dict with 'type' and type-specific pa
 """
 
 import pandas as pd
-import numpy as np
-from typing import Any, Optional
 
 
 class TransformationEngine:
     """Applies a sequence of transformations to a DataFrame."""
 
     TRANSFORMATIONS = {
-        "rename", "drop", "filter", "fill", "convert", "calculate",
-        "join", "split", "merge", "sort", "deduplicate", "standardize",
+        "rename",
+        "drop",
+        "filter",
+        "fill",
+        "convert",
+        "calculate",
+        "join",
+        "split",
+        "merge",
+        "sort",
+        "deduplicate",
+        "standardize",
     }
 
     def apply(self, df: pd.DataFrame, transformations: list[dict]) -> pd.DataFrame:
@@ -80,7 +88,9 @@ class TransformationEngine:
         elif method == "median":
             df[column] = df[column].fillna(df[column].median())
         elif method == "mode":
-            df[column] = df[column].fillna(df[column].mode().iloc[0] if not df[column].mode().empty else None)
+            df[column] = df[column].fillna(
+                df[column].mode().iloc[0] if not df[column].mode().empty else None
+            )
         elif method == "ffill":
             df[column] = df[column].ffill()
         elif method == "bfill":

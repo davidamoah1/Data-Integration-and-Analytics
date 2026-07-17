@@ -10,13 +10,13 @@ Plugins are registered in the database and loaded dynamically.
 """
 
 import importlib
-import json
-from typing import Optional, Any
+from typing import Any
+
 from sqlalchemy.orm import Session as DbSession
 
 from ai.models import AIPlugin
-from ai.providers.manager import register_provider_class
 from ai.providers.base import BaseProvider
+from ai.providers.manager import register_provider_class
 
 
 class PluginRegistry:
@@ -26,10 +26,16 @@ class PluginRegistry:
         self.db = db
         self._loaded: dict[str, Any] = {}
 
-    def register_plugin(self, name: str, display_name: str, plugin_type: str,
-                        module_path: str, description: str = "",
-                        config_schema: Optional[dict] = None,
-                        is_system: bool = False) -> dict:
+    def register_plugin(
+        self,
+        name: str,
+        display_name: str,
+        plugin_type: str,
+        module_path: str,
+        description: str = "",
+        config_schema: dict | None = None,
+        is_system: bool = False,
+    ) -> dict:
         """Register a new plugin in the database."""
         plugin = AIPlugin(
             name=name,
@@ -67,7 +73,11 @@ class PluginRegistry:
                 # Look for a provider class in the module
                 for attr_name in dir(module):
                     attr = getattr(module, attr_name)
-                    if isinstance(attr, type) and issubclass(attr, BaseProvider) and attr != BaseProvider:
+                    if (
+                        isinstance(attr, type)
+                        and issubclass(attr, BaseProvider)
+                        and attr != BaseProvider
+                    ):
                         register_provider_class(plugin.name, attr)
 
             plugin.is_active = True
@@ -86,7 +96,7 @@ class PluginRegistry:
         self.db.commit()
         return True
 
-    def list_plugins(self, plugin_type: Optional[str] = None) -> list[dict]:
+    def list_plugins(self, plugin_type: str | None = None) -> list[dict]:
         """List all registered plugins."""
         query = self.db.query(AIPlugin)
         if plugin_type:
@@ -105,19 +115,20 @@ class PluginRegistry:
             for p in plugins
         ]
 
-    def get_plugin(self, name: str) -> Optional[Any]:
+    def get_plugin(self, name: str) -> Any | None:
         """Get a loaded plugin module by name."""
         return self._loaded.get(name)
 
 
 # --- Built-in System Plugins ------------------------------------------------
 
+
 def register_system_plugins(db: DbSession):
     """Register built-in system plugins."""
     registry = PluginRegistry(db)
 
     # Check if already registered
-    existing = db.query(AIPlugin).filter(AIPlugin.is_system == True).count()
+    existing = db.query(AIPlugin).filter(AIPlugin.is_system.is_(True)).count()
     if existing > 0:
         return
 

@@ -6,17 +6,13 @@ extract, transform, load modules and the repository layer.
 
 import time
 import uuid
-from datetime import datetime
-from typing import Optional
+from datetime import datetime, timezone
 
-import pandas as pd
-
+from database.repositories import PipelineRunRepository, SalesRepository
 from etl.extract import extract_data
-from etl.transform import transform_data
 from etl.load import load_data
 from etl.logging_config import logger
-from database.db_setup import init_db
-from database.repositories import SalesRepository, PipelineRunRepository
+from etl.transform import transform_data
 
 
 class ETLService:
@@ -28,8 +24,8 @@ class ETLService:
 
     def __init__(
         self,
-        sales_repo: Optional[SalesRepository] = None,
-        run_repo: Optional[PipelineRunRepository] = None,
+        sales_repo: SalesRepository | None = None,
+        run_repo: PipelineRunRepository | None = None,
         max_retries: int = 3,
         retry_delay: float = 5.0,
     ):
@@ -54,10 +50,12 @@ class ETLService:
             - run_id, status, rows_extracted, rows_transformed,
               rows_loaded, duplicates_removed, duration_seconds
         """
-        run_id = f"run_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
+        run_id = f"run_{datetime.now(timezone.utc).replace(tzinfo=None).strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
         start_time = datetime.now()
         logger.info("=" * 50)
-        logger.info(f"Pipeline started at {start_time.strftime('%Y-%m-%d %H:%M:%S')} (run_id={run_id})")
+        logger.info(
+            f"Pipeline started at {start_time.strftime('%Y-%m-%d %H:%M:%S')} (run_id={run_id})"
+        )
         print(f"\nPipeline started at {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
 
         metrics = {
@@ -76,17 +74,13 @@ class ETLService:
             raw_data = self._execute_with_retry(extract_data, "Extract")
             metrics["rows_extracted"] = len(raw_data)
 
-            clean_data = self._execute_with_retry(
-                lambda: transform_data(raw_data), "Transform"
-            )
+            clean_data = self._execute_with_retry(lambda: transform_data(raw_data), "Transform")
             before_count = len(raw_data)
             after_count = len(clean_data)
             metrics["rows_transformed"] = after_count
             metrics["duplicates_removed"] = before_count - after_count
 
-            loaded_count = self._execute_with_retry(
-                lambda: load_data(clean_data), "Load"
-            )
+            loaded_count = self._execute_with_retry(lambda: load_data(clean_data), "Load")
             metrics["rows_loaded"] = loaded_count
 
             end_time = datetime.now()

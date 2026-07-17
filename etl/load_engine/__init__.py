@@ -1,13 +1,13 @@
 """Load engine — insert, update, upsert, incremental, batch load with transactions."""
 
 from enum import Enum
-from typing import Optional
+
 import pandas as pd
 from sqlalchemy import create_engine, text
-from sqlalchemy.orm import Session
 
-from config import DB_URL, DB_TYPE
+from config import DB_TYPE, DB_URL
 from etl.logging_config import logger
+from shared.security import validate_sql_identifier
 
 
 class LoadMode(str, Enum):
@@ -43,9 +43,9 @@ class LoadEngine:
         df: pd.DataFrame,
         table: str,
         mode: LoadMode = LoadMode.INSERT,
-        conflict_columns: Optional[list[str]] = None,
-        incremental_column: Optional[str] = None,
-        last_value: Optional[str] = None,
+        conflict_columns: list[str] | None = None,
+        incremental_column: str | None = None,
+        last_value: str | None = None,
     ) -> dict:
         """Load a DataFrame into a database table.
 
@@ -74,6 +74,7 @@ class LoadEngine:
             raise ValueError(f"Unknown load mode: {mode}")
 
     def _load_full(self, df: pd.DataFrame, table: str) -> dict:
+        validate_sql_identifier(table)
         with self._engine.begin() as conn:
             conn.execute(text(f"DELETE FROM {table}"))
         result = self._load_batch(df, table)
@@ -83,7 +84,7 @@ class LoadEngine:
     def _load_batch(self, df: pd.DataFrame, table: str) -> dict:
         total = 0
         for i in range(0, len(df), self.batch_size):
-            batch = df.iloc[i:i + self.batch_size]
+            batch = df.iloc[i : i + self.batch_size]
             batch.to_sql(table, con=self._engine, if_exists="append", index=False, method="multi")
             total += len(batch)
             logger.info(f"Load: Inserted batch {i // self.batch_size + 1} ({len(batch)} rows)")
@@ -92,14 +93,21 @@ class LoadEngine:
     def _load_upsert(self, df: pd.DataFrame, table: str, conflict_columns: list[str]) -> dict:
         if not conflict_columns:
             raise ValueError("Upsert mode requires conflict_columns")
+        validate_sql_identifier(table)
+        for col in conflict_columns:
+            validate_sql_identifier(col)
 
         with self._engine.connect() as conn:
             try:
                 existing = pd.read_sql(f"SELECT {', '.join(conflict_columns)} FROM {table}", conn)
-                existing_keys = existing[conflict_columns].astype(str).agg("|".join, axis=1).tolist()
+                existing_keys = (
+                    existing[conflict_columns].astype(str).agg("|".join, axis=1).tolist()
+                )
             except Exception:
                 existing_keys = []
 
+        for col in df.columns:
+            validate_sql_identifier(col)
         df_keys = df[conflict_columns].astype(str).agg("|".join, axis=1)
         is_new = ~df_keys.isin(existing_keys)
 
@@ -115,7 +123,9 @@ class LoadEngine:
 
         if len(update_rows) > 0 and DB_TYPE == "sqlite":
             for _, row in update_rows.iterrows():
-                set_clause = ", ".join(f"{c} = :{c}" for c in df.columns if c not in conflict_columns)
+                set_clause = ", ".join(
+                    f"{c} = :{c}" for c in df.columns if c not in conflict_columns
+                )
                 where_clause = " AND ".join(f"{c} = :{c}" for c in conflict_columns)
                 if not set_clause:
                     continue
@@ -125,9 +135,19 @@ class LoadEngine:
                     conn.execute(sql, params)
                 updated += 1
 
-        return {"rows_inserted": inserted, "rows_updated": updated, "rows_skipped": 0, "mode": "upsert"}
+        return {
+            "rows_inserted": inserted,
+            "rows_updated": updated,
+            "rows_skipped": 0,
+            "mode": "upsert",
+        }
 
-    def _load_incremental(self, df: pd.DataFrame, table: str, incremental_column: Optional[str], last_value: Optional[str]) -> dict:
+    def _load_incremental(
+        self, df: pd.DataFrame, table: str, incremental_column: str | None, last_value: str | None
+    ) -> dict:
+        validate_sql_identifier(table)
+        if incremental_column:
+            validate_sql_identifier(incremental_column)
         if not incremental_column:
             return self._load_batch(df, table)
 
@@ -143,12 +163,18 @@ class LoadEngine:
     def _load_update(self, df: pd.DataFrame, table: str, conflict_columns: list[str]) -> dict:
         if not conflict_columns:
             raise ValueError("Update mode requires conflict_columns")
+        validate_sql_identifier(table)
+        for col in conflict_columns:
+            validate_sql_identifier(col)
+        for col in df.columns:
+            validate_sql_identifier(col)
         updated = 0
         for _, row in df.iterrows():
-            set_clause = ", ".join(f"{c} = :{c}" for c in df.columns if c not in conflict_columns)
-            where_clause = " AND ".join(f"{c} = :{c}" for c in conflict_columns)
-            if not set_clause:
+            update_cols = [c for c in df.columns if c not in conflict_columns]
+            if not update_cols:
                 continue
+            set_clause = ", ".join(f"{c} = :{c}" for c in update_cols)
+            where_clause = " AND ".join(f"{c} = :{c}" for c in conflict_columns)
             sql = text(f"UPDATE {table} SET {set_clause} WHERE {where_clause}")
             params = {c: row[c] for c in df.columns}
             with self._engine.begin() as conn:
@@ -156,8 +182,11 @@ class LoadEngine:
                 updated += result.rowcount
         return {"rows_inserted": 0, "rows_updated": updated, "rows_skipped": 0, "mode": "update"}
 
-    def rollback(self, table: str, backup_table: Optional[str] = None):
+    def rollback(self, table: str, backup_table: str | None = None):
         """Restore a table from a backup or truncate it."""
+        validate_sql_identifier(table)
+        if backup_table:
+            validate_sql_identifier(backup_table)
         with self._engine.begin() as conn:
             if backup_table:
                 conn.execute(text(f"DELETE FROM {table}"))

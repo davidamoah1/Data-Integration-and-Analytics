@@ -1,11 +1,9 @@
 """Tests for data lineage tracking and report generation."""
 
 import pytest
-import pandas as pd
 
 from etl.lineage import LineageTracker
 from etl.reports import ReportGenerator
-from etl.models import ETLDataLineage
 
 
 class TestLineageTracker:
@@ -23,8 +21,18 @@ class TestLineageTracker:
 
     def test_get_lineage(self, db_session):
         tracker = LineageTracker(db_session)
-        tracker.record(source_name="a.csv", source_type="csv", destination_name="table_a", destination_type="database")
-        tracker.record(source_name="b.csv", source_type="csv", destination_name="table_b", destination_type="database")
+        tracker.record(
+            source_name="a.csv",
+            source_type="csv",
+            destination_name="table_a",
+            destination_type="database",
+        )
+        tracker.record(
+            source_name="b.csv",
+            source_type="csv",
+            destination_name="table_b",
+            destination_type="database",
+        )
         entries = tracker.get_lineage()
         assert len(entries) >= 2
 
@@ -36,7 +44,13 @@ class TestLineageTracker:
 
     def test_build_graph(self, db_session):
         tracker = LineageTracker(db_session)
-        tracker.record(source_name="src.csv", source_type="csv", destination_name="dest_table", destination_type="database", transformation="rename")
+        tracker.record(
+            source_name="src.csv",
+            source_type="csv",
+            destination_name="dest_table",
+            destination_type="database",
+            transformation="rename",
+        )
         graph = tracker.build_graph()
         assert "nodes" in graph
         assert "edges" in graph
@@ -69,8 +83,19 @@ class TestReportGenerator:
 
     def test_pipeline_report(self):
         gen = ReportGenerator()
-        metrics = {"job_id": 1, "pipeline_id": 1, "status": "completed", "rows_extracted": 100, "rows_transformed": 95, "rows_loaded": 90, "rows_rejected": 5, "duration_seconds": 10.5}
-        report = gen.pipeline_report(metrics, step_records=[{"step_name": "extract", "status": "completed"}])
+        metrics = {
+            "job_id": 1,
+            "pipeline_id": 1,
+            "status": "completed",
+            "rows_extracted": 100,
+            "rows_transformed": 95,
+            "rows_loaded": 90,
+            "rows_rejected": 5,
+            "duration_seconds": 10.5,
+        }
+        report = gen.pipeline_report(
+            metrics, step_records=[{"step_name": "extract", "status": "completed"}]
+        )
         assert report["report_type"] == "pipeline_report"
         assert report["rows_loaded"] == 90
 
@@ -100,5 +125,12 @@ class TestReportGenerator:
 
     def test_performance_report(self):
         gen = ReportGenerator()
-        report = gen.performance_report({"duration_seconds": 10, "rows_loaded": 1000, "rows_extracted": 1000, "rows_transformed": 950})
+        report = gen.performance_report(
+            {
+                "duration_seconds": 10,
+                "rows_loaded": 1000,
+                "rows_extracted": 1000,
+                "rows_transformed": 950,
+            }
+        )
         assert report["rows_per_second"] == 100.0

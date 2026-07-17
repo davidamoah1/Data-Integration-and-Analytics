@@ -17,34 +17,39 @@ def repo(tmp_path, monkeypatch):
     db_url = f"sqlite:///{db_path}"
 
     import config
+
     monkeypatch.setattr(config, "DB_URL", db_url)
     monkeypatch.setattr(config, "DB_TYPE", "sqlite")
 
     from database.db_setup import Base
+
     engine = create_engine(db_url)
     Base.metadata.create_all(engine)
 
     from database.repositories import SalesRepository
+
     return SalesRepository(engine=engine)
 
 
 @pytest.fixture
 def sample_df():
-    return pd.DataFrame({
-        "order_id": ["CA-001", "CA-002", "CA-003"],
-        "order_date": pd.to_datetime(["2024-01-01", "2024-02-01", "2024-03-01"]),
-        "ship_date": pd.to_datetime(["2024-01-05", "2024-02-05", "2024-03-05"]),
-        "customer_name": ["John", "Jane", "Bob"],
-        "segment": ["Consumer", "Corporate", "Consumer"],
-        "region": ["West", "East", "West"],
-        "category": ["Furniture", "Technology", "Furniture"],
-        "sub_category": ["Chairs", "Phones", "Tables"],
-        "product_name": ["Chair", "Phone", "Table"],
-        "sales": [500.0, 1200.0, 300.0],
-        "quantity": [2, 1, 3],
-        "discount": [0.1, 0.0, 0.05],
-        "profit": [120.0, 300.0, 60.0],
-    })
+    return pd.DataFrame(
+        {
+            "order_id": ["CA-001", "CA-002", "CA-003"],
+            "order_date": pd.to_datetime(["2024-01-01", "2024-02-01", "2024-03-01"]),
+            "ship_date": pd.to_datetime(["2024-01-05", "2024-02-05", "2024-03-05"]),
+            "customer_name": ["John", "Jane", "Bob"],
+            "segment": ["Consumer", "Corporate", "Consumer"],
+            "region": ["West", "East", "West"],
+            "category": ["Furniture", "Technology", "Furniture"],
+            "sub_category": ["Chairs", "Phones", "Tables"],
+            "product_name": ["Chair", "Phone", "Table"],
+            "sales": [500.0, 1200.0, 300.0],
+            "quantity": [2, 1, 3],
+            "discount": [0.1, 0.0, 0.05],
+            "profit": [120.0, 300.0, 60.0],
+        }
+    )
 
 
 def test_get_all_sales_empty(repo):

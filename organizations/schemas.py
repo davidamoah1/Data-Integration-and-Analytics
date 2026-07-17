@@ -1,98 +1,94 @@
 """Pydantic schemas for organization endpoints."""
 
 from datetime import datetime
-from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class OrganizationCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
     slug: str = Field(..., min_length=1, max_length=100)
-    description: Optional[str] = None
-    logo_url: Optional[str] = None
-    contact_email: Optional[str] = None
-    contact_phone: Optional[str] = None
-    address: Optional[str] = None
+    description: str | None = None
+    logo_url: str | None = None
+    contact_email: str | None = None
+    contact_phone: str | None = None
+    address: str | None = None
 
 
 class OrganizationUpdate(BaseModel):
-    name: Optional[str] = Field(None, max_length=255)
-    description: Optional[str] = None
-    logo_url: Optional[str] = None
-    contact_email: Optional[str] = None
-    contact_phone: Optional[str] = None
-    address: Optional[str] = None
-    is_active: Optional[bool] = None
+    name: str | None = Field(None, max_length=255)
+    description: str | None = None
+    logo_url: str | None = None
+    contact_email: str | None = None
+    contact_phone: str | None = None
+    address: str | None = None
+    is_active: bool | None = None
 
 
 class OrganizationResponse(BaseModel):
     id: int
     name: str
     slug: str
-    description: Optional[str] = None
-    logo_url: Optional[str] = None
-    contact_email: Optional[str] = None
-    contact_phone: Optional[str] = None
-    address: Optional[str] = None
+    description: str | None = None
+    logo_url: str | None = None
+    contact_email: str | None = None
+    contact_phone: str | None = None
+    address: str | None = None
     is_active: bool
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class DepartmentCreate(BaseModel):
     organization_id: int
-    branch_id: Optional[int] = None
+    branch_id: int | None = None
     name: str = Field(..., min_length=1, max_length=255)
-    code: Optional[str] = None
-    description: Optional[str] = None
-    head_user_id: Optional[int] = None
-    parent_id: Optional[int] = None
+    code: str | None = None
+    description: str | None = None
+    head_user_id: int | None = None
+    parent_id: int | None = None
 
 
 class DepartmentUpdate(BaseModel):
-    name: Optional[str] = Field(None, max_length=255)
-    code: Optional[str] = None
-    description: Optional[str] = None
-    head_user_id: Optional[int] = None
-    parent_id: Optional[int] = None
-    is_active: Optional[bool] = None
+    name: str | None = Field(None, max_length=255)
+    code: str | None = None
+    description: str | None = None
+    head_user_id: int | None = None
+    parent_id: int | None = None
+    is_active: bool | None = None
 
 
 class DepartmentResponse(BaseModel):
     id: int
     organization_id: int
-    branch_id: Optional[int] = None
+    branch_id: int | None = None
     name: str
-    code: Optional[str] = None
-    description: Optional[str] = None
-    head_user_id: Optional[int] = None
-    parent_id: Optional[int] = None
+    code: str | None = None
+    description: str | None = None
+    head_user_id: int | None = None
+    parent_id: int | None = None
     is_active: bool
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class BranchCreate(BaseModel):
     organization_id: int
     name: str = Field(..., min_length=1, max_length=255)
-    code: Optional[str] = None
-    address: Optional[str] = None
-    contact_email: Optional[str] = None
-    contact_phone: Optional[str] = None
+    code: str | None = None
+    address: str | None = None
+    contact_email: str | None = None
+    contact_phone: str | None = None
 
 
 class BranchResponse(BaseModel):
     id: int
     organization_id: int
     name: str
-    code: Optional[str] = None
+    code: str | None = None
     is_active: bool
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

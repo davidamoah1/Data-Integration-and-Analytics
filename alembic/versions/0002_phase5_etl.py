@@ -5,8 +5,9 @@ Revises: 0001_phase4_iam
 Create Date: 2026-07-11
 """
 
-from alembic import op
 import sqlalchemy as sa
+
+from alembic import op
 
 revision = "0002_phase5_etl"
 down_revision = "0001_phase4_iam"
@@ -18,7 +19,12 @@ def upgrade():
     # etl_pipelines
     op.create_table(
         "etl_pipelines",
-        sa.Column("id", sa.BigInteger().with_variant(sa.Integer, "sqlite"), primary_key=True, autoincrement=True),
+        sa.Column(
+            "id",
+            sa.BigInteger().with_variant(sa.Integer, "sqlite"),
+            primary_key=True,
+            autoincrement=True,
+        ),
         sa.Column("name", sa.String(200), nullable=False, index=True),
         sa.Column("description", sa.Text, nullable=True),
         sa.Column("status", sa.String(20), nullable=False, server_default="active"),
@@ -31,7 +37,12 @@ def upgrade():
     # etl_pipeline_versions
     op.create_table(
         "etl_pipeline_versions",
-        sa.Column("id", sa.BigInteger().with_variant(sa.Integer, "sqlite"), primary_key=True, autoincrement=True),
+        sa.Column(
+            "id",
+            sa.BigInteger().with_variant(sa.Integer, "sqlite"),
+            primary_key=True,
+            autoincrement=True,
+        ),
         sa.Column("pipeline_id", sa.BigInteger, nullable=False, index=True),
         sa.Column("version_number", sa.Integer, nullable=False),
         sa.Column("step_config", sa.JSON, nullable=False),
@@ -43,7 +54,12 @@ def upgrade():
     # etl_pipeline_steps
     op.create_table(
         "etl_pipeline_steps",
-        sa.Column("id", sa.BigInteger().with_variant(sa.Integer, "sqlite"), primary_key=True, autoincrement=True),
+        sa.Column(
+            "id",
+            sa.BigInteger().with_variant(sa.Integer, "sqlite"),
+            primary_key=True,
+            autoincrement=True,
+        ),
         sa.Column("job_id", sa.BigInteger, nullable=False, index=True),
         sa.Column("step_name", sa.String(100), nullable=False),
         sa.Column("step_type", sa.String(50), nullable=False),
@@ -61,7 +77,12 @@ def upgrade():
     # etl_jobs
     op.create_table(
         "etl_jobs",
-        sa.Column("id", sa.BigInteger().with_variant(sa.Integer, "sqlite"), primary_key=True, autoincrement=True),
+        sa.Column(
+            "id",
+            sa.BigInteger().with_variant(sa.Integer, "sqlite"),
+            primary_key=True,
+            autoincrement=True,
+        ),
         sa.Column("pipeline_id", sa.BigInteger, nullable=True, index=True),
         sa.Column("job_type", sa.String(50), nullable=False),
         sa.Column("status", sa.String(20), nullable=False, server_default="queued"),
@@ -82,7 +103,12 @@ def upgrade():
     # etl_import_templates
     op.create_table(
         "etl_import_templates",
-        sa.Column("id", sa.BigInteger().with_variant(sa.Integer, "sqlite"), primary_key=True, autoincrement=True),
+        sa.Column(
+            "id",
+            sa.BigInteger().with_variant(sa.Integer, "sqlite"),
+            primary_key=True,
+            autoincrement=True,
+        ),
         sa.Column("name", sa.String(200), nullable=False),
         sa.Column("source_type", sa.String(50), nullable=False),
         sa.Column("source_config", sa.JSON, nullable=False),
@@ -97,7 +123,12 @@ def upgrade():
     # etl_data_profiles
     op.create_table(
         "etl_data_profiles",
-        sa.Column("id", sa.BigInteger().with_variant(sa.Integer, "sqlite"), primary_key=True, autoincrement=True),
+        sa.Column(
+            "id",
+            sa.BigInteger().with_variant(sa.Integer, "sqlite"),
+            primary_key=True,
+            autoincrement=True,
+        ),
         sa.Column("job_id", sa.BigInteger, nullable=True, index=True),
         sa.Column("source_name", sa.String(255), nullable=False),
         sa.Column("source_type", sa.String(50), nullable=False),
@@ -111,7 +142,12 @@ def upgrade():
     # etl_quality_reports
     op.create_table(
         "etl_quality_reports",
-        sa.Column("id", sa.BigInteger().with_variant(sa.Integer, "sqlite"), primary_key=True, autoincrement=True),
+        sa.Column(
+            "id",
+            sa.BigInteger().with_variant(sa.Integer, "sqlite"),
+            primary_key=True,
+            autoincrement=True,
+        ),
         sa.Column("job_id", sa.BigInteger, nullable=True, index=True),
         sa.Column("source_name", sa.String(255), nullable=False),
         sa.Column("overall_score", sa.Integer, nullable=False, server_default="0"),
@@ -126,7 +162,12 @@ def upgrade():
     # etl_data_lineage
     op.create_table(
         "etl_data_lineage",
-        sa.Column("id", sa.BigInteger().with_variant(sa.Integer, "sqlite"), primary_key=True, autoincrement=True),
+        sa.Column(
+            "id",
+            sa.BigInteger().with_variant(sa.Integer, "sqlite"),
+            primary_key=True,
+            autoincrement=True,
+        ),
         sa.Column("job_id", sa.BigInteger, nullable=True, index=True),
         sa.Column("pipeline_id", sa.BigInteger, nullable=True, index=True),
         sa.Column("source_name", sa.String(255), nullable=False),
@@ -142,7 +183,12 @@ def upgrade():
     # etl_schedules
     op.create_table(
         "etl_schedules",
-        sa.Column("id", sa.BigInteger().with_variant(sa.Integer, "sqlite"), primary_key=True, autoincrement=True),
+        sa.Column(
+            "id",
+            sa.BigInteger().with_variant(sa.Integer, "sqlite"),
+            primary_key=True,
+            autoincrement=True,
+        ),
         sa.Column("pipeline_id", sa.BigInteger, nullable=False, index=True),
         sa.Column("schedule_type", sa.String(30), nullable=False),
         sa.Column("cron_expr", sa.String(100), nullable=True),
@@ -157,7 +203,12 @@ def upgrade():
     # etl_transformations
     op.create_table(
         "etl_transformations",
-        sa.Column("id", sa.BigInteger().with_variant(sa.Integer, "sqlite"), primary_key=True, autoincrement=True),
+        sa.Column(
+            "id",
+            sa.BigInteger().with_variant(sa.Integer, "sqlite"),
+            primary_key=True,
+            autoincrement=True,
+        ),
         sa.Column("name", sa.String(200), nullable=False),
         sa.Column("description", sa.Text, nullable=True),
         sa.Column("transformation_type", sa.String(50), nullable=False),

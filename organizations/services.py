@@ -1,22 +1,24 @@
 """Services and routes for organization management."""
 
-from datetime import datetime, timezone
-from typing import Optional
+# ruff: noqa: B008  # FastAPI Depends() calls in default arguments are intentional
 
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select, update, func
+from datetime import datetime, timezone
+
+from fastapi import APIRouter, Depends
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session as DbSession
 
+from organizations.models import Department, Organization
+from organizations.schemas import (
+    DepartmentCreate,
+    DepartmentUpdate,
+    OrganizationCreate,
+    OrganizationUpdate,
+)
 from shared.database import get_db
 from shared.dependencies import get_current_user, require_permissions
+from shared.exceptions import ConflictError, NotFoundError
 from shared.response import success_response
-from shared.exceptions import NotFoundError, ConflictError
-from organizations.models import Organization, Branch, Department, Team
-from organizations.schemas import (
-    OrganizationCreate, OrganizationUpdate, OrganizationResponse,
-    DepartmentCreate, DepartmentUpdate, DepartmentResponse,
-    BranchCreate, BranchResponse,
-)
 
 
 class OrganizationService:
@@ -41,9 +43,7 @@ class OrganizationService:
             raise NotFoundError("Organization not found")
         kwargs = {k: v for k, v in request.model_dump().items() if v is not None}
         if kwargs:
-            self.db.execute(
-                update(Organization).where(Organization.id == org_id).values(**kwargs)
-            )
+            self.db.execute(update(Organization).where(Organization.id == org_id).values(**kwargs))
             self.db.flush()
         self.db.commit()
         return self._org_to_dict(self._get_org(org_id))
@@ -53,16 +53,20 @@ class OrganizationService:
         if not org:
             raise NotFoundError("Organization not found")
         self.db.execute(
-            update(Organization).where(Organization.id == org_id).values(
-                is_deleted=1, deleted_at=datetime.now(timezone.utc), is_active=0
-            )
+            update(Organization)
+            .where(Organization.id == org_id)
+            .values(is_deleted=1, deleted_at=datetime.now(timezone.utc), is_active=0)
         )
         self.db.commit()
 
     def list_orgs(self) -> list[dict]:
-        orgs = self.db.execute(
-            select(Organization).where(Organization.is_deleted == 0).order_by(Organization.id)
-        ).scalars().all()
+        orgs = (
+            self.db.execute(
+                select(Organization).where(Organization.is_deleted == 0).order_by(Organization.id)
+            )
+            .scalars()
+            .all()
+        )
         return [self._org_to_dict(o) for o in orgs]
 
     def get_org(self, org_id: int) -> dict:
@@ -71,19 +75,22 @@ class OrganizationService:
             raise NotFoundError("Organization not found")
         return self._org_to_dict(org)
 
-    def _get_org(self, org_id: int) -> Optional[Organization]:
+    def _get_org(self, org_id: int) -> Organization | None:
         return self.db.execute(
-            select(Organization).where(
-                Organization.id == org_id, Organization.is_deleted == 0
-            )
+            select(Organization).where(Organization.id == org_id, Organization.is_deleted == 0)
         ).scalar_one_or_none()
 
     def _org_to_dict(self, org: Organization) -> dict:
         return {
-            "id": org.id, "name": org.name, "slug": org.slug,
-            "description": org.description, "logo_url": org.logo_url,
-            "contact_email": org.contact_email, "contact_phone": org.contact_phone,
-            "address": org.address, "is_active": bool(org.is_active),
+            "id": org.id,
+            "name": org.name,
+            "slug": org.slug,
+            "description": org.description,
+            "logo_url": org.logo_url,
+            "contact_email": org.contact_email,
+            "contact_phone": org.contact_phone,
+            "address": org.address,
+            "is_active": bool(org.is_active),
             "created_at": org.created_at,
         }
 
@@ -105,18 +112,16 @@ class DepartmentService:
             raise NotFoundError("Department not found")
         kwargs = {k: v for k, v in request.model_dump().items() if v is not None}
         if kwargs:
-            self.db.execute(
-                update(Department).where(Department.id == dept_id).values(**kwargs)
-            )
+            self.db.execute(update(Department).where(Department.id == dept_id).values(**kwargs))
             self.db.flush()
         self.db.commit()
         return self._dept_to_dict(self._get_dept(dept_id))
 
     def delete_dept(self, dept_id: int):
         self.db.execute(
-            update(Department).where(Department.id == dept_id).values(
-                is_deleted=1, deleted_at=datetime.now(timezone.utc), is_active=0
-            )
+            update(Department)
+            .where(Department.id == dept_id)
+            .values(is_deleted=1, deleted_at=datetime.now(timezone.utc), is_active=0)
         )
         self.db.commit()
 
@@ -133,20 +138,23 @@ class DepartmentService:
             raise NotFoundError("Department not found")
         return self._dept_to_dict(dept)
 
-    def _get_dept(self, dept_id: int) -> Optional[Department]:
+    def _get_dept(self, dept_id: int) -> Department | None:
         return self.db.execute(
-            select(Department).where(
-                Department.id == dept_id, Department.is_deleted == 0
-            )
+            select(Department).where(Department.id == dept_id, Department.is_deleted == 0)
         ).scalar_one_or_none()
 
     def _dept_to_dict(self, dept: Department) -> dict:
         return {
-            "id": dept.id, "organization_id": dept.organization_id,
-            "branch_id": dept.branch_id, "name": dept.name,
-            "code": dept.code, "description": dept.description,
-            "head_user_id": dept.head_user_id, "parent_id": dept.parent_id,
-            "is_active": bool(dept.is_active), "created_at": dept.created_at,
+            "id": dept.id,
+            "organization_id": dept.organization_id,
+            "branch_id": dept.branch_id,
+            "name": dept.name,
+            "code": dept.code,
+            "description": dept.description,
+            "head_user_id": dept.head_user_id,
+            "parent_id": dept.parent_id,
+            "is_active": bool(dept.is_active),
+            "created_at": dept.created_at,
         }
 
 

@@ -3,25 +3,33 @@
 All endpoints use standard response format and proper permission checks.
 """
 
-from fastapi import APIRouter, Depends, Request, HTTPException, status
+# ruff: noqa: B008  # FastAPI Depends() calls in default arguments are intentional
+
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session as DbSession
 
+from authentication.schemas import (
+    ChangePasswordRequest,
+    ForgotPasswordRequest,
+    LoginRequest,
+    ProfileUpdate,
+    RefreshTokenRequest,
+    ResetPasswordRequest,
+    RoleCreate,
+    RoleUpdate,
+    UserCreate,
+    UserUpdate,
+)
+from authentication.services import AuthService, RoleService, UserService
 from shared.database import get_db
 from shared.dependencies import get_current_user, require_permissions
-from shared.response import success_response, error_response
-from authentication.services import AuthService, UserService, RoleService
-from authentication.schemas import (
-    LoginRequest, TokenResponse, RefreshTokenRequest,
-    ChangePasswordRequest, ForgotPasswordRequest, ResetPasswordRequest,
-    UserCreate, UserUpdate, UserResponse, UserListResponse,
-    RoleCreate, RoleUpdate, RoleResponse,
-    ProfileUpdate, SessionResponse, LoginHistoryResponse,
-)
+from shared.response import success_response
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
 # --- Authentication endpoints ------------------------------------------------
+
 
 @router.post("/login")
 async def login(request: LoginRequest, req: Request, db: DbSession = Depends(get_db)):
@@ -89,6 +97,7 @@ async def reset_password(
 
 
 # --- Profile endpoints ------------------------------------------------------
+
 
 @router.get("/profile")
 async def get_profile(

@@ -5,13 +5,23 @@ JWT tokens signed with HS256.
 """
 
 import os
+import re
 import secrets
 from datetime import datetime, timedelta, timezone
-from typing import Optional
 from uuid import uuid4
 
 import jwt
 from passlib.context import CryptContext
+
+from config import (
+    JWT_ACCESS_EXPIRE_MINUTES as _JWT_ACCESS_EXPIRE_MINUTES,
+)
+from config import (
+    JWT_REFRESH_EXPIRE_DAYS as _JWT_REFRESH_EXPIRE_DAYS,
+)
+from config import (
+    JWT_SECRET_KEY,
+)
 
 # --- Password hashing -------------------------------------------------------
 
@@ -39,16 +49,15 @@ def verify_password(plain: str, hashed: str) -> bool:
 
 # --- JWT tokens -------------------------------------------------------------
 
-JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "change-this-in-production-please")
-JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
-JWT_ACCESS_EXPIRE_MINUTES = int(os.getenv("JWT_ACCESS_EXPIRE_MINUTES", "30"))
-JWT_REFRESH_EXPIRE_DAYS = int(os.getenv("JWT_REFRESH_EXPIRE_DAYS", "7"))
+JWT_ALGORITHM = "HS256"
+JWT_ACCESS_EXPIRE_MINUTES = _JWT_ACCESS_EXPIRE_MINUTES
+JWT_REFRESH_EXPIRE_DAYS = _JWT_REFRESH_EXPIRE_DAYS
 
 
 def create_access_token(
     subject: str,
-    extra_claims: Optional[dict] = None,
-    expires_minutes: Optional[int] = None,
+    extra_claims: dict | None = None,
+    expires_minutes: int | None = None,
 ) -> str:
     """Create a short-lived JWT access token.
 
@@ -77,8 +86,8 @@ def create_access_token(
 
 def create_refresh_token(
     subject: str,
-    extra_claims: Optional[dict] = None,
-    expires_days: Optional[int] = None,
+    extra_claims: dict | None = None,
+    expires_days: int | None = None,
 ) -> str:
     """Create a long-lived JWT refresh token.
 
@@ -90,9 +99,7 @@ def create_refresh_token(
     Returns:
         Encoded JWT string.
     """
-    expire = datetime.now(timezone.utc) + timedelta(
-        days=expires_days or JWT_REFRESH_EXPIRE_DAYS
-    )
+    expire = datetime.now(timezone.utc) + timedelta(days=expires_days or JWT_REFRESH_EXPIRE_DAYS)
     payload = {
         "sub": subject,
         "exp": expire,
@@ -157,3 +164,19 @@ def generate_token(length: int = 32) -> str:
 
 ACCOUNT_LOCKOUT_THRESHOLD = int(os.getenv("ACCOUNT_LOCKOUT_THRESHOLD", "5"))
 ACCOUNT_LOCKOUT_DURATION_MINUTES = int(os.getenv("ACCOUNT_LOCKOUT_DURATION_MINUTES", "30"))
+
+
+# --- SQL identifier validation ------------------------------------------------
+
+_SQL_IDENTIFIER_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+
+
+def validate_sql_identifier(name: str) -> str:
+    """Validate a string is a safe SQL identifier.
+
+    Returns the identifier unchanged. Raises ValueError if it contains
+    characters that could be used for SQL injection.
+    """
+    if not name or not _SQL_IDENTIFIER_RE.match(name):
+        raise ValueError(f"Invalid SQL identifier: {name!r}")
+    return name

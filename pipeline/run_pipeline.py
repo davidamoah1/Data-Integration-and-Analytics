@@ -1,11 +1,11 @@
-import sys
 import os
+import sys
 from datetime import datetime
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from etl.logging_config import logger
 from database.db_setup import init_db
+from etl.logging_config import logger
 from services.etl_service import ETLService
 
 

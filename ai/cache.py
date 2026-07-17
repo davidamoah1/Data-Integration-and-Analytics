@@ -7,22 +7,23 @@ Can be extended to use Redis or database-backed caching.
 import time
 from collections import OrderedDict
 from threading import Lock
-from typing import Optional, Any
+from typing import Any
 
-from ai.config import AI_CACHE_TTL_SECONDS, AI_CACHE_MAX_ENTRIES
+from ai.config import AI_CACHE_MAX_ENTRIES, AI_CACHE_TTL_SECONDS
 
 
 class AICache:
     """Thread-safe LRU cache with TTL for AI responses."""
 
-    def __init__(self, max_entries: int = AI_CACHE_MAX_ENTRIES,
-                 ttl_seconds: int = AI_CACHE_TTL_SECONDS):
+    def __init__(
+        self, max_entries: int = AI_CACHE_MAX_ENTRIES, ttl_seconds: int = AI_CACHE_TTL_SECONDS
+    ):
         self._cache: OrderedDict[str, dict] = OrderedDict()
         self._max_entries = max_entries
         self._ttl = ttl_seconds
         self._lock = Lock()
 
-    def get(self, key: str) -> Optional[Any]:
+    def get(self, key: str) -> Any | None:
         """Get a value from the cache. Returns None if not found or expired."""
         with self._lock:
             if key not in self._cache:
@@ -64,7 +65,8 @@ class AICache:
         with self._lock:
             current_time = time.time()
             active = sum(
-                1 for entry in self._cache.values()
+                1
+                for entry in self._cache.values()
                 if current_time - entry["timestamp"] <= self._ttl
             )
             return {

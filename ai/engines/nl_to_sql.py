@@ -8,29 +8,68 @@ Features:
 - Warns about performance issues
 """
 
-import re
 import json
-from typing import Optional
-from sqlalchemy.orm import Session as DbSession
+import re
+
 from sqlalchemy import text
+from sqlalchemy.orm import Session as DbSession
 
 from ai.gateway import AIGateway
 from ai.security import AISecurityLayer
 
-
 # SQL keywords that are NOT allowed
 FORBIDDEN_KEYWORDS = [
-    "INSERT", "UPDATE", "DELETE", "DROP", "ALTER", "TRUNCATE",
-    "CREATE", "GRANT", "REVOKE", "EXEC", "MERGE", "REPLACE",
+    "INSERT",
+    "UPDATE",
+    "DELETE",
+    "DROP",
+    "ALTER",
+    "TRUNCATE",
+    "CREATE",
+    "GRANT",
+    "REVOKE",
+    "EXEC",
+    "MERGE",
+    "REPLACE",
 ]
 
 # Allowed SQL keywords
-ALLOWED_KEYWORDS = ["SELECT", "FROM", "WHERE", "GROUP BY", "ORDER BY",
-                    "LIMIT", "OFFSET", "JOIN", "LEFT JOIN", "RIGHT JOIN",
-                    "INNER JOIN", "OUTER JOIN", "HAVING", "UNION",
-                    "COUNT", "SUM", "AVG", "MIN", "MAX", "DISTINCT",
-                    "AS", "AND", "OR", "NOT", "IN", "LIKE", "BETWEEN",
-                    "IS NULL", "IS NOT NULL", "CASE", "WHEN", "THEN", "ELSE", "END"]
+ALLOWED_KEYWORDS = [
+    "SELECT",
+    "FROM",
+    "WHERE",
+    "GROUP BY",
+    "ORDER BY",
+    "LIMIT",
+    "OFFSET",
+    "JOIN",
+    "LEFT JOIN",
+    "RIGHT JOIN",
+    "INNER JOIN",
+    "OUTER JOIN",
+    "HAVING",
+    "UNION",
+    "COUNT",
+    "SUM",
+    "AVG",
+    "MIN",
+    "MAX",
+    "DISTINCT",
+    "AS",
+    "AND",
+    "OR",
+    "NOT",
+    "IN",
+    "LIKE",
+    "BETWEEN",
+    "IS NULL",
+    "IS NOT NULL",
+    "CASE",
+    "WHEN",
+    "THEN",
+    "ELSE",
+    "END",
+]
 
 
 class NLToSQLEngine:
@@ -41,9 +80,13 @@ class NLToSQLEngine:
         self.gateway = AIGateway(db)
         self.security = AISecurityLayer(db)
 
-    def generate_sql(self, question: str, table_name: Optional[str] = None,
-                     schema_hint: Optional[dict] = None,
-                     user_id: Optional[int] = None) -> dict:
+    def generate_sql(
+        self,
+        question: str,
+        table_name: str | None = None,
+        schema_hint: dict | None = None,
+        user_id: int | None = None,
+    ) -> dict:
         """Generate SQL from a natural language question.
 
         Returns:
@@ -59,7 +102,7 @@ class NLToSQLEngine:
         # Use the SQL copilot to generate SQL
         result = self.gateway.chat(
             user_message=f"Generate a SQL query for this question: {question}\n"
-                        f"Respond with JSON: {{\"sql\": \"...\", \"explanation\": \"...\"}}",
+            f'Respond with JSON: {{"sql": "...", "explanation": "..."}}',
             assistant_type="sql_copilot",
             user_id=user_id,
             context=context,
@@ -97,15 +140,15 @@ class NLToSQLEngine:
             pass
 
         # Fall back to extracting SQL from code blocks
-        sql_match = re.search(r'```sql\s*(.*?)\s*```', response, re.DOTALL | re.IGNORECASE)
+        sql_match = re.search(r"```sql\s*(.*?)\s*```", response, re.DOTALL | re.IGNORECASE)
         if sql_match:
             sql = sql_match.group(1).strip()
             # Remove the SQL block from response to get explanation
-            explanation = re.sub(r'```sql.*?```', '', response, flags=re.DOTALL).strip()
+            explanation = re.sub(r"```sql.*?```", "", response, flags=re.DOTALL).strip()
             return sql, explanation
 
         # Try to find SELECT statement directly
-        select_match = re.search(r'(SELECT\s+.*?)(?:;|$)', response, re.DOTALL | re.IGNORECASE)
+        select_match = re.search(r"(SELECT\s+.*?)(?:;|$)", response, re.DOTALL | re.IGNORECASE)
         if select_match:
             return select_match.group(1).strip(), response
 
@@ -121,7 +164,7 @@ class NLToSQLEngine:
 
         # Check for forbidden keywords first
         for keyword in FORBIDDEN_KEYWORDS:
-            if re.search(r'\b' + keyword + r'\b', sql_upper):
+            if re.search(r"\b" + keyword + r"\b", sql_upper):
                 warnings.append(f"Forbidden keyword detected: {keyword}")
                 return False, warnings
 
@@ -145,7 +188,7 @@ class NLToSQLEngine:
 
         return len(warnings) == 0 or all("Consider" in w or "may" in w for w in warnings), warnings
 
-    def _estimate_rows(self, sql: str) -> Optional[int]:
+    def _estimate_rows(self, sql: str) -> int | None:
         """Estimate the number of rows the query will return."""
         try:
             # Wrap in a COUNT subquery
@@ -180,7 +223,7 @@ class NLToSQLEngine:
         try:
             result = self.db.execute(text(sql))
             columns = list(result.keys())
-            rows = [dict(zip(columns, row)) for row in result.fetchall()]
+            rows = [dict(zip(columns, row, strict=False)) for row in result.fetchall()]
             return {
                 "columns": columns,
                 "rows": rows[:limit],

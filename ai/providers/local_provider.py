@@ -1,10 +1,12 @@
 """Local LLM provider — supports Ollama, LM Studio, vLLM, and other OpenAI-compatible local servers."""
 
 import json
+from collections.abc import Generator
+
 import requests
-from typing import Optional, Generator
+
+from ai.config import AI_REQUEST_TIMEOUT, LOCAL_LLM_BASE_URL
 from ai.providers.base import BaseProvider, LLMResponse
-from ai.config import LOCAL_LLM_BASE_URL, AI_REQUEST_TIMEOUT
 
 
 class LocalLLMProvider(BaseProvider):
@@ -33,9 +35,14 @@ class LocalLLMProvider(BaseProvider):
         except Exception:
             return False
 
-    def chat(self, messages: list[dict], model: Optional[str] = None,
-             temperature: float = 0.7, max_tokens: int = 4096,
-             stream: bool = False) -> LLMResponse | Generator[str, None, None]:
+    def chat(
+        self,
+        messages: list[dict],
+        model: str | None = None,
+        temperature: float = 0.7,
+        max_tokens: int = 4096,
+        stream: bool = False,
+    ) -> LLMResponse | Generator[str, None, None]:
         model = model or self.model
         url = f"{self.base_url}/chat/completions"
         headers = {"Content-Type": "application/json"}
@@ -69,7 +76,9 @@ class LocalLLMProvider(BaseProvider):
         )
 
     def _stream_chat(self, url: str, headers: dict, payload: dict) -> Generator[str, None, None]:
-        resp = requests.post(url, headers=headers, json=payload, stream=True, timeout=AI_REQUEST_TIMEOUT)
+        resp = requests.post(
+            url, headers=headers, json=payload, stream=True, timeout=AI_REQUEST_TIMEOUT
+        )
         resp.raise_for_status()
         for line in resp.iter_lines():
             if not line:
@@ -93,7 +102,9 @@ class LocalLLMProvider(BaseProvider):
             resp = requests.get(f"{self.base_url}/models", timeout=5)
             resp.raise_for_status()
             data = resp.json()
-            return [m.get("id", m.get("name", "")) for m in data.get("data", data.get("models", []))]
+            return [
+                m.get("id", m.get("name", "")) for m in data.get("data", data.get("models", []))
+            ]
         except Exception:
             return ["llama3", "mistral", "phi3", "qwen2"]
 

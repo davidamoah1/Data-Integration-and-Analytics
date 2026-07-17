@@ -7,7 +7,7 @@ The valid API key is loaded from the API_KEY environment variable.
 import os
 import secrets
 
-from fastapi import Security, HTTPException, status
+from fastapi import HTTPException, Security, status
 from fastapi.security import APIKeyHeader, APIKeyQuery
 
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)

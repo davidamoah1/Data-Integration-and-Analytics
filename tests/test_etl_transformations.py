@@ -1,20 +1,22 @@
 """Tests for transformation engine."""
 
-import pytest
 import pandas as pd
+import pytest
 
 from etl.transformations import TransformationEngine
 
 
 @pytest.fixture
 def sample_df():
-    return pd.DataFrame({
-        "First Name": ["Alice", "Bob", "Carol"],
-        "Last Name": ["Smith", "Jones", "Brown"],
-        "Age": ["30", "25", "35"],
-        "Score": [85.5, 90.0, 78.5],
-        "City": ["  Lagos  ", " Accra", "Cairo "],
-    })
+    return pd.DataFrame(
+        {
+            "First Name": ["Alice", "Bob", "Carol"],
+            "Last Name": ["Smith", "Jones", "Brown"],
+            "Age": ["30", "25", "35"],
+            "Score": [85.5, 90.0, 78.5],
+            "City": ["  Lagos  ", " Accra", "Cairo "],
+        }
+    )
 
 
 class TestTransformationEngine:
@@ -31,7 +33,9 @@ class TestTransformationEngine:
 
     def test_filter_eq(self, sample_df):
         engine = TransformationEngine()
-        df = engine.apply(sample_df, [{"type": "filter", "column": "Age", "operator": "eq", "value": "30"}])
+        df = engine.apply(
+            sample_df, [{"type": "filter", "column": "Age", "operator": "eq", "value": "30"}]
+        )
         assert len(df) == 1
 
     def test_fill_value(self, sample_df):
@@ -48,18 +52,41 @@ class TestTransformationEngine:
 
     def test_calculate(self, sample_df):
         engine = TransformationEngine()
-        df = engine.apply(sample_df, [{"type": "calculate", "new_column": "double_score", "expression": "Score * 2"}])
+        df = engine.apply(
+            sample_df,
+            [{"type": "calculate", "new_column": "double_score", "expression": "Score * 2"}],
+        )
         assert "double_score" in df.columns
         assert df["double_score"].iloc[0] == 171.0
 
     def test_split(self, sample_df):
         engine = TransformationEngine()
-        df = engine.apply(sample_df, [{"type": "split", "column": "First Name", "delimiter": " ", "new_columns": ["first", "rest"]}])
+        df = engine.apply(
+            sample_df,
+            [
+                {
+                    "type": "split",
+                    "column": "First Name",
+                    "delimiter": " ",
+                    "new_columns": ["first", "rest"],
+                }
+            ],
+        )
         assert "first" in df.columns
 
     def test_merge(self, sample_df):
         engine = TransformationEngine()
-        df = engine.apply(sample_df, [{"type": "merge", "columns": ["First Name", "Last Name"], "new_column": "full_name", "separator": " "}])
+        df = engine.apply(
+            sample_df,
+            [
+                {
+                    "type": "merge",
+                    "columns": ["First Name", "Last Name"],
+                    "new_column": "full_name",
+                    "separator": " ",
+                }
+            ],
+        )
         assert "full_name" in df.columns
         assert "Alice Smith" in df["full_name"].values
 
@@ -76,21 +103,28 @@ class TestTransformationEngine:
 
     def test_standardize_trim(self, sample_df):
         engine = TransformationEngine()
-        df = engine.apply(sample_df, [{"type": "standardize", "column": "City", "operation": "trim"}])
+        df = engine.apply(
+            sample_df, [{"type": "standardize", "column": "City", "operation": "trim"}]
+        )
         assert df["City"].iloc[0] == "Lagos"
 
     def test_standardize_lower(self, sample_df):
         engine = TransformationEngine()
-        df = engine.apply(sample_df, [{"type": "standardize", "column": "City", "operation": "lower"}])
+        df = engine.apply(
+            sample_df, [{"type": "standardize", "column": "City", "operation": "lower"}]
+        )
         assert df["City"].iloc[0] == "  lagos  "
 
     def test_chained_transformations(self, sample_df):
         engine = TransformationEngine()
-        df = engine.apply(sample_df, [
-            {"type": "rename", "mapping": {"First Name": "first_name"}},
-            {"type": "standardize", "column": "City", "operation": "trim"},
-            {"type": "convert", "column": "Age", "to": "int"},
-        ])
+        df = engine.apply(
+            sample_df,
+            [
+                {"type": "rename", "mapping": {"First Name": "first_name"}},
+                {"type": "standardize", "column": "City", "operation": "trim"},
+                {"type": "convert", "column": "Age", "to": "int"},
+            ],
+        )
         assert "first_name" in df.columns
         assert df["City"].iloc[0] == "Lagos"
         assert df["Age"].dtype == "int64"

@@ -6,10 +6,12 @@ and a super admin user for each test.
 
 import os
 import sys
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session as DbSession
+from sqlalchemy.orm import Session as DbSession
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -18,20 +20,14 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 os.environ["DB_TYPE"] = "sqlite"
 os.environ["SQLITE_DB_PATH"] = "test_auth.db"
 
-from shared.database import Base, get_db
-from shared import database as db_module
+import ai.models  # noqa: F401
+import audit.models  # noqa: F401
+import authentication.models  # noqa: F401
+import etl.models  # noqa: F401
+import organizations.models  # noqa: F401
 from authentication.services import seed_default_data
-from authentication.models import (
-    User, Role, Permission, RolePermission, UserRole,
-    Session as UserSession, PasswordReset, LoginHistory, ActivityLog,
-    PasswordHistory,
-)
-import authentication.models
-import organizations.models
-import audit.models
-import etl.models
-import ai.models
-from database.db_setup import SalesRecord, PipelineRun
+from shared import database as db_module
+from shared.database import Base, get_db
 
 
 @pytest.fixture(scope="function")
@@ -45,6 +41,7 @@ def db_engine():
     Base.metadata.create_all(engine)
     # Also create existing tables (sales, pipeline_runs) — they use a different Base
     from database.db_setup import Base as OldBase
+
     OldBase.metadata.create_all(engine)
 
     # Seed default data
@@ -81,6 +78,7 @@ def client(db_engine):
             db.close()
 
     from api.main import app
+
     app.dependency_overrides[get_db] = override_get_db
     # Override get_engine so startup event uses the test engine
     original_get_engine = db_module.get_engine
@@ -94,10 +92,13 @@ def client(db_engine):
 @pytest.fixture
 def admin_token(client):
     """Login as the default super admin and return the access token."""
-    response = client.post("/auth/login", json={
-        "email": "admin@dataflow.io",
-        "password": "Admin@12345",
-    })
+    response = client.post(
+        "/auth/login",
+        json={
+            "email": "admin@dataflow.io",
+            "password": "Admin@12345",
+        },
+    )
     assert response.status_code == 200
     data = response.json()
     return data["data"]["access_token"]

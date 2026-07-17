@@ -1,20 +1,22 @@
 """Tests for data quality engine."""
 
-import pytest
 import pandas as pd
+import pytest
 
 from etl.quality import DataQualityEngine, QualityCheck
 
 
 @pytest.fixture
 def dirty_df():
-    return pd.DataFrame({
-        "name": ["Alice", "Bob", "Alice", None, "Eve"],
-        "email": ["a@test.com", "invalid", "a@test.com", "d@test.com", None],
-        "phone": ["+1234567890", "abc", "+1234567890", "+9876543210", None],
-        "age": [30, -5, 30, 40, 25],
-        "empty_col": [None, None, None, None, None],
-    })
+    return pd.DataFrame(
+        {
+            "name": ["Alice", "Bob", "Alice", None, "Eve"],
+            "email": ["a@test.com", "invalid", "a@test.com", "d@test.com", None],
+            "phone": ["+1234567890", "abc", "+1234567890", "+9876543210", None],
+            "age": [30, -5, 30, 40, 25],
+            "empty_col": [None, None, None, None, None],
+        }
+    )
 
 
 class TestDataQualityEngine:
@@ -74,10 +76,17 @@ class TestDataQualityEngine:
     def test_custom_check(self):
         df = pd.DataFrame({"x": [1, 2, 3]})
         engine = DataQualityEngine()
-        engine.add_check(QualityCheck(
-            "custom", "error",
-            lambda df: {"passed": df["x"].sum() > 10, "affected_rows": 0, "message": "sum too low"},
-        ))
+        engine.add_check(
+            QualityCheck(
+                "custom",
+                "error",
+                lambda df: {
+                    "passed": df["x"].sum() > 10,
+                    "affected_rows": 0,
+                    "message": "sum too low",
+                },
+            )
+        )
         result = engine.run_checks(df)
         custom = [c for c in result["checks"] if c["check"] == "custom"][0]
         assert not custom["passed"]

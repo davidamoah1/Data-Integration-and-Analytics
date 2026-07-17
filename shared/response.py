@@ -1,6 +1,7 @@
 """Standard API response format for consistent API responses."""
 
-from typing import Any, Optional
+from typing import Any
+
 from pydantic import BaseModel
 
 
@@ -9,8 +10,8 @@ class StandardResponse(BaseModel):
 
     success: bool = True
     message: str = "OK"
-    data: Optional[Any] = None
-    errors: Optional[list[str]] = None
+    data: Any | None = None
+    errors: list[str] | None = None
 
 
 def success_response(data: Any = None, message: str = "OK") -> dict:

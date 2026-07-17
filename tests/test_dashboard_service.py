@@ -4,7 +4,6 @@ import os
 import sys
 
 import pandas as pd
-import pytest
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -34,11 +33,13 @@ def test_detect_columns_returns_empty_for_no_match():
 
 
 def test_clean_df_standardizes_columns():
-    df = pd.DataFrame({
-        "Order ID": ["A1", "A2", "A1"],
-        "Sales": ["100.0", "200.0", "100.0"],
-        "Order Date": ["2024-01-01", "2024-02-01", "2024-01-01"],
-    })
+    df = pd.DataFrame(
+        {
+            "Order ID": ["A1", "A2", "A1"],
+            "Sales": ["100.0", "200.0", "100.0"],
+            "Order Date": ["2024-01-01", "2024-02-01", "2024-01-01"],
+        }
+    )
     mapping = DashboardDataService.detect_columns(df)
     cleaned = DashboardDataService.clean_df(df, mapping)
     assert "order_id" in cleaned.columns
@@ -47,12 +48,14 @@ def test_clean_df_standardizes_columns():
 
 
 def test_clean_df_converts_types():
-    df = pd.DataFrame({
-        "Order ID": ["A1"],
-        "Sales": ["100.5"],
-        "Quantity": ["3"],
-        "Order Date": ["2024-01-01"],
-    })
+    df = pd.DataFrame(
+        {
+            "Order ID": ["A1"],
+            "Sales": ["100.5"],
+            "Quantity": ["3"],
+            "Order Date": ["2024-01-01"],
+        }
+    )
     mapping = DashboardDataService.detect_columns(df)
     cleaned = DashboardDataService.clean_df(df, mapping)
     assert cleaned["sales"].dtype == float

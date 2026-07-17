@@ -1,11 +1,12 @@
 """GLM (Zhipu BigModel) provider — supports GLM-4 series."""
 
 import json
+from collections.abc import Generator
+
 import requests
-from typing import Optional, Generator
+
+from ai.config import AI_COST_PER_1K, AI_REQUEST_TIMEOUT, GLM_API_KEY, GLM_BASE_URL
 from ai.providers.base import BaseProvider, LLMResponse
-from ai.config import GLM_API_KEY, GLM_BASE_URL, AI_REQUEST_TIMEOUT
-from ai.config import AI_COST_PER_1K
 
 
 class GLMProvider(BaseProvider):
@@ -30,9 +31,14 @@ class GLMProvider(BaseProvider):
     def is_available(self) -> bool:
         return bool(self.api_key)
 
-    def chat(self, messages: list[dict], model: Optional[str] = None,
-             temperature: float = 0.7, max_tokens: int = 4096,
-             stream: bool = False) -> LLMResponse | Generator[str, None, None]:
+    def chat(
+        self,
+        messages: list[dict],
+        model: str | None = None,
+        temperature: float = 0.7,
+        max_tokens: int = 4096,
+        stream: bool = False,
+    ) -> LLMResponse | Generator[str, None, None]:
         model = model or self.model
         url = f"{self.base_url}/chat/completions"
         headers = {
@@ -67,7 +73,9 @@ class GLMProvider(BaseProvider):
         )
 
     def _stream_chat(self, url: str, headers: dict, payload: dict) -> Generator[str, None, None]:
-        resp = requests.post(url, headers=headers, json=payload, stream=True, timeout=AI_REQUEST_TIMEOUT)
+        resp = requests.post(
+            url, headers=headers, json=payload, stream=True, timeout=AI_REQUEST_TIMEOUT
+        )
         resp.raise_for_status()
         for line in resp.iter_lines():
             if not line:

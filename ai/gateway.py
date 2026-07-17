@@ -5,27 +5,26 @@ It coordinates providers, memory, context, security, usage tracking, caching,
 and audit logging.
 """
 
-import time
 import hashlib
 import json
-from datetime import datetime
-from typing import Optional, Generator
+import time
+from collections.abc import Generator
 
 from sqlalchemy.orm import Session as DbSession
 
-from ai.providers.manager import ProviderManager
-from ai.providers.base import LLMResponse
-from ai.prompts.templates import PromptManager
-from ai.memory import AIMemory
+from ai.cache import AICache
+from ai.config import (
+    AI_CACHE_ENABLED,
+    AI_ENFORCE_PERMISSIONS,
+)
 from ai.context_builder import ContextBuilder
+from ai.memory import AIMemory
+from ai.model_router import ModelRouter
+from ai.models import AIAuditLog, AIConversation
+from ai.prompts.templates import PromptManager
+from ai.providers.manager import ProviderManager
 from ai.security import AISecurityLayer
 from ai.usage import UsageTracker
-from ai.cache import AICache
-from ai.model_router import ModelRouter
-from ai.models import AIConversation, AIMessage, AIAuditLog
-from ai.config import (
-    AI_CACHE_ENABLED, AI_ENFORCE_PERMISSIONS, AI_MAX_INPUT_LENGTH,
-)
 
 
 class AIGateway:
@@ -42,11 +41,16 @@ class AIGateway:
         self.cache = AICache() if AI_CACHE_ENABLED else None
         self.model_router = ModelRouter(db)
 
-    def chat(self, user_message: str, assistant_type: str = "data_copilot",
-             user_id: Optional[int] = None, conversation_id: Optional[int] = None,
-             context: Optional[dict] = None, stream: bool = False,
-             permissions: Optional[list[str]] = None,
-             ) -> dict | Generator[str, None, None]:
+    def chat(
+        self,
+        user_message: str,
+        assistant_type: str = "data_copilot",
+        user_id: int | None = None,
+        conversation_id: int | None = None,
+        context: dict | None = None,
+        stream: bool = False,
+        permissions: list[str] | None = None,
+    ) -> dict | Generator[str, None, None]:
         """Process a chat request through the full AI stack.
 
         Flow:
@@ -81,9 +85,9 @@ class AIGateway:
 
         # 3. Get or create conversation
         if conversation_id:
-            conversation = self.db.query(AIConversation).filter(
-                AIConversation.id == conversation_id
-            ).first()
+            conversation = (
+                self.db.query(AIConversation).filter(AIConversation.id == conversation_id).first()
+            )
             if not conversation:
                 conversation = self._create_conversation(user_id, assistant_type, user_message)
         else:
@@ -100,10 +104,12 @@ class AIGateway:
 
         # Add platform context as system message
         if platform_context:
-            messages.append({
-                "role": "system",
-                "content": f"Platform Context:\n{json.dumps(platform_context, default=str)[:3000]}",
-            })
+            messages.append(
+                {
+                    "role": "system",
+                    "content": f"Platform Context:\n{json.dumps(platform_context, default=str)[:3000]}",
+                }
+            )
 
         # Add conversation history
         for msg in history:
@@ -121,7 +127,9 @@ class AIGateway:
                 # Save user message and cached response
                 self.memory.add_message(conversation_id, "user", user_message)
                 msg = self.memory.add_message(
-                    conversation_id, "assistant", cached["content"],
+                    conversation_id,
+                    "assistant",
+                    cached["content"],
                     tokens_used=cached.get("total_tokens", 0),
                     model_used=cached.get("model", ""),
                     provider=cached.get("provider", ""),
@@ -146,8 +154,13 @@ class AIGateway:
 
         if stream:
             return self._stream_response(
-                messages, provider_name, model, conversation_id,
-                user_id, assistant_type, start_time,
+                messages,
+                provider_name,
+                model,
+                conversation_id,
+                user_id,
+                assistant_type,
+                start_time,
             )
 
         # Non-streaming
@@ -173,7 +186,9 @@ class AIGateway:
 
         # 9. Save assistant message
         msg = self.memory.add_message(
-            conversation_id, "assistant", response.content,
+            conversation_id,
+            "assistant",
+            response.content,
             tokens_used=response.total_tokens,
             model_used=response.model,
             provider=response.provider,
@@ -182,19 +197,25 @@ class AIGateway:
 
         # 10. Audit log
         self._audit_log(
-            user_id=user_id, action="chat", assistant_type=assistant_type,
-            input_summary=user_message[:200], output_summary=response.content[:200],
+            user_id=user_id,
+            action="chat",
+            assistant_type=assistant_type,
+            input_summary=user_message[:200],
+            output_summary=response.content[:200],
             success=True,
         )
 
         # Cache the response
         if self.cache and cache_key:
-            self.cache.set(cache_key, {
-                "content": response.content,
-                "total_tokens": response.total_tokens,
-                "model": response.model,
-                "provider": response.provider,
-            })
+            self.cache.set(
+                cache_key,
+                {
+                    "content": response.content,
+                    "total_tokens": response.total_tokens,
+                    "model": response.model,
+                    "provider": response.provider,
+                },
+            )
 
         return {
             "conversation_id": conversation_id,
@@ -208,22 +229,29 @@ class AIGateway:
             "cached": False,
         }
 
-    def _stream_response(self, messages, provider_name, model, conversation_id,
-                         user_id, assistant_type, start_time) -> Generator[str, None, None]:
+    def _stream_response(
+        self, messages, provider_name, model, conversation_id, user_id, assistant_type, start_time
+    ) -> Generator[str, None, None]:
         """Stream response chunks to the client."""
         chunks = []
         try:
             for chunk in self.provider_manager.chat(
-                messages=messages, provider_name=provider_name,
-                model=model, stream=True,
+                messages=messages,
+                provider_name=provider_name,
+                model=model,
+                stream=True,
             ):
                 chunks.append(chunk)
                 yield chunk
         except Exception as e:
             yield f"\n[Error: {str(e)}]"
             self._audit_log(
-                user_id=user_id, action="chat_stream", assistant_type=assistant_type,
-                input_summary="streaming request", success=False, error_message=str(e),
+                user_id=user_id,
+                action="chat_stream",
+                assistant_type=assistant_type,
+                input_summary="streaming request",
+                success=False,
+                error_message=str(e),
             )
             return
 
@@ -232,7 +260,9 @@ class AIGateway:
 
         # Save assistant message
         self.memory.add_message(
-            conversation_id, "assistant", full_response,
+            conversation_id,
+            "assistant",
+            full_response,
             tokens_used=0,  # Streaming doesn't return token counts
             model_used=model,
             provider=provider_name,
@@ -241,12 +271,17 @@ class AIGateway:
 
         # Audit log
         self._audit_log(
-            user_id=user_id, action="chat_stream", assistant_type=assistant_type,
-            input_summary="streaming request", output_summary=full_response[:200],
+            user_id=user_id,
+            action="chat_stream",
+            assistant_type=assistant_type,
+            input_summary="streaming request",
+            output_summary=full_response[:200],
             success=True,
         )
 
-    def _create_conversation(self, user_id: int, assistant_type: str, first_message: str) -> AIConversation:
+    def _create_conversation(
+        self, user_id: int, assistant_type: str, first_message: str
+    ) -> AIConversation:
         """Create a new conversation."""
         title = first_message[:50] + ("..." if len(first_message) > 50 else "")
         conv = AIConversation(
@@ -271,9 +306,16 @@ class AIGateway:
         key_str = f"{assistant_type}:{last_user_msg}"
         return hashlib.sha256(key_str.encode()).hexdigest()
 
-    def _audit_log(self, user_id: Optional[int], action: str, assistant_type: str,
-                   input_summary: str = "", output_summary: str = "",
-                   success: bool = True, error_message: str = ""):
+    def _audit_log(
+        self,
+        user_id: int | None,
+        action: str,
+        assistant_type: str,
+        input_summary: str = "",
+        output_summary: str = "",
+        success: bool = True,
+        error_message: str = "",
+    ):
         """Create an audit log entry."""
         log = AIAuditLog(
             user_id=user_id,

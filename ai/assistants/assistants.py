@@ -10,7 +10,6 @@ All assistants are routed through the AIGateway which handles
 provider selection, memory, caching, security, and audit logging.
 """
 
-from typing import Optional
 from sqlalchemy.orm import Session as DbSession
 
 from ai.gateway import AIGateway
@@ -28,11 +27,15 @@ class BaseAssistant:
         self.gateway = AIGateway(db)
         self.db = db
 
-    def chat(self, message: str, user_id: Optional[int] = None,
-             conversation_id: Optional[int] = None,
-             context: Optional[dict] = None,
-             permissions: Optional[list[str]] = None,
-             stream: bool = False) -> dict:
+    def chat(
+        self,
+        message: str,
+        user_id: int | None = None,
+        conversation_id: int | None = None,
+        context: dict | None = None,
+        permissions: list[str] | None = None,
+        stream: bool = False,
+    ) -> dict:
         """Send a message to this assistant."""
         return self.gateway.chat(
             user_message=message,
@@ -57,6 +60,7 @@ class BaseAssistant:
 
 class DataCopilot(BaseAssistant):
     """General data assistant — understands datasets, KPIs, and platform data."""
+
     assistant_type = "data_copilot"
     display_name = "Data Copilot"
     description = "Understands datasets, reports, charts, dashboards, KPIs, and platform data"
@@ -64,6 +68,7 @@ class DataCopilot(BaseAssistant):
 
 class ETLCopilot(BaseAssistant):
     """ETL assistant — builds pipelines from natural language."""
+
     assistant_type = "etl_copilot"
     display_name = "ETL Copilot"
     description = "Builds and troubleshoots ETL pipelines from natural language instructions"
@@ -71,6 +76,7 @@ class ETLCopilot(BaseAssistant):
 
 class DashboardCopilot(BaseAssistant):
     """Dashboard assistant — generates dashboards from descriptions."""
+
     assistant_type = "dashboard_copilot"
     display_name = "Dashboard Copilot"
     description = "Creates dashboards and generates appropriate visualizations"
@@ -78,6 +84,7 @@ class DashboardCopilot(BaseAssistant):
 
 class ReportCopilot(BaseAssistant):
     """Report assistant — generates professional reports."""
+
     assistant_type = "report_copilot"
     display_name = "Report Copilot"
     description = "Generates executive summaries, monthly reports, and department reports"
@@ -85,6 +92,7 @@ class ReportCopilot(BaseAssistant):
 
 class DecisionCopilot(BaseAssistant):
     """Decision assistant — the flagship decision intelligence feature."""
+
     assistant_type = "decision_copilot"
     display_name = "Decision Copilot"
     description = "Explains what happened, why, what may happen next, and recommends actions"
@@ -92,6 +100,7 @@ class DecisionCopilot(BaseAssistant):
 
 class ForecastCopilot(BaseAssistant):
     """Forecast assistant — helps with forecasting and trend analysis."""
+
     assistant_type = "forecast_copilot"
     display_name = "Forecast Copilot"
     description = "Supports forecasting for revenue, attendance, enrollment, demand, and more"
@@ -99,6 +108,7 @@ class ForecastCopilot(BaseAssistant):
 
 class QualityCopilot(BaseAssistant):
     """Data quality assistant — analyzes and improves data quality."""
+
     assistant_type = "quality_copilot"
     display_name = "Data Quality Copilot"
     description = "Detects duplicates, outliers, missing values, and recommends fixes"
@@ -106,6 +116,7 @@ class QualityCopilot(BaseAssistant):
 
 class SQLCopilot(BaseAssistant):
     """SQL assistant — translates natural language to safe SQL."""
+
     assistant_type = "sql_copilot"
     display_name = "SQL Copilot"
     description = "Translates natural language questions into validated SQL queries"

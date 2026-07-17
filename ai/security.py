@@ -9,11 +9,10 @@ Features:
 """
 
 import re
-from typing import Optional
+
 from sqlalchemy.orm import Session as DbSession
 
-from ai.config import AI_MAX_INPUT_LENGTH, AI_ENFORCE_PERMISSIONS
-
+from ai.config import AI_ENFORCE_PERMISSIONS, AI_MAX_INPUT_LENGTH
 
 # Dangerous SQL keywords that should only appear in generated SQL, not user input
 _SQL_INJECTION_PATTERNS = [
@@ -111,12 +110,15 @@ class AISecurityLayer:
         Removes credit card numbers, SSN-like patterns, and API keys.
         """
         # Credit card numbers (basic pattern)
-        text = re.sub(r'\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b', '[REDACTED-CC]', text)
+        text = re.sub(r"\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b", "[REDACTED-CC]", text)
         # API key patterns
-        text = re.sub(r'sk-[a-zA-Z0-9]{20,}', '[REDACTED-KEY]', text)
+        text = re.sub(r"sk-[a-zA-Z0-9]{20,}", "[REDACTED-KEY]", text)
         # Email addresses (partial redaction)
-        text = re.sub(r'\b([a-zA-Z0-9._%+-])[a-zA-Z0-9._%+-]*@([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\b',
-                      r'\1***@\2', text)
+        text = re.sub(
+            r"\b([a-zA-Z0-9._%+-])[a-zA-Z0-9._%+-]*@([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\b",
+            r"\1***@\2",
+            text,
+        )
         return text
 
     def sanitize_for_audit(self, text: str, max_length: int = 200) -> str:
@@ -128,8 +130,7 @@ class AISecurityLayer:
             sanitized = sanitized[:max_length] + "..."
         return sanitized
 
-    def check_data_access(self, user_id: int, table_name: str,
-                          user_permissions: list[str]) -> bool:
+    def check_data_access(self, user_id: int, table_name: str, user_permissions: list[str]) -> bool:
         """Check if a user can access a specific data table.
 
         This integrates with the RBAC system to ensure AI doesn't

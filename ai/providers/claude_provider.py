@@ -1,17 +1,24 @@
 """Claude (Anthropic) provider — supports Claude 3.5 Sonnet, Claude 3 Haiku."""
 
 import json
+from collections.abc import Generator
+
 import requests
-from typing import Optional, Generator
+
+from ai.config import AI_COST_PER_1K, AI_REQUEST_TIMEOUT, CLAUDE_API_KEY, CLAUDE_BASE_URL
 from ai.providers.base import BaseProvider, LLMResponse
-from ai.config import CLAUDE_API_KEY, CLAUDE_BASE_URL, AI_REQUEST_TIMEOUT
-from ai.config import AI_COST_PER_1K
 
 
 class ClaudeProvider(BaseProvider):
     """Anthropic Claude AI provider."""
 
-    def __init__(self, api_key: str = "", base_url: str = "", model: str = "claude-3-5-sonnet-20241022", **kwargs):
+    def __init__(
+        self,
+        api_key: str = "",
+        base_url: str = "",
+        model: str = "claude-3-5-sonnet-20241022",
+        **kwargs,
+    ):
         super().__init__(
             api_key=api_key or CLAUDE_API_KEY,
             base_url=base_url or CLAUDE_BASE_URL,
@@ -41,9 +48,14 @@ class ClaudeProvider(BaseProvider):
                 converted.append({"role": msg["role"], "content": msg["content"]})
         return " ".join(system_parts), converted
 
-    def chat(self, messages: list[dict], model: Optional[str] = None,
-             temperature: float = 0.7, max_tokens: int = 4096,
-             stream: bool = False) -> LLMResponse | Generator[str, None, None]:
+    def chat(
+        self,
+        messages: list[dict],
+        model: str | None = None,
+        temperature: float = 0.7,
+        max_tokens: int = 4096,
+        stream: bool = False,
+    ) -> LLMResponse | Generator[str, None, None]:
         model = model or self.model
         system_prompt, converted_messages = self._convert_messages(messages)
         url = f"{self.base_url}/messages"
@@ -83,7 +95,9 @@ class ClaudeProvider(BaseProvider):
         )
 
     def _stream_chat(self, url: str, headers: dict, payload: dict) -> Generator[str, None, None]:
-        resp = requests.post(url, headers=headers, json=payload, stream=True, timeout=AI_REQUEST_TIMEOUT)
+        resp = requests.post(
+            url, headers=headers, json=payload, stream=True, timeout=AI_REQUEST_TIMEOUT
+        )
         resp.raise_for_status()
         for line in resp.iter_lines():
             if not line:

@@ -1,17 +1,19 @@
 """Google Gemini provider — supports Gemini 1.5 Pro and Flash."""
 
-import json
+from collections.abc import Generator
+
 import requests
-from typing import Optional, Generator
+
+from ai.config import AI_COST_PER_1K, AI_REQUEST_TIMEOUT, GEMINI_API_KEY, GEMINI_BASE_URL
 from ai.providers.base import BaseProvider, LLMResponse
-from ai.config import GEMINI_API_KEY, GEMINI_BASE_URL, AI_REQUEST_TIMEOUT
-from ai.config import AI_COST_PER_1K
 
 
 class GeminiProvider(BaseProvider):
     """Google Gemini AI provider."""
 
-    def __init__(self, api_key: str = "", base_url: str = "", model: str = "gemini-1.5-flash", **kwargs):
+    def __init__(
+        self, api_key: str = "", base_url: str = "", model: str = "gemini-1.5-flash", **kwargs
+    ):
         super().__init__(
             api_key=api_key or GEMINI_API_KEY,
             base_url=base_url or GEMINI_BASE_URL,
@@ -44,9 +46,14 @@ class GeminiProvider(BaseProvider):
         system_instruction = " ".join(system_parts) if system_parts else None
         return system_instruction, contents
 
-    def chat(self, messages: list[dict], model: Optional[str] = None,
-             temperature: float = 0.7, max_tokens: int = 4096,
-             stream: bool = False) -> LLMResponse | Generator[str, None, None]:
+    def chat(
+        self,
+        messages: list[dict],
+        model: str | None = None,
+        temperature: float = 0.7,
+        max_tokens: int = 4096,
+        stream: bool = False,
+    ) -> LLMResponse | Generator[str, None, None]:
         model = model or self.model
         system_instruction, contents = self._convert_messages(messages)
         url = f"{self.base_url}/models/{model}:generateContent?key={self.api_key}"

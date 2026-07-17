@@ -6,25 +6,26 @@ Provides:
 - get_current_user_optional: Optional auth (for public endpoints)
 """
 
-from typing import Optional, Callable
-from functools import wraps
+# ruff: noqa: B008  # FastAPI Depends() calls in default arguments are intentional
 
-from fastapi import Depends, HTTPException, Request, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from collections.abc import Callable
+
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session as DbSession
 
+from authentication.repositories import (
+    UserRepository,
+    UserRoleRepository,
+)
 from shared.database import get_db
 from shared.security import decode_token
-from shared.exceptions import AuthenticationError, AuthorizationError
-from authentication.repositories import (
-    UserRepository, UserRoleRepository,
-)
 
 security_scheme = HTTPBearer(auto_error=False)
 
 
 async def get_current_user(
-    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security_scheme),
+    credentials: HTTPAuthorizationCredentials | None = Depends(security_scheme),
     db: DbSession = Depends(get_db),
 ) -> dict:
     """Extract and verify the JWT access token from the request.
@@ -49,7 +50,7 @@ async def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",
             headers={"WWW-Authenticate": "Bearer"},
-        )
+        ) from None
 
     if payload.get("type") != "access":
         raise HTTPException(
@@ -82,9 +83,9 @@ async def get_current_user(
 
 
 async def get_current_user_optional(
-    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security_scheme),
+    credentials: HTTPAuthorizationCredentials | None = Depends(security_scheme),
     db: DbSession = Depends(get_db),
-) -> Optional[dict]:
+) -> dict | None:
     """Optional auth — returns None if no token provided (for public endpoints)."""
     if not credentials:
         return None
@@ -103,6 +104,7 @@ def require_permissions(*required_perms: str) -> Callable:
     The user must have at least ONE of the required permissions.
     Super admin role bypasses all checks.
     """
+
     async def permission_checker(
         current_user: dict = Depends(get_current_user),
     ) -> dict:
@@ -125,6 +127,7 @@ def require_permissions(*required_perms: str) -> Callable:
 
 def require_any_role(*roles: str) -> Callable:
     """Dependency factory that checks if the current user has any of the specified roles."""
+
     async def role_checker(
         current_user: dict = Depends(get_current_user),
     ) -> dict:

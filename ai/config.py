@@ -1,6 +1,7 @@
 """AI Platform configuration — reads from environment variables with sensible defaults."""
 
 import os
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -62,7 +63,12 @@ AI_ANOMALY_MIN_DATA_POINTS = int(os.getenv("AI_ANOMALY_MIN_DATA_POINTS", "10"))
 
 # --- Cost Estimates (per 1K tokens, USD) ---
 AI_COST_PER_1K = {
-    "openai": {"gpt-4o": 0.005, "gpt-4o-mini": 0.00015, "gpt-4-turbo": 0.01, "gpt-3.5-turbo": 0.0005},
+    "openai": {
+        "gpt-4o": 0.005,
+        "gpt-4o-mini": 0.00015,
+        "gpt-4-turbo": 0.01,
+        "gpt-3.5-turbo": 0.0005,
+    },
     "gemini": {"gemini-1.5-pro": 0.00125, "gemini-1.5-flash": 0.000075},
     "deepseek": {"deepseek-chat": 0.00014, "deepseek-coder": 0.00014},
     "glm": {"glm-4": 0.0005, "glm-4-flash": 0.0001},

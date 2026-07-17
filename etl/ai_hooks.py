@@ -5,7 +5,7 @@ No AI logic is implemented here — only the architecture and data contracts.
 """
 
 from abc import ABC, abstractmethod
-from typing import Optional
+
 import pandas as pd
 
 
@@ -14,8 +14,7 @@ class AIHook(ABC):
 
     @property
     @abstractmethod
-    def name(self) -> str:
-        ...
+    def name(self) -> str: ...
 
     @abstractmethod
     def is_available(self) -> bool:
@@ -128,7 +127,7 @@ AI_HOOKS: dict[str, AIHook] = {
 }
 
 
-def get_ai_hook(name: str) -> Optional[AIHook]:
+def get_ai_hook(name: str) -> AIHook | None:
     """Get an AI hook by name. Returns None if not found."""
     return AI_HOOKS.get(name)
 

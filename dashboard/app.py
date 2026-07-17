@@ -15,25 +15,27 @@ Features:
 
 import os
 import sys
+from contextlib import suppress
 
 import pandas as pd
 import streamlit as st
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from dashboard.styles import DARK_THEME_CSS
-from dashboard.utils import sanitize_text, MAX_UPLOAD_SIZE_MB, MAX_UPLOAD_SIZE_BYTES
-from dashboard.auth import require_auth, get_current_user, logout
+from dashboard.auth import get_current_user, logout, require_auth
 from dashboard.charts import (
-    render_revenue_over_time,
-    render_revenue_by_category,
-    render_profit_by_region,
-    render_top_products,
-    render_sales_vs_profit_scatter,
-    render_profit_margin_by_category,
     render_heatmap_sales_region_category,
     render_kpi_cards,
+    render_profit_by_region,
+    render_profit_margin_by_category,
+    render_revenue_by_category,
+    render_revenue_over_time,
+    render_sales_vs_profit_scatter,
+    render_top_products,
 )
+from dashboard.copilot import render_copilot_panel
+from dashboard.styles import DARK_THEME_CSS
+from dashboard.utils import MAX_UPLOAD_SIZE_BYTES, MAX_UPLOAD_SIZE_MB, sanitize_text
 from services.dashboard_data_service import DashboardDataService
 
 st.set_page_config(
@@ -98,11 +100,14 @@ def get_db_record_count(_service) -> int:
 with st.sidebar:
     st.markdown('<div class="sidebar-logo">Data<span>Flow</span></div>', unsafe_allow_html=True)
 
-    st.markdown(f"""
+    st.markdown(
+        f"""
     <div style="color:rgba(255,255,255,0.5);font-size:0.8rem;margin-bottom:12px;">
         👤 {sanitize_text(user.get('name', ''))} <span style="color:#a78bfa;">({sanitize_text(user.get('role', ''))})</span>
     </div>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
     if st.button("Logout", use_container_width=True):
         logout()
 
@@ -111,10 +116,8 @@ with st.sidebar:
     st.markdown('<div class="sidebar-section">Data Source</div>', unsafe_allow_html=True)
     service = get_data_service()
     db_count = 0
-    try:
+    with suppress(Exception):
         db_count = get_db_record_count(service)
-    except Exception:
-        pass
 
     data_source = st.radio(
         "Choose data source",
@@ -133,7 +136,8 @@ with st.sidebar:
         uploaded_file = None
 
     st.markdown("---")
-    st.markdown("""
+    st.markdown(
+        """
     <div style="color:rgba(255,255,255,0.3);font-size:0.75rem;line-height:1.8;">
         <strong style="color:rgba(255,255,255,0.5);">How it works</strong><br>
         1. Choose data source<br>
@@ -141,20 +145,25 @@ with st.sidebar:
         3. Explore charts<br>
         4. Download your report
     </div>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
 
 # ──────────────────────────────────────────────
 # Hero
 # ──────────────────────────────────────────────
-st.markdown("""
+st.markdown(
+    """
 <div class="hero-header">
     <div class="hero-badge">Business Intelligence Platform</div>
     <h1 class="hero-title">Turn your data into<br>clear business insights</h1>
     <p class="hero-subtitle">Interactive reports, trend charts, and key metrics.<br>
     Query your live database or upload a file for ad-hoc analysis.</p>
 </div>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 
 # ──────────────────────────────────────────────
@@ -164,7 +173,8 @@ df = None
 
 if data_source == "Live Database":
     if db_count == 0:
-        st.markdown("""
+        st.markdown(
+            """
         <div class="empty-state">
             <div class="empty-state-icon">🗄️</div>
             <div class="empty-state-title">Database is empty</div>
@@ -173,7 +183,9 @@ if data_source == "Live Database":
                 <code>python pipeline/run_pipeline.py</code>
             </div>
         </div>
-        """, unsafe_allow_html=True)
+        """,
+            unsafe_allow_html=True,
+        )
         st.stop()
 
     filter_opts = get_db_filter_options(service)
@@ -224,16 +236,20 @@ if data_source == "Live Database":
                 use_container_width=True,
             )
 
-    st.markdown(f"""
+    st.markdown(
+        f"""
     <div class="info-banner">
         📡 Connected to live database. {len(df):,} records matching current filters.
     </div>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
 else:
     # File upload mode
     if not uploaded_file:
-        st.markdown("""
+        st.markdown(
+            """
         <div class="empty-state">
             <div class="empty-state-icon">📂</div>
             <div class="empty-state-title">No dataset loaded yet</div>
@@ -243,7 +259,9 @@ else:
                 Works with sales data, financial records, inventory reports, and more.
             </div>
         </div>
-        """, unsafe_allow_html=True)
+        """,
+            unsafe_allow_html=True,
+        )
         st.stop()
 
     # File size validation
@@ -291,13 +309,16 @@ else:
         df = DashboardDataService.clean_df(raw_df, col_map)
 
     dupes_removed = len(raw_df) - len(df)
-    st.markdown(f"""
+    st.markdown(
+        f"""
     <div class="success-banner">
         Dataset loaded successfully. {len(df):,} records ready to explore.
         <span class="stat-pill"><strong>{dupes_removed}</strong> duplicates removed</span>
         <span class="stat-pill"><strong>{len(df.columns)}</strong> columns detected</span>
     </div>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
     # File mode filters
     with st.sidebar:
@@ -362,14 +383,20 @@ st.markdown("<br>", unsafe_allow_html=True)
 # ──────────────────────────────────────────────
 # Charts
 # ──────────────────────────────────────────────
-st.markdown('<div class="section-header">Sales Performance</div><hr class="section-divider">', unsafe_allow_html=True)
+st.markdown(
+    '<div class="section-header">Sales Performance</div><hr class="section-divider">',
+    unsafe_allow_html=True,
+)
 c1, c2 = st.columns(2)
 with c1:
     render_revenue_over_time(df)
 with c2:
     render_revenue_by_category(df)
 
-st.markdown('<div class="section-header">Profit and Regional Breakdown</div><hr class="section-divider">', unsafe_allow_html=True)
+st.markdown(
+    '<div class="section-header">Profit and Regional Breakdown</div><hr class="section-divider">',
+    unsafe_allow_html=True,
+)
 c3, c4 = st.columns(2)
 with c3:
     render_profit_by_region(df)
@@ -377,7 +404,10 @@ with c4:
     render_top_products(df)
 
 if "profit" in df.columns and "sales" in df.columns and "category" in df.columns:
-    st.markdown('<div class="section-header">Deep Dive Analysis</div><hr class="section-divider">', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="section-header">Deep Dive Analysis</div><hr class="section-divider">',
+        unsafe_allow_html=True,
+    )
     c5, c6 = st.columns([3, 2])
     with c5:
         render_sales_vs_profit_scatter(df)
@@ -385,17 +415,33 @@ if "profit" in df.columns and "sales" in df.columns and "category" in df.columns
         render_profit_margin_by_category(df)
 
 if "region" in df.columns and "category" in df.columns and "sales" in df.columns:
-    st.markdown('<div class="section-header">Regional Analysis</div><hr class="section-divider">', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="section-header">Regional Analysis</div><hr class="section-divider">',
+        unsafe_allow_html=True,
+    )
     render_heatmap_sales_region_category(df)
 
 
 # ──────────────────────────────────────────────
 # Data Table
 # ──────────────────────────────────────────────
-st.markdown('<div class="section-header">Data Preview</div><hr class="section-divider">', unsafe_allow_html=True)
+st.markdown(
+    '<div class="section-header">Data Preview</div><hr class="section-divider">',
+    unsafe_allow_html=True,
+)
 display_cols = [
-    c for c in ["order_id", "order_date", "customer_name", "region",
-                "category", "product_name", "sales", "profit", "quantity"]
+    c
+    for c in [
+        "order_id",
+        "order_date",
+        "customer_name",
+        "region",
+        "category",
+        "product_name",
+        "sales",
+        "profit",
+        "quantity",
+    ]
     if c in df.columns
 ]
 st.dataframe(
@@ -409,3 +455,13 @@ st.markdown(
     "Use the Download button in the sidebar to export the full dataset.</div>",
     unsafe_allow_html=True,
 )
+
+
+# ──────────────────────────────────────────────
+# AI Copilot
+# ──────────────────────────────────────────────
+st.markdown(
+    '<div class="section-header">AI Copilot</div><hr class="section-divider">',
+    unsafe_allow_html=True,
+)
+render_copilot_panel()

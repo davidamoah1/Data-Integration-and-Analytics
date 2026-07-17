@@ -1,9 +1,6 @@
 """SQLAlchemy ORM models for the Audit domain."""
 
-from sqlalchemy import (
-    Column, BigInteger, String, Text, Integer, JSON,
-    TIMESTAMP, func
-)
+from sqlalchemy import JSON, TIMESTAMP, BigInteger, Column, Integer, String, Text, func
 
 from shared.database import Base, BigInt
 

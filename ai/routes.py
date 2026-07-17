@@ -25,73 +25,97 @@ Endpoints:
   - Message Feedback
 """
 
-from datetime import datetime
-from typing import Optional
-import json
+# ruff: noqa: B008  # FastAPI Depends() calls in default arguments are intentional
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from sqlalchemy.orm import Session as DbSession
 
-from shared.database import get_db
-from shared.dependencies import get_current_user
-from ai.gateway import AIGateway
-from ai.assistants.assistants import list_assistants, get_assistant
-from ai.memory import AIMemory
-from ai.usage import UsageTracker
-from ai.providers.manager import ProviderManager
-from ai.prompts.templates import PromptManager
-from ai.plugins import PluginRegistry, register_system_plugins
-from ai.engines.nl_to_sql import NLToSQLEngine
-from ai.engines.nl_to_etl import NLToETLEngine
-from ai.engines.nl_to_dashboard import NLToDashboardEngine
+from ai.assistants.assistants import list_assistants
 from ai.engines.ai_quality import AIDataQualityEngine
-from ai.engines.report_writer import AIReportWriter
-from ai.engines.decision_center import DecisionCenterEngine
-from ai.engines.forecasting import ForecastingEngine
-from ai.engines.anomaly_detection import AnomalyDetectionEngine
-from ai.engines.kpi_engine import KPIEngine
-from ai.engines.dashboard_insights import DashboardInsightsEngine
 from ai.engines.ai_search import AISearchEngine
+from ai.engines.anomaly_detection import AnomalyDetectionEngine
+from ai.engines.dashboard_insights import DashboardInsightsEngine
+from ai.engines.decision_center import DecisionCenterEngine
 from ai.engines.document_chat import DocumentChatEngine
-from ai.workflow import WorkflowEngine
+from ai.engines.forecasting import ForecastingEngine
+from ai.engines.kpi_engine import KPIEngine
+from ai.engines.nl_to_dashboard import NLToDashboardEngine
+from ai.engines.nl_to_etl import NLToETLEngine
+from ai.engines.nl_to_sql import NLToSQLEngine
+from ai.engines.report_writer import AIReportWriter
+from ai.gateway import AIGateway
+from ai.memory import AIMemory
 from ai.models import (
-    AIConversation, AIMessage, AIProviderConfig, AIUsageLog, AIAuditLog,
-    AIWorkflow, AIWorkflowRun, AIInsight, AIForecast, AIAnomalyAlert,
-    AIDocument, AIKPIRecommendation, AIReportGeneration, AIPromptTemplate,
-    AIPlugin,
+    AIAnomalyAlert,
+    AIAuditLog,
+    AIConversation,
+    AIForecast,
+    AIInsight,
+    AIMessage,
+    AIPromptTemplate,
+    AIProviderConfig,
+    AIReportGeneration,
+    AIWorkflow,
 )
+from ai.plugins import PluginRegistry
+from ai.prompts.templates import PromptManager
+from ai.providers.manager import ProviderManager
 from ai.schemas import (
-    ChatRequest, ChatResponse, ConversationSummary, MessageSummary,
-    ProviderConfigCreate, ProviderConfigUpdate, ProviderConfigResponse,
-    NLToSQLRequest, NLToSQLResponse,
-    NLToETLRequest, NLToETLResponse,
-    NLToDashboardRequest, NLToDashboardResponse,
-    AIQualityRequest, AIQualityResponse,
-    ReportGenerateRequest, ReportGenerateResponse,
-    DecisionCenterRequest, DecisionCenterResponse,
-    ForecastRequest, ForecastResponse,
-    AnomalyRequest, AnomalyResponse,
-    KPIRecommendRequest, KPIRecommendResponse, KPIMonitorResponse,
-    DashboardInsightsRequest, DashboardInsightsResponse,
-    AISearchRequest, AISearchResponse,
-    DocumentUploadResponse, DocumentChatRequest, DocumentChatResponse,
-    WorkflowCreate, WorkflowResponse, WorkflowRunResponse,
-    InsightResponse,
-    PromptTemplateCreate, PromptTemplateResponse,
-    UsageStatsResponse, AuditLogResponse,
-    PluginResponse,
     AIDashboardResponse,
+    AIQualityRequest,
+    AIQualityResponse,
+    AISearchRequest,
+    AISearchResponse,
+    AnomalyRequest,
+    AnomalyResponse,
+    AuditLogResponse,
+    ChatRequest,
+    ChatResponse,
+    ConversationSummary,
+    DashboardInsightsRequest,
+    DashboardInsightsResponse,
+    DecisionCenterRequest,
+    DecisionCenterResponse,
+    DocumentChatRequest,
+    DocumentChatResponse,
+    DocumentUploadResponse,
+    ForecastRequest,
+    ForecastResponse,
+    InsightResponse,
+    KPIMonitorResponse,
+    KPIRecommendRequest,
+    KPIRecommendResponse,
     MessageFeedbackRequest,
+    MessageSummary,
+    NLToDashboardRequest,
+    NLToDashboardResponse,
+    NLToETLRequest,
+    NLToETLResponse,
+    NLToSQLRequest,
+    NLToSQLResponse,
+    PluginResponse,
+    PromptTemplateCreate,
+    PromptTemplateResponse,
+    ProviderConfigCreate,
+    ProviderConfigResponse,
+    ProviderConfigUpdate,
+    ReportGenerateRequest,
+    ReportGenerateResponse,
+    UsageStatsResponse,
+    WorkflowCreate,
+    WorkflowResponse,
+    WorkflowRunResponse,
 )
-from ai.config import (
-    AI_DEFAULT_PROVIDER, AI_DEFAULT_MODEL, AI_MAX_TOKENS, AI_TEMPERATURE,
-    AI_STREAM_ENABLED,
-)
+from ai.usage import UsageTracker
+from ai.workflow import WorkflowEngine
+from shared.database import get_db
+from shared.dependencies import get_current_user, require_permissions
 
 router = APIRouter(prefix="/ai", tags=["AI Intelligence Platform"])
 
 
 # --- AI Chat ----------------------------------------------------------------
+
 
 @router.post("/chat", response_model=ChatResponse)
 async def ai_chat(
@@ -122,11 +146,11 @@ async def ai_chat(
             provider=result["provider"],
         )
     except PermissionError as e:
-        raise HTTPException(status_code=403, detail=str(e))
+        raise HTTPException(status_code=403, detail=str(e)) from e
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"AI request failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"AI request failed: {str(e)}") from e
 
 
 @router.post("/chat/stream")
@@ -155,14 +179,15 @@ async def ai_chat_stream(
             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 # --- Conversations ----------------------------------------------------------
 
+
 @router.get("/conversations", response_model=list[ConversationSummary])
 async def list_conversations(
-    assistant_type: Optional[str] = Query(None),
+    assistant_type: str | None = Query(None),
     db: DbSession = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
@@ -178,11 +203,15 @@ async def get_conversation_messages(
     current_user: dict = Depends(get_current_user),
 ):
     """Get all messages in a conversation."""
-    memory = AIMemory(db)
-    messages = memory.get_conversation_messages(conversation_id)
-    if not messages:
+    conversation = (
+        db.query(AIConversation)
+        .filter(AIConversation.id == conversation_id, AIConversation.user_id == current_user["id"])
+        .first()
+    )
+    if not conversation:
         raise HTTPException(status_code=404, detail="Conversation not found")
-    return messages
+    memory = AIMemory(db)
+    return memory.get_conversation_messages(conversation_id)
 
 
 @router.delete("/conversations/{conversation_id}")
@@ -192,10 +221,42 @@ async def delete_conversation(
     current_user: dict = Depends(get_current_user),
 ):
     """Delete (archive) a conversation."""
-    memory = AIMemory(db)
-    if not memory.delete_conversation(conversation_id):
+    conversation = (
+        db.query(AIConversation)
+        .filter(AIConversation.id == conversation_id, AIConversation.user_id == current_user["id"])
+        .first()
+    )
+    if not conversation:
         raise HTTPException(status_code=404, detail="Conversation not found")
+    memory = AIMemory(db)
+    memory.delete_conversation(conversation_id)
     return {"message": "Conversation archived"}
+
+
+@router.get("/conversations/search", response_model=list[ConversationSummary])
+async def search_conversations(
+    q: str = Query(..., min_length=1, max_length=200),
+    limit: int = Query(20, ge=1, le=100),
+    db: DbSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Search user's AI conversations by title and message content."""
+    memory = AIMemory(db)
+    return memory.search_conversations(current_user["id"], q, limit)
+
+
+@router.get("/conversations/{conversation_id}/export")
+async def export_conversation(
+    conversation_id: int,
+    db: DbSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Export a conversation with all messages as structured data."""
+    memory = AIMemory(db)
+    result = memory.export_conversation(conversation_id, current_user["id"])
+    if not result:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    return result
 
 
 @router.post("/messages/{message_id}/feedback")
@@ -206,26 +267,42 @@ async def message_feedback(
     current_user: dict = Depends(get_current_user),
 ):
     """Provide feedback (positive/negative) on an AI message."""
-    memory = AIMemory(db)
-    if not memory.set_feedback(message_id, request.feedback):
+    msg = db.query(AIMessage).filter(AIMessage.id == message_id).first()
+    if not msg:
         raise HTTPException(status_code=404, detail="Message not found")
+    conversation = (
+        db.query(AIConversation)
+        .filter(
+            AIConversation.id == msg.conversation_id,
+            AIConversation.user_id == current_user["id"],
+        )
+        .first()
+    )
+    if not conversation:
+        raise HTTPException(status_code=404, detail="Message not found")
+    memory = AIMemory(db)
+    memory.set_feedback(message_id, request.feedback)
     return {"message": "Feedback recorded"}
 
 
 # --- AI Assistants ----------------------------------------------------------
 
+
 @router.get("/assistants")
-async def list_all_assistants():
+async def list_all_assistants(
+    current_user: dict = Depends(get_current_user),
+):
     """List all available AI assistants."""
     return list_assistants()
 
 
 # --- Provider Management ----------------------------------------------------
 
+
 @router.get("/providers")
 async def list_providers(
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(require_permissions("ai.use")),
 ):
     """List all AI providers and their status."""
     manager = ProviderManager(db)
@@ -236,12 +313,14 @@ async def list_providers(
 async def create_provider(
     config: ProviderConfigCreate,
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(require_permissions("settings.manage")),
 ):
     """Configure a new AI provider."""
-    existing = db.query(AIProviderConfig).filter(
-        AIProviderConfig.provider_name == config.provider_name
-    ).first()
+    existing = (
+        db.query(AIProviderConfig)
+        .filter(AIProviderConfig.provider_name == config.provider_name)
+        .first()
+    )
     if existing:
         raise HTTPException(status_code=400, detail="Provider already configured")
 
@@ -282,7 +361,7 @@ async def update_provider(
     provider_id: int,
     config: ProviderConfigUpdate,
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(require_permissions("settings.manage")),
 ):
     """Update an AI provider configuration."""
     provider = db.query(AIProviderConfig).filter(AIProviderConfig.id == provider_id).first()
@@ -303,9 +382,9 @@ async def update_provider(
         provider.is_active = config.is_active
     if config.is_default is not None:
         if config.is_default:
-            db.query(AIProviderConfig).filter(
-                AIProviderConfig.is_default == True
-            ).update({AIProviderConfig.is_default: False})
+            db.query(AIProviderConfig).filter(AIProviderConfig.is_default.is_(True)).update(
+                {AIProviderConfig.is_default: False}
+            )
         provider.is_default = config.is_default
     if config.max_tokens is not None:
         provider.max_tokens = config.max_tokens
@@ -336,7 +415,7 @@ async def update_provider(
 async def test_provider(
     provider_name: str,
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(require_permissions("settings.manage")),
 ):
     """Test a provider connection."""
     manager = ProviderManager(db)
@@ -344,6 +423,7 @@ async def test_provider(
 
 
 # --- NL to SQL --------------------------------------------------------------
+
 
 @router.post("/sql/generate", response_model=NLToSQLResponse)
 async def generate_sql(
@@ -376,6 +456,7 @@ async def execute_sql(
 
 # --- NL to ETL --------------------------------------------------------------
 
+
 @router.post("/etl/generate", response_model=NLToETLResponse)
 async def generate_etl(
     request: NLToETLRequest,
@@ -395,6 +476,7 @@ async def generate_etl(
 
 # --- NL to Dashboard --------------------------------------------------------
 
+
 @router.post("/dashboard/generate", response_model=NLToDashboardResponse)
 async def generate_dashboard(
     request: NLToDashboardRequest,
@@ -412,6 +494,7 @@ async def generate_dashboard(
 
 
 # --- AI Data Quality --------------------------------------------------------
+
 
 @router.post("/quality/analyze", response_model=AIQualityResponse)
 async def ai_quality_analyze(
@@ -432,6 +515,7 @@ async def ai_quality_analyze(
 
 
 # --- AI Report Writer -------------------------------------------------------
+
 
 @router.post("/reports/generate", response_model=ReportGenerateResponse)
 async def generate_report(
@@ -455,7 +539,7 @@ async def generate_report(
 
 @router.get("/reports", response_model=list[dict])
 async def list_reports(
-    report_type: Optional[str] = Query(None),
+    report_type: str | None = Query(None),
     limit: int = Query(20, ge=1, le=100),
     db: DbSession = Depends(get_db),
     current_user: dict = Depends(get_current_user),
@@ -467,8 +551,11 @@ async def list_reports(
     reports = query.order_by(AIReportGeneration.created_at.desc()).limit(limit).all()
     return [
         {
-            "id": r.id, "report_type": r.report_type, "title": r.title,
-            "summary": r.summary, "created_at": str(r.created_at) if r.created_at else None,
+            "id": r.id,
+            "report_type": r.report_type,
+            "title": r.title,
+            "summary": r.summary,
+            "created_at": str(r.created_at) if r.created_at else None,
         }
         for r in reports
     ]
@@ -485,14 +572,19 @@ async def get_report(
     if not report:
         raise HTTPException(status_code=404, detail="Report not found")
     return {
-        "id": report.id, "report_type": report.report_type, "title": report.title,
-        "content": report.content, "summary": report.summary,
-        "sections": report.sections, "format": report.format,
+        "id": report.id,
+        "report_type": report.report_type,
+        "title": report.title,
+        "content": report.content,
+        "summary": report.summary,
+        "sections": report.sections,
+        "format": report.format,
         "created_at": str(report.created_at) if report.created_at else None,
     }
 
 
 # --- AI Decision Center -----------------------------------------------------
+
 
 @router.post("/decision/analyze", response_model=DecisionCenterResponse)
 async def decision_analyze(
@@ -514,7 +606,7 @@ async def decision_analyze(
 
 @router.get("/insights", response_model=list[InsightResponse])
 async def list_insights(
-    insight_type: Optional[str] = Query(None),
+    insight_type: str | None = Query(None),
     limit: int = Query(20, ge=1, le=100),
     db: DbSession = Depends(get_db),
     current_user: dict = Depends(get_current_user),
@@ -525,6 +617,7 @@ async def list_insights(
 
 
 # --- AI Forecasting ---------------------------------------------------------
+
 
 @router.post("/forecast", response_model=ForecastResponse)
 async def generate_forecast(
@@ -559,9 +652,12 @@ async def list_forecasts(
     forecasts = db.query(AIForecast).order_by(AIForecast.created_at.desc()).limit(limit).all()
     return [
         {
-            "id": f.id, "forecast_type": f.forecast_type,
-            "target_column": f.target_column, "horizon": f.horizon,
-            "method": f.method, "accuracy_score": f.accuracy_score,
+            "id": f.id,
+            "forecast_type": f.forecast_type,
+            "target_column": f.target_column,
+            "horizon": f.horizon,
+            "method": f.method,
+            "accuracy_score": f.accuracy_score,
             "created_at": str(f.created_at) if f.created_at else None,
         }
         for f in forecasts
@@ -579,9 +675,12 @@ async def get_forecast(
     if not forecast:
         raise HTTPException(status_code=404, detail="Forecast not found")
     return {
-        "id": forecast.id, "forecast_type": forecast.forecast_type,
-        "target_column": forecast.target_column, "horizon": forecast.horizon,
-        "method": forecast.method, "predictions": forecast.predictions,
+        "id": forecast.id,
+        "forecast_type": forecast.forecast_type,
+        "target_column": forecast.target_column,
+        "horizon": forecast.horizon,
+        "method": forecast.method,
+        "predictions": forecast.predictions,
         "accuracy_score": forecast.accuracy_score,
         "confidence_level": forecast.confidence_level,
         "input_summary": forecast.input_summary,
@@ -590,6 +689,7 @@ async def get_forecast(
 
 
 # --- AI Anomaly Detection ---------------------------------------------------
+
 
 @router.post("/anomaly/detect", response_model=AnomalyResponse)
 async def detect_anomalies(
@@ -637,6 +737,7 @@ async def resolve_alert(
 
 # --- AI KPI Engine ----------------------------------------------------------
 
+
 @router.post("/kpi/recommend", response_model=KPIRecommendResponse)
 async def recommend_kpis(
     request: KPIRecommendRequest,
@@ -665,6 +766,7 @@ async def monitor_kpis(
 
 # --- AI Dashboard Insights --------------------------------------------------
 
+
 @router.post("/dashboard/insights", response_model=DashboardInsightsResponse)
 async def generate_dashboard_insights(
     request: DashboardInsightsRequest,
@@ -684,6 +786,7 @@ async def generate_dashboard_insights(
 
 # --- AI Search --------------------------------------------------------------
 
+
 @router.post("/search", response_model=AISearchResponse)
 async def ai_search(
     request: AISearchRequest,
@@ -701,6 +804,7 @@ async def ai_search(
 
 
 # --- AI Document Chat -------------------------------------------------------
+
 
 @router.post("/documents/upload", response_model=DocumentUploadResponse)
 async def upload_document(
@@ -721,7 +825,7 @@ async def upload_document(
         )
         return DocumentUploadResponse(**result)
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @router.post("/documents/{document_id}/chat", response_model=DocumentChatResponse)
@@ -752,6 +856,7 @@ async def list_documents(
 
 
 # --- AI Workflow ------------------------------------------------------------
+
 
 @router.post("/workflows", response_model=WorkflowResponse)
 async def create_workflow(
@@ -810,9 +915,10 @@ async def get_workflow_runs(
 
 # --- AI Prompt Templates ----------------------------------------------------
 
+
 @router.get("/prompts", response_model=list[PromptTemplateResponse])
 async def list_prompt_templates(
-    assistant_type: Optional[str] = Query(None),
+    assistant_type: str | None = Query(None),
     db: DbSession = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
@@ -823,9 +929,14 @@ async def list_prompt_templates(
     templates = query.order_by(AIPromptTemplate.created_at.desc()).all()
     return [
         PromptTemplateResponse(
-            id=t.id, name=t.name, assistant_type=t.assistant_type,
-            system_prompt=t.system_prompt, description=t.description,
-            variables=t.variables, is_active=t.is_active, is_system=t.is_system,
+            id=t.id,
+            name=t.name,
+            assistant_type=t.assistant_type,
+            system_prompt=t.system_prompt,
+            description=t.description,
+            variables=t.variables,
+            is_active=t.is_active,
+            is_system=t.is_system,
             created_at=str(t.created_at) if t.created_at else None,
         )
         for t in templates
@@ -848,15 +959,20 @@ async def create_prompt_template(
         variables=request.variables,
     )
     return PromptTemplateResponse(
-        id=template.id, name=template.name, assistant_type=template.assistant_type,
-        system_prompt=template.system_prompt, description=template.description,
-        variables=template.variables, is_active=template.is_active,
+        id=template.id,
+        name=template.name,
+        assistant_type=template.assistant_type,
+        system_prompt=template.system_prompt,
+        description=template.description,
+        variables=template.variables,
+        is_active=template.is_active,
         is_system=template.is_system,
         created_at=str(template.created_at) if template.created_at else None,
     )
 
 
 # --- AI Usage & Audit -------------------------------------------------------
+
 
 @router.get("/usage/stats", response_model=UsageStatsResponse)
 async def usage_stats(
@@ -894,27 +1010,32 @@ async def usage_limits(
 async def audit_logs(
     limit: int = Query(50, ge=1, le=200),
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(require_permissions("audit.view")),
 ):
     """Get AI audit logs."""
     logs = db.query(AIAuditLog).order_by(AIAuditLog.created_at.desc()).limit(limit).all()
     return [
         AuditLogResponse(
-            id=l.id, user_id=l.user_id, action=l.action,
-            assistant_type=l.assistant_type,
-            input_summary=l.input_summary, output_summary=l.output_summary,
-            success=l.success, error_message=l.error_message,
-            created_at=str(l.created_at) if l.created_at else None,
+            id=log.id,
+            user_id=log.user_id,
+            action=log.action,
+            assistant_type=log.assistant_type,
+            input_summary=log.input_summary,
+            output_summary=log.output_summary,
+            success=log.success,
+            error_message=log.error_message,
+            created_at=str(log.created_at) if log.created_at else None,
         )
-        for l in logs
+        for log in logs
     ]
 
 
 # --- AI Plugins -------------------------------------------------------------
 
+
 @router.get("/plugins", response_model=list[PluginResponse])
 async def list_plugins(
-    plugin_type: Optional[str] = Query(None),
+    plugin_type: str | None = Query(None),
     db: DbSession = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
@@ -951,6 +1072,7 @@ async def deactivate_plugin(
 
 # --- AI Dashboard -----------------------------------------------------------
 
+
 @router.get("/dashboard", response_model=AIDashboardResponse)
 async def ai_dashboard(
     db: DbSession = Depends(get_db),
@@ -962,32 +1084,48 @@ async def ai_dashboard(
 
     total_conversations = db.query(AIConversation).count()
     total_messages = db.query(AIMessage).filter(AIMessage.role != "system").count()
-    active_workflows = db.query(AIWorkflow).filter(AIWorkflow.is_active == True).count()
-    total_insights = db.query(AIInsight).filter(AIInsight.is_archived == False).count()
+    active_workflows = db.query(AIWorkflow).filter(AIWorkflow.is_active.is_(True)).count()
+    total_insights = db.query(AIInsight).filter(AIInsight.is_archived.is_(False)).count()
     total_forecasts = db.query(AIForecast).count()
-    active_alerts = db.query(AIAnomalyAlert).filter(AIAnomalyAlert.is_resolved == False).count()
+    active_alerts = db.query(AIAnomalyAlert).filter(AIAnomalyAlert.is_resolved.is_(False)).count()
 
     # Provider status
     manager = ProviderManager(db)
     provider_status = manager.list_providers()
 
     # Recent insights
-    recent_insights = db.query(AIInsight).filter(
-        AIInsight.is_archived == False
-    ).order_by(AIInsight.created_at.desc()).limit(5).all()
+    recent_insights = (
+        db.query(AIInsight)
+        .filter(AIInsight.is_archived.is_(False))
+        .order_by(AIInsight.created_at.desc())
+        .limit(5)
+        .all()
+    )
     recent_insights_data = [
-        {"id": i.id, "title": i.title, "type": i.insight_type,
-         "created_at": str(i.created_at) if i.created_at else None}
+        {
+            "id": i.id,
+            "title": i.title,
+            "type": i.insight_type,
+            "created_at": str(i.created_at) if i.created_at else None,
+        }
         for i in recent_insights
     ]
 
     # Recent alerts
-    recent_alerts = db.query(AIAnomalyAlert).filter(
-        AIAnomalyAlert.is_resolved == False
-    ).order_by(AIAnomalyAlert.created_at.desc()).limit(5).all()
+    recent_alerts = (
+        db.query(AIAnomalyAlert)
+        .filter(AIAnomalyAlert.is_resolved.is_(False))
+        .order_by(AIAnomalyAlert.created_at.desc())
+        .limit(5)
+        .all()
+    )
     recent_alerts_data = [
-        {"id": a.id, "title": a.title, "severity": a.severity,
-         "created_at": str(a.created_at) if a.created_at else None}
+        {
+            "id": a.id,
+            "title": a.title,
+            "severity": a.severity,
+            "created_at": str(a.created_at) if a.created_at else None,
+        }
         for a in recent_alerts
     ]
 

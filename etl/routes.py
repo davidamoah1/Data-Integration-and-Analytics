@@ -1,41 +1,60 @@
 """FastAPI routes for the ETL Engine — imports, pipelines, schedules, profiling, quality, jobs, lineage, templates."""
 
+# ruff: noqa: B008  # FastAPI Depends() calls in default arguments are intentional
+
 import os
 import tempfile
-from datetime import datetime
-from typing import Optional
-import json
+from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, UploadFile, File, Query, HTTPException, BackgroundTasks
+from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, Query, UploadFile
 from sqlalchemy.orm import Session as DbSession
 
-from shared.database import get_db
-from shared.dependencies import get_current_user
+from etl.ai_hooks import list_ai_hooks
 from etl.connectors.connectors import get_connector
+from etl.file_security import FileSecurityError, FileValidator
+from etl.lineage import LineageTracker
+from etl.logging_config import logger
+from etl.models import (
+    ETLDataProfile,
+    ETLImportTemplate,
+    ETLJob,
+    ETLPipeline,
+    ETLQualityReport,
+    ETLSchedule,
+    ETLTransformation,
+)
+from etl.pipeline_builder import JobMonitor, PipelineBuilder, PipelineExecutor
 from etl.profiling import DataProfiler
 from etl.quality import DataQualityEngine
-from etl.transformations import TransformationEngine
-from etl.load_engine import LoadEngine, LoadMode
-from etl.lineage import LineageTracker
 from etl.reports import ReportGenerator
-from etl.file_security import FileValidator, FileSecurityError
-from etl.pipeline_builder import PipelineBuilder, PipelineExecutor, JobMonitor
-from etl.models import (
-    ETLPipeline, ETLJob, ETLImportTemplate, ETLDataProfile,
-    ETLQualityReport, ETLDataLineage, ETLSchedule, ETLTransformation,
-)
 from etl.schemas import (
-    ImportRequest, ImportPreviewResponse, ImportResponse,
-    ProfileResponse, QualityResponse, ApplyFixRequest,
-    TransformRequest, TransformResponse, TransformationTemplateCreate,
-    PipelineCreate, PipelineUpdate, PipelineResponse, PipelineExecuteResponse,
-    VersionHistoryItem, RollbackRequest,
-    JobResponse, JobStatsResponse,
-    LineageResponse, ScheduleCreate, ScheduleResponse,
-    DashboardResponse, ImportTemplateResponse, AIHooksResponse,
+    AIHooksResponse,
+    ApplyFixRequest,
+    DashboardResponse,
+    ImportPreviewResponse,
+    ImportRequest,
+    ImportResponse,
+    ImportTemplateResponse,
+    JobResponse,
+    JobStatsResponse,
+    LineageResponse,
+    PipelineCreate,
+    PipelineExecuteResponse,
+    PipelineResponse,
+    PipelineUpdate,
+    ProfileResponse,
+    QualityResponse,
+    RollbackRequest,
+    ScheduleCreate,
+    ScheduleResponse,
+    TransformationTemplateCreate,
+    TransformRequest,
+    TransformResponse,
+    VersionHistoryItem,
 )
-from etl.ai_hooks import list_ai_hooks
-from etl.logging_config import logger
+from etl.transformations import TransformationEngine
+from shared.database import get_db
+from shared.dependencies import get_current_user
 
 router = APIRouter(prefix="/etl", tags=["ETL Engine"])
 
@@ -47,7 +66,33 @@ _transform_engine = TransformationEngine()
 _report_gen = ReportGenerator()
 
 
+# --- Connector discovery endpoints -----------------------------------------
+
+
+@router.post("/connectors/test", response_model=dict)
+async def test_connector(
+    request: ImportRequest,
+    current_user=Depends(get_current_user),
+):
+    connector = get_connector(request.source_type, request.source_config)
+    return connector.test_connection()
+
+
+@router.post("/connectors/discover", response_model=dict)
+async def discover_connector(
+    request: ImportRequest,
+    preview_rows: int = Query(default=10, ge=1, le=100),
+    current_user=Depends(get_current_user),
+):
+    connector = get_connector(request.source_type, request.source_config)
+    with connector:
+        metadata = connector.discover_metadata()
+        preview = connector.preview(preview_rows).to_dict(orient="records")
+    return {**metadata, "preview": preview}
+
+
 # --- Import endpoints -------------------------------------------------------
+
 
 @router.post("/import/upload", response_model=ImportPreviewResponse)
 async def upload_file(
@@ -69,11 +114,13 @@ async def upload_file(
     # Validate
     ext = suffix.lstrip(".").lower()
     try:
-        validation = _validator.validate(tmp_path, expected_type=ext if ext in ("csv", "xlsx", "xls", "json", "xml") else None)
+        validation = _validator.validate(
+            tmp_path, expected_type=ext if ext in ("csv", "xlsx", "xls", "json", "xml") else None
+        )
         if not validation["valid"]:
             raise HTTPException(status_code=422, detail=validation["errors"])
     except FileSecurityError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
     finally:
         os.unlink(tmp_path)
 
@@ -87,7 +134,6 @@ async def upload_file(
         connector = get_connector(ext, config)
         with connector:
             df = connector.extract()
-            schema = connector.get_schema()
 
         preview_rows = df.head(10).to_dict(orient="records")
         return ImportPreviewResponse(
@@ -109,7 +155,6 @@ async def preview_import(
     connector = get_connector(request.source_type, request.source_config)
     with connector:
         df = connector.extract()
-        schema = connector.get_schema()
 
     preview_rows = df.head(10).to_dict(orient="records")
     return ImportPreviewResponse(
@@ -132,7 +177,7 @@ async def execute_import(
         job_type="import",
         status="running",
         trigger_type="api",
-        started_at=datetime.utcnow(),
+        started_at=datetime.now(timezone.utc).replace(tzinfo=None),
         created_by=current_user["id"] if current_user else None,
     )
     db.add(job)
@@ -156,7 +201,9 @@ async def execute_import(
             df = df.rename(columns=request.column_mapping)
 
         # Profile
-        profile = _profiler.profile(df, source_name=request.source_config.get("file_path", request.source_type))
+        profile = _profiler.profile(
+            df, source_name=request.source_config.get("file_path", request.source_type)
+        )
 
         # Quality check
         quality = _quality_engine.run_checks(df, source_name=request.source_type)
@@ -213,7 +260,7 @@ async def execute_import(
         job.status = "completed"
         job.rows_extracted = rows_imported
         job.rows_transformed = rows_imported
-        job.completed_at = datetime.utcnow()
+        job.completed_at = datetime.now(timezone.utc).replace(tzinfo=None)
         db.commit()
 
         return ImportResponse(
@@ -226,13 +273,14 @@ async def execute_import(
     except Exception as e:
         job.status = "failed"
         job.error_message = str(e)
-        job.completed_at = datetime.utcnow()
+        job.completed_at = datetime.now(timezone.utc).replace(tzinfo=None)
         db.commit()
         logger.error(f"Import failed: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 # --- Profiling endpoints ----------------------------------------------------
+
 
 @router.post("/profile", response_model=ProfileResponse)
 async def profile_data(
@@ -244,7 +292,9 @@ async def profile_data(
     with connector:
         df = connector.extract()
 
-    profile = _profiler.profile(df, source_name=request.source_config.get("file_path", request.source_type))
+    profile = _profiler.profile(
+        df, source_name=request.source_config.get("file_path", request.source_type)
+    )
     return ProfileResponse(
         source_name=profile["source_name"],
         row_count=profile["row_count"],
@@ -280,6 +330,7 @@ async def get_profile(
 
 
 # --- Quality endpoints ------------------------------------------------------
+
 
 @router.post("/quality/check", response_model=QualityResponse)
 async def check_quality(
@@ -339,6 +390,7 @@ async def get_quality_report(
 
 
 # --- Transformation endpoints ------------------------------------------------
+
 
 @router.post("/transform", response_model=TransformResponse)
 async def transform_data(
@@ -402,6 +454,7 @@ async def list_transformation_templates(
 
 
 # --- Pipeline endpoints -----------------------------------------------------
+
 
 @router.post("/pipelines", response_model=PipelineResponse)
 async def create_pipeline(
@@ -527,9 +580,10 @@ async def execute_pipeline(
 
 # --- Job endpoints ----------------------------------------------------------
 
+
 @router.get("/jobs", response_model=list[JobResponse])
 async def list_jobs(
-    status: Optional[str] = Query(None, description="Filter by status"),
+    status: str | None = Query(None, description="Filter by status"),
     limit: int = Query(50, ge=1, le=200),
     db: DbSession = Depends(get_db),
     current_user=Depends(get_current_user),
@@ -576,9 +630,10 @@ async def get_job_steps(
 
 # --- Lineage endpoints ------------------------------------------------------
 
+
 @router.get("/lineage", response_model=LineageResponse)
 async def get_lineage_graph(
-    job_id: Optional[int] = Query(None),
+    job_id: int | None = Query(None),
     db: DbSession = Depends(get_db),
     current_user=Depends(get_current_user),
 ):
@@ -590,8 +645,8 @@ async def get_lineage_graph(
 
 @router.get("/lineage/entries", response_model=list[dict])
 async def get_lineage_entries(
-    source_name: Optional[str] = Query(None),
-    job_id: Optional[int] = Query(None),
+    source_name: str | None = Query(None),
+    job_id: int | None = Query(None),
     limit: int = Query(100, ge=1, le=500),
     db: DbSession = Depends(get_db),
     current_user=Depends(get_current_user),
@@ -602,6 +657,7 @@ async def get_lineage_entries(
 
 
 # --- Schedule endpoints -----------------------------------------------------
+
 
 @router.post("/schedules", response_model=ScheduleResponse)
 async def create_schedule(
@@ -668,6 +724,7 @@ async def delete_schedule(
 
 # --- Import Templates -------------------------------------------------------
 
+
 @router.get("/templates", response_model=list[ImportTemplateResponse])
 async def list_templates(
     db: DbSession = Depends(get_db),
@@ -712,6 +769,7 @@ async def get_template(
 
 # --- Dashboard --------------------------------------------------------------
 
+
 @router.get("/dashboard", response_model=DashboardResponse)
 async def get_dashboard(
     db: DbSession = Depends(get_db),
@@ -735,7 +793,11 @@ async def get_dashboard(
     ]
 
     avg_quality = db.query(ETLDataProfile).filter(ETLDataProfile.quality_score.isnot(None)).all()
-    avg_q = round(sum(p.quality_score for p in avg_quality) / len(avg_quality), 2) if avg_quality else None
+    avg_q = (
+        round(sum(p.quality_score for p in avg_quality) / len(avg_quality), 2)
+        if avg_quality
+        else None
+    )
 
     return DashboardResponse(
         total_jobs=stats["total_jobs"],
@@ -750,6 +812,7 @@ async def get_dashboard(
 
 
 # --- AI Hooks --------------------------------------------------------------
+
 
 @router.get("/ai/hooks", response_model=AIHooksResponse)
 async def get_ai_hooks(

@@ -6,7 +6,7 @@ dashboard configurations with appropriate chart types and data mappings.
 
 import json
 import re
-from typing import Optional
+
 from sqlalchemy.orm import Session as DbSession
 
 from ai.gateway import AIGateway
@@ -19,8 +19,9 @@ class NLToDashboardEngine:
         self.db = db
         self.gateway = AIGateway(db)
 
-    def generate_dashboard(self, description: str, data_source: Optional[str] = None,
-                           user_id: Optional[int] = None) -> dict:
+    def generate_dashboard(
+        self, description: str, data_source: str | None = None, user_id: int | None = None
+    ) -> dict:
         """Generate a dashboard configuration from a description.
 
         Returns:
@@ -71,12 +72,16 @@ class NLToDashboardEngine:
             pass
 
         # Try code block
-        code_match = re.search(r'```(?:json)?\s*(.*?)\s*```', response, re.DOTALL)
+        code_match = re.search(r"```(?:json)?\s*(.*?)\s*```", response, re.DOTALL)
         if code_match:
             try:
                 data = json.loads(code_match.group(1))
                 if "dashboard_config" in data:
-                    return data["dashboard_config"], data.get("charts", []), data.get("explanation", "")
+                    return (
+                        data["dashboard_config"],
+                        data.get("charts", []),
+                        data.get("explanation", ""),
+                    )
             except json.JSONDecodeError:
                 pass
 

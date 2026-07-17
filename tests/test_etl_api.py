@@ -1,9 +1,6 @@
 """Tests for ETL API endpoints."""
 
 import io
-import json
-import pytest
-from fastapi.testclient import TestClient
 
 
 class TestETLAPI:
@@ -21,15 +18,24 @@ class TestETLAPI:
         assert isinstance(resp.json(), list)
 
     def test_create_pipeline(self, client, auth_headers):
-        resp = client.post("/etl/pipelines", headers=auth_headers, json={
-            "name": "API Test Pipeline",
-            "description": "Created via API",
-            "steps": [
-                {"type": "extract", "source_type": "csv", "source_config": {"file_path": "test.csv"}, "source_name": "test.csv"},
-                {"type": "validate"},
-                {"type": "load", "table": "sales", "mode": "insert"},
-            ],
-        })
+        resp = client.post(
+            "/etl/pipelines",
+            headers=auth_headers,
+            json={
+                "name": "API Test Pipeline",
+                "description": "Created via API",
+                "steps": [
+                    {
+                        "type": "extract",
+                        "source_type": "csv",
+                        "source_config": {"file_path": "test.csv"},
+                        "source_name": "test.csv",
+                    },
+                    {"type": "validate"},
+                    {"type": "load", "table": "sales", "mode": "insert"},
+                ],
+            },
+        )
         assert resp.status_code == 200
         data = resp.json()
         assert data["name"] == "API Test Pipeline"
@@ -37,29 +43,48 @@ class TestETLAPI:
         assert len(data["steps"]) == 3
 
     def test_get_pipeline(self, client, auth_headers):
-        create = client.post("/etl/pipelines", headers=auth_headers, json={
-            "name": "Get Pipeline", "steps": [],
-        })
+        create = client.post(
+            "/etl/pipelines",
+            headers=auth_headers,
+            json={
+                "name": "Get Pipeline",
+                "steps": [],
+            },
+        )
         pid = create.json()["id"]
         resp = client.get(f"/etl/pipelines/{pid}", headers=auth_headers)
         assert resp.status_code == 200
         assert resp.json()["name"] == "Get Pipeline"
 
     def test_update_pipeline(self, client, auth_headers):
-        create = client.post("/etl/pipelines", headers=auth_headers, json={
-            "name": "Update Pipeline", "steps": [],
-        })
+        create = client.post(
+            "/etl/pipelines",
+            headers=auth_headers,
+            json={
+                "name": "Update Pipeline",
+                "steps": [],
+            },
+        )
         pid = create.json()["id"]
-        resp = client.put(f"/etl/pipelines/{pid}", headers=auth_headers, json={
-            "steps": [{"type": "extract", "source_type": "json", "source_config": {}}],
-        })
+        resp = client.put(
+            f"/etl/pipelines/{pid}",
+            headers=auth_headers,
+            json={
+                "steps": [{"type": "extract", "source_type": "json", "source_config": {}}],
+            },
+        )
         assert resp.status_code == 200
         assert resp.json()["new_version"] == 2
 
     def test_version_history(self, client, auth_headers):
-        create = client.post("/etl/pipelines", headers=auth_headers, json={
-            "name": "Version Pipeline", "steps": [],
-        })
+        create = client.post(
+            "/etl/pipelines",
+            headers=auth_headers,
+            json={
+                "name": "Version Pipeline",
+                "steps": [],
+            },
+        )
         pid = create.json()["id"]
         client.put(f"/etl/pipelines/{pid}", headers=auth_headers, json={"steps": []})
         resp = client.get(f"/etl/pipelines/{pid}/versions", headers=auth_headers)
@@ -67,12 +92,19 @@ class TestETLAPI:
         assert len(resp.json()) == 2
 
     def test_rollback(self, client, auth_headers):
-        create = client.post("/etl/pipelines", headers=auth_headers, json={
-            "name": "Rollback Pipeline", "steps": [],
-        })
+        create = client.post(
+            "/etl/pipelines",
+            headers=auth_headers,
+            json={
+                "name": "Rollback Pipeline",
+                "steps": [],
+            },
+        )
         pid = create.json()["id"]
         client.put(f"/etl/pipelines/{pid}", headers=auth_headers, json={"steps": []})
-        resp = client.post(f"/etl/pipelines/{pid}/rollback", headers=auth_headers, json={"version_number": 1})
+        resp = client.post(
+            f"/etl/pipelines/{pid}/rollback", headers=auth_headers, json={"version_number": 1}
+        )
         assert resp.status_code == 200
         assert resp.json()["rolled_back_to"] == 1
 
@@ -106,14 +138,23 @@ class TestETLAPI:
         assert isinstance(resp.json(), list)
 
     def test_create_schedule(self, client, auth_headers):
-        create = client.post("/etl/pipelines", headers=auth_headers, json={
-            "name": "Schedule Pipeline", "steps": [],
-        })
+        create = client.post(
+            "/etl/pipelines",
+            headers=auth_headers,
+            json={
+                "name": "Schedule Pipeline",
+                "steps": [],
+            },
+        )
         pid = create.json()["id"]
-        resp = client.post("/etl/schedules", headers=auth_headers, json={
-            "pipeline_id": pid,
-            "schedule_type": "daily",
-        })
+        resp = client.post(
+            "/etl/schedules",
+            headers=auth_headers,
+            json={
+                "pipeline_id": pid,
+                "schedule_type": "daily",
+            },
+        )
         assert resp.status_code == 200
         assert resp.json()["schedule_type"] == "daily"
 
@@ -130,12 +171,16 @@ class TestETLAPI:
         assert len(data["hooks"]) > 0
 
     def test_transformation_templates(self, client, auth_headers):
-        resp = client.post("/etl/transformations/templates", headers=auth_headers, json={
-            "name": "Lower Names",
-            "description": "Lowercase name column",
-            "transformation_type": "standardize",
-            "config": {"column": "name", "operation": "lower"},
-        })
+        resp = client.post(
+            "/etl/transformations/templates",
+            headers=auth_headers,
+            json={
+                "name": "Lower Names",
+                "description": "Lowercase name column",
+                "transformation_type": "standardize",
+                "config": {"column": "name", "operation": "lower"},
+            },
+        )
         assert resp.status_code == 200
         assert resp.json()["name"] == "Lower Names"
 
@@ -159,10 +204,14 @@ class TestETLAPI:
     def test_import_preview(self, client, auth_headers, tmp_path):
         csv_path = tmp_path / "preview.csv"
         csv_path.write_text("name,age\nAlice,30\nBob,25\n")
-        resp = client.post("/etl/import/preview", headers=auth_headers, json={
-            "source_type": "csv",
-            "source_config": {"file_path": str(csv_path)},
-        })
+        resp = client.post(
+            "/etl/import/preview",
+            headers=auth_headers,
+            json={
+                "source_type": "csv",
+                "source_config": {"file_path": str(csv_path)},
+            },
+        )
         assert resp.status_code == 200
         data = resp.json()
         assert data["row_count"] == 2
@@ -170,10 +219,14 @@ class TestETLAPI:
     def test_profile_endpoint(self, client, auth_headers, tmp_path):
         csv_path = tmp_path / "profile.csv"
         csv_path.write_text("name,age\nAlice,30\nBob,25\n")
-        resp = client.post("/etl/profile", headers=auth_headers, json={
-            "source_type": "csv",
-            "source_config": {"file_path": str(csv_path)},
-        })
+        resp = client.post(
+            "/etl/profile",
+            headers=auth_headers,
+            json={
+                "source_type": "csv",
+                "source_config": {"file_path": str(csv_path)},
+            },
+        )
         assert resp.status_code == 200
         data = resp.json()
         assert data["row_count"] == 2
@@ -183,10 +236,14 @@ class TestETLAPI:
     def test_quality_check_endpoint(self, client, auth_headers, tmp_path):
         csv_path = tmp_path / "quality.csv"
         csv_path.write_text("name,email\nAlice,a@test.com\nBob,invalid\n")
-        resp = client.post("/etl/quality/check", headers=auth_headers, json={
-            "source_type": "csv",
-            "source_config": {"file_path": str(csv_path)},
-        })
+        resp = client.post(
+            "/etl/quality/check",
+            headers=auth_headers,
+            json={
+                "source_type": "csv",
+                "source_config": {"file_path": str(csv_path)},
+            },
+        )
         assert resp.status_code == 200
         data = resp.json()
         assert "overall_score" in data
@@ -195,11 +252,15 @@ class TestETLAPI:
     def test_transform_endpoint(self, client, auth_headers, tmp_path):
         csv_path = tmp_path / "transform.csv"
         csv_path.write_text("Name,Age\nAlice,30\nBob,25\n")
-        resp = client.post("/etl/transform", headers=auth_headers, json={
-            "source_type": "csv",
-            "source_config": {"file_path": str(csv_path)},
-            "transformations": [{"type": "rename", "mapping": {"Name": "name"}}],
-        })
+        resp = client.post(
+            "/etl/transform",
+            headers=auth_headers,
+            json={
+                "source_type": "csv",
+                "source_config": {"file_path": str(csv_path)},
+                "transformations": [{"type": "rename", "mapping": {"Name": "name"}}],
+            },
+        )
         assert resp.status_code == 200
         data = resp.json()
         assert data["transformations_applied"] == 1

@@ -1,29 +1,28 @@
-"""Alembic migration environment for DataFlow Enterprise Data Intelligence Platform.
+"""Alembic migration environment for AEDIP."""
 
-Uses the shared Base metadata for autogenerate support.
-"""
-
-import os
 import sys
 from logging.config import fileConfig
+from pathlib import Path
 
-from alembic import context
 from sqlalchemy import engine_from_config, pool
 
-# Ensure project root is on sys.path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from alembic import context
 
-from shared.database import Base
-from config import DB_URL
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
-# Import all models so they register with Base.metadata
-import authentication.models  # noqa: F401
-import organizations.models  # noqa: F401
-import audit.models  # noqa: F401
+import ai.models  # noqa: F401, E402
+import audit.models  # noqa: F401, E402
+import authentication.models  # noqa: F401, E402
+import database.db_setup  # noqa: F401, E402
+import etl.models  # noqa: F401, E402
+import organizations.models  # noqa: F401, E402
+from config import DB_TYPE, DB_URL, validate_config  # noqa: E402
+from shared.database import Base  # noqa: E402
 
 config = context.config
-
-# Override sqlalchemy.url with the project's DB_URL
+validate_config()
 config.set_main_option("sqlalchemy.url", DB_URL)
 
 if config.config_file_name is not None:
@@ -32,23 +31,30 @@ if config.config_file_name is not None:
 target_metadata = Base.metadata
 
 
-def run_migrations_offline():
-    """Run migrations in 'offline' mode (emit SQL to a file)."""
-    url = config.get_main_option("sqlalchemy.url")
+def _migration_options() -> dict:
+    return {
+        "target_metadata": target_metadata,
+        "compare_type": True,
+        "compare_server_default": True,
+        "render_as_batch": DB_TYPE == "sqlite",
+    }
+
+
+def run_migrations_offline() -> None:
+    """Run migrations in offline mode."""
     context.configure(
-        url=url,
-        target_metadata=target_metadata,
+        url=config.get_main_option("sqlalchemy.url"),
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
-        compare_type=True,
+        **_migration_options(),
     )
 
     with context.begin_transaction():
         context.run_migrations()
 
 
-def run_migrations_online():
-    """Run migrations in 'online' mode (connect to DB and apply)."""
+def run_migrations_online() -> None:
+    """Run migrations against the configured database."""
     connectable = engine_from_config(
         config.get_section(config.config_ini_section),
         prefix="sqlalchemy.",
@@ -56,11 +62,7 @@ def run_migrations_online():
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection,
-            target_metadata=target_metadata,
-            compare_type=True,
-        )
+        context.configure(connection=connection, **_migration_options())
 
         with context.begin_transaction():
             context.run_migrations()

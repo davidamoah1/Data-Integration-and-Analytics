@@ -1,9 +1,8 @@
 """Pydantic schemas for API request/response validation."""
 
 from datetime import date, datetime
-from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class KPIResponse(BaseModel):
@@ -20,21 +19,20 @@ class SalesRecordResponse(BaseModel):
     """Response schema for a single sales record."""
 
     order_id: str
-    order_date: Optional[date] = None
-    ship_date: Optional[date] = None
-    customer_name: Optional[str] = None
-    segment: Optional[str] = None
-    region: Optional[str] = None
-    category: Optional[str] = None
-    sub_category: Optional[str] = None
-    product_name: Optional[str] = None
+    order_date: date | None = None
+    ship_date: date | None = None
+    customer_name: str | None = None
+    segment: str | None = None
+    region: str | None = None
+    category: str | None = None
+    sub_category: str | None = None
+    product_name: str | None = None
     sales: float
     quantity: int
     discount: float
     profit: float
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class SalesListResponse(BaseModel):
@@ -60,12 +58,12 @@ class PipelineRunResponse(BaseModel):
     run_id: str
     status: str
     started_at: datetime
-    completed_at: Optional[datetime] = None
+    completed_at: datetime | None = None
     rows_extracted: int = 0
     rows_transformed: int = 0
     rows_loaded: int = 0
     duplicates_removed: int = 0
-    error_message: Optional[str] = None
+    error_message: str | None = None
 
 
 class PipelineTriggerResponse(BaseModel):

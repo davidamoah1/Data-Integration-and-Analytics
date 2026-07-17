@@ -4,23 +4,27 @@ Pipelines consist of steps (extract, validate, clean, transform, load, report, n
 Each step has configuration, validation, logging, execution status, duration, and retry count.
 """
 
-from datetime import datetime
-from typing import Optional, Any
+from datetime import datetime, timezone
+
 import pandas as pd
 from sqlalchemy.orm import Session as DbSession
 
-from etl.models import (
-    ETLPipeline, ETLPipelineVersion, ETLPipelineStep, ETLJob,
-    ETLDataProfile, ETLQualityReport, ETLDataLineage,
-)
 from etl.connectors.connectors import get_connector
+from etl.lineage import LineageTracker
+from etl.load_engine import LoadEngine, LoadMode
+from etl.logging_config import logger
+from etl.models import (
+    ETLDataProfile,
+    ETLJob,
+    ETLPipeline,
+    ETLPipelineStep,
+    ETLPipelineVersion,
+    ETLQualityReport,
+)
 from etl.profiling import DataProfiler
 from etl.quality import DataQualityEngine
-from etl.transformations import TransformationEngine
-from etl.load_engine import LoadEngine, LoadMode
-from etl.lineage import LineageTracker
 from etl.reports import ReportGenerator
-from etl.logging_config import logger
+from etl.transformations import TransformationEngine
 
 
 class PipelineBuilder:
@@ -29,7 +33,13 @@ class PipelineBuilder:
     def __init__(self, db: DbSession):
         self.db = db
 
-    def create_pipeline(self, name: str, description: str = "", steps: list[dict] = None, created_by: Optional[int] = None) -> ETLPipeline:
+    def create_pipeline(
+        self,
+        name: str,
+        description: str = "",
+        steps: list[dict] = None,
+        created_by: int | None = None,
+    ) -> ETLPipeline:
         """Create a new pipeline with an initial version."""
         pipeline = ETLPipeline(
             name=name,
@@ -53,17 +63,23 @@ class PipelineBuilder:
         logger.info(f"Pipeline created: '{name}' (id={pipeline.id}, version=1)")
         return pipeline
 
-    def update_pipeline(self, pipeline_id: int, steps: list[dict], created_by: Optional[int] = None) -> ETLPipelineVersion:
+    def update_pipeline(
+        self, pipeline_id: int, steps: list[dict], created_by: int | None = None
+    ) -> ETLPipelineVersion:
         """Create a new version of an existing pipeline."""
         pipeline = self.db.query(ETLPipeline).filter(ETLPipeline.id == pipeline_id).first()
         if not pipeline:
             raise ValueError(f"Pipeline not found: {pipeline_id}")
 
         # Deactivate old versions
-        old_versions = self.db.query(ETLPipelineVersion).filter(
-            ETLPipelineVersion.pipeline_id == pipeline_id,
-            ETLPipelineVersion.is_active == 1,
-        ).all()
+        old_versions = (
+            self.db.query(ETLPipelineVersion)
+            .filter(
+                ETLPipelineVersion.pipeline_id == pipeline_id,
+                ETLPipelineVersion.is_active == 1,
+            )
+            .all()
+        )
         for v in old_versions:
             v.is_active = 0
 
@@ -83,10 +99,14 @@ class PipelineBuilder:
 
     def rollback_version(self, pipeline_id: int, version_number: int) -> ETLPipelineVersion:
         """Rollback to a previous pipeline version."""
-        target = self.db.query(ETLPipelineVersion).filter(
-            ETLPipelineVersion.pipeline_id == pipeline_id,
-            ETLPipelineVersion.version_number == version_number,
-        ).first()
+        target = (
+            self.db.query(ETLPipelineVersion)
+            .filter(
+                ETLPipelineVersion.pipeline_id == pipeline_id,
+                ETLPipelineVersion.version_number == version_number,
+            )
+            .first()
+        )
         if not target:
             raise ValueError(f"Version {version_number} not found for pipeline {pipeline_id}")
 
@@ -104,15 +124,19 @@ class PipelineBuilder:
         logger.info(f"Pipeline {pipeline_id} rolled back to version {version_number}")
         return target
 
-    def get_pipeline(self, pipeline_id: int) -> Optional[dict]:
+    def get_pipeline(self, pipeline_id: int) -> dict | None:
         """Get pipeline with current version config."""
         pipeline = self.db.query(ETLPipeline).filter(ETLPipeline.id == pipeline_id).first()
         if not pipeline:
             return None
-        version = self.db.query(ETLPipelineVersion).filter(
-            ETLPipelineVersion.pipeline_id == pipeline_id,
-            ETLPipelineVersion.is_active == 1,
-        ).first()
+        version = (
+            self.db.query(ETLPipelineVersion)
+            .filter(
+                ETLPipelineVersion.pipeline_id == pipeline_id,
+                ETLPipelineVersion.is_active == 1,
+            )
+            .first()
+        )
         return {
             "id": pipeline.id,
             "name": pipeline.name,
@@ -141,9 +165,14 @@ class PipelineBuilder:
 
     def get_version_history(self, pipeline_id: int) -> list[dict]:
         """Get version history for a pipeline."""
-        versions = self.db.query(ETLPipelineVersion).filter(
-            ETLPipelineVersion.pipeline_id == pipeline_id,
-        ).order_by(ETLPipelineVersion.version_number.desc()).all()
+        versions = (
+            self.db.query(ETLPipelineVersion)
+            .filter(
+                ETLPipelineVersion.pipeline_id == pipeline_id,
+            )
+            .order_by(ETLPipelineVersion.version_number.desc())
+            .all()
+        )
         return [
             {
                 "id": v.id,
@@ -159,7 +188,7 @@ class PipelineBuilder:
 class PipelineExecutor:
     """Executes a pipeline step by step with full tracking."""
 
-    def __init__(self, db: DbSession, load_engine: Optional[LoadEngine] = None):
+    def __init__(self, db: DbSession, load_engine: LoadEngine | None = None):
         self.db = db
         self.profiler = DataProfiler()
         self.quality_engine = DataQualityEngine()
@@ -168,7 +197,9 @@ class PipelineExecutor:
         self.report_gen = ReportGenerator()
         self.lineage = LineageTracker(db)
 
-    def execute(self, pipeline_id: int, user_id: Optional[int] = None, trigger_type: str = "manual") -> dict:
+    def execute(
+        self, pipeline_id: int, user_id: int | None = None, trigger_type: str = "manual"
+    ) -> dict:
         """Execute a pipeline by ID.
 
         Returns:
@@ -179,10 +210,14 @@ class PipelineExecutor:
         if not pipeline:
             raise ValueError(f"Pipeline not found: {pipeline_id}")
 
-        version = self.db.query(ETLPipelineVersion).filter(
-            ETLPipelineVersion.pipeline_id == pipeline_id,
-            ETLPipelineVersion.is_active == 1,
-        ).first()
+        version = (
+            self.db.query(ETLPipelineVersion)
+            .filter(
+                ETLPipelineVersion.pipeline_id == pipeline_id,
+                ETLPipelineVersion.is_active == 1,
+            )
+            .first()
+        )
         if not version:
             raise ValueError(f"No active version for pipeline {pipeline_id}")
 
@@ -194,7 +229,7 @@ class PipelineExecutor:
             job_type="pipeline",
             status="running",
             trigger_type=trigger_type,
-            started_at=datetime.utcnow(),
+            started_at=datetime.now(timezone.utc).replace(tzinfo=None),
             created_by=user_id,
         )
         self.db.add(job)
@@ -214,7 +249,7 @@ class PipelineExecutor:
             "duration_seconds": 0,
         }
 
-        start_time = datetime.utcnow()
+        start_time = datetime.now(timezone.utc).replace(tzinfo=None)
         df = None
         step_records = []
 
@@ -224,16 +259,25 @@ class PipelineExecutor:
                 step_records.append(step_record)
                 if step_config["type"] == "extract" and step_record["status"] == "completed":
                     df = step_record.get("data")
-                if step_config["type"] in ("clean", "transform") and step_record["status"] == "completed":
+                if (
+                    step_config["type"] in ("clean", "transform")
+                    and step_record["status"] == "completed"
+                ):
                     df = step_record.get("data")
                 if step_config["type"] == "load" and step_record["status"] == "completed":
                     metrics["rows_loaded"] = step_record.get("rows_processed", 0)
 
             if df is not None:
-                metrics["rows_extracted"] = len(df) if "extract" in [s["type"] for s in steps] else 0
-                metrics["rows_transformed"] = len(df) if "transform" in [s["type"] for s in steps] else 0
+                metrics["rows_extracted"] = (
+                    len(df) if "extract" in [s["type"] for s in steps] else 0
+                )
+                metrics["rows_transformed"] = (
+                    len(df) if "transform" in [s["type"] for s in steps] else 0
+                )
 
-            duration = (datetime.utcnow() - start_time).total_seconds()
+            duration = (
+                datetime.now(timezone.utc).replace(tzinfo=None) - start_time
+            ).total_seconds()
             metrics["duration_seconds"] = round(duration, 2)
             metrics["status"] = "completed"
 
@@ -242,14 +286,14 @@ class PipelineExecutor:
             job.rows_transformed = metrics["rows_transformed"]
             job.rows_loaded = metrics["rows_loaded"]
             job.duration_seconds = int(duration)
-            job.completed_at = datetime.utcnow()
+            job.completed_at = datetime.now(timezone.utc).replace(tzinfo=None)
             self.db.commit()
 
         except Exception as e:
             metrics["status"] = "failed"
             job.status = "failed"
             job.error_message = str(e)
-            job.completed_at = datetime.utcnow()
+            job.completed_at = datetime.now(timezone.utc).replace(tzinfo=None)
             self.db.commit()
             logger.error(f"Pipeline execution failed: {e}")
             raise
@@ -257,7 +301,14 @@ class PipelineExecutor:
         metrics["steps"] = step_records
         return metrics
 
-    def _execute_step(self, job_id: int, config: dict, df: Optional[pd.DataFrame], user_id: Optional[int], pipeline_id: int) -> dict:
+    def _execute_step(
+        self,
+        job_id: int,
+        config: dict,
+        df: pd.DataFrame | None,
+        user_id: int | None,
+        pipeline_id: int,
+    ) -> dict:
         """Execute a single pipeline step."""
         step_type = config["type"]
         step_name = config.get("name", step_type)
@@ -268,13 +319,18 @@ class PipelineExecutor:
             step_type=step_type,
             status="running",
             config=config,
-            started_at=datetime.utcnow(),
+            started_at=datetime.now(timezone.utc).replace(tzinfo=None),
         )
         self.db.add(step)
         self.db.commit()
         self.db.refresh(step)
 
-        result = {"step_name": step_name, "step_type": step_type, "status": "completed", "rows_processed": 0}
+        result = {
+            "step_name": step_name,
+            "step_type": step_type,
+            "status": "completed",
+            "rows_processed": 0,
+        }
 
         try:
             if step_type == "extract":
@@ -320,10 +376,11 @@ class PipelineExecutor:
             elif step_type == "transform":
                 if df is not None:
                     transformations = config.get("transformations", [])
-                    before = len(df)
+                    rows_before = len(df)
                     df = self.transform_engine.apply(df, transformations)
                     result["data"] = df
                     result["rows_processed"] = len(df)
+                    result["rows_before"] = rows_before
                     self.lineage.record(
                         source_name="transformed_data",
                         source_type="transform",
@@ -357,7 +414,9 @@ class PipelineExecutor:
                     mode = LoadMode(mode_str)
                     conflict_columns = config.get("conflict_columns")
                     load_result = self.load_engine.load(df, table, mode, conflict_columns)
-                    result["rows_processed"] = load_result.get("rows_inserted", 0) + load_result.get("rows_updated", 0)
+                    result["rows_processed"] = load_result.get(
+                        "rows_inserted", 0
+                    ) + load_result.get("rows_updated", 0)
                     result["load_result"] = load_result
                     self.lineage.record(
                         source_name=config.get("source_name", "transformed_data"),
@@ -381,7 +440,7 @@ class PipelineExecutor:
                 result["notification"] = config.get("message", "Pipeline step completed")
 
             step.status = "completed"
-            step.completed_at = datetime.utcnow()
+            step.completed_at = datetime.now(timezone.utc).replace(tzinfo=None)
             step.rows_processed = result.get("rows_processed", 0)
             if step.started_at:
                 step.duration_seconds = int((step.completed_at - step.started_at).total_seconds())
@@ -389,7 +448,7 @@ class PipelineExecutor:
         except Exception as e:
             step.status = "failed"
             step.error_message = str(e)
-            step.completed_at = datetime.utcnow()
+            step.completed_at = datetime.now(timezone.utc).replace(tzinfo=None)
             result["status"] = "failed"
             result["error"] = str(e)
             self.db.commit()
@@ -405,13 +464,13 @@ class JobMonitor:
     def __init__(self, db: DbSession):
         self.db = db
 
-    def get_job(self, job_id: int) -> Optional[dict]:
+    def get_job(self, job_id: int) -> dict | None:
         job = self.db.query(ETLJob).filter(ETLJob.id == job_id).first()
         if not job:
             return None
         return self._job_to_dict(job)
 
-    def list_jobs(self, status: Optional[str] = None, limit: int = 50) -> list[dict]:
+    def list_jobs(self, status: str | None = None, limit: int = 50) -> list[dict]:
         query = self.db.query(ETLJob)
         if status:
             query = query.filter(ETLJob.status == status)

@@ -5,16 +5,14 @@ etl_jobs, etl_import_templates, etl_data_profiles, etl_quality_reports,
 etl_data_lineage, etl_schedules, etl_transformations.
 """
 
-from datetime import datetime
-
 from sqlalchemy import (
-    Column,
+    JSON,
+    TIMESTAMP,
     BigInteger,
+    Column,
+    Integer,
     String,
     Text,
-    Integer,
-    TIMESTAMP,
-    JSON,
     func,
 )
 
@@ -23,6 +21,7 @@ from shared.database import Base, BigInt
 
 class ETLPipeline(Base):
     """A reusable ETL pipeline definition."""
+
     __tablename__ = "etl_pipelines"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
@@ -37,6 +36,7 @@ class ETLPipeline(Base):
 
 class ETLPipelineVersion(Base):
     """A specific version of a pipeline with its step configuration."""
+
     __tablename__ = "etl_pipeline_versions"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
@@ -50,13 +50,18 @@ class ETLPipelineVersion(Base):
 
 class ETLPipelineStep(Base):
     """Execution record for a single step within a pipeline run."""
+
     __tablename__ = "etl_pipeline_steps"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
     job_id = Column(BigInteger, nullable=False, index=True)
     step_name = Column(String(100), nullable=False)
-    step_type = Column(String(50), nullable=False)  # extract, validate, clean, transform, load, report, notify
-    status = Column(String(20), nullable=False, default="pending")  # pending, running, completed, failed, skipped
+    step_type = Column(
+        String(50), nullable=False
+    )  # extract, validate, clean, transform, load, report, notify
+    status = Column(
+        String(20), nullable=False, default="pending"
+    )  # pending, running, completed, failed, skipped
     config = Column(JSON, nullable=True)
     started_at = Column(TIMESTAMP, nullable=True)
     completed_at = Column(TIMESTAMP, nullable=True)
@@ -69,13 +74,18 @@ class ETLPipelineStep(Base):
 
 class ETLJob(Base):
     """A single execution of a pipeline (a job/run)."""
+
     __tablename__ = "etl_jobs"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
     pipeline_id = Column(BigInteger, nullable=True, index=True)
     job_type = Column(String(50), nullable=False)  # pipeline, import, export, profile, quality
-    status = Column(String(20), nullable=False, default="queued")  # queued, running, completed, failed, cancelled
-    trigger_type = Column(String(30), nullable=False, default="manual")  # manual, scheduled, api, retry
+    status = Column(
+        String(20), nullable=False, default="queued"
+    )  # queued, running, completed, failed, cancelled
+    trigger_type = Column(
+        String(30), nullable=False, default="manual"
+    )  # manual, scheduled, api, retry
     rows_extracted = Column(Integer, nullable=False, default=0)
     rows_transformed = Column(Integer, nullable=False, default=0)
     rows_loaded = Column(Integer, nullable=False, default=0)
@@ -91,6 +101,7 @@ class ETLJob(Base):
 
 class ETLImportTemplate(Base):
     """Saved import configuration for recurring imports."""
+
     __tablename__ = "etl_import_templates"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
@@ -107,6 +118,7 @@ class ETLImportTemplate(Base):
 
 class ETLDataProfile(Base):
     """Saved data profiling results."""
+
     __tablename__ = "etl_data_profiles"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
@@ -122,6 +134,7 @@ class ETLDataProfile(Base):
 
 class ETLQualityReport(Base):
     """Saved data quality assessment results."""
+
     __tablename__ = "etl_quality_reports"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
@@ -138,6 +151,7 @@ class ETLQualityReport(Base):
 
 class ETLDataLineage(Base):
     """Tracks data flow from source through transformations to destination."""
+
     __tablename__ = "etl_data_lineage"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
@@ -155,6 +169,7 @@ class ETLDataLineage(Base):
 
 class ETLSchedule(Base):
     """Pipeline execution schedules."""
+
     __tablename__ = "etl_schedules"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
@@ -171,12 +186,15 @@ class ETLSchedule(Base):
 
 class ETLTransformation(Base):
     """Reusable transformation templates."""
+
     __tablename__ = "etl_transformations"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
     name = Column(String(200), nullable=False)
     description = Column(Text, nullable=True)
-    transformation_type = Column(String(50), nullable=False)  # rename, drop, filter, fill, convert, calculate, join, split, merge, sort, deduplicate, standardize
+    transformation_type = Column(
+        String(50), nullable=False
+    )  # rename, drop, filter, fill, convert, calculate, join, split, merge, sort, deduplicate, standardize
     config = Column(JSON, nullable=False)  # transformation-specific config
     is_builtin = Column(Integer, nullable=False, default=0)
     created_by = Column(BigInteger, nullable=True)

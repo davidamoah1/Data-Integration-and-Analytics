@@ -5,33 +5,59 @@ No business logic in route handlers.
 """
 
 from datetime import datetime, timedelta, timezone
-from typing import Optional
 
 from sqlalchemy.orm import Session as DbSession
 
 from authentication.models import (
-    User, Role, Permission, Session as UserSession,
-    PasswordReset, LoginHistory, ActivityLog,
+    ActivityLog,
+    LoginHistory,
+    PasswordReset,
+    Permission,
+    Role,
+    User,
+)
+from authentication.models import (
+    Session as UserSession,
 )
 from authentication.repositories import (
-    UserRepository, RoleRepository, PermissionRepository,
-    RolePermissionRepository, UserRoleRepository, SessionRepository,
-    PasswordResetRepository, LoginHistoryRepository,
-    ActivityLogRepository, PasswordHistoryRepository,
+    ActivityLogRepository,
+    LoginHistoryRepository,
+    PasswordHistoryRepository,
+    PasswordResetRepository,
+    PermissionRepository,
+    RolePermissionRepository,
+    RoleRepository,
+    SessionRepository,
+    UserRepository,
+    UserRoleRepository,
 )
 from authentication.schemas import (
-    LoginRequest, UserCreate, UserUpdate, RoleCreate, RoleUpdate,
-    ProfileUpdate, ChangePasswordRequest,
-)
-from shared.security import (
-    hash_password, verify_password, validate_password,
-    create_access_token, create_refresh_token, decode_token,
-    generate_token, PASSWORD_HISTORY_COUNT,
-    JWT_REFRESH_EXPIRE_DAYS,
+    ChangePasswordRequest,
+    LoginRequest,
+    ProfileUpdate,
+    RoleCreate,
+    RoleUpdate,
+    UserCreate,
+    UserUpdate,
 )
 from shared.exceptions import (
-    AuthenticationError, AuthorizationError, NotFoundError,
-    ConflictError, AccountLockedError, ValidationError,
+    AccountLockedError,
+    AuthenticationError,
+    AuthorizationError,
+    ConflictError,
+    NotFoundError,
+    ValidationError,
+)
+from shared.security import (
+    JWT_REFRESH_EXPIRE_DAYS,
+    PASSWORD_HISTORY_COUNT,
+    create_access_token,
+    create_refresh_token,
+    decode_token,
+    generate_token,
+    hash_password,
+    validate_password,
+    verify_password,
 )
 
 
@@ -57,13 +83,15 @@ class AuthService:
         user = self.user_repo.get_by_email(request.email)
 
         # Record login attempt
-        self.login_history_repo.create(LoginHistory(
-            user_id=user.id if user else None,
-            email=request.email,
-            ip_address=ip,
-            user_agent=user_agent,
-            success=False,
-        ))
+        self.login_history_repo.create(
+            LoginHistory(
+                user_id=user.id if user else None,
+                email=request.email,
+                ip_address=ip,
+                user_agent=user_agent,
+                success=False,
+            )
+        )
 
         if not user:
             raise AuthenticationError("Invalid email or password")
@@ -86,13 +114,15 @@ class AuthService:
         self.user_repo.update_last_login(user.id)
 
         # Update login history as success
-        self.login_history_repo.create(LoginHistory(
-            user_id=user.id,
-            email=user.email,
-            ip_address=ip,
-            user_agent=user_agent,
-            success=True,
-        ))
+        self.login_history_repo.create(
+            LoginHistory(
+                user_id=user.id,
+                email=user.email,
+                ip_address=ip,
+                user_agent=user_agent,
+                success=True,
+            )
+        )
 
         # Get roles and permissions
         role_names = self.user_role_repo.get_roles_for_user(user.id)
@@ -102,7 +132,12 @@ class AuthService:
         expire_days = 30 if request.remember_me else JWT_REFRESH_EXPIRE_DAYS
         access_token = create_access_token(
             subject=str(user.id),
-            extra_claims={"email": user.email, "roles": role_names, "org_id": user.organization_id},
+            extra_claims={
+                "email": user.email,
+                "roles": role_names,
+                "permissions": permission_names,
+                "org_id": user.organization_id,
+            },
         )
         refresh_token = create_refresh_token(
             subject=str(user.id),
@@ -121,12 +156,14 @@ class AuthService:
         self.session_repo.create(session)
 
         # Log activity
-        self.activity_repo.create(ActivityLog(
-            user_id=user.id,
-            action="login",
-            ip_address=ip,
-            user_agent=user_agent,
-        ))
+        self.activity_repo.create(
+            ActivityLog(
+                user_id=user.id,
+                action="login",
+                ip_address=ip,
+                user_agent=user_agent,
+            )
+        )
 
         self.db.commit()
 
@@ -149,11 +186,13 @@ class AuthService:
         session = self.session_repo.get_by_token(refresh_token)
         if session:
             self.session_repo.revoke(session.id)
-            self.activity_repo.create(ActivityLog(
-                user_id=session.user_id,
-                action="logout",
-                ip_address=ip,
-            ))
+            self.activity_repo.create(
+                ActivityLog(
+                    user_id=session.user_id,
+                    action="logout",
+                    ip_address=ip,
+                )
+            )
         self.db.commit()
 
     def refresh_tokens(self, refresh_token: str) -> dict:
@@ -161,7 +200,7 @@ class AuthService:
         try:
             payload = decode_token(refresh_token)
         except Exception:
-            raise AuthenticationError("Invalid or expired refresh token")
+            raise AuthenticationError("Invalid or expired refresh token") from None
         if payload.get("type") != "refresh":
             raise AuthenticationError("Invalid token type")
 
@@ -178,7 +217,12 @@ class AuthService:
 
         new_access = create_access_token(
             subject=str(user.id),
-            extra_claims={"email": user.email, "roles": role_names, "org_id": user.organization_id},
+            extra_claims={
+                "email": user.email,
+                "roles": role_names,
+                "permissions": permission_names,
+                "org_id": user.organization_id,
+            },
         )
 
         self.session_repo.update_activity(session.id)
@@ -220,10 +264,12 @@ class AuthService:
         self.session_repo.revoke_all_for_user(user_id)
 
         # Log activity
-        self.activity_repo.create(ActivityLog(
-            user_id=user_id,
-            action="password_change",
-        ))
+        self.activity_repo.create(
+            ActivityLog(
+                user_id=user_id,
+                action="password_change",
+            )
+        )
 
         self.db.commit()
 
@@ -238,16 +284,20 @@ class AuthService:
         reset_repo.invalidate_all_for_user(user.id)
 
         token = generate_token()
-        reset_repo.create(PasswordReset(
-            user_id=user.id,
-            token=token,
-            expires_at=datetime.now(timezone.utc) + timedelta(hours=1),
-        ))
+        reset_repo.create(
+            PasswordReset(
+                user_id=user.id,
+                token=token,
+                expires_at=datetime.now(timezone.utc) + timedelta(hours=1),
+            )
+        )
 
-        self.activity_repo.create(ActivityLog(
-            user_id=user.id,
-            action="password_reset_requested",
-        ))
+        self.activity_repo.create(
+            ActivityLog(
+                user_id=user.id,
+                action="password_reset_requested",
+            )
+        )
 
         self.db.commit()
         return token
@@ -283,20 +333,24 @@ class AuthService:
         reset_repo.mark_used(reset.id)
         self.session_repo.revoke_all_for_user(user.id)
 
-        self.activity_repo.create(ActivityLog(
-            user_id=user.id,
-            action="password_reset_completed",
-        ))
+        self.activity_repo.create(
+            ActivityLog(
+                user_id=user.id,
+                action="password_reset_completed",
+            )
+        )
 
         self.db.commit()
 
     def verify_email(self, user_id: int):
         """Mark email as verified."""
         self.user_repo.verify_email(user_id)
-        self.activity_repo.create(ActivityLog(
-            user_id=user_id,
-            action="email_verified",
-        ))
+        self.activity_repo.create(
+            ActivityLog(
+                user_id=user_id,
+                action="email_verified",
+            )
+        )
         self.db.commit()
 
     def get_profile(self, user_id: int) -> dict:
@@ -332,10 +386,12 @@ class AuthService:
         kwargs = {k: v for k, v in update.model_dump().items() if v is not None}
         if kwargs:
             self.user_repo.update(user_id, **kwargs)
-            self.activity_repo.create(ActivityLog(
-                user_id=user_id,
-                action="profile_updated",
-            ))
+            self.activity_repo.create(
+                ActivityLog(
+                    user_id=user_id,
+                    action="profile_updated",
+                )
+            )
             self.db.commit()
         return self.get_profile(user_id)
 
@@ -362,12 +418,14 @@ class AuthService:
         for s in sessions:
             if s.id == session_id:
                 self.session_repo.revoke(s.id)
-                self.activity_repo.create(ActivityLog(
-                    user_id=user_id,
-                    action="session_revoked",
-                    resource_type="session",
-                    resource_id=session_id,
-                ))
+                self.activity_repo.create(
+                    ActivityLog(
+                        user_id=user_id,
+                        action="session_revoked",
+                        resource_type="session",
+                        resource_id=session_id,
+                    )
+                )
                 self.db.commit()
                 return
         raise NotFoundError("Session not found")
@@ -467,12 +525,14 @@ class UserService:
         pwd_history = PasswordHistoryRepository(self.db)
         pwd_history.add(user.id, user.password_hash)
 
-        self.activity_repo.create(ActivityLog(
-            user_id=created_by,
-            action="user_created",
-            resource_type="user",
-            resource_id=user.id,
-        ))
+        self.activity_repo.create(
+            ActivityLog(
+                user_id=created_by,
+                action="user_created",
+                resource_type="user",
+                resource_id=user.id,
+            )
+        )
 
         self.db.commit()
         return self._user_to_dict(user)
@@ -486,12 +546,14 @@ class UserService:
         kwargs = {k: v for k, v in request.model_dump().items() if v is not None}
         if kwargs:
             self.user_repo.update(user_id, **kwargs)
-            self.activity_repo.create(ActivityLog(
-                user_id=updated_by,
-                action="user_updated",
-                resource_type="user",
-                resource_id=user_id,
-            ))
+            self.activity_repo.create(
+                ActivityLog(
+                    user_id=updated_by,
+                    action="user_updated",
+                    resource_type="user",
+                    resource_id=user_id,
+                )
+            )
 
         self.db.commit()
         return self._user_to_dict(self.user_repo.get_by_id(user_id))
@@ -505,12 +567,14 @@ class UserService:
         self.user_repo.soft_delete(user_id)
         self.session_repo = SessionRepository(self.db)
         self.session_repo.revoke_all_for_user(user_id)
-        self.activity_repo.create(ActivityLog(
-            user_id=deleted_by,
-            action="user_deleted",
-            resource_type="user",
-            resource_id=user_id,
-        ))
+        self.activity_repo.create(
+            ActivityLog(
+                user_id=deleted_by,
+                action="user_deleted",
+                resource_type="user",
+                resource_id=user_id,
+            )
+        )
         self.db.commit()
 
     def list_users(self, page: int = 1, page_size: int = 20) -> dict:
@@ -537,12 +601,14 @@ class UserService:
             role_ids.append(role.id)
 
         self.user_role_repo.set_user_roles(user_id, role_ids, assigned_by)
-        self.activity_repo.create(ActivityLog(
-            user_id=assigned_by,
-            action="user_roles_changed",
-            resource_type="user",
-            resource_id=user_id,
-        ))
+        self.activity_repo.create(
+            ActivityLog(
+                user_id=assigned_by,
+                action="user_roles_changed",
+                resource_type="user",
+                resource_id=user_id,
+            )
+        )
         self.db.commit()
 
     def _user_to_dict(self, user: User) -> dict:
@@ -702,6 +768,8 @@ def seed_default_data(db: DbSession):
         ("datasets.view", "View Datasets", "datasets", "View datasets"),
         # Analytics
         ("analytics.view", "View Analytics", "analytics", "View analytics"),
+        ("analytics.manage", "Manage Analytics", "analytics", "Create and manage dashboards and KPIs"),
+        ("analytics.export", "Export Analytics", "analytics", "Export dashboards and analytics data"),
         # AI
         ("ai.use", "Use AI Features", "ai", "Access AI predictions and insights"),
         # Settings
@@ -709,7 +777,12 @@ def seed_default_data(db: DbSession):
         # Audit
         ("audit.view", "View Audit Logs", "audit", "View audit logs"),
         # Notifications
-        ("notifications.manage", "Manage Notifications", "notifications", "Manage notification settings"),
+        (
+            "notifications.manage",
+            "Manage Notifications",
+            "notifications",
+            "Manage notification settings",
+        ),
         # Organization
         ("organizations.manage", "Manage Organizations", "organizations", "Manage organizations"),
         ("departments.manage", "Manage Departments", "departments", "Manage departments"),
@@ -721,46 +794,149 @@ def seed_default_data(db: DbSession):
 
     for name, display, module, desc in permissions_def:
         if not perm_repo.get_by_name(name):
-            perm_repo.create(Permission(
-                name=name, display_name=display, module=module, description=desc,
-            ))
+            perm_repo.create(
+                Permission(
+                    name=name,
+                    display_name=display,
+                    module=module,
+                    description=desc,
+                )
+            )
 
     # Define roles and their permissions
     roles_def = [
-        ("super_admin", "Super Administrator", "Full system access with all permissions", True,
-         [p[0] for p in permissions_def]),
-        ("org_owner", "Organization Owner", "Owner of an organization with full org access", True,
-         [p[0] for p in permissions_def if not p[0].startswith("settings.manage")]),
-        ("org_admin", "Organization Administrator", "Manage users and data within organization", True,
-         ["users.create", "users.read", "users.edit", "users.delete", "users.manage",
-          "roles.read", "pipelines.create", "pipelines.execute", "pipelines.view",
-          "etl.import", "etl.export", "dashboard.view", "dashboard.manage",
-          "reports.generate", "reports.export", "reports.view",
-          "datasets.upload", "datasets.view", "analytics.view",
-          "notifications.manage", "departments.manage", "sessions.manage",
-          "profile.update", "audit.view"]),
-        ("dept_manager", "Department Manager", "Manage department operations", True,
-         ["users.read", "pipelines.view", "etl.import", "etl.export",
-          "dashboard.view", "reports.view", "reports.generate", "reports.export",
-          "datasets.view", "analytics.view", "profile.update"]),
-        ("data_engineer", "Data Engineer", "Build and run ETL pipelines", True,
-         ["pipelines.create", "pipelines.execute", "pipelines.view",
-          "etl.import", "etl.export", "datasets.upload", "datasets.view",
-          "dashboard.view", "profile.update"]),
-        ("data_analyst", "Data Analyst", "Analyze data and create reports", True,
-         ["dashboard.view", "reports.generate", "reports.view",
-          "datasets.view", "analytics.view", "etl.export", "profile.update"]),
-        ("business_analyst", "Business Analyst", "View dashboards and reports", True,
-         ["dashboard.view", "reports.view", "datasets.view",
-          "analytics.view", "profile.update"]),
-        ("executive", "Executive", "View high-level analytics and reports", True,
-         ["dashboard.view", "reports.view", "analytics.view", "profile.update"]),
-        ("dept_officer", "Department Officer", "Department-level operations", True,
-         ["dashboard.view", "reports.view", "datasets.view", "profile.update"]),
-        ("auditor", "Auditor", "View audit logs and security events", True,
-         ["audit.view", "users.read", "profile.update"]),
-        ("viewer", "Viewer", "Read-only access to dashboards", True,
-         ["dashboard.view", "profile.update"]),
+        (
+            "super_admin",
+            "Super Administrator",
+            "Full system access with all permissions",
+            True,
+            [p[0] for p in permissions_def],
+        ),
+        (
+            "org_owner",
+            "Organization Owner",
+            "Owner of an organization with full org access",
+            True,
+            [p[0] for p in permissions_def if not p[0].startswith("settings.manage")],
+        ),
+        (
+            "org_admin",
+            "Organization Administrator",
+            "Manage users and data within organization",
+            True,
+            [
+                "users.create",
+                "users.read",
+                "users.edit",
+                "users.delete",
+                "users.manage",
+                "roles.read",
+                "pipelines.create",
+                "pipelines.execute",
+                "pipelines.view",
+                "etl.import",
+                "etl.export",
+                "dashboard.view",
+                "dashboard.manage",
+                "reports.generate",
+                "reports.export",
+                "reports.view",
+                "datasets.upload",
+                "datasets.view",
+                "analytics.view",
+                "notifications.manage",
+                "departments.manage",
+                "sessions.manage",
+                "profile.update",
+                "audit.view",
+            ],
+        ),
+        (
+            "dept_manager",
+            "Department Manager",
+            "Manage department operations",
+            True,
+            [
+                "users.read",
+                "pipelines.view",
+                "etl.import",
+                "etl.export",
+                "dashboard.view",
+                "reports.view",
+                "reports.generate",
+                "reports.export",
+                "datasets.view",
+                "analytics.view",
+                "profile.update",
+            ],
+        ),
+        (
+            "data_engineer",
+            "Data Engineer",
+            "Build and run ETL pipelines",
+            True,
+            [
+                "pipelines.create",
+                "pipelines.execute",
+                "pipelines.view",
+                "etl.import",
+                "etl.export",
+                "datasets.upload",
+                "datasets.view",
+                "dashboard.view",
+                "profile.update",
+            ],
+        ),
+        (
+            "data_analyst",
+            "Data Analyst",
+            "Analyze data and create reports",
+            True,
+            [
+                "dashboard.view",
+                "reports.generate",
+                "reports.view",
+                "datasets.view",
+                "analytics.view",
+                "etl.export",
+                "profile.update",
+            ],
+        ),
+        (
+            "business_analyst",
+            "Business Analyst",
+            "View dashboards and reports",
+            True,
+            ["dashboard.view", "reports.view", "datasets.view", "analytics.view", "profile.update"],
+        ),
+        (
+            "executive",
+            "Executive",
+            "View high-level analytics and reports",
+            True,
+            ["dashboard.view", "reports.view", "analytics.view", "profile.update"],
+        ),
+        (
+            "dept_officer",
+            "Department Officer",
+            "Department-level operations",
+            True,
+            ["dashboard.view", "reports.view", "datasets.view", "profile.update"],
+        ),
+        (
+            "auditor",
+            "Auditor",
+            "View audit logs and security events",
+            True,
+            ["audit.view", "users.read", "profile.update"],
+        ),
+        (
+            "viewer",
+            "Viewer",
+            "Read-only access to dashboards",
+            True,
+            ["dashboard.view", "profile.update"],
+        ),
     ]
 
     for name, display, desc, is_system, perm_names in roles_def:

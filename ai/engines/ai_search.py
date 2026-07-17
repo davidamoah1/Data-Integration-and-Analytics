@@ -8,17 +8,18 @@ Users can search using natural language queries like:
 """
 
 import json
-from datetime import datetime, timedelta
-from typing import Optional
+
+from sqlalchemy import text
 from sqlalchemy.orm import Session as DbSession
-from sqlalchemy import text, or_
 
 from ai.gateway import AIGateway
-from etl.models import ETLJob, ETLPipeline, ETLDataProfile, ETLQualityReport
 from ai.models import (
-    AIInsight, AIReportGeneration, AIForecast, AIAnomalyAlert,
-    AIConversation,
+    AIAnomalyAlert,
+    AIForecast,
+    AIInsight,
+    AIReportGeneration,
 )
+from etl.models import ETLJob, ETLPipeline
 
 
 class AISearchEngine:
@@ -28,8 +29,9 @@ class AISearchEngine:
         self.db = db
         self.gateway = AIGateway(db)
 
-    def search(self, query: str, search_type: Optional[str] = None,
-               user_id: Optional[int] = None) -> dict:
+    def search(
+        self, query: str, search_type: str | None = None, user_id: int | None = None
+    ) -> dict:
         """Search the platform using natural language.
 
         Returns:
@@ -98,13 +100,15 @@ class AISearchEngine:
             for job in jobs:
                 searchable = f"{job.job_type} {job.status} {job.trigger_type} {job.error_message or ''}".lower()
                 if any(word in searchable for word in query_lower.split()):
-                    results.append({
-                        "type": "etl_job",
-                        "id": job.id,
-                        "title": f"ETL Job #{job.id} - {job.status}",
-                        "description": f"Type: {job.job_type}, Status: {job.status}, Rows: {job.rows_extracted}",
-                        "created_at": str(job.created_at) if job.created_at else None,
-                    })
+                    results.append(
+                        {
+                            "type": "etl_job",
+                            "id": job.id,
+                            "title": f"ETL Job #{job.id} - {job.status}",
+                            "description": f"Type: {job.job_type}, Status: {job.status}, Rows: {job.rows_extracted}",
+                            "created_at": str(job.created_at) if job.created_at else None,
+                        }
+                    )
         except Exception:
             pass
         return results
@@ -115,14 +119,19 @@ class AISearchEngine:
         try:
             pipelines = self.db.query(ETLPipeline).limit(50).all()
             for p in pipelines:
-                if query.lower() in (p.name or "").lower() or query.lower() in (p.description or "").lower():
-                    results.append({
-                        "type": "pipeline",
-                        "id": p.id,
-                        "title": p.name,
-                        "description": p.description or "",
-                        "status": p.status,
-                    })
+                if (
+                    query.lower() in (p.name or "").lower()
+                    or query.lower() in (p.description or "").lower()
+                ):
+                    results.append(
+                        {
+                            "type": "pipeline",
+                            "id": p.id,
+                            "title": p.name,
+                            "description": p.description or "",
+                            "status": p.status,
+                        }
+                    )
         except Exception:
             pass
         return results
@@ -131,19 +140,24 @@ class AISearchEngine:
         """Search AI-generated reports."""
         results = []
         try:
-            reports = self.db.query(AIReportGeneration).order_by(
-                AIReportGeneration.created_at.desc()
-            ).limit(50).all()
+            reports = (
+                self.db.query(AIReportGeneration)
+                .order_by(AIReportGeneration.created_at.desc())
+                .limit(50)
+                .all()
+            )
             for r in reports:
                 searchable = f"{r.title} {r.report_type} {r.summary or ''}".lower()
                 if any(word in searchable for word in query.lower().split()):
-                    results.append({
-                        "type": "report",
-                        "id": r.id,
-                        "title": r.title,
-                        "description": r.summary or r.report_type,
-                        "created_at": str(r.created_at) if r.created_at else None,
-                    })
+                    results.append(
+                        {
+                            "type": "report",
+                            "id": r.id,
+                            "title": r.title,
+                            "description": r.summary or r.report_type,
+                            "created_at": str(r.created_at) if r.created_at else None,
+                        }
+                    )
         except Exception:
             pass
         return results
@@ -152,20 +166,26 @@ class AISearchEngine:
         """Search AI insights."""
         results = []
         try:
-            insights = self.db.query(AIInsight).filter(
-                AIInsight.is_archived == False
-            ).order_by(AIInsight.created_at.desc()).limit(50).all()
+            insights = (
+                self.db.query(AIInsight)
+                .filter(AIInsight.is_archived.is_(False))
+                .order_by(AIInsight.created_at.desc())
+                .limit(50)
+                .all()
+            )
             for i in insights:
                 searchable = f"{i.title} {i.summary}".lower()
                 if any(word in searchable for word in query.lower().split()):
-                    results.append({
-                        "type": "insight",
-                        "id": i.id,
-                        "title": i.title,
-                        "description": i.summary[:200],
-                        "insight_type": i.insight_type,
-                        "created_at": str(i.created_at) if i.created_at else None,
-                    })
+                    results.append(
+                        {
+                            "type": "insight",
+                            "id": i.id,
+                            "title": i.title,
+                            "description": i.summary[:200],
+                            "insight_type": i.insight_type,
+                            "created_at": str(i.created_at) if i.created_at else None,
+                        }
+                    )
         except Exception:
             pass
         return results
@@ -177,16 +197,20 @@ class AISearchEngine:
             # Use AI to generate a SQL query for the search
             query_lower = query.lower()
             if "sales" in query_lower or "revenue" in query_lower or "profit" in query_lower:
-                result = self.db.execute(text(
-                    "SELECT region, SUM(sales) as sales, SUM(profit) as profit "
-                    "FROM sales GROUP BY region ORDER BY sales DESC LIMIT 10"
-                ))
+                result = self.db.execute(
+                    text(
+                        "SELECT region, SUM(sales) as sales, SUM(profit) as profit "
+                        "FROM sales GROUP BY region ORDER BY sales DESC LIMIT 10"
+                    )
+                )
                 for r in result.fetchall():
-                    results.append({
-                        "type": "data",
-                        "title": f"Sales in {r[0]}",
-                        "description": f"Sales: {float(r[1]):.2f}, Profit: {float(r[2]):.2f}",
-                    })
+                    results.append(
+                        {
+                            "type": "data",
+                            "title": f"Sales in {r[0]}",
+                            "description": f"Sales: {float(r[1]):.2f}, Profit: {float(r[2]):.2f}",
+                        }
+                    )
         except Exception:
             pass
         return results
@@ -195,18 +219,23 @@ class AISearchEngine:
         """Search forecasts."""
         results = []
         try:
-            forecasts = self.db.query(AIForecast).order_by(
-                AIForecast.created_at.desc()
-            ).limit(20).all()
+            forecasts = (
+                self.db.query(AIForecast).order_by(AIForecast.created_at.desc()).limit(20).all()
+            )
             for f in forecasts:
-                if query.lower() in f.target_column.lower() or query.lower() in f.forecast_type.lower():
-                    results.append({
-                        "type": "forecast",
-                        "id": f.id,
-                        "title": f"Forecast: {f.target_column}",
-                        "description": f"Method: {f.method}, Horizon: {f.horizon} periods",
-                        "created_at": str(f.created_at) if f.created_at else None,
-                    })
+                if (
+                    query.lower() in f.target_column.lower()
+                    or query.lower() in f.forecast_type.lower()
+                ):
+                    results.append(
+                        {
+                            "type": "forecast",
+                            "id": f.id,
+                            "title": f"Forecast: {f.target_column}",
+                            "description": f"Method: {f.method}, Horizon: {f.horizon} periods",
+                            "created_at": str(f.created_at) if f.created_at else None,
+                        }
+                    )
         except Exception:
             pass
         return results
@@ -215,26 +244,31 @@ class AISearchEngine:
         """Search anomaly alerts."""
         results = []
         try:
-            alerts = self.db.query(AIAnomalyAlert).filter(
-                AIAnomalyAlert.is_resolved == False
-            ).order_by(AIAnomalyAlert.created_at.desc()).limit(50).all()
+            alerts = (
+                self.db.query(AIAnomalyAlert)
+                .filter(AIAnomalyAlert.is_resolved.is_(False))
+                .order_by(AIAnomalyAlert.created_at.desc())
+                .limit(50)
+                .all()
+            )
             for a in alerts:
                 searchable = f"{a.title} {a.description} {a.metric_name or ''}".lower()
                 if any(word in searchable for word in query.lower().split()):
-                    results.append({
-                        "type": "alert",
-                        "id": a.id,
-                        "title": a.title,
-                        "description": a.description,
-                        "severity": a.severity,
-                        "created_at": str(a.created_at) if a.created_at else None,
-                    })
+                    results.append(
+                        {
+                            "type": "alert",
+                            "id": a.id,
+                            "title": a.title,
+                            "description": a.description,
+                            "severity": a.severity,
+                            "created_at": str(a.created_at) if a.created_at else None,
+                        }
+                    )
         except Exception:
             pass
         return results
 
-    def _generate_summary(self, query: str, results: list[dict],
-                          user_id: Optional[int]) -> str:
+    def _generate_summary(self, query: str, results: list[dict], user_id: int | None) -> str:
         """Generate an AI summary of search results."""
         if not results:
             return "No results found."

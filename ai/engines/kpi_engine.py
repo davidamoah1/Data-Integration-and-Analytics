@@ -1,9 +1,9 @@
 """AI KPI Engine — recommends, explains, monitors, and alerts on KPIs."""
 
 import json
-from typing import Optional
-from sqlalchemy.orm import Session as DbSession
+
 from sqlalchemy import text
+from sqlalchemy.orm import Session as DbSession
 
 from ai.gateway import AIGateway
 from ai.models import AIKPIRecommendation
@@ -16,9 +16,9 @@ class KPIEngine:
         self.db = db
         self.gateway = AIGateway(db)
 
-    def recommend_kpis(self, domain: Optional[str] = None,
-                       data_source: Optional[dict] = None,
-                       user_id: Optional[int] = None) -> dict:
+    def recommend_kpis(
+        self, domain: str | None = None, data_source: dict | None = None, user_id: int | None = None
+    ) -> dict:
         """Recommend KPIs based on domain and available data.
 
         Returns:
@@ -73,9 +73,9 @@ class KPIEngine:
         Returns:
             Dict with kpis and alerts.
         """
-        kpis = self.db.query(AIKPIRecommendation).filter(
-            AIKPIRecommendation.is_active == True
-        ).all()
+        kpis = (
+            self.db.query(AIKPIRecommendation).filter(AIKPIRecommendation.is_active.is_(True)).all()
+        )
 
         kpi_results = []
         alerts = []
@@ -100,22 +100,28 @@ class KPIEngine:
                 if kpi.threshold_critical is not None:
                     if current_value <= kpi.threshold_critical:
                         kpi_result["status"] = "critical"
-                        alerts.append({
-                            "kpi": kpi.kpi_name,
-                            "severity": "critical",
-                            "message": f"{kpi.kpi_name} is at critical level: {current_value} {kpi.unit or ''}",
-                            "current_value": current_value,
-                            "threshold": kpi.threshold_critical,
-                        })
-                    elif kpi.threshold_warning is not None and current_value <= kpi.threshold_warning:
+                        alerts.append(
+                            {
+                                "kpi": kpi.kpi_name,
+                                "severity": "critical",
+                                "message": f"{kpi.kpi_name} is at critical level: {current_value} {kpi.unit or ''}",
+                                "current_value": current_value,
+                                "threshold": kpi.threshold_critical,
+                            }
+                        )
+                    elif (
+                        kpi.threshold_warning is not None and current_value <= kpi.threshold_warning
+                    ):
                         kpi_result["status"] = "warning"
-                        alerts.append({
-                            "kpi": kpi.kpi_name,
-                            "severity": "warning",
-                            "message": f"{kpi.kpi_name} is below warning threshold: {current_value} {kpi.unit or ''}",
-                            "current_value": current_value,
-                            "threshold": kpi.threshold_warning,
-                        })
+                        alerts.append(
+                            {
+                                "kpi": kpi.kpi_name,
+                                "severity": "warning",
+                                "message": f"{kpi.kpi_name} is below warning threshold: {current_value} {kpi.unit or ''}",
+                                "current_value": current_value,
+                                "threshold": kpi.threshold_warning,
+                            }
+                        )
                     else:
                         kpi_result["status"] = "healthy"
                 else:
@@ -125,7 +131,7 @@ class KPIEngine:
 
         return {"kpis": kpi_results, "alerts": alerts}
 
-    def _calculate_kpi(self, kpi: AIKPIRecommendation) -> Optional[float]:
+    def _calculate_kpi(self, kpi: AIKPIRecommendation) -> float | None:
         """Attempt to calculate a KPI's current value from platform data."""
         try:
             # Map common KPI names to queries
@@ -148,9 +154,11 @@ class KPIEngine:
                 return float(result.fetchone()[0])
 
             if "margin" in name_lower:
-                result = self.db.execute(text(
-                    "SELECT CASE WHEN SUM(sales) > 0 THEN SUM(profit)/SUM(sales)*100 ELSE 0 END FROM sales"
-                ))
+                result = self.db.execute(
+                    text(
+                        "SELECT CASE WHEN SUM(sales) > 0 THEN SUM(profit)/SUM(sales)*100 ELSE 0 END FROM sales"
+                    )
+                )
                 return float(result.fetchone()[0])
 
             return None
@@ -161,21 +169,36 @@ class KPIEngine:
         """Gather platform data context for KPI recommendations."""
         context = {}
         try:
-            result = self.db.execute(text(
-                "SELECT COUNT(*) as records, COALESCE(SUM(sales), 0) as sales, "
-                "COALESCE(SUM(profit), 0) as profit, COUNT(DISTINCT region) as regions, "
-                "COUNT(DISTINCT category) as categories FROM sales"
-            ))
+            result = self.db.execute(
+                text(
+                    "SELECT COUNT(*) as records, COALESCE(SUM(sales), 0) as sales, "
+                    "COALESCE(SUM(profit), 0) as profit, COUNT(DISTINCT region) as regions, "
+                    "COUNT(DISTINCT category) as categories FROM sales"
+                )
+            )
             row = result.fetchone()
             if row:
                 context["sales_data"] = {
-                    "records": row[0], "total_sales": float(row[1]),
-                    "total_profit": float(row[2]), "regions": row[3], "categories": row[4],
+                    "records": row[0],
+                    "total_sales": float(row[1]),
+                    "total_profit": float(row[2]),
+                    "regions": row[3],
+                    "categories": row[4],
                 }
             context["available_columns"] = [
-                "order_id", "order_date", "ship_date", "customer_name",
-                "segment", "region", "category", "sub_category",
-                "product_name", "sales", "quantity", "discount", "profit",
+                "order_id",
+                "order_date",
+                "ship_date",
+                "customer_name",
+                "segment",
+                "region",
+                "category",
+                "sub_category",
+                "product_name",
+                "sales",
+                "quantity",
+                "discount",
+                "profit",
             ]
         except Exception:
             context["note"] = "Sales data not available"
@@ -184,6 +207,7 @@ class KPIEngine:
     def _extract_recommendations(self, response: str) -> dict:
         """Extract KPI recommendations from AI response."""
         import re
+
         try:
             json_match = re.search(r'\{.*"recommendations".*\}', response, re.DOTALL)
             if json_match:

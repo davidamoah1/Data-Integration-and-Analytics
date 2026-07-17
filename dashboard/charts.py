@@ -46,8 +46,14 @@ def render_revenue_over_time(df: pd.DataFrame):
             .reset_index()
         )
         trend.columns = ["Month", "Revenue"]
-        fig = px.area(trend, x="Month", y="Revenue", color_discrete_sequence=["#667eea"], template="none")
-        fig.update_traces(fill="tozeroy", fillcolor="rgba(102,126,234,0.15)", line=dict(color="#667eea", width=2.5))
+        fig = px.area(
+            trend, x="Month", y="Revenue", color_discrete_sequence=["#667eea"], template="none"
+        )
+        fig.update_traces(
+            fill="tozeroy",
+            fillcolor="rgba(102,126,234,0.15)",
+            line=dict(color="#667eea", width=2.5),
+        )
         fig.update_layout(**CHART_LAYOUT, height=280)
         fig.update_xaxes(tickangle=-35)
         st.plotly_chart(fig, use_container_width=True)
@@ -67,8 +73,13 @@ def render_revenue_by_category(df: pd.DataFrame):
         cat_data = df.groupby("category")["sales"].sum().sort_values(ascending=True).reset_index()
         cat_data.columns = ["Category", "Revenue"]
         fig = px.bar(
-            cat_data, x="Revenue", y="Category", orientation="h",
-            color="Revenue", color_continuous_scale=["#4338ca", "#667eea", "#a78bfa"], template="none",
+            cat_data,
+            x="Revenue",
+            y="Category",
+            orientation="h",
+            color="Revenue",
+            color_continuous_scale=["#4338ca", "#667eea", "#a78bfa"],
+            template="none",
         )
         fig.update_coloraxes(showscale=False)
         fig.update_layout(**CHART_LAYOUT, height=280)
@@ -88,8 +99,18 @@ def render_profit_by_region(df: pd.DataFrame):
     if "region" in df.columns and "profit" in df.columns:
         reg = df.groupby("region")["profit"].sum().reset_index()
         reg.columns = ["Region", "Profit"]
-        fig = px.pie(reg, names="Region", values="Profit", color_discrete_sequence=COLORS, hole=0.45, template="none")
-        fig.update_traces(textfont=dict(color="white", size=12), marker=dict(line=dict(color="rgba(0,0,0,0.3)", width=2)))
+        fig = px.pie(
+            reg,
+            names="Region",
+            values="Profit",
+            color_discrete_sequence=COLORS,
+            hole=0.45,
+            template="none",
+        )
+        fig.update_traces(
+            textfont=dict(color="white", size=12),
+            marker=dict(line=dict(color="rgba(0,0,0,0.3)", width=2)),
+        )
         layout = {k: v for k, v in CHART_LAYOUT.items() if k not in ("xaxis", "yaxis")}
         fig.update_layout(**layout, height=300)
         st.plotly_chart(fig, use_container_width=True)
@@ -107,12 +128,23 @@ def render_top_products(df: pd.DataFrame, n: int = 10):
     """
     _chart_container(f"Top {n} Products by Revenue")
     if "product_name" in df.columns:
-        top = df.groupby("product_name")["sales"].sum().sort_values(ascending=False).head(n).reset_index()
+        top = (
+            df.groupby("product_name")["sales"]
+            .sum()
+            .sort_values(ascending=False)
+            .head(n)
+            .reset_index()
+        )
         top.columns = ["Product", "Revenue"]
         top["Label"] = top["Product"].str[:30] + "..."
         fig = px.bar(
-            top, x="Revenue", y="Label", orientation="h",
-            color="Revenue", color_continuous_scale=["#11998e", "#38ef7d"], template="none",
+            top,
+            x="Revenue",
+            y="Label",
+            orientation="h",
+            color="Revenue",
+            color_continuous_scale=["#11998e", "#38ef7d"],
+            template="none",
         )
         fig.update_coloraxes(showscale=False)
         fig.update_layout(
@@ -142,9 +174,13 @@ def render_sales_vs_profit_scatter(df: pd.DataFrame):
     if "profit" in df.columns and "sales" in df.columns:
         samp = df.dropna(subset=["sales", "profit"]).sample(min(500, len(df)), random_state=42)
         fig = px.scatter(
-            samp, x="sales", y="profit",
+            samp,
+            x="sales",
+            y="profit",
             color="category" if "category" in samp.columns else None,
-            color_discrete_sequence=COLORS, opacity=0.65, template="none",
+            color_discrete_sequence=COLORS,
+            opacity=0.65,
+            template="none",
         )
         fig.update_layout(**CHART_LAYOUT, height=280)
         st.plotly_chart(fig, use_container_width=True)
@@ -161,13 +197,24 @@ def render_profit_margin_by_category(df: pd.DataFrame):
     """
     _chart_container("Profit Margin by Category")
     if "profit" in df.columns and "sales" in df.columns and "category" in df.columns:
-        mdata = df.groupby("category").agg(sales=("sales", "sum"), profit=("profit", "sum")).reset_index()
+        mdata = (
+            df.groupby("category")
+            .agg(sales=("sales", "sum"), profit=("profit", "sum"))
+            .reset_index()
+        )
         mdata["Margin"] = (mdata["profit"] / mdata["sales"] * 100).round(1)
         fig = px.bar(
-            mdata, x="category", y="Margin", color="Margin",
-            color_continuous_scale=["#f5576c", "#ffd200", "#38ef7d"], template="none", text="Margin",
+            mdata,
+            x="category",
+            y="Margin",
+            color="Margin",
+            color_continuous_scale=["#f5576c", "#ffd200", "#38ef7d"],
+            template="none",
+            text="Margin",
         )
-        fig.update_traces(texttemplate="%{text:.1f}%", textposition="outside", textfont=dict(color="white"))
+        fig.update_traces(
+            texttemplate="%{text:.1f}%", textposition="outside", textfont=dict(color="white")
+        )
         fig.update_coloraxes(showscale=False)
         fig.update_layout(**CHART_LAYOUT, height=280)
         st.plotly_chart(fig, use_container_width=True)
@@ -204,7 +251,9 @@ def render_heatmap_sales_region_category(df: pd.DataFrame):
     _close_container()
 
 
-def render_kpi_cards(total_sales: float, total_profit: float, total_orders: int, avg_order: float, margin_pct: float):
+def render_kpi_cards(
+    total_sales: float, total_profit: float, total_orders: int, avg_order: float, margin_pct: float
+):
     """Render the 4 KPI cards.
 
     Args:

@@ -5,17 +5,14 @@ sessions, password_resets, api_tokens, login_history, activity_logs,
 password_history.
 """
 
-from datetime import datetime
-
 from sqlalchemy import (
-    Column,
+    JSON,
+    TIMESTAMP,
     BigInteger,
+    Column,
+    Integer,
     String,
     Text,
-    Integer,
-    TIMESTAMP,
-    JSON,
-    DateTime,
     func,
 )
 

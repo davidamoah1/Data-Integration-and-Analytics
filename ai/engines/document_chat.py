@@ -6,12 +6,12 @@ The AI answers using only the uploaded document unless explicitly instructed oth
 
 import os
 import tempfile
-from typing import Optional
+
 from sqlalchemy.orm import Session as DbSession
 
+from ai.config import AI_DOC_ALLOWED_TYPES, AI_DOC_MAX_SIZE_MB
 from ai.gateway import AIGateway
 from ai.models import AIDocument
-from ai.config import AI_DOC_MAX_SIZE_MB, AI_DOC_ALLOWED_TYPES
 from ai.security import AISecurityLayer
 
 
@@ -23,8 +23,9 @@ class DocumentChatEngine:
         self.gateway = AIGateway(db)
         self.security = AISecurityLayer(db)
 
-    def upload_document(self, filename: str, file_content: bytes,
-                        file_type: str, user_id: Optional[int] = None) -> dict:
+    def upload_document(
+        self, filename: str, file_content: bytes, file_type: str, user_id: int | None = None
+    ) -> dict:
         """Upload and index a document for chat.
 
         Returns:
@@ -36,7 +37,9 @@ class DocumentChatEngine:
 
         # Validate file type
         if file_type.lower() not in AI_DOC_ALLOWED_TYPES:
-            raise ValueError(f"File type '{file_type}' not allowed. Allowed: {', '.join(AI_DOC_ALLOWED_TYPES)}")
+            raise ValueError(
+                f"File type '{file_type}' not allowed. Allowed: {', '.join(AI_DOC_ALLOWED_TYPES)}"
+            )
 
         # Save file
         upload_dir = os.path.join(tempfile.gettempdir(), "ai_documents")
@@ -71,8 +74,7 @@ class DocumentChatEngine:
             "is_indexed": True,
         }
 
-    def chat(self, document_id: int, question: str,
-             user_id: Optional[int] = None) -> dict:
+    def chat(self, document_id: int, question: str, user_id: int | None = None) -> dict:
         """Chat with a document.
 
         Returns:
@@ -84,7 +86,11 @@ class DocumentChatEngine:
             return {"answer": "Document not found.", "citations": None, "confidence_score": None}
 
         if not doc.extracted_text:
-            return {"answer": "Document content could not be extracted.", "citations": None, "confidence_score": None}
+            return {
+                "answer": "Document content could not be extracted.",
+                "citations": None,
+                "confidence_score": None,
+            }
 
         # Validate question
         question = self.security.validate_input(question)
@@ -134,6 +140,7 @@ class DocumentChatEngine:
     def _extract_csv(self, file_path: str, metadata: dict) -> tuple[str, dict]:
         """Extract text from CSV."""
         import pandas as pd
+
         try:
             df = pd.read_csv(file_path)
             metadata["row_count"] = len(df)
@@ -150,11 +157,14 @@ class DocumentChatEngine:
     def _extract_excel(self, file_path: str, metadata: dict) -> tuple[str, dict]:
         """Extract text from Excel."""
         import pandas as pd
+
         try:
             xls = pd.ExcelFile(file_path)
             metadata["sheet_names"] = xls.sheet_names
             metadata["page_count"] = len(xls.sheet_names)
-            text = f"Excel file with {len(xls.sheet_names)} sheets: {', '.join(xls.sheet_names)}\n\n"
+            text = (
+                f"Excel file with {len(xls.sheet_names)} sheets: {', '.join(xls.sheet_names)}\n\n"
+            )
             for sheet in xls.sheet_names[:5]:  # Limit to first 5 sheets
                 df = pd.read_excel(file_path, sheet_name=sheet)
                 text += f"Sheet: {sheet} ({len(df)} rows, {len(df.columns)} columns)\n"
@@ -167,6 +177,7 @@ class DocumentChatEngine:
         """Extract text from PDF."""
         try:
             from PyPDF2 import PdfReader
+
             reader = PdfReader(file_path)
             metadata["page_count"] = len(reader.pages)
             text = ""
@@ -184,15 +195,22 @@ class DocumentChatEngine:
         """Extract text from Word document."""
         try:
             from docx import Document
+
             doc = Document(file_path)
             paragraphs = [p.text for p in doc.paragraphs if p.text.strip()]
             metadata["paragraph_count"] = len(paragraphs)
             text = "\n".join(paragraphs)
             return text, metadata
         except ImportError:
-            return "Word document extraction requires python-docx. Install with: pip install python-docx", metadata
+            return (
+                "Word document extraction requires python-docx. Install with: pip install python-docx",
+                metadata,
+            )
         except ModuleNotFoundError:
-            return "Word document extraction requires python-docx. Install with: pip install python-docx", metadata
+            return (
+                "Word document extraction requires python-docx. Install with: pip install python-docx",
+                metadata,
+            )
         except Exception as e:
             return f"Error reading Word document: {e}", metadata
 
@@ -200,6 +218,7 @@ class DocumentChatEngine:
         """Extract text from PowerPoint."""
         try:
             from pptx import Presentation
+
             prs = Presentation(file_path)
             metadata["page_count"] = len(prs.slides)
             text = ""
@@ -210,23 +229,29 @@ class DocumentChatEngine:
                 text += "\n"
             return text, metadata
         except ImportError:
-            return "PowerPoint extraction requires python-pptx. Install with: pip install python-pptx", metadata
+            return (
+                "PowerPoint extraction requires python-pptx. Install with: pip install python-pptx",
+                metadata,
+            )
         except ModuleNotFoundError:
-            return "PowerPoint extraction requires python-pptx. Install with: pip install python-pptx", metadata
+            return (
+                "PowerPoint extraction requires python-pptx. Install with: pip install python-pptx",
+                metadata,
+            )
         except Exception as e:
             return f"Error reading PowerPoint: {e}", metadata
 
     def _extract_txt(self, file_path: str, metadata: dict) -> tuple[str, dict]:
         """Extract text from plain text file."""
         try:
-            with open(file_path, "r", encoding="utf-8", errors="replace") as f:
+            with open(file_path, encoding="utf-8", errors="replace") as f:
                 text = f.read()
             metadata["character_count"] = len(text)
             return text, metadata
         except Exception as e:
             return f"Error reading text file: {e}", metadata
 
-    def list_documents(self, user_id: Optional[int] = None) -> list[dict]:
+    def list_documents(self, user_id: int | None = None) -> list[dict]:
         """List uploaded documents."""
         query = self.db.query(AIDocument)
         if user_id:

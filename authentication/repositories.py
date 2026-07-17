@@ -5,18 +5,25 @@ users, roles, permissions, sessions, and related entities.
 """
 
 from datetime import datetime, timedelta, timezone
-from typing import Optional
 
-from sqlalchemy import select, update, delete, func
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.orm import Session as DbSession
 
 from authentication.models import (
-    User, Role, Permission, RolePermission, UserRole,
-    Session, PasswordReset, LoginHistory, ActivityLog, PasswordHistory,
+    ActivityLog,
+    LoginHistory,
+    PasswordHistory,
+    PasswordReset,
+    Permission,
+    Role,
+    RolePermission,
+    Session,
+    User,
+    UserRole,
 )
 from shared.security import (
-    ACCOUNT_LOCKOUT_THRESHOLD,
     ACCOUNT_LOCKOUT_DURATION_MINUTES,
+    ACCOUNT_LOCKOUT_THRESHOLD,
 )
 
 
@@ -26,12 +33,12 @@ class UserRepository:
     def __init__(self, db: DbSession):
         self.db = db
 
-    def get_by_id(self, user_id: int) -> Optional[User]:
+    def get_by_id(self, user_id: int) -> User | None:
         return self.db.execute(
             select(User).where(User.id == user_id, User.is_deleted == 0)
         ).scalar_one_or_none()
 
-    def get_by_email(self, email: str) -> Optional[User]:
+    def get_by_email(self, email: str) -> User | None:
         return self.db.execute(
             select(User).where(User.email == email, User.is_deleted == 0)
         ).scalar_one_or_none()
@@ -41,19 +48,17 @@ class UserRepository:
         self.db.flush()
         return user
 
-    def update(self, user_id: int, **kwargs) -> Optional[User]:
+    def update(self, user_id: int, **kwargs) -> User | None:
         kwargs["updated_at"] = datetime.now(timezone.utc)
-        self.db.execute(
-            update(User).where(User.id == user_id).values(**kwargs)
-        )
+        self.db.execute(update(User).where(User.id == user_id).values(**kwargs))
         self.db.flush()
         return self.get_by_id(user_id)
 
     def soft_delete(self, user_id: int):
         self.db.execute(
-            update(User).where(User.id == user_id).values(
-                is_deleted=1, deleted_at=datetime.now(timezone.utc), is_active=0
-            )
+            update(User)
+            .where(User.id == user_id)
+            .values(is_deleted=1, deleted_at=datetime.now(timezone.utc), is_active=0)
         )
         self.db.flush()
 
@@ -62,10 +67,13 @@ class UserRepository:
         total = self.db.execute(
             select(func.count()).select_from(User).where(User.is_deleted == 0)
         ).scalar()
-        users = self.db.execute(
-            select(User).where(User.is_deleted == 0)
-            .offset(offset).limit(page_size)
-        ).scalars().all()
+        users = (
+            self.db.execute(
+                select(User).where(User.is_deleted == 0).offset(offset).limit(page_size)
+            )
+            .scalars()
+            .all()
+        )
         return list(users), total
 
     def increment_failed_login(self, user_id: int) -> int:
@@ -79,7 +87,9 @@ class UserRepository:
                 minutes=ACCOUNT_LOCKOUT_DURATION_MINUTES
             )
         self.db.execute(
-            update(User).where(User.id == user_id).values(
+            update(User)
+            .where(User.id == user_id)
+            .values(
                 failed_login_count=count,
                 locked_until=lock_until,
             )
@@ -89,9 +99,7 @@ class UserRepository:
 
     def reset_failed_logins(self, user_id: int):
         self.db.execute(
-            update(User).where(User.id == user_id).values(
-                failed_login_count=0, locked_until=None
-            )
+            update(User).where(User.id == user_id).values(failed_login_count=0, locked_until=None)
         )
         self.db.flush()
 
@@ -103,17 +111,15 @@ class UserRepository:
 
     def update_last_login(self, user_id: int):
         self.db.execute(
-            update(User).where(User.id == user_id).values(
-                last_login_at=datetime.now(timezone.utc)
-            )
+            update(User).where(User.id == user_id).values(last_login_at=datetime.now(timezone.utc))
         )
         self.db.flush()
 
     def verify_email(self, user_id: int):
         self.db.execute(
-            update(User).where(User.id == user_id).values(
-                email_verified_at=datetime.now(timezone.utc)
-            )
+            update(User)
+            .where(User.id == user_id)
+            .values(email_verified_at=datetime.now(timezone.utc))
         )
         self.db.flush()
 
@@ -124,38 +130,38 @@ class RoleRepository:
     def __init__(self, db: DbSession):
         self.db = db
 
-    def get_by_id(self, role_id: int) -> Optional[Role]:
+    def get_by_id(self, role_id: int) -> Role | None:
         return self.db.execute(
             select(Role).where(Role.id == role_id, Role.is_deleted == 0)
         ).scalar_one_or_none()
 
-    def get_by_name(self, name: str) -> Optional[Role]:
+    def get_by_name(self, name: str) -> Role | None:
         return self.db.execute(
             select(Role).where(Role.name == name, Role.is_deleted == 0)
         ).scalar_one_or_none()
 
     def list_roles(self) -> list[Role]:
-        return list(self.db.execute(
-            select(Role).where(Role.is_deleted == 0).order_by(Role.id)
-        ).scalars().all())
+        return list(
+            self.db.execute(select(Role).where(Role.is_deleted == 0).order_by(Role.id))
+            .scalars()
+            .all()
+        )
 
     def create(self, role: Role) -> Role:
         self.db.add(role)
         self.db.flush()
         return role
 
-    def update(self, role_id: int, **kwargs) -> Optional[Role]:
-        self.db.execute(
-            update(Role).where(Role.id == role_id).values(**kwargs)
-        )
+    def update(self, role_id: int, **kwargs) -> Role | None:
+        self.db.execute(update(Role).where(Role.id == role_id).values(**kwargs))
         self.db.flush()
         return self.get_by_id(role_id)
 
     def soft_delete(self, role_id: int):
         self.db.execute(
-            update(Role).where(Role.id == role_id).values(
-                is_deleted=1, deleted_at=datetime.now(timezone.utc)
-            )
+            update(Role)
+            .where(Role.id == role_id)
+            .values(is_deleted=1, deleted_at=datetime.now(timezone.utc))
         )
         self.db.flush()
 
@@ -166,20 +172,22 @@ class PermissionRepository:
     def __init__(self, db: DbSession):
         self.db = db
 
-    def get_by_name(self, name: str) -> Optional[Permission]:
+    def get_by_name(self, name: str) -> Permission | None:
         return self.db.execute(
             select(Permission).where(Permission.name == name)
         ).scalar_one_or_none()
 
     def list_permissions(self) -> list[Permission]:
-        return list(self.db.execute(
-            select(Permission).order_by(Permission.module, Permission.name)
-        ).scalars().all())
+        return list(
+            self.db.execute(select(Permission).order_by(Permission.module, Permission.name))
+            .scalars()
+            .all()
+        )
 
     def list_by_module(self, module: str) -> list[Permission]:
-        return list(self.db.execute(
-            select(Permission).where(Permission.module == module)
-        ).scalars().all())
+        return list(
+            self.db.execute(select(Permission).where(Permission.module == module)).scalars().all()
+        )
 
     def create(self, permission: Permission) -> Permission:
         self.db.add(permission)
@@ -199,25 +207,27 @@ class RolePermissionRepository:
         self.db = db
 
     def get_permissions_for_role(self, role_id: int) -> list[str]:
-        results = self.db.execute(
-            select(Permission.name)
-            .join(RolePermission, RolePermission.permission_id == Permission.id)
-            .where(RolePermission.role_id == role_id)
-        ).scalars().all()
+        results = (
+            self.db.execute(
+                select(Permission.name)
+                .join(RolePermission, RolePermission.permission_id == Permission.id)
+                .where(RolePermission.role_id == role_id)
+            )
+            .scalars()
+            .all()
+        )
         return list(results)
 
     def set_role_permissions(self, role_id: int, permission_ids: list[int]):
-        self.db.execute(
-            delete(RolePermission).where(RolePermission.role_id == role_id)
-        )
+        self.db.execute(delete(RolePermission).where(RolePermission.role_id == role_id))
         for pid in permission_ids:
             self.db.add(RolePermission(role_id=role_id, permission_id=pid))
         self.db.flush()
 
     def get_permission_ids_by_names(self, names: list[str]) -> list[int]:
-        results = self.db.execute(
-            select(Permission.id).where(Permission.name.in_(names))
-        ).scalars().all()
+        results = (
+            self.db.execute(select(Permission.id).where(Permission.name.in_(names))).scalars().all()
+        )
         return list(results)
 
 
@@ -228,24 +238,28 @@ class UserRoleRepository:
         self.db = db
 
     def get_roles_for_user(self, user_id: int) -> list[str]:
-        results = self.db.execute(
-            select(Role.name)
-            .join(UserRole, UserRole.role_id == Role.id)
-            .where(UserRole.user_id == user_id, Role.is_deleted == 0)
-        ).scalars().all()
+        results = (
+            self.db.execute(
+                select(Role.name)
+                .join(UserRole, UserRole.role_id == Role.id)
+                .where(UserRole.user_id == user_id, Role.is_deleted == 0)
+            )
+            .scalars()
+            .all()
+        )
         return list(results)
 
     def get_role_ids_for_user(self, user_id: int) -> list[int]:
-        results = self.db.execute(
-            select(UserRole.role_id).where(UserRole.user_id == user_id)
-        ).scalars().all()
+        results = (
+            self.db.execute(select(UserRole.role_id).where(UserRole.user_id == user_id))
+            .scalars()
+            .all()
+        )
         return list(results)
 
     def assign_role(self, user_id: int, role_id: int, assigned_by: int = None):
         existing = self.db.execute(
-            select(UserRole).where(
-                UserRole.user_id == user_id, UserRole.role_id == role_id
-            )
+            select(UserRole).where(UserRole.user_id == user_id, UserRole.role_id == role_id)
         ).scalar_one_or_none()
         if not existing:
             self.db.add(UserRole(user_id=user_id, role_id=role_id, assigned_by=assigned_by))
@@ -253,28 +267,28 @@ class UserRoleRepository:
 
     def remove_role(self, user_id: int, role_id: int):
         self.db.execute(
-            delete(UserRole).where(
-                UserRole.user_id == user_id, UserRole.role_id == role_id
-            )
+            delete(UserRole).where(UserRole.user_id == user_id, UserRole.role_id == role_id)
         )
         self.db.flush()
 
     def set_user_roles(self, user_id: int, role_ids: list[int], assigned_by: int = None):
-        self.db.execute(
-            delete(UserRole).where(UserRole.user_id == user_id)
-        )
+        self.db.execute(delete(UserRole).where(UserRole.user_id == user_id))
         for rid in role_ids:
             self.db.add(UserRole(user_id=user_id, role_id=rid, assigned_by=assigned_by))
         self.db.flush()
 
     def get_all_permissions_for_user(self, user_id: int) -> list[str]:
         """Get all permission names for a user via their roles."""
-        results = self.db.execute(
-            select(Permission.name)
-            .join(RolePermission, RolePermission.permission_id == Permission.id)
-            .join(UserRole, UserRole.role_id == RolePermission.role_id)
-            .where(UserRole.user_id == user_id)
-        ).scalars().all()
+        results = (
+            self.db.execute(
+                select(Permission.name)
+                .join(RolePermission, RolePermission.permission_id == Permission.id)
+                .join(UserRole, UserRole.role_id == RolePermission.role_id)
+                .where(UserRole.user_id == user_id)
+            )
+            .scalars()
+            .all()
+        )
         return list(results)
 
 
@@ -289,42 +303,50 @@ class SessionRepository:
         self.db.flush()
         return session
 
-    def get_by_token(self, token: str) -> Optional[Session]:
+    def get_by_token(self, token: str) -> Session | None:
         return self.db.execute(
             select(Session).where(Session.refresh_token == token)
         ).scalar_one_or_none()
 
     def get_active_for_user(self, user_id: int) -> list[Session]:
-        return list(self.db.execute(
-            select(Session).where(
-                Session.user_id == user_id,
-                Session.is_active == 1,
-                Session.revoked_at.is_(None),
-            ).order_by(Session.created_at.desc())
-        ).scalars().all())
+        return list(
+            self.db.execute(
+                select(Session)
+                .where(
+                    Session.user_id == user_id,
+                    Session.is_active == 1,
+                    Session.revoked_at.is_(None),
+                )
+                .order_by(Session.created_at.desc())
+            )
+            .scalars()
+            .all()
+        )
 
     def revoke(self, session_id: int):
         self.db.execute(
-            update(Session).where(Session.id == session_id).values(
-                is_active=0, revoked_at=datetime.now(timezone.utc)
-            )
+            update(Session)
+            .where(Session.id == session_id)
+            .values(is_active=0, revoked_at=datetime.now(timezone.utc))
         )
         self.db.flush()
 
     def revoke_all_for_user(self, user_id: int):
         self.db.execute(
-            update(Session).where(
+            update(Session)
+            .where(
                 Session.user_id == user_id,
                 Session.is_active == 1,
-            ).values(is_active=0, revoked_at=datetime.now(timezone.utc))
+            )
+            .values(is_active=0, revoked_at=datetime.now(timezone.utc))
         )
         self.db.flush()
 
     def update_activity(self, session_id: int):
         self.db.execute(
-            update(Session).where(Session.id == session_id).values(
-                last_activity_at=datetime.now(timezone.utc)
-            )
+            update(Session)
+            .where(Session.id == session_id)
+            .values(last_activity_at=datetime.now(timezone.utc))
         )
         self.db.flush()
 
@@ -340,25 +362,27 @@ class PasswordResetRepository:
         self.db.flush()
         return reset
 
-    def get_by_token(self, token: str) -> Optional[PasswordReset]:
+    def get_by_token(self, token: str) -> PasswordReset | None:
         return self.db.execute(
             select(PasswordReset).where(PasswordReset.token == token)
         ).scalar_one_or_none()
 
     def mark_used(self, reset_id: int):
         self.db.execute(
-            update(PasswordReset).where(PasswordReset.id == reset_id).values(
-                used_at=datetime.now(timezone.utc)
-            )
+            update(PasswordReset)
+            .where(PasswordReset.id == reset_id)
+            .values(used_at=datetime.now(timezone.utc))
         )
         self.db.flush()
 
     def invalidate_all_for_user(self, user_id: int):
         self.db.execute(
-            update(PasswordReset).where(
+            update(PasswordReset)
+            .where(
                 PasswordReset.user_id == user_id,
                 PasswordReset.used_at.is_(None),
-            ).values(used_at=datetime.now(timezone.utc))
+            )
+            .values(used_at=datetime.now(timezone.utc))
         )
         self.db.flush()
 
@@ -375,19 +399,25 @@ class LoginHistoryRepository:
         return record
 
     def list_for_user(self, user_id: int, limit: int = 20) -> list[LoginHistory]:
-        return list(self.db.execute(
-            select(LoginHistory)
-            .where(LoginHistory.user_id == user_id)
-            .order_by(LoginHistory.created_at.desc())
-            .limit(limit)
-        ).scalars().all())
+        return list(
+            self.db.execute(
+                select(LoginHistory)
+                .where(LoginHistory.user_id == user_id)
+                .order_by(LoginHistory.created_at.desc())
+                .limit(limit)
+            )
+            .scalars()
+            .all()
+        )
 
     def list_all(self, limit: int = 50) -> list[LoginHistory]:
-        return list(self.db.execute(
-            select(LoginHistory)
-            .order_by(LoginHistory.created_at.desc())
-            .limit(limit)
-        ).scalars().all())
+        return list(
+            self.db.execute(
+                select(LoginHistory).order_by(LoginHistory.created_at.desc()).limit(limit)
+            )
+            .scalars()
+            .all()
+        )
 
 
 class ActivityLogRepository:
@@ -402,12 +432,16 @@ class ActivityLogRepository:
         return log
 
     def list_for_user(self, user_id: int, limit: int = 50) -> list[ActivityLog]:
-        return list(self.db.execute(
-            select(ActivityLog)
-            .where(ActivityLog.user_id == user_id)
-            .order_by(ActivityLog.created_at.desc())
-            .limit(limit)
-        ).scalars().all())
+        return list(
+            self.db.execute(
+                select(ActivityLog)
+                .where(ActivityLog.user_id == user_id)
+                .order_by(ActivityLog.created_at.desc())
+                .limit(limit)
+            )
+            .scalars()
+            .all()
+        )
 
 
 class PasswordHistoryRepository:
@@ -421,9 +455,13 @@ class PasswordHistoryRepository:
         self.db.flush()
 
     def list_for_user(self, user_id: int, limit: int = 5) -> list[str]:
-        return list(self.db.execute(
-            select(PasswordHistory.password_hash)
-            .where(PasswordHistory.user_id == user_id)
-            .order_by(PasswordHistory.created_at.desc())
-            .limit(limit)
-        ).scalars().all())
+        return list(
+            self.db.execute(
+                select(PasswordHistory.password_hash)
+                .where(PasswordHistory.user_id == user_id)
+                .order_by(PasswordHistory.created_at.desc())
+                .limit(limit)
+            )
+            .scalars()
+            .all()
+        )

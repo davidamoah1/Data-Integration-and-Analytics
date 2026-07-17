@@ -4,8 +4,8 @@ Validates MIME types, file sizes, file structure, and records audit entries.
 """
 
 import os
+
 import magic
-from typing import Optional
 
 MAX_FILE_SIZE = 50 * 1024 * 1024  # 50 MB
 
@@ -22,6 +22,7 @@ ALLOWED_EXTENSIONS = {"csv", "xlsx", "xls", "json", "xml"}
 
 class FileSecurityError(Exception):
     """Raised when a file fails security validation."""
+
     pass
 
 
@@ -31,7 +32,7 @@ class FileValidator:
     def __init__(self, max_size: int = MAX_FILE_SIZE):
         self.max_size = max_size
 
-    def validate(self, file_path: str, expected_type: Optional[str] = None) -> dict:
+    def validate(self, file_path: str, expected_type: str | None = None) -> dict:
         """Validate an uploaded file.
 
         Args:
@@ -100,14 +101,18 @@ class FileValidator:
         """Quick scan of file structure to detect corruption or malicious content."""
         if ext == "csv":
             import pandas as pd
+
             pd.read_csv(file_path, nrows=5)
         elif ext in ("xlsx", "xls"):
             import pandas as pd
+
             pd.read_excel(file_path, nrows=5, engine="openpyxl")
         elif ext == "json":
             import json
-            with open(file_path, "r") as f:
+
+            with open(file_path) as f:
                 json.load(f)
         elif ext == "xml":
             import xml.etree.ElementTree as ET
+
             ET.parse(file_path)

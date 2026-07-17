@@ -9,8 +9,8 @@ Prerequisites:
     - MySQL database must be empty or have the schema created via init_db()
 """
 
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -37,10 +37,7 @@ def get_mysql_url() -> str:
     user = os.getenv("MYSQL_USER", "")
     password = os.getenv("MYSQL_PASSWORD", "")
 
-    return (
-        f"mysql+pymysql://{user}:{password}"
-        f"@{host}:{port}/{db}?charset=utf8mb4"
-    )
+    return f"mysql+pymysql://{user}:{password}" f"@{host}:{port}/{db}?charset=utf8mb4"
 
 
 def migrate():
@@ -56,6 +53,7 @@ def migrate():
 
     logger.info("Migration: Creating schema on MySQL target...")
     from database.db_setup import Base
+
     Base.metadata.create_all(target_engine)
 
     tables = ["sales", "pipeline_runs"]

@@ -1,17 +1,23 @@
 """Report generation for imports, quality, pipeline execution, and transformations."""
 
-from datetime import datetime
-from typing import Optional
-import pandas as pd
+from datetime import datetime, timezone
 
 
 class ReportGenerator:
     """Generates structured reports from ETL operation results."""
 
-    def import_summary(self, source_name: str, source_type: str, row_count: int, column_count: int, quality_score: Optional[int] = None, errors: Optional[list] = None) -> dict:
+    def import_summary(
+        self,
+        source_name: str,
+        source_type: str,
+        row_count: int,
+        column_count: int,
+        quality_score: int | None = None,
+        errors: list | None = None,
+    ) -> dict:
         return {
             "report_type": "import_summary",
-            "generated_at": datetime.utcnow().isoformat(),
+            "generated_at": datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),
             "source_name": source_name,
             "source_type": source_type,
             "row_count": row_count,
@@ -24,7 +30,7 @@ class ReportGenerator:
     def quality_report(self, quality_result: dict) -> dict:
         return {
             "report_type": "quality_report",
-            "generated_at": datetime.utcnow().isoformat(),
+            "generated_at": datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),
             "source_name": quality_result.get("source_name"),
             "overall_score": quality_result.get("overall_score"),
             "checks_passed": quality_result.get("checks_passed"),
@@ -34,10 +40,10 @@ class ReportGenerator:
             "checks": quality_result.get("checks"),
         }
 
-    def pipeline_report(self, job_metrics: dict, step_records: Optional[list] = None) -> dict:
+    def pipeline_report(self, job_metrics: dict, step_records: list | None = None) -> dict:
         return {
             "report_type": "pipeline_report",
-            "generated_at": datetime.utcnow().isoformat(),
+            "generated_at": datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),
             "job_id": job_metrics.get("job_id"),
             "pipeline_id": job_metrics.get("pipeline_id"),
             "status": job_metrics.get("status"),
@@ -60,7 +66,7 @@ class ReportGenerator:
             avg_duration = round(sum(durations) / len(durations), 2)
         return {
             "report_type": "execution_report",
-            "generated_at": datetime.utcnow().isoformat(),
+            "generated_at": datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),
             "total_jobs": total,
             "completed": completed,
             "failed": failed,
@@ -75,17 +81,19 @@ class ReportGenerator:
         failed = sum(1 for v in validation_results if not v.get("passed"))
         return {
             "report_type": "validation_report",
-            "generated_at": datetime.utcnow().isoformat(),
+            "generated_at": datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),
             "total_checks": len(validation_results),
             "passed": passed,
             "failed": failed,
             "results": validation_results,
         }
 
-    def transformation_report(self, transformations: list[dict], before_count: int, after_count: int) -> dict:
+    def transformation_report(
+        self, transformations: list[dict], before_count: int, after_count: int
+    ) -> dict:
         return {
             "report_type": "transformation_report",
-            "generated_at": datetime.utcnow().isoformat(),
+            "generated_at": datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),
             "transformations_applied": len(transformations),
             "transformation_types": [t.get("type") for t in transformations],
             "rows_before": before_count,
@@ -96,10 +104,11 @@ class ReportGenerator:
     def performance_report(self, job_metrics: dict) -> dict:
         return {
             "report_type": "performance_report",
-            "generated_at": datetime.utcnow().isoformat(),
+            "generated_at": datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),
             "duration_seconds": job_metrics.get("duration_seconds"),
             "rows_per_second": round(
-                job_metrics.get("rows_loaded", 0) / max(job_metrics.get("duration_seconds", 1), 1), 2
+                job_metrics.get("rows_loaded", 0) / max(job_metrics.get("duration_seconds", 1), 1),
+                2,
             ),
             "rows_extracted": job_metrics.get("rows_extracted"),
             "rows_transformed": job_metrics.get("rows_transformed"),

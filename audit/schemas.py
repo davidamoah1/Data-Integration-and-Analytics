@@ -1,42 +1,38 @@
 """Pydantic schemas for audit endpoints."""
 
 from datetime import datetime
-from typing import Optional, Any
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class AuditLogResponse(BaseModel):
     id: int
-    user_id: Optional[int] = None
+    user_id: int | None = None
     action: str
-    resource_type: Optional[str] = None
-    resource_id: Optional[int] = None
-    ip_address: Optional[str] = None
+    resource_type: str | None = None
+    resource_id: int | None = None
+    ip_address: str | None = None
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class SecurityLogResponse(BaseModel):
     id: int
-    user_id: Optional[int] = None
+    user_id: int | None = None
     event_type: str
-    ip_address: Optional[str] = None
+    ip_address: str | None = None
     severity: str
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class SystemLogResponse(BaseModel):
     id: int
     log_level: str
     message: str
-    module: Optional[str] = None
+    module: str | None = None
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

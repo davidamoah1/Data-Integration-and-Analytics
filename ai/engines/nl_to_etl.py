@@ -7,7 +7,7 @@ into concrete ETL pipeline step configurations.
 
 import json
 import re
-from typing import Optional
+
 from sqlalchemy.orm import Session as DbSession
 
 from ai.gateway import AIGateway
@@ -20,9 +20,13 @@ class NLToETLEngine:
         self.db = db
         self.gateway = AIGateway(db)
 
-    def generate_pipeline(self, instruction: str, file_path: Optional[str] = None,
-                          target_table: Optional[str] = None,
-                          user_id: Optional[int] = None) -> dict:
+    def generate_pipeline(
+        self,
+        instruction: str,
+        file_path: str | None = None,
+        target_table: str | None = None,
+        user_id: int | None = None,
+    ) -> dict:
         """Generate ETL pipeline steps from natural language instruction.
 
         Returns:
@@ -59,7 +63,7 @@ class NLToETLEngine:
             "estimated_duration": duration,
         }
 
-    def _extract_pipeline(self, response: str) -> tuple[list[dict], str, Optional[str]]:
+    def _extract_pipeline(self, response: str) -> tuple[list[dict], str, str | None]:
         """Extract pipeline steps from AI response."""
         # Try JSON extraction
         try:
@@ -75,12 +79,16 @@ class NLToETLEngine:
             pass
 
         # Fall back to code block extraction
-        code_match = re.search(r'```(?:json)?\s*(.*?)\s*```', response, re.DOTALL)
+        code_match = re.search(r"```(?:json)?\s*(.*?)\s*```", response, re.DOTALL)
         if code_match:
             try:
                 data = json.loads(code_match.group(1))
                 if "pipeline_steps" in data:
-                    return data["pipeline_steps"], data.get("explanation", ""), data.get("estimated_duration")
+                    return (
+                        data["pipeline_steps"],
+                        data.get("explanation", ""),
+                        data.get("estimated_duration"),
+                    )
             except json.JSONDecodeError:
                 pass
 

@@ -5,7 +5,6 @@ the database or uploaded files, with caching support.
 """
 
 from datetime import date
-from typing import Optional
 
 import pandas as pd
 
@@ -21,7 +20,7 @@ class DashboardDataService:
     2. File mode — processes uploaded CSV/Excel files (existing behavior)
     """
 
-    def __init__(self, sales_repo: Optional[SalesRepository] = None):
+    def __init__(self, sales_repo: SalesRepository | None = None):
         """Initialize the dashboard data service.
 
         Args:
@@ -31,10 +30,10 @@ class DashboardDataService:
 
     def load_from_database(
         self,
-        region: Optional[str] = None,
-        category: Optional[str] = None,
-        date_from: Optional[date] = None,
-        date_to: Optional[date] = None,
+        region: str | None = None,
+        category: str | None = None,
+        date_from: date | None = None,
+        date_to: date | None = None,
     ) -> pd.DataFrame:
         """Load sales data from the database with optional filters.
 
@@ -47,19 +46,21 @@ class DashboardDataService:
         Returns:
             DataFrame of sales records matching the filters.
         """
-        logger.info(f"DashboardDataService: Loading from database with filters "
-                     f"region={region}, category={category}, "
-                     f"date_from={date_from}, date_to={date_to}")
+        logger.info(
+            f"DashboardDataService: Loading from database with filters "
+            f"region={region}, category={category}, "
+            f"date_from={date_from}, date_to={date_to}"
+        )
         return self.sales_repo.get_sales_filtered(
             region=region, category=category, date_from=date_from, date_to=date_to
         )
 
     def get_kpis_from_database(
         self,
-        region: Optional[str] = None,
-        category: Optional[str] = None,
-        date_from: Optional[date] = None,
-        date_to: Optional[date] = None,
+        region: str | None = None,
+        category: str | None = None,
+        date_from: date | None = None,
+        date_to: date | None = None,
     ) -> dict:
         """Get aggregate KPIs from the database.
 

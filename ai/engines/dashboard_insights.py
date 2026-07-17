@@ -9,9 +9,9 @@ Every dashboard should include:
 """
 
 import json
-from typing import Optional
-from sqlalchemy.orm import Session as DbSession
+
 from sqlalchemy import text
+from sqlalchemy.orm import Session as DbSession
 
 from ai.gateway import AIGateway
 from ai.models import AIInsight
@@ -24,10 +24,13 @@ class DashboardInsightsEngine:
         self.db = db
         self.gateway = AIGateway(db)
 
-    def generate_insights(self, dashboard_id: Optional[str] = None,
-                          data_source: Optional[dict] = None,
-                          context: Optional[dict] = None,
-                          user_id: Optional[int] = None) -> dict:
+    def generate_insights(
+        self,
+        dashboard_id: str | None = None,
+        data_source: dict | None = None,
+        context: dict | None = None,
+        user_id: int | None = None,
+    ) -> dict:
         """Generate insights for a dashboard.
 
         Returns:
@@ -70,44 +73,51 @@ class DashboardInsightsEngine:
 
         return parsed
 
-    def _gather_data(self, data_source: Optional[dict]) -> dict:
+    def _gather_data(self, data_source: dict | None) -> dict:
         """Gather data for insight generation."""
         data = {}
         try:
-            result = self.db.execute(text(
-                "SELECT region, SUM(sales) as sales, SUM(profit) as profit "
-                "FROM sales GROUP BY region ORDER BY sales DESC"
-            ))
+            result = self.db.execute(
+                text(
+                    "SELECT region, SUM(sales) as sales, SUM(profit) as profit "
+                    "FROM sales GROUP BY region ORDER BY sales DESC"
+                )
+            )
             data["by_region"] = [
                 {"region": r[0], "sales": float(r[1]), "profit": float(r[2])}
                 for r in result.fetchall()
             ]
 
-            result = self.db.execute(text(
-                "SELECT category, SUM(sales) as sales FROM sales GROUP BY category ORDER BY sales DESC"
-            ))
+            result = self.db.execute(
+                text(
+                    "SELECT category, SUM(sales) as sales FROM sales GROUP BY category ORDER BY sales DESC"
+                )
+            )
             data["by_category"] = [
-                {"category": r[0], "sales": float(r[1])}
-                for r in result.fetchall()
+                {"category": r[0], "sales": float(r[1])} for r in result.fetchall()
             ]
 
-            result = self.db.execute(text(
-                "SELECT strftime('%Y-%m', order_date) as month, SUM(sales) as sales "
-                "FROM sales WHERE order_date IS NOT NULL "
-                "GROUP BY month ORDER BY month DESC LIMIT 12"
-            ))
+            result = self.db.execute(
+                text(
+                    "SELECT strftime('%Y-%m', order_date) as month, SUM(sales) as sales "
+                    "FROM sales WHERE order_date IS NOT NULL "
+                    "GROUP BY month ORDER BY month DESC LIMIT 12"
+                )
+            )
             data["monthly_trend"] = [
-                {"month": r[0], "sales": float(r[1])}
-                for r in result.fetchall()
+                {"month": r[0], "sales": float(r[1])} for r in result.fetchall()
             ]
 
-            result = self.db.execute(text(
-                "SELECT COUNT(*) as total, COALESCE(SUM(sales), 0) as sales, "
-                "COALESCE(SUM(profit), 0) as profit FROM sales"
-            ))
+            result = self.db.execute(
+                text(
+                    "SELECT COUNT(*) as total, COALESCE(SUM(sales), 0) as sales, "
+                    "COALESCE(SUM(profit), 0) as profit FROM sales"
+                )
+            )
             row = result.fetchone()
             data["summary"] = {
-                "total_records": row[0], "total_sales": float(row[1]),
+                "total_records": row[0],
+                "total_sales": float(row[1]),
                 "total_profit": float(row[2]),
             }
         except Exception:
@@ -121,6 +131,7 @@ class DashboardInsightsEngine:
     def _extract_insights(self, response: str) -> dict:
         """Extract insights from AI response."""
         import re
+
         try:
             json_match = re.search(r'\{.*"key_findings".*\}', response, re.DOTALL)
             if json_match:

@@ -5,21 +5,20 @@ Credentials are loaded from environment variables or a config file.
 For production, replace with a proper identity provider (Auth0, Cognito, etc.).
 """
 
-import os
 import hashlib
-import secrets
+import os
 
 import streamlit as st
 
 # Default credentials (override via env vars in production)
 _DEFAULT_USERS = {
     "admin": {
-        "password_hash": hashlib.sha256("admin123".encode()).hexdigest(),
+        "password_hash": hashlib.sha256(b"admin123").hexdigest(),
         "role": "admin",
         "name": "Administrator",
     },
     "viewer": {
-        "password_hash": hashlib.sha256("viewer123".encode()).hexdigest(),
+        "password_hash": hashlib.sha256(b"viewer123").hexdigest(),
         "role": "viewer",
         "name": "Viewer",
     },
@@ -96,12 +95,15 @@ def require_auth():
     if is_authenticated():
         return True
 
-    st.markdown("""
+    st.markdown(
+        """
     <div class="login-container">
         <div class="login-title">DataFlow</div>
         <div class="login-subtitle">Sign in to access the dashboard</div>
     </div>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
     users = _load_users()
 
@@ -121,12 +123,15 @@ def require_auth():
             else:
                 st.error("Invalid username or password.")
 
-    st.markdown("""
+    st.markdown(
+        """
     <div style="text-align:center;color:rgba(255,255,255,0.3);font-size:0.78rem;margin-top:20px;">
         Default credentials — admin/admin123, viewer/viewer123<br>
         Set AUTH_ADMIN_PASSWORD and AUTH_VIEWER_PASSWORD env vars for production.
     </div>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
     return False
 

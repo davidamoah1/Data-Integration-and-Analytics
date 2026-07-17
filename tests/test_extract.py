@@ -1,7 +1,8 @@
-import pytest
-import pandas as pd
 import os
 import sys
+
+import pandas as pd
+import pytest
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -14,6 +15,7 @@ def test_extract_returns_dataframe(tmp_path, monkeypatch):
     )
 
     from etl import extract
+
     monkeypatch.setattr(extract, "RAW_DATA_PATH", str(dummy_csv))
 
     df = extract.extract_data()
@@ -24,6 +26,7 @@ def test_extract_returns_dataframe(tmp_path, monkeypatch):
 
 def test_extract_raises_if_file_missing(monkeypatch):
     from etl import extract
+
     monkeypatch.setattr(extract, "RAW_DATA_PATH", "/nonexistent/path.csv")
 
     with pytest.raises(FileNotFoundError):

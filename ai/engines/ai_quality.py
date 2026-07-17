@@ -5,13 +5,13 @@ to generate recommendations, risk assessments, and fix suggestions.
 """
 
 import json
-from typing import Optional
+
 from sqlalchemy.orm import Session as DbSession
 
 from ai.gateway import AIGateway
 from etl.connectors.connectors import get_connector
-from etl.quality import DataQualityEngine
 from etl.profiling import DataProfiler
+from etl.quality import DataQualityEngine
 
 
 class AIDataQualityEngine:
@@ -23,9 +23,14 @@ class AIDataQualityEngine:
         self.quality_engine = DataQualityEngine()
         self.profiler = DataProfiler()
 
-    def analyze(self, source_type: str, source_config: dict,
-                auto_fix: bool = False, user_id: Optional[int] = None,
-                permissions: Optional[list[str]] = None) -> dict:
+    def analyze(
+        self,
+        source_type: str,
+        source_config: dict,
+        auto_fix: bool = False,
+        user_id: int | None = None,
+        permissions: list[str] | None = None,
+    ) -> dict:
         """Analyze data quality with AI enhancement.
 
         Returns:
@@ -44,26 +49,38 @@ class AIDataQualityEngine:
         profile = self.profiler.profile(df, source_name=source_config.get("file_path", source_type))
 
         # Use AI to enhance the analysis
-        quality_summary = json.dumps({
-            "overall_score": quality_result["overall_score"],
-            "checks_passed": quality_result["checks_passed"],
-            "checks_failed": quality_result["checks_failed"],
-            "issues": [
-                {"check": c["check"], "passed": c["passed"], "message": c["message"],
-                 "severity": c["severity"], "affected_rows": c["affected_rows"]}
-                for c in quality_result["checks"] if not c["passed"]
-            ],
-            "profile": {
-                "row_count": profile["row_count"],
-                "column_count": profile["column_count"],
-                "duplicate_rows": profile["duplicate_rows"],
-                "columns": [
-                    {"name": name, "null_percentage": info.get("null_percentage", 0),
-                     "unique_count": info.get("unique_count", 0)}
-                    for name, info in profile.get("columns", {}).items()
+        quality_summary = json.dumps(
+            {
+                "overall_score": quality_result["overall_score"],
+                "checks_passed": quality_result["checks_passed"],
+                "checks_failed": quality_result["checks_failed"],
+                "issues": [
+                    {
+                        "check": c["check"],
+                        "passed": c["passed"],
+                        "message": c["message"],
+                        "severity": c["severity"],
+                        "affected_rows": c["affected_rows"],
+                    }
+                    for c in quality_result["checks"]
+                    if not c["passed"]
                 ],
+                "profile": {
+                    "row_count": profile["row_count"],
+                    "column_count": profile["column_count"],
+                    "duplicate_rows": profile["duplicate_rows"],
+                    "columns": [
+                        {
+                            "name": name,
+                            "null_percentage": info.get("null_percentage", 0),
+                            "unique_count": info.get("unique_count", 0),
+                        }
+                        for name, info in profile.get("columns", {}).items()
+                    ],
+                },
             },
-        }, default=str)
+            default=str,
+        )
 
         result = self.gateway.chat(
             user_message=(
@@ -93,17 +110,21 @@ class AIDataQualityEngine:
                     before_result = check.run(df)
                     after_result = check.run(fixed_df)
                     if not before_result["passed"] and after_result["passed"]:
-                        fixes.append({
-                            "check": check.name,
-                            "description": f"Fixed: {before_result['message']}",
-                        })
+                        fixes.append(
+                            {
+                                "check": check.name,
+                                "description": f"Fixed: {before_result['message']}",
+                            }
+                        )
             auto_fixes_applied = fixes
 
         return {
             "quality_score": quality_result["overall_score"],
             "risk_level": ai_analysis.get("risk_level", "medium"),
             "issues_found": ai_analysis.get("issues_found", []),
-            "recommendations": ai_analysis.get("recommendations", quality_result.get("recommendations", [])),
+            "recommendations": ai_analysis.get(
+                "recommendations", quality_result.get("recommendations", [])
+            ),
             "fix_suggestions": ai_analysis.get("fix_suggestions", []),
             "auto_fixes_applied": auto_fixes_applied if auto_fix else None,
         }
@@ -111,6 +132,7 @@ class AIDataQualityEngine:
     def _extract_analysis(self, response: str) -> dict:
         """Extract AI analysis from response."""
         import re
+
         try:
             json_match = re.search(r'\{.*"risk_level".*\}', response, re.DOTALL)
             if json_match:

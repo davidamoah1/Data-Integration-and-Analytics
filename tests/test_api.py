@@ -16,23 +16,29 @@ def client(tmp_path, monkeypatch):
     db_url = f"sqlite:///{db_path}"
 
     import config
+
     monkeypatch.setattr(config, "DB_URL", db_url)
     monkeypatch.setattr(config, "DB_TYPE", "sqlite")
 
     # Patch DB_URL in all modules that imported it at module level
     from database import repositories
+
     monkeypatch.setattr(repositories, "DB_URL", db_url)
     from database import db_setup
+
     monkeypatch.setattr(db_setup, "DB_URL", db_url)
 
     monkeypatch.setenv("API_KEY", "test-api-key")
 
-    from database.db_setup import Base
     from sqlalchemy import create_engine
+
+    from database.db_setup import Base
+
     engine = create_engine(db_url)
     Base.metadata.create_all(engine)
 
     from api.main import app
+
     return TestClient(app)
 
 
@@ -44,7 +50,7 @@ def test_root_endpoint(client):
 
 
 def test_health_check(client):
-    response = client.get("/health", headers={"X-API-Key": "test-api-key"})
+    response = client.get("/health")
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "healthy"
@@ -52,14 +58,22 @@ def test_health_check(client):
     assert "record_count" in data
 
 
-def test_health_check_no_api_key(client):
-    response = client.get("/health")
-    assert response.status_code == 401
-
-
-def test_health_check_wrong_api_key(client):
+def test_health_check_ignores_api_key(client):
     response = client.get("/health", headers={"X-API-Key": "wrong-key"})
-    assert response.status_code == 401
+    assert response.status_code == 200
+
+
+def test_health_check_returns_request_id(client):
+    response = client.get("/health")
+    assert response.status_code == 200
+    assert "X-Request-ID" in response.headers
+    assert response.headers["X-Request-ID"]
+
+
+def test_health_check_preserves_correlation_id(client):
+    response = client.get("/health", headers={"X-Correlation-ID": "test-corr-123"})
+    assert response.status_code == 200
+    assert response.headers.get("X-Correlation-ID") == "test-corr-123"
 
 
 def test_get_sales_empty_db(client):

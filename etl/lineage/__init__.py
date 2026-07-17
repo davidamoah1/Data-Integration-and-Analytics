@@ -1,7 +1,5 @@
 """Data lineage tracking — records data flow from source through transformations to destination."""
 
-from datetime import datetime
-from typing import Optional
 from sqlalchemy.orm import Session as DbSession
 
 from etl.models import ETLDataLineage
@@ -17,13 +15,13 @@ class LineageTracker:
         self,
         source_name: str,
         source_type: str,
-        transformation: Optional[str] = None,
-        destination_name: Optional[str] = None,
-        destination_type: Optional[str] = None,
-        job_id: Optional[int] = None,
-        pipeline_id: Optional[int] = None,
-        user_id: Optional[int] = None,
-        extra_data: Optional[dict] = None,
+        transformation: str | None = None,
+        destination_name: str | None = None,
+        destination_type: str | None = None,
+        job_id: int | None = None,
+        pipeline_id: int | None = None,
+        user_id: int | None = None,
+        extra_data: dict | None = None,
     ):
         """Record a single lineage entry."""
         entry = ETLDataLineage(
@@ -41,7 +39,9 @@ class LineageTracker:
         self.db.commit()
         return entry
 
-    def get_lineage(self, source_name: Optional[str] = None, job_id: Optional[int] = None, limit: int = 100) -> list[dict]:
+    def get_lineage(
+        self, source_name: str | None = None, job_id: int | None = None, limit: int = 100
+    ) -> list[dict]:
         """Retrieve lineage entries."""
         query = self.db.query(ETLDataLineage)
         if source_name:
@@ -66,7 +66,7 @@ class LineageTracker:
             for e in entries
         ]
 
-    def build_graph(self, job_id: Optional[int] = None) -> dict:
+    def build_graph(self, job_id: int | None = None) -> dict:
         """Build a lineage graph (nodes + edges) for visualization."""
         entries = self.get_lineage(job_id=job_id, limit=1000)
         nodes = set()
@@ -75,11 +75,13 @@ class LineageTracker:
             nodes.add((e["source_name"], e["source_type"]))
             if e["destination_name"]:
                 nodes.add((e["destination_name"], e["destination_type"]))
-                edges.append({
-                    "source": e["source_name"],
-                    "target": e["destination_name"],
-                    "transformation": e["transformation"],
-                })
+                edges.append(
+                    {
+                        "source": e["source_name"],
+                        "target": e["destination_name"],
+                        "transformation": e["transformation"],
+                    }
+                )
         return {
             "nodes": [{"name": n[0], "type": n[1]} for n in nodes],
             "edges": edges,

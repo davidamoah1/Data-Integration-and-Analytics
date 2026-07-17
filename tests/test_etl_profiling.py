@@ -1,20 +1,21 @@
 """Tests for data profiling engine."""
 
-import pytest
 import pandas as pd
-import numpy as np
+import pytest
 
 from etl.profiling import DataProfiler
 
 
 @pytest.fixture
 def sample_df():
-    return pd.DataFrame({
-        "name": ["Alice", "Bob", "Carol", "Alice", None],
-        "age": [30, 25, 35, 30, None],
-        "salary": [50000.0, 60000.0, 70000.0, 50000.0, 1000000.0],
-        "email": ["a@test.com", "b@test.com", "c@test.com", "a@test.com", None],
-    })
+    return pd.DataFrame(
+        {
+            "name": ["Alice", "Bob", "Carol", "Alice", None],
+            "age": [30, 25, 35, 30, None],
+            "salary": [50000.0, 60000.0, 70000.0, 50000.0, 1000000.0],
+            "email": ["a@test.com", "b@test.com", "c@test.com", "a@test.com", None],
+        }
+    )
 
 
 class TestDataProfiler:

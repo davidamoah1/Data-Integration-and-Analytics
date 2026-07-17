@@ -1,8 +1,5 @@
 """Tests for audit log endpoints."""
 
-import pytest
-from tests.conftest import client, auth_headers
-
 
 class TestAuditLogs:
     """Tests for audit log retrieval."""
@@ -10,10 +7,13 @@ class TestAuditLogs:
     def test_list_audit_logs(self, client, auth_headers):
         """Test listing audit logs (should have entries from login activity)."""
         # Login to generate audit entries
-        client.post("/auth/login", json={
-            "email": "admin@dataflow.io",
-            "password": "Admin@12345",
-        })
+        client.post(
+            "/auth/login",
+            json={
+                "email": "admin@dataflow.io",
+                "password": "Admin@12345",
+            },
+        )
 
         response = client.get("/audit/logs", headers=auth_headers)
         assert response.status_code == 200
@@ -47,17 +47,24 @@ class TestAuditLogs:
     def test_audit_requires_permission(self, client, auth_headers):
         """Test that audit endpoints require audit.view permission."""
         # Create a viewer user (no audit.view permission)
-        client.post("/users", json={
-            "email": "viewer2@test.com",
-            "password": "TestUser@123",
-            "full_name": "Viewer Two",
-            "role_names": ["viewer"],
-        }, headers=auth_headers)
+        client.post(
+            "/users",
+            json={
+                "email": "viewer2@test.com",
+                "password": "TestUser@123",
+                "full_name": "Viewer Two",
+                "role_names": ["viewer"],
+            },
+            headers=auth_headers,
+        )
 
-        login_resp = client.post("/auth/login", json={
-            "email": "viewer2@test.com",
-            "password": "TestUser@123",
-        })
+        login_resp = client.post(
+            "/auth/login",
+            json={
+                "email": "viewer2@test.com",
+                "password": "TestUser@123",
+            },
+        )
         viewer_token = login_resp.json()["data"]["access_token"]
         viewer_headers = {"Authorization": f"Bearer {viewer_token}"}
 

@@ -12,15 +12,14 @@ Methods:
 """
 
 import json
+
 import numpy as np
 import pandas as pd
-from datetime import datetime, timedelta
-from typing import Optional
 from sqlalchemy.orm import Session as DbSession
 
+from ai.config import AI_FORECAST_CONFIDENCE_LEVEL
 from ai.gateway import AIGateway
 from ai.models import AIForecast
-from ai.config import AI_FORECAST_CONFIDENCE_LEVEL, AI_FORECAST_MAX_HORIZON
 from etl.connectors.connectors import get_connector
 
 
@@ -31,11 +30,18 @@ class ForecastingEngine:
         self.db = db
         self.gateway = AIGateway(db)
 
-    def forecast(self, source_type: str, source_config: dict,
-                 target_column: str, date_column: str,
-                 horizon: int = 30, frequency: str = "D",
-                 confidence_level: float = AI_FORECAST_CONFIDENCE_LEVEL,
-                 method: str = "auto", user_id: Optional[int] = None) -> dict:
+    def forecast(
+        self,
+        source_type: str,
+        source_config: dict,
+        target_column: str,
+        date_column: str,
+        horizon: int = 30,
+        frequency: str = "D",
+        confidence_level: float = AI_FORECAST_CONFIDENCE_LEVEL,
+        method: str = "auto",
+        user_id: int | None = None,
+    ) -> dict:
         """Generate a forecast for the given data.
 
         Returns:
@@ -61,9 +67,7 @@ class ForecastingEngine:
             method = self._select_best_method(ts)
 
         # Generate forecast
-        predictions, accuracy = self._generate_forecast(
-            ts, horizon, method, confidence_level
-        )
+        predictions, accuracy = self._generate_forecast(ts, horizon, method, confidence_level)
 
         # Build input summary
         input_summary = {
@@ -110,8 +114,9 @@ class ForecastingEngine:
             "ai_interpretation": ai_interpretation,
         }
 
-    def _prepare_time_series(self, df: pd.DataFrame, target_column: str,
-                             date_column: str, frequency: str) -> Optional[pd.Series]:
+    def _prepare_time_series(
+        self, df: pd.DataFrame, target_column: str, date_column: str, frequency: str
+    ) -> pd.Series | None:
         """Prepare a time series from a DataFrame."""
         if target_column not in df.columns or date_column not in df.columns:
             return None
@@ -128,7 +133,7 @@ class ForecastingEngine:
         ts = df[target_column].resample(frequency).sum()
 
         # Fill missing values
-        ts = ts.fillna(method="ffill").fillna(method="bfill")
+        ts = ts.ffill().bfill()
 
         return ts
 
@@ -143,15 +148,16 @@ class ForecastingEngine:
             return "seasonal"
 
         # Check for trend
-        first_half = ts.iloc[:len(ts) // 2].mean()
-        second_half = ts.iloc[len(ts) // 2:].mean()
+        first_half = ts.iloc[: len(ts) // 2].mean()
+        second_half = ts.iloc[len(ts) // 2 :].mean()
         if abs(second_half - first_half) / max(first_half, 1) > 0.1:
             return "linear"
 
         return "exponential"
 
-    def _generate_forecast(self, ts: pd.Series, horizon: int,
-                           method: str, confidence_level: float) -> tuple[list[dict], float]:
+    def _generate_forecast(
+        self, ts: pd.Series, horizon: int, method: str, confidence_level: float
+    ) -> tuple[list[dict], float]:
         """Generate forecast predictions with confidence intervals."""
         if method == "linear":
             return self._linear_forecast(ts, horizon, confidence_level)
@@ -164,8 +170,9 @@ class ForecastingEngine:
         else:
             return self._linear_forecast(ts, horizon, confidence_level)
 
-    def _linear_forecast(self, ts: pd.Series, horizon: int,
-                         confidence_level: float) -> tuple[list[dict], float]:
+    def _linear_forecast(
+        self, ts: pd.Series, horizon: int, confidence_level: float
+    ) -> tuple[list[dict], float]:
         """Linear regression forecast."""
         x = np.arange(len(ts)).reshape(-1, 1)
         y = ts.values
@@ -185,31 +192,38 @@ class ForecastingEngine:
         # Z-score for confidence level
         try:
             from scipy import stats
+
             z = stats.norm.ppf((1 + confidence_level) / 2)
         except Exception:
             z = 1.96  # 95% default
 
         # Calculate R² for accuracy
-        ss_res = np.sum(residuals ** 2)
+        ss_res = np.sum(residuals**2)
         ss_tot = np.sum((y - np.mean(y)) ** 2)
         r_squared = 1 - (ss_res / ss_tot) if ss_tot > 0 else 0
 
         predictions = []
-        for i, (date, value) in enumerate(zip(
-            pd.date_range(ts.index[-1], periods=horizon + 1, freq=ts.index.freqstr)[1:],
-            predictions_values,
-        )):
-            predictions.append({
-                "date": str(date.date()),
-                "value": round(float(value), 2),
-                "lower_ci": round(float(value - z * std_error), 2),
-                "upper_ci": round(float(value + z * std_error), 2),
-            })
+        for _, (date, value) in enumerate(
+            zip(
+                pd.date_range(ts.index[-1], periods=horizon + 1, freq=ts.index.freqstr)[1:],
+                predictions_values,
+                strict=False,
+            )
+        ):
+            predictions.append(
+                {
+                    "date": str(date.date()),
+                    "value": round(float(value), 2),
+                    "lower_ci": round(float(value - z * std_error), 2),
+                    "upper_ci": round(float(value + z * std_error), 2),
+                }
+            )
 
         return predictions, round(float(r_squared), 4)
 
-    def _exponential_forecast(self, ts: pd.Series, horizon: int,
-                              confidence_level: float) -> tuple[list[dict], float]:
+    def _exponential_forecast(
+        self, ts: pd.Series, horizon: int, confidence_level: float
+    ) -> tuple[list[dict], float]:
         """Exponential smoothing forecast."""
         alpha = 0.3  # Smoothing factor
         smoothed = [ts.iloc[0]]
@@ -226,6 +240,7 @@ class ForecastingEngine:
 
         try:
             from scipy import stats
+
             z = stats.norm.ppf((1 + confidence_level) / 2)
         except Exception:
             z = 1.96
@@ -238,18 +253,22 @@ class ForecastingEngine:
         for date, value in zip(
             pd.date_range(ts.index[-1], periods=horizon + 1, freq=ts.index.freqstr)[1:],
             predictions_values,
+            strict=False,
         ):
-            predictions.append({
-                "date": str(date.date()),
-                "value": round(float(value), 2),
-                "lower_ci": round(float(value - z * std_error), 2),
-                "upper_ci": round(float(value + z * std_error), 2),
-            })
+            predictions.append(
+                {
+                    "date": str(date.date()),
+                    "value": round(float(value), 2),
+                    "lower_ci": round(float(value - z * std_error), 2),
+                    "upper_ci": round(float(value + z * std_error), 2),
+                }
+            )
 
         return predictions, round(float(accuracy), 4)
 
-    def _moving_average_forecast(self, ts: pd.Series, horizon: int,
-                                 confidence_level: float) -> tuple[list[dict], float]:
+    def _moving_average_forecast(
+        self, ts: pd.Series, horizon: int, confidence_level: float
+    ) -> tuple[list[dict], float]:
         """Moving average forecast."""
         window = min(7, len(ts))
         ma_value = ts.iloc[-window:].mean()
@@ -262,6 +281,7 @@ class ForecastingEngine:
 
         try:
             from scipy import stats
+
             z = stats.norm.ppf((1 + confidence_level) / 2)
         except Exception:
             z = 1.96
@@ -270,18 +290,22 @@ class ForecastingEngine:
         for date, value in zip(
             pd.date_range(ts.index[-1], periods=horizon + 1, freq=ts.index.freqstr)[1:],
             predictions_values,
+            strict=False,
         ):
-            predictions.append({
-                "date": str(date.date()),
-                "value": round(float(value), 2),
-                "lower_ci": round(float(value - z * std_error), 2),
-                "upper_ci": round(float(value + z * std_error), 2),
-            })
+            predictions.append(
+                {
+                    "date": str(date.date()),
+                    "value": round(float(value), 2),
+                    "lower_ci": round(float(value - z * std_error), 2),
+                    "upper_ci": round(float(value + z * std_error), 2),
+                }
+            )
 
         return predictions, 0.5  # Moderate accuracy for MA
 
-    def _seasonal_forecast(self, ts: pd.Series, horizon: int,
-                           confidence_level: float) -> tuple[list[dict], float]:
+    def _seasonal_forecast(
+        self, ts: pd.Series, horizon: int, confidence_level: float
+    ) -> tuple[list[dict], float]:
         """Seasonal decomposition forecast."""
         # Simple seasonal: use same period from previous cycle
         period = min(12, len(ts) // 2)
@@ -308,11 +332,12 @@ class ForecastingEngine:
 
         try:
             from scipy import stats
+
             z = stats.norm.ppf((1 + confidence_level) / 2)
         except Exception:
             z = 1.96
 
-        ss_res = np.sum(residuals ** 2)
+        ss_res = np.sum(residuals**2)
         ss_tot = np.sum((y - np.mean(y)) ** 2)
         r_squared = 1 - (ss_res / ss_tot) if ss_tot > 0 else 0
 
@@ -320,19 +345,27 @@ class ForecastingEngine:
         for date, value in zip(
             pd.date_range(ts.index[-1], periods=horizon + 1, freq=ts.index.freqstr)[1:],
             predictions_values,
+            strict=False,
         ):
-            predictions.append({
-                "date": str(date.date()),
-                "value": round(float(value), 2),
-                "lower_ci": round(float(value - z * std_error), 2),
-                "upper_ci": round(float(value + z * std_error), 2),
-            })
+            predictions.append(
+                {
+                    "date": str(date.date()),
+                    "value": round(float(value), 2),
+                    "lower_ci": round(float(value - z * std_error), 2),
+                    "upper_ci": round(float(value + z * std_error), 2),
+                }
+            )
 
         return predictions, round(float(r_squared), 4)
 
-    def _ai_interpret(self, target_column: str, predictions: list[dict],
-                      input_summary: dict, method: str,
-                      user_id: Optional[int] = None) -> str:
+    def _ai_interpret(
+        self,
+        target_column: str,
+        predictions: list[dict],
+        input_summary: dict,
+        method: str,
+        user_id: int | None = None,
+    ) -> str:
         """Get AI interpretation of the forecast."""
         try:
             result = self.gateway.chat(

@@ -1,15 +1,15 @@
 """Audit service and routes — log retrieval and security event tracking."""
 
-from typing import Optional
+# ruff: noqa: B008  # FastAPI Depends() calls in default arguments are intentional
 
-from fastapi import APIRouter, Depends, Query
-from sqlalchemy import select, func
+from fastapi import APIRouter, Depends
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session as DbSession
 
+from audit.models import AuditLog, SecurityLog, SystemLog
 from shared.database import get_db
-from shared.dependencies import get_current_user, require_permissions
+from shared.dependencies import require_permissions
 from shared.response import success_response
-from audit.models import AuditLog, SecurityLog, SystemLog, UserActivity
 
 
 class AuditService:
@@ -37,7 +37,7 @@ class AuditService:
         logs = self.db.execute(query.offset(offset).limit(page_size)).scalars().all()
 
         return {
-            "logs": [self._audit_to_dict(l) for l in logs],
+            "logs": [self._audit_to_dict(log) for log in logs],
             "total": total,
             "page": page,
             "page_size": page_size,
@@ -60,7 +60,7 @@ class AuditService:
         logs = self.db.execute(query.offset(offset).limit(page_size)).scalars().all()
 
         return {
-            "logs": [self._security_to_dict(l) for l in logs],
+            "logs": [self._security_to_dict(log) for log in logs],
             "total": total,
             "page": page,
             "page_size": page_size,
@@ -83,7 +83,7 @@ class AuditService:
         logs = self.db.execute(query.offset(offset).limit(page_size)).scalars().all()
 
         return {
-            "logs": [self._system_to_dict(l) for l in logs],
+            "logs": [self._system_to_dict(log) for log in logs],
             "total": total,
             "page": page,
             "page_size": page_size,
@@ -115,24 +115,34 @@ class AuditService:
     @staticmethod
     def _audit_to_dict(log: AuditLog) -> dict:
         return {
-            "id": log.id, "user_id": log.user_id, "action": log.action,
-            "resource_type": log.resource_type, "resource_id": log.resource_id,
-            "ip_address": log.ip_address, "created_at": log.created_at,
+            "id": log.id,
+            "user_id": log.user_id,
+            "action": log.action,
+            "resource_type": log.resource_type,
+            "resource_id": log.resource_id,
+            "ip_address": log.ip_address,
+            "created_at": log.created_at,
         }
 
     @staticmethod
     def _security_to_dict(log: SecurityLog) -> dict:
         return {
-            "id": log.id, "user_id": log.user_id, "event_type": log.event_type,
-            "ip_address": log.ip_address, "severity": log.severity,
+            "id": log.id,
+            "user_id": log.user_id,
+            "event_type": log.event_type,
+            "ip_address": log.ip_address,
+            "severity": log.severity,
             "created_at": log.created_at,
         }
 
     @staticmethod
     def _system_to_dict(log: SystemLog) -> dict:
         return {
-            "id": log.id, "log_level": log.log_level, "message": log.message,
-            "module": log.module, "created_at": log.created_at,
+            "id": log.id,
+            "log_level": log.log_level,
+            "message": log.message,
+            "module": log.module,
+            "created_at": log.created_at,
         }
 
 

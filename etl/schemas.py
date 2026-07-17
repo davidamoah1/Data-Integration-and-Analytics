@@ -1,19 +1,17 @@
 """Pydantic schemas for Phase 5 ETL Engine API endpoints."""
 
-from datetime import datetime
-from typing import Optional, Any
 from pydantic import BaseModel, Field
 
-
 # --- Import -----------------------------------------------------------------
+
 
 class ImportRequest(BaseModel):
     source_type: str = Field(..., description="csv, excel, json, xml, mysql, api")
     source_config: dict = Field(..., description="Connector-specific configuration")
-    column_mapping: Optional[dict] = None
-    transformations: Optional[list[dict]] = None
-    validation_rules: Optional[dict] = None
-    template_name: Optional[str] = None
+    column_mapping: dict | None = None
+    transformations: list[dict] | None = None
+    validation_rules: dict | None = None
+    template_name: str | None = None
 
 
 class ImportPreviewResponse(BaseModel):
@@ -27,11 +25,12 @@ class ImportResponse(BaseModel):
     job_id: int
     status: str
     rows_imported: int
-    quality_score: Optional[int] = None
+    quality_score: int | None = None
     errors: list[str] = []
 
 
 # --- Profiling --------------------------------------------------------------
+
 
 class ProfileResponse(BaseModel):
     source_name: str
@@ -45,6 +44,7 @@ class ProfileResponse(BaseModel):
 
 # --- Quality ----------------------------------------------------------------
 
+
 class QualityResponse(BaseModel):
     source_name: str
     overall_score: int
@@ -57,10 +57,11 @@ class QualityResponse(BaseModel):
 
 
 class ApplyFixRequest(BaseModel):
-    check_names: Optional[list[str]] = None
+    check_names: list[str] | None = None
 
 
 # --- Transformations --------------------------------------------------------
+
 
 class TransformRequest(BaseModel):
     source_type: str = Field(..., description="csv, excel, json, xml, mysql, api")
@@ -77,16 +78,17 @@ class TransformResponse(BaseModel):
 
 class TransformationTemplateCreate(BaseModel):
     name: str
-    description: Optional[str] = None
+    description: str | None = None
     transformation_type: str
     config: dict
 
 
 # --- Pipeline ---------------------------------------------------------------
 
+
 class PipelineCreate(BaseModel):
     name: str
-    description: Optional[str] = None
+    description: str | None = None
     steps: list[dict] = Field(default_factory=list)
 
 
@@ -97,11 +99,11 @@ class PipelineUpdate(BaseModel):
 class PipelineResponse(BaseModel):
     id: int
     name: str
-    description: Optional[str]
+    description: str | None
     status: str
     current_version: int
     steps: list[dict]
-    created_at: Optional[str]
+    created_at: str | None
 
 
 class PipelineExecuteResponse(BaseModel):
@@ -117,7 +119,7 @@ class VersionHistoryItem(BaseModel):
     id: int
     version_number: int
     is_active: bool
-    created_at: Optional[str]
+    created_at: str | None
 
 
 class RollbackRequest(BaseModel):
@@ -126,9 +128,10 @@ class RollbackRequest(BaseModel):
 
 # --- Jobs -------------------------------------------------------------------
 
+
 class JobResponse(BaseModel):
     id: int
-    pipeline_id: Optional[int]
+    pipeline_id: int | None
     job_type: str
     status: str
     trigger_type: str
@@ -136,11 +139,11 @@ class JobResponse(BaseModel):
     rows_transformed: int
     rows_loaded: int
     rows_rejected: int
-    error_message: Optional[str]
-    duration_seconds: Optional[int]
-    started_at: Optional[str]
-    completed_at: Optional[str]
-    created_at: Optional[str]
+    error_message: str | None
+    duration_seconds: int | None
+    started_at: str | None
+    completed_at: str | None
+    created_at: str | None
 
 
 class JobStatsResponse(BaseModel):
@@ -156,6 +159,7 @@ class JobStatsResponse(BaseModel):
 
 # --- Lineage ----------------------------------------------------------------
 
+
 class LineageResponse(BaseModel):
     nodes: list[dict]
     edges: list[dict]
@@ -163,23 +167,25 @@ class LineageResponse(BaseModel):
 
 # --- Schedules --------------------------------------------------------------
 
+
 class ScheduleCreate(BaseModel):
     pipeline_id: int
     schedule_type: str = Field(..., description="once, hourly, daily, weekly, monthly, cron")
-    cron_expr: Optional[str] = None
+    cron_expr: str | None = None
 
 
 class ScheduleResponse(BaseModel):
     id: int
     pipeline_id: int
     schedule_type: str
-    cron_expr: Optional[str]
+    cron_expr: str | None
     is_active: bool
-    last_run_at: Optional[str]
-    next_run_at: Optional[str]
+    last_run_at: str | None
+    next_run_at: str | None
 
 
 # --- Dashboard --------------------------------------------------------------
+
 
 class DashboardResponse(BaseModel):
     total_jobs: int
@@ -187,24 +193,26 @@ class DashboardResponse(BaseModel):
     completed_jobs: int
     failed_jobs: int
     success_rate: float
-    average_quality_score: Optional[float]
+    average_quality_score: float | None
     recent_activity: list[dict]
     active_pipelines: int
 
 
 # --- Templates --------------------------------------------------------------
 
+
 class ImportTemplateResponse(BaseModel):
     id: int
     name: str
     source_type: str
     source_config: dict
-    column_mapping: Optional[dict]
-    transformations: Optional[list[dict]]
-    created_at: Optional[str]
+    column_mapping: dict | None
+    transformations: list[dict] | None
+    created_at: str | None
 
 
 # --- AI Hooks ---------------------------------------------------------------
+
 
 class AIHooksResponse(BaseModel):
     hooks: list[dict]

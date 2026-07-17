@@ -20,48 +20,141 @@ Authentication:
     Legacy endpoints support API key via X-API-Key header (backward compatible).
 """
 
-import sys
-import os
-from datetime import date, datetime
-from typing import Optional
+# ruff: noqa: B008  # FastAPI Depends() calls in default arguments are intentional
 
-from fastapi import FastAPI, Depends, Query, HTTPException, BackgroundTasks
+import os
+import sys
+import uuid
+from contextlib import asynccontextmanager
+from datetime import date, datetime, timezone
+
+from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from starlette.middleware.base import BaseHTTPMiddleware
+
+from config import validate_config
+from shared.context import correlation_id, request_id
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+from ai.routes import router as ai_router
+from api.auth import get_api_key
 from api.schemas import (
+    FilterOptionsResponse,
+    HealthResponse,
     KPIResponse,
+    PipelineTriggerResponse,
     SalesListResponse,
     SalesRecordResponse,
-    FilterOptionsResponse,
-    PipelineRunResponse,
-    PipelineTriggerResponse,
-    HealthResponse,
 )
-from api.auth import get_api_key
-from database.repositories import SalesRepository, PipelineRunRepository
-from services.etl_service import ETLService
-from etl.logging_config import logger
+from audit.services import audit_router
+from authentication.routes import roles_router, users_router
 
 # Phase 4 — Enterprise IAM
-from authentication.routes import router as auth_router, users_router, roles_router
-from organizations.services import org_router, dept_router
-from audit.services import audit_router
-from shared.database import get_db, get_engine, Base
+from authentication.routes import router as auth_router
 from authentication.services import seed_default_data
+from database.repositories import PipelineRunRepository, SalesRepository
+from etl.logging_config import logger
 from etl.routes import router as etl_router
-from ai.routes import router as ai_router
+from organizations.services import dept_router, org_router
+from services.etl_service import ETLService
+from shared.database import Base, get_engine
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Validate configuration, create tables, and seed data at startup."""
+    validate_config()
+    engine = get_engine()
+    # Import all models so they register with Base.metadata
+    import ai.models  # noqa: F401
+    import audit.models  # noqa: F401
+    import authentication.models  # noqa: F401
+    import database.db_setup  # noqa: F401
+    import etl.models  # noqa: F401
+    import organizations.models  # noqa: F401
+
+    Base.metadata.create_all(engine)
+
+    # Register system AI plugins
+    from sqlalchemy.orm import Session as AIDbSession
+
+    ai_db = AIDbSession(engine)
+    try:
+        from ai.plugins import register_system_plugins
+
+        register_system_plugins(ai_db)
+    except Exception as e:
+        logger.error(f"AI plugin registration failed: {e}")
+    finally:
+        ai_db.close()
+
+    # Seed default data
+    from sqlalchemy.orm import Session as DbSession
+
+    db = DbSession(engine)
+    try:
+        seed_default_data(db)
+    finally:
+        db.close()
+    logger.info("Auth tables created and default data seeded.")
+
+    yield
+
+
+class RequestContextMiddleware(BaseHTTPMiddleware):
+    """Attach a request ID and optional correlation ID to every incoming request."""
+
+    async def dispatch(self, request: Request, call_next):
+        req_token = request_id.set(str(uuid.uuid4()))
+        corr_value = request.headers.get("X-Correlation-ID")
+        corr_token = correlation_id.set(corr_value or str(uuid.uuid4()))
+        try:
+            response = await call_next(request)
+            response.headers["X-Request-ID"] = request_id.get()
+            if corr_value:
+                response.headers["X-Correlation-ID"] = corr_value
+            return response
+        finally:
+            request_id.reset(req_token)
+            correlation_id.reset(corr_token)
+
 
 app = FastAPI(
     title="DataFlow — Enterprise Data Intelligence API",
     description="Enterprise REST API for ETL, analytics, IAM, and pipeline management.",
     version="2.0.0",
+    lifespan=lifespan,
 )
 
+app.add_middleware(RequestContextMiddleware)
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    """Return consistent error JSON for HTTPExceptions."""
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"success": False, "message": exc.detail, "data": None},
+    )
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """Catch unhandled exceptions and return a safe response without stack traces."""
+    logger.exception("Unhandled exception")
+    return JSONResponse(
+        status_code=500,
+        content={"success": False, "message": "Internal server error", "data": None},
+    )
+
+
+_raw_cors = os.getenv("CORS_ORIGINS", "*")
+allow_origins = [origin.strip() for origin in _raw_cors.split(",") if origin.strip()]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=os.getenv("CORS_ORIGINS", "*").split(","),
+    allow_origins=allow_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -76,42 +169,6 @@ app.include_router(dept_router)
 app.include_router(audit_router)
 app.include_router(etl_router)
 app.include_router(ai_router)
-
-
-@app.on_event("startup")
-async def startup_event():
-    """Create auth tables and seed default roles/permissions/admin on startup."""
-    try:
-        engine = get_engine()
-        # Import all models so they register with Base.metadata
-        import authentication.models  # noqa: F401
-        import organizations.models  # noqa: F401
-        import audit.models  # noqa: F401
-        import etl.models  # noqa: F401
-        import ai.models  # noqa: F401
-        Base.metadata.create_all(engine)
-
-        # Register system AI plugins
-        from sqlalchemy.orm import Session as AIDbSession
-        ai_db = AIDbSession(engine)
-        try:
-            from ai.plugins import register_system_plugins
-            register_system_plugins(ai_db)
-        except Exception as e:
-            logger.error(f"AI plugin registration failed: {e}")
-        finally:
-            ai_db.close()
-
-        # Seed default data
-        from sqlalchemy.orm import Session as DbSession
-        db = DbSession(engine)
-        try:
-            seed_default_data(db)
-        finally:
-            db.close()
-        logger.info("Auth tables created and default data seeded.")
-    except Exception as e:
-        logger.error(f"Startup seeding failed: {e}")
 
 
 # ──────────────────────────────────────────────
@@ -131,27 +188,27 @@ def get_run_repo() -> PipelineRunRepository:
 # Health
 # ──────────────────────────────────────────────
 @app.get("/health", response_model=HealthResponse, tags=["System"])
-async def health_check(
-    repo: SalesRepository = Depends(get_sales_repo),
-    _api_key: str = Depends(get_api_key),
-):
+async def health_check(repo: SalesRepository = Depends(get_sales_repo)):
     """Check API and database health.
 
-    Returns database connection status and record count.
+    Returns database connection status and record count. This endpoint is
+    intentionally public so load balancers and monitoring tools can reach it.
     """
     try:
         count = repo.get_record_count()
         return HealthResponse(
+            status="healthy",
             database_connected=True,
             record_count=count,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
         )
     except Exception as e:
         logger.error(f"Health check failed: {e}")
         return HealthResponse(
+            status="unhealthy",
             database_connected=False,
             record_count=0,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
         )
 
 
@@ -160,10 +217,10 @@ async def health_check(
 # ──────────────────────────────────────────────
 @app.get("/api/v1/sales", response_model=SalesListResponse, tags=["Sales"])
 async def get_sales(
-    region: Optional[str] = Query(None, description="Filter by region"),
-    category: Optional[str] = Query(None, description="Filter by category"),
-    date_from: Optional[date] = Query(None, description="Start date (YYYY-MM-DD)"),
-    date_to: Optional[date] = Query(None, description="End date (YYYY-MM-DD)"),
+    region: str | None = Query(None, description="Filter by region"),
+    category: str | None = Query(None, description="Filter by category"),
+    date_from: date | None = Query(None, description="Start date (YYYY-MM-DD)"),
+    date_to: date | None = Query(None, description="End date (YYYY-MM-DD)"),
     page: int = Query(1, ge=1, description="Page number"),
     page_size: int = Query(50, ge=1, le=500, description="Records per page"),
     repo: SalesRepository = Depends(get_sales_repo),
@@ -217,10 +274,10 @@ async def get_sales(
 # ──────────────────────────────────────────────
 @app.get("/api/v1/kpis", response_model=KPIResponse, tags=["Analytics"])
 async def get_kpis(
-    region: Optional[str] = Query(None, description="Filter by region"),
-    category: Optional[str] = Query(None, description="Filter by category"),
-    date_from: Optional[date] = Query(None, description="Start date (YYYY-MM-DD)"),
-    date_to: Optional[date] = Query(None, description="End date (YYYY-MM-DD)"),
+    region: str | None = Query(None, description="Filter by region"),
+    category: str | None = Query(None, description="Filter by category"),
+    date_from: date | None = Query(None, description="Start date (YYYY-MM-DD)"),
+    date_to: date | None = Query(None, description="End date (YYYY-MM-DD)"),
     repo: SalesRepository = Depends(get_sales_repo),
     _api_key: str = Depends(get_api_key),
 ):
@@ -228,9 +285,7 @@ async def get_kpis(
 
     Returns total sales, profit, order count, average order value, and margin.
     """
-    kpis = repo.get_kpis(
-        region=region, category=category, date_from=date_from, date_to=date_to
-    )
+    kpis = repo.get_kpis(region=region, category=category, date_from=date_from, date_to=date_to)
     return KPIResponse(**kpis)
 
 
@@ -249,7 +304,10 @@ async def get_filter_options(
     return FilterOptionsResponse(
         regions=opts,
         categories=cats,
-        date_range={"min": str(min_date) if min_date else None, "max": str(max_date) if max_date else None},
+        date_range={
+            "min": str(min_date) if min_date else None,
+            "max": str(max_date) if max_date else None,
+        },
     )
 
 
@@ -276,7 +334,7 @@ async def trigger_pipeline(
     background_tasks.add_task(run_in_background)
 
     return PipelineTriggerResponse(
-        run_id=f"api_triggered_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}",
+        run_id=f"api_triggered_{datetime.now(timezone.utc).replace(tzinfo=None).strftime('%Y%m%d_%H%M%S')}",
         status="triggered",
         message="Pipeline execution started in background. Check /api/v1/pipeline/runs for status.",
     )

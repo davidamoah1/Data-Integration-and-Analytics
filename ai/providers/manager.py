@@ -5,19 +5,19 @@ The manager loads provider configs from the database and environment,
 and routes requests to the appropriate provider.
 """
 
-from typing import Optional, Generator
+from collections.abc import Generator
+
 from sqlalchemy.orm import Session as DbSession
 
-from ai.providers.base import BaseProvider, LLMResponse
-from ai.providers.openai_provider import OpenAIProvider
-from ai.providers.gemini_provider import GeminiProvider
-from ai.providers.deepseek_provider import DeepSeekProvider
-from ai.providers.glm_provider import GLMProvider
-from ai.providers.claude_provider import ClaudeProvider
-from ai.providers.local_provider import LocalLLMProvider
+from ai.config import AI_DEFAULT_MODEL, AI_DEFAULT_PROVIDER, AI_MAX_TOKENS, AI_TEMPERATURE
 from ai.models import AIProviderConfig
-from ai.config import AI_DEFAULT_PROVIDER, AI_DEFAULT_MODEL, AI_MAX_TOKENS, AI_TEMPERATURE
-
+from ai.providers.base import BaseProvider, LLMResponse
+from ai.providers.claude_provider import ClaudeProvider
+from ai.providers.deepseek_provider import DeepSeekProvider
+from ai.providers.gemini_provider import GeminiProvider
+from ai.providers.glm_provider import GLMProvider
+from ai.providers.local_provider import LocalLLMProvider
+from ai.providers.openai_provider import OpenAIProvider
 
 # --- Provider Registry ------------------------------------------------------
 
@@ -46,23 +46,28 @@ def list_available_provider_types() -> list[dict]:
 
 # --- Provider Manager -------------------------------------------------------
 
+
 class ProviderManager:
     """Manages provider lifecycle, configuration, and request routing."""
 
-    def __init__(self, db: Optional[DbSession] = None):
+    def __init__(self, db: DbSession | None = None):
         self.db = db
         self._cache: dict[str, BaseProvider] = {}
 
-    def _load_config_from_db(self, provider_name: str) -> Optional[AIProviderConfig]:
+    def _load_config_from_db(self, provider_name: str) -> AIProviderConfig | None:
         """Load provider configuration from the database."""
         if not self.db:
             return None
-        return self.db.query(AIProviderConfig).filter(
-            AIProviderConfig.provider_name == provider_name,
-            AIProviderConfig.is_active == True,
-        ).first()
+        return (
+            self.db.query(AIProviderConfig)
+            .filter(
+                AIProviderConfig.provider_name == provider_name,
+                AIProviderConfig.is_active.is_(True),
+            )
+            .first()
+        )
 
-    def get_provider(self, provider_name: Optional[str] = None) -> BaseProvider:
+    def get_provider(self, provider_name: str | None = None) -> BaseProvider:
         """Get a configured provider instance.
 
         Args:
@@ -107,18 +112,27 @@ class ProviderManager:
     def get_default_provider(self) -> BaseProvider:
         """Get the default configured provider."""
         if self.db:
-            default_config = self.db.query(AIProviderConfig).filter(
-                AIProviderConfig.is_default == True,
-                AIProviderConfig.is_active == True,
-            ).first()
+            default_config = (
+                self.db.query(AIProviderConfig)
+                .filter(
+                    AIProviderConfig.is_default.is_(True),
+                    AIProviderConfig.is_active.is_(True),
+                )
+                .first()
+            )
             if default_config:
                 return self.get_provider(default_config.provider_name)
         return self.get_provider(AI_DEFAULT_PROVIDER)
 
-    def chat(self, messages: list[dict], provider_name: Optional[str] = None,
-             model: Optional[str] = None, temperature: Optional[float] = None,
-             max_tokens: Optional[int] = None, stream: bool = False
-             ) -> LLMResponse | Generator[str, None, None]:
+    def chat(
+        self,
+        messages: list[dict],
+        provider_name: str | None = None,
+        model: str | None = None,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+        stream: bool = False,
+    ) -> LLMResponse | Generator[str, None, None]:
         """Send a chat request through the appropriate provider.
 
         Args:
@@ -147,15 +161,19 @@ class ProviderManager:
         for name, cls in _PROVIDER_CLASSES.items():
             provider = cls()
             db_config = self._load_config_from_db(name) if self.db else None
-            result.append({
-                "name": name,
-                "display_name": provider.display_name,
-                "is_available": provider.is_available(),
-                "is_active": db_config.is_active if db_config else False,
-                "is_default": db_config.is_default if db_config else (name == AI_DEFAULT_PROVIDER),
-                "default_model": db_config.default_model if db_config else provider.model,
-                "available_models": provider.list_models(),
-            })
+            result.append(
+                {
+                    "name": name,
+                    "display_name": provider.display_name,
+                    "is_available": provider.is_available(),
+                    "is_active": db_config.is_active if db_config else False,
+                    "is_default": (
+                        db_config.is_default if db_config else (name == AI_DEFAULT_PROVIDER)
+                    ),
+                    "default_model": db_config.default_model if db_config else provider.model,
+                    "available_models": provider.list_models(),
+                }
+            )
         return result
 
     def test_provider(self, provider_name: str) -> dict:

@@ -18,16 +18,26 @@ Tables:
   - ai_plugins: Registered AI plugins
 """
 
-from datetime import datetime
 from sqlalchemy import (
-    Column, String, Text, Integer, Float, Boolean, JSON, ForeignKey,
-    TIMESTAMP, func, Index,
+    JSON,
+    TIMESTAMP,
+    Boolean,
+    Column,
+    Float,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    Text,
+    func,
 )
+
 from shared.database import Base, BigInt
 
 
 class AIConversation(Base):
     """A chat conversation between a user and an AI assistant."""
+
     __tablename__ = "ai_conversations"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
@@ -42,6 +52,7 @@ class AIConversation(Base):
 
 class AIMessage(Base):
     """Individual messages within an AI conversation."""
+
     __tablename__ = "ai_messages"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
@@ -60,6 +71,7 @@ class AIMessage(Base):
 
 class AIProviderConfig(Base):
     """Configuration for AI providers — admin managed."""
+
     __tablename__ = "ai_provider_configs"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
@@ -80,6 +92,7 @@ class AIProviderConfig(Base):
 
 class AIUsageLog(Base):
     """Token usage and cost tracking per AI request."""
+
     __tablename__ = "ai_usage_logs"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
@@ -102,6 +115,7 @@ class AIUsageLog(Base):
 
 class AIAuditLog(Base):
     """Audit trail for all AI actions — compliance and security."""
+
     __tablename__ = "ai_audit_logs"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
@@ -120,6 +134,7 @@ class AIAuditLog(Base):
 
 class AIWorkflow(Base):
     """Automated AI workflow definition."""
+
     __tablename__ = "ai_workflows"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
@@ -136,11 +151,14 @@ class AIWorkflow(Base):
 
 class AIWorkflowRun(Base):
     """Execution record for an AI workflow."""
+
     __tablename__ = "ai_workflow_runs"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
     workflow_id = Column(BigInt, ForeignKey("ai_workflows.id"), nullable=False, index=True)
-    status = Column(String(20), nullable=False, default="queued")  # queued, running, completed, failed
+    status = Column(
+        String(20), nullable=False, default="queued"
+    )  # queued, running, completed, failed
     trigger_type = Column(String(30), nullable=False, default="manual")
     step_results = Column(JSON, nullable=True)
     started_at = Column(TIMESTAMP, nullable=True)
@@ -152,10 +170,13 @@ class AIWorkflowRun(Base):
 
 class AIInsight(Base):
     """Generated insights from decision center, dashboard insights, etc."""
+
     __tablename__ = "ai_insights"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
-    insight_type = Column(String(50), nullable=False)  # decision, dashboard, trend, risk, opportunity
+    insight_type = Column(
+        String(50), nullable=False
+    )  # decision, dashboard, trend, risk, opportunity
     title = Column(String(255), nullable=False)
     summary = Column(Text, nullable=False)
     details = Column(JSON, nullable=True)  # structured insight data
@@ -172,6 +193,7 @@ class AIInsight(Base):
 
 class AIForecast(Base):
     """Forecasting results from the AI forecasting engine."""
+
     __tablename__ = "ai_forecasts"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
@@ -189,6 +211,7 @@ class AIForecast(Base):
 
 class AIAnomalyAlert(Base):
     """Anomaly detection alerts."""
+
     __tablename__ = "ai_anomaly_alerts"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
@@ -210,6 +233,7 @@ class AIAnomalyAlert(Base):
 
 class AIDocument(Base):
     """Uploaded documents for AI document chat."""
+
     __tablename__ = "ai_documents"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
@@ -226,6 +250,7 @@ class AIDocument(Base):
 
 class AIKPIRecommendation(Base):
     """AI-recommended KPIs for the organization."""
+
     __tablename__ = "ai_kpi_recommendations"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
@@ -246,6 +271,7 @@ class AIKPIRecommendation(Base):
 
 class AIReportGeneration(Base):
     """Metadata for AI-generated reports."""
+
     __tablename__ = "ai_report_generations"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
@@ -262,6 +288,7 @@ class AIReportGeneration(Base):
 
 class AIPromptTemplate(Base):
     """Reusable prompt templates managed by administrators."""
+
     __tablename__ = "ai_prompt_templates"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
@@ -278,6 +305,7 @@ class AIPromptTemplate(Base):
 
 class AIPlugin(Base):
     """Registered AI plugins for extensibility."""
+
     __tablename__ = "ai_plugins"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)

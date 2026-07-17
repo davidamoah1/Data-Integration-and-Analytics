@@ -1,4 +1,5 @@
 import os
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -15,15 +16,13 @@ def _resolve_path(path_str: str) -> str:
 
 
 # Data paths
-RAW_DATA_PATH = _resolve_path(
-    os.getenv("RAW_DATA_PATH", "dataset/Superstore.csv")
-)
+RAW_DATA_PATH = _resolve_path(os.getenv("RAW_DATA_PATH", "dataset/Superstore.csv"))
 PROCESSED_DATA_PATH = _resolve_path(
     os.getenv("PROCESSED_DATA_PATH", "data/processed/cleaned_data.csv")
 )
 
 # Database
-DB_TYPE = os.getenv("DB_TYPE", "sqlite")
+DB_TYPE = os.getenv("DB_TYPE", "").lower()
 
 if DB_TYPE == "mysql":
     _mysql_host = os.getenv("MYSQL_HOST", "localhost")
@@ -35,11 +34,14 @@ if DB_TYPE == "mysql":
         f"mysql+pymysql://{_mysql_user}:{_mysql_pass}"
         f"@{_mysql_host}:{_mysql_port}/{_mysql_db}?charset=utf8mb4"
     )
-else:
-    _sqlite_path = _resolve_path(
-        os.getenv("SQLITE_DB_PATH", "database/etl_database.db")
-    )
+elif DB_TYPE == "sqlite":
+    _sqlite_path = _resolve_path(os.getenv("SQLITE_DB_PATH", "database/etl_database.db"))
     DB_URL = f"sqlite:///{_sqlite_path}"
+else:
+    raise ValueError(
+        "DB_TYPE environment variable must be set to 'mysql' or 'sqlite'. "
+        "Use 'mysql' for production and 'sqlite' only for local development/testing."
+    )
 
 # Logging
 LOG_PATH = _resolve_path(os.getenv("LOG_PATH", "logs/pipeline.log"))
@@ -49,7 +51,8 @@ LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 PIPELINE_RUN_TIME = os.getenv("PIPELINE_RUN_TIME", "08:00")
 
 # --- Security / JWT ---
-JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "change-this-in-production-please")
+_JWT_DEFAULT_SECRET = "change-this-to-a-strong-random-secret-min-32-chars"
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", _JWT_DEFAULT_SECRET)
 JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 JWT_ACCESS_EXPIRE_MINUTES = int(os.getenv("JWT_ACCESS_EXPIRE_MINUTES", "30"))
 JWT_REFRESH_EXPIRE_DAYS = int(os.getenv("JWT_REFRESH_EXPIRE_DAYS", "7"))
@@ -116,3 +119,35 @@ AI_FORECAST_MAX_HORIZON = int(os.getenv("AI_FORECAST_MAX_HORIZON", "365"))
 # AI Anomaly Detection
 AI_ANOMALY_SENSITIVITY = float(os.getenv("AI_ANOMALY_SENSITIVITY", "2.0"))
 AI_ANOMALY_MIN_DATA_POINTS = int(os.getenv("AI_ANOMALY_MIN_DATA_POINTS", "10"))
+
+
+def validate_config() -> None:
+    """Validate production-critical configuration at startup.
+
+    Fail fast when required settings are missing or insecure. SQLite is only
+    permitted for development and testing; production deployments must use
+    MySQL.
+    """
+    if DB_TYPE not in {"mysql", "sqlite"}:
+        raise ValueError("DB_TYPE must be set to 'mysql' (production) or 'sqlite' (dev/test).")
+
+    if DB_TYPE == "mysql":
+        required = {
+            "MYSQL_HOST": os.getenv("MYSQL_HOST", ""),
+            "MYSQL_DATABASE": os.getenv("MYSQL_DATABASE", ""),
+            "MYSQL_USER": os.getenv("MYSQL_USER", ""),
+            "MYSQL_PASSWORD": os.getenv("MYSQL_PASSWORD", ""),
+        }
+        missing = [name for name, value in required.items() if not value]
+        if missing:
+            raise ValueError(
+                f"MySQL production configuration incomplete. Missing: {', '.join(missing)}"
+            )
+
+        if not JWT_SECRET_KEY or JWT_SECRET_KEY == _JWT_DEFAULT_SECRET:
+            raise ValueError("JWT_SECRET_KEY must be set to a strong secret in production.")
+
+        if CORS_ORIGINS == "*":
+            raise ValueError(
+                "CORS_ORIGINS cannot be '*' in production. Set allowed origins explicitly."
+            )

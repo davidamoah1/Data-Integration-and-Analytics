@@ -4,10 +4,10 @@ All ORM models across the platform import Base from here to ensure
 a single metadata registry for create_all and Alembic autogenerate.
 """
 
-from sqlalchemy import create_engine, BigInteger, Integer
-from sqlalchemy.orm import declarative_base, sessionmaker, Session
+from sqlalchemy import BigInteger, Integer, create_engine
+from sqlalchemy.orm import declarative_base, sessionmaker
 
-from config import DB_URL, DB_TYPE
+from config import DB_TYPE, DB_URL
 
 Base = declarative_base()
 

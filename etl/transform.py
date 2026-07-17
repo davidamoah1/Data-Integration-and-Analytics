@@ -60,13 +60,7 @@ def transform_data(df: pd.DataFrame) -> pd.DataFrame:
     """
     try:
         # Standardize column names
-        df.columns = (
-            df.columns
-            .str.strip()
-            .str.lower()
-            .str.replace(" ", "_")
-            .str.replace("-", "_")
-        )
+        df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_").str.replace("-", "_")
 
         # Drop full duplicate rows
         before = len(df)
@@ -88,7 +82,14 @@ def transform_data(df: pd.DataFrame) -> pd.DataFrame:
         df["ship_date"] = pd.to_datetime(df["ship_date"], errors="coerce")
 
         # Trim whitespace from string columns
-        str_cols = ["customer_name", "segment", "region", "category", "sub_category", "product_name"]
+        str_cols = [
+            "customer_name",
+            "segment",
+            "region",
+            "category",
+            "sub_category",
+            "product_name",
+        ]
         for col in str_cols:
             if col in df.columns:
                 df[col] = df[col].astype(str).str.strip()
@@ -113,10 +114,12 @@ def transform_data(df: pd.DataFrame) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    import sys
     import os
+    import sys
+
     sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
     from etl.extract import extract_data
+
     raw = extract_data()
     clean = transform_data(raw)
     print(clean.head())

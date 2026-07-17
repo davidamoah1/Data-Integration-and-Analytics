@@ -13,15 +13,15 @@ Configuration:
     PIPELINE_RUN_TIME env var (24h format, e.g. "08:00")
 """
 
-import sys
 import os
 import signal
+import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+from apscheduler.events import EVENT_JOB_ERROR, EVENT_JOB_EXECUTED
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger
-from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
 
 from config import PIPELINE_RUN_TIME
 from etl.logging_config import logger

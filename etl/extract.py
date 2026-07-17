@@ -1,5 +1,6 @@
-import pandas as pd
 import os
+
+import pandas as pd
 
 from config import RAW_DATA_PATH
 from etl.logging_config import logger

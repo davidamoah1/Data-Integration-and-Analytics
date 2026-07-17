@@ -10,14 +10,14 @@ Generates:
 """
 
 import json
-from datetime import datetime, timedelta
-from typing import Optional
-from sqlalchemy.orm import Session as DbSession
+from datetime import datetime, timezone
+
 from sqlalchemy import text
+from sqlalchemy.orm import Session as DbSession
 
 from ai.gateway import AIGateway
 from ai.models import AIReportGeneration
-from etl.models import ETLJob, ETLDataProfile, ETLQualityReport
+from etl.models import ETLJob, ETLQualityReport
 
 
 class AIReportWriter:
@@ -27,10 +27,16 @@ class AIReportWriter:
         self.db = db
         self.gateway = AIGateway(db)
 
-    def generate_report(self, report_type: str, title: Optional[str] = None,
-                        date_from: Optional[str] = None, date_to: Optional[str] = None,
-                        department: Optional[str] = None, format: str = "markdown",
-                        user_id: Optional[int] = None) -> dict:
+    def generate_report(
+        self,
+        report_type: str,
+        title: str | None = None,
+        date_from: str | None = None,
+        date_to: str | None = None,
+        department: str | None = None,
+        format: str = "markdown",
+        user_id: int | None = None,
+    ) -> dict:
         """Generate a report of the specified type.
 
         Returns:
@@ -44,7 +50,9 @@ class AIReportWriter:
             title = self._default_title(report_type, date_from, date_to, department)
 
         # Build prompt
-        prompt = self._build_report_prompt(report_type, title, report_data, date_from, date_to, department)
+        prompt = self._build_report_prompt(
+            report_type, title, report_data, date_from, date_to, department
+        )
 
         # Generate report via AI
         result = self.gateway.chat(
@@ -83,20 +91,23 @@ class AIReportWriter:
             "created_at": str(report.created_at) if report.created_at else None,
         }
 
-    def _gather_report_data(self, report_type: str, date_from: Optional[str],
-                            date_to: Optional[str], department: Optional[str]) -> dict:
+    def _gather_report_data(
+        self, report_type: str, date_from: str | None, date_to: str | None, department: str | None
+    ) -> dict:
         """Gather platform data relevant to the report type."""
         data = {}
 
         if report_type in ("executive", "monthly", "annual"):
             try:
-                result = self.db.execute(text(
-                    "SELECT COUNT(*) as records, COALESCE(SUM(sales), 0) as total_sales, "
-                    "COALESCE(SUM(profit), 0) as total_profit, "
-                    "COALESCE(AVG(sales), 0) as avg_order_value, "
-                    "COUNT(DISTINCT region) as regions, COUNT(DISTINCT category) as categories "
-                    "FROM sales"
-                ))
+                result = self.db.execute(
+                    text(
+                        "SELECT COUNT(*) as records, COALESCE(SUM(sales), 0) as total_sales, "
+                        "COALESCE(SUM(profit), 0) as total_profit, "
+                        "COALESCE(AVG(sales), 0) as avg_order_value, "
+                        "COUNT(DISTINCT region) as regions, COUNT(DISTINCT category) as categories "
+                        "FROM sales"
+                    )
+                )
                 row = result.fetchone()
                 if row:
                     data["sales_summary"] = {
@@ -109,22 +120,25 @@ class AIReportWriter:
                     }
 
                 # Sales by region
-                result = self.db.execute(text(
-                    "SELECT region, SUM(sales) as sales, SUM(profit) as profit "
-                    "FROM sales GROUP BY region ORDER BY sales DESC"
-                ))
+                result = self.db.execute(
+                    text(
+                        "SELECT region, SUM(sales) as sales, SUM(profit) as profit "
+                        "FROM sales GROUP BY region ORDER BY sales DESC"
+                    )
+                )
                 data["sales_by_region"] = [
                     {"region": r[0], "sales": float(r[1]), "profit": float(r[2])}
                     for r in result.fetchall()
                 ]
 
                 # Sales by category
-                result = self.db.execute(text(
-                    "SELECT category, SUM(sales) as sales FROM sales GROUP BY category ORDER BY sales DESC"
-                ))
+                result = self.db.execute(
+                    text(
+                        "SELECT category, SUM(sales) as sales FROM sales GROUP BY category ORDER BY sales DESC"
+                    )
+                )
                 data["sales_by_category"] = [
-                    {"category": r[0], "sales": float(r[1])}
-                    for r in result.fetchall()
+                    {"category": r[0], "sales": float(r[1])} for r in result.fetchall()
                 ]
             except Exception:
                 data["sales_summary"] = {"note": "Sales data not available"}
@@ -147,9 +161,12 @@ class AIReportWriter:
 
         if report_type == "quality":
             try:
-                reports = self.db.query(ETLQualityReport).order_by(
-                    ETLQualityReport.created_at.desc()
-                ).limit(20).all()
+                reports = (
+                    self.db.query(ETLQualityReport)
+                    .order_by(ETLQualityReport.created_at.desc())
+                    .limit(20)
+                    .all()
+                )
                 data["quality_reports"] = [
                     {
                         "source": r.source_name,
@@ -164,13 +181,14 @@ class AIReportWriter:
 
         return data
 
-    def _default_title(self, report_type: str, date_from: Optional[str],
-                        date_to: Optional[str], department: Optional[str]) -> str:
+    def _default_title(
+        self, report_type: str, date_from: str | None, date_to: str | None, department: str | None
+    ) -> str:
         """Generate a default title for the report."""
         titles = {
             "executive": "Executive Summary Report",
-            "monthly": f"Monthly Report - {datetime.utcnow().strftime('%B %Y')}",
-            "annual": f"Annual Report - {datetime.utcnow().year}",
+            "monthly": f"Monthly Report - {datetime.now(timezone.utc).replace(tzinfo=None).strftime('%B %Y')}",
+            "annual": f"Annual Report - {datetime.now(timezone.utc).replace(tzinfo=None).year}",
             "department": f"Department Report - {department or 'All'}",
             "quality": "Data Quality Report",
             "etl": "ETL Performance Report",
@@ -179,9 +197,15 @@ class AIReportWriter:
         }
         return titles.get(report_type, "Report")
 
-    def _build_report_prompt(self, report_type: str, title: str, data: dict,
-                             date_from: Optional[str], date_to: Optional[str],
-                             department: Optional[str]) -> str:
+    def _build_report_prompt(
+        self,
+        report_type: str,
+        title: str,
+        data: dict,
+        date_from: str | None,
+        date_to: str | None,
+        department: str | None,
+    ) -> str:
         """Build the prompt for report generation."""
         return (
             f"Generate a {report_type} report titled '{title}'.\n"

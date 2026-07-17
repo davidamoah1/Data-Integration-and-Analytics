@@ -1,13 +1,14 @@
 """Base AI provider interface — all providers implement this contract."""
 
 from abc import ABC, abstractmethod
+from collections.abc import Generator
 from dataclasses import dataclass, field
-from typing import Optional, Generator
 
 
 @dataclass
 class LLMResponse:
     """Standardized response from any LLM provider."""
+
     content: str
     provider: str
     model: str
@@ -45,9 +46,14 @@ class BaseProvider(ABC):
         ...
 
     @abstractmethod
-    def chat(self, messages: list[dict], model: Optional[str] = None,
-             temperature: float = 0.7, max_tokens: int = 4096,
-             stream: bool = False) -> LLMResponse | Generator[str, None, None]:
+    def chat(
+        self,
+        messages: list[dict],
+        model: str | None = None,
+        temperature: float = 0.7,
+        max_tokens: int = 4096,
+        stream: bool = False,
+    ) -> LLMResponse | Generator[str, None, None]:
         """Send a chat completion request.
 
         Args:
