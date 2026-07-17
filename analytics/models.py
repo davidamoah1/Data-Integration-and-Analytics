@@ -1,4 +1,15 @@
-from sqlalchemy import JSON, TIMESTAMP, BigInteger, Boolean, Column, Float, Integer, String, Text, func
+from sqlalchemy import (
+    JSON,
+    TIMESTAMP,
+    BigInteger,
+    Boolean,
+    Column,
+    Float,
+    Integer,
+    String,
+    Text,
+    func,
+)
 
 from shared.database import Base, BigInt
 

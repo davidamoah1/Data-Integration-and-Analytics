@@ -161,6 +161,32 @@ header {visibility: hidden;}
 
 ::-webkit-scrollbar { width:6px; }
 ::-webkit-scrollbar-thumb { background:rgba(102,126,234,0.4); border-radius:4px; }
+
+/* Accessibility — keyboard focus indicators */
+*:focus-visible {
+    outline: 2px solid #a78bfa !important;
+    outline-offset: 2px !important;
+}
+.stButton button:focus-visible {
+    outline: 2px solid #a78bfa !important;
+    outline-offset: 2px !important;
+}
+.stTextInput input:focus-visible,
+.stSelectbox div:focus-visible {
+    outline: 2px solid #a78bfa !important;
+}
+
+/* Accessibility — respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Accessibility — high contrast for KPI labels */
+.kpi-label { color: rgba(255,255,255,0.65); }
+.empty-state-desc { color: rgba(255,255,255,0.55); }
 """
 
 CHART_LAYOUT = dict(

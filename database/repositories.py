@@ -79,6 +79,61 @@ class SalesRepository:
         with self.engine.connect() as conn:
             return pd.read_sql(text(query), conn, params=params)
 
+    def get_sales_paginated(
+        self,
+        region: str | None = None,
+        category: str | None = None,
+        date_from: date | None = None,
+        date_to: date | None = None,
+        page: int = 1,
+        page_size: int = 50,
+    ) -> tuple[pd.DataFrame, int]:
+        """Retrieve a page of sales records with optional filters.
+
+        Uses SQL-level LIMIT/OFFSET for efficient pagination instead of
+        loading all records into memory.
+
+        Args:
+            region: Filter by region name.
+            category: Filter by category name.
+            date_from: Filter orders from this date (inclusive).
+            date_to: Filter orders up to this date (inclusive).
+            page: Page number (1-indexed).
+            page_size: Number of records per page.
+
+        Returns:
+            Tuple of (DataFrame of page records, total count).
+        """
+        where = " WHERE 1=1"
+        params: dict = {}
+
+        if region:
+            where += " AND region = :region"
+            params["region"] = region
+        if category:
+            where += " AND category = :category"
+            params["category"] = category
+        if date_from:
+            where += " AND order_date >= :date_from"
+            params["date_from"] = date_from
+        if date_to:
+            where += " AND order_date <= :date_to"
+            params["date_to"] = date_to
+
+        offset = (page - 1) * page_size
+        params["limit"] = page_size
+        params["offset"] = offset
+
+        count_query = f"SELECT COUNT(*) as total FROM sales{where}"
+        data_query = (
+            f"SELECT * FROM sales{where} ORDER BY order_date DESC " f"LIMIT :limit OFFSET :offset"
+        )
+
+        with self.engine.connect() as conn:
+            total = int(pd.read_sql(text(count_query), conn, params=params).iloc[0]["total"])
+            df = pd.read_sql(text(data_query), conn, params=params)
+        return df, total
+
     def get_existing_order_ids(self) -> set:
         """Get the set of all order_ids currently in the database.
 

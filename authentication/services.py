@@ -768,8 +768,18 @@ def seed_default_data(db: DbSession):
         ("datasets.view", "View Datasets", "datasets", "View datasets"),
         # Analytics
         ("analytics.view", "View Analytics", "analytics", "View analytics"),
-        ("analytics.manage", "Manage Analytics", "analytics", "Create and manage dashboards and KPIs"),
-        ("analytics.export", "Export Analytics", "analytics", "Export dashboards and analytics data"),
+        (
+            "analytics.manage",
+            "Manage Analytics",
+            "analytics",
+            "Create and manage dashboards and KPIs",
+        ),
+        (
+            "analytics.export",
+            "Export Analytics",
+            "analytics",
+            "Export dashboards and analytics data",
+        ),
         # AI
         ("ai.use", "Use AI Features", "ai", "Access AI predictions and insights"),
         # Settings

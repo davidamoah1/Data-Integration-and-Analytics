@@ -19,6 +19,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 # Set env to use sqlite for tests
 os.environ["DB_TYPE"] = "sqlite"
 os.environ["SQLITE_DB_PATH"] = "test_auth.db"
+os.environ["PYTEST_RUNNING"] = "1"
 
 import ai.models  # noqa: F401
 import audit.models  # noqa: F401

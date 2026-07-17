@@ -49,6 +49,8 @@ class AIConversation(Base):
     created_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
     updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now(), nullable=False)
 
+    __table_args__ = (Index("idx_conv_user_active", "user_id", "is_active"),)
+
 
 class AIMessage(Base):
     """Individual messages within an AI conversation."""
@@ -67,6 +69,8 @@ class AIMessage(Base):
     confidence_score = Column(Float, nullable=True)
     feedback = Column(String(20), nullable=True)  # positive, negative, null
     created_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
+
+    __table_args__ = (Index("idx_msg_conv_created", "conversation_id", "created_at"),)
 
 
 class AIProviderConfig(Base):

@@ -13,14 +13,21 @@ from fastapi.security import APIKeyHeader, APIKeyQuery
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
 api_key_query = APIKeyQuery(name="api_key", auto_error=False)
 
+_DEV_KEY = "dev-api-key-change-in-production"
+
 
 def _get_valid_api_key() -> str:
-    """Get the valid API key from environment, generating a default if not set.
+    """Get the valid API key from environment.
 
-    Returns:
-        The valid API key string.
+    In production (DB_TYPE=mysql), the default dev key is rejected.
     """
-    return os.getenv("API_KEY", "dev-api-key-change-in-production")
+    key = os.getenv("API_KEY", _DEV_KEY)
+    if os.getenv("DB_TYPE", "").lower() == "mysql" and key == _DEV_KEY:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="API_KEY environment variable must be set in production.",
+        )
+    return key
 
 
 def get_api_key(

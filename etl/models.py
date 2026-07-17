@@ -10,6 +10,7 @@ from sqlalchemy import (
     TIMESTAMP,
     BigInteger,
     Column,
+    Index,
     Integer,
     String,
     Text,
@@ -97,6 +98,11 @@ class ETLJob(Base):
     duration_seconds = Column(Integer, nullable=True)
     created_by = Column(BigInteger, nullable=True)
     created_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
+
+    __table_args__ = (
+        Index("idx_job_status_created", "status", "created_at"),
+        Index("idx_job_pipeline_status", "pipeline_id", "status"),
+    )
 
 
 class ETLImportTemplate(Base):

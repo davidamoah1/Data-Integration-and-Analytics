@@ -30,11 +30,17 @@ from datetime import date, datetime, timezone
 
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from config import validate_config
 from shared.context import correlation_id, request_id
+from shared.middleware import (
+    RateLimitMiddleware,
+    RequestLoggingMiddleware,
+    SecurityHeadersMiddleware,
+)
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -128,7 +134,16 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 app.add_middleware(RequestContextMiddleware)
+app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(RequestLoggingMiddleware)
+_is_test_env = os.getenv("PYTEST_RUNNING", "").lower() in ("1", "true", "yes")
+if not _is_test_env:
+    app.add_middleware(
+        RateLimitMiddleware,
+        requests_per_minute=int(os.getenv("RATE_LIMIT_RPM", "120")),
+    )
 
 
 @app.exception_handler(HTTPException)
@@ -156,8 +171,14 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=allow_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=[
+        "Authorization",
+        "Content-Type",
+        "X-API-Key",
+        "X-Correlation-ID",
+        "X-Request-ID",
+    ],
 )
 
 # Include Phase 4 routers
@@ -212,6 +233,108 @@ async def health_check(repo: SalesRepository = Depends(get_sales_repo)):
         )
 
 
+@app.get("/ready", tags=["System"])
+async def readiness_check():
+    """Check readiness of all subsystems (database, ETL, AI).
+
+    Returns 200 if all critical subsystems are operational, 503 otherwise.
+    Intentionally public for orchestration probes.
+    """
+    checks: dict[str, dict] = {}
+    overall = True
+
+    try:
+        from sqlalchemy import text
+
+        from shared.database import get_engine
+
+        engine = get_engine()
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        checks["database"] = {"status": "ready"}
+    except Exception as e:
+        checks["database"] = {"status": "not_ready", "error": str(e)}
+        overall = False
+
+    try:
+        from etl.models import ETLPipeline
+        from shared.database import get_session_factory
+
+        factory = get_session_factory()
+        db = factory()
+        try:
+            db.query(ETLPipeline).limit(1).count()
+            checks["etl"] = {"status": "ready"}
+        finally:
+            db.close()
+    except Exception as e:
+        checks["etl"] = {"status": "not_ready", "error": str(e)}
+        overall = False
+
+    try:
+        from ai.models import AIProviderConfig
+        from shared.database import get_session_factory
+
+        factory = get_session_factory()
+        db = factory()
+        try:
+            db.query(AIProviderConfig).limit(1).count()
+            checks["ai"] = {"status": "ready"}
+        finally:
+            db.close()
+    except Exception as e:
+        checks["ai"] = {"status": "not_ready", "error": str(e)}
+        overall = False
+
+    status_code = 200 if overall else 503
+    return JSONResponse(
+        status_code=status_code,
+        content={
+            "status": "ready" if overall else "not_ready",
+            "checks": checks,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        },
+    )
+
+
+@app.get("/metrics", tags=["System"])
+async def metrics():
+    """Expose basic platform metrics for monitoring.
+
+    Returns counts for key entities. Intentionally public (no sensitive data).
+    """
+    from sqlalchemy import text
+
+    from shared.database import get_engine
+
+    metrics_data: dict[str, int] = {}
+    engine = get_engine()
+    try:
+        with engine.connect() as conn:
+            for table_name in [
+                "etl_pipelines",
+                "etl_jobs",
+                "ai_conversations",
+                "ai_messages",
+                "auth_users",
+                "audit_logs",
+            ]:
+                try:
+                    result = conn.execute(text(f"SELECT COUNT(*) FROM {table_name}"))
+                    metrics_data[table_name] = result.scalar() or 0
+                except Exception:
+                    metrics_data[table_name] = -1
+    except Exception:
+        pass
+
+    return JSONResponse(
+        content={
+            "metrics": metrics_data,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+    )
+
+
 # ──────────────────────────────────────────────
 # Sales Data
 # ──────────────────────────────────────────────
@@ -239,16 +362,17 @@ async def get_sales(
     Returns:
         Paginated list of sales records.
     """
-    df = repo.get_sales_filtered(
-        region=region, category=category, date_from=date_from, date_to=date_to
+    df, total = repo.get_sales_paginated(
+        region=region,
+        category=category,
+        date_from=date_from,
+        date_to=date_to,
+        page=page,
+        page_size=page_size,
     )
-    total = len(df)
-    start = (page - 1) * page_size
-    end = start + page_size
-    page_df = df.iloc[start:end]
 
     records = []
-    for _, row in page_df.iterrows():
+    for _, row in df.iterrows():
         record = SalesRecordResponse(
             order_id=str(row.get("order_id", "")),
             order_date=row.get("order_date"),
