@@ -39,6 +39,35 @@ def seed_demo_data(db: DbSession) -> dict:
     else:
         org_id = existing_org.id
 
+    # 1b. Demo users
+    from authentication.models import User
+    from authentication.repositories import RoleRepository, UserRoleRepository
+    from shared.security import hash_password
+
+    demo_users = [
+        ("demo.admin@democorp.com", "DemoAdmin1!", "Demo Admin", "admin"),
+        ("demo.analyst@democorp.com", "DemoAnalyst1!", "Demo Analyst", "analyst"),
+        ("demo.viewer@democorp.com", "DemoViewer1!", "Demo Viewer", "viewer"),
+    ]
+    role_repo = RoleRepository(db)
+    user_role_repo = UserRoleRepository(db)
+    for email, password, full_name, role_name in demo_users:
+        existing_user = db.query(User).filter(User.email == email).first()
+        if not existing_user:
+            user = User(
+                email=email,
+                password_hash=hash_password(password),
+                full_name=full_name,
+                organization_id=org_id,
+            )
+            db.add(user)
+            db.flush()
+            role = role_repo.get_by_name(role_name)
+            if role:
+                user_role_repo.set_user_roles(user.id, [role.id])
+            created["users"].append(email)
+    db.commit()
+
     # 2. Demo dashboard
     existing_dash = db.query(Dashboard).filter(Dashboard.name == "Sales Performance Demo").first()
     if not existing_dash:

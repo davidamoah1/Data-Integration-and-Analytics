@@ -10,7 +10,7 @@ Provides:
 
 import streamlit as st
 
-from enterprise.industry_packs import get_all_packs, get_pack_names
+from enterprise.industry_packs import get_all_packs, get_pack, get_pack_names
 
 ONBOARDING_STEPS = [
     {"key": "welcome", "title": "Welcome", "icon": "👋", "desc": "Get started with DataFlow"},

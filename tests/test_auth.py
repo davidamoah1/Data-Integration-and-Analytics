@@ -270,3 +270,62 @@ class TestLoginHistory:
         data = response.json()["data"]
         assert isinstance(data, list)
         assert len(data) >= 1
+
+
+class TestSignup:
+    """Tests for the public signup endpoint."""
+
+    def test_signup_success(self, client):
+        """Test successful self-registration."""
+        response = client.post(
+            "/auth/signup",
+            json={
+                "email": "newuser@test.com",
+                "password": "StrongPass1!",
+                "full_name": "New User",
+            },
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["success"] is True
+        assert data["data"]["email"] == "newuser@test.com"
+        assert data["data"]["full_name"] == "New User"
+
+    def test_signup_with_org(self, client):
+        """Test signup with organization creation."""
+        response = client.post(
+            "/auth/signup",
+            json={
+                "email": "orgadmin@test.com",
+                "password": "StrongPass1!",
+                "full_name": "Org Admin",
+                "organization_name": "Test Company Inc",
+            },
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["data"]["organization_id"] is not None
+
+    def test_signup_duplicate_email(self, client):
+        """Test signup with existing email fails."""
+        response = client.post(
+            "/auth/signup",
+            json={
+                "email": "admin@dataflow.io",
+                "password": "StrongPass1!",
+                "full_name": "Duplicate User",
+            },
+        )
+        assert response.status_code == 409
+
+    def test_signup_weak_password(self, client):
+        """Test signup with weak password fails."""
+        response = client.post(
+            "/auth/signup",
+            json={
+                "email": "weakpass@test.com",
+                "password": "weak",
+                "full_name": "Weak Pass User",
+            },
+        )
+        assert response.status_code == 422

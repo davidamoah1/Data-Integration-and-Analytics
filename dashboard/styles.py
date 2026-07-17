@@ -278,4 +278,105 @@ RESPONSIVE_CSS = """
     border-radius: 8px;
 }
 @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+/* RC1: Toast notifications */
+.toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; }
+.toast {
+    background: linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06));
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 12px;
+    padding: 14px 20px;
+    color: rgba(255,255,255,0.9);
+    font-size: 0.88rem;
+    margin-bottom: 10px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    animation: slideIn 0.3s ease-out;
+    max-width: 380px;
+}
+.toast-success { border-left: 3px solid #38ef7d; }
+.toast-warning { border-left: 3px solid #f5576c; }
+.toast-info { border-left: 3px solid #667eea; }
+@keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+/* RC1: Confirmation dialog */
+.confirm-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 9998;
+    display: flex; align-items: center; justify-content: center;
+    animation: fadeIn 0.2s ease-out;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.confirm-dialog {
+    background: linear-gradient(145deg, #1a1a4e, #0f0c29);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 20px;
+    padding: 32px;
+    max-width: 420px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+.confirm-icon { font-size: 2.5rem; margin-bottom: 16px; }
+.confirm-title { font-family: 'Space Grotesk', sans-serif; font-size: 1.2rem; font-weight: 600; color: #fff; margin-bottom: 8px; }
+.confirm-message { color: rgba(255,255,255,0.6); font-size: 0.9rem; line-height: 1.5; margin-bottom: 24px; }
+
+/* RC1: Footer */
+.app-footer {
+    text-align: center;
+    padding: 24px 0 8px 0;
+    margin-top: 40px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.25);
+    font-size: 0.75rem;
+}
+.app-footer a { color: rgba(167,139,250,0.6); text-decoration: none; }
+
+/* RC1: KPI trend indicator */
+.kpi-trend { font-size: 0.72rem; margin-top: 4px; }
+.kpi-trend-up { color: #38ef7d; }
+.kpi-trend-down { color: #f5576c; }
+.kpi-trend-flat { color: rgba(255,255,255,0.4); }
+
+/* RC1: Improved data table styling */
+.stDataFrame { border-radius: 12px; overflow: hidden; }
+.stDataFrame [data-testid="stDataFrameResizable"] {
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+}
+
+/* RC1: Chat input styling */
+.stChatInput textarea {
+    background: rgba(255,255,255,0.05) !important;
+    border-color: rgba(255,255,255,0.12) !important;
+    color: white !important;
+    border-radius: 12px !important;
+}
+
+/* RC1: Tab styling */
+.stTabs [data-baseweb="tab-list"] { gap: 8px; }
+.stTabs [data-baseweb="tab"] {
+    background: rgba(255,255,255,0.04);
+    border-radius: 8px 8px 0 0;
+    padding: 8px 16px;
+    color: rgba(255,255,255,0.6) !important;
+}
+.stTabs [aria-selected="true"] {
+    background: rgba(102,126,234,0.15) !important;
+    color: #a78bfa !important;
+    border-bottom: 2px solid #667eea;
+}
+
+/* RC1: Badge / tag styling */
+.badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+.badge-success { background: rgba(56,239,125,0.15); color: #38ef7d; border: 1px solid rgba(56,239,125,0.3); }
+.badge-warning { background: rgba(245,87,108,0.15); color: #f5576c; border: 1px solid rgba(245,87,108,0.3); }
+.badge-info { background: rgba(102,126,234,0.15); color: #a78bfa; border: 1px solid rgba(102,126,234,0.3); }
 """

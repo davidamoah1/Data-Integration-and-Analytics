@@ -116,7 +116,30 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
     if st.button("Logout", use_container_width=True):
-        logout()
+        st.session_state["show_logout_confirm"] = True
+
+    if st.session_state.get("show_logout_confirm"):
+        st.markdown(
+            """
+        <div class="confirm-overlay">
+            <div class="confirm-dialog">
+                <div class="confirm-icon">🚪</div>
+                <div class="confirm-title">Log out of DataFlow?</div>
+                <div class="confirm-message">You'll need to sign in again to access your dashboards.</div>
+            </div>
+        </div>
+        """,
+            unsafe_allow_html=True,
+        )
+        col_y, col_n = st.columns(2)
+        with col_y:
+            if st.button("Yes, log out", use_container_width=True, type="primary"):
+                st.session_state["show_logout_confirm"] = False
+                logout()
+        with col_n:
+            if st.button("Cancel", use_container_width=True):
+                st.session_state["show_logout_confirm"] = False
+                st.rerun()
 
     st.markdown("---")
 
@@ -190,8 +213,13 @@ if data_source == "Live Database":
             <div class="empty-state-icon">🗄️</div>
             <div class="empty-state-title">Database is empty</div>
             <div class="empty-state-desc">
-                Run the ETL pipeline to populate the database with data.<br>
-                <code>python pipeline/run_pipeline.py</code>
+                No data has been loaded yet. You can:<br><br>
+                <strong>Option 1:</strong> Run the ETL pipeline to load sample data<br>
+                <code>python pipeline/run_pipeline.py</code><br><br>
+                <strong>Option 2:</strong> Switch to <strong>Upload File</strong> mode in the sidebar<br>
+                to analyze your own CSV or Excel file instantly<br><br>
+                <strong>Option 3:</strong> Use the API to seed demo data<br>
+                <code>POST /platform/demo/seed</code>
             </div>
         </div>
         """,
@@ -265,9 +293,12 @@ else:
             <div class="empty-state-icon">📂</div>
             <div class="empty-state-title">No dataset loaded yet</div>
             <div class="empty-state-desc">
-                Upload a CSV or Excel file using the panel on the left to get started.
+                Upload a CSV or Excel file using the panel on the left to get started.<br>
                 The system will automatically detect your columns and build your dashboard instantly.<br><br>
-                Works with sales data, financial records, inventory reports, and more.
+                <strong>Supported formats:</strong> .csv, .xlsx, .xls<br>
+                <strong>Max file size:</strong> 50 MB<br>
+                <strong>Auto-detected columns:</strong> sales/revenue/amount, profit, date, region, category, product, customer<br><br>
+                Works with sales data, financial records, inventory reports, education data, and more.
             </div>
         </div>
         """,
@@ -309,12 +340,26 @@ else:
     if "sales" not in col_map:
         st.markdown(
             '<div class="warning-banner">Could not find a sales or revenue column. '
-            "Make sure your file has a column with sales, revenue, or amount data.</div>",
+            "Select the column that contains your revenue/sales/amount data below.</div>",
             unsafe_allow_html=True,
         )
-        with st.expander("Detected columns in your file"):
+        with st.expander("Map your columns manually", expanded=True):
+            st.write("**Detected columns in your file:**")
             st.write(list(raw_df.columns))
-        st.stop()
+            numeric_cols = raw_df.select_dtypes(include=["number"]).columns.tolist()
+            if numeric_cols:
+                sales_col = st.selectbox(
+                    "Which column contains your revenue/sales data?",
+                    ["— Select a column —"] + numeric_cols,
+                )
+                if sales_col != "— Select a column —":
+                    col_map["sales"] = sales_col
+                    st.success(f"Mapped '{sales_col}' as the sales/revenue column.")
+                else:
+                    st.stop()
+            else:
+                st.error("No numeric columns found in your file. Please check your data.")
+                st.stop()
 
     with st.spinner("Processing your data..."):
         df = DashboardDataService.clean_df(raw_df, col_map)
@@ -476,3 +521,18 @@ st.markdown(
     unsafe_allow_html=True,
 )
 render_copilot_panel()
+
+
+# ──────────────────────────────────────────────
+# Footer
+# ──────────────────────────────────────────────
+st.markdown(
+    """
+    <div class="app-footer">
+        DataFlow v2.0.0 &mdash; Enterprise Data Intelligence Platform<br>
+        <a href="/docs" target="_blank">API Docs</a> &bull; 
+        <a href="https://github.com/davidamoah1/Data-Integration-and-Analytics" target="_blank">GitHub</a>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)

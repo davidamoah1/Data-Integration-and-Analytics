@@ -42,6 +42,13 @@ class VerifyEmailRequest(BaseModel):
     token: str
 
 
+class SignupRequest(BaseModel):
+    email: EmailStr
+    password: str = Field(..., min_length=8)
+    full_name: str = Field(..., min_length=1, max_length=255)
+    organization_name: str | None = Field(None, max_length=200, description="Optional — creates a new org for this user")
+
+
 # --- User -------------------------------------------------------------------
 
 

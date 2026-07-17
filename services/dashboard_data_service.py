@@ -110,7 +110,7 @@ class DashboardDataService:
         cols = {c.lower().replace(" ", "_").replace("-", "_"): c for c in df.columns}
         mapping = {}
         for key, variants in {
-            "sales": ["sales", "revenue", "amount", "total", "sale_amount", "total_sales"],
+            "sales": ["sales", "revenue", "amount", "total", "sale_amount", "total_sales", "total_revenue", "income", "turnover", "gross", "net_revenue", "value", "cost", "fee", "tuition", "price", "grand_total", "net_amount", "balance", "payment"],
             "profit": ["profit", "net_profit", "earnings", "margin"],
             "quantity": ["quantity", "qty", "units", "count", "volume"],
             "discount": ["discount", "disc", "reduction"],
