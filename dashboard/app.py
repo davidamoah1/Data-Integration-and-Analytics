@@ -35,6 +35,7 @@ from dashboard.charts import (
 )
 from dashboard.copilot import render_copilot_panel
 from dashboard.onboarding import get_industry_labels, render_industry_pack_selector, render_onboarding, render_quick_start_checklist
+from dashboard.sector_dashboards import render_sector_dashboard
 from dashboard.styles import DARK_THEME_CSS, RESPONSIVE_CSS
 from dashboard.utils import MAX_UPLOAD_SIZE_BYTES, MAX_UPLOAD_SIZE_MB, sanitize_text
 from services.dashboard_data_service import DashboardDataService
@@ -430,60 +431,10 @@ else:
 
 
 # ──────────────────────────────────────────────
-# KPIs
+# Sector Dashboard (KPIs + Charts)
 # ──────────────────────────────────────────────
-render_kpi_cards(
-    kpis["total_sales"],
-    kpis["total_profit"],
-    kpis["total_orders"],
-    kpis["avg_order_value"],
-    kpis["margin_pct"],
-    labels=labels,
-)
-
-st.markdown("<br>", unsafe_allow_html=True)
-
-
-# ──────────────────────────────────────────────
-# Charts
-# ──────────────────────────────────────────────
-st.markdown(
-    f'<div class="section-header">{labels["performance"]}</div><hr class="section-divider">',
-    unsafe_allow_html=True,
-)
-c1, c2 = st.columns(2)
-with c1:
-    render_revenue_over_time(df, labels=labels)
-with c2:
-    render_revenue_by_category(df, labels=labels)
-
-st.markdown(
-    f'<div class="section-header">{labels["breakdown"]}</div><hr class="section-divider">',
-    unsafe_allow_html=True,
-)
-c3, c4 = st.columns(2)
-with c3:
-    render_profit_by_region(df, labels=labels)
-with c4:
-    render_top_products(df, labels=labels)
-
-if "profit" in df.columns and "sales" in df.columns and "category" in df.columns:
-    st.markdown(
-        f'<div class="section-header">{labels["deep_dive"]}</div><hr class="section-divider">',
-        unsafe_allow_html=True,
-    )
-    c5, c6 = st.columns([3, 2])
-    with c5:
-        render_sales_vs_profit_scatter(df, labels=labels)
-    with c6:
-        render_profit_margin_by_category(df, labels=labels)
-
-if "region" in df.columns and "category" in df.columns and "sales" in df.columns:
-    st.markdown(
-        f'<div class="section-header">{labels["regional"]}</div><hr class="section-divider">',
-        unsafe_allow_html=True,
-    )
-    render_heatmap_sales_region_category(df, labels=labels)
+pack_key = st.session_state.get("active_industry_pack")
+render_sector_dashboard(df, kpis, pack_key=pack_key)
 
 
 # ──────────────────────────────────────────────

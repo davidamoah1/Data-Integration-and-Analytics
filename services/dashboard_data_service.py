@@ -117,9 +117,13 @@ class DashboardDataService:
             "order_id": ["order_id", "id", "order_number", "transaction_id", "orderid"],
             "order_date": ["order_date", "date", "purchase_date", "transaction_date", "created_at"],
             "region": ["region", "area", "zone", "territory", "location"],
-            "category": ["category", "type", "product_type", "segment", "class"],
+            "category": ["category", "type", "product_type", "segment", "class", "program_type", "service_type", "event_type", "project_type"],
             "product_name": ["product_name", "product", "item", "item_name", "description"],
-            "customer_name": ["customer_name", "customer", "client", "buyer"],
+            "customer_name": ["customer_name", "customer", "client", "buyer", "student_name", "patient_name", "member_name", "donor_name", "contractor_name"],
+            "department": ["department", "dept", "ward", "faculty", "ministry"],
+            "insurance_type": ["insurance_type", "insurance", "insurance_provider"],
+            "funding_source": ["funding_source", "funding", "fund_source", "donor_type"],
+            "payment_method": ["payment_method", "payment_type", "payment_mode", "payment"],
         }.items():
             for v in variants:
                 if v in cols:
