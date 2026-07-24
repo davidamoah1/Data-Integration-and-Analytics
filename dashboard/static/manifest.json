@@ -1,0 +1,25 @@
+{
+  "id": "/",
+  "name": "DataFlow Enterprise Intelligence",
+  "short_name": "DataFlow",
+  "description": "Enterprise data intelligence workspace for governed analytics and decision support.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#090b16",
+  "theme_color": "#4f46e5",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/app/static/icons/dataflow-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/app/static/icons/dataflow-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

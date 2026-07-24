@@ -44,7 +44,9 @@ def upgrade() -> None:
     op.create_table(
         "platform_template_installs",
         sa.Column("id", sa.BigInteger(), primary_key=True, autoincrement=True),
-        sa.Column("template_id", sa.BigInteger(), sa.ForeignKey("platform_templates.id"), nullable=False),
+        sa.Column(
+            "template_id", sa.BigInteger(), sa.ForeignKey("platform_templates.id"), nullable=False
+        ),
         sa.Column("organization_id", sa.BigInteger(), nullable=True),
         sa.Column("installed_by", sa.BigInteger(), nullable=False),
         sa.Column("installed_at", sa.TIMESTAMP(), server_default=sa.func.now(), nullable=False),
@@ -59,7 +61,9 @@ def upgrade() -> None:
         sa.Column("resource_type", sa.String(50), nullable=False),
         sa.Column("resource_id", sa.BigInteger(), nullable=False),
         sa.Column("author_id", sa.BigInteger(), nullable=False),
-        sa.Column("parent_id", sa.BigInteger(), sa.ForeignKey("platform_comments.id"), nullable=True),
+        sa.Column(
+            "parent_id", sa.BigInteger(), sa.ForeignKey("platform_comments.id"), nullable=True
+        ),
         sa.Column("body", sa.Text(), nullable=False),
         sa.Column("mentions", sa.JSON(), nullable=True),
         sa.Column("is_resolved", sa.Boolean(), nullable=False, server_default=sa.text("0")),
@@ -70,6 +74,7 @@ def upgrade() -> None:
         batch_op.create_index("ix_platform_comments_resource_type", ["resource_type"])
         batch_op.create_index("ix_platform_comments_resource_id", ["resource_id"])
         batch_op.create_index("ix_platform_comments_author_id", ["author_id"])
+        batch_op.create_index("ix_platform_comments_parent_id", ["parent_id"])
 
     op.create_table(
         "platform_shared_resources",
@@ -85,6 +90,8 @@ def upgrade() -> None:
     with op.batch_alter_table("platform_shared_resources", schema=None) as batch_op:
         batch_op.create_index("ix_platform_shared_resources_resource_type", ["resource_type"])
         batch_op.create_index("ix_platform_shared_resources_resource_id", ["resource_id"])
+        batch_op.create_index("ix_platform_shared_resources_shared_by", ["shared_by"])
+        batch_op.create_index("ix_platform_shared_resources_shared_with_id", ["shared_with_id"])
 
     op.create_table(
         "platform_activity_events",
@@ -121,7 +128,9 @@ def upgrade() -> None:
         sa.Column("updated_at", sa.TIMESTAMP(), server_default=sa.func.now(), nullable=False),
     )
     with op.batch_alter_table("platform_org_branding", schema=None) as batch_op:
-        batch_op.create_index("ix_platform_org_branding_organization_id", ["organization_id"], unique=True)
+        batch_op.create_index(
+            "ix_platform_org_branding_organization_id", ["organization_id"], unique=True
+        )
 
 
 def downgrade() -> None:

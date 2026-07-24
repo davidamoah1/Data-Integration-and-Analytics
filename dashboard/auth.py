@@ -100,51 +100,78 @@ def require_auth():
     if is_authenticated():
         return True
 
-    st.markdown(
-        """
-    <div class="login-container">
-        <div class="login-title">DataFlow</div>
-        <div class="login-subtitle">Sign in to access the dashboard</div>
-    </div>
-    """,
-        unsafe_allow_html=True,
-    )
+    _, login_column, _ = st.columns([1, 1.15, 1])
+    with login_column:
+        st.markdown(
+            """
+        <div class="login-shell">
+            <div class="login-brand-mark">DF</div>
+            <div class="login-eyebrow">ENTERPRISE DATA INTELLIGENCE</div>
+            <div class="login-title">Welcome back</div>
+            <div class="login-subtitle">Sign in to access your dashboards, insights, and governed data workspace.</div>
+        </div>
+        """,
+            unsafe_allow_html=True,
+        )
 
-    users = _load_users()
+        users = _load_users()
+        with st.form("login_form", border=False):
+            username = st.text_input("Username", placeholder="Enter your username", autocomplete="username")
+            password = st.text_input(
+                "Password",
+                type="password",
+                placeholder="Enter your password",
+                autocomplete="current-password",
+            )
+            submitted = st.form_submit_button("Sign in to DataFlow", use_container_width=True)
 
-    with st.form("login_form"):
-        username = st.text_input("Username", placeholder="Enter your username")
-        password = st.text_input("Password", type="password", placeholder="Enter your password")
-        submitted = st.form_submit_button("Sign In", use_container_width=True)
-
-        if submitted:
-            user = users.get(username)
-            if user and _verify_password(password, user["password_hash"]):
-                st.session_state["authenticated"] = True
-                st.session_state["username"] = username
-                st.session_state["role"] = user["role"]
-                st.session_state["user_name"] = user["name"]
-                st.session_state["user_id"] = 1 if username == "admin" else 2
-                st.session_state["permissions"] = (
-                    ["*"] if user["role"] == "admin" else ["dashboards.view", "kpis.view"]
-                )
-                st.session_state["user"] = {
-                    "username": username,
-                    "role": user["role"],
-                    "name": user["name"],
-                    "permissions": st.session_state["permissions"],
-                    "roles": [user["role"]],
-                }
-                st.rerun()
-            else:
-                st.error("Invalid username or password.")
+            if submitted:
+                user = users.get(username)
+                if user and _verify_password(password, user["password_hash"]):
+                    st.session_state["authenticated"] = True
+                    st.session_state["username"] = username
+                    st.session_state["role"] = user["role"]
+                    st.session_state["user_name"] = user["name"]
+                    st.session_state["user_id"] = 1 if username == "admin" else 2
+                    st.session_state["permissions"] = (
+                        ["*"] if user["role"] == "admin" else ["dashboards.view", "kpis.view"]
+                    )
+                    st.session_state["user"] = {
+                        "username": username,
+                        "role": user["role"],
+                        "name": user["name"],
+                        "permissions": st.session_state["permissions"],
+                        "roles": [user["role"]],
+                    }
+                    st.rerun()
+                else:
+                    st.error("Invalid username or password.")
+        st.markdown(
+            '<div class="login-security">Protected workspace <span>•</span> Role-based access</div>',
+            unsafe_allow_html=True,
+        )
 
     return False
 
 
 def logout():
-    """Clear the current session and log out the user."""
-    st.session_state.clear()
+    """Clear authentication and user-scoped state, then return to sign-in."""
+    for key in (
+        "authenticated",
+        "username",
+        "role",
+        "user_name",
+        "user_id",
+        "permissions",
+        "user",
+        "show_logout_confirm",
+        "semantic_dataset_context",
+        "copilot_messages",
+        "copilot_conversation_id",
+        "copilot_assistant",
+        "copilot_assistant_name",
+    ):
+        st.session_state.pop(key, None)
     st.rerun()
 
 

@@ -34,7 +34,6 @@ _etl_service = ETLService()
 def scheduled_job():
     """Execute the ETL pipeline."""
     logger.info("Scheduler triggered the pipeline.")
-    print("\nScheduler triggered the pipeline.")
     try:
         metrics = _etl_service.run_pipeline()
         logger.info(f"Scheduled pipeline completed: {metrics}")

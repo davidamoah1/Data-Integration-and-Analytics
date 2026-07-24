@@ -145,9 +145,22 @@ header {visibility: hidden;}
 .empty-state-title { font-family:'Space Grotesk',sans-serif; font-size:1.4rem; font-weight:600; color:rgba(255,255,255,0.75); margin-bottom:10px; }
 .empty-state-desc { color:rgba(255,255,255,0.4); font-size:0.9rem; line-height:1.7; max-width:440px; margin:0 auto; }
 
-.login-container { max-width:400px; margin:80px auto; background:linear-gradient(145deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03)); border:1px solid rgba(255,255,255,0.12); border-radius:20px; padding:40px; backdrop-filter:blur(12px); }
-.login-title { font-family:'Space Grotesk',sans-serif; font-size:1.8rem; font-weight:700; color:#fff; text-align:center; margin-bottom:8px; }
-.login-subtitle { color:rgba(255,255,255,0.5); text-align:center; font-size:0.9rem; margin-bottom:28px; }
+[data-testid="stMain"] { background:radial-gradient(circle at 12% 12%,rgba(102,126,234,0.2),transparent 34%),radial-gradient(circle at 88% 88%,rgba(17,153,142,0.12),transparent 32%),#090b16; }
+[data-testid="stMainBlockContainer"] { max-width:1200px; padding-top:8vh; }
+.login-shell { text-align:center; padding:1.25rem 1rem 1.6rem; }
+.login-brand-mark { width:58px; height:58px; display:flex; align-items:center; justify-content:center; margin:0 auto 1rem; border:1px solid rgba(167,139,250,0.55); border-radius:18px; background:linear-gradient(145deg,#7c3aed,#4f46e5); color:#fff; font-family:'Space Grotesk',sans-serif; font-size:1.3rem; font-weight:800; box-shadow:0 12px 32px rgba(79,70,229,0.4); }
+.login-eyebrow { color:#a78bfa; font-size:0.68rem; font-weight:800; letter-spacing:0.17em; margin-bottom:0.75rem; }
+.login-title { font-family:'Space Grotesk',sans-serif; font-size:2.1rem; line-height:1.1; font-weight:700; color:#fff; letter-spacing:-0.04em; margin-bottom:0.65rem; }
+.login-subtitle { max-width:360px; margin:0 auto; color:rgba(255,255,255,0.58); text-align:center; font-size:0.94rem; line-height:1.6; }
+[data-testid="stForm"]:has(#login_form) { margin:0 auto; padding:1.65rem; border:1px solid rgba(255,255,255,0.11); border-radius:20px; background:linear-gradient(145deg,rgba(24,28,48,0.88),rgba(14,17,32,0.94)); box-shadow:0 22px 55px rgba(0,0,0,0.25); }
+[data-testid="stForm"]:has(#login_form) [data-testid="stTextInput"] { margin-bottom:0.45rem; }
+[data-testid="stForm"]:has(#login_form) label { color:rgba(255,255,255,0.8) !important; font-size:0.82rem !important; font-weight:650 !important; }
+[data-testid="stForm"]:has(#login_form) input { min-height:46px; border-radius:10px !important; background:rgba(255,255,255,0.055) !important; border:1px solid rgba(255,255,255,0.12) !important; }
+[data-testid="stForm"]:has(#login_form) input:focus { border-color:#8b5cf6 !important; box-shadow:0 0 0 3px rgba(139,92,246,0.18) !important; }
+[data-testid="stForm"]:has(#login_form) [data-testid="stFormSubmitButton"] { margin-top:0.7rem; }
+[data-testid="stForm"]:has(#login_form) [data-testid="stFormSubmitButton"] button { min-height:47px; border-radius:11px !important; font-size:0.94rem; }
+.login-security { margin-top:1.1rem; color:rgba(255,255,255,0.38); text-align:center; font-size:0.72rem; letter-spacing:0.02em; }
+.login-security span { margin:0 0.4rem; color:#8b5cf6; }
 
 .stButton button { background:linear-gradient(135deg,#667eea,#764ba2) !important; color:white !important; border:none !important; border-radius:10px !important; font-weight:600 !important; box-shadow:0 4px 15px rgba(102,126,234,0.35) !important; }
 .stButton button:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(102,126,234,0.45) !important; }
@@ -223,6 +236,10 @@ RESPONSIVE_CSS = """
     .kpi-value { font-size: 1.5rem !important; }
     .section-header { font-size: 1.1rem !important; }
     [data-testid="stSidebar"] { min-width: 250px !important; }
+    [data-testid="stMainBlockContainer"] { padding-top: 2.5rem !important; }
+    .login-shell { padding: 0.5rem 0.5rem 1.2rem !important; }
+    .login-title { font-size: 1.8rem !important; }
+    [data-testid="stForm"]:has(#login_form) { padding: 1.25rem !important; border-radius: 16px !important; }
     .stColumns > div { flex-direction: column !important; }
 }
 @media (max-width: 480px) {

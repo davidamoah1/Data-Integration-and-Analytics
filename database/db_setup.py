@@ -1,7 +1,7 @@
-from sqlalchemy import TIMESTAMP, Column, Date, Float, Index, Integer, String, create_engine, func
+from sqlalchemy import TIMESTAMP, Column, Date, Float, Index, Integer, String, func
 
-from config import DB_URL
-from shared.database import Base
+from etl.logging_config import logger
+from shared.database import Base, get_engine
 
 # Sales and pipeline-run models share the application's authoritative metadata
 # registry so Alembic can discover the complete schema.
@@ -61,7 +61,7 @@ def init_db():
     Returns:
         SQLAlchemy Engine instance.
     """
-    engine = create_engine(DB_URL, pool_pre_ping=True)
+    engine = get_engine()
     Base.metadata.create_all(engine)
 
     # Create application tables and seed defaults
@@ -70,23 +70,24 @@ def init_db():
     import audit.models  # noqa: F401
     import authentication.models  # noqa: F401
     import enterprise.models  # noqa: F401
+    import enterprise.subscription  # noqa: F401
     import etl.models  # noqa: F401
+    import notifications.models  # noqa: F401
     import organizations.models  # noqa: F401
+    import scheduler.models  # noqa: F401
     from authentication.services import seed_default_data
-    from shared.database import get_engine
 
-    shared_engine = get_engine()
-    Base.metadata.create_all(shared_engine)
+    Base.metadata.create_all(engine)
 
     from sqlalchemy.orm import Session as DbSession
 
-    db = DbSession(shared_engine)
+    db = DbSession(engine)
     try:
         seed_default_data(db)
     finally:
         db.close()
 
-    print("Database and tables created successfully. Default data seeded.")
+    logger.info("Database and tables created successfully. Default data seeded.")
     return engine
 
 

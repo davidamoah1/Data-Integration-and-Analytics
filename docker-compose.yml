@@ -14,7 +14,7 @@ services:
       - MYSQL_DATABASE=${MYSQL_DATABASE:-etl_db}
       - MYSQL_USER=${MYSQL_USER:-etl_user}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD:-etl_password}
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-change-this-to-a-strong-random-secret-min-32-chars}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:8501}
       - API_KEY=${API_KEY:-dev-api-key-change-in-production}
       - LOG_LEVEL=${LOG_LEVEL:-INFO}

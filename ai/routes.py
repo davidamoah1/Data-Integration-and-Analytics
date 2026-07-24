@@ -27,7 +27,7 @@ Endpoints:
 
 # ruff: noqa: B008  # FastAPI Depends() calls in default arguments are intentional
 
-from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, Query, Response, UploadFile
 from sqlalchemy.orm import Session as DbSession
 
 from ai.assistants.assistants import list_assistants
@@ -115,9 +115,10 @@ from ai.schemas import (
 )
 from ai.usage import UsageTracker
 from ai.workflow import WorkflowEngine
+from services.report_export_service import ReportExportService
 from shared.database import get_db
 from shared.dependencies import get_current_user, require_permissions
-from shared.security import decrypt_secret, encrypt_secret
+from shared.security import encrypt_secret
 
 router = APIRouter(prefix="/ai", tags=["AI Intelligence Platform"])
 
@@ -158,7 +159,7 @@ async def ai_chat(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"AI request failed: {str(e)}") from e
+        raise HTTPException(status_code=500, detail="AI request failed") from e
 
 
 @router.post("/chat/stream")
@@ -187,7 +188,7 @@ async def ai_chat_stream(
             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
+        raise HTTPException(status_code=500, detail="AI streaming request failed") from e
 
 
 # --- Conversations ----------------------------------------------------------
@@ -589,6 +590,28 @@ async def get_report(
         "format": report.format,
         "created_at": str(report.created_at) if report.created_at else None,
     }
+
+
+@router.get("/reports/{report_id}/export")
+async def export_report(
+    report_id: int,
+    format: str = Query("pdf", pattern="^(csv|excel|xlsx|pdf)$"),
+    db: DbSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Export an AI-generated report to CSV, Excel, or PDF."""
+    report = db.query(AIReportGeneration).filter(AIReportGeneration.id == report_id).first()
+    if not report:
+        raise HTTPException(status_code=404, detail="Report not found")
+    try:
+        data, media_type, ext = ReportExportService().export(report, format)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return Response(
+        content=data,
+        media_type=media_type,
+        headers={"Content-Disposition": f"attachment; filename=report_{report_id}.{ext}"},
+    )
 
 
 # --- AI Decision Center -----------------------------------------------------

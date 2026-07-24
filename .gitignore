@@ -46,3 +46,24 @@ htmlcov/
 venv/
 .venv/
 env/
+
+# Caches and temporary files
+.ruff_cache/
+.mypy_cache/
+.pytype/
+*.tmp
+*.temp
+tmp/
+temp/
+
+# Archives and local uploads
+*.zip
+*.tar.gz
+*.7z
+archive/
+uploads/
+
+# Runtime artifacts
+*.pid
+*.log
+

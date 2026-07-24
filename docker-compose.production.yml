@@ -1,0 +1,116 @@
+version: "3.8"
+
+# AEDIP Production Docker Compose
+# Usage: docker-compose -f docker-compose.production.yml up -d
+
+services:
+  aedip-api:
+    build: .
+    container_name: aedip-api
+    restart: unless-stopped
+    ports:
+      - "${API_PORT:-8000}:8000"
+    env_file:
+      - .env
+    environment:
+      - DB_TYPE=mysql
+    depends_on:
+      - aedip-mysql
+    networks:
+      - aedip-net
+    volumes:
+      - ./logs:/app/logs
+      - ./backups:/app/backups
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  aedip-dashboard:
+    build: .
+    container_name: aedip-dashboard
+    restart: unless-stopped
+    ports:
+      - "8501:8501"
+    env_file:
+      - .env
+    environment:
+      - DB_TYPE=mysql
+    depends_on:
+      - aedip-mysql
+    networks:
+      - aedip-net
+    volumes:
+      - ./logs:/app/logs
+    command: ["streamlit", "run", "dashboard/app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  aedip-mysql:
+    image: mysql:8.0
+    container_name: aedip-mysql
+    restart: unless-stopped
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-change-me-root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-aedip}
+      MYSQL_USER: ${MYSQL_USER:-aedip_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-change-me-in-production}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql-init:/docker-entrypoint-initdb.d
+    networks:
+      - aedip-net
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --max-connections=200
+      --innodb-buffer-pool-size=512M
+      --slow-query-log=ON
+      --long-query-time=2
+      --innodb-file-per-table=1
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  aedip-backup:
+    build: .
+    container_name: aedip-backup
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - DB_TYPE=mysql
+    depends_on:
+      - aedip-mysql
+    networks:
+      - aedip-net
+    volumes:
+      - ./backups:/app/backups
+      - ./scripts:/app/scripts
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        echo "Starting daily backup cron (02:00 UTC)..."
+        while true; do
+          sleep 86400
+          /app/scripts/database_backup.sh /app/backups
+        done
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  aedip-net:
+    driver: bridge

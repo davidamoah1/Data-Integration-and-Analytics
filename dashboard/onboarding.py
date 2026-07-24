@@ -14,10 +14,34 @@ from enterprise.industry_packs import get_all_packs, get_pack, get_pack_names
 
 ONBOARDING_STEPS = [
     {"key": "welcome", "title": "Welcome", "icon": "👋", "desc": "Get started with DataFlow"},
-    {"key": "data_source", "title": "Connect Data", "icon": "🗄️", "desc": "Choose your data source"},
-    {"key": "explore", "title": "Explore Dashboards", "icon": "📊", "desc": "View your analytics"},
-    {"key": "ai_copilot", "title": "Ask AI Copilot", "icon": "🤖", "desc": "Chat with your data"},
-    {"key": "export", "title": "Export Reports", "icon": "📤", "desc": "Download your insights"},
+    {
+        "key": "org_profile",
+        "title": "Organization Profile",
+        "icon": "🏢",
+        "desc": "Set up your organization",
+    },
+    {
+        "key": "user_profile",
+        "title": "Your Profile",
+        "icon": "👤",
+        "desc": "Personalize your account",
+    },
+    {"key": "team_invite", "title": "Invite Your Team", "icon": "👥", "desc": "Add team members"},
+    {
+        "key": "data_import",
+        "title": "Import Data",
+        "icon": "�",
+        "desc": "Upload your first dataset",
+    },
+    {
+        "key": "etl_pipeline",
+        "title": "ETL Pipeline",
+        "icon": "🔄",
+        "desc": "Set up data transformation",
+    },
+    {"key": "dashboard", "title": "First Dashboard", "icon": "📊", "desc": "View your analytics"},
+    {"key": "ai_copilot", "title": "AI Copilot", "icon": "🤖", "desc": "Chat with your data"},
+    {"key": "report", "title": "First Report", "icon": "�", "desc": "Generate insights"},
 ]
 
 QUICK_START_CHECKLIST = [
@@ -126,24 +150,72 @@ def render_setup_wizard():
     if step["key"] == "welcome":
         st.info(
             "DataFlow helps you go from raw data to insights in minutes. "
-            "This quick tour will show you the key features. Let's get started!"
+            "This guided setup will walk you through 8 quick steps to get your organization ready. "
+            "You can skip at any time and explore on your own."
         )
 
-    elif step["key"] == "data_source":
+    elif step["key"] == "org_profile":
         st.info(
-            "DataFlow supports two data sources:\n\n"
-            "1. **Live Database** — Connect to your MySQL or SQLite database\n"
-            "2. **File Upload** — Upload a CSV or Excel file for instant analysis\n\n"
-            "Use the sidebar on the left to choose your data source."
+            "Your organization profile defines how DataFlow appears to your team.\n\n"
+            "1. **Organization Name** — Shown in headers and reports\n"
+            "2. **Industry** — Select from SME, Healthcare, Education, Government, Church, NGO\n"
+            "3. **Timezone & Currency** — Used for date formatting and financial displays\n"
+            "4. **Logo & Branding** — Customize colors and upload your logo\n\n"
+            "Configure this in **Settings → Organization** after setup."
         )
 
-    elif step["key"] == "explore":
+    elif step["key"] == "user_profile":
+        st.info(
+            "Personalize your account:\n\n"
+            "1. **Full Name** — Displayed to team members\n"
+            "2. **Role** — Admin, Analyst, or Viewer\n"
+            "3. **Profile Picture** — Upload or use initials\n"
+            "4. **Language & Timezone** — For localized experience\n\n"
+            "Update this in **Settings → Profile** after setup."
+        )
+
+    elif step["key"] == "team_invite":
+        st.info(
+            "Invite team members to collaborate:\n\n"
+            "1. Go to **Settings → Users**\n"
+            "2. Click **Invite User**\n"
+            "3. Enter their email and assign a role\n"
+            "4. They'll receive an invitation to join your organization\n\n"
+            "Roles available:\n"
+            "- **Admin** — Full access to all settings and data\n"
+            "- **Analyst** — Create dashboards, run ETL, use AI Copilot\n"
+            "- **Viewer** — View dashboards and export data (read-only)"
+        )
+
+    elif step["key"] == "data_import":
+        st.info(
+            "Import your first dataset:\n\n"
+            "1. Use the **sidebar** to select 'Upload File'\n"
+            "2. Drag and drop a CSV or Excel file (max 50MB on trial)\n"
+            "3. DataFlow automatically detects columns and cleans the data\n"
+            "4. Common issues fixed automatically: duplicates, date formats, currency strings\n\n"
+            "Try uploading one of the sample datasets from the `dataset/` folder!"
+        )
+
+    elif step["key"] == "etl_pipeline":
+        st.info(
+            "Set up an ETL pipeline for automated data processing:\n\n"
+            "1. Go to **ETL → Pipelines**\n"
+            "2. Click **Create Pipeline**\n"
+            "3. Define your data source (CSV, database, API)\n"
+            "4. Configure transformation rules\n"
+            "5. Set a schedule (daily, weekly, monthly)\n\n"
+            "DataFlow handles extraction, transformation, and loading automatically."
+        )
+
+    elif step["key"] == "dashboard":
         st.info(
             "Once your data is loaded, you'll see:\n\n"
             "- **KPI Cards** — Key metrics at a glance\n"
-            "- **Charts** — Revenue trends, category breakdowns, regional analysis\n"
+            "- **Charts** — Sector-specific visualizations (different per industry!)\n"
             "- **Data Table** — Browse your records\n"
-            "- **Filters** — Narrow down by region, category, or date range"
+            "- **Filters** — Narrow down by region, category, or date range\n\n"
+            "Select an industry pack in the sidebar to see sector-specific dashboards."
         )
 
     elif step["key"] == "ai_copilot":
@@ -151,34 +223,38 @@ def render_setup_wizard():
             "The AI Copilot lets you ask questions in plain English:\n\n"
             "- 'What are the top selling products?'\n"
             "- 'Show me profit by region'\n"
-            "- 'Explain the revenue trend'\n\n"
-            "The AI understands your data and provides instant insights."
+            "- 'Explain the revenue trend'\n"
+            "- 'Generate a monthly report'\n\n"
+            "The AI understands your data context and provides instant insights with citations."
         )
 
-    elif step["key"] == "export":
+    elif step["key"] == "report":
         st.info(
-            "Export your filtered data anytime:\n\n"
-            "- Click **Download Filtered Data** in the sidebar\n"
-            "- Get a CSV file with your current view\n"
-            "- Use for reports, presentations, or further analysis"
+            "Generate your first report:\n\n"
+            "1. Use the AI Copilot to ask for a report\n"
+            "2. Or go to **Reports → Generate**\n"
+            "3. Choose report type: Executive, Monthly, Department, Custom\n"
+            "4. Download as Markdown, HTML, or PDF\n\n"
+            "Reports include charts, KPIs, and AI-generated insights automatically."
         )
 
     col_prev, col_next = st.columns([1, 2])
     with col_prev:
-        if step_idx > 0:
-            if st.button("← Previous", use_container_width=True):
-                st.session_state["onboarding_step"] = step_idx - 1
-                st.rerun()
+        if step_idx > 0 and st.button("← Previous", use_container_width=True):
+            st.session_state["onboarding_step"] = step_idx - 1
+            st.rerun()
     with col_next:
-        if step_idx < len(ONBOARDING_STEPS) - 1:
-            if st.button("Next →", use_container_width=True, type="primary"):
-                st.session_state["onboarding_step"] = step_idx + 1
-                st.rerun()
-        else:
-            if st.button("✓ Finish Setup", use_container_width=True, type="primary"):
-                st.session_state["onboarding_complete"] = True
-                st.session_state["onboarding_active"] = False
-                st.rerun()
+        if step_idx < len(ONBOARDING_STEPS) - 1 and st.button(
+            "Next →", use_container_width=True, type="primary"
+        ):
+            st.session_state["onboarding_step"] = step_idx + 1
+            st.rerun()
+        elif step_idx == len(ONBOARDING_STEPS) - 1 and st.button(
+            "✓ Finish Setup", use_container_width=True, type="primary"
+        ):
+            st.session_state["onboarding_complete"] = True
+            st.session_state["onboarding_active"] = False
+            st.rerun()
 
 
 def render_quick_start_checklist():
@@ -199,7 +275,6 @@ def render_quick_start_checklist():
     for item in QUICK_START_CHECKLIST:
         key = item["key"]
         is_done = st.session_state["checklist"].get(key, False)
-        icon = "✅" if is_done else "⬜"
         if st.checkbox(f"{item['label']}", value=is_done, key=f"checklist_{key}"):
             st.session_state["checklist"][key] = True
         else:
@@ -240,46 +315,121 @@ def render_industry_pack_selector():
 
 INDUSTRY_LABELS = {
     "sme": {
-        "revenue": "Revenue", "profit": "Profit", "orders": "Orders",
-        "avg_order": "Avg Order Value", "performance": "Sales Performance",
-        "breakdown": "Profit and Regional Breakdown", "deep_dive": "Deep Dive Analysis",
-        "regional": "Regional Analysis", "category_label": "Category",
-        "product_label": "Top Products", "region_label": "Region",
+        "revenue": "Revenue",
+        "profit": "Profit",
+        "orders": "Orders",
+        "avg_order": "Avg Order Value",
+        "performance": "Sales Performance",
+        "breakdown": "Profit and Regional Breakdown",
+        "deep_dive": "Deep Dive Analysis",
+        "regional": "Regional Analysis",
+        "category_label": "Category",
+        "product_label": "Top Products",
+        "region_label": "Region",
     },
     "education": {
-        "revenue": "Tuition Revenue", "profit": "Net Revenue", "orders": "Transactions",
-        "avg_order": "Avg Payment", "performance": "Enrollment & Revenue Performance",
-        "breakdown": "Department and Regional Breakdown", "deep_dive": "Deep Dive Analysis",
-        "regional": "Regional Analysis", "category_label": "Program Type",
-        "product_label": "Top Departments", "region_label": "Region",
+        "revenue": "Tuition Revenue",
+        "profit": "Net Revenue",
+        "orders": "Transactions",
+        "avg_order": "Avg Payment",
+        "performance": "Enrollment & Revenue Performance",
+        "breakdown": "Department and Regional Breakdown",
+        "deep_dive": "Deep Dive Analysis",
+        "regional": "Regional Analysis",
+        "category_label": "Program Type",
+        "product_label": "Top Departments",
+        "region_label": "Region",
     },
     "healthcare": {
-        "revenue": "Billing Amount", "profit": "Net Billing", "orders": "Transactions",
-        "avg_order": "Avg Bill Amount", "performance": "Billing Performance",
-        "breakdown": "Department and Regional Breakdown", "deep_dive": "Deep Dive Analysis",
-        "regional": "Regional Analysis", "category_label": "Service Type",
-        "product_label": "Top Departments", "region_label": "Region",
+        "revenue": "Billing Amount",
+        "profit": "Net Billing",
+        "orders": "Transactions",
+        "avg_order": "Avg Bill Amount",
+        "performance": "Billing Performance",
+        "breakdown": "Department and Regional Breakdown",
+        "deep_dive": "Deep Dive Analysis",
+        "regional": "Regional Analysis",
+        "category_label": "Service Type",
+        "product_label": "Top Departments",
+        "region_label": "Region",
     },
     "government": {
-        "revenue": "Spending Amount", "profit": "Net Spending", "orders": "Projects",
-        "avg_order": "Avg Project Cost", "performance": "Spending Performance",
-        "breakdown": "Department and Regional Breakdown", "deep_dive": "Deep Dive Analysis",
-        "regional": "Regional Analysis", "category_label": "Project Type",
-        "product_label": "Top Departments", "region_label": "Region",
+        "revenue": "Spending Amount",
+        "profit": "Net Spending",
+        "orders": "Projects",
+        "avg_order": "Avg Project Cost",
+        "performance": "Spending Performance",
+        "breakdown": "Department and Regional Breakdown",
+        "deep_dive": "Deep Dive Analysis",
+        "regional": "Regional Analysis",
+        "category_label": "Project Type",
+        "product_label": "Top Departments",
+        "region_label": "Region",
     },
     "church": {
-        "revenue": "Offerings", "profit": "Net Offerings", "orders": "Transactions",
-        "avg_order": "Avg Offering", "performance": "Offerings Performance",
-        "breakdown": "Department and Regional Breakdown", "deep_dive": "Deep Dive Analysis",
-        "regional": "Regional Analysis", "category_label": "Event Type",
-        "product_label": "Top Departments", "region_label": "Region",
+        "revenue": "Offerings",
+        "profit": "Net Offerings",
+        "orders": "Transactions",
+        "avg_order": "Avg Offering",
+        "performance": "Offerings Performance",
+        "breakdown": "Department and Regional Breakdown",
+        "deep_dive": "Deep Dive Analysis",
+        "regional": "Regional Analysis",
+        "category_label": "Event Type",
+        "product_label": "Top Departments",
+        "region_label": "Region",
     },
     "ngo": {
-        "revenue": "Donations", "profit": "Net Donations", "orders": "Transactions",
-        "avg_order": "Avg Donation", "performance": "Donations Performance",
-        "breakdown": "Program and Regional Breakdown", "deep_dive": "Deep Dive Analysis",
-        "regional": "Regional Analysis", "category_label": "Program Type",
-        "product_label": "Top Programs", "region_label": "Region",
+        "revenue": "Donations",
+        "profit": "Net Donations",
+        "orders": "Transactions",
+        "avg_order": "Avg Donation",
+        "performance": "Donations Performance",
+        "breakdown": "Program and Regional Breakdown",
+        "deep_dive": "Deep Dive Analysis",
+        "regional": "Regional Analysis",
+        "category_label": "Program Type",
+        "product_label": "Top Programs",
+        "region_label": "Region",
+    },
+    "retail": {
+        "revenue": "Revenue",
+        "profit": "Profit",
+        "orders": "Orders",
+        "avg_order": "Avg Order Value",
+        "performance": "Sales Performance",
+        "breakdown": "Profit and Regional Breakdown",
+        "deep_dive": "Deep Dive Analysis",
+        "regional": "Regional Analysis",
+        "category_label": "Category",
+        "product_label": "Top Products",
+        "region_label": "Region",
+    },
+    "manufacturing": {
+        "revenue": "Total Production",
+        "profit": "Net Yield Value",
+        "orders": "Active Machines",
+        "avg_order": "Utilization Rate",
+        "performance": "Production Performance",
+        "breakdown": "Machine & Downtime Breakdown",
+        "deep_dive": "Yield & Output Analysis",
+        "regional": "Regional Production Analysis",
+        "category_label": "Machine Line",
+        "product_label": "Top Machines",
+        "region_label": "Plant",
+    },
+    "agriculture": {
+        "revenue": "Total Harvest",
+        "profit": "Harvest Value",
+        "orders": "Farms",
+        "avg_order": "Yield / Hectare",
+        "performance": "Yield & Harvest Performance",
+        "breakdown": "Farm & Crop Breakdown",
+        "deep_dive": "Livestock & Weather Analysis",
+        "regional": "Regional Agriculture Analysis",
+        "category_label": "Crop Type",
+        "product_label": "Top Crops",
+        "region_label": "Region",
     },
 }
 

@@ -23,8 +23,13 @@ random.seed(42)
 OUTPUT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 MESSY_DATES = [
-    "%Y-%m-%d", "%m/%d/%Y", "%d-%m-%Y", "%m/%d/%y",
-    "%B %d, %Y", "%d %b %Y", "%Y/%m/%d",
+    "%Y-%m-%d",
+    "%m/%d/%Y",
+    "%d-%m-%Y",
+    "%m/%d/%y",
+    "%B %d, %Y",
+    "%d %b %Y",
+    "%Y/%m/%d",
 ]
 MESSY_NUMBERS = ["N/A", "TBD", "", "unknown", "null", "-", "N/A"]
 MESSY_TEXT = ["", "  ", "N/A", "Unknown", "TBD", "null", "None", "  -  "]
@@ -141,19 +146,21 @@ def generate_education():
         quantity = random.randint(1, 6)
         payment = net_tuition * quantity
 
-        rows.append({
-            "Transaction ID": f"TXN{10000 + i}",
-            "Date": messy_date(datetime(2022, 1, 1), datetime(2024, 12, 31)),
-            "Student Name": messy_text(random.choice(student_names)),
-            "Department": messy_text(dept),
-            "Program Type": messy_text(category),
-            "Region": messy_text(random.choice(regions)),
-            "Tuition": messy_number(tuition),
-            "Discount": messy_number(discount),
-            "Quantity": messy_int(quantity),
-            "Payment": messy_number(payment),
-            "Payment Method": messy_text(random.choice(payment_methods)),
-        })
+        rows.append(
+            {
+                "Transaction ID": f"TXN{10000 + i}",
+                "Date": messy_date(datetime(2022, 1, 1), datetime(2024, 12, 31)),
+                "Student Name": messy_text(random.choice(student_names)),
+                "Department": messy_text(dept),
+                "Program Type": messy_text(category),
+                "Region": messy_text(random.choice(regions)),
+                "Tuition": messy_number(tuition),
+                "Discount": messy_number(discount),
+                "Quantity": messy_int(quantity),
+                "Payment": messy_number(payment),
+                "Payment Method": messy_text(random.choice(payment_methods)),
+            }
+        )
 
     rows = inject_duplicates(rows, 0.05)
     rows = inject_empty_rows(rows, 0.02)
@@ -172,9 +179,25 @@ def generate_education():
 # ──────────────────────────────────────────────
 def generate_healthcare():
     regions = ["North", "South", "East", "West", "Central"]
-    departments = ["Cardiology", "Orthopedics", "Pediatrics", "Oncology", "Emergency", "Radiology", "General"]
+    departments = [
+        "Cardiology",
+        "Orthopedics",
+        "Pediatrics",
+        "Oncology",
+        "Emergency",
+        "Radiology",
+        "General",
+    ]
     patient_names = [f"Patient_{i:04d}" for i in range(1, 901)]
-    service_types = ["Consultation", "Surgery", "Lab Test", "Imaging", "Therapy", "Vaccination", "Emergency Care"]
+    service_types = [
+        "Consultation",
+        "Surgery",
+        "Lab Test",
+        "Imaging",
+        "Therapy",
+        "Vaccination",
+        "Emergency Care",
+    ]
     insurance = ["NHIS", "Private", "Self-Pay", "Corporate"]
 
     rows = []
@@ -201,19 +224,21 @@ def generate_healthcare():
         quantity = random.randint(1, 4)
         total = net_amount * quantity
 
-        rows.append({
-            "Transaction ID": f"HCR{20000 + i}",
-            "Date": messy_date(datetime(2022, 1, 1), datetime(2024, 12, 31)),
-            "Patient Name": messy_text(random.choice(patient_names)),
-            "Department": messy_text(random.choice(departments)),
-            "Service Type": messy_text(service),
-            "Region": messy_text(random.choice(regions)),
-            "Amount": messy_number(amount),
-            "Discount": messy_number(discount),
-            "Quantity": messy_int(quantity),
-            "Total": messy_number(total),
-            "Insurance Type": messy_text(random.choice(insurance)),
-        })
+        rows.append(
+            {
+                "Transaction ID": f"HCR{20000 + i}",
+                "Date": messy_date(datetime(2022, 1, 1), datetime(2024, 12, 31)),
+                "Patient Name": messy_text(random.choice(patient_names)),
+                "Department": messy_text(random.choice(departments)),
+                "Service Type": messy_text(service),
+                "Region": messy_text(random.choice(regions)),
+                "Amount": messy_number(amount),
+                "Discount": messy_number(discount),
+                "Quantity": messy_int(quantity),
+                "Total": messy_number(total),
+                "Insurance Type": messy_text(random.choice(insurance)),
+            }
+        )
 
     rows = inject_duplicates(rows, 0.05)
     rows = inject_empty_rows(rows, 0.02)
@@ -232,8 +257,23 @@ def generate_healthcare():
 # ──────────────────────────────────────────────
 def generate_government():
     regions = ["North", "South", "East", "West", "Central"]
-    departments = ["Infrastructure", "Education", "Health", "Defense", "Agriculture", "Energy", "Transport"]
-    project_types = ["Road Construction", "School Building", "Hospital Project", "Water Supply", "Rural Electrification", "Public Transport"]
+    departments = [
+        "Infrastructure",
+        "Education",
+        "Health",
+        "Defense",
+        "Agriculture",
+        "Energy",
+        "Transport",
+    ]
+    project_types = [
+        "Road Construction",
+        "School Building",
+        "Hospital Project",
+        "Water Supply",
+        "Rural Electrification",
+        "Public Transport",
+    ]
     contractors = [f"Contractor_{i:03d}" for i in range(1, 101)]
 
     rows = []
@@ -258,18 +298,20 @@ def generate_government():
         quantity = random.randint(1, 12)
         total = net_amount * quantity
 
-        rows.append({
-            "Transaction ID": f"GOV{30000 + i}",
-            "Date": messy_date(datetime(2022, 1, 1), datetime(2024, 12, 31)),
-            "Contractor Name": messy_text(random.choice(contractors)),
-            "Department": messy_text(random.choice(departments)),
-            "Project Type": messy_text(project),
-            "Region": messy_text(random.choice(regions)),
-            "Amount": messy_number(amount),
-            "Discount": messy_number(discount),
-            "Quantity": messy_int(quantity),
-            "Total": messy_number(total),
-        })
+        rows.append(
+            {
+                "Transaction ID": f"GOV{30000 + i}",
+                "Date": messy_date(datetime(2022, 1, 1), datetime(2024, 12, 31)),
+                "Contractor Name": messy_text(random.choice(contractors)),
+                "Department": messy_text(random.choice(departments)),
+                "Project Type": messy_text(project),
+                "Region": messy_text(random.choice(regions)),
+                "Amount": messy_number(amount),
+                "Discount": messy_number(discount),
+                "Quantity": messy_int(quantity),
+                "Total": messy_number(total),
+            }
+        )
 
     rows = inject_duplicates(rows, 0.05)
     rows = inject_empty_rows(rows, 0.02)
@@ -288,8 +330,22 @@ def generate_government():
 # ──────────────────────────────────────────────
 def generate_church():
     regions = ["North", "South", "East", "West", "Central"]
-    event_types = ["Sunday Service", "Midweek Service", "Special Program", "Conference", "Outreach", "Building Fund"]
-    departments = ["Main Sanctuary", "Youth Ministry", "Children's Church", "Music Ministry", "Outreach", "Administration"]
+    event_types = [
+        "Sunday Service",
+        "Midweek Service",
+        "Special Program",
+        "Conference",
+        "Outreach",
+        "Building Fund",
+    ]
+    departments = [
+        "Main Sanctuary",
+        "Youth Ministry",
+        "Children's Church",
+        "Music Ministry",
+        "Outreach",
+        "Administration",
+    ]
     member_names = [f"Member_{i:04d}" for i in range(1, 601)]
     payment_methods = ["Cash", "Bank Transfer", "Mobile Money", "Cheque"]
 
@@ -311,19 +367,21 @@ def generate_church():
         quantity = random.randint(1, 4)
         total = amount * quantity
 
-        rows.append({
-            "Transaction ID": f"CHC{40000 + i}",
-            "Date": messy_date(datetime(2022, 1, 1), datetime(2024, 12, 31)),
-            "Member Name": messy_text(random.choice(member_names)),
-            "Department": messy_text(random.choice(departments)),
-            "Event Type": messy_text(event),
-            "Region": messy_text(random.choice(regions)),
-            "Amount": messy_number(amount),
-            "Discount": messy_number(0),
-            "Quantity": messy_int(quantity),
-            "Total": messy_number(total),
-            "Payment Method": messy_text(random.choice(payment_methods)),
-        })
+        rows.append(
+            {
+                "Transaction ID": f"CHC{40000 + i}",
+                "Date": messy_date(datetime(2022, 1, 1), datetime(2024, 12, 31)),
+                "Member Name": messy_text(random.choice(member_names)),
+                "Department": messy_text(random.choice(departments)),
+                "Event Type": messy_text(event),
+                "Region": messy_text(random.choice(regions)),
+                "Amount": messy_number(amount),
+                "Discount": messy_number(0),
+                "Quantity": messy_int(quantity),
+                "Total": messy_number(total),
+                "Payment Method": messy_text(random.choice(payment_methods)),
+            }
+        )
 
     rows = inject_duplicates(rows, 0.05)
     rows = inject_empty_rows(rows, 0.02)
@@ -342,7 +400,15 @@ def generate_church():
 # ──────────────────────────────────────────────
 def generate_ngo():
     regions = ["North", "South", "East", "West", "Central", "International"]
-    program_types = ["Education Support", "Health Outreach", "Water Project", "Food Aid", "Shelter", "Skills Training", "Emergency Relief"]
+    program_types = [
+        "Education Support",
+        "Health Outreach",
+        "Water Project",
+        "Food Aid",
+        "Shelter",
+        "Skills Training",
+        "Emergency Relief",
+    ]
     donors = [f"Donor_{i:03d}" for i in range(1, 201)]
     funding_sources = ["Individual", "Corporate", "Grant", "Government", "International Aid"]
 
@@ -370,18 +436,20 @@ def generate_ngo():
         quantity = random.randint(1, 10)
         total = net_amount * quantity
 
-        rows.append({
-            "Transaction ID": f"NGO{50000 + i}",
-            "Date": messy_date(datetime(2022, 1, 1), datetime(2024, 12, 31)),
-            "Donor Name": messy_text(random.choice(donors)),
-            "Program Type": messy_text(program),
-            "Region": messy_text(random.choice(regions)),
-            "Amount": messy_number(amount),
-            "Discount": messy_number(discount),
-            "Quantity": messy_int(quantity),
-            "Total": messy_number(total),
-            "Funding Source": messy_text(random.choice(funding_sources)),
-        })
+        rows.append(
+            {
+                "Transaction ID": f"NGO{50000 + i}",
+                "Date": messy_date(datetime(2022, 1, 1), datetime(2024, 12, 31)),
+                "Donor Name": messy_text(random.choice(donors)),
+                "Program Type": messy_text(program),
+                "Region": messy_text(random.choice(regions)),
+                "Amount": messy_number(amount),
+                "Discount": messy_number(discount),
+                "Quantity": messy_int(quantity),
+                "Total": messy_number(total),
+                "Funding Source": messy_text(random.choice(funding_sources)),
+            }
+        )
 
     rows = inject_duplicates(rows, 0.05)
     rows = inject_empty_rows(rows, 0.02)

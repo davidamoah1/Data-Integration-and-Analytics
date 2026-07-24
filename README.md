@@ -1,9 +1,10 @@
-# DataFlow — Enterprise Data Intelligence Platform (AEDIP)
+# DataFlow — Enterprise Data Intelligence Platform (AEDIP) v1.0.0
 
-A production-ready ETL pipeline and business intelligence platform that
-automatically extracts, transforms, and loads sales data into a database
-(SQLite for dev, MySQL for production), with a Streamlit dashboard,
-REST API, AI Copilot, scheduling, and monitoring.
+A production-ready ETL, analytics, and AI platform that ingests any tabular
+dataset, automatically maps business semantics, and generates governed KPIs and
+dashboards. It ships with a FastAPI REST layer, Streamlit dashboard, AI Copilot,
+job scheduling, audit logging, and multi-tenant IAM (SQLite for dev, MySQL for
+production).
 
 ---
 
@@ -36,7 +37,7 @@ etl_project/
 ├── audit/                        # Audit logging
 ├── shared/                       # Shared utilities (security, database, middleware, response)
 ├── monitoring/                   # Health checks
-├── tests/                        # Comprehensive test suite (270+ tests)
+├── tests/                        # Comprehensive test suite (430+ tests)
 ├── logs/                         # Application logs
 └── docs/                         # Documentation (audit report, architecture)
 ```

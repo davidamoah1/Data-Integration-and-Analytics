@@ -20,8 +20,7 @@ def extract_data() -> pd.DataFrame:
             raise FileNotFoundError(f"Raw data file not found at: {RAW_DATA_PATH}")
 
         df = pd.read_csv(RAW_DATA_PATH, encoding="latin-1")
-        logger.info(f"Extract: Successfully loaded {len(df)} rows from {RAW_DATA_PATH}")
-        print(f"Extract complete. {len(df)} rows loaded.")
+        logger.info(f"Extract complete. {len(df)} rows loaded.")
         return df
 
     except Exception as e:

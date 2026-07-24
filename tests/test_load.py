@@ -21,12 +21,6 @@ def temp_sqlite_db(tmp_path, monkeypatch):
     monkeypatch.setattr(config, "DB_URL", db_url)
     monkeypatch.setattr(config, "DB_TYPE", "sqlite")
 
-    # Patch DB_URL in modules that imported it at module level
-    from etl import load as load_mod
-
-    monkeypatch.setattr(load_mod, "DB_URL", db_url)
-    monkeypatch.setattr(load_mod, "DB_TYPE", "sqlite")
-
     from database.db_setup import Base
 
     engine = create_engine(db_url)

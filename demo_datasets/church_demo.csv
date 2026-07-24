@@ -1,0 +1,201 @@
+member_id,member_name,visitor,branch,ministry,tithe,offering,event,date
+1,Member 001,Visitor 001,Branch A,Prayer,994,299,Concert,2024-01-01
+2,Member 002,Visitor 002,Branch D,Outreach,222,405,Service,2024-01-02
+3,Member 003,Visitor 003,Branch C,Ushering,611,129,Service,2024-01-03
+4,Member 004,Visitor 004,Branch D,Ushering,157,171,Bible Study,2024-01-04
+5,Member 005,Visitor 005,Branch A,Music,780,197,Concert,2024-01-05
+6,Member 006,Visitor 006,Branch B,Outreach,850,148,Concert,2024-01-06
+7,Member 007,Visitor 007,Branch A,Ushering,739,423,Bible Study,2024-01-07
+8,Member 008,Visitor 008,Branch B,Music,850,407,Charity Drive,2024-01-08
+9,Member 009,Visitor 009,Branch D,Prayer,417,206,Service,2024-01-09
+10,Member 010,Visitor 010,Branch D,Ushering,961,191,Concert,2024-01-10
+11,Member 011,Visitor 011,Branch D,Music,88,63,Charity Drive,2024-01-11
+12,Member 012,Visitor 012,Branch B,Music,316,482,Concert,2024-01-12
+13,Member 013,Visitor 013,Branch C,Outreach,176,293,Charity Drive,2024-01-13
+14,Member 014,Visitor 014,Branch C,Music,587,107,Charity Drive,2024-01-14
+15,Member 015,Visitor 015,Branch C,Ushering,256,308,Service,2024-01-15
+16,Member 016,Visitor 016,Branch A,Youth,590,284,Concert,2024-01-16
+17,Member 017,Visitor 017,Branch A,Prayer,864,97,Concert,2024-01-17
+18,Member 018,Visitor 018,Branch B,Ushering,879,354,Charity Drive,2024-01-18
+19,Member 019,Visitor 019,Branch A,Ushering,408,398,Bible Study,2024-01-19
+20,Member 020,Visitor 020,Branch B,Prayer,703,286,Concert,2024-01-20
+21,Member 021,Visitor 021,Branch D,Prayer,928,18,Service,2024-01-21
+22,Member 022,Visitor 022,Branch B,Music,563,492,Bible Study,2024-01-22
+23,Member 023,Visitor 023,Branch A,Ushering,349,377,Concert,2024-01-23
+24,Member 024,Visitor 024,Branch D,Music,403,241,Service,2024-01-24
+25,Member 025,Visitor 025,Branch D,Outreach,783,487,Bible Study,2024-01-25
+26,Member 026,Visitor 026,Branch B,Music,767,367,Concert,2024-01-26
+27,Member 027,Visitor 027,Branch C,Outreach,153,112,Service,2024-01-27
+28,Member 028,Visitor 028,Branch A,Youth,819,229,Bible Study,2024-01-28
+29,Member 029,Visitor 029,Branch A,Ushering,715,413,Concert,2024-01-29
+30,Member 030,Visitor 030,Branch C,Outreach,751,154,Bible Study,2024-01-30
+31,Member 031,Visitor 031,Branch A,Youth,90,430,Charity Drive,2024-01-31
+32,Member 032,Visitor 032,Branch C,Prayer,522,359,Charity Drive,2024-02-01
+33,Member 033,Visitor 033,Branch C,Music,773,40,Bible Study,2024-02-02
+34,Member 034,Visitor 034,Branch D,Youth,364,424,Charity Drive,2024-02-03
+35,Member 035,Visitor 035,Branch D,Outreach,64,439,Charity Drive,2024-02-04
+36,Member 036,Visitor 036,Branch B,Ushering,110,412,Bible Study,2024-02-05
+37,Member 037,Visitor 037,Branch D,Prayer,457,412,Charity Drive,2024-02-06
+38,Member 038,Visitor 038,Branch C,Prayer,247,214,Bible Study,2024-02-07
+39,Member 039,Visitor 039,Branch B,Youth,868,349,Bible Study,2024-02-08
+40,Member 040,Visitor 040,Branch A,Youth,87,260,Charity Drive,2024-02-09
+41,Member 041,Visitor 041,Branch C,Music,358,76,Concert,2024-02-10
+42,Member 042,Visitor 042,Branch B,Prayer,629,329,Bible Study,2024-02-11
+43,Member 043,Visitor 043,Branch D,Prayer,797,160,Bible Study,2024-02-12
+44,Member 044,Visitor 044,Branch C,Music,638,128,Concert,2024-02-13
+45,Member 045,Visitor 045,Branch B,Ushering,987,134,Charity Drive,2024-02-14
+46,Member 046,Visitor 046,Branch A,Music,619,342,Service,2024-02-15
+47,Member 047,Visitor 047,Branch C,Outreach,416,83,Concert,2024-02-16
+48,Member 048,Visitor 048,Branch C,Outreach,802,371,Service,2024-02-17
+49,Member 049,Visitor 049,Branch B,Youth,344,221,Charity Drive,2024-02-18
+50,Member 050,Visitor 050,Branch B,Music,40,409,Bible Study,2024-02-19
+51,Member 051,Visitor 051,Branch D,Music,659,198,Bible Study,2024-02-20
+52,Member 052,Visitor 052,Branch D,Youth,289,42,Charity Drive,2024-02-21
+53,Member 053,Visitor 053,Branch C,Ushering,812,234,Charity Drive,2024-02-22
+54,Member 054,Visitor 054,Branch A,Music,471,311,Charity Drive,2024-02-23
+55,Member 055,Visitor 055,Branch D,Prayer,512,250,Charity Drive,2024-02-24
+56,Member 056,Visitor 056,Branch A,Music,243,303,Charity Drive,2024-02-25
+57,Member 057,Visitor 057,Branch B,Ushering,374,210,Charity Drive,2024-02-26
+58,Member 058,Visitor 058,Branch B,Music,576,278,Charity Drive,2024-02-27
+59,Member 059,Visitor 059,Branch D,Prayer,973,264,Bible Study,2024-02-28
+60,Member 060,Visitor 060,Branch C,Outreach,394,477,Service,2024-02-29
+61,Member 061,Visitor 061,Branch B,Outreach,452,476,Service,2024-03-01
+62,Member 062,Visitor 062,Branch A,Ushering,200,450,Bible Study,2024-03-02
+63,Member 063,Visitor 063,Branch C,Ushering,706,359,Concert,2024-03-03
+64,Member 064,Visitor 064,Branch D,Prayer,609,219,Service,2024-03-04
+65,Member 065,Visitor 065,Branch B,Outreach,686,283,Concert,2024-03-05
+66,Member 066,Visitor 066,Branch D,Outreach,399,23,Bible Study,2024-03-06
+67,Member 067,Visitor 067,Branch C,Outreach,97,409,Concert,2024-03-07
+68,Member 068,Visitor 068,Branch C,Outreach,800,500,Bible Study,2024-03-08
+69,Member 069,Visitor 069,Branch C,Prayer,643,189,Charity Drive,2024-03-09
+70,Member 070,Visitor 070,Branch A,Ushering,312,364,Charity Drive,2024-03-10
+71,Member 071,Visitor 071,Branch C,Ushering,827,463,Service,2024-03-11
+72,Member 072,Visitor 072,Branch C,Youth,262,420,Service,2024-03-12
+73,Member 073,Visitor 073,Branch B,Ushering,740,279,Concert,2024-03-13
+74,Member 074,Visitor 074,Branch A,Outreach,85,309,Concert,2024-03-14
+75,Member 075,Visitor 075,Branch A,Music,94,331,Service,2024-03-15
+76,Member 076,Visitor 076,Branch D,Outreach,284,473,Charity Drive,2024-03-16
+77,Member 077,Visitor 077,Branch C,Outreach,167,48,Bible Study,2024-03-17
+78,Member 078,Visitor 078,Branch B,Ushering,399,60,Charity Drive,2024-03-18
+79,Member 079,Visitor 079,Branch D,Youth,738,398,Service,2024-03-19
+80,Member 080,Visitor 080,Branch C,Prayer,812,132,Bible Study,2024-03-20
+81,Member 081,Visitor 081,Branch A,Music,659,341,Concert,2024-03-21
+82,Member 082,Visitor 082,Branch C,Music,167,345,Service,2024-03-22
+83,Member 083,Visitor 083,Branch C,Youth,767,186,Charity Drive,2024-03-23
+84,Member 084,Visitor 084,Branch B,Outreach,408,90,Concert,2024-03-24
+85,Member 085,Visitor 085,Branch B,Prayer,334,336,Concert,2024-03-25
+86,Member 086,Visitor 086,Branch B,Prayer,379,318,Service,2024-03-26
+87,Member 087,Visitor 087,Branch D,Prayer,119,27,Charity Drive,2024-03-27
+88,Member 088,Visitor 088,Branch B,Ushering,103,293,Service,2024-03-28
+89,Member 089,Visitor 089,Branch D,Outreach,15,335,Bible Study,2024-03-29
+90,Member 090,Visitor 090,Branch C,Music,975,351,Bible Study,2024-03-30
+91,Member 091,Visitor 091,Branch D,Music,325,336,Concert,2024-03-31
+92,Member 092,Visitor 092,Branch D,Outreach,465,209,Charity Drive,2024-04-01
+93,Member 093,Visitor 093,Branch B,Music,378,500,Bible Study,2024-04-02
+94,Member 094,Visitor 094,Branch B,Ushering,789,390,Bible Study,2024-04-03
+95,Member 095,Visitor 095,Branch A,Prayer,286,174,Bible Study,2024-04-04
+96,Member 096,Visitor 096,Branch D,Music,114,499,Bible Study,2024-04-05
+97,Member 097,Visitor 097,Branch C,Ushering,145,412,Service,2024-04-06
+98,Member 098,Visitor 098,Branch A,Prayer,99,225,Concert,2024-04-07
+99,Member 099,Visitor 099,Branch A,Outreach,201,59,Concert,2024-04-08
+100,Member 100,Visitor 100,Branch A,Outreach,451,10,Bible Study,2024-04-09
+101,Member 101,Visitor 101,Branch B,Ushering,469,55,Concert,2024-04-10
+102,Member 102,Visitor 102,Branch B,Ushering,580,137,Concert,2024-04-11
+103,Member 103,Visitor 103,Branch B,Ushering,578,118,Concert,2024-04-12
+104,Member 104,Visitor 104,Branch C,Music,534,266,Concert,2024-04-13
+105,Member 105,Visitor 105,Branch D,Outreach,427,387,Service,2024-04-14
+106,Member 106,Visitor 106,Branch A,Music,115,270,Bible Study,2024-04-15
+107,Member 107,Visitor 107,Branch B,Music,36,290,Charity Drive,2024-04-16
+108,Member 108,Visitor 108,Branch D,Prayer,101,302,Service,2024-04-17
+109,Member 109,Visitor 109,Branch A,Ushering,372,357,Concert,2024-04-18
+110,Member 110,Visitor 110,Branch D,Music,577,299,Bible Study,2024-04-19
+111,Member 111,Visitor 111,Branch A,Prayer,105,118,Bible Study,2024-04-20
+112,Member 112,Visitor 112,Branch D,Youth,621,233,Bible Study,2024-04-21
+113,Member 113,Visitor 113,Branch B,Prayer,622,196,Bible Study,2024-04-22
+114,Member 114,Visitor 114,Branch D,Youth,813,205,Concert,2024-04-23
+115,Member 115,Visitor 115,Branch D,Youth,342,242,Bible Study,2024-04-24
+116,Member 116,Visitor 116,Branch A,Youth,894,400,Charity Drive,2024-04-25
+117,Member 117,Visitor 117,Branch D,Youth,404,352,Charity Drive,2024-04-26
+118,Member 118,Visitor 118,Branch C,Ushering,22,306,Bible Study,2024-04-27
+119,Member 119,Visitor 119,Branch A,Music,308,358,Concert,2024-04-28
+120,Member 120,Visitor 120,Branch D,Music,433,261,Charity Drive,2024-04-29
+121,Member 121,Visitor 121,Branch C,Youth,407,82,Charity Drive,2024-04-30
+122,Member 122,Visitor 122,Branch A,Music,807,181,Charity Drive,2024-05-01
+123,Member 123,Visitor 123,Branch B,Youth,96,17,Service,2024-05-02
+124,Member 124,Visitor 124,Branch A,Music,752,252,Service,2024-05-03
+125,Member 125,Visitor 125,Branch A,Prayer,932,58,Charity Drive,2024-05-04
+126,Member 126,Visitor 126,Branch D,Ushering,582,156,Concert,2024-05-05
+127,Member 127,Visitor 127,Branch C,Outreach,936,217,Concert,2024-05-06
+128,Member 128,Visitor 128,Branch A,Youth,258,476,Charity Drive,2024-05-07
+129,Member 129,Visitor 129,Branch A,Prayer,595,497,Charity Drive,2024-05-08
+130,Member 130,Visitor 130,Branch A,Prayer,543,48,Concert,2024-05-09
+131,Member 131,Visitor 131,Branch D,Ushering,183,64,Service,2024-05-10
+132,Member 132,Visitor 132,Branch A,Ushering,711,430,Service,2024-05-11
+133,Member 133,Visitor 133,Branch C,Youth,399,486,Charity Drive,2024-05-12
+134,Member 134,Visitor 134,Branch D,Youth,183,378,Concert,2024-05-13
+135,Member 135,Visitor 135,Branch B,Prayer,152,77,Service,2024-05-14
+136,Member 136,Visitor 136,Branch B,Prayer,285,183,Charity Drive,2024-05-15
+137,Member 137,Visitor 137,Branch D,Ushering,318,164,Bible Study,2024-05-16
+138,Member 138,Visitor 138,Branch C,Youth,284,180,Charity Drive,2024-05-17
+139,Member 139,Visitor 139,Branch D,Youth,514,238,Bible Study,2024-05-18
+140,Member 140,Visitor 140,Branch D,Prayer,159,406,Charity Drive,2024-05-19
+141,Member 141,Visitor 141,Branch D,Outreach,74,110,Concert,2024-05-20
+142,Member 142,Visitor 142,Branch D,Prayer,181,271,Concert,2024-05-21
+143,Member 143,Visitor 143,Branch A,Outreach,455,252,Concert,2024-05-22
+144,Member 144,Visitor 144,Branch B,Youth,292,183,Concert,2024-05-23
+145,Member 145,Visitor 145,Branch C,Prayer,441,248,Bible Study,2024-05-24
+146,Member 146,Visitor 146,Branch A,Ushering,316,54,Charity Drive,2024-05-25
+147,Member 147,Visitor 147,Branch B,Music,505,229,Concert,2024-05-26
+148,Member 148,Visitor 148,Branch D,Youth,811,374,Service,2024-05-27
+149,Member 149,Visitor 149,Branch B,Youth,88,361,Service,2024-05-28
+150,Member 150,Visitor 150,Branch B,Prayer,379,236,Service,2024-05-29
+151,Member 151,Visitor 151,Branch A,Music,267,168,Charity Drive,2024-05-30
+152,Member 152,Visitor 152,Branch A,Music,976,39,Service,2024-05-31
+153,Member 153,Visitor 153,Branch C,Music,262,158,Service,2024-06-01
+154,Member 154,Visitor 154,Branch D,Prayer,748,27,Bible Study,2024-06-02
+155,Member 155,Visitor 155,Branch D,Prayer,650,419,Charity Drive,2024-06-03
+156,Member 156,Visitor 156,Branch D,Outreach,517,368,Charity Drive,2024-06-04
+157,Member 157,Visitor 157,Branch B,Outreach,618,63,Service,2024-06-05
+158,Member 158,Visitor 158,Branch B,Outreach,641,16,Charity Drive,2024-06-06
+159,Member 159,Visitor 159,Branch D,Ushering,210,439,Bible Study,2024-06-07
+160,Member 160,Visitor 160,Branch C,Youth,478,180,Bible Study,2024-06-08
+161,Member 161,Visitor 161,Branch B,Outreach,119,336,Concert,2024-06-09
+162,Member 162,Visitor 162,Branch C,Ushering,148,60,Bible Study,2024-06-10
+163,Member 163,Visitor 163,Branch B,Ushering,321,351,Concert,2024-06-11
+164,Member 164,Visitor 164,Branch A,Prayer,16,414,Service,2024-06-12
+165,Member 165,Visitor 165,Branch A,Music,981,89,Concert,2024-06-13
+166,Member 166,Visitor 166,Branch D,Music,415,481,Concert,2024-06-14
+167,Member 167,Visitor 167,Branch A,Outreach,350,384,Service,2024-06-15
+168,Member 168,Visitor 168,Branch B,Youth,871,129,Concert,2024-06-16
+169,Member 169,Visitor 169,Branch B,Youth,645,269,Bible Study,2024-06-17
+170,Member 170,Visitor 170,Branch A,Youth,399,94,Service,2024-06-18
+171,Member 171,Visitor 171,Branch A,Ushering,833,287,Charity Drive,2024-06-19
+172,Member 172,Visitor 172,Branch A,Ushering,892,86,Concert,2024-06-20
+173,Member 173,Visitor 173,Branch D,Ushering,347,174,Bible Study,2024-06-21
+174,Member 174,Visitor 174,Branch A,Prayer,460,291,Charity Drive,2024-06-22
+175,Member 175,Visitor 175,Branch B,Ushering,352,223,Service,2024-06-23
+176,Member 176,Visitor 176,Branch A,Youth,450,495,Service,2024-06-24
+177,Member 177,Visitor 177,Branch D,Youth,845,241,Service,2024-06-25
+178,Member 178,Visitor 178,Branch D,Music,853,123,Bible Study,2024-06-26
+179,Member 179,Visitor 179,Branch B,Youth,890,413,Charity Drive,2024-06-27
+180,Member 180,Visitor 180,Branch B,Ushering,676,212,Service,2024-06-28
+181,Member 181,Visitor 181,Branch A,Ushering,618,327,Bible Study,2024-06-29
+182,Member 182,Visitor 182,Branch B,Outreach,149,99,Bible Study,2024-06-30
+183,Member 183,Visitor 183,Branch C,Prayer,317,100,Charity Drive,2024-07-01
+184,Member 184,Visitor 184,Branch B,Youth,338,332,Service,2024-07-02
+185,Member 185,Visitor 185,Branch C,Prayer,627,341,Service,2024-07-03
+186,Member 186,Visitor 186,Branch C,Youth,980,226,Concert,2024-07-04
+187,Member 187,Visitor 187,Branch B,Music,721,207,Service,2024-07-05
+188,Member 188,Visitor 188,Branch C,Music,215,19,Charity Drive,2024-07-06
+189,Member 189,Visitor 189,Branch B,Prayer,500,382,Bible Study,2024-07-07
+190,Member 190,Visitor 190,Branch B,Ushering,331,319,Charity Drive,2024-07-08
+191,Member 191,Visitor 191,Branch D,Outreach,191,457,Service,2024-07-09
+192,Member 192,Visitor 192,Branch C,Youth,997,106,Bible Study,2024-07-10
+193,Member 193,Visitor 193,Branch C,Youth,417,235,Charity Drive,2024-07-11
+194,Member 194,Visitor 194,Branch A,Outreach,336,308,Service,2024-07-12
+195,Member 195,Visitor 195,Branch B,Prayer,308,224,Service,2024-07-13
+196,Member 196,Visitor 196,Branch D,Prayer,762,204,Service,2024-07-14
+197,Member 197,Visitor 197,Branch D,Youth,721,7,Concert,2024-07-15
+198,Member 198,Visitor 198,Branch A,Music,658,365,Concert,2024-07-16
+199,Member 199,Visitor 199,Branch C,Outreach,512,114,Concert,2024-07-17
+200,Member 200,Visitor 200,Branch D,Youth,1000,110,Bible Study,2024-07-18

@@ -7,11 +7,12 @@ data access logic from business logic.
 from datetime import date
 
 import pandas as pd
-from sqlalchemy import create_engine, text
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from config import DB_TYPE, DB_URL
+from config import DB_TYPE
 from etl.logging_config import logger
+from shared.database import get_engine
 
 
 class SalesRepository:
@@ -26,12 +27,7 @@ class SalesRepository:
         if engine is not None:
             self.engine = engine
         else:
-            kwargs = {"pool_pre_ping": True}
-            if DB_TYPE == "mysql":
-                kwargs["pool_size"] = 5
-                kwargs["pool_recycle"] = 3600
-                kwargs["max_overflow"] = 10
-            self.engine = create_engine(DB_URL, **kwargs)
+            self.engine = get_engine()
 
     def get_all_sales(self) -> pd.DataFrame:
         """Retrieve all sales records as a DataFrame.
@@ -281,7 +277,7 @@ class PipelineRunRepository:
         if engine is not None:
             self.engine = engine
         else:
-            self.engine = create_engine(DB_URL, pool_pre_ping=True)
+            self.engine = get_engine()
 
     def create_run(self, run_id: str) -> int:
         """Create a new pipeline run record.

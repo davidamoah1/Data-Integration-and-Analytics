@@ -109,3 +109,42 @@ The GitHub Actions workflow (`.github/workflows/ci.yml`) runs on every push/PR t
 | `/health` | Liveness probe | 200 (always if process is up) |
 | `/ready` | Readiness probe | 200 (all subsystems ready) or 503 |
 | `/metrics` | Platform metrics | 200 with JSON metrics |
+
+## Production Deployment Checklist
+
+### Pre-Deployment
+
+- [ ] Set `DB_TYPE=mysql` (not SQLite for production)
+- [ ] Set strong `JWT_SECRET_KEY` (32+ random characters)
+- [ ] Set strong `API_KEY`
+- [ ] Configure `CORS_ORIGINS` to only allow your dashboard URL
+- [ ] Set `RATE_LIMIT_RPM` appropriately (default: 120)
+- [ ] Configure AI provider API keys
+- [ ] Set up MySQL with automated backups
+- [ ] Configure HTTPS reverse proxy (nginx, Caddy, or Traefik)
+- [ ] Set up log rotation and monitoring
+- [ ] Create super admin account: `python init_super_admin.py`
+
+### Post-Deployment
+
+- [ ] Verify `/health` returns 200
+- [ ] Verify `/ready` returns 200
+- [ ] Verify dashboard loads at the configured URL
+- [ ] Test login with demo credentials
+- [ ] Seed demo data: `POST /platform/demo/seed`
+- [ ] Verify subscription auto-created for demo org
+- [ ] Test data upload (CSV)
+- [ ] Test AI Copilot
+- [ ] Test each industry pack dashboard
+- [ ] Verify audit logs are recording
+- [ ] Set up regular database backups
+- [ ] Configure monitoring alerts
+
+### Scaling Considerations
+
+- **Database**: Use MySQL with connection pooling for production
+- **API**: Run multiple API instances behind a load balancer
+- **Dashboard**: Streamlit Community Cloud or self-hosted with sticky sessions
+- **File Storage**: Use S3 or similar for uploaded files in production
+- **AI**: Consider caching AI responses to reduce API costs
+- **Rate Limiting**: Adjust `RATE_LIMIT_RPM` based on your user count

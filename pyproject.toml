@@ -1,7 +1,7 @@
 [project]
 name = "etl-project"
 version = "1.0.0"
-description = "ETL Pipeline Automation for Business Reporting"
+description = "AEDIP — Enterprise Data Intelligence Platform with ETL, analytics, AI, and governance"
 requires-python = ">=3.10"
 
 [tool.ruff]
@@ -10,7 +10,7 @@ target-version = "py310"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "N", "UP", "B", "SIM"]
-ignore = ["E501"]
+ignore = ["E501", "B008"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["etl", "database", "pipeline", "scheduler", "dashboard", "config"]

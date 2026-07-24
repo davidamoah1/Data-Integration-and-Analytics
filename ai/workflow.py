@@ -347,14 +347,33 @@ class WorkflowEngine:
         return {"insight_id": result["id"], "title": result["title"]}
 
     def _step_notify(self, config: dict, context: dict, user_id: int) -> dict:
-        """Notify step (logs notification — integrate with email/notification system)."""
+        """Notify step — create an in-app notification."""
+        from notifications.service import NotificationService
+
         message = config.get("message", "Workflow notification")
-        # In production, this would send an actual notification
-        return {"notification_sent": True, "message": message}
+        result = NotificationService(self.db).send_in_app(
+            subject="Workflow Notification",
+            body=message,
+            user_id=user_id,
+        )
+        return {"notification_sent": result.get("sent"), "message": message, "id": result.get("id")}
 
     def _step_email(self, config: dict, context: dict, user_id: int) -> dict:
-        """Email step (placeholder — integrate with email service)."""
-        return {"email_sent": False, "note": "Email service not configured"}
+        """Email step — send email via SMTP when configured."""
+        from notifications.service import NotificationService
+
+        to = config.get("to")
+        subject = config.get("subject", "Workflow Email")
+        body = config.get("body", "")
+        if not to:
+            return {"email_sent": False, "note": "No recipient configured"}
+        result = NotificationService(self.db).send_email(
+            to=to,
+            subject=subject,
+            body=body,
+            user_id=user_id,
+        )
+        return {"email_sent": result.get("sent"), "to": to, "note": result.get("note") or result.get("error")}
 
     def _step_archive(self, config: dict, context: dict, user_id: int) -> dict:
         """Archive step."""

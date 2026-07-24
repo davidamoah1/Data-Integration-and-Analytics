@@ -25,9 +25,12 @@ import ai.models  # noqa: F401
 import analytics.models  # noqa: F401
 import audit.models  # noqa: F401
 import authentication.models  # noqa: F401
-import etl.models  # noqa: F401
-import organizations.models  # noqa: F401
 import enterprise.models  # noqa: F401
+import enterprise.subscription  # noqa: F401
+import etl.models  # noqa: F401
+import notifications.models  # noqa: F401
+import organizations.models  # noqa: F401
+import scheduler.models  # noqa: F401
 from authentication.services import seed_default_data
 from shared import database as db_module
 from shared.database import Base, get_db

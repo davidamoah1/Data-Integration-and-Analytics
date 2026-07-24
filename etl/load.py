@@ -1,8 +1,7 @@
 import pandas as pd
-from sqlalchemy import create_engine
 
-from config import DB_TYPE, DB_URL
 from etl.logging_config import logger
+from shared.database import get_engine
 
 BATCH_SIZE = 1000
 
@@ -21,7 +20,7 @@ def load_data(df: pd.DataFrame) -> int:
         Number of new records inserted.
     """
     try:
-        engine = _create_engine()
+        engine = get_engine()
 
         with engine.connect() as conn:
             try:
@@ -33,8 +32,7 @@ def load_data(df: pd.DataFrame) -> int:
         df_new = df[~df["order_id"].isin(existing_ids)]
 
         if df_new.empty:
-            logger.info("Load: No new records to insert. Database is already up to date.")
-            print("Load complete. No new records to insert.")
+            logger.info("Load complete. No new records to insert.")
             return 0
 
         columns_to_load = [
@@ -57,23 +55,12 @@ def load_data(df: pd.DataFrame) -> int:
 
         total_inserted = _batch_insert(engine, df_new)
 
-        logger.info(f"Load: Inserted {total_inserted} new records into the database.")
-        print(f"Load complete. {total_inserted} new records inserted.")
+        logger.info(f"Load complete. {total_inserted} new records inserted.")
         return total_inserted
 
     except Exception as e:
         logger.error(f"Load failed: {e}")
         raise
-
-
-def _create_engine():
-    """Create a SQLAlchemy engine with appropriate pooling settings."""
-    engine_kwargs = {"pool_pre_ping": True}
-    if DB_TYPE == "mysql":
-        engine_kwargs["pool_size"] = 5
-        engine_kwargs["pool_recycle"] = 3600
-        engine_kwargs["max_overflow"] = 10
-    return create_engine(DB_URL, **engine_kwargs)
 
 
 def _batch_insert(engine, df_new: pd.DataFrame) -> int:

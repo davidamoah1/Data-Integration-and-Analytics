@@ -46,7 +46,6 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 from ai.routes import router as ai_router
 from analytics.routes import router as analytics_router
-from enterprise.routes import router as platform_router
 from api.auth import get_api_key
 from api.schemas import (
     FilterOptionsResponse,
@@ -63,9 +62,14 @@ from authentication.routes import roles_router, users_router
 from authentication.routes import router as auth_router
 from authentication.services import seed_default_data
 from database.repositories import PipelineRunRepository, SalesRepository
+from enterprise.routes import router as platform_router
 from etl.logging_config import logger
 from etl.routes import router as etl_router
+from notifications.routes import router as notifications_router
 from organizations.services import dept_router, org_router
+from scheduler.report_scheduler import ReportScheduler
+from scheduler.routes import router as scheduler_router
+from semantic.routes import router as semantic_router
 from services.etl_service import ETLService
 from shared.database import Base, get_engine
 
@@ -81,9 +85,12 @@ async def lifespan(app: FastAPI):
     import audit.models  # noqa: F401
     import authentication.models  # noqa: F401
     import database.db_setup  # noqa: F401
-    import etl.models  # noqa: F401
-    import organizations.models  # noqa: F401
     import enterprise.models  # noqa: F401
+    import enterprise.subscription  # noqa: F401
+    import etl.models  # noqa: F401
+    import notifications.models  # noqa: F401
+    import organizations.models  # noqa: F401
+    import scheduler.models  # noqa: F401
 
     Base.metadata.create_all(engine)
 
@@ -106,9 +113,49 @@ async def lifespan(app: FastAPI):
     db = DbSession(engine)
     try:
         seed_default_data(db)
+        # Seed demo data for pilot deployments
+        from enterprise.demo_data import is_demo_seeded, seed_demo_data
+
+        if not is_demo_seeded(db):
+            seed_demo_data(db)
+            logger.info(
+                "Pilot demo data seeded (org, users, dashboards, KPIs, pipelines, AI conversations, reports)."
+            )
+        # Create trial subscriptions for all orgs without one
+        from enterprise.subscription import SubscriptionService
+        from organizations.models import Organization
+
+        sub_svc = SubscriptionService(db)
+        for org in db.query(Organization).filter(Organization.is_active == 1).all():
+            if not sub_svc.get_subscription(org.id):
+                sub_svc.create_trial(org.id)
+
+        # Start background report scheduler (disabled during tests)
+        try:
+            report_scheduler = ReportScheduler()
+            report_scheduler.start()
+            app.state.report_scheduler = report_scheduler
+
+            # Schedule daily database/config backups at 02:00 UTC
+            try:
+                from apscheduler.triggers.cron import CronTrigger
+
+                from services.backup_service import BackupService
+
+                report_scheduler.scheduler.add_job(
+                    BackupService().create_backup,
+                    trigger=CronTrigger(hour=2, minute=0),
+                    id="daily_backup",
+                    replace_existing=True,
+                )
+                logger.info("Daily backup scheduled for 02:00 UTC")
+            except Exception as e:
+                logger.error(f"Backup scheduler setup failed: {e}")
+        except Exception as e:
+            logger.error(f"Report scheduler failed to start: {e}")
     finally:
         db.close()
-    logger.info("Auth tables created and default data seeded.")
+    logger.info("Auth tables created, default data seeded, subscriptions initialized.")
 
     yield
 
@@ -134,7 +181,7 @@ class RequestContextMiddleware(BaseHTTPMiddleware):
 app = FastAPI(
     title="DataFlow — Enterprise Data Intelligence API",
     description="Enterprise REST API for ETL, analytics, IAM, and pipeline management.",
-    version="2.0.0",
+    version="1.0.0",
     lifespan=lifespan,
 )
 
@@ -196,6 +243,9 @@ app.include_router(etl_router)
 app.include_router(ai_router)
 app.include_router(analytics_router)
 app.include_router(platform_router)
+app.include_router(notifications_router)
+app.include_router(scheduler_router)
+app.include_router(semantic_router)
 
 
 # ──────────────────────────────────────────────
@@ -303,6 +353,18 @@ async def readiness_check():
     )
 
 
+@app.get("/health/detailed", tags=["System"])
+async def detailed_health_check():
+    """Return detailed health status for all subsystems.
+
+    Exposes readiness for database, ETL, AI, scheduler, email, SMS, WhatsApp,
+    push notifications, storage, and internal monitoring.
+    """
+    from monitoring.health_check import run_full_health_check
+
+    return JSONResponse(content=run_full_health_check())
+
+
 @app.get("/metrics", tags=["System"])
 async def metrics():
     """Expose basic platform metrics for monitoring.
@@ -322,7 +384,7 @@ async def metrics():
                 "etl_jobs",
                 "ai_conversations",
                 "ai_messages",
-                "auth_users",
+                "users",
                 "audit_logs",
             ]:
                 try:
@@ -488,8 +550,8 @@ async def get_pipeline_runs(
 async def root():
     """API root — basic info."""
     return {
-        "name": "ETL Data Intelligence API",
-        "version": "2.0.0",
+        "name": "AEDIP Enterprise Data Intelligence API",
+        "version": "1.0.0",
         "docs": "/docs",
         "health": "/health",
     }

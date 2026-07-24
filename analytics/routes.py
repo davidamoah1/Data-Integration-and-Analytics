@@ -6,11 +6,11 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session as DbSession
 
 from analytics.models import (
+    KPI,
     AnalyticsAlert,
     Dashboard,
     DashboardFavorite,
     DashboardWidget,
-    KPI,
     KPIHistory,
 )
 from analytics.schemas import (
@@ -22,8 +22,8 @@ from analytics.schemas import (
     KPIRecord,
     WidgetCreate,
 )
-from shared.dependencies import get_current_user
 from shared.database import get_db
+from shared.dependencies import get_current_user
 
 router = APIRouter(prefix="/analytics", tags=["Analytics"])
 
@@ -39,9 +39,7 @@ async def list_dashboards(
 ):
     query = db.query(Dashboard).filter(Dashboard.owner_id == current_user["id"])
     if include_public:
-        query = query.union(
-            db.query(Dashboard).filter(Dashboard.is_public.is_(True))
-        )
+        query = query.union(db.query(Dashboard).filter(Dashboard.is_public.is_(True)))
     dashboards = query.order_by(Dashboard.updated_at.desc()).all()
     return [
         {
@@ -95,11 +93,7 @@ async def get_dashboard(
         and "super_admin" not in current_user["roles"]
     ):
         raise HTTPException(status_code=403, detail="Access denied")
-    widgets = (
-        db.query(DashboardWidget)
-        .filter(DashboardWidget.dashboard_id == dashboard_id)
-        .all()
-    )
+    widgets = db.query(DashboardWidget).filter(DashboardWidget.dashboard_id == dashboard_id).all()
     return {
         "id": dashboard.id,
         "name": dashboard.name,
@@ -161,12 +155,8 @@ async def delete_dashboard(
         raise HTTPException(status_code=404, detail="Dashboard not found")
     if dashboard.owner_id != current_user["id"] and "super_admin" not in current_user["roles"]:
         raise HTTPException(status_code=403, detail="Only the owner can delete")
-    db.query(DashboardWidget).filter(
-        DashboardWidget.dashboard_id == dashboard_id
-    ).delete()
-    db.query(DashboardFavorite).filter(
-        DashboardFavorite.dashboard_id == dashboard_id
-    ).delete()
+    db.query(DashboardWidget).filter(DashboardWidget.dashboard_id == dashboard_id).delete()
+    db.query(DashboardFavorite).filter(DashboardFavorite.dashboard_id == dashboard_id).delete()
     db.delete(dashboard)
     db.commit()
     return {"message": "Dashboard deleted"}

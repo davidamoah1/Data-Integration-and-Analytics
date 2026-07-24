@@ -23,21 +23,19 @@ import streamlit as st
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from dashboard.auth import get_current_user, logout, require_auth
-from dashboard.charts import (
-    render_heatmap_sales_region_category,
-    render_kpi_cards,
-    render_profit_by_region,
-    render_profit_margin_by_category,
-    render_revenue_by_category,
-    render_revenue_over_time,
-    render_sales_vs_profit_scatter,
-    render_top_products,
-)
 from dashboard.copilot import render_copilot_panel
-from dashboard.onboarding import get_industry_labels, render_industry_pack_selector, render_onboarding, render_quick_start_checklist
+from dashboard.onboarding import (
+    get_industry_labels,
+    render_industry_pack_selector,
+    render_onboarding,
+    render_quick_start_checklist,
+)
+from dashboard.pwa import register_pwa
 from dashboard.sector_dashboards import render_sector_dashboard
+from dashboard.semantic_dashboard import render_semantic_dashboard
 from dashboard.styles import DARK_THEME_CSS, RESPONSIVE_CSS
 from dashboard.utils import MAX_UPLOAD_SIZE_BYTES, MAX_UPLOAD_SIZE_MB, sanitize_text
+from semantic.mapping_engine import SemanticMappingEngine
 from services.dashboard_data_service import DashboardDataService
 
 st.set_page_config(
@@ -48,6 +46,7 @@ st.set_page_config(
 )
 
 st.markdown(f"<style>{DARK_THEME_CSS}\n{RESPONSIVE_CSS}</style>", unsafe_allow_html=True)
+register_pwa()
 
 
 # ──────────────────────────────────────────────
@@ -120,22 +119,10 @@ with st.sidebar:
         st.session_state["show_logout_confirm"] = True
 
     if st.session_state.get("show_logout_confirm"):
-        st.markdown(
-            """
-        <div class="confirm-overlay">
-            <div class="confirm-dialog">
-                <div class="confirm-icon">🚪</div>
-                <div class="confirm-title">Log out of DataFlow?</div>
-                <div class="confirm-message">You'll need to sign in again to access your dashboards.</div>
-            </div>
-        </div>
-        """,
-            unsafe_allow_html=True,
-        )
+        st.warning("Log out of DataFlow? You'll need to sign in again to access your dashboards.")
         col_y, col_n = st.columns(2)
         with col_y:
             if st.button("Yes, log out", use_container_width=True, type="primary"):
-                st.session_state["show_logout_confirm"] = False
                 logout()
         with col_n:
             if st.button("Cancel", use_container_width=True):
@@ -185,11 +172,43 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
 
+    st.markdown("---")
+    st.markdown('<div class="sidebar-section">Navigation</div>', unsafe_allow_html=True)
+    page = st.radio(
+        "Page",
+        ["Dashboard", "Administration", "Support", "Observability"],
+        key="nav_page",
+        label_visibility="collapsed",
+    )
+
 
 # ──────────────────────────────────────────────
 # Industry labels (from selected pack)
 # ──────────────────────────────────────────────
 labels = get_industry_labels()
+
+# ──────────────────────────────────────────────
+# Page routing
+# ──────────────────────────────────────────────
+_current_page = st.session_state.get("nav_page", "Dashboard")
+
+if _current_page == "Administration":
+    from dashboard.admin import render_admin_page
+
+    render_admin_page()
+    st.stop()
+
+elif _current_page == "Support":
+    from dashboard.support import render_support_page
+
+    render_support_page()
+    st.stop()
+
+elif _current_page == "Observability":
+    from dashboard.observability import render_observability_page
+
+    render_observability_page()
+    st.stop()
 
 
 # ──────────────────────────────────────────────
@@ -198,10 +217,10 @@ labels = get_industry_labels()
 st.markdown(
     """
 <div class="hero-header">
-    <div class="hero-badge">Business Intelligence Platform</div>
+    <div class="hero-badge">Enterprise Data Intelligence</div>
     <h1 class="hero-title">Turn your data into<br>clear business insights</h1>
-    <p class="hero-subtitle">Interactive reports, trend charts, and key metrics.<br>
-    Query your live database or upload a file for ad-hoc analysis.</p>
+    <p class="hero-subtitle">Upload a dataset and the platform detects your industry,<br>
+    maps business entities, and generates governed KPIs and dashboards automatically.</p>
 </div>
 """,
     unsafe_allow_html=True,
@@ -212,6 +231,7 @@ st.markdown(
 # Load data
 # ──────────────────────────────────────────────
 df = None
+semantic_mapping_result = None
 
 if data_source == "Live Database":
     if db_count == 0:
@@ -272,6 +292,7 @@ if data_source == "Live Database":
 
     df = load_db_data(service, sel_region, sel_category, date_from, date_to)
     kpis = get_db_kpis(service, sel_region, sel_category, date_from, date_to)
+    st.session_state.pop("semantic_dataset_context", None)
 
     if df is not None and not df.empty:
         with st.sidebar:
@@ -305,8 +326,8 @@ else:
                 The system will automatically detect your columns and build your dashboard instantly.<br><br>
                 <strong>Supported formats:</strong> .csv, .xlsx, .xls<br>
                 <strong>Max file size:</strong> 50 MB<br>
-                <strong>Auto-detected columns:</strong> sales/revenue/amount, profit, date, region, category, product, customer<br><br>
-                Works with sales data, financial records, inventory reports, education data, and more.
+                <strong>Auto-detected concepts:</strong> revenue, cost, date, region, category, product, customer, enrollment, patient, project, and more.<br><br>
+                Works with business, financial, operational, educational, healthcare, government, and NGO data.
             </div>
         </div>
         """,
@@ -343,34 +364,17 @@ else:
         )
         st.stop()
 
-    col_map = DashboardDataService.detect_columns(raw_df)
-
-    if "sales" not in col_map:
-        st.markdown(
-            '<div class="warning-banner">Could not find a sales or revenue column. '
-            "Select the column that contains your revenue/sales/amount data below.</div>",
-            unsafe_allow_html=True,
-        )
-        with st.expander("Map your columns manually", expanded=True):
-            st.write("**Detected columns in your file:**")
-            st.write(list(raw_df.columns))
-            numeric_cols = raw_df.select_dtypes(include=["number"]).columns.tolist()
-            if numeric_cols:
-                sales_col = st.selectbox(
-                    "Which column contains your revenue/sales data?",
-                    ["— Select a column —"] + numeric_cols,
-                )
-                if sales_col != "— Select a column —":
-                    col_map["sales"] = sales_col
-                    st.success(f"Mapped '{sales_col}' as the sales/revenue column.")
-                else:
-                    st.stop()
-            else:
-                st.error("No numeric columns found in your file. Please check your data.")
-                st.stop()
-
-    with st.spinner("Processing your data..."):
-        df = DashboardDataService.clean_df(raw_df, col_map)
+    with st.spinner("Discovering business meaning in your data..."):
+        semantic_mapping_result = SemanticMappingEngine.analyze(raw_df, uploaded_file.name)
+        df = raw_df.copy()
+    st.session_state["semantic_dataset_context"] = {
+        "industry": semantic_mapping_result.industry,
+        "industry_confidence": semantic_mapping_result.industry_confidence,
+        "business_entities": semantic_mapping_result.business_entities,
+        "column_mappings": semantic_mapping_result.semantic_result.to_dict()["mappings"],
+        "kpi_definitions": semantic_mapping_result.kpi_definitions,
+        "business_rules": semantic_mapping_result.recommendations,
+    }
 
     dupes_removed = len(raw_df) - len(df)
     st.markdown(
@@ -415,26 +419,17 @@ else:
             use_container_width=True,
         )
 
-    # Compute KPIs from filtered DataFrame
-    total_sales = df["sales"].sum() if "sales" in df.columns else 0
-    total_profit = df["profit"].sum() if "profit" in df.columns else 0
-    total_orders = df["order_id"].nunique() if "order_id" in df.columns else len(df)
-    avg_order = df["sales"].mean() if "sales" in df.columns else 0
-    margin_pct = (total_profit / total_sales * 100) if total_sales > 0 else 0
-    kpis = {
-        "total_sales": total_sales,
-        "total_profit": total_profit,
-        "total_orders": total_orders,
-        "avg_order_value": avg_order,
-        "margin_pct": margin_pct,
-    }
+    kpis = {}
 
 
 # ──────────────────────────────────────────────
 # Sector Dashboard (KPIs + Charts)
 # ──────────────────────────────────────────────
-pack_key = st.session_state.get("active_industry_pack")
-render_sector_dashboard(df, kpis, pack_key=pack_key)
+if semantic_mapping_result is not None:
+    render_semantic_dashboard(df, semantic_mapping_result)
+else:
+    pack_key = st.session_state.get("active_industry_pack")
+    render_sector_dashboard(df, kpis, pack_key=pack_key)
 
 
 # ──────────────────────────────────────────────
@@ -444,21 +439,20 @@ st.markdown(
     '<div class="section-header">Data Preview</div><hr class="section-divider">',
     unsafe_allow_html=True,
 )
-display_cols = [
-    c
-    for c in [
-        "order_id",
-        "order_date",
-        "customer_name",
-        "region",
-        "category",
-        "product_name",
-        "sales",
-        "profit",
-        "quantity",
-    ]
-    if c in df.columns
-]
+if semantic_mapping_result is not None:
+    mapped_cols = []
+    for mapping in semantic_mapping_result.semantic_result.mappings:
+        if mapping.column_name in df.columns:
+            mapped_cols.append(mapping.column_name)
+    remaining = [c for c in df.columns if c not in mapped_cols]
+    for c in remaining:
+        if len(mapped_cols) >= 12:
+            break
+        mapped_cols.append(c)
+    display_cols = mapped_cols[:12]
+else:
+    display_cols = list(df.columns)[:12]
+
 st.dataframe(
     df[display_cols].head(200) if display_cols else df.head(200),
     use_container_width=True,
@@ -488,8 +482,8 @@ render_copilot_panel()
 st.markdown(
     """
     <div class="app-footer">
-        DataFlow v2.0.0 &mdash; Enterprise Data Intelligence Platform<br>
-        <a href="/docs" target="_blank">API Docs</a> &bull; 
+        DataFlow v1.0.1.0 &mdash; Enterprise Data Intelligence Platform<br>
+        <a href="/docs" target="_blank">API Docs</a> &bull;
         <a href="https://github.com/davidamoah1/Data-Integration-and-Analytics" target="_blank">GitHub</a>
     </div>
     """,

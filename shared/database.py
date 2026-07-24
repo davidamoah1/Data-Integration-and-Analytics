@@ -7,8 +7,6 @@ a single metadata registry for create_all and Alembic autogenerate.
 from sqlalchemy import BigInteger, Integer, create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-from config import DB_TYPE, DB_URL
-
 Base = declarative_base()
 
 # SQLite doesn't support BigInteger autoincrement; use Integer variant for SQLite.
@@ -18,16 +16,22 @@ BigInt = BigInteger().with_variant(Integer, "sqlite")
 def get_engine(**kwargs):
     """Create a SQLAlchemy engine with appropriate pooling settings.
 
+    Reads DB_URL and DB_TYPE from config at call time so that test
+    monkeypatching of config attributes takes effect.
+
     Returns:
         SQLAlchemy Engine instance.
     """
+    import config
+
     defaults = {"pool_pre_ping": True}
-    if DB_TYPE == "mysql":
-        defaults["pool_size"] = 10
-        defaults["pool_recycle"] = 3600
-        defaults["max_overflow"] = 20
+    if config.DB_TYPE == "mysql":
+        defaults["pool_size"] = config.POOL_SIZE
+        defaults["pool_recycle"] = config.POOL_RECYCLE
+        defaults["max_overflow"] = config.MAX_OVERFLOW
+        defaults["pool_timeout"] = config.POOL_TIMEOUT
     defaults.update(kwargs)
-    return create_engine(DB_URL, **defaults)
+    return create_engine(config.DB_URL, **defaults)
 
 
 def get_session_factory(engine=None) -> sessionmaker:

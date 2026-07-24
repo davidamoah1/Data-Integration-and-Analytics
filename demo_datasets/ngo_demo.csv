@@ -1,0 +1,201 @@
+beneficiary_id,beneficiary_name,donor,program,project,donation,grant,region,date
+1,Beneficiary 001,Gates Foundation,Health,Project-0001,23838,Grant-0001,Asia,2024-01-01
+2,Beneficiary 002,WHO,Food Security,Project-0002,39554,Grant-0002,Middle East,2024-01-02
+3,Beneficiary 003,WHO,Education,Project-0003,47109,Grant-0003,Africa,2024-01-03
+4,Beneficiary 004,Gates Foundation,Shelter,Project-0004,7854,Grant-0004,Africa,2024-01-04
+5,Beneficiary 005,WHO,Education,Project-0005,43426,Grant-0005,Asia,2024-01-05
+6,Beneficiary 006,Red Cross,Education,Project-0006,15195,Grant-0006,Middle East,2024-01-06
+7,Beneficiary 007,Gates Foundation,Food Security,Project-0007,27272,Grant-0007,Middle East,2024-01-07
+8,Beneficiary 008,USAID,Shelter,Project-0008,21741,Grant-0008,Africa,2024-01-08
+9,Beneficiary 009,WHO,Water,Project-0009,47302,Grant-0009,Africa,2024-01-09
+10,Beneficiary 010,USAID,Education,Project-0010,7527,Grant-0010,Latin America,2024-01-10
+11,Beneficiary 011,USAID,Water,Project-0011,31656,Grant-0011,Asia,2024-01-11
+12,Beneficiary 012,Gates Foundation,Water,Project-0012,44351,Grant-0012,Latin America,2024-01-12
+13,Beneficiary 013,UNICEF,Health,Project-0013,31479,Grant-0013,Africa,2024-01-13
+14,Beneficiary 014,USAID,Shelter,Project-0014,31493,Grant-0014,Africa,2024-01-14
+15,Beneficiary 015,USAID,Shelter,Project-0015,13908,Grant-0015,Middle East,2024-01-15
+16,Beneficiary 016,UNICEF,Education,Project-0016,38818,Grant-0016,Middle East,2024-01-16
+17,Beneficiary 017,Red Cross,Health,Project-0017,10667,Grant-0017,Latin America,2024-01-17
+18,Beneficiary 018,UNICEF,Health,Project-0018,42518,Grant-0018,Africa,2024-01-18
+19,Beneficiary 019,Red Cross,Health,Project-0019,27028,Grant-0019,Asia,2024-01-19
+20,Beneficiary 020,Red Cross,Shelter,Project-0020,1571,Grant-0020,Middle East,2024-01-20
+21,Beneficiary 021,UNICEF,Shelter,Project-0021,16069,Grant-0021,Middle East,2024-01-21
+22,Beneficiary 022,USAID,Food Security,Project-0022,2927,Grant-0022,Africa,2024-01-22
+23,Beneficiary 023,Red Cross,Shelter,Project-0023,8481,Grant-0023,Asia,2024-01-23
+24,Beneficiary 024,UNICEF,Shelter,Project-0024,37684,Grant-0024,Latin America,2024-01-24
+25,Beneficiary 025,WHO,Health,Project-0025,38920,Grant-0025,Asia,2024-01-25
+26,Beneficiary 026,USAID,Water,Project-0026,10659,Grant-0026,Africa,2024-01-26
+27,Beneficiary 027,Red Cross,Education,Project-0027,8929,Grant-0027,Asia,2024-01-27
+28,Beneficiary 028,Gates Foundation,Water,Project-0028,41357,Grant-0028,Asia,2024-01-28
+29,Beneficiary 029,USAID,Education,Project-0029,33696,Grant-0029,Africa,2024-01-29
+30,Beneficiary 030,WHO,Food Security,Project-0030,2668,Grant-0030,Latin America,2024-01-30
+31,Beneficiary 031,WHO,Shelter,Project-0031,37604,Grant-0031,Asia,2024-01-31
+32,Beneficiary 032,UNICEF,Education,Project-0032,9724,Grant-0032,Africa,2024-02-01
+33,Beneficiary 033,WHO,Education,Project-0033,3764,Grant-0033,Asia,2024-02-02
+34,Beneficiary 034,Gates Foundation,Education,Project-0034,11001,Grant-0034,Africa,2024-02-03
+35,Beneficiary 035,UNICEF,Education,Project-0035,17025,Grant-0035,Latin America,2024-02-04
+36,Beneficiary 036,WHO,Shelter,Project-0036,11898,Grant-0036,Middle East,2024-02-05
+37,Beneficiary 037,Red Cross,Water,Project-0037,33958,Grant-0037,Latin America,2024-02-06
+38,Beneficiary 038,USAID,Education,Project-0038,26671,Grant-0038,Middle East,2024-02-07
+39,Beneficiary 039,Gates Foundation,Health,Project-0039,39379,Grant-0039,Middle East,2024-02-08
+40,Beneficiary 040,Gates Foundation,Education,Project-0040,37036,Grant-0040,Asia,2024-02-09
+41,Beneficiary 041,Gates Foundation,Shelter,Project-0041,41887,Grant-0041,Africa,2024-02-10
+42,Beneficiary 042,Red Cross,Health,Project-0042,1320,Grant-0042,Africa,2024-02-11
+43,Beneficiary 043,WHO,Shelter,Project-0043,47256,Grant-0043,Africa,2024-02-12
+44,Beneficiary 044,USAID,Food Security,Project-0044,47808,Grant-0044,Latin America,2024-02-13
+45,Beneficiary 045,USAID,Shelter,Project-0045,43468,Grant-0045,Latin America,2024-02-14
+46,Beneficiary 046,Red Cross,Health,Project-0046,18676,Grant-0046,Latin America,2024-02-15
+47,Beneficiary 047,UNICEF,Water,Project-0047,5719,Grant-0047,Latin America,2024-02-16
+48,Beneficiary 048,WHO,Health,Project-0048,14294,Grant-0048,Asia,2024-02-17
+49,Beneficiary 049,Gates Foundation,Water,Project-0049,29538,Grant-0049,Asia,2024-02-18
+50,Beneficiary 050,UNICEF,Health,Project-0050,39849,Grant-0050,Middle East,2024-02-19
+51,Beneficiary 051,Red Cross,Education,Project-0051,30994,Grant-0051,Middle East,2024-02-20
+52,Beneficiary 052,WHO,Shelter,Project-0052,31666,Grant-0052,Africa,2024-02-21
+53,Beneficiary 053,WHO,Food Security,Project-0053,11278,Grant-0053,Latin America,2024-02-22
+54,Beneficiary 054,WHO,Water,Project-0054,14476,Grant-0054,Asia,2024-02-23
+55,Beneficiary 055,UNICEF,Water,Project-0055,27020,Grant-0055,Middle East,2024-02-24
+56,Beneficiary 056,UNICEF,Education,Project-0056,39476,Grant-0056,Africa,2024-02-25
+57,Beneficiary 057,Red Cross,Education,Project-0057,9452,Grant-0057,Africa,2024-02-26
+58,Beneficiary 058,Gates Foundation,Health,Project-0058,38284,Grant-0058,Latin America,2024-02-27
+59,Beneficiary 059,UNICEF,Water,Project-0059,12019,Grant-0059,Latin America,2024-02-28
+60,Beneficiary 060,USAID,Shelter,Project-0060,40942,Grant-0060,Africa,2024-02-29
+61,Beneficiary 061,UNICEF,Health,Project-0061,43330,Grant-0061,Latin America,2024-03-01
+62,Beneficiary 062,UNICEF,Education,Project-0062,33576,Grant-0062,Latin America,2024-03-02
+63,Beneficiary 063,WHO,Water,Project-0063,17435,Grant-0063,Middle East,2024-03-03
+64,Beneficiary 064,USAID,Food Security,Project-0064,11091,Grant-0064,Middle East,2024-03-04
+65,Beneficiary 065,Gates Foundation,Food Security,Project-0065,47560,Grant-0065,Middle East,2024-03-05
+66,Beneficiary 066,USAID,Water,Project-0066,45030,Grant-0066,Asia,2024-03-06
+67,Beneficiary 067,Gates Foundation,Shelter,Project-0067,22557,Grant-0067,Latin America,2024-03-07
+68,Beneficiary 068,Red Cross,Water,Project-0068,29818,Grant-0068,Middle East,2024-03-08
+69,Beneficiary 069,WHO,Shelter,Project-0069,39194,Grant-0069,Middle East,2024-03-09
+70,Beneficiary 070,Red Cross,Education,Project-0070,38805,Grant-0070,Africa,2024-03-10
+71,Beneficiary 071,UNICEF,Shelter,Project-0071,4611,Grant-0071,Middle East,2024-03-11
+72,Beneficiary 072,UNICEF,Shelter,Project-0072,15161,Grant-0072,Africa,2024-03-12
+73,Beneficiary 073,WHO,Water,Project-0073,24886,Grant-0073,Latin America,2024-03-13
+74,Beneficiary 074,Red Cross,Water,Project-0074,25361,Grant-0074,Africa,2024-03-14
+75,Beneficiary 075,USAID,Food Security,Project-0075,8764,Grant-0075,Middle East,2024-03-15
+76,Beneficiary 076,Red Cross,Education,Project-0076,7215,Grant-0076,Asia,2024-03-16
+77,Beneficiary 077,Gates Foundation,Health,Project-0077,1185,Grant-0077,Asia,2024-03-17
+78,Beneficiary 078,UNICEF,Water,Project-0078,13361,Grant-0078,Latin America,2024-03-18
+79,Beneficiary 079,USAID,Education,Project-0079,34356,Grant-0079,Middle East,2024-03-19
+80,Beneficiary 080,UNICEF,Education,Project-0080,33153,Grant-0080,Latin America,2024-03-20
+81,Beneficiary 081,Red Cross,Food Security,Project-0081,44950,Grant-0081,Africa,2024-03-21
+82,Beneficiary 082,WHO,Water,Project-0082,27611,Grant-0082,Latin America,2024-03-22
+83,Beneficiary 083,USAID,Water,Project-0083,9901,Grant-0083,Asia,2024-03-23
+84,Beneficiary 084,WHO,Education,Project-0084,39782,Grant-0084,Latin America,2024-03-24
+85,Beneficiary 085,Red Cross,Water,Project-0085,6411,Grant-0085,Africa,2024-03-25
+86,Beneficiary 086,Gates Foundation,Food Security,Project-0086,11727,Grant-0086,Middle East,2024-03-26
+87,Beneficiary 087,WHO,Food Security,Project-0087,31286,Grant-0087,Latin America,2024-03-27
+88,Beneficiary 088,WHO,Food Security,Project-0088,40388,Grant-0088,Africa,2024-03-28
+89,Beneficiary 089,Red Cross,Water,Project-0089,39409,Grant-0089,Asia,2024-03-29
+90,Beneficiary 090,USAID,Water,Project-0090,2658,Grant-0090,Middle East,2024-03-30
+91,Beneficiary 091,Red Cross,Food Security,Project-0091,34927,Grant-0091,Latin America,2024-03-31
+92,Beneficiary 092,WHO,Shelter,Project-0092,33086,Grant-0092,Latin America,2024-04-01
+93,Beneficiary 093,UNICEF,Health,Project-0093,49408,Grant-0093,Asia,2024-04-02
+94,Beneficiary 094,UNICEF,Education,Project-0094,7801,Grant-0094,Latin America,2024-04-03
+95,Beneficiary 095,WHO,Shelter,Project-0095,6207,Grant-0095,Asia,2024-04-04
+96,Beneficiary 096,USAID,Health,Project-0096,31704,Grant-0096,Asia,2024-04-05
+97,Beneficiary 097,WHO,Water,Project-0097,43313,Grant-0097,Middle East,2024-04-06
+98,Beneficiary 098,UNICEF,Education,Project-0098,8641,Grant-0098,Asia,2024-04-07
+99,Beneficiary 099,Gates Foundation,Shelter,Project-0099,39649,Grant-0099,Asia,2024-04-08
+100,Beneficiary 100,WHO,Education,Project-0100,35442,Grant-0100,Asia,2024-04-09
+101,Beneficiary 101,WHO,Water,Project-0101,178,Grant-0101,Latin America,2024-04-10
+102,Beneficiary 102,Gates Foundation,Health,Project-0102,44570,Grant-0102,Asia,2024-04-11
+103,Beneficiary 103,USAID,Health,Project-0103,42648,Grant-0103,Asia,2024-04-12
+104,Beneficiary 104,Red Cross,Health,Project-0104,28378,Grant-0104,Asia,2024-04-13
+105,Beneficiary 105,UNICEF,Shelter,Project-0105,34312,Grant-0105,Asia,2024-04-14
+106,Beneficiary 106,UNICEF,Health,Project-0106,27669,Grant-0106,Latin America,2024-04-15
+107,Beneficiary 107,Red Cross,Shelter,Project-0107,24373,Grant-0107,Asia,2024-04-16
+108,Beneficiary 108,Red Cross,Shelter,Project-0108,2946,Grant-0108,Africa,2024-04-17
+109,Beneficiary 109,Red Cross,Food Security,Project-0109,45820,Grant-0109,Africa,2024-04-18
+110,Beneficiary 110,Red Cross,Shelter,Project-0110,34822,Grant-0110,Africa,2024-04-19
+111,Beneficiary 111,UNICEF,Education,Project-0111,28212,Grant-0111,Middle East,2024-04-20
+112,Beneficiary 112,WHO,Health,Project-0112,15139,Grant-0112,Africa,2024-04-21
+113,Beneficiary 113,WHO,Shelter,Project-0113,31696,Grant-0113,Africa,2024-04-22
+114,Beneficiary 114,Gates Foundation,Water,Project-0114,25084,Grant-0114,Middle East,2024-04-23
+115,Beneficiary 115,WHO,Shelter,Project-0115,23071,Grant-0115,Latin America,2024-04-24
+116,Beneficiary 116,USAID,Shelter,Project-0116,38703,Grant-0116,Latin America,2024-04-25
+117,Beneficiary 117,USAID,Food Security,Project-0117,48687,Grant-0117,Middle East,2024-04-26
+118,Beneficiary 118,Red Cross,Education,Project-0118,45759,Grant-0118,Latin America,2024-04-27
+119,Beneficiary 119,Gates Foundation,Water,Project-0119,37856,Grant-0119,Middle East,2024-04-28
+120,Beneficiary 120,UNICEF,Food Security,Project-0120,6503,Grant-0120,Asia,2024-04-29
+121,Beneficiary 121,WHO,Education,Project-0121,27984,Grant-0121,Latin America,2024-04-30
+122,Beneficiary 122,WHO,Shelter,Project-0122,8874,Grant-0122,Middle East,2024-05-01
+123,Beneficiary 123,UNICEF,Water,Project-0123,16780,Grant-0123,Asia,2024-05-02
+124,Beneficiary 124,USAID,Education,Project-0124,31369,Grant-0124,Asia,2024-05-03
+125,Beneficiary 125,Red Cross,Food Security,Project-0125,15337,Grant-0125,Africa,2024-05-04
+126,Beneficiary 126,Gates Foundation,Shelter,Project-0126,5593,Grant-0126,Middle East,2024-05-05
+127,Beneficiary 127,USAID,Shelter,Project-0127,18664,Grant-0127,Middle East,2024-05-06
+128,Beneficiary 128,Gates Foundation,Health,Project-0128,39309,Grant-0128,Africa,2024-05-07
+129,Beneficiary 129,Red Cross,Food Security,Project-0129,35733,Grant-0129,Latin America,2024-05-08
+130,Beneficiary 130,WHO,Water,Project-0130,26881,Grant-0130,Middle East,2024-05-09
+131,Beneficiary 131,Red Cross,Shelter,Project-0131,16995,Grant-0131,Asia,2024-05-10
+132,Beneficiary 132,USAID,Health,Project-0132,12487,Grant-0132,Middle East,2024-05-11
+133,Beneficiary 133,WHO,Education,Project-0133,458,Grant-0133,Africa,2024-05-12
+134,Beneficiary 134,Red Cross,Shelter,Project-0134,46574,Grant-0134,Middle East,2024-05-13
+135,Beneficiary 135,WHO,Education,Project-0135,48835,Grant-0135,Latin America,2024-05-14
+136,Beneficiary 136,WHO,Shelter,Project-0136,566,Grant-0136,Africa,2024-05-15
+137,Beneficiary 137,Gates Foundation,Education,Project-0137,37978,Grant-0137,Africa,2024-05-16
+138,Beneficiary 138,Gates Foundation,Food Security,Project-0138,34345,Grant-0138,Asia,2024-05-17
+139,Beneficiary 139,USAID,Education,Project-0139,7822,Grant-0139,Middle East,2024-05-18
+140,Beneficiary 140,Red Cross,Education,Project-0140,34163,Grant-0140,Africa,2024-05-19
+141,Beneficiary 141,UNICEF,Shelter,Project-0141,571,Grant-0141,Latin America,2024-05-20
+142,Beneficiary 142,Red Cross,Shelter,Project-0142,24677,Grant-0142,Latin America,2024-05-21
+143,Beneficiary 143,WHO,Education,Project-0143,42996,Grant-0143,Latin America,2024-05-22
+144,Beneficiary 144,USAID,Food Security,Project-0144,13562,Grant-0144,Asia,2024-05-23
+145,Beneficiary 145,USAID,Water,Project-0145,45173,Grant-0145,Latin America,2024-05-24
+146,Beneficiary 146,UNICEF,Health,Project-0146,20802,Grant-0146,Asia,2024-05-25
+147,Beneficiary 147,WHO,Education,Project-0147,26894,Grant-0147,Latin America,2024-05-26
+148,Beneficiary 148,WHO,Food Security,Project-0148,23841,Grant-0148,Middle East,2024-05-27
+149,Beneficiary 149,USAID,Education,Project-0149,7085,Grant-0149,Latin America,2024-05-28
+150,Beneficiary 150,USAID,Health,Project-0150,10243,Grant-0150,Latin America,2024-05-29
+151,Beneficiary 151,UNICEF,Water,Project-0151,28023,Grant-0151,Asia,2024-05-30
+152,Beneficiary 152,UNICEF,Water,Project-0152,42801,Grant-0152,Middle East,2024-05-31
+153,Beneficiary 153,Gates Foundation,Education,Project-0153,38462,Grant-0153,Middle East,2024-06-01
+154,Beneficiary 154,USAID,Health,Project-0154,16722,Grant-0154,Asia,2024-06-02
+155,Beneficiary 155,UNICEF,Education,Project-0155,17224,Grant-0155,Middle East,2024-06-03
+156,Beneficiary 156,WHO,Shelter,Project-0156,35234,Grant-0156,Latin America,2024-06-04
+157,Beneficiary 157,Gates Foundation,Water,Project-0157,27858,Grant-0157,Latin America,2024-06-05
+158,Beneficiary 158,USAID,Food Security,Project-0158,37106,Grant-0158,Middle East,2024-06-06
+159,Beneficiary 159,UNICEF,Food Security,Project-0159,24062,Grant-0159,Latin America,2024-06-07
+160,Beneficiary 160,USAID,Food Security,Project-0160,40200,Grant-0160,Middle East,2024-06-08
+161,Beneficiary 161,Gates Foundation,Health,Project-0161,18159,Grant-0161,Asia,2024-06-09
+162,Beneficiary 162,Red Cross,Health,Project-0162,44704,Grant-0162,Asia,2024-06-10
+163,Beneficiary 163,USAID,Water,Project-0163,26147,Grant-0163,Asia,2024-06-11
+164,Beneficiary 164,USAID,Health,Project-0164,49577,Grant-0164,Africa,2024-06-12
+165,Beneficiary 165,USAID,Shelter,Project-0165,13449,Grant-0165,Latin America,2024-06-13
+166,Beneficiary 166,USAID,Water,Project-0166,27181,Grant-0166,Asia,2024-06-14
+167,Beneficiary 167,UNICEF,Water,Project-0167,36282,Grant-0167,Middle East,2024-06-15
+168,Beneficiary 168,Red Cross,Shelter,Project-0168,36640,Grant-0168,Middle East,2024-06-16
+169,Beneficiary 169,WHO,Shelter,Project-0169,31719,Grant-0169,Asia,2024-06-17
+170,Beneficiary 170,USAID,Shelter,Project-0170,11812,Grant-0170,Asia,2024-06-18
+171,Beneficiary 171,WHO,Education,Project-0171,24362,Grant-0171,Asia,2024-06-19
+172,Beneficiary 172,UNICEF,Food Security,Project-0172,36740,Grant-0172,Middle East,2024-06-20
+173,Beneficiary 173,Red Cross,Food Security,Project-0173,36466,Grant-0173,Africa,2024-06-21
+174,Beneficiary 174,Gates Foundation,Water,Project-0174,31803,Grant-0174,Asia,2024-06-22
+175,Beneficiary 175,Gates Foundation,Shelter,Project-0175,16731,Grant-0175,Middle East,2024-06-23
+176,Beneficiary 176,Gates Foundation,Health,Project-0176,20196,Grant-0176,Middle East,2024-06-24
+177,Beneficiary 177,Gates Foundation,Shelter,Project-0177,37956,Grant-0177,Asia,2024-06-25
+178,Beneficiary 178,Gates Foundation,Water,Project-0178,22667,Grant-0178,Latin America,2024-06-26
+179,Beneficiary 179,Red Cross,Food Security,Project-0179,46335,Grant-0179,Middle East,2024-06-27
+180,Beneficiary 180,USAID,Education,Project-0180,26191,Grant-0180,Latin America,2024-06-28
+181,Beneficiary 181,Gates Foundation,Shelter,Project-0181,48320,Grant-0181,Latin America,2024-06-29
+182,Beneficiary 182,USAID,Food Security,Project-0182,9148,Grant-0182,Africa,2024-06-30
+183,Beneficiary 183,WHO,Water,Project-0183,43306,Grant-0183,Middle East,2024-07-01
+184,Beneficiary 184,USAID,Water,Project-0184,7904,Grant-0184,Africa,2024-07-02
+185,Beneficiary 185,WHO,Food Security,Project-0185,49108,Grant-0185,Asia,2024-07-03
+186,Beneficiary 186,USAID,Food Security,Project-0186,15158,Grant-0186,Africa,2024-07-04
+187,Beneficiary 187,WHO,Shelter,Project-0187,29368,Grant-0187,Asia,2024-07-05
+188,Beneficiary 188,USAID,Health,Project-0188,45930,Grant-0188,Latin America,2024-07-06
+189,Beneficiary 189,USAID,Shelter,Project-0189,10703,Grant-0189,Middle East,2024-07-07
+190,Beneficiary 190,Red Cross,Education,Project-0190,6671,Grant-0190,Africa,2024-07-08
+191,Beneficiary 191,WHO,Food Security,Project-0191,14154,Grant-0191,Middle East,2024-07-09
+192,Beneficiary 192,USAID,Education,Project-0192,33414,Grant-0192,Latin America,2024-07-10
+193,Beneficiary 193,Red Cross,Education,Project-0193,26351,Grant-0193,Latin America,2024-07-11
+194,Beneficiary 194,Red Cross,Health,Project-0194,22279,Grant-0194,Latin America,2024-07-12
+195,Beneficiary 195,WHO,Shelter,Project-0195,36182,Grant-0195,Latin America,2024-07-13
+196,Beneficiary 196,USAID,Water,Project-0196,40340,Grant-0196,Latin America,2024-07-14
+197,Beneficiary 197,Red Cross,Education,Project-0197,45782,Grant-0197,Latin America,2024-07-15
+198,Beneficiary 198,Gates Foundation,Education,Project-0198,44963,Grant-0198,Africa,2024-07-16
+199,Beneficiary 199,Gates Foundation,Education,Project-0199,46420,Grant-0199,Middle East,2024-07-17
+200,Beneficiary 200,Gates Foundation,Education,Project-0200,3511,Grant-0200,Africa,2024-07-18

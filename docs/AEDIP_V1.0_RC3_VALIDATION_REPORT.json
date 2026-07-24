@@ -1,0 +1,362 @@
+{
+  "validation": "AEDIP v1.0 RC3 Real-World Certification",
+  "timestamp": "2026-07-24T04:54:13Z",
+  "overall_phase4_pass": true,
+  "industries": {
+    "healthcare": {
+      "rows": 200,
+      "columns": 11,
+      "detected_industry": "healthcare",
+      "confidence": 85.71428571428571,
+      "detected_entities": [
+        "admission",
+        "agent",
+        "date",
+        "diagnosis",
+        "doctor",
+        "insurance",
+        "patient",
+        "transaction",
+        "ward"
+      ],
+      "kpi_count": 7,
+      "dashboard_title": "Healthcare Executive Dashboard",
+      "phase4_validation": {
+        "industry_matches": true,
+        "detected_industry": "healthcare",
+        "required_terms_present": [],
+        "cross_industry_terms": [],
+        "passed": true
+      },
+      "timings": {
+        "upload_read_seconds": 0.071,
+        "industry_detection_seconds": 0.219,
+        "full_analysis_seconds": 0.176
+      }
+    },
+    "education": {
+      "rows": 200,
+      "columns": 9,
+      "detected_industry": "education",
+      "confidence": 85.71428571428571,
+      "detected_entities": [
+        "attendance",
+        "course",
+        "department_gov",
+        "grade",
+        "graduation",
+        "student"
+      ],
+      "kpi_count": 7,
+      "dashboard_title": "Education Executive Dashboard",
+      "phase4_validation": {
+        "industry_matches": true,
+        "detected_industry": "education",
+        "required_terms_present": [],
+        "cross_industry_terms": [],
+        "passed": true
+      },
+      "timings": {
+        "upload_read_seconds": 0.007,
+        "industry_detection_seconds": 0.305,
+        "full_analysis_seconds": 0.194
+      }
+    },
+    "church": {
+      "rows": 200,
+      "columns": 9,
+      "detected_industry": "church",
+      "confidence": 83.33333333333334,
+      "detected_entities": [
+        "branch_church",
+        "date",
+        "department_gov",
+        "member",
+        "offering",
+        "tithe",
+        "visitor"
+      ],
+      "kpi_count": 9,
+      "dashboard_title": "Church Executive Dashboard",
+      "phase4_validation": {
+        "industry_matches": true,
+        "detected_industry": "church",
+        "required_terms_present": [],
+        "cross_industry_terms": [],
+        "passed": true
+      },
+      "timings": {
+        "upload_read_seconds": 0.115,
+        "industry_detection_seconds": 0.152,
+        "full_analysis_seconds": 0.201
+      }
+    },
+    "government": {
+      "rows": 200,
+      "columns": 11,
+      "detected_industry": "government",
+      "confidence": 66.66666666666666,
+      "detected_entities": [
+        "asset_gov",
+        "budget_gov",
+        "contractor",
+        "date",
+        "department_gov",
+        "project_ngo"
+      ],
+      "kpi_count": 4,
+      "dashboard_title": "Government Executive Dashboard",
+      "phase4_validation": {
+        "industry_matches": true,
+        "detected_industry": "government",
+        "required_terms_present": [],
+        "cross_industry_terms": [],
+        "passed": true
+      },
+      "timings": {
+        "upload_read_seconds": 0.066,
+        "industry_detection_seconds": 0.255,
+        "full_analysis_seconds": 0.253
+      }
+    },
+    "retail": {
+      "rows": 200,
+      "columns": 11,
+      "detected_industry": "retail",
+      "confidence": 75.0,
+      "detected_entities": [
+        "customer",
+        "date",
+        "inventory",
+        "order",
+        "product_manufacturing",
+        "region",
+        "revenue"
+      ],
+      "kpi_count": 12,
+      "dashboard_title": "Retail Executive Dashboard",
+      "phase4_validation": {
+        "industry_matches": true,
+        "detected_industry": "retail",
+        "required_terms_present": [],
+        "cross_industry_terms": [],
+        "passed": true
+      },
+      "timings": {
+        "upload_read_seconds": 0.044,
+        "industry_detection_seconds": 0.159,
+        "full_analysis_seconds": 0.168
+      }
+    },
+    "ngo": {
+      "rows": 200,
+      "columns": 10,
+      "detected_industry": "ngo",
+      "confidence": 100.0,
+      "detected_entities": [
+        "beneficiary",
+        "date",
+        "donation",
+        "donor",
+        "program",
+        "region"
+      ],
+      "kpi_count": 9,
+      "dashboard_title": "NGO Executive Dashboard",
+      "phase4_validation": {
+        "industry_matches": true,
+        "detected_industry": "ngo",
+        "required_terms_present": [],
+        "cross_industry_terms": [],
+        "passed": true
+      },
+      "timings": {
+        "upload_read_seconds": 0.016,
+        "industry_detection_seconds": 0.144,
+        "full_analysis_seconds": 0.132
+      }
+    },
+    "manufacturing": {
+      "rows": 200,
+      "columns": 10,
+      "detected_industry": "manufacturing",
+      "confidence": 100.0,
+      "detected_entities": [
+        "date",
+        "downtime",
+        "machine",
+        "product_manufacturing",
+        "production"
+      ],
+      "kpi_count": 6,
+      "dashboard_title": "Manufacturing Executive Dashboard",
+      "phase4_validation": {
+        "industry_matches": true,
+        "detected_industry": "manufacturing",
+        "required_terms_present": [],
+        "cross_industry_terms": [],
+        "passed": true
+      },
+      "timings": {
+        "upload_read_seconds": 0.016,
+        "industry_detection_seconds": 0.101,
+        "full_analysis_seconds": 0.154
+      }
+    },
+    "banking": {
+      "rows": 200,
+      "columns": 9,
+      "detected_industry": "banking",
+      "confidence": 75.0,
+      "detected_entities": [
+        "account",
+        "branch_church",
+        "customer",
+        "date",
+        "revenue",
+        "transaction"
+      ],
+      "kpi_count": 8,
+      "dashboard_title": "Banking Executive Dashboard",
+      "phase4_validation": {
+        "industry_matches": true,
+        "detected_industry": "banking",
+        "required_terms_present": [],
+        "cross_industry_terms": [],
+        "passed": true
+      },
+      "timings": {
+        "upload_read_seconds": 0.02,
+        "industry_detection_seconds": 0.095,
+        "full_analysis_seconds": 0.135
+      }
+    },
+    "insurance": {
+      "rows": 200,
+      "columns": 9,
+      "detected_industry": "insurance",
+      "confidence": 80.0,
+      "detected_entities": [
+        "agent",
+        "claim",
+        "customer",
+        "date",
+        "policy"
+      ],
+      "kpi_count": 8,
+      "dashboard_title": "Insurance Executive Dashboard",
+      "phase4_validation": {
+        "industry_matches": true,
+        "detected_industry": "insurance",
+        "required_terms_present": [],
+        "cross_industry_terms": [],
+        "passed": true
+      },
+      "timings": {
+        "upload_read_seconds": 0.037,
+        "industry_detection_seconds": 0.112,
+        "full_analysis_seconds": 0.156
+      }
+    },
+    "agriculture": {
+      "rows": 200,
+      "columns": 10,
+      "detected_industry": "agriculture",
+      "confidence": 100.0,
+      "detected_entities": [
+        "crop",
+        "date",
+        "farm",
+        "livestock",
+        "weather"
+      ],
+      "kpi_count": 7,
+      "dashboard_title": "Agriculture Executive Dashboard",
+      "phase4_validation": {
+        "industry_matches": true,
+        "detected_industry": "agriculture",
+        "required_terms_present": [],
+        "cross_industry_terms": [],
+        "passed": true
+      },
+      "timings": {
+        "upload_read_seconds": 0.064,
+        "industry_detection_seconds": 0.145,
+        "full_analysis_seconds": 0.179
+      }
+    },
+    "hospitality": {
+      "rows": 200,
+      "columns": 11,
+      "detected_industry": "hospitality",
+      "confidence": 80.0,
+      "detected_entities": [
+        "date",
+        "event",
+        "guest",
+        "reservation",
+        "room",
+        "transaction"
+      ],
+      "kpi_count": 6,
+      "dashboard_title": "Hospitality Executive Dashboard",
+      "phase4_validation": {
+        "industry_matches": true,
+        "detected_industry": "hospitality",
+        "required_terms_present": [],
+        "cross_industry_terms": [],
+        "passed": true
+      },
+      "timings": {
+        "upload_read_seconds": 0.014,
+        "industry_detection_seconds": 0.138,
+        "full_analysis_seconds": 0.131
+      }
+    },
+    "telecommunications": {
+      "rows": 200,
+      "columns": 9,
+      "detected_industry": "telecommunications",
+      "confidence": 100.0,
+      "detected_entities": [
+        "call",
+        "data_usage",
+        "date",
+        "expense",
+        "plan",
+        "subscriber"
+      ],
+      "kpi_count": 6,
+      "dashboard_title": "Telecommunications Executive Dashboard",
+      "phase4_validation": {
+        "industry_matches": true,
+        "detected_industry": "telecommunications",
+        "required_terms_present": [],
+        "cross_industry_terms": [],
+        "passed": true
+      },
+      "timings": {
+        "upload_read_seconds": 0.021,
+        "industry_detection_seconds": 0.125,
+        "full_analysis_seconds": 0.183
+      }
+    }
+  },
+  "report_export": {
+    "csv": {
+      "bytes": 76,
+      "extension": "csv",
+      "time_seconds": 0.085
+    },
+    "excel": {
+      "bytes": 5030,
+      "extension": "xlsx",
+      "time_seconds": 1.368
+    },
+    "pdf": {
+      "bytes": 1138,
+      "extension": "pdf",
+      "time_seconds": 0.006
+    }
+  }
+}

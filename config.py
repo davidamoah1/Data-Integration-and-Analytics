@@ -43,6 +43,12 @@ else:
         "Use 'mysql' for production and 'sqlite' only for local development/testing."
     )
 
+# --- Connection Pool Settings (MySQL) ---
+POOL_SIZE = int(os.getenv("POOL_SIZE", "10"))
+POOL_TIMEOUT = int(os.getenv("POOL_TIMEOUT", "30"))
+POOL_RECYCLE = int(os.getenv("POOL_RECYCLE", "3600"))
+MAX_OVERFLOW = int(os.getenv("MAX_OVERFLOW", "20"))
+
 # Logging
 LOG_PATH = _resolve_path(os.getenv("LOG_PATH", "logs/pipeline.log"))
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
@@ -70,7 +76,7 @@ ACCOUNT_LOCKOUT_THRESHOLD = int(os.getenv("ACCOUNT_LOCKOUT_THRESHOLD", "5"))
 ACCOUNT_LOCKOUT_DURATION_MINUTES = int(os.getenv("ACCOUNT_LOCKOUT_DURATION_MINUTES", "30"))
 
 # --- CORS ---
-CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*")
+CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:8501,http://localhost:3000")
 
 # --- AI Platform (Phase 6) ---
 AI_DEFAULT_PROVIDER = os.getenv("AI_DEFAULT_PROVIDER", "openai")
@@ -144,10 +150,13 @@ def validate_config() -> None:
                 f"MySQL production configuration incomplete. Missing: {', '.join(missing)}"
             )
 
-        if not JWT_SECRET_KEY or JWT_SECRET_KEY == _JWT_DEFAULT_SECRET:
-            raise ValueError("JWT_SECRET_KEY must be set to a strong secret in production.")
+    if not JWT_SECRET_KEY or JWT_SECRET_KEY == _JWT_DEFAULT_SECRET:
+        raise ValueError("JWT_SECRET_KEY must be set to a strong secret.")
 
-        if CORS_ORIGINS == "*":
-            raise ValueError(
-                "CORS_ORIGINS cannot be '*' in production. Set allowed origins explicitly."
-            )
+    if DB_TYPE == "mysql" and len(JWT_SECRET_KEY) < 32:
+        raise ValueError("JWT_SECRET_KEY must be at least 32 characters in production.")
+
+    if CORS_ORIGINS == "*":
+        raise ValueError(
+            "CORS_ORIGINS cannot be '*'. Set allowed origins explicitly."
+        )

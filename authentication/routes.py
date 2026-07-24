@@ -47,9 +47,9 @@ async def signup(request: SignupRequest, db: DbSession = Depends(get_db)):
     """Public self-registration. Creates a user and optionally a new organization."""
     from authentication.models import User
     from authentication.repositories import UserRepository
+    from authentication.services import validate_password
     from organizations.models import Organization
     from shared.security import hash_password
-    from authentication.services import validate_password
 
     user_repo = UserRepository(db)
     existing = user_repo.get_by_email(request.email)
@@ -62,7 +62,9 @@ async def signup(request: SignupRequest, db: DbSession = Depends(get_db)):
 
     org_id = None
     if request.organization_name:
-        org = Organization(name=request.organization_name, slug=request.organization_name.lower().replace(" ", "-"))
+        org = Organization(
+            name=request.organization_name, slug=request.organization_name.lower().replace(" ", "-")
+        )
         db.add(org)
         db.flush()
         org_id = org.id
@@ -77,6 +79,7 @@ async def signup(request: SignupRequest, db: DbSession = Depends(get_db)):
 
     # Assign default 'viewer' role if it exists
     from authentication.repositories import RoleRepository, UserRoleRepository
+
     role_repo = RoleRepository(db)
     viewer_role = role_repo.get_by_name("viewer")
     if viewer_role:
@@ -84,7 +87,12 @@ async def signup(request: SignupRequest, db: DbSession = Depends(get_db)):
 
     db.commit()
     return success_response(
-        {"id": user.id, "email": user.email, "full_name": user.full_name, "organization_id": org_id},
+        {
+            "id": user.id,
+            "email": user.email,
+            "full_name": user.full_name,
+            "organization_id": org_id,
+        },
         "Account created successfully",
     )
 

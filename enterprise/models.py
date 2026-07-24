@@ -21,7 +21,6 @@ from sqlalchemy import (
 
 from shared.database import Base, BigInt
 
-
 # --- Template Marketplace ----------------------------------------------------
 
 
@@ -54,7 +53,9 @@ class TemplateInstall(Base):
     __tablename__ = "platform_template_installs"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
-    template_id = Column(BigInteger, ForeignKey("platform_templates.id"), nullable=False, index=True)
+    template_id = Column(
+        BigInteger, ForeignKey("platform_templates.id"), nullable=False, index=True
+    )
     organization_id = Column(BigInteger, nullable=True, index=True)
     installed_by = Column(BigInteger, nullable=False)
     installed_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
@@ -72,7 +73,7 @@ class Comment(Base):
     resource_type = Column(String(50), nullable=False, index=True)
     resource_id = Column(BigInteger, nullable=False, index=True)
     author_id = Column(BigInteger, nullable=False, index=True)
-    parent_id = Column(BigInteger, ForeignKey("platform_comments.id"), nullable=True)
+    parent_id = Column(BigInteger, ForeignKey("platform_comments.id"), nullable=True, index=True)
     body = Column(Text, nullable=False)
     mentions = Column(JSON, nullable=True, default=list)
     is_resolved = Column(Boolean, nullable=False, default=False)
@@ -88,9 +89,9 @@ class SharedResource(Base):
     id = Column(BigInt, primary_key=True, autoincrement=True)
     resource_type = Column(String(50), nullable=False, index=True)
     resource_id = Column(BigInteger, nullable=False, index=True)
-    shared_by = Column(BigInteger, nullable=False)
+    shared_by = Column(BigInteger, nullable=False, index=True)
     shared_with_type = Column(String(20), nullable=False, default="user")
-    shared_with_id = Column(BigInteger, nullable=False)
+    shared_with_id = Column(BigInteger, nullable=False, index=True)
     permission = Column(String(20), nullable=False, default="view")
     created_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
 

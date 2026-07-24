@@ -1,0 +1,21 @@
+2026-07-23 00:21:38.814 
+Warning: the config option 'server.enableCORS=false' is not compatible with 'server.enableXsrfProtection=true'.
+As a result, 'server.enableCORS' is being overridden to 'true'.
+
+More information:
+In order to protect against CSRF attacks, we send a cookie with each request.
+To do so, we must specify allowable origins, which places a restriction on
+cross-origin resource sharing.
+
+If cross origin resource sharing is required, please disable server.enableXsrfProtection.
+            
+2026-07-23 08:38:36.757 An update to the [server] config option section was detected. To have these changes be reflected, please restart streamlit.
+2026-07-23 13:51:59.040 304 GET /_stcore/host-config (127.0.0.1) 241.86ms
+2026-07-23 13:51:59.089 304 GET /_stcore/health (127.0.0.1) 195.78ms
+2026-07-23 13:53:02.004 304 GET /_stcore/health (127.0.0.1) 81.02ms
+2026-07-23 13:53:02.041 304 GET /_stcore/host-config (127.0.0.1) 8.63ms
+2026-07-23 13:53:12.588 101 GET /_stcore/stream (127.0.0.1) 41.64ms
+2026-07-23 17:31:14.592 304 GET /_stcore/health (127.0.0.1) 138.60ms
+2026-07-23 17:31:14.675 304 GET /_stcore/host-config (127.0.0.1) 163.58ms
+2026-07-23 17:31:14.976 101 GET /_stcore/stream (127.0.0.1) 22.40ms
+2026-07-23 17:31:32.945 304 GET /app/static/service-worker.js (127.0.0.1) 3.62ms

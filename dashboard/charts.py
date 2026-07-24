@@ -272,7 +272,11 @@ def render_heatmap_sales_region_category(df: pd.DataFrame, labels: dict | None =
 
 
 def render_kpi_cards(
-    total_sales: float, total_profit: float, total_orders: int, avg_order: float, margin_pct: float,
+    total_sales: float,
+    total_profit: float,
+    total_orders: int,
+    avg_order: float,
+    margin_pct: float,
     labels: dict | None = None,
 ):
     """Render the 4 KPI cards.

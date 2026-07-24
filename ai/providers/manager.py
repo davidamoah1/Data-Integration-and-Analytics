@@ -97,7 +97,11 @@ class ProviderManager:
 
         if db_config:
             provider = cls(
-                api_key=decrypt_secret(db_config.api_key_encrypted) if db_config.api_key_encrypted else "",
+                api_key=(
+                    decrypt_secret(db_config.api_key_encrypted)
+                    if db_config.api_key_encrypted
+                    else ""
+                ),
                 base_url=db_config.api_base_url or "",
                 model=db_config.default_model or AI_DEFAULT_MODEL,
                 max_tokens=db_config.max_tokens,

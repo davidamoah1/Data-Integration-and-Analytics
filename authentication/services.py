@@ -49,6 +49,7 @@ from shared.exceptions import (
     ValidationError,
 )
 from shared.security import (
+    ACCOUNT_LOCKOUT_THRESHOLD,
     JWT_REFRESH_EXPIRE_DAYS,
     PASSWORD_HISTORY_COUNT,
     create_access_token,
@@ -105,7 +106,7 @@ class AuthService:
         if not verify_password(request.password, user.password_hash):
             count = self.user_repo.increment_failed_login(user.id)
             self.db.commit()
-            if count >= 5:
+            if count >= ACCOUNT_LOCKOUT_THRESHOLD:
                 raise AccountLockedError()
             raise AuthenticationError("Invalid email or password")
 

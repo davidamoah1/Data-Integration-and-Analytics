@@ -184,9 +184,10 @@ def validate_sql_identifier(name: str) -> str:
 
 # --- API key encryption ------------------------------------------------------
 
-from cryptography.fernet import Fernet, InvalidToken  # noqa: E402
-import hashlib as _hashlib  # noqa: E402
 import base64 as _base64  # noqa: E402
+import hashlib as _hashlib  # noqa: E402
+
+from cryptography.fernet import Fernet, InvalidToken  # noqa: E402
 
 
 def _get_fernet_key() -> bytes:

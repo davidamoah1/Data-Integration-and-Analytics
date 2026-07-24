@@ -59,8 +59,41 @@ class ContextBuilder:
         # Merge extra context
         if extra_context:
             context["user_context"] = extra_context
+            if semantic_dataset := extra_context.get("semantic_dataset"):
+                context["semantic_dataset"] = semantic_dataset
+
+        # Enrich with semantic context if available
+        context.update(self._semantic_context())
 
         return context
+
+    def _semantic_context(self) -> dict:
+        """Enrich AI context with semantic intelligence from the entity library."""
+        ctx = {}
+        try:
+            from semantic.entity_library import ENTITY_LIBRARY, get_all_industries
+            from semantic.industry_knowledge import INDUSTRY_KNOWLEDGE
+
+            ctx["semantic_layer"] = {
+                "available": True,
+                "total_entities": len(ENTITY_LIBRARY),
+                "industries": get_all_industries(),
+                "entity_keys": list(ENTITY_LIBRARY.keys())[:30],
+            }
+            # Add industry knowledge summaries for AI reasoning
+            ctx["industry_knowledge"] = {
+                ind: {
+                    "display_name": k["display_name"],
+                    "entities": k["entities"],
+                    "kpis": k["kpis"],
+                    "business_rules": k["business_rules"],
+                    "ai_prompts": k["ai_prompts"],
+                }
+                for ind, k in INDUSTRY_KNOWLEDGE.items()
+            }
+        except Exception:
+            ctx["semantic_layer"] = {"available": False}
+        return ctx
 
     def _data_context(self) -> dict:
         """Context for data copilot — dynamically discovered dataset summary."""

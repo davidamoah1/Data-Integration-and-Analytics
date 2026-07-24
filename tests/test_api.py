@@ -20,14 +20,6 @@ def client(tmp_path, monkeypatch):
     monkeypatch.setattr(config, "DB_URL", db_url)
     monkeypatch.setattr(config, "DB_TYPE", "sqlite")
 
-    # Patch DB_URL in all modules that imported it at module level
-    from database import repositories
-
-    monkeypatch.setattr(repositories, "DB_URL", db_url)
-    from database import db_setup
-
-    monkeypatch.setattr(db_setup, "DB_URL", db_url)
-
     monkeypatch.setenv("API_KEY", "test-api-key")
 
     from sqlalchemy import create_engine
@@ -46,7 +38,7 @@ def test_root_endpoint(client):
     response = client.get("/")
     assert response.status_code == 200
     data = response.json()
-    assert data["name"] == "ETL Data Intelligence API"
+    assert data["name"] == "AEDIP Enterprise Data Intelligence API"
 
 
 def test_health_check(client):

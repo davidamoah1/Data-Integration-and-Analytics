@@ -1,11 +1,11 @@
 """Platform API routes — templates, collaboration, branding, and enterprise search."""
 
-from datetime import datetime, timezone
-
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import or_
 from sqlalchemy.orm import Session as DbSession
 
+from enterprise.demo_data import is_demo_seeded, seed_demo_data
+from enterprise.industry_packs import get_all_packs, get_pack
 from enterprise.models import (
     ActivityEvent,
     Comment,
@@ -14,12 +14,7 @@ from enterprise.models import (
     Template,
     TemplateInstall,
 )
-from enterprise.industry_packs import get_all_packs, get_pack, get_pack_names
-from enterprise.demo_data import is_demo_seeded, seed_demo_data
 from enterprise.schemas import (
-    ActivityResponse,
-    BrandingCreate,
-    BrandingResponse,
     BrandingUpdate,
     CommentCreate,
     CommentResponse,
@@ -29,11 +24,16 @@ from enterprise.schemas import (
     ShareCreate,
     ShareResponse,
     TemplateCreate,
-    TemplateResponse,
-    TemplateUpdate,
 )
-from shared.dependencies import get_current_user
+from enterprise.subscription import (
+    ALL_FEATURES,
+    PLAN_DEFINITIONS,
+    SubscriptionService,
+)
+from services.backup_service import BackupService
 from shared.database import get_db
+from shared.dependencies import get_current_user
+from shared.response import success_response
 
 router = APIRouter(prefix="/platform", tags=["Platform"])
 
@@ -61,9 +61,7 @@ async def list_templates(
         query = query.filter(Template.is_featured == is_featured)
     if search:
         pattern = f"%{search}%"
-        query = query.filter(
-            or_(Template.name.ilike(pattern), Template.description.ilike(pattern))
-        )
+        query = query.filter(or_(Template.name.ilike(pattern), Template.description.ilike(pattern)))
     templates = query.order_by(Template.install_count.desc()).limit(limit).all()
     return [
         {
@@ -133,7 +131,9 @@ async def get_template(
         "tags": template.tags or [],
         "is_featured": template.is_featured,
         "install_count": template.install_count,
-        "rating": round(template.rating_sum / template.rating_count, 1) if template.rating_count else 0.0,
+        "rating": (
+            round(template.rating_sum / template.rating_count, 1) if template.rating_count else 0.0
+        ),
         "created_at": str(template.created_at) if template.created_at else None,
         "updated_at": str(template.updated_at) if template.updated_at else None,
     }
@@ -264,8 +264,14 @@ async def resolve_comment(
     comment = db.query(Comment).filter(Comment.id == comment_id).first()
     if not comment:
         raise HTTPException(status_code=404, detail="Comment not found")
-    if comment.author_id != current_user["id"] and "admin" not in current_user["roles"] and "super_admin" not in current_user["roles"]:
-        raise HTTPException(status_code=403, detail="Only the author or an admin can resolve a comment")
+    if (
+        comment.author_id != current_user["id"]
+        and "admin" not in current_user["roles"]
+        and "super_admin" not in current_user["roles"]
+    ):
+        raise HTTPException(
+            status_code=403, detail="Only the author or an admin can resolve a comment"
+        )
     comment.is_resolved = True
     db.commit()
     return {"message": "Comment resolved"}
@@ -377,9 +383,11 @@ async def get_branding(
     org_id = current_user.get("organization_id")
     if not org_id:
         return {"branding": None, "message": "No organization configured"}
-    branding = db.query(OrganizationBranding).filter(
-        OrganizationBranding.organization_id == org_id
-    ).first()
+    branding = (
+        db.query(OrganizationBranding)
+        .filter(OrganizationBranding.organization_id == org_id)
+        .first()
+    )
     if not branding:
         return {"branding": None}
     return {
@@ -411,9 +419,11 @@ async def update_branding(
         raise HTTPException(status_code=400, detail="No organization configured")
     if "super_admin" not in current_user["roles"] and "admin" not in current_user["roles"]:
         raise HTTPException(status_code=403, detail="Admin access required")
-    branding = db.query(OrganizationBranding).filter(
-        OrganizationBranding.organization_id == org_id
-    ).first()
+    branding = (
+        db.query(OrganizationBranding)
+        .filter(OrganizationBranding.organization_id == org_id)
+        .first()
+    )
     if not branding:
         branding = OrganizationBranding(organization_id=org_id)
         db.add(branding)
@@ -430,7 +440,11 @@ async def update_branding(
     branding.custom_css = body.custom_css
     db.commit()
     db.refresh(branding)
-    return {"id": branding.id, "organization_id": branding.organization_id, "message": "Branding updated"}
+    return {
+        "id": branding.id,
+        "organization_id": branding.organization_id,
+        "message": "Branding updated",
+    }
 
 
 # --- Enterprise Search -------------------------------------------------------
@@ -445,7 +459,14 @@ async def enterprise_search(
     """Search across dashboards, reports, pipelines, KPIs, templates, and conversations."""
     results: list[dict] = []
     pattern = f"%{body.query}%"
-    types = body.resource_types or ["dashboard", "kpi", "pipeline", "template", "conversation", "report"]
+    types = body.resource_types or [
+        "dashboard",
+        "kpi",
+        "pipeline",
+        "template",
+        "conversation",
+        "report",
+    ]
 
     if "dashboard" in types:
         from analytics.models import Dashboard
@@ -465,14 +486,16 @@ async def enterprise_search(
             )
         dashboards = dash_query.limit(body.limit).all()
         for d in dashboards:
-            results.append({
-                "resource_type": "dashboard",
-                "resource_id": d.id,
-                "title": d.name,
-                "description": d.description,
-                "url": f"/analytics/dashboards/{d.id}",
-                "score": 1.0,
-            })
+            results.append(
+                {
+                    "resource_type": "dashboard",
+                    "resource_id": d.id,
+                    "title": d.name,
+                    "description": d.description,
+                    "url": f"/analytics/dashboards/{d.id}",
+                    "score": 1.0,
+                }
+            )
 
     if "kpi" in types:
         from analytics.models import KPI
@@ -489,35 +512,37 @@ async def enterprise_search(
             )
         kpis = kpi_query.limit(body.limit).all()
         for k in kpis:
-            results.append({
-                "resource_type": "kpi",
-                "resource_id": k.id,
-                "title": k.name,
-                "description": k.description,
-                "url": f"/analytics/kpis/{k.id}",
-                "score": 1.0,
-            })
+            results.append(
+                {
+                    "resource_type": "kpi",
+                    "resource_id": k.id,
+                    "title": k.name,
+                    "description": k.description,
+                    "url": f"/analytics/kpis/{k.id}",
+                    "score": 1.0,
+                }
+            )
 
     if "pipeline" in types:
         from etl.models import ETLPipeline
 
         pipelines = (
             db.query(ETLPipeline)
-            .filter(
-                or_(ETLPipeline.name.ilike(pattern), ETLPipeline.description.ilike(pattern))
-            )
+            .filter(or_(ETLPipeline.name.ilike(pattern), ETLPipeline.description.ilike(pattern)))
             .limit(body.limit)
             .all()
         )
         for p in pipelines:
-            results.append({
-                "resource_type": "pipeline",
-                "resource_id": p.id,
-                "title": p.name,
-                "description": p.description,
-                "url": f"/etl/pipelines/{p.id}",
-                "score": 1.0,
-            })
+            results.append(
+                {
+                    "resource_type": "pipeline",
+                    "resource_id": p.id,
+                    "title": p.name,
+                    "description": p.description,
+                    "url": f"/etl/pipelines/{p.id}",
+                    "score": 1.0,
+                }
+            )
 
     if "template" in types:
         templates = (
@@ -530,14 +555,16 @@ async def enterprise_search(
             .all()
         )
         for t in templates:
-            results.append({
-                "resource_type": "template",
-                "resource_id": t.id,
-                "title": t.name,
-                "description": t.description,
-                "url": f"/platform/templates/{t.id}",
-                "score": 1.0,
-            })
+            results.append(
+                {
+                    "resource_type": "template",
+                    "resource_id": t.id,
+                    "title": t.name,
+                    "description": t.description,
+                    "url": f"/platform/templates/{t.id}",
+                    "score": 1.0,
+                }
+            )
 
     if "conversation" in types:
         from ai.models import AIConversation
@@ -546,20 +573,25 @@ async def enterprise_search(
             db.query(AIConversation)
             .filter(
                 AIConversation.user_id == current_user["id"],
-                or_(AIConversation.title.ilike(pattern), AIConversation.assistant_type.ilike(pattern)),
+                or_(
+                    AIConversation.title.ilike(pattern),
+                    AIConversation.assistant_type.ilike(pattern),
+                ),
             )
             .limit(body.limit)
             .all()
         )
         for c in convs:
-            results.append({
-                "resource_type": "conversation",
-                "resource_id": c.id,
-                "title": c.title or f"Conversation {c.id}",
-                "description": c.assistant_type,
-                "url": f"/ai/conversations/{c.id}",
-                "score": 1.0,
-            })
+            results.append(
+                {
+                    "resource_type": "conversation",
+                    "resource_id": c.id,
+                    "title": c.title or f"Conversation {c.id}",
+                    "description": c.assistant_type,
+                    "url": f"/ai/conversations/{c.id}",
+                    "score": 1.0,
+                }
+            )
 
     if "report" in types:
         from ai.models import AIReportGeneration
@@ -574,18 +606,20 @@ async def enterprise_search(
             .all()
         )
         for r in reports:
-            results.append({
-                "resource_type": "report",
-                "resource_id": r.id,
-                "title": r.title,
-                "description": r.summary[:200] if r.summary else None,
-                "url": f"/ai/reports/{r.id}",
-                "score": 1.0,
-            })
+            results.append(
+                {
+                    "resource_type": "report",
+                    "resource_id": r.id,
+                    "title": r.title,
+                    "description": r.summary[:200] if r.summary else None,
+                    "url": f"/ai/reports/{r.id}",
+                    "score": 1.0,
+                }
+            )
 
     return SearchResponse(
         query=body.query,
-        results=[SearchResult(**r) for r in results[:body.limit]],
+        results=[SearchResult(**r) for r in results[: body.limit]],
         total=len(results),
     )
 
@@ -650,3 +684,150 @@ async def demo_status(
 ):
     """Check if demo data has been seeded."""
     return {"is_seeded": is_demo_seeded(db)}
+
+
+# --- Subscription & Licensing ------------------------------------------------
+
+
+@router.get("/subscription/plans")
+async def list_plans():
+    """List all available subscription plans."""
+    return [
+        {
+            "key": key,
+            "name": plan["name"],
+            "description": plan["description"],
+            "trial_days": plan["trial_days"],
+            "limits": {
+                "max_users": plan["max_users"],
+                "max_dashboards": plan["max_dashboards"],
+                "max_pipelines": plan["max_pipelines"],
+                "max_ai_queries_per_month": plan["max_ai_queries_per_month"],
+                "max_upload_mb": plan["max_upload_mb"],
+            },
+            "features": plan["features"],
+        }
+        for key, plan in PLAN_DEFINITIONS.items()
+    ]
+
+
+@router.get("/subscription/current")
+async def get_current_subscription(
+    db: DbSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Get the current organization's subscription state."""
+    org_id = current_user.get("organization_id")
+    if not org_id:
+        raise HTTPException(status_code=400, detail="No organization configured")
+    svc = SubscriptionService(db)
+    svc.check_trial_expired(org_id)
+    return svc.get_limits(org_id)
+
+
+@router.post("/subscription/upgrade")
+async def upgrade_subscription(
+    plan: str = Query(
+        ..., description="Plan key: free_trial, starter, professional, enterprise, government"
+    ),
+    db: DbSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Upgrade the organization to a new plan."""
+    if "super_admin" not in current_user["roles"] and "admin" not in current_user["roles"]:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    if plan not in PLAN_DEFINITIONS:
+        raise HTTPException(status_code=400, detail=f"Unknown plan: {plan}")
+    org_id = current_user.get("organization_id")
+    if not org_id:
+        raise HTTPException(status_code=400, detail="No organization configured")
+    svc = SubscriptionService(db)
+    sub = svc.upgrade_plan(org_id, plan)
+    return {
+        "message": f"Upgraded to {PLAN_DEFINITIONS[plan]['name']}",
+        "plan": sub.plan,
+        "status": sub.status,
+        "limits": svc.get_limits(org_id),
+    }
+
+
+@router.post("/subscription/cancel")
+async def cancel_subscription(
+    db: DbSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Cancel the organization's subscription."""
+    if "super_admin" not in current_user["roles"] and "admin" not in current_user["roles"]:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    org_id = current_user.get("organization_id")
+    if not org_id:
+        raise HTTPException(status_code=400, detail="No organization configured")
+    svc = SubscriptionService(db)
+    svc.cancel_subscription(org_id)
+    return {"message": "Subscription canceled"}
+
+
+@router.get("/subscription/features")
+async def list_all_features():
+    """List all available feature keys."""
+    return {"features": ALL_FEATURES}
+
+
+@router.get("/subscription/feature-check")
+async def check_feature(
+    feature: str = Query(..., description="Feature key to check"),
+    db: DbSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Check if the current organization has access to a feature."""
+    org_id = current_user.get("organization_id")
+    if not org_id:
+        return {"has_access": False, "reason": "No organization configured"}
+    svc = SubscriptionService(db)
+    has_access = svc.has_feature(org_id, feature)
+    return {"has_access": has_access, "feature": feature}
+
+
+@router.put("/subscription/feature-flag")
+async def set_feature_flag(
+    feature: str = Query(..., description="Feature key"),
+    enabled: bool = Query(True, description="Enable or disable"),
+    db: DbSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Set a feature flag override for the organization."""
+    if "super_admin" not in current_user["roles"] and "admin" not in current_user["roles"]:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    org_id = current_user.get("organization_id")
+    if not org_id:
+        raise HTTPException(status_code=400, detail="No organization configured")
+    svc = SubscriptionService(db)
+    svc.set_feature_flag(org_id, feature, enabled)
+    return {"message": f"Feature '{feature}' {'enabled' if enabled else 'disabled'}"}
+
+
+# --- Backup management -------------------------------------------------------
+
+
+@router.post("/backups")
+async def trigger_backup(current_user: dict = Depends(get_current_user)):
+    """Trigger an on-demand backup of the database and configuration.
+
+    Requires admin or super_admin role.
+    """
+    if "admin" not in current_user["roles"] and "super_admin" not in current_user["roles"]:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    result = BackupService().create_backup()
+    return success_response(result, "Backup created")
+
+
+@router.get("/backups")
+async def list_backups(current_user: dict = Depends(get_current_user)):
+    """List available backups.
+
+    Requires admin or super_admin role.
+    """
+    if "admin" not in current_user["roles"] and "super_admin" not in current_user["roles"]:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    backups = BackupService().list_backups()
+    return success_response(backups)

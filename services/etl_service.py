@@ -50,13 +50,12 @@ class ETLService:
             - run_id, status, rows_extracted, rows_transformed,
               rows_loaded, duplicates_removed, duration_seconds
         """
-        run_id = f"run_{datetime.now(timezone.utc).replace(tzinfo=None).strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
-        start_time = datetime.now()
+        run_id = f"run_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
+        start_time = datetime.now(timezone.utc)
         logger.info("=" * 50)
         logger.info(
             f"Pipeline started at {start_time.strftime('%Y-%m-%d %H:%M:%S')} (run_id={run_id})"
         )
-        print(f"\nPipeline started at {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
 
         metrics = {
             "run_id": run_id,
@@ -97,14 +96,12 @@ class ETLService:
             )
 
             logger.info(f"Pipeline completed successfully in {duration:.1f} seconds.")
-            print(f"\nPipeline completed successfully in {duration:.1f} seconds.")
 
         except Exception as e:
             metrics["status"] = "failed"
             error_msg = str(e)
             self.run_repo.fail_run(run_id, error_msg)
             logger.error(f"Pipeline failed: {error_msg}")
-            print(f"\nPipeline failed: {error_msg}")
             raise
 
         return metrics
@@ -125,7 +122,7 @@ class ETLService:
         last_exception = None
         for attempt in range(1, self.max_retries + 1):
             try:
-                print(f"\n[{step_name}] Attempt {attempt}/{self.max_retries}...")
+                logger.info(f"[{step_name}] Attempt {attempt}/{self.max_retries}...")
                 return func()
             except Exception as e:
                 last_exception = e

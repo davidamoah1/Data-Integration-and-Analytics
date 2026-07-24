@@ -53,6 +53,7 @@ def _init_copilot_state():
 
 def _send_message(message: str, assistant_type: str, conversation_id: int | None):
     """Send a message to the AI gateway and return the result dict."""
+    semantic_context = st.session_state.get("semantic_dataset_context")
     db = _get_db_session()
     try:
         gateway = AIGateway(db)
@@ -61,6 +62,7 @@ def _send_message(message: str, assistant_type: str, conversation_id: int | None
             assistant_type=assistant_type,
             user_id=_get_user_id(),
             conversation_id=conversation_id,
+            context={"semantic_dataset": semantic_context} if semantic_context else None,
             stream=False,
             permissions=_get_user_permissions(),
         )

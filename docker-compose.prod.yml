@@ -1,0 +1,167 @@
+# Production Docker Compose for AEDIP v1.0
+# Usage: docker compose -f docker-compose.prod.yml up -d
+#
+# Before deploying:
+# 1. Copy .env.example to .env and fill in strong secrets.
+# 2. Replace example.com with your domain in deployment/nginx.conf.
+# 3. For HTTPS, run certbot to obtain certificates and mount them into nginx.
+
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deployment/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./deployment/certbot-data/cert:/etc/letsencrypt:ro
+      - ./deployment/certbot-data/www:/var/www/certbot:ro
+      - nginx_cache:/var/cache/nginx
+    depends_on:
+      api:
+        condition: service_healthy
+      dashboard:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./deployment/certbot-data/cert:/etc/letsencrypt
+      - ./deployment/certbot-data/www:/var/www/certbot
+    # command: certonly --webroot -w /var/www/certbot -d example.com -d www.example.com --agree-tos --non-interactive --email admin@example.com
+    entrypoint: ["/bin/sh", "-c", "trap exit TERM; while :; do sleep 12h & wait $${!}; certbot renew; done;"]
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    expose:
+      - "8000"
+    env_file:
+      - .env
+    environment:
+      - DB_TYPE=mysql
+      - MYSQL_HOST=db
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-aedip}
+      - MYSQL_USER=${MYSQL_USER:-aedip_user}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - REDIS_URL=redis://redis:6379/0
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - API_KEY=${API_KEY}
+      - CORS_ORIGINS=${CORS_ORIGINS:-https://example.com,http://localhost}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - LOG_FORMAT=json
+      - RATE_LIMIT_RPM=${RATE_LIMIT_RPM:-120}
+      - BACKUP_PATH=/app/backups
+    volumes:
+      - api_backups:/app/backups
+      - api_logs:/app/logs
+      - api_data:/app/data
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '2.0'
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["streamlit", "run", "dashboard/app.py", "--server.port=8501", "--server.address=0.0.0.0", "--server.headless=true"]
+    expose:
+      - "8501"
+    env_file:
+      - .env
+    environment:
+      - DB_TYPE=mysql
+      - MYSQL_HOST=db
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-aedip}
+      - MYSQL_USER=${MYSQL_USER:-aedip_user}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - API_BASE_URL=http://api:8000
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-aedip}
+      MYSQL_USER: ${MYSQL_USER:-aedip_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    expose:
+      - "3306"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+
+  redis:
+    image: redis:7-alpine
+    expose:
+      - "6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+
+volumes:
+  mysql_data:
+  redis_data:
+  api_backups:
+  api_logs:
+  api_data:
+  nginx_cache:

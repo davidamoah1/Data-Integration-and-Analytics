@@ -3,10 +3,11 @@
 from enum import Enum
 
 import pandas as pd
-from sqlalchemy import create_engine, text
+from sqlalchemy import text
 
-from config import DB_TYPE, DB_URL
+from config import DB_TYPE
 from etl.logging_config import logger
+from shared.database import get_engine
 from shared.security import validate_sql_identifier
 
 
@@ -23,16 +24,8 @@ class LoadEngine:
     """Handles loading DataFrames into database tables with multiple modes."""
 
     def __init__(self, engine=None, batch_size: int = 1000):
-        self._engine = engine or self._create_engine()
+        self._engine = engine or get_engine()
         self.batch_size = batch_size
-
-    def _create_engine(self):
-        kwargs = {"pool_pre_ping": True}
-        if DB_TYPE == "mysql":
-            kwargs["pool_size"] = 5
-            kwargs["pool_recycle"] = 3600
-            kwargs["max_overflow"] = 10
-        return create_engine(DB_URL, **kwargs)
 
     @property
     def engine(self):
@@ -121,19 +114,32 @@ class LoadEngine:
             result = self._load_batch(new_rows, table)
             inserted = result["rows_inserted"]
 
-        if len(update_rows) > 0 and DB_TYPE == "sqlite":
-            for _, row in update_rows.iterrows():
-                set_clause = ", ".join(
-                    f"{c} = :{c}" for c in df.columns if c not in conflict_columns
-                )
-                where_clause = " AND ".join(f"{c} = :{c}" for c in conflict_columns)
-                if not set_clause:
-                    continue
-                sql = text(f"UPDATE {table} SET {set_clause} WHERE {where_clause}")
-                params = {c: row[c] for c in df.columns}
-                with self._engine.begin() as conn:
-                    conn.execute(sql, params)
-                updated += 1
+        if len(update_rows) > 0:
+            if DB_TYPE == "mysql":
+                for _, row in update_rows.iterrows():
+                    update_cols = [c for c in df.columns if c not in conflict_columns]
+                    if not update_cols:
+                        continue
+                    set_clause = ", ".join(f"{c} = :{c}" for c in update_cols)
+                    where_clause = " AND ".join(f"{c} = :{c}" for c in conflict_columns)
+                    sql = text(f"UPDATE {table} SET {set_clause} WHERE {where_clause}")
+                    params = {c: row[c] for c in df.columns}
+                    with self._engine.begin() as conn:
+                        result = conn.execute(sql, params)
+                        updated += result.rowcount
+            else:
+                for _, row in update_rows.iterrows():
+                    set_clause = ", ".join(
+                        f"{c} = :{c}" for c in df.columns if c not in conflict_columns
+                    )
+                    where_clause = " AND ".join(f"{c} = :{c}" for c in conflict_columns)
+                    if not set_clause:
+                        continue
+                    sql = text(f"UPDATE {table} SET {set_clause} WHERE {where_clause}")
+                    params = {c: row[c] for c in df.columns}
+                    with self._engine.begin() as conn:
+                        conn.execute(sql, params)
+                    updated += 1
 
         return {
             "rows_inserted": inserted,

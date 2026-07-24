@@ -75,6 +75,7 @@ class AIReportWriter:
             summary=summary,
             sections=sections,
             format=format,
+            data_sources=report_data,
             user_id=user_id,
         )
         self.db.add(report)
@@ -187,8 +188,8 @@ class AIReportWriter:
         """Generate a default title for the report."""
         titles = {
             "executive": "Executive Summary Report",
-            "monthly": f"Monthly Report - {datetime.now(timezone.utc).replace(tzinfo=None).strftime('%B %Y')}",
-            "annual": f"Annual Report - {datetime.now(timezone.utc).replace(tzinfo=None).year}",
+            "monthly": f"Monthly Report - {datetime.now(timezone.utc).strftime('%B %Y')}",
+            "annual": f"Annual Report - {datetime.now(timezone.utc).year}",
             "department": f"Department Report - {department or 'All'}",
             "quality": "Data Quality Report",
             "etl": "ETL Performance Report",

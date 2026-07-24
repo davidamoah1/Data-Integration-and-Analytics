@@ -104,8 +104,7 @@ def transform_data(df: pd.DataFrame) -> pd.DataFrame:
 
         # Save processed data
         df.to_csv(PROCESSED_DATA_PATH, index=False)
-        logger.info(f"Transform: Saved {len(df)} cleaned rows to {PROCESSED_DATA_PATH}")
-        print(f"Transform complete. {len(df)} rows cleaned and saved.")
+        logger.info(f"Transform complete. {len(df)} rows cleaned and saved.")
         return df
 
     except Exception as e:

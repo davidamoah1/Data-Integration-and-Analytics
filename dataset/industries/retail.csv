@@ -1,0 +1,201 @@
+order_id,order_date,customer_name,segment,region,category,product_name,sales,quantity,discount,profit
+ORD1000,2024-01-01,Customer_0,Consumer,Central,Electronics,Product_0,743.66,5,0.08,105.7
+ORD1001,2024-01-02,Customer_1,Corporate,South,Office Supplies,Product_1,680.55,9,0.28,182.67
+ORD1002,2024-01-03,Customer_2,Corporate,East,Office Supplies,Product_2,520.65,2,0.2,148.54
+ORD1003,2024-01-04,Customer_3,Home Office,Central,Food,Product_3,203.28,1,0.11,33.74
+ORD1004,2024-01-05,Customer_4,Corporate,North,Furniture,Product_4,53.73,5,0.25,9.12
+ORD1005,2024-01-06,Customer_5,Corporate,North,Clothing,Product_5,377.69,3,0.24,29.4
+ORD1006,2024-01-07,Customer_6,Home Office,Central,Office Supplies,Product_6,868.72,3,0.07,203.45
+ORD1007,2024-01-08,Customer_7,Home Office,East,Furniture,Product_7,407.65,6,0.18,108.85
+ORD1008,2024-01-09,Customer_8,Corporate,North,Clothing,Product_8,321.88,2,0.11,43.38
+ORD1009,2024-01-10,Customer_9,Consumer,Central,Food,Product_9,433.07,9,0.12,37.59
+ORD1010,2024-01-11,Customer_10,Corporate,West,Office Supplies,Product_10,588.76,8,0.28,46.31
+ORD1011,2024-01-12,Customer_11,Consumer,Central,Food,Product_11,246.91,1,0.25,24.83
+ORD1012,2024-01-13,Customer_12,Home Office,North,Office Supplies,Product_12,748.94,7,0.07,110.7
+ORD1013,2024-01-14,Customer_13,Home Office,West,Electronics,Product_13,26.11,6,0.12,5.84
+ORD1014,2024-01-15,Customer_14,Corporate,South,Office Supplies,Product_14,879.9,8,0.01,181.33
+ORD1015,2024-01-16,Customer_15,Consumer,North,Food,Product_15,66.55,7,0.25,6.51
+ORD1016,2024-01-17,Customer_16,Consumer,North,Food,Product_16,135.64,3,0.3,15.58
+ORD1017,2024-01-18,Customer_17,Consumer,East,Food,Product_17,452.83,5,0.26,133.78
+ORD1018,2024-01-19,Customer_18,Consumer,North,Electronics,Product_18,543.96,5,0.03,124.99
+ORD1019,2024-01-20,Customer_19,Consumer,West,Office Supplies,Product_19,477.01,7,0.23,114.63
+ORD1020,2024-01-21,Customer_20,Consumer,North,Furniture,Product_20,473.19,7,0.15,103.76
+ORD1021,2024-01-22,Customer_21,Corporate,West,Office Supplies,Product_21,187.25,8,0.12,15.03
+ORD1022,2024-01-23,Customer_22,Consumer,Central,Electronics,Product_22,232.4,6,0.29,43.03
+ORD1023,2024-01-24,Customer_23,Home Office,East,Office Supplies,Product_23,590.16,5,0.18,141.34
+ORD1024,2024-01-25,Customer_24,Consumer,East,Food,Product_24,512.52,5,0.29,52.1
+ORD1025,2024-01-26,Customer_25,Home Office,Central,Electronics,Product_25,696.24,8,0.25,186.31
+ORD1026,2024-01-27,Customer_26,Corporate,Central,Electronics,Product_26,330.68,7,0.11,17.1
+ORD1027,2024-01-28,Customer_27,Consumer,East,Electronics,Product_27,196.82,1,0.09,50.5
+ORD1028,2024-01-29,Customer_28,Consumer,West,Office Supplies,Product_28,717.85,6,0.21,198.8
+ORD1029,2024-01-30,Customer_29,Home Office,Central,Office Supplies,Product_29,163.66,7,0.02,21.01
+ORD1030,2024-01-31,Customer_30,Consumer,North,Clothing,Product_30,755.65,2,0.19,215.06
+ORD1031,2024-02-01,Customer_31,Consumer,South,Office Supplies,Product_31,647.87,7,0.03,193.65
+ORD1032,2024-02-02,Customer_32,Home Office,West,Office Supplies,Product_32,774.15,8,0.27,59.23
+ORD1033,2024-02-03,Customer_33,Corporate,South,Office Supplies,Product_33,775.87,1,0.22,124.45
+ORD1034,2024-02-04,Customer_34,Home Office,West,Furniture,Product_34,412.05,9,0.03,73.7
+ORD1035,2024-02-05,Customer_35,Home Office,South,Clothing,Product_35,265.52,1,0.01,72.93
+ORD1036,2024-02-06,Customer_36,Consumer,West,Furniture,Product_36,422.2,3,0.07,24.15
+ORD1037,2024-02-07,Customer_37,Consumer,North,Food,Product_37,146.13,4,0.18,22.91
+ORD1038,2024-02-08,Customer_38,Consumer,West,Office Supplies,Product_38,103.08,3,0.06,15.74
+ORD1039,2024-02-09,Customer_39,Corporate,South,Clothing,Product_39,577.05,3,0.15,171.08
+ORD1040,2024-02-10,Customer_40,Home Office,South,Food,Product_40,167.2,8,0.11,13.99
+ORD1041,2024-02-11,Customer_41,Consumer,Central,Clothing,Product_41,184.57,3,0.17,32.18
+ORD1042,2024-02-12,Customer_42,Home Office,South,Furniture,Product_42,225.09,3,0.24,15.2
+ORD1043,2024-02-13,Customer_43,Corporate,Central,Electronics,Product_43,369.22,8,0.06,55.91
+ORD1044,2024-02-14,Customer_44,Corporate,East,Food,Product_44,978.61,9,0.08,200.62
+ORD1045,2024-02-15,Customer_45,Home Office,West,Electronics,Product_45,679.81,1,0.03,43.79
+ORD1046,2024-02-16,Customer_46,Corporate,West,Furniture,Product_46,243.56,3,0.25,67.7
+ORD1047,2024-02-17,Customer_47,Corporate,Central,Clothing,Product_47,26.22,2,0.27,5.07
+ORD1048,2024-02-18,Customer_48,Corporate,North,Office Supplies,Product_48,740.76,4,0.1,176.82
+ORD1049,2024-02-19,Customer_49,Corporate,West,Office Supplies,Product_49,87.29,6,0.08,24.15
+ORD1050,2024-02-20,Customer_50,Consumer,North,Electronics,Product_50,962.92,6,0.12,57.59
+ORD1051,2024-02-21,Customer_51,Consumer,Central,Office Supplies,Product_51,721.36,5,0.21,169.87
+ORD1052,2024-02-22,Customer_52,Consumer,North,Office Supplies,Product_52,243.59,1,0.17,52.04
+ORD1053,2024-02-23,Customer_53,Home Office,North,Electronics,Product_53,40.25,5,0.02,5.26
+ORD1054,2024-02-24,Customer_54,Consumer,North,Electronics,Product_54,762.39,2,0.26,209.06
+ORD1055,2024-02-25,Customer_55,Home Office,Central,Furniture,Product_55,296.77,7,0.12,44.87
+ORD1056,2024-02-26,Customer_56,Corporate,South,Clothing,Product_56,672.04,3,0.01,169.42
+ORD1057,2024-02-27,Customer_57,Consumer,South,Office Supplies,Product_57,797.08,1,0.08,63.95
+ORD1058,2024-02-28,Customer_58,Consumer,North,Electronics,Product_58,790.16,9,0.21,167.06
+ORD1059,2024-02-29,Customer_59,Consumer,West,Clothing,Product_59,114.58,7,0.04,25.02
+ORD1060,2024-03-01,Customer_60,Corporate,South,Office Supplies,Product_60,549.62,6,0.16,139.96
+ORD1061,2024-03-02,Customer_61,Corporate,East,Food,Product_61,132.3,6,0.29,37.13
+ORD1062,2024-03-03,Customer_62,Corporate,East,Office Supplies,Product_62,225.09,7,0.14,32.21
+ORD1063,2024-03-04,Customer_63,Home Office,South,Office Supplies,Product_63,478.59,9,0.12,116.72
+ORD1064,2024-03-05,Customer_64,Home Office,East,Electronics,Product_64,995.0,8,0.18,64.51
+ORD1065,2024-03-06,Customer_65,Consumer,East,Food,Product_65,360.08,6,0.15,66.23
+ORD1066,2024-03-07,Customer_66,Home Office,West,Clothing,Product_66,695.77,9,0.05,161.92
+ORD1067,2024-03-08,Customer_67,Consumer,Central,Furniture,Product_67,948.73,9,0.19,52.97
+ORD1068,2024-03-09,Customer_68,Corporate,Central,Clothing,Product_68,221.07,8,0.17,51.37
+ORD1069,2024-03-10,Customer_69,Corporate,West,Office Supplies,Product_69,76.99,5,0.23,4.13
+ORD1070,2024-03-11,Customer_70,Home Office,North,Clothing,Product_70,732.09,5,0.23,98.0
+ORD1071,2024-03-12,Customer_71,Home Office,West,Office Supplies,Product_71,600.38,7,0.27,122.07
+ORD1072,2024-03-13,Customer_72,Corporate,East,Furniture,Product_72,121.2,2,0.22,13.48
+ORD1073,2024-03-14,Customer_73,Home Office,South,Office Supplies,Product_73,316.25,1,0.06,47.39
+ORD1074,2024-03-15,Customer_74,Corporate,Central,Food,Product_74,177.78,6,0.21,50.78
+ORD1075,2024-03-16,Customer_75,Corporate,West,Electronics,Product_75,297.83,3,0.29,32.88
+ORD1076,2024-03-17,Customer_76,Corporate,Central,Furniture,Product_76,180.1,7,0.21,49.14
+ORD1077,2024-03-18,Customer_77,Consumer,East,Food,Product_77,360.67,2,0.07,18.76
+ORD1078,2024-03-19,Customer_78,Consumer,Central,Electronics,Product_78,569.12,7,0.06,48.42
+ORD1079,2024-03-20,Customer_79,Consumer,Central,Electronics,Product_79,611.42,5,0.23,134.84
+ORD1080,2024-03-21,Customer_80,Home Office,Central,Office Supplies,Product_80,422.56,4,0.3,77.49
+ORD1081,2024-03-22,Customer_81,Home Office,South,Food,Product_81,524.36,5,0.25,47.05
+ORD1082,2024-03-23,Customer_82,Consumer,Central,Electronics,Product_82,59.51,2,0.12,13.44
+ORD1083,2024-03-24,Customer_83,Home Office,North,Clothing,Product_83,493.88,2,0.07,35.33
+ORD1084,2024-03-25,Customer_84,Home Office,North,Electronics,Product_84,285.72,3,0.17,39.28
+ORD1085,2024-03-26,Customer_85,Corporate,West,Electronics,Product_85,459.67,5,0.07,43.98
+ORD1086,2024-03-27,Customer_86,Corporate,South,Clothing,Product_86,625.9,2,0.27,135.43
+ORD1087,2024-03-28,Customer_87,Home Office,West,Food,Product_87,664.7,2,0.22,106.81
+ORD1088,2024-03-29,Customer_88,Home Office,North,Office Supplies,Product_88,859.26,5,0.11,221.88
+ORD1089,2024-03-30,Customer_89,Consumer,West,Office Supplies,Product_89,660.53,5,0.24,134.04
+ORD1090,2024-03-31,Customer_90,Corporate,Central,Food,Product_90,271.75,4,0.18,28.98
+ORD1091,2024-04-01,Customer_91,Home Office,South,Furniture,Product_91,395.48,9,0.01,45.56
+ORD1092,2024-04-02,Customer_92,Home Office,West,Office Supplies,Product_92,739.03,7,0.26,201.44
+ORD1093,2024-04-03,Customer_93,Home Office,Central,Office Supplies,Product_93,647.09,5,0.12,187.58
+ORD1094,2024-04-04,Customer_94,Corporate,West,Food,Product_94,878.83,3,0.04,95.57
+ORD1095,2024-04-05,Customer_95,Corporate,East,Electronics,Product_95,612.64,5,0.05,99.91
+ORD1096,2024-04-06,Customer_96,Corporate,East,Clothing,Product_96,955.23,5,0.25,65.72
+ORD1097,2024-04-07,Customer_97,Consumer,North,Clothing,Product_97,190.88,5,0.26,42.76
+ORD1098,2024-04-08,Customer_98,Consumer,Central,Office Supplies,Product_98,94.16,8,0.07,12.26
+ORD1099,2024-04-09,Customer_99,Home Office,North,Food,Product_99,385.86,3,0.15,100.98
+ORD1100,2024-04-10,Customer_100,Home Office,North,Clothing,Product_100,116.91,9,0.13,11.32
+ORD1101,2024-04-11,Customer_101,Consumer,East,Office Supplies,Product_101,51.52,6,0.08,5.1
+ORD1102,2024-04-12,Customer_102,Corporate,West,Office Supplies,Product_102,44.94,3,0.05,2.89
+ORD1103,2024-04-13,Customer_103,Corporate,Central,Electronics,Product_103,168.3,2,0.12,44.73
+ORD1104,2024-04-14,Customer_104,Corporate,North,Food,Product_104,652.56,1,0.24,53.28
+ORD1105,2024-04-15,Customer_105,Corporate,East,Food,Product_105,21.56,1,0.24,5.25
+ORD1106,2024-04-16,Customer_106,Consumer,East,Clothing,Product_106,932.71,8,0.27,132.64
+ORD1107,2024-04-17,Customer_107,Corporate,Central,Food,Product_107,480.89,5,0.27,88.05
+ORD1108,2024-04-18,Customer_108,Home Office,North,Food,Product_108,322.83,6,0.23,35.84
+ORD1109,2024-04-19,Customer_109,Home Office,South,Electronics,Product_109,481.43,2,0.09,85.48
+ORD1110,2024-04-20,Customer_110,Corporate,South,Office Supplies,Product_110,231.81,5,0.04,40.43
+ORD1111,2024-04-21,Customer_111,Home Office,West,Food,Product_111,908.7,7,0.19,190.73
+ORD1112,2024-04-22,Customer_112,Consumer,South,Electronics,Product_112,56.07,5,0.16,14.41
+ORD1113,2024-04-23,Customer_113,Consumer,East,Clothing,Product_113,380.11,6,0.11,113.84
+ORD1114,2024-04-24,Customer_114,Consumer,North,Office Supplies,Product_114,284.76,3,0.22,18.83
+ORD1115,2024-04-25,Customer_115,Consumer,East,Clothing,Product_115,48.85,5,0.16,4.22
+ORD1116,2024-04-26,Customer_116,Consumer,North,Furniture,Product_116,341.02,4,0.02,57.1
+ORD1117,2024-04-27,Customer_117,Home Office,North,Electronics,Product_117,496.19,2,0.21,63.62
+ORD1118,2024-04-28,Customer_118,Corporate,Central,Office Supplies,Product_118,298.18,9,0.08,56.98
+ORD1119,2024-04-29,Customer_119,Corporate,East,Electronics,Product_119,877.9,4,0.04,242.61
+ORD1120,2024-04-30,Customer_120,Corporate,Central,Electronics,Product_120,845.95,3,0.06,53.06
+ORD1121,2024-05-01,Customer_121,Home Office,Central,Office Supplies,Product_121,84.69,9,0.29,19.92
+ORD1122,2024-05-02,Customer_122,Corporate,North,Office Supplies,Product_122,410.96,4,0.05,114.28
+ORD1123,2024-05-03,Customer_123,Consumer,South,Clothing,Product_123,984.98,7,0.17,241.06
+ORD1124,2024-05-04,Customer_124,Consumer,South,Food,Product_124,183.83,8,0.26,53.17
+ORD1125,2024-05-05,Customer_125,Consumer,East,Office Supplies,Product_125,207.64,8,0.09,20.03
+ORD1126,2024-05-06,Customer_126,Home Office,East,Office Supplies,Product_126,590.57,6,0.04,149.16
+ORD1127,2024-05-07,Customer_127,Home Office,North,Food,Product_127,13.01,2,0.11,2.35
+ORD1128,2024-05-08,Customer_128,Consumer,West,Electronics,Product_128,513.36,9,0.05,96.76
+ORD1129,2024-05-09,Customer_129,Corporate,Central,Electronics,Product_129,262.54,9,0.26,58.71
+ORD1130,2024-05-10,Customer_130,Corporate,Central,Food,Product_130,711.68,6,0.24,174.78
+ORD1131,2024-05-11,Customer_131,Corporate,South,Food,Product_131,345.97,4,0.06,66.52
+ORD1132,2024-05-12,Customer_132,Home Office,South,Office Supplies,Product_132,751.38,1,0.02,208.56
+ORD1133,2024-05-13,Customer_133,Corporate,South,Electronics,Product_133,245.46,4,0.01,33.37
+ORD1134,2024-05-14,Customer_134,Home Office,West,Electronics,Product_134,700.09,7,0.2,73.49
+ORD1135,2024-05-15,Customer_135,Consumer,West,Electronics,Product_135,79.97,4,0.28,20.05
+ORD1136,2024-05-16,Customer_136,Home Office,West,Furniture,Product_136,536.56,3,0.14,42.48
+ORD1137,2024-05-17,Customer_137,Consumer,West,Clothing,Product_137,158.07,1,0.04,21.23
+ORD1138,2024-05-18,Customer_138,Consumer,South,Food,Product_138,230.27,6,0.24,20.4
+ORD1139,2024-05-19,Customer_139,Consumer,North,Office Supplies,Product_139,588.93,7,0.08,120.36
+ORD1140,2024-05-20,Customer_140,Corporate,West,Office Supplies,Product_140,761.11,7,0.27,135.64
+ORD1141,2024-05-21,Customer_141,Home Office,East,Food,Product_141,129.92,3,0.03,38.03
+ORD1142,2024-05-22,Customer_142,Consumer,West,Furniture,Product_142,504.64,8,0.0,36.92
+ORD1143,2024-05-23,Customer_143,Corporate,Central,Clothing,Product_143,934.3,5,0.06,66.9
+ORD1144,2024-05-24,Customer_144,Consumer,Central,Furniture,Product_144,550.92,4,0.28,133.95
+ORD1145,2024-05-25,Customer_145,Consumer,South,Furniture,Product_145,700.57,9,0.27,190.27
+ORD1146,2024-05-26,Customer_146,Home Office,South,Office Supplies,Product_146,996.31,5,0.02,198.6
+ORD1147,2024-05-27,Customer_147,Corporate,Central,Food,Product_147,197.25,6,0.01,52.49
+ORD1148,2024-05-28,Customer_148,Home Office,Central,Office Supplies,Product_148,251.74,5,0.04,13.07
+ORD1149,2024-05-29,Customer_149,Home Office,West,Office Supplies,Product_149,338.0,9,0.23,94.21
+ORD1150,2024-05-30,Customer_150,Consumer,West,Furniture,Product_150,943.36,5,0.2,149.24
+ORD1151,2024-05-31,Customer_151,Consumer,North,Food,Product_151,353.63,2,0.12,101.61
+ORD1152,2024-06-01,Customer_152,Home Office,North,Furniture,Product_152,289.82,2,0.13,64.9
+ORD1153,2024-06-02,Customer_153,Consumer,South,Electronics,Product_153,802.35,4,0.04,218.82
+ORD1154,2024-06-03,Customer_154,Corporate,North,Food,Product_154,356.58,8,0.14,103.24
+ORD1155,2024-06-04,Customer_155,Consumer,West,Office Supplies,Product_155,341.56,7,0.09,38.19
+ORD1156,2024-06-05,Customer_156,Consumer,West,Office Supplies,Product_156,768.96,2,0.13,84.0
+ORD1157,2024-06-06,Customer_157,Consumer,West,Clothing,Product_157,909.8,3,0.01,48.45
+ORD1158,2024-06-07,Customer_158,Home Office,Central,Clothing,Product_158,383.42,7,0.03,107.71
+ORD1159,2024-06-08,Customer_159,Home Office,North,Office Supplies,Product_159,514.85,5,0.25,142.13
+ORD1160,2024-06-09,Customer_160,Home Office,West,Clothing,Product_160,483.43,6,0.09,79.25
+ORD1161,2024-06-10,Customer_161,Consumer,West,Food,Product_161,405.66,1,0.25,34.68
+ORD1162,2024-06-11,Customer_162,Corporate,East,Office Supplies,Product_162,277.42,3,0.08,26.86
+ORD1163,2024-06-12,Customer_163,Home Office,North,Electronics,Product_163,147.27,6,0.28,34.49
+ORD1164,2024-06-13,Customer_164,Corporate,North,Electronics,Product_164,611.82,2,0.11,109.99
+ORD1165,2024-06-14,Customer_165,Corporate,West,Food,Product_165,141.34,5,0.15,8.72
+ORD1166,2024-06-15,Customer_166,Consumer,North,Clothing,Product_166,842.13,4,0.1,242.21
+ORD1167,2024-06-16,Customer_167,Home Office,North,Electronics,Product_167,685.94,9,0.29,65.23
+ORD1168,2024-06-17,Customer_168,Home Office,North,Food,Product_168,391.89,9,0.29,115.96
+ORD1169,2024-06-18,Customer_169,Home Office,West,Office Supplies,Product_169,697.09,4,0.02,163.5
+ORD1170,2024-06-19,Customer_170,Corporate,East,Furniture,Product_170,848.88,4,0.06,170.01
+ORD1171,2024-06-20,Customer_171,Home Office,North,Furniture,Product_171,242.78,5,0.03,53.83
+ORD1172,2024-06-21,Customer_172,Corporate,West,Furniture,Product_172,826.01,2,0.06,165.44
+ORD1173,2024-06-22,Customer_173,Home Office,West,Food,Product_173,577.86,6,0.15,144.24
+ORD1174,2024-06-23,Customer_174,Consumer,Central,Electronics,Product_174,315.24,8,0.2,29.87
+ORD1175,2024-06-24,Customer_175,Consumer,North,Electronics,Product_175,273.7,7,0.2,15.57
+ORD1176,2024-06-25,Customer_176,Home Office,South,Office Supplies,Product_176,896.06,7,0.01,72.59
+ORD1177,2024-06-26,Customer_177,Consumer,East,Office Supplies,Product_177,406.82,3,0.01,43.98
+ORD1178,2024-06-27,Customer_178,Corporate,North,Food,Product_178,892.47,6,0.13,55.0
+ORD1179,2024-06-28,Customer_179,Corporate,South,Electronics,Product_179,175.17,6,0.12,38.03
+ORD1180,2024-06-29,Customer_180,Home Office,East,Furniture,Product_180,722.0,7,0.28,53.81
+ORD1181,2024-06-30,Customer_181,Consumer,East,Electronics,Product_181,796.46,3,0.07,149.44
+ORD1182,2024-07-01,Customer_182,Consumer,North,Clothing,Product_182,95.88,1,0.28,9.23
+ORD1183,2024-07-02,Customer_183,Home Office,West,Clothing,Product_183,437.2,1,0.04,124.87
+ORD1184,2024-07-03,Customer_184,Consumer,North,Electronics,Product_184,54.96,9,0.2,12.91
+ORD1185,2024-07-04,Customer_185,Corporate,East,Food,Product_185,218.89,9,0.17,43.57
+ORD1186,2024-07-05,Customer_186,Corporate,West,Electronics,Product_186,307.33,5,0.28,35.7
+ORD1187,2024-07-06,Customer_187,Home Office,South,Furniture,Product_187,532.02,8,0.27,133.51
+ORD1188,2024-07-07,Customer_188,Corporate,North,Office Supplies,Product_188,301.24,4,0.06,55.19
+ORD1189,2024-07-08,Customer_189,Home Office,West,Electronics,Product_189,272.24,4,0.25,26.34
+ORD1190,2024-07-09,Customer_190,Corporate,East,Food,Product_190,580.68,2,0.04,37.16
+ORD1191,2024-07-10,Customer_191,Consumer,West,Clothing,Product_191,643.75,1,0.14,55.5
+ORD1192,2024-07-11,Customer_192,Home Office,West,Office Supplies,Product_192,640.98,2,0.01,95.34
+ORD1193,2024-07-12,Customer_193,Corporate,North,Food,Product_193,911.25,5,0.08,142.36
+ORD1194,2024-07-13,Customer_194,Corporate,Central,Electronics,Product_194,533.07,6,0.04,77.04
+ORD1195,2024-07-14,Customer_195,Home Office,Central,Food,Product_195,319.75,5,0.24,91.38
+ORD1196,2024-07-15,Customer_196,Corporate,East,Office Supplies,Product_196,402.38,4,0.2,28.17
+ORD1197,2024-07-16,Customer_197,Consumer,Central,Food,Product_197,287.38,6,0.14,30.97
+ORD1198,2024-07-17,Customer_198,Corporate,Central,Clothing,Product_198,191.1,3,0.03,23.63
+ORD1199,2024-07-18,Customer_199,Corporate,North,Office Supplies,Product_199,655.61,4,0.27,137.05
