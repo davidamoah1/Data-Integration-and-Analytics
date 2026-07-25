@@ -91,6 +91,8 @@ class DashboardRegistry:
         "insurance": "insurance",
         "hospitality": "hospitality",
         "telecommunications": "telecommunications",
+        "unknown": "generic",
+        "generic": "generic",
     }
 
     @classmethod
@@ -461,4 +463,24 @@ DashboardRegistry.register(
             _chart("data_usage_trend", "line_chart", "Data Usage Trend", "data_usage", "date"),
         ),
     ),
+)
+DashboardRegistry.register(
+    "generic",
+    DashboardTemplate(
+        "generic_analytics",
+        "Generic Analytics Dashboard",
+        ("overview", "statistics", "quality", "trends"),
+        (
+            "Review dataset overview and column statistics.",
+            "Identify missing values and data quality issues.",
+            "Explore numeric correlations and time-based trends.",
+        ),
+        _widgets(
+            _card("total_records", "Total Records", None, "count", "operational"),
+            _card("numeric_cols", "Numeric Columns", None, "count", "operational"),
+            _card("text_cols", "Text Columns", None, "count", "operational"),
+            _card("date_cols", "Date Columns", None, "count", "operational"),
+        ),
+    ),
+    replace=True,
 )

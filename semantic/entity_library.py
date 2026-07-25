@@ -17,6 +17,7 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "patient": {
         "display_name": "Patient",
         "industry": "healthcare",
+        "weight": 3.0,
         "synonyms": [
             "patient_id",
             "patient_name",
@@ -51,6 +52,7 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "doctor": {
         "display_name": "Doctor",
         "industry": "healthcare",
+        "weight": 2.5,
         "synonyms": ["doctor_id", "doctor_name", "physician", "physician_name", "consultant"],
         "attributes": ["doctor_id", "doctor_name", "specialization", "department"],
         "kpis": ["patient_count", "consultations", "procedures", "revenue_generated"],
@@ -62,6 +64,7 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "admission": {
         "display_name": "Admission",
         "industry": "healthcare",
+        "weight": 2.5,
         "synonyms": ["admission_id", "admission_date", "admission_record", "hospitalization"],
         "attributes": [
             "admission_id",
@@ -81,7 +84,8 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "ward": {
         "display_name": "Ward",
         "industry": "healthcare",
-        "synonyms": ["ward", "department", "unit", "ward_name", "hospital_unit"],
+        "weight": 2.0,
+        "synonyms": ["ward", "ward_name", "hospital_unit", "hospital_ward"],
         "attributes": ["ward_id", "ward_name", "bed_count", "occupancy"],
         "kpis": ["bed_occupancy", "patient_count", "staff_count"],
         "relationships": [
@@ -92,6 +96,7 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "diagnosis": {
         "display_name": "Diagnosis",
         "industry": "healthcare",
+        "weight": 3.0,
         "synonyms": ["diagnosis", "condition", "disease", "icd_code", "diagnosis_code"],
         "attributes": ["diagnosis_code", "diagnosis_name", "severity"],
         "kpis": ["frequency", "mortality_rate", "treatment_success_rate"],
@@ -102,6 +107,7 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "medicine": {
         "display_name": "Medicine",
         "industry": "healthcare",
+        "weight": 2.0,
         "synonyms": ["medicine", "medication", "drug", "prescription", "pharmacy"],
         "attributes": ["medicine_id", "medicine_name", "dosage", "stock"],
         "kpis": ["prescription_count", "stock_level", "expiry_alerts"],
@@ -112,7 +118,8 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "lab_test": {
         "display_name": "Laboratory Test",
         "industry": "healthcare",
-        "synonyms": ["lab_test", "laboratory", "test", "lab_result", "test_name"],
+        "weight": 2.0,
+        "synonyms": ["lab_test", "laboratory", "lab_result", "test_name"],
         "attributes": ["test_id", "test_name", "result", "patient_id"],
         "kpis": ["test_count", "abnormal_rate", "turnaround_time"],
         "relationships": [
@@ -122,7 +129,8 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "appointment": {
         "display_name": "Appointment",
         "industry": "healthcare",
-        "synonyms": ["appointment", "appointment_date", "schedule", "booking"],
+        "weight": 2.0,
+        "synonyms": ["appointment", "appointment_date", "appointment_id"],
         "attributes": ["appointment_id", "patient_id", "doctor_id", "appointment_date", "status"],
         "kpis": ["total_appointments", "no_show_rate", "cancellation_rate"],
         "relationships": [
@@ -133,7 +141,8 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "insurance": {
         "display_name": "Insurance",
         "industry": "healthcare",
-        "synonyms": ["insurance", "insurance_type", "insurance_provider", "coverage", "payer"],
+        "weight": 2.0,
+        "synonyms": ["insurance", "insurance_type", "insurance_provider", "payer"],
         "attributes": ["insurance_id", "provider", "coverage_type", "patient_id"],
         "kpis": ["claim_count", "approval_rate", "average_claim", "denial_rate"],
         "relationships": [
@@ -144,12 +153,10 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "billing": {
         "display_name": "Billing",
         "industry": "healthcare",
+        "weight": 2.0,
         "synonyms": [
             "billing",
             "billing_amount",
-            "invoice",
-            "bill",
-            "charge",
             "hospital_bill",
             "hospital_charge",
         ],
@@ -164,6 +171,7 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "student": {
         "display_name": "Student",
         "industry": "education",
+        "weight": 3.0,
         "synonyms": [
             "student_id",
             "student_name",
@@ -184,6 +192,7 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "teacher": {
         "display_name": "Teacher",
         "industry": "education",
+        "weight": 2.5,
         "synonyms": [
             "teacher_id",
             "teacher_name",
@@ -202,7 +211,8 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "course": {
         "display_name": "Course",
         "industry": "education",
-        "synonyms": ["course", "course_id", "course_name", "subject", "module", "class"],
+        "weight": 2.5,
+        "synonyms": ["course", "course_id", "course_name", "subject", "module"],
         "attributes": ["course_id", "course_name", "credits", "department", "teacher_id"],
         "kpis": ["enrollment_count", "pass_rate", "average_grade", "completion_rate"],
         "relationships": [
@@ -214,7 +224,8 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "department_edu": {
         "display_name": "Department",
         "industry": "education",
-        "synonyms": ["faculty", "school", "program", "academic_department", "edu_department"],
+        "weight": 2.0,
+        "synonyms": ["faculty", "academic_department", "edu_department", "school"],
         "attributes": ["department_id", "department_name", "head", "budget"],
         "kpis": ["student_count", "teacher_count", "course_count", "budget_utilization"],
         "relationships": [
@@ -226,7 +237,8 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "semester": {
         "display_name": "Semester",
         "industry": "education",
-        "synonyms": ["semester", "term", "academic_year", "session", "semester_id"],
+        "weight": 2.0,
+        "synonyms": ["semester", "term", "academic_year", "semester_id"],
         "attributes": ["semester_id", "semester_name", "start_date", "end_date"],
         "kpis": ["enrollment_count", "revenue", "course_offered"],
         "relationships": [
@@ -236,7 +248,8 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "attendance": {
         "display_name": "Attendance",
         "industry": "education",
-        "synonyms": ["attendance", "attendance_date", "present", "absent", "attendance_record"],
+        "weight": 2.5,
+        "synonyms": ["attendance", "attendance_date", "attendance_record"],
         "attributes": ["student_id", "date", "status", "course_id"],
         "kpis": ["attendance_rate", "absenteeism_rate", "late_rate"],
         "relationships": [
@@ -247,7 +260,8 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "exam": {
         "display_name": "Exam",
         "industry": "education",
-        "synonyms": ["exam", "exam_id", "test", "assessment", "examination"],
+        "weight": 2.5,
+        "synonyms": ["exam", "exam_id", "assessment", "examination"],
         "attributes": ["exam_id", "course_id", "exam_date", "max_score"],
         "kpis": ["average_score", "pass_rate", "top_scorer"],
         "relationships": [
@@ -258,6 +272,7 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "grade": {
         "display_name": "Grade",
         "industry": "education",
+        "weight": 3.0,
         "synonyms": ["grade", "score", "marks", "result", "gpa", "cgpa"],
         "attributes": ["student_id", "course_id", "grade", "score"],
         "kpis": ["average_grade", "pass_rate", "distinction_rate", "failure_rate"],
@@ -270,6 +285,7 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "graduation": {
         "display_name": "Graduation",
         "industry": "education",
+        "weight": 2.0,
         "synonyms": [
             "graduation",
             "graduation_rate",
@@ -289,7 +305,8 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "member": {
         "display_name": "Member",
         "industry": "church",
-        "synonyms": ["member", "member_id", "member_name", "member_no", "congregant", "believer"],
+        "weight": 3.0,
+        "synonyms": ["member", "member_id", "member_name", "member_no", "congregant"],
         "attributes": ["member_id", "member_name", "join_date", "branch", "ministry"],
         "kpis": ["total_members", "new_members", "active_members", "retention_rate"],
         "relationships": [
@@ -302,7 +319,8 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "visitor": {
         "display_name": "Visitor",
         "industry": "church",
-        "synonyms": ["visitor", "guest", "first_timer", "newcomer"],
+        "weight": 2.0,
+        "synonyms": ["visitor", "first_timer", "newcomer"],
         "attributes": ["visitor_id", "visitor_name", "visit_date", "invited_by"],
         "kpis": ["visitor_count", "conversion_rate", "retention_rate"],
         "relationships": [
@@ -312,7 +330,8 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "ministry": {
         "display_name": "Ministry",
         "industry": "church",
-        "synonyms": ["ministry", "fellowship", "group", "ministry_name"],
+        "weight": 2.0,
+        "synonyms": ["ministry", "fellowship", "ministry_name"],
         "attributes": ["ministry_id", "ministry_name", "leader", "member_count"],
         "kpis": ["member_count", "activity_count", "growth_rate"],
         "relationships": [
@@ -322,7 +341,8 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "pastor": {
         "display_name": "Pastor",
         "industry": "church",
-        "synonyms": ["pastor", "pastor_name", "reverend", "minister", "leader", "clergy"],
+        "weight": 2.5,
+        "synonyms": ["pastor", "pastor_name", "reverend", "minister", "clergy"],
         "attributes": ["pastor_id", "pastor_name", "branch", "role"],
         "kpis": ["sermon_count", "counseling_count", "baptism_count"],
         "relationships": [
@@ -333,13 +353,12 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "offering": {
         "display_name": "Offering",
         "industry": "church",
+        "weight": 2.5,
         "synonyms": [
             "offering",
             "offering_amount",
             "giving",
             "tithe",
-            "donation",
-            "contribution",
             "pledge",
         ],
         "attributes": ["offering_id", "member_id", "amount", "date", "type"],
@@ -352,6 +371,7 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "tithe": {
         "display_name": "Tithe",
         "industry": "church",
+        "weight": 3.0,
         "synonyms": ["tithe", "tithe_amount", "tithes", "tenth"],
         "attributes": ["member_id", "amount", "date"],
         "kpis": ["total_tithe", "tithe_compliance_rate", "average_tithe"],
@@ -362,7 +382,8 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "branch_church": {
         "display_name": "Branch",
         "industry": "church",
-        "synonyms": ["branch", "branch_name", "campus", "location", "church_branch", "parish"],
+        "weight": 2.0,
+        "synonyms": ["branch", "branch_name", "campus", "church_branch", "parish"],
         "attributes": ["branch_id", "branch_name", "location", "pastor_id"],
         "kpis": ["member_count", "offering_total", "attendance_rate", "growth_rate"],
         "relationships": [
@@ -373,7 +394,8 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "event": {
         "display_name": "Event",
         "industry": "church",
-        "synonyms": ["event", "event_name", "church_service", "program", "event_type"],
+        "weight": 2.0,
+        "synonyms": ["event", "event_name", "church_service", "event_type"],
         "attributes": ["event_id", "event_name", "event_date", "branch_id", "attendance_count"],
         "kpis": ["total_events", "average_attendance", "offering_per_event"],
         "relationships": [
@@ -395,6 +417,7 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "order": {
         "display_name": "Order",
         "industry": "retail",
+        "weight": 2.5,
         "synonyms": ["order", "order_id", "order_number", "purchase", "sale"],
         "attributes": ["order_id", "customer_id", "order_date", "amount", "status"],
         "kpis": ["total_orders", "avg_order_value", "order_growth", "conversion_rate"],
@@ -407,7 +430,8 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "invoice": {
         "display_name": "Invoice",
         "industry": "retail",
-        "synonyms": ["invoice", "invoice_id", "invoice_number", "bill", "receipt"],
+        "weight": 2.0,
+        "synonyms": ["invoice", "invoice_id", "invoice_number", "receipt"],
         "attributes": ["invoice_id", "order_id", "amount", "date", "status"],
         "kpis": ["total_invoiced", "outstanding", "collection_rate", "avg_invoice"],
         "relationships": [
@@ -429,6 +453,7 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "supplier": {
         "display_name": "Supplier",
         "industry": "retail",
+        "weight": 2.0,
         "synonyms": ["supplier", "supplier_id", "supplier_name", "vendor", "vendor_name"],
         "attributes": ["supplier_id", "supplier_name", "contact", "lead_time"],
         "kpis": ["supplier_count", "on_time_delivery", "quality_score"],
@@ -439,7 +464,8 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "warehouse": {
         "display_name": "Warehouse",
         "industry": "retail",
-        "synonyms": ["warehouse", "warehouse_id", "store", "location", "facility"],
+        "weight": 2.0,
+        "synonyms": ["warehouse", "warehouse_id", "store", "facility"],
         "attributes": ["warehouse_id", "location", "capacity"],
         "kpis": ["utilization", "throughput", "stock_accuracy"],
         "relationships": [
@@ -449,7 +475,8 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "inventory": {
         "display_name": "Inventory",
         "industry": "retail",
-        "synonyms": ["inventory", "stock", "stock_level", "quantity", "qty", "on_hand"],
+        "weight": 2.0,
+        "synonyms": ["inventory", "stock", "stock_level", "on_hand"],
         "attributes": ["product_id", "warehouse_id", "quantity", "reorder_level"],
         "kpis": ["stock_value", "turnover_rate", "stockout_rate", "aging_stock"],
         "relationships": [
@@ -461,7 +488,8 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "citizen": {
         "display_name": "Citizen",
         "industry": "government",
-        "synonyms": ["citizen", "citizen_id", "national_id", "ssn", "resident", "taxpayer"],
+        "weight": 2.5,
+        "synonyms": ["citizen", "citizen_id", "national_id", "ssn", "taxpayer"],
         "attributes": ["citizen_id", "name", "dob", "region", "status"],
         "kpis": ["population", "demographics", "employment_rate"],
         "relationships": [
@@ -471,6 +499,7 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "department_gov": {
         "display_name": "Department",
         "industry": "government",
+        "weight": 2.0,
         "synonyms": ["agency", "bureau", "directorate", "government_department", "gov_dept"],
         "attributes": ["department_id", "department_name", "budget", "head"],
         "kpis": ["budget_utilization", "project_count", "staff_count", "efficiency_score"],
@@ -482,7 +511,8 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "project_gov": {
         "display_name": "Project",
         "industry": "government",
-        "synonyms": ["project", "project_id", "project_name", "initiative", "program", "scheme"],
+        "weight": 2.5,
+        "synonyms": ["project", "project_id", "project_name", "initiative", "scheme"],
         "attributes": [
             "project_id",
             "project_name",
@@ -502,6 +532,7 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "budget_gov": {
         "display_name": "Budget",
         "industry": "government",
+        "weight": 2.5,
         "synonyms": ["budget", "budget_id", "allocation", "appropriation", "fiscal"],
         "attributes": ["budget_id", "department_id", "allocated", "spent", "fiscal_year"],
         "kpis": ["total_budget", "utilization_rate", "variance", "deficit"],
@@ -513,7 +544,8 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "procurement": {
         "display_name": "Procurement",
         "industry": "government",
-        "synonyms": ["procurement", "tender", "contract", "purchase_order", "rfq", "bid"],
+        "weight": 2.5,
+        "synonyms": ["procurement", "tender", "purchase_order", "rfq", "bid"],
         "attributes": ["procurement_id", "project_id", "contractor_id", "amount", "status"],
         "kpis": ["total_procurement", "avg_contract", "competition_rate", "savings"],
         "relationships": [
@@ -524,13 +556,11 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "contractor": {
         "display_name": "Contractor",
         "industry": "government",
+        "weight": 2.0,
         "synonyms": [
             "contractor",
             "contractor_id",
             "contractor_name",
-            "vendor",
-            "supplier",
-            "company",
         ],
         "attributes": ["contractor_id", "contractor_name", "registration", "rating"],
         "kpis": ["contract_count", "total_value", "performance_score", "on_time_rate"],
@@ -542,7 +572,8 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "revenue_gov": {
         "display_name": "Revenue",
         "industry": "government",
-        "synonyms": ["revenue", "tax_revenue", "collection", "income", "levy", "duties"],
+        "weight": 2.0,
+        "synonyms": ["tax_revenue", "collection", "levy", "duties"],
         "attributes": ["revenue_id", "source", "amount", "fiscal_year", "department_id"],
         "kpis": ["total_revenue", "collection_rate", "growth_rate", "per_capita"],
         "relationships": [
@@ -552,7 +583,8 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "asset_gov": {
         "display_name": "Asset",
         "industry": "government",
-        "synonyms": ["asset", "asset_value", "asset_type", "property", "infrastructure", "vehicle"],
+        "weight": 2.0,
+        "synonyms": ["asset", "asset_value", "asset_type", "infrastructure"],
         "attributes": ["asset_id", "asset_type", "value", "department_id", "status"],
         "kpis": ["total_asset_value", "asset_count", "asset_utilization", "maintenance_cost"],
         "relationships": [
@@ -563,6 +595,7 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "beneficiary": {
         "display_name": "Beneficiary",
         "industry": "ngo",
+        "weight": 3.0,
         "synonyms": [
             "beneficiary",
             "beneficiary_id",
@@ -580,7 +613,8 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "grant": {
         "display_name": "Grant",
         "industry": "ngo",
-        "synonyms": ["grant", "grant_id", "grant_name", "funding", "subsidy", "award"],
+        "weight": 2.5,
+        "synonyms": ["grant", "grant_id", "grant_name", "subsidy", "award"],
         "attributes": ["grant_id", "donor_id", "amount", "start_date", "end_date", "status"],
         "kpis": ["total_grants", "utilization_rate", "success_rate", "avg_grant"],
         "relationships": [
@@ -591,6 +625,7 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "donor": {
         "display_name": "Donor",
         "industry": "ngo",
+        "weight": 2.5,
         "synonyms": ["donor", "donor_id", "donor_name", "contributor", "sponsor", "funder"],
         "attributes": ["donor_id", "donor_name", "type", "total_given", "contact"],
         "kpis": ["total_donors", "retention_rate", "avg_donation", "lifetime_value"],
@@ -602,11 +637,11 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "program": {
         "display_name": "Program",
         "industry": "ngo",
+        "weight": 2.0,
         "synonyms": [
             "program",
             "program_id",
             "program_name",
-            "initiative",
             "intervention",
             "activity",
         ],
@@ -621,7 +656,8 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "project_ngo": {
         "display_name": "Project",
         "industry": "ngo",
-        "synonyms": ["activity", "field_project", "ngo_project", "relief_project", "community_project"],
+        "weight": 2.0,
+        "synonyms": ["field_project", "ngo_project", "relief_project", "community_project"],
         "attributes": ["project_id", "project_name", "program_id", "location", "budget", "status"],
         "kpis": ["total_projects", "completion_rate", "budget_utilization", "beneficiary_reach"],
         "relationships": [
@@ -632,7 +668,8 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "donation": {
         "display_name": "Donation",
         "industry": "ngo",
-        "synonyms": ["donation", "donation_id", "contribution", "gift", "pledge", "funding_source"],
+        "weight": 2.5,
+        "synonyms": ["donation", "donation_id", "pledge", "funding_source"],
         "attributes": ["donation_id", "donor_id", "amount", "date", "type", "program_id"],
         "kpis": ["total_donations", "avg_donation", "growth_rate", "donor_retention"],
         "relationships": [
@@ -644,14 +681,13 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "machine": {
         "display_name": "Machine",
         "industry": "manufacturing",
+        "weight": 3.0,
         "synonyms": [
             "machine",
             "machine_id",
             "machine_name",
             "equipment",
             "equipment_id",
-            "asset",
-            "asset_id",
         ],
         "attributes": ["machine_id", "machine_name", "line", "status"],
         "kpis": ["machine_count", "utilization_rate", "availability_rate", "downtime_hours"],
@@ -662,11 +698,11 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "production": {
         "display_name": "Production",
         "industry": "manufacturing",
+        "weight": 2.5,
         "synonyms": [
             "production",
             "production_id",
             "production_record",
-            "output",
             "output_quantity",
             "units_produced",
             "batch",
@@ -681,6 +717,7 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "downtime": {
         "display_name": "Downtime",
         "industry": "manufacturing",
+        "weight": 2.5,
         "synonyms": ["downtime", "downtime_id", "stoppage", "breakdown", "unplanned_downtime"],
         "attributes": ["downtime_id", "machine_id", "start_time", "end_time", "reason"],
         "kpis": ["total_downtime", "downtime_frequency", "mttr", "mtbf"],
@@ -691,7 +728,8 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "product_manufacturing": {
         "display_name": "Product",
         "industry": "manufacturing",
-        "synonyms": ["manufactured_product", "finished_good", "output_product", "assembly", "component_part"],
+        "weight": 2.0,
+        "synonyms": ["manufactured_product", "finished_good", "assembly", "component_part"],
         "attributes": ["product_id", "product_name", "unit_cost", "target_yield"],
         "kpis": ["product_count", "yield_rate", "defect_rate", "cost_per_unit"],
         "relationships": [
@@ -702,6 +740,7 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "farm": {
         "display_name": "Farm",
         "industry": "agriculture",
+        "weight": 3.0,
         "synonyms": ["farm", "farm_id", "farm_name", "plot", "field", "parcel"],
         "attributes": ["farm_id", "farm_name", "location", "size_hectares"],
         "kpis": ["farm_count", "total_hectares", "yield_per_hectare"],
@@ -713,7 +752,8 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "crop": {
         "display_name": "Crop",
         "industry": "agriculture",
-        "synonyms": ["crop", "crop_id", "crop_name", "produce", "harvest", "cultivar"],
+        "weight": 3.0,
+        "synonyms": ["crop", "crop_id", "crop_name", "cultivar"],
         "attributes": ["crop_id", "crop_name", "farm_id", "planting_date", "harvest_date"],
         "kpis": ["total_harvest", "yield_per_hectare", "crop_count", "harvest_value"],
         "relationships": [
@@ -723,6 +763,7 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "livestock": {
         "display_name": "Livestock",
         "industry": "agriculture",
+        "weight": 2.5,
         "synonyms": ["livestock", "animal", "herd", "cattle", "poultry", "sheep", "goat"],
         "attributes": ["livestock_id", "farm_id", "animal_type", "count", "health_status"],
         "kpis": ["total_livestock", "mortality_rate", "growth_rate", "herd_value"],
@@ -733,6 +774,7 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "weather": {
         "display_name": "Weather",
         "industry": "agriculture",
+        "weight": 2.0,
         "synonyms": [
             "weather",
             "weather_id",
@@ -775,6 +817,30 @@ ENTITY_LIBRARY: dict[str, dict] = {
         "synonyms": ["expense", "cost", "expenditure", "spending", "outflow", "payment_made"],
         "attributes": ["amount", "date", "category"],
         "kpis": ["total_expense", "avg_expense", "budget_variance"],
+        "relationships": [],
+    },
+    "balance": {
+        "display_name": "Balance",
+        "industry": "universal",
+        "synonyms": ["balance", "current_balance", "available_balance", "closing_balance", "opening_balance"],
+        "attributes": ["amount", "date"],
+        "kpis": ["total_balance", "avg_balance"],
+        "relationships": [],
+    },
+    "account_universal": {
+        "display_name": "Account",
+        "industry": "universal",
+        "synonyms": ["account", "account_id"],
+        "attributes": ["account_id", "name"],
+        "kpis": ["account_count"],
+        "relationships": [],
+    },
+    "transaction_universal": {
+        "display_name": "Transaction",
+        "industry": "universal",
+        "synonyms": ["transaction", "transfer", "deposit", "withdrawal", "payment_amount"],
+        "attributes": ["transaction_id", "amount", "date"],
+        "kpis": ["total_transactions", "avg_transaction"],
         "relationships": [],
     },
     "date": {

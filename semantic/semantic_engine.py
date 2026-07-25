@@ -6,6 +6,15 @@ Maps column names to business entities using:
   - Fuzzy string similarity
   - Data type analysis
   - Sample value analysis
+
+Industry classification uses a weighted scoring system:
+  - Strong signals (patient_id, student_id, loan_id) have weight 3.0
+  - Moderate signals (doctor, teacher, crop) have weight 2.0-2.5
+  - Weak signals (date, region, revenue) are universal and don't vote
+  - Generic terms (amount, balance, status) are universal, never industry-specific
+
+Tie-breaking: if two industries have equal votes, return "unknown" and ask user.
+Minimum confidence: if best industry share < 40%, return "unknown".
 """
 
 from __future__ import annotations
@@ -16,6 +25,11 @@ import numpy as np
 import pandas as pd
 
 from semantic.entity_library import ENTITY_LIBRARY, get_all_synonyms
+
+# Minimum confidence to auto-select an industry (without user confirmation)
+MIN_INDUSTRY_CONFIDENCE = 40.0
+# Minimum vote margin between top two industries to avoid tie-breaking
+MIN_VOTE_MARGIN = 0.5
 
 
 @dataclass
@@ -70,6 +84,12 @@ class SemanticResult:
         return [m.column_name for m in self.mappings if m.entity_key == entity_key]
 
 
+def _entity_weight(entity_key: str) -> float:
+    """Get the weight of an entity for industry voting."""
+    entity = ENTITY_LIBRARY.get(entity_key, {})
+    return float(entity.get("weight", 1.0))
+
+
 class SemanticEngine:
     """Maps raw column names to business entities."""
 
@@ -92,7 +112,7 @@ class SemanticEngine:
         """
         cls._ensure_synonyms()
         mappings: list[SemanticMapping] = []
-        industry_votes: dict[str, int] = {}
+        industry_votes: dict[str, float] = {}
         entity_keys_found: set[str] = set()
 
         for col_name in df.columns:
@@ -101,20 +121,42 @@ class SemanticEngine:
                 mappings.append(mapping)
                 entity_keys_found.add(mapping.entity_key)
                 if mapping.industry != "universal":
-                    industry_votes[mapping.industry] = industry_votes.get(
-                        mapping.industry, 0
-                    ) + int(mapping.confidence)
+                    weight = _entity_weight(mapping.entity_key)
+                    vote = weight * mapping.confidence
+                    industry_votes[mapping.industry] = (
+                        industry_votes.get(mapping.industry, 0.0) + vote
+                    )
 
-        # Detect industry — no default fallback; "unknown" forces admin confirmation
+        # Detect industry using weighted scoring with tie-breaking
         detected_industry = "unknown"
         industry_confidence = 0.0
+
         if industry_votes:
-            best_industry = max(industry_votes, key=industry_votes.get)
+            sorted_votes = sorted(industry_votes.items(), key=lambda x: x[1], reverse=True)
+            best_industry, best_votes = sorted_votes[0]
             total_votes = sum(industry_votes.values())
-            detected_industry = best_industry
-            industry_confidence = (
-                (industry_votes[best_industry] / total_votes * 100) if total_votes > 0 else 0
-            )
+
+            # Confidence = share of total votes
+            confidence_pct = (best_votes / total_votes * 100) if total_votes > 0 else 0
+
+            # Tie-breaking: if top two industries are within MIN_VOTE_MARGIN, return unknown
+            if len(sorted_votes) > 1:
+                second_votes = sorted_votes[1][1]
+                if (best_votes - second_votes) < MIN_VOTE_MARGIN:
+                    detected_industry = "unknown"
+                    industry_confidence = confidence_pct
+                elif confidence_pct < MIN_INDUSTRY_CONFIDENCE:
+                    detected_industry = "unknown"
+                    industry_confidence = confidence_pct
+                else:
+                    detected_industry = best_industry
+                    industry_confidence = confidence_pct
+            elif confidence_pct < MIN_INDUSTRY_CONFIDENCE:
+                detected_industry = "unknown"
+                industry_confidence = confidence_pct
+            else:
+                detected_industry = best_industry
+                industry_confidence = confidence_pct
 
         # Build business concepts summary
         business_concepts = {}
@@ -156,44 +198,56 @@ class SemanticEngine:
             )
 
         # 2. Partial synonym match (contains or is contained)
-        # Skip very short column names to avoid false positives (e.g. "age" -> "agent")
-        if len(normalized) >= 4:
+        # Skip short column names to avoid false positives
+        if len(normalized) >= 5:
+            best_partial = None
+            best_partial_score = 0.0
             for syn, entity_key in cls.SYNONYM_MAP.items():
+                if len(syn) < 4:
+                    continue
                 if syn in normalized or normalized in syn:
-                    entity = ENTITY_LIBRARY[entity_key]
-                    confidence = min(len(normalized), len(syn)) / max(len(normalized), len(syn))
-                    if confidence > 0.6:
-                        return SemanticMapping(
-                            column_name=col_name,
-                            entity_key=entity_key,
-                            entity_display=entity["display_name"],
-                            industry=entity["industry"],
-                            confidence=confidence,
-                            match_method="synonym",
-                            role=cls._determine_role(normalized, entity_key, df, col_name),
-                        )
+                    score = min(len(normalized), len(syn)) / max(len(normalized), len(syn))
+                    if score > best_partial_score and score > 0.65:
+                        best_partial_score = score
+                        best_partial = (entity_key, syn)
+            if best_partial:
+                entity_key, syn = best_partial
+                entity = ENTITY_LIBRARY[entity_key]
+                return SemanticMapping(
+                    column_name=col_name,
+                    entity_key=entity_key,
+                    entity_display=entity["display_name"],
+                    industry=entity["industry"],
+                    confidence=best_partial_score,
+                    match_method="synonym",
+                    role=cls._determine_role(normalized, entity_key, df, col_name),
+                )
 
-        # 3. Fuzzy match using simple character overlap
-        best_match = None
-        best_score = 0.0
-        for syn, entity_key in cls.SYNONYM_MAP.items():
-            score = cls._fuzzy_score(normalized, syn)
-            if score > best_score:
-                best_score = score
-                best_match = (entity_key, syn)
+        # 3. Fuzzy match using character overlap
+        # Only for longer column names to reduce false positives
+        if len(normalized) >= 6:
+            best_match = None
+            best_score = 0.0
+            for syn, entity_key in cls.SYNONYM_MAP.items():
+                if len(syn) < 5:
+                    continue
+                score = cls._fuzzy_score(normalized, syn)
+                if score > best_score:
+                    best_score = score
+                    best_match = (entity_key, syn)
 
-        if best_match and best_score > 0.5 and len(normalized) >= 4:
-            entity_key, syn = best_match
-            entity = ENTITY_LIBRARY[entity_key]
-            return SemanticMapping(
-                column_name=col_name,
-                entity_key=entity_key,
-                entity_display=entity["display_name"],
-                industry=entity["industry"],
-                confidence=best_score,
-                match_method="fuzzy",
-                role=cls._determine_role(normalized, entity_key, df, col_name),
-            )
+            if best_match and best_score > 0.65:
+                entity_key, syn = best_match
+                entity = ENTITY_LIBRARY[entity_key]
+                return SemanticMapping(
+                    column_name=col_name,
+                    entity_key=entity_key,
+                    entity_display=entity["display_name"],
+                    industry=entity["industry"],
+                    confidence=best_score,
+                    match_method="fuzzy",
+                    role=cls._determine_role(normalized, entity_key, df, col_name),
+                )
 
         # 4. Heuristic: data type based
         return cls._heuristic_map(df, col_name, normalized)

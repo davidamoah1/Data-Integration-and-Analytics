@@ -11,14 +11,15 @@ EXTRA_ENTITIES: dict[str, dict] = {
     "account": {
         "display_name": "Account",
         "industry": "banking",
+        "weight": 3.0,
         "synonyms": [
-            "account",
-            "account_id",
             "account_number",
             "bank_account",
             "savings_account",
             "checking_account",
-            "balance",
+            "swift_code",
+            "iban",
+            "routing_number",
         ],
         "attributes": ["account_id", "customer_id", "account_type", "balance", "open_date"],
         "kpis": ["total_accounts", "active_accounts", "average_balance", "deposit_growth"],
@@ -30,15 +31,16 @@ EXTRA_ENTITIES: dict[str, dict] = {
     "transaction": {
         "display_name": "Transaction",
         "industry": "banking",
+        "weight": 2.5,
         "synonyms": [
-            "transaction",
             "transaction_id",
             "txn",
             "txn_id",
-            "transfer",
-            "deposit",
-            "withdrawal",
             "transaction_amount",
+            "debit",
+            "credit_entry",
+            "wire_transfer",
+            "ach_transfer",
         ],
         "attributes": ["transaction_id", "account_id", "amount", "type", "date"],
         "kpis": ["total_volume", "total_value", "avg_transaction", "fraud_rate"],
@@ -49,7 +51,8 @@ EXTRA_ENTITIES: dict[str, dict] = {
     "loan": {
         "display_name": "Loan",
         "industry": "banking",
-        "synonyms": ["loan", "loan_id", "credit", "mortgage", "personal_loan", "business_loan"],
+        "weight": 3.0,
+        "synonyms": ["loan_id", "loan_number", "mortgage", "personal_loan", "business_loan", "credit_score", "interest_rate", "principal_amount"],
         "attributes": ["loan_id", "customer_id", "principal", "interest_rate", "status"],
         "kpis": ["total_loans", "total_principal", "default_rate", "approval_rate"],
         "relationships": [
@@ -59,7 +62,8 @@ EXTRA_ENTITIES: dict[str, dict] = {
     "card": {
         "display_name": "Card",
         "industry": "banking",
-        "synonyms": ["card", "card_id", "credit_card", "debit_card", "atm_card"],
+        "weight": 2.5,
+        "synonyms": ["credit_card", "debit_card", "atm_card", "card_number", "cvv", "expiry_date"],
         "attributes": ["card_id", "account_id", "card_type", "limit", "status"],
         "kpis": ["active_cards", "spending_volume", "delinquency_rate"],
         "relationships": [
@@ -70,6 +74,7 @@ EXTRA_ENTITIES: dict[str, dict] = {
     "policy": {
         "display_name": "Policy",
         "industry": "insurance",
+        "weight": 3.0,
         "synonyms": ["policy", "policy_id", "policy_number", "coverage", "insurance_policy"],
         "attributes": ["policy_id", "customer_id", "premium", "coverage_amount", "start_date"],
         "kpis": ["total_policies", "total_premium", "avg_premium", "renewal_rate"],
@@ -81,6 +86,7 @@ EXTRA_ENTITIES: dict[str, dict] = {
     "claim": {
         "display_name": "Claim",
         "industry": "insurance",
+        "weight": 3.0,
         "synonyms": [
             "claim",
             "claim_id",
@@ -98,6 +104,7 @@ EXTRA_ENTITIES: dict[str, dict] = {
     "agent": {
         "display_name": "Agent",
         "industry": "insurance",
+        "weight": 2.0,
         "synonyms": ["agent", "agent_id", "agent_name", "broker", "underwriter"],
         "attributes": ["agent_id", "name", "region", "policies_sold"],
         "kpis": ["agent_count", "policies_per_agent", "commission_total"],
@@ -109,6 +116,7 @@ EXTRA_ENTITIES: dict[str, dict] = {
     "reservation": {
         "display_name": "Reservation",
         "industry": "hospitality",
+        "weight": 3.0,
         "synonyms": [
             "reservation",
             "reservation_id",
@@ -128,6 +136,7 @@ EXTRA_ENTITIES: dict[str, dict] = {
     "guest": {
         "display_name": "Guest",
         "industry": "hospitality",
+        "weight": 3.0,
         "synonyms": ["guest", "guest_id", "guest_name", "hotel_guest", "lodging_guest"],
         "attributes": ["guest_id", "name", "email", "loyalty_tier"],
         "kpis": ["total_guests", "repeat_guest_rate", "satisfaction_score"],
@@ -138,6 +147,7 @@ EXTRA_ENTITIES: dict[str, dict] = {
     "room": {
         "display_name": "Room",
         "industry": "hospitality",
+        "weight": 2.5,
         "synonyms": ["room", "room_id", "room_number", "suite", "room_type"],
         "attributes": ["room_id", "room_type", "rate", "status"],
         "kpis": ["total_rooms", "available_rooms", "adr", "revpar"],
@@ -148,6 +158,7 @@ EXTRA_ENTITIES: dict[str, dict] = {
     "service": {
         "display_name": "Service",
         "industry": "hospitality",
+        "weight": 2.0,
         "synonyms": ["service", "service_id", "amenity", "spa", "restaurant", "minibar"],
         "attributes": ["service_id", "reservation_id", "service_type", "amount", "date"],
         "kpis": ["service_revenue", "service_count", "revenue_per_guest"],
@@ -159,6 +170,7 @@ EXTRA_ENTITIES: dict[str, dict] = {
     "subscriber": {
         "display_name": "Subscriber",
         "industry": "telecommunications",
+        "weight": 3.0,
         "synonyms": [
             "subscriber",
             "subscriber_id",
@@ -178,6 +190,7 @@ EXTRA_ENTITIES: dict[str, dict] = {
     "call": {
         "display_name": "Call",
         "industry": "telecommunications",
+        "weight": 2.5,
         "synonyms": ["call", "call_id", "voice_call", "call_duration", "minutes"],
         "attributes": ["call_id", "subscriber_id", "duration_minutes", "cost", "date"],
         "kpis": ["total_calls", "total_minutes", "avg_call_duration", "revenue"],
@@ -188,7 +201,8 @@ EXTRA_ENTITIES: dict[str, dict] = {
     "data_usage": {
         "display_name": "Data Usage",
         "industry": "telecommunications",
-        "synonyms": ["data_usage", "data", "data_mb", "data_gb", "internet_usage", "usage"],
+        "weight": 2.5,
+        "synonyms": ["data_usage", "data_mb", "data_gb", "internet_usage"],
         "attributes": ["usage_id", "subscriber_id", "mb_used", "date"],
         "kpis": ["total_data_gb", "avg_usage_per_sub", "overage_revenue"],
         "relationships": [
@@ -198,6 +212,7 @@ EXTRA_ENTITIES: dict[str, dict] = {
     "plan": {
         "display_name": "Plan",
         "industry": "telecommunications",
+        "weight": 2.0,
         "synonyms": ["plan", "plan_id", "tariff", "subscription_plan", "bundle"],
         "attributes": ["plan_id", "plan_name", "monthly_fee", "data_allowance"],
         "kpis": ["plan_count", "subscribers_per_plan", "plan_revenue"],

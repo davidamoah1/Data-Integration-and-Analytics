@@ -36,7 +36,7 @@ from dashboard.semantic_dashboard import render_semantic_dashboard
 from dashboard.styles import DARK_THEME_CSS, RESPONSIVE_CSS
 from dashboard.utils import MAX_UPLOAD_SIZE_BYTES, MAX_UPLOAD_SIZE_MB, sanitize_text
 from dashboard.validation_dashboard import render_validation_dashboard, render_approval_section
-from semantic.mapping_engine import SemanticMappingEngine
+from semantic.mapping_engine import SemanticMappingEngine, SemanticMappingResult
 from services.dashboard_data_service import DashboardDataService
 from validation.engine import ValidationEngine, ValidationStatus
 
@@ -349,6 +349,18 @@ else:
 
     try:
         with st.spinner("Reading your file..."):
+            # Clear all previous session state related to prior uploads
+            for key in (
+                "semantic_dataset_context",
+                "admin_confirmed_industry",
+                "admin_overridden_industry",
+                "validation_result",
+                "validation_filename",
+                "copilot_messages",
+                "copilot_conversation_id",
+            ):
+                st.session_state.pop(key, None)
+
             if uploaded_file.name.endswith(".csv"):
                 try:
                     raw_df = pd.read_csv(uploaded_file, encoding="utf-8")
@@ -398,14 +410,48 @@ else:
     }
 
     # Admin confirmation for low-confidence industry detection
-    if semantic_mapping_result.industry_confidence < 90.0:
+    confidence_threshold = 85.0
+    if (
+        semantic_mapping_result.industry_confidence < confidence_threshold
+        or semantic_mapping_result.industry == "unknown"
+    ):
+        from semantic.entity_library import get_all_industries
+
+        available_industries = get_all_industries()
         st.info(
             f"Detected industry: **{semantic_mapping_result.industry.title()}** "
             f"({semantic_mapping_result.industry_confidence:.0f}% confidence). "
-            f"Confidence is below the 90% threshold. "
-            f"Click **Confirm Industry** to proceed with dashboard generation."
+            f"Confidence is below the {confidence_threshold:.0f}% threshold. "
+            f"Please confirm or select the correct industry below."
+        )
+        selected_industry = st.selectbox(
+            "Select Industry",
+            options=["unknown"] + available_industries,
+            index=0 if semantic_mapping_result.industry == "unknown"
+            else (available_industries.index(semantic_mapping_result.industry) + 1
+                  if semantic_mapping_result.industry in available_industries else 0),
+            format_func=lambda x: x.title(),
         )
         if st.button("Confirm Industry", type="primary"):
+            if selected_industry != "unknown" and selected_industry != semantic_mapping_result.industry:
+                # Override the industry
+                semantic_mapping_result = SemanticMappingResult(
+                    table_metadata=semantic_mapping_result.table_metadata,
+                    data_profile=semantic_mapping_result.data_profile,
+                    semantic_result=semantic_mapping_result.semantic_result,
+                    relationship_result=semantic_mapping_result.relationship_result,
+                    industry=selected_industry,
+                    industry_confidence=100.0,
+                    business_entities=semantic_mapping_result.business_entities,
+                    business_concepts=semantic_mapping_result.business_concepts,
+                    kpi_definitions=semantic_mapping_result.kpi_definitions,
+                    alerts=semantic_mapping_result.alerts,
+                    ai_prompts=semantic_mapping_result.ai_prompts,
+                    recommendations=semantic_mapping_result.recommendations,
+                    overrides=semantic_mapping_result.overrides,
+                )
+                st.session_state["semantic_dataset_context"]["industry"] = selected_industry
+                st.session_state["semantic_dataset_context"]["industry_confidence"] = 100.0
             st.session_state["admin_confirmed_industry"] = True
             st.rerun()
 

@@ -164,20 +164,35 @@ class SemanticMappingEngine:
                         )
                     )
 
-        # Recalculate detected entities and industry
+        # Recalculate detected entities and industry using weighted scoring
         entity_keys = {m.entity_key for m in new_mappings}
-        industry_votes: dict[str, int] = {}
+        industry_votes: dict[str, float] = {}
         for m in new_mappings:
             if m.industry != "universal":
-                industry_votes[m.industry] = industry_votes.get(m.industry, 0) + int(m.confidence)
+                entity = ENTITY_LIBRARY.get(m.entity_key, {})
+                weight = float(entity.get("weight", 1.0))
+                vote = weight * m.confidence
+                industry_votes[m.industry] = industry_votes.get(m.industry, 0.0) + vote
 
         detected_industry = "unknown"
         industry_confidence = 0.0
         if industry_votes:
-            best = max(industry_votes, key=industry_votes.get)
+            sorted_votes = sorted(industry_votes.items(), key=lambda x: x[1], reverse=True)
+            best, best_votes = sorted_votes[0]
             total = sum(industry_votes.values())
-            detected_industry = best
-            industry_confidence = (industry_votes[best] / total * 100) if total > 0 else 0
+            confidence_pct = (best_votes / total * 100) if total > 0 else 0
+
+            if len(sorted_votes) > 1:
+                second_votes = sorted_votes[1][1]
+                if (best_votes - second_votes) < 0.5 or confidence_pct < 40.0:
+                    detected_industry = "unknown"
+                else:
+                    detected_industry = best
+            elif confidence_pct < 40.0:
+                detected_industry = "unknown"
+            else:
+                detected_industry = best
+            industry_confidence = confidence_pct
 
         business_concepts = {}
         for ek in entity_keys:
