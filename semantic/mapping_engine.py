@@ -20,6 +20,17 @@ from semantic.relationship_engine import RelationshipEngine, RelationshipResult
 from semantic.semantic_engine import SemanticEngine, SemanticResult
 from semantic.semantic_model import SemanticModel, SemanticModelBuilder
 
+# Import industry intelligence modules to register them
+import industry_intelligence.healthcare  # noqa: F401
+import industry_intelligence.education  # noqa: F401
+import industry_intelligence.banking  # noqa: F401
+import industry_intelligence.agriculture  # noqa: F401
+import industry_intelligence.government  # noqa: F401
+import industry_intelligence.retail  # noqa: F401
+import industry_intelligence.manufacturing  # noqa: F401
+import industry_intelligence.ngo  # noqa: F401
+from industry_intelligence.base import AnalyticsResult, IndustryAnalyticsRegistry
+
 
 @dataclass
 class SemanticMappingResult:
@@ -40,6 +51,7 @@ class SemanticMappingResult:
     overrides: dict = field(default_factory=dict)
     semantic_model: SemanticModel | None = None
     metric_results: MetricResultSet | None = None
+    industry_intelligence: AnalyticsResult | None = None
 
     def to_dict(self) -> dict:
         return {
@@ -70,6 +82,7 @@ class SemanticMappingResult:
             "statistical_patterns": self.semantic_result.statistical_patterns,
             "semantic_model": self.semantic_model.to_dict() if self.semantic_model else None,
             "metric_results": self.metric_results.to_dict() if self.metric_results else None,
+            "industry_intelligence": self.industry_intelligence.to_dict() if self.industry_intelligence else None,
         }
 
 
@@ -143,6 +156,10 @@ class SemanticMappingEngine:
 
         result.semantic_model = semantic_model
         result.metric_results = metric_results
+
+        # Step 9: Industry-specific intelligence
+        col_mapping = semantic.get_column_mapping()
+        result.industry_intelligence = IndustryAnalyticsRegistry.analyze(industry, df, col_mapping)
 
         return result
 
