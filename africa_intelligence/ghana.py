@@ -1,0 +1,284 @@
+"""Ghana Country Profile.
+
+Ghana-specific data including:
+  - 16 regions (post-2018 reorganization)
+  - GHS currency (Ghana Cedi)
+  - Local industries (cocoa, gold, oil, textiles, tourism)
+  - Education structure (basic, secondary, tertiary)
+  - Healthcare structure (NHIS, CHPS, hospitals)
+  - Agriculture structure (cocoa, maize, cassava, yam)
+"""
+
+from __future__ import annotations
+
+from africa_intelligence.base import (
+    AgricultureStructure,
+    CountryProfile,
+    CurrencyInfo,
+    EducationStructure,
+    HealthcareStructure,
+    IndustryInfo,
+    RegionInfo,
+)
+
+GHANA_PROFILE = CountryProfile(
+    name="Ghana",
+    code="GH",
+    dialing_code="233",
+    capital="Accra",
+    official_languages=["English"],
+    currency=CurrencyInfo(
+        code="GHS",
+        name="Ghana Cedi",
+        symbol="₵",
+        subunit="Pesewa",
+        subunit_symbol="p",
+        decimal_places=2,
+        exchange_rate_to_usd=0.075,
+    ),
+    regions=[
+        RegionInfo(
+            name="Greater Accra", code="GA", capital="Accra",
+            districts=["Accra Metropolitan", "Tema Metropolitan", "Ga East", "Ga West", "Adentan", "Ashaiman", "La Dade-Kotopon", "Ledzokuku-Krowor", "Kpone-Katamansi", "Ningo-Prampram", "Shai-Osudoku"],
+            population=5055880, area_km2=3245, languages=["English", "Ga", "Twi"],
+        ),
+        RegionInfo(
+            name="Ashanti", code="AS", capital="Kumasi",
+            districts=["Kumasi Metropolitan", "Asokore-Mampong", "Ejisu", "Asante Akim North", "Asante Akim South", "Adansi North", "Adansi South", "Afigya-Kwabre", "Ahafo Ano South", "Ahafo Ano North", "Amansie Central", "Amansie East", "Amansie West", "Asunafo North", "Asunafo South", "Atwima Kwanwoma", "Atwima Nwabiagya", "Bekwai Municipal", "Bosome Freho", "Bosomtwe", "Ejura-Sekyedumase", "Kwabre East", "Mampong Municipal", "Obuasi Municipal", "Offinso North", "Offinso South", "Sekyere Afram Plains", "Sekyere Central", "Sekyere East", "Sekyere South"],
+            population=5436121, area_km2=24869, languages=["English", "Twi"],
+        ),
+        RegionInfo(
+            name="Western", code="WE", capital="Sekondi-Takoradi",
+            districts=["Sekondi-Takoradi Metropolitan", "Ahanta West", "Wassa Amenfi East", "Wassa Amenfi West", "Wassa Mpohor", "Shama", "Nzema East", "Ellembelle", "Jomoro", "Prestea-Huni Valley", "Tarkwa-Nsuaem", "Mpohor", "Wassa Amenfi Central"],
+            population=2165261, area_km2=13947, languages=["English", "Fante", "Nzema"],
+        ),
+        RegionInfo(
+            name="Western North", code="WN", capital="Sefwi-Wiawso",
+            districts=["Sefwi-Wiawso", "Bia East", "Bia West", "Juaboso", "Bodi", "Akontombra", "Suaman", "Aowin", "Bibiani-Anhwiaso-Bekwai", "Asunafo North"],
+            population=868770, area_km2=10314, languages=["English", "Sefwi"],
+        ),
+        RegionInfo(
+            name="Central", code="CE", capital="Cape Coast",
+            districts=["Cape Coast Metropolitan", "Komenda-Edina-Eguafo-Abirem", "Effutu", "Gomoa East", "Gomoa West", "Awutu-Senya East", "Awutu-Senya West", "Ajumako-Enyan-Essiam", "Asikuma-Odoben-Brakwa", "Assin North", "Assin South", "Assin Central", "Twifo-Ati-Morkwa", "Twifo-Heman-Lower-Denkyira", "Upper-Denkyira East", "Upper-Denkyira West", "Abura-Asebu-Kwamankese", "Agona East", "Agona West", "Ekumfi"],
+            population=2571272, area_km2=9826, languages=["English", "Fante", "Twifo"],
+        ),
+        RegionInfo(
+            name="Eastern", code="EE", capital="Koforidua",
+            districts=["New Juaben North", "New Juaben South", "Akuapem North", "Akuapem South", "Akyemansa", "Birim Central", "Birim South", "Birim North", "East Akim", "Kwaebibirem", "Kwahu East", "Kwahu South", "Kwahu West", "Kwahu Afram Plains North", "Kwahu Afram Plains South", "Lower-Manya Krobo", "Upper-Manya Krobo", "Yilo Krobo", "Asuogyaman", "Denkyembour", "Atiwa East", "Atiwa West", "Fanteakwa North", "Fanteakwa South", "Suhum"],
+            population=3150437, area_km2=19323, languages=["English", "Twi", "Krobo", "Akuapem"],
+        ),
+        RegionInfo(
+            name="Volta", code="VO", capital="Ho",
+            districts=["Ho Municipal", "Kpando", "Hohoe", "Keta", "Ketu South", "Ketu North", "Akatsi South", "Akatsi North", "Anloga", "South Tongu", "North Tongu", "Central Tongu", "Adaklu", "Agortime-Ziope", "Ho West", "Afadjato South", "Awashiafiase"],
+            population=1650451, area_km2=17843, languages=["English", "Ewe"],
+        ),
+        RegionInfo(
+            name="Oti", code="OT", capital="Dambai",
+            districts=["Krachi East", "Krachi West", "Krachi Nchumuru", "Kwahu Afram Plains South", "Nkwanta South", "Nkwanta North", "Biakoye", "Jasikan", "Kadjebi", "Guan"],
+            population=747770, area_km2=11671, languages=["English", "Ewe", "Dagbani"],
+        ),
+        RegionInfo(
+            name="Bono", code="BO", capital="Sunyani",
+            districts=["Sunyani Municipal", "Sunyani West", "Berekum East", "Berekum West", "Dormaa East", "Dormaa West", "Dormaa Central", "Jaman North", "Jaman South", "Tain", "Wenchi", "Banda", "Berekum"],
+            population=1207060, area_km2=11481, languages=["English", "Twi"],
+        ),
+        RegionInfo(
+            name="Bono East", code="BE", capital="Techiman",
+            districts=["Techiman Municipal", "Techiman North", "Kintampo South", "Kintampo North", "Pru East", "Pru West", "Atebubu-Amantin", "Sene East", "Sene West", "Nkoranza South", "Nkoranza North"],
+            population=1146800, area_km2=12291, languages=["English", "Twi"],
+        ),
+        RegionInfo(
+            name="Ahafo", code="AH", capital="Goaso",
+            districts=["Asunafo North", "Asunafo South", "Asutifi North", "Asutifi South", "Tano North", "Tano South"],
+            population=569870, area_km2=6430, languages=["English", "Twi"],
+        ),
+        RegionInfo(
+            name="Northern", code="NO", capital="Tamale",
+            districts=["Tamale Metropolitan", "Sagnarigu", "Savelugu", "Nanton", "Gushegu", "Karaga", "Zabzugu", "Tatale", "Tolon", "Kumbungu", "Yendi", "Mion", "Sanguli"],
+            population=2280036, area_km2=25448, languages=["English", "Dagbani"],
+        ),
+        RegionInfo(
+            name="Savannah", code="SV", capital="Damongo",
+            districts=["Bole", "Central Gonja", "East Gonja", "West Gonja", "North East Gonja", "Sawla-Tuna-Kalba", "North Gonja"],
+            population=649630, area_km2=34791, languages=["English", "Gonja"],
+        ),
+        RegionInfo(
+            name="North East", code="NE", capital="Nalerigu",
+            districts=["Mamprusi East", "Mamprusi West", "Mamprusi North", "Bunkpurugu", "Yunyoo", "Nabdam", "Chereponi", "East Mamprusi"],
+            population=658870, area_km2=9072, languages=["English", "Mampruli"],
+        ),
+        RegionInfo(
+            name="Upper East", code="UE", capital="Bolgatanga",
+            districts=["Bolgatanga Municipal", "Bawku West", "Bawku East", "Binduri", "Pusiga", "Talensi", "Nabdam", "Kassena-Nankana East", "Kassena-Nankana West", "Builsa North", "Builsa South", "Garu", "Tempane", "Bongo"],
+            population=1096964, area_km2=8422, languages=["English", "Gurune", "Kassem", "Buli"],
+        ),
+        RegionInfo(
+            name="Upper West", code="UW", capital="Wa",
+            districts=["Wa Municipal", "Wa East", "Wa West", "Nadowli-Kaleo", "Daffiama-Bussie-Issa", "Jirapa", "Lawra", "Nandom", "Lambussie", "Sissala East", "Sissala West"],
+            population=702189, area_km2=10649, languages=["English", "Dagaare", "Sissali"],
+        ),
+    ],
+    industries=[
+        IndustryInfo(
+            name="Cocoa", sector="Agriculture",
+            description="Ghana is the world's second-largest cocoa producer.",
+            key_products=["cocoa beans", "cocoa butter", "cocoa powder", "chocolate"],
+            regions=["Western", "Ashanti", "Central", "Eastern", "Volta", "Bono"],
+            contribution_to_gdp=3.5,
+        ),
+        IndustryInfo(
+            name="Gold Mining", sector="Mining",
+            description="Ghana is Africa's largest gold producer.",
+            key_products=["gold", "gold ore", "gold dore", "bullion"],
+            regions=["Western", "Ashanti", "Eastern", "Central"],
+            contribution_to_gdp=5.2,
+        ),
+        IndustryInfo(
+            name="Oil and Gas", sector="Energy",
+            description="Offshore oil production from Jubilee, TEN, and Sankofa fields.",
+            key_products=["crude oil", "natural gas", "LPG", "condensate"],
+            regions=["Western"],
+            contribution_to_gdp=4.7,
+        ),
+        IndustryInfo(
+            name="Timber", sector="Forestry",
+            description="Timber and wood products from tropical forests.",
+            key_products=["timber", "lumber", "plywood", "veneer"],
+            regions=["Western", "Eastern", "Ashanti", "Bono"],
+            contribution_to_gdp=1.2,
+        ),
+        IndustryInfo(
+            name="Textiles and Garments", sector="Manufacturing",
+            description="Textile manufacturing and garment production.",
+            key_products=["kente", "adinkra cloth", "smock", "batik", "garments"],
+            regions=["Ashanti", "Greater Accra", "Northern"],
+            contribution_to_gdp=0.8,
+        ),
+        IndustryInfo(
+            name="Tourism", sector="Services",
+            description="Cultural, historical, and eco-tourism.",
+            key_products=["Cape Coast Castle", "Kakum National Park", "Mole National Park", "Kwame Nkrumah Mausoleum"],
+            regions=["Central", "Western", "Northern", "Greater Accra"],
+            contribution_to_gdp=2.0,
+        ),
+        IndustryInfo(
+            name="Agriculture (Food Crops)", sector="Agriculture",
+            description="Food crop production for domestic consumption and export.",
+            key_products=["maize", "cassava", "yam", "plantain", "rice", "millet", "sorghum"],
+            regions=["Ashanti", "Eastern", "Bono", "Northern", "Upper East", "Upper West"],
+            contribution_to_gdp=14.0,
+        ),
+        IndustryInfo(
+            name="Fishing", sector="Agriculture",
+            description="Marine and inland fishing.",
+            key_products=["tilapia", "mackerel", "tuna", "herring", "catfish"],
+            regions=["Greater Accra", "Western", "Volta", "Central"],
+            contribution_to_gdp=1.1,
+        ),
+    ],
+    education=EducationStructure(
+        levels=[
+            {"name": "Kindergarten", "duration": "2 years", "ages": "4-5"},
+            {"name": "Primary School", "duration": "6 years", "ages": "6-11"},
+            {"name": "Junior High School (JHS)", "duration": "3 years", "ages": "12-14"},
+            {"name": "Senior High School (SHS)", "duration": "3 years", "ages": "15-17"},
+            {"name": "Technical/Vocational", "duration": "2-3 years", "ages": "15-18"},
+            {"name": "Tertiary (University)", "duration": "4+ years", "ages": "18+"},
+            {"name": "Tertiary (Polytechnic/Technical University)", "duration": "2-4 years", "ages": "18+"},
+        ],
+        grading_scales={
+            "SHS": [
+                {"grade": "A1", "score": "75-100", "interpretation": "Excellent"},
+                {"grade": "B2", "score": "70-74", "interpretation": "Very Good"},
+                {"grade": "B3", "score": "65-69", "interpretation": "Good"},
+                {"grade": "C4", "score": "60-64", "interpretation": "Credit"},
+                {"grade": "C5", "score": "55-59", "interpretation": "Credit"},
+                {"grade": "C6", "score": "50-54", "interpretation": "Credit"},
+                {"grade": "D7", "score": "45-49", "interpretation": "Pass"},
+                {"grade": "E8", "score": "40-44", "interpretation": "Pass"},
+                {"grade": "F9", "score": "0-39", "interpretation": "Fail"},
+            ],
+            "University": [
+                {"grade": "First Class", "score": "70-100", "gpa": "3.6-4.0"},
+                {"grade": "Second Class Upper", "score": "60-69", "gpa": "3.0-3.5"},
+                {"grade": "Second Class Lower", "score": "50-59", "gpa": "2.5-2.9"},
+                {"grade": "Third Class", "score": "40-49", "gpa": "2.0-2.4"},
+                {"grade": "Pass", "score": "35-39", "gpa": "1.5-1.9"},
+                {"grade": "Fail", "score": "0-34", "gpa": "0.0-1.4"},
+            ],
+        },
+        academic_year="September to July (3 terms)",
+        school_types=["Public", "Private", "Mission", "Community"],
+        examination_bodies=["WAEC (WASSCE, BECE)", "GES", "NTC", "NAB"],
+        notable_institutions=[
+            "University of Ghana (Legon)",
+            "Kwame Nkrumah University of Science and Technology (KNUST)",
+            "University of Cape Coast (UCC)",
+            "University for Development Studies (UDS)",
+            "Ghana Institute of Management and Public Administration (GIMPA)",
+            "Ashesi University",
+            "Central University",
+        ],
+    ),
+    healthcare=HealthcareStructure(
+        tiers=[
+            {"name": "CHPS (Community-based Health Planning and Services)", "level": "Primary", "description": "Community-level primary healthcare"},
+            {"name": "Health Centre", "level": "Primary", "description": "Sub-district level primary care"},
+            {"name": "District Hospital", "level": "Secondary", "description": "First-level referral hospital"},
+            {"name": "Regional Hospital", "level": "Secondary", "description": "Regional referral hospital"},
+            {"name": "Teaching Hospital", "level": "Tertiary", "description": "Highest-level referral and training"},
+        ],
+        insurance_schemes=[
+            {"name": "National Health Insurance Scheme (NHIS)", "type": "Public", "coverage": "Nationwide"},
+            {"name": "Private Health Insurance", "type": "Private", "coverage": "Corporate/Individual"},
+        ],
+        facility_types=["CHPS Compound", "Health Centre", "Clinic", "District Hospital", "Regional Hospital", "Teaching Hospital", "Private Hospital", "Maternity Home"],
+        major_diseases=["Malaria", "HIV/AIDS", "Tuberculosis", "Cholera", "Hypertension", "Diabetes", "Maternal mortality"],
+        regulatory_bodies=["Ghana Health Service (GHS)", "Ministry of Health (MoH)", "Food and Drugs Authority (FDA)", "Pharmacy Council"],
+        doctor_to_patient_ratio="1:10,000 (approximate)",
+    ),
+    agriculture=AgricultureStructure(
+        major_crops=[
+            {"name": "Cocoa", "season": "October-September (main), April-September (light)", "regions": ["Western", "Ashanti", "Central", "Eastern"], "export": True},
+            {"name": "Maize", "season": "March-July (major), September-November (minor)", "regions": ["Ashanti", "Eastern", "Bono", "Northern"], "export": False},
+            {"name": "Cassava", "season": "Year-round", "regions": ["Ashanti", "Central", "Eastern", "Volta"], "export": False},
+            {"name": "Yam", "season": "July-November", "regions": ["Northern", "Upper East", "Brong Ahafo"], "export": False},
+            {"name": "Rice", "season": "May-October", "regions": ["Northern", "Volta", "Western"], "export": False},
+            {"name": "Plantain", "season": "Year-round", "regions": ["Eastern", "Ashanti", "Western"], "export": False},
+            {"name": "Oil Palm", "season": "Year-round", "regions": ["Western", "Central", "Eastern"], "export": True},
+            {"name": "Cashew", "season": "January-May", "regions": ["Bono", "Bono East"], "export": True},
+        ],
+        farming_systems=["Smallholder farming", "Commercial plantations", "Mixed farming", "Agroforestry", "Irrigation farming"],
+        growing_seasons=[
+            {"name": "Major Season", "period": "March-July", "rainfall": "Heavy rains"},
+            {"name": "Minor Season", "period": "September-November", "rainfall": "Moderate rains"},
+            {"name": "Dry Season", "period": "December-February", "rainfall": "Harmattan (dry)"},
+        ],
+        livestock=["Cattle", "Sheep", "Goats", "Poultry", "Pigs", "Guinea fowl"],
+        export_crops=["Cocoa", "Cashew", "Oil palm", "Timber", "Shea nuts"],
+        challenges=["Climate change", "Pest infestation", "Limited irrigation", "Post-harvest losses", "Small farm sizes", "Limited mechanization"],
+    ),
+    national_holidays=[
+        {"name": "New Year's Day", "date": "January 1"},
+        {"name": "Independence Day", "date": "March 6"},
+        {"name": "Good Friday", "date": "Variable (Easter)"},
+        {"name": "Easter Monday", "date": "Variable"},
+        {"name": "May Day (Workers' Day)", "date": "May 1"},
+        {"name": "Eid al-Fitr", "date": "Variable"},
+        {"name": "Eid al-Adha", "date": "Variable"},
+        {"name": "Republic Day", "date": "July 1"},
+        {"name": "Founders' Day", "date": "August 4"},
+        {"name": "Kwame Nkrumah Memorial Day", "date": "September 21"},
+        {"name": "Farmers' Day", "date": "First Friday of December"},
+        {"name": "Christmas Day", "date": "December 25"},
+        {"name": "Boxing Day", "date": "December 26"},
+    ],
+    demographics={
+        "population": 34000000,
+        "life_expectancy": 64.0,
+        "literacy_rate": 79.0,
+        "urban_population_pct": 57.0,
+        "major_ethnic_groups": ["Akan", "Mole-Dagbani", "Ewe", "Ga-Dangme", "Gurma", "Guan"],
+        "major_religions": ["Christianity", "Islam", "Traditional"],
+    },
+)

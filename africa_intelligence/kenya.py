@@ -1,0 +1,125 @@
+"""Kenya Country Profile."""
+
+from __future__ import annotations
+
+from africa_intelligence.base import (
+    AgricultureStructure, CountryProfile, CurrencyInfo,
+    EducationStructure, HealthcareStructure, IndustryInfo, RegionInfo,
+)
+
+KENYA_PROFILE = CountryProfile(
+    name="Kenya", code="KE", dialing_code="254", capital="Nairobi",
+    official_languages=["English", "Swahili"],
+    currency=CurrencyInfo(
+        code="KES", name="Kenyan Shilling", symbol="KSh",
+        subunit="Cent", subunit_symbol="c", decimal_places=2,
+        exchange_rate_to_usd=0.0077,
+    ),
+    regions=[
+        RegionInfo(name="Nairobi", code="47", capital="Nairobi", population=4397073, area_km2=696, languages=["English", "Swahili"]),
+        RegionInfo(name="Mombasa", code="01", capital="Mombasa", population=1208333, area_km2=212, languages=["English", "Swahili"]),
+        RegionInfo(name="Kisumu", code="42", capital="Kisumu", population=1135100, area_km2=569, languages=["English", "Swahili", "Dholuo"]),
+        RegionInfo(name="Kiambu", code="22", capital="Kiambu", population=2417836, area_km2=2449, languages=["English", "Swahili", "Kikuyu"]),
+        RegionInfo(name="Nakuru", code="32", capital="Nakuru", population=1875300, area_km2=7196, languages=["English", "Swahili"]),
+        RegionInfo(name="Kakamega", code="37", capital="Kakamega", population=1866459, area_km2=3050, languages=["English", "Swahili"]),
+        RegionInfo(name="Bungoma", code="39", capital="Bungoma", population=1670000, area_km2=3032, languages=["English", "Swahili"]),
+        RegionInfo(name="Meru", code="12", capital="Meru", population=1532300, area_km2=6936, languages=["English", "Swahili", "Kimeru"]),
+        RegionInfo(name="Kilifi", code="02", capital="Kilifi", population=1441000, area_km2=12255, languages=["English", "Swahili"]),
+        RegionInfo(name="Machakos", code="16", capital="Machakos", population=1421000, area_km2=6208, languages=["English", "Swahili", "Kikamba"]),
+    ],
+    industries=[
+        IndustryInfo(name="Agriculture", sector="Agriculture", description="Tea, coffee, horticulture are major exports.",
+            key_products=["tea", "coffee", "flowers", "maize", "beans"], regions=["Kiambu", "Nakuru", "Kisumu"], contribution_to_gdp=22.0),
+        IndustryInfo(name="Tourism", sector="Services", description="Safari tourism is a major foreign exchange earner.",
+            key_products=["safari", "Maasai Mara", "Amboseli", "Diani Beach"], regions=["Mombasa", "Kilifi"], contribution_to_gdp=10.0),
+        IndustryInfo(name="Financial Services", sector="Services", description="Nairobi is East Africa's financial hub with M-Pesa.",
+            key_products=["M-Pesa", "banking", "fintech", "insurance"], regions=["Nairobi"], contribution_to_gdp=12.0),
+        IndustryInfo(name="Manufacturing", sector="Manufacturing", description="Light manufacturing and agro-processing.",
+            key_products=["textiles", "food processing", "cement", "beverages"], regions=["Nairobi", "Mombasa"], contribution_to_gdp=8.0),
+    ],
+    education=EducationStructure(
+        levels=[
+            {"name": "Pre-Primary", "duration": "2 years", "ages": "3-5"},
+            {"name": "Primary School", "duration": "8 years", "ages": "6-13"},
+            {"name": "Secondary School", "duration": "4 years", "ages": "14-17"},
+            {"name": "University", "duration": "4-6 years", "ages": "18+"},
+        ],
+        grading_scales={
+            "Secondary": [
+                {"grade": "A", "score": "80-100", "points": 12},
+                {"grade": "A-", "score": "75-79", "points": 11},
+                {"grade": "B+", "score": "70-74", "points": 10},
+                {"grade": "B", "score": "65-69", "points": 9},
+                {"grade": "B-", "score": "60-64", "points": 8},
+                {"grade": "C+", "score": "55-59", "points": 7},
+                {"grade": "C", "score": "50-54", "points": 6},
+                {"grade": "C-", "score": "45-49", "points": 5},
+                {"grade": "D+", "score": "40-44", "points": 4},
+                {"grade": "D", "score": "35-39", "points": 3},
+                {"grade": "D-", "score": "30-34", "points": 2},
+                {"grade": "E", "score": "0-29", "points": 1},
+            ],
+        },
+        academic_year="January to November (3 terms)",
+        school_types=["Public", "Private", "Mission", "International"],
+        examination_bodies=["KNEC (KCPE, KCSE)", "KICD"],
+        notable_institutions=[
+            "University of Nairobi (UoN)",
+            "Kenyatta University (KU)",
+            "Strathmore University",
+            "Moi University",
+            "Egerton University",
+        ],
+    ),
+    healthcare=HealthcareStructure(
+        tiers=[
+            {"name": "Dispensary", "level": "Primary", "description": "Community-level care"},
+            {"name": "Health Centre", "level": "Primary", "description": "Sub-county level"},
+            {"name": "County Hospital", "level": "Secondary", "description": "County referral"},
+            {"name": "National Referral Hospital", "level": "Tertiary", "description": "Highest level"},
+        ],
+        insurance_schemes=[
+            {"name": "National Hospital Insurance Fund (NHIF)", "type": "Public", "coverage": "Nationwide"},
+            {"name": "Private Health Insurance", "type": "Private", "coverage": "Corporate/Individual"},
+        ],
+        facility_types=["Dispensary", "Health Centre", "County Hospital", "National Hospital", "Private Hospital", "Clinic"],
+        major_diseases=["Malaria", "HIV/AIDS", "Tuberculosis", "Cholera", "Pneumonia"],
+        regulatory_bodies=["Ministry of Health (MoH)", "Kenya Medical Practitioners Council", "Pharmacy and Poisons Board"],
+        doctor_to_patient_ratio="1:16,000 (approximate)",
+    ),
+    agriculture=AgricultureStructure(
+        major_crops=[
+            {"name": "Tea", "season": "Year-round (peak March-June, Oct-Dec)", "regions": ["Kiambu", "Nakuru", "Kisumu"], "export": True},
+            {"name": "Coffee", "season": "October-December", "regions": ["Kiambu", "Nakuru"], "export": True},
+            {"name": "Maize", "season": "March-September", "regions": ["Nakuru", "Kakamega", "Bungoma"], "export": False},
+            {"name": "Beans", "season": "March-August", "regions": ["Kiambu", "Machakos"], "export": False},
+            {"name": "Flowers (Horticulture)", "season": "Year-round", "regions": ["Nakuru", "Kiambu"], "export": True},
+        ],
+        farming_systems=["Smallholder farming", "Commercial plantations", "Pastoralism", "Mixed farming"],
+        growing_seasons=[
+            {"name": "Long Rains", "period": "March-May", "rainfall": "Heavy"},
+            {"name": "Short Rains", "period": "October-December", "rainfall": "Moderate"},
+            {"name": "Dry Season", "period": "January-February, June-September", "rainfall": "Dry"},
+        ],
+        livestock=["Cattle", "Sheep", "Goats", "Camels", "Poultry"],
+        export_crops=["Tea", "Coffee", "Flowers", "Vegetables", "Avocado"],
+        challenges=["Climate change", "Pest infestation", "Limited irrigation", "Post-harvest losses"],
+    ),
+    national_holidays=[
+        {"name": "New Year's Day", "date": "January 1"},
+        {"name": "Madaraka Day", "date": "June 1"},
+        {"name": "Mashujaa Day", "date": "October 20"},
+        {"name": "Jamhuri Day", "date": "December 12"},
+        {"name": "Christmas Day", "date": "December 25"},
+        {"name": "Boxing Day", "date": "December 26"},
+        {"name": "Eid al-Fitr", "date": "Variable"},
+        {"name": "Good Friday", "date": "Variable"},
+        {"name": "Easter Monday", "date": "Variable"},
+    ],
+    demographics={
+        "population": 54000000, "life_expectancy": 66.0, "literacy_rate": 83.0,
+        "urban_population_pct": 28.0,
+        "major_ethnic_groups": ["Kikuyu", "Luhya", "Kalenjin", "Luo", "Kamba", "Kisii"],
+        "major_religions": ["Christianity", "Islam", "Traditional"],
+    },
+)

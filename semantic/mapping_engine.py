@@ -54,6 +54,7 @@ class SemanticMappingResult:
     industry_intelligence: AnalyticsResult | None = None
     quality_intelligence: object | None = None
     predictive_intelligence: object | None = None
+    africa_intelligence: object | None = None
 
     def to_dict(self) -> dict:
         return {
@@ -87,6 +88,7 @@ class SemanticMappingResult:
             "industry_intelligence": self.industry_intelligence.to_dict() if self.industry_intelligence else None,
             "quality_intelligence": self.quality_intelligence.to_dict() if self.quality_intelligence else None,
             "predictive_intelligence": self.predictive_intelligence.to_dict() if self.predictive_intelligence else None,
+            "africa_intelligence": self.africa_intelligence.to_dict() if self.africa_intelligence else None,
         }
 
     def get_copilot(self, df: pd.DataFrame | None = None) -> "DataAnalystCopilot":
@@ -191,6 +193,10 @@ class SemanticMappingEngine:
         # Step 11: Predictive analytics
         from predictive_analytics import PredictiveAnalyticsRegistry
         result.predictive_intelligence = PredictiveAnalyticsRegistry.analyze(industry, df, col_mapping)
+
+        # Step 12: Africa intelligence
+        from africa_intelligence import AfricaIntelligenceRegistry
+        result.africa_intelligence = AfricaIntelligenceRegistry.analyze(df, col_mapping)
 
         return result
 
