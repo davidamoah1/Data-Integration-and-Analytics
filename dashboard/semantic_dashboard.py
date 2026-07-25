@@ -12,7 +12,19 @@ from semantic.dashboard_registry import DashboardRegistry, WidgetDefinition
 from semantic.mapping_engine import SemanticMappingResult
 
 
-def render_semantic_dashboard(df: pd.DataFrame, mapping_result: SemanticMappingResult) -> None:
+def render_semantic_dashboard(
+    df: pd.DataFrame,
+    mapping_result: SemanticMappingResult,
+    admin_confirmed: bool = False,
+) -> None:
+    confidence = mapping_result.industry_confidence
+    if confidence < 90.0 and not admin_confirmed:
+        st.warning(
+            f"Industry confidence is {confidence:.0f}% (below 90% threshold). "
+            f"Detected industry: '{mapping_result.industry}'. "
+            f"Admin confirmation required to generate the dashboard."
+        )
+        return
     template = DashboardRegistry.get(mapping_result.industry)
     if template is None:
         st.warning(

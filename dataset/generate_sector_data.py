@@ -1,4 +1,7 @@
-"""Generate synthetic DIRTY CSV datasets for each industry sector.
+"""DEMO/TEST TOOLING — Generate synthetic DIRTY CSV datasets for each industry sector.
+
+NOT for production use. These datasets are for testing the ETL pipeline and
+semantic detection with realistic data quality issues.
 
 Creates realistic datasets with real-world data quality issues:
 - Duplicate rows (~5%)

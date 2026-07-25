@@ -13,9 +13,15 @@ def extract_data() -> pd.DataFrame:
         pandas DataFrame containing the raw data.
 
     Raises:
+        ValueError: If RAW_DATA_PATH is not configured.
         FileNotFoundError: If the raw data file does not exist.
     """
     try:
+        if not RAW_DATA_PATH:
+            raise ValueError(
+                "RAW_DATA_PATH is not configured. Set the RAW_DATA_PATH environment variable "
+                "to point to your data file. Production must not rely on default sample data."
+            )
         if not os.path.exists(RAW_DATA_PATH):
             raise FileNotFoundError(f"Raw data file not found at: {RAW_DATA_PATH}")
 

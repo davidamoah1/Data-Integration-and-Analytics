@@ -108,12 +108,19 @@ class KPIGenerator:
             col_mapping, ["revenue", "offering", "tithe", "donation", "billing"]
         )
         entity_id_col = KPIGenerator._find_column(
-            col_mapping, ["order", "admission", "appointment", "donation"]
+            col_mapping, ["order", "admission", "appointment", "donation",
+                          "transaction", "reservation", "claim", "policy",
+                          "call", "subscription"]
         )
         customer_col = KPIGenerator._find_column(
             col_mapping,
-            ["patient", "student", "member", "customer", "donor", "beneficiary", "citizen"],
+            ["patient", "student", "member", "customer", "donor", "beneficiary", "citizen",
+             "account", "subscriber", "guest", "policy_holder"],
         )
+
+        # Industry-appropriate labels
+        tx_label = KPIGenerator._transaction_label(industry)
+        revenue_label = KPIGenerator._revenue_label(industry)
 
         # Compute universal KPIs
         if revenue_col and revenue_col in df.columns:
@@ -121,7 +128,7 @@ class KPIGenerator:
             kpis.append(
                 KPI(
                     key="total_revenue",
-                    label="Total Revenue" if industry == "retail" else "Total Amount",
+                    label=revenue_label,
                     value=total_revenue,
                     formatted=_fmt_currency(total_revenue),
                     entity="revenue",
@@ -139,7 +146,7 @@ class KPIGenerator:
             kpis.append(
                 KPI(
                     key="avg_value",
-                    label="Avg per Transaction",
+                    label=f"Avg per {tx_label}",
                     value=avg_value,
                     formatted=_fmt_currency(avg_value),
                     entity="revenue",
@@ -156,7 +163,7 @@ class KPIGenerator:
         kpis.append(
             KPI(
                 key="total_transactions",
-                label="Total Transactions",
+                label=f"Total {tx_label}s",
                 value=tx_count,
                 formatted=_fmt_number(tx_count),
                 entity="order",
@@ -252,8 +259,52 @@ class KPIGenerator:
             "retail": "Customers",
             "government": "Citizens",
             "ngo": "Beneficiaries",
+            "banking": "Accounts",
+            "insurance": "Policyholders",
+            "hospitality": "Guests",
+            "telecommunications": "Subscribers",
+            "manufacturing": "Machines",
+            "agriculture": "Farms",
         }
         return labels.get(industry, "Entities")
+
+    @staticmethod
+    def _transaction_label(industry: str) -> str:
+        """Get the industry-appropriate label for transactions."""
+        labels = {
+            "healthcare": "Admission",
+            "education": "Enrollment",
+            "church": "Contribution",
+            "retail": "Transaction",
+            "government": "Project",
+            "ngo": "Donation",
+            "banking": "Transaction",
+            "insurance": "Claim",
+            "hospitality": "Reservation",
+            "telecommunications": "Call",
+            "manufacturing": "Production Run",
+            "agriculture": "Harvest",
+        }
+        return labels.get(industry, "Transaction")
+
+    @staticmethod
+    def _revenue_label(industry: str) -> str:
+        """Get the industry-appropriate label for total revenue."""
+        labels = {
+            "healthcare": "Total Billing",
+            "education": "Total Tuition",
+            "church": "Total Offerings",
+            "retail": "Total Revenue",
+            "government": "Total Spending",
+            "ngo": "Total Donations",
+            "banking": "Total Transaction Volume",
+            "insurance": "Total Premium",
+            "hospitality": "Total Revenue",
+            "telecommunications": "Total Revenue",
+            "manufacturing": "Total Production Value",
+            "agriculture": "Total Harvest Value",
+        }
+        return labels.get(industry, "Total Amount")
 
     @staticmethod
     def _registry_kpis(df: pd.DataFrame, industry: str, col_mapping: dict) -> list[KPI]:

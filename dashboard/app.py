@@ -35,8 +35,10 @@ from dashboard.sector_dashboards import render_sector_dashboard
 from dashboard.semantic_dashboard import render_semantic_dashboard
 from dashboard.styles import DARK_THEME_CSS, RESPONSIVE_CSS
 from dashboard.utils import MAX_UPLOAD_SIZE_BYTES, MAX_UPLOAD_SIZE_MB, sanitize_text
+from dashboard.validation_dashboard import render_validation_dashboard, render_approval_section
 from semantic.mapping_engine import SemanticMappingEngine
 from services.dashboard_data_service import DashboardDataService
+from validation.engine import ValidationEngine, ValidationStatus
 
 st.set_page_config(
     page_title="DataFlow - Business Analytics",
@@ -241,13 +243,11 @@ if data_source == "Live Database":
             <div class="empty-state-icon">🗄️</div>
             <div class="empty-state-title">Database is empty</div>
             <div class="empty-state-desc">
-                No data has been loaded yet. You can:<br><br>
-                <strong>Option 1:</strong> Run the ETL pipeline to load sample data<br>
-                <code>python pipeline/run_pipeline.py</code><br><br>
-                <strong>Option 2:</strong> Switch to <strong>Upload File</strong> mode in the sidebar<br>
-                to analyze your own CSV or Excel file instantly<br><br>
-                <strong>Option 3:</strong> Use the API to seed demo data<br>
-                <code>POST /platform/demo/seed</code>
+                No data has been loaded into the database yet. You can:<br><br>
+                <strong>Option 1:</strong> Upload a CSV or Excel file using <strong>Upload File</strong> mode in the sidebar<br><br>
+                <strong>Option 2:</strong> Connect a data source via the Dataset Library API<br>
+                <code>POST /datasets/production/database</code><br><br>
+                <strong>Option 3:</strong> Run an ETL pipeline to load data from an external source
             </div>
         </div>
         """,
@@ -364,6 +364,27 @@ else:
         )
         st.stop()
 
+    # ── Hospital Data Validation (mandatory pre-ETL stage) ──
+    if "validation_result" not in st.session_state or st.session_state.get("validation_filename") != uploaded_file.name:
+        with st.spinner("Running hospital data validation..."):
+            validation_engine = ValidationEngine()
+            validation_result = validation_engine.validate(raw_df, dataset_name=uploaded_file.name)
+            st.session_state["validation_result"] = validation_result
+            st.session_state["validation_filename"] = uploaded_file.name
+
+    validation_result = st.session_state["validation_result"]
+
+    # Render validation dashboard
+    render_validation_dashboard(validation_result)
+
+    # Approval workflow — block ETL if validation failed
+    if not validation_result.can_proceed_to_etl:
+        approved = render_approval_section(validation_result)
+        if not approved:
+            st.stop()
+
+    st.markdown("---")
+
     with st.spinner("Discovering business meaning in your data..."):
         semantic_mapping_result = SemanticMappingEngine.analyze(raw_df, uploaded_file.name)
         df = raw_df.copy()
@@ -375,6 +396,18 @@ else:
         "kpi_definitions": semantic_mapping_result.kpi_definitions,
         "business_rules": semantic_mapping_result.recommendations,
     }
+
+    # Admin confirmation for low-confidence industry detection
+    if semantic_mapping_result.industry_confidence < 90.0:
+        st.info(
+            f"Detected industry: **{semantic_mapping_result.industry.title()}** "
+            f"({semantic_mapping_result.industry_confidence:.0f}% confidence). "
+            f"Confidence is below the 90% threshold. "
+            f"Click **Confirm Industry** to proceed with dashboard generation."
+        )
+        if st.button("Confirm Industry", type="primary"):
+            st.session_state["admin_confirmed_industry"] = True
+            st.rerun()
 
     dupes_removed = len(raw_df) - len(df)
     st.markdown(
@@ -426,7 +459,8 @@ else:
 # Sector Dashboard (KPIs + Charts)
 # ──────────────────────────────────────────────
 if semantic_mapping_result is not None:
-    render_semantic_dashboard(df, semantic_mapping_result)
+    admin_confirmed = st.session_state.get("admin_confirmed_industry", False)
+    render_semantic_dashboard(df, semantic_mapping_result, admin_confirmed=admin_confirmed)
 else:
     pack_key = st.session_state.get("active_industry_pack")
     render_sector_dashboard(df, kpis, pack_key=pack_key)

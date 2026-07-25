@@ -1,7 +1,16 @@
-"""Generate realistic demo datasets for all 12 supported industries.
+"""DEMO TOOLING — Generate demo datasets for onboarding and training. NOT for production.
 
+Generates realistic demo datasets for all 12 supported industries.
 Each dataset contains 200 rows with industry-specific columns that will
 trigger correct semantic entity mapping and industry detection.
+
+These datasets are for:
+  - Onboarding new users
+  - Training sessions
+  - Testing semantic detection
+  - Demo dashboards
+
+Production must NEVER auto-use these datasets. They are opt-in only.
 
 Usage:
     python scripts/generate_demo_datasets.py

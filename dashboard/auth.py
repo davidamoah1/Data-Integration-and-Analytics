@@ -12,42 +12,34 @@ from passlib.context import CryptContext
 
 _pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
-_DEFAULT_USERS = {
-    "admin": {
-        "password_hash": _pwd_context.hash("admin123"),
-        "role": "admin",
-        "name": "Administrator",
-    },
-    "viewer": {
-        "password_hash": _pwd_context.hash("viewer123"),
-        "role": "viewer",
-        "name": "Viewer",
-    },
+# No hardcoded default users — credentials must come from environment variables or database
+_ENV_USER_KEYS = {
+    "admin": {"role": "admin", "name": "Administrator"},
+    "viewer": {"role": "viewer", "name": "Viewer"},
 }
 
 
 def _load_users() -> dict:
-    """Load user credentials from environment variables or defaults.
+    """Load user credentials from environment variables.
 
     Environment variables:
         AUTH_ADMIN_PASSWORD: Password for admin user.
         AUTH_VIEWER_PASSWORD: Password for viewer user.
 
     Returns:
-        Dict of user credentials.
+        Dict of user credentials. Empty if no env vars set (production should
+        use the database-backed authentication system instead).
     """
     users = {}
-    for username, defaults in _DEFAULT_USERS.items():
+    for username, meta in _ENV_USER_KEYS.items():
         env_var = f"AUTH_{username.upper()}_PASSWORD"
         password = os.getenv(env_var)
         if password:
             users[username] = {
                 "password_hash": _pwd_context.hash(password),
-                "role": defaults["role"],
-                "name": defaults["name"],
+                "role": meta["role"],
+                "name": meta["name"],
             }
-        else:
-            users[username] = defaults
     return users
 
 

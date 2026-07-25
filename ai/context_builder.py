@@ -2,6 +2,14 @@
 
 Gathers relevant data from the platform (sales, ETL jobs, pipelines, quality
 reports, organizations, etc.) and structures it as context for the AI.
+
+DATA SOURCE POLICY:
+    AI context is built ONLY from:
+      - User-uploaded data (passed via extra_context)
+      - Connected database tables (dynamically discovered)
+      - Semantic layer metadata (entity library, industry knowledge)
+      - Knowledge graph
+    AI must NEVER generate answers from fake, mock, or demo datasets.
 """
 
 from sqlalchemy import inspect as sqlalchemy_inspect

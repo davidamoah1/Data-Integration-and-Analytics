@@ -156,20 +156,22 @@ class SemanticEngine:
             )
 
         # 2. Partial synonym match (contains or is contained)
-        for syn, entity_key in cls.SYNONYM_MAP.items():
-            if syn in normalized or normalized in syn:
-                entity = ENTITY_LIBRARY[entity_key]
-                confidence = min(len(normalized), len(syn)) / max(len(normalized), len(syn))
-                if confidence > 0.6:
-                    return SemanticMapping(
-                        column_name=col_name,
-                        entity_key=entity_key,
-                        entity_display=entity["display_name"],
-                        industry=entity["industry"],
-                        confidence=confidence,
-                        match_method="synonym",
-                        role=cls._determine_role(normalized, entity_key, df, col_name),
-                    )
+        # Skip very short column names to avoid false positives (e.g. "age" -> "agent")
+        if len(normalized) >= 4:
+            for syn, entity_key in cls.SYNONYM_MAP.items():
+                if syn in normalized or normalized in syn:
+                    entity = ENTITY_LIBRARY[entity_key]
+                    confidence = min(len(normalized), len(syn)) / max(len(normalized), len(syn))
+                    if confidence > 0.6:
+                        return SemanticMapping(
+                            column_name=col_name,
+                            entity_key=entity_key,
+                            entity_display=entity["display_name"],
+                            industry=entity["industry"],
+                            confidence=confidence,
+                            match_method="synonym",
+                            role=cls._determine_role(normalized, entity_key, df, col_name),
+                        )
 
         # 3. Fuzzy match using simple character overlap
         best_match = None
@@ -180,7 +182,7 @@ class SemanticEngine:
                 best_score = score
                 best_match = (entity_key, syn)
 
-        if best_match and best_score > 0.5:
+        if best_match and best_score > 0.5 and len(normalized) >= 4:
             entity_key, syn = best_match
             entity = ENTITY_LIBRARY[entity_key]
             return SemanticMapping(

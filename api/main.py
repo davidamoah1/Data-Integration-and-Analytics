@@ -72,6 +72,8 @@ from scheduler.routes import router as scheduler_router
 from semantic.routes import router as semantic_router
 from services.etl_service import ETLService
 from shared.database import Base, get_engine
+from dataset_library.routes import router as dataset_library_router
+from validation.routes import router as validation_router
 
 
 @asynccontextmanager
@@ -91,6 +93,7 @@ async def lifespan(app: FastAPI):
     import notifications.models  # noqa: F401
     import organizations.models  # noqa: F401
     import scheduler.models  # noqa: F401
+    import validation.models  # noqa: F401
 
     Base.metadata.create_all(engine)
 
@@ -113,14 +116,18 @@ async def lifespan(app: FastAPI):
     db = DbSession(engine)
     try:
         seed_default_data(db)
-        # Seed demo data for pilot deployments
-        from enterprise.demo_data import is_demo_seeded, seed_demo_data
+        # Seed demo data only when explicitly enabled (opt-in for pilot/onboarding)
+        from config import SEED_DEMO_DATA
 
-        if not is_demo_seeded(db):
-            seed_demo_data(db)
-            logger.info(
-                "Pilot demo data seeded (org, users, dashboards, KPIs, pipelines, AI conversations, reports)."
-            )
+        if SEED_DEMO_DATA:
+            from enterprise.demo_data import is_demo_seeded, seed_demo_data
+
+            if not is_demo_seeded(db):
+                seed_demo_data(db)
+                logger.info(
+                    "Pilot demo data seeded (org, users, dashboards, KPIs, pipelines, AI conversations, reports). "
+                    "Set SEED_DEMO_DATA=false for production."
+                )
         # Create trial subscriptions for all orgs without one
         from enterprise.subscription import SubscriptionService
         from organizations.models import Organization
@@ -246,6 +253,8 @@ app.include_router(platform_router)
 app.include_router(notifications_router)
 app.include_router(scheduler_router)
 app.include_router(semantic_router)
+app.include_router(validation_router)
+app.include_router(dataset_library_router)
 
 
 # ──────────────────────────────────────────────

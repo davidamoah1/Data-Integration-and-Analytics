@@ -15,11 +15,15 @@ def _resolve_path(path_str: str) -> str:
     return os.path.join(BASE_DIR, path_str)
 
 
-# Data paths
-RAW_DATA_PATH = _resolve_path(os.getenv("RAW_DATA_PATH", "dataset/Superstore.csv"))
+# Data paths — production must set RAW_DATA_PATH explicitly (no default sample data)
+RAW_DATA_PATH = _resolve_path(os.getenv("RAW_DATA_PATH", ""))
 PROCESSED_DATA_PATH = _resolve_path(
     os.getenv("PROCESSED_DATA_PATH", "data/processed/cleaned_data.csv")
 )
+
+# Demo / onboarding datasets — opt-in only, never used in production automatically
+DEMO_DATASETS_DIR = _resolve_path(os.getenv("DEMO_DATASETS_DIR", "demo_datasets"))
+SEED_DEMO_DATA = os.getenv("SEED_DEMO_DATA", "false").lower() in ("true", "1", "yes")
 
 # Database
 DB_TYPE = os.getenv("DB_TYPE", "").lower()

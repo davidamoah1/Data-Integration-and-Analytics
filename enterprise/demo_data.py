@@ -1,7 +1,10 @@
-"""Demo data seeding for pilot readiness.
+"""DEMO DATA MODULE — For pilot/onboarding only. NOT for production use.
 
 Creates a demo organization, demo users (admin, analyst, manager, data engineer, viewer),
 sample dashboards, KPIs, ETL pipelines, AI conversations, and AI reports.
+
+⚠️  This module is only invoked when SEED_DEMO_DATA=true is set in the environment.
+    Production deployments MUST keep SEED_DEMO_DATA=false.
 """
 
 from datetime import datetime, timezone
