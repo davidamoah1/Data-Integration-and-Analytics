@@ -360,6 +360,9 @@ class TestConfidenceGate:
             }
         )
         mapping = SemanticMappingEngine.analyze(df)
+        # "unknown" now resolves to the generic fallback dashboard, so test
+        # with a truly nonexistent industry key to verify the ValueError path.
+        mapping.industry = "nonexistent_industry_xyz"
         with pytest.raises(ValueError, match="No dashboard template"):
             DashboardGenerator.generate(df, mapping, admin_confirmed=True)
 

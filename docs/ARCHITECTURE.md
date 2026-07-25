@@ -79,3 +79,71 @@ analytics, AI-powered insights, and enterprise IAM into a unified system.
 - **CI/CD**: GitHub Actions with lint, format, and test stages
 - **Health Checks**: Docker HEALTHCHECK + application-level endpoints
 - **Environment Separation**: `.env` files, production validation at startup
+
+### Semantic Engine (Industry Classification)
+
+```
+┌──────────────────────────────────────────────────────────┐
+│                  Semantic Engine Pipeline                 │
+│                                                          │
+│  Upload → Column Profiling → Entity Matching → Voting    │
+│                                                          │
+│  Entity Matching:                                        │
+│    - Exact synonym match (confidence=1.0)                │
+│    - Partial synonym match (min len 5, threshold 0.65)   │
+│    - Fuzzy match (min len 6, threshold 0.65)             │
+│                                                          │
+│  Weighted Scoring:                                       │
+│    - Each entity has a weight (1.0–3.0)                  │
+│    - Industry vote = sum(entity_weight × confidence)     │
+│    - Universal entities (date, revenue) don't vote       │
+│                                                          │
+│  Tie-Breaking:                                           │
+│    - If top-2 industries within 0.5 votes → "unknown"    │
+│    - If best industry vote share < 40% → "unknown"       │
+│    - "unknown" triggers user confirmation UI             │
+│                                                          │
+│  Dashboard Routing:                                      │
+│    - Confidence ≥ 85% → auto-render industry dashboard   │
+│    - Confidence < 85% → admin confirmation required      │
+│    - "unknown" → generic fallback dashboard              │
+└──────────────────────────────────────────────────────────┘
+```
+
+**Supported Industries**: Healthcare, Education, Banking, Agriculture, Government,
+Retail, Church, NGO, Manufacturing, Insurance, Hospitality, Telecommunications.
+
+**Entity Library**: ~60+ entities with industry-specific synonyms, weights, KPIs,
+attributes, and relationships. Generic financial terms (balance, transaction, account)
+are universal entities that map columns but don't vote for any industry.
+
+### Module Map
+
+| Module | Path | Description |
+|--------|------|-------------|
+| API | `api/` | FastAPI app, routers, schemas, legacy auth |
+| Authentication | `authentication/` | JWT IAM: users, roles, permissions, sessions |
+| ETL | `etl/` | Extract, transform, load, connectors, pipeline builder |
+| Semantic Engine | `semantic/` | Entity library, classification, dashboard registry |
+| Dashboard | `dashboard/` | Streamlit app, auth, semantic dashboard rendering |
+| AI Platform | `ai/` | Multi-provider AI gateway, copilot, plugins |
+| Analytics | `analytics/` | KPI aggregation, sales queries |
+| Audit | `audit/` | Security event logging, audit trails |
+| Enterprise | `enterprise/` | Subscriptions, demo data, branding |
+| Organizations | `organizations/` | Org/department management |
+| Notifications | `notifications/` | Email, SMS, WhatsApp, push |
+| Scheduler | `scheduler/` | APScheduler-based report scheduling |
+| Validation | `validation/` | Data quality checks, validation rules |
+| Shared | `shared/` | Database, security, middleware, dependencies, exceptions |
+| Database | `database/` | Legacy sales/pipeline_run repositories |
+| Services | `services/` | ETL service, backup service |
+| Config | `config.py` | Central config from env vars, production validation |
+
+### Known Technical Debt
+
+1. **`etl/extract.py`**: Hardcoded to CSV only — needs connector-based extraction like the pipeline builder
+2. **`etl/load.py`**: Hardcoded to `sales` table — needs dynamic table routing
+3. **`etl/transform.py`**: Retail-specific column assumptions (sales, quantity, discount) — needs generic cleaning
+4. **`database/`**: Legacy `db_setup.py` uses a separate `Base` from `shared/database.py` — should be unified
+5. **Rate limiter**: In-memory only — needs Redis for multi-worker deployments
+6. **`docker-compose.yml`**: Dev compose uses SQLite, should have MySQL option for integration testing

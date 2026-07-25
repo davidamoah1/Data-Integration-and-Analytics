@@ -67,3 +67,6 @@ uploads/
 *.pid
 *.log
 
+# Stray test files
+/test.pdf
+

@@ -20,6 +20,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 os.environ["DB_TYPE"] = "sqlite"
 os.environ["SQLITE_DB_PATH"] = "test_auth.db"
 os.environ["PYTEST_RUNNING"] = "1"
+os.environ["SUPER_ADMIN_PASSWORD"] = "Admin@12345"
 
 import ai.models  # noqa: F401
 import analytics.models  # noqa: F401

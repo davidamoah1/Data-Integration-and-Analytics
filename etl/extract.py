@@ -25,7 +25,7 @@ def extract_data() -> pd.DataFrame:
         if not os.path.exists(RAW_DATA_PATH):
             raise FileNotFoundError(f"Raw data file not found at: {RAW_DATA_PATH}")
 
-        df = pd.read_csv(RAW_DATA_PATH, encoding="latin-1")
+        df = pd.read_csv(RAW_DATA_PATH, encoding="utf-8", encoding_errors="replace")
         logger.info(f"Extract complete. {len(df)} rows loaded.")
         return df
 

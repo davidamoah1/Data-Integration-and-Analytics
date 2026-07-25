@@ -958,11 +958,11 @@ def seed_default_data(db: DbSession):
         perm_ids = role_perm_repo.get_permission_ids_by_names(perm_names)
         role_perm_repo.set_role_permissions(role.id, perm_ids)
 
-    # Create default super admin user (credentials from env vars — no hardcoded passwords in production)
+    # Create default super admin user (credentials from env vars — no hardcoded passwords)
     import os as _os
     admin_email = _os.getenv("SUPER_ADMIN_EMAIL", "admin@dataflow.io")
-    admin_password = _os.getenv("SUPER_ADMIN_PASSWORD", "Admin@12345")
-    if not user_repo.get_by_email(admin_email):
+    admin_password = _os.getenv("SUPER_ADMIN_PASSWORD", "")
+    if admin_password and not user_repo.get_by_email(admin_email):
         admin = User(
             email=admin_email,
             password_hash=hash_password(admin_password),

@@ -53,7 +53,7 @@ class DashboardConfig:
 class DashboardGenerator:
     """Generates dashboard configurations from semantic analysis."""
 
-    CONFIDENCE_THRESHOLD = 90.0
+    CONFIDENCE_THRESHOLD = 85.0
 
     @staticmethod
     def generate(

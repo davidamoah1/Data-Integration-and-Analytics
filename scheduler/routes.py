@@ -1,7 +1,7 @@
 """REST routes for scheduled report jobs."""
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.orm import Session as DbSession
 
 from scheduler.models import ScheduledReport
@@ -30,8 +30,7 @@ class ScheduledReportResponse(BaseModel):
     last_run_at: str | None
     created_at: str | None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 @router.get("", response_model=list[ScheduledReportResponse])

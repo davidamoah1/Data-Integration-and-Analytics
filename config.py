@@ -154,8 +154,18 @@ def validate_config() -> None:
                 f"MySQL production configuration incomplete. Missing: {', '.join(missing)}"
             )
 
-    if not JWT_SECRET_KEY or JWT_SECRET_KEY == _JWT_DEFAULT_SECRET:
+    if not JWT_SECRET_KEY:
         raise ValueError("JWT_SECRET_KEY must be set to a strong secret.")
+
+    if JWT_SECRET_KEY == _JWT_DEFAULT_SECRET:
+        if DB_TYPE == "mysql":
+            raise ValueError("JWT_SECRET_KEY must be set to a strong secret for production.")
+        import warnings
+
+        warnings.warn(
+            "JWT_SECRET_KEY is using the default value. Set a strong secret for production.",
+            stacklevel=2,
+        )
 
     if DB_TYPE == "mysql" and len(JWT_SECRET_KEY) < 32:
         raise ValueError("JWT_SECRET_KEY must be at least 32 characters in production.")

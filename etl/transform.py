@@ -17,17 +17,12 @@ def _validate_dataframe(df: pd.DataFrame) -> list[str]:
     """
     warnings = []
 
-    required_cols = ["order_id", "sales", "order_date"]
-    missing = [c for c in required_cols if c not in df.columns]
-    if missing:
-        warnings.append(f"Missing required columns: {missing}")
-
     if "sales" in df.columns:
         neg_sales = (df["sales"] < 0).sum()
         if neg_sales > 0:
             warnings.append(f"{neg_sales} rows have negative sales values")
 
-    if "profit" in df.columns:
+    if "profit" in df.columns and "sales" in df.columns:
         extreme_profit = (df["profit"].abs() > df["sales"] * 10).sum()
         if extreme_profit > 0:
             warnings.append(f"{extreme_profit} rows have profit values exceeding 10x sales")
@@ -62,24 +57,38 @@ def transform_data(df: pd.DataFrame) -> pd.DataFrame:
         # Standardize column names
         df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_").str.replace("-", "_")
 
-        # Drop full duplicate rows
+        # Drop full duplicate rows (use all columns if no ID column exists)
         before = len(df)
-        df = df.drop_duplicates(subset=["order_id"], keep="first")
+        id_col = None
+        for candidate in ("order_id", "id", "record_id", "transaction_id"):
+            if candidate in df.columns:
+                id_col = candidate
+                break
+        if id_col:
+            df = df.drop_duplicates(subset=[id_col], keep="first")
+        else:
+            df = df.drop_duplicates(keep="first")
         after = len(df)
         logger.info(f"Transform: Removed {before - after} duplicate rows.")
 
-        # Drop rows where key columns are missing
-        df = df.dropna(subset=["order_id", "sales", "order_date"])
+        # Drop rows where key columns are missing (only if they exist)
+        key_cols = [c for c in ("order_id", "sales", "order_date") if c in df.columns]
+        if key_cols:
+            df = df.dropna(subset=key_cols)
 
-        # Fix data types
-        df["sales"] = pd.to_numeric(df["sales"], errors="coerce").fillna(0.0)
-        df["quantity"] = pd.to_numeric(df["quantity"], errors="coerce").fillna(0).astype(int)
-        df["discount"] = pd.to_numeric(df["discount"], errors="coerce").fillna(0.0)
-        df["profit"] = pd.to_numeric(df["profit"], errors="coerce").fillna(0.0)
+        # Fix data types — only for columns that exist
+        numeric_cols = ("sales", "quantity", "discount", "profit")
+        for col in numeric_cols:
+            if col in df.columns:
+                if col == "quantity":
+                    df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0).astype(int)
+                else:
+                    df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0.0)
 
         # Standardize date format (keep as datetime for proper DB Date columns)
-        df["order_date"] = pd.to_datetime(df["order_date"], errors="coerce")
-        df["ship_date"] = pd.to_datetime(df["ship_date"], errors="coerce")
+        for date_col in ("order_date", "ship_date"):
+            if date_col in df.columns:
+                df[date_col] = pd.to_datetime(df[date_col], errors="coerce")
 
         # Trim whitespace from string columns
         str_cols = [

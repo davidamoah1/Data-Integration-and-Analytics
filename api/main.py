@@ -223,7 +223,7 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
 
 
-_raw_cors = os.getenv("CORS_ORIGINS", "*")
+_raw_cors = os.getenv("CORS_ORIGINS", "http://localhost:8501,http://localhost:3000")
 allow_origins = [origin.strip() for origin in _raw_cors.split(",") if origin.strip()]
 app.add_middleware(
     CORSMiddleware,

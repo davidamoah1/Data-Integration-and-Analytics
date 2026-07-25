@@ -22,19 +22,24 @@ def load_data(df: pd.DataFrame) -> int:
     try:
         engine = get_engine()
 
-        with engine.connect() as conn:
-            try:
-                existing = pd.read_sql("SELECT order_id FROM sales", conn)
-                existing_ids = set(existing["order_id"].tolist())
-            except Exception:
-                existing_ids = set()
-
-        df_new = df[~df["order_id"].isin(existing_ids)]
+        # Check for existing records to skip duplicates (only if order_id exists)
+        existing_ids = set()
+        if "order_id" in df.columns:
+            with engine.connect() as conn:
+                try:
+                    existing = pd.read_sql("SELECT order_id FROM sales", conn)
+                    existing_ids = set(existing["order_id"].tolist())
+                except Exception:
+                    existing_ids = set()
+            df_new = df[~df["order_id"].isin(existing_ids)]
+        else:
+            df_new = df
 
         if df_new.empty:
             logger.info("Load complete. No new records to insert.")
             return 0
 
+        # Load all columns that exist in the DataFrame and match the sales table schema
         columns_to_load = [
             "order_id",
             "order_date",
