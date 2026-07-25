@@ -15,8 +15,10 @@ import pandas as pd
 from semantic.data_profiler import DataProfiler, DatasetProfile
 from semantic.industry_knowledge import get_industry_knowledge
 from semantic.metadata_extractor import MetadataExtractor, TableMetadata
+from semantic.metric_engine import MetricEngine, MetricResultSet
 from semantic.relationship_engine import RelationshipEngine, RelationshipResult
 from semantic.semantic_engine import SemanticEngine, SemanticResult
+from semantic.semantic_model import SemanticModel, SemanticModelBuilder
 
 
 @dataclass
@@ -36,6 +38,8 @@ class SemanticMappingResult:
     ai_prompts: list[str]
     recommendations: list[str]
     overrides: dict = field(default_factory=dict)
+    semantic_model: SemanticModel | None = None
+    metric_results: MetricResultSet | None = None
 
     def to_dict(self) -> dict:
         return {
@@ -64,6 +68,8 @@ class SemanticMappingResult:
                 for s in self.semantic_result.value_signals
             ],
             "statistical_patterns": self.semantic_result.statistical_patterns,
+            "semantic_model": self.semantic_model.to_dict() if self.semantic_model else None,
+            "metric_results": self.metric_results.to_dict() if self.metric_results else None,
         }
 
 
@@ -113,7 +119,8 @@ class SemanticMappingEngine:
         ai_prompts = knowledge.get("ai_prompts", []) if knowledge else []
         recommendations = knowledge.get("recommendations", []) if knowledge else []
 
-        return SemanticMappingResult(
+        # Step 7: Build semantic model (construct result first, then build model)
+        result = SemanticMappingResult(
             table_metadata=metadata,
             data_profile=profile,
             semantic_result=semantic,
@@ -128,6 +135,16 @@ class SemanticMappingEngine:
             recommendations=recommendations,
             overrides=overrides,
         )
+
+        semantic_model = SemanticModelBuilder.build(df, result, table_name)
+
+        # Step 8: Compute metrics
+        metric_results = MetricEngine.compute(df, semantic_model)
+
+        result.semantic_model = semantic_model
+        result.metric_results = metric_results
+
+        return result
 
     @staticmethod
     def _apply_overrides(semantic: SemanticResult, overrides: dict) -> SemanticResult:
