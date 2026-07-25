@@ -52,6 +52,7 @@ class SemanticMappingResult:
     semantic_model: SemanticModel | None = None
     metric_results: MetricResultSet | None = None
     industry_intelligence: AnalyticsResult | None = None
+    quality_intelligence: object | None = None
 
     def to_dict(self) -> dict:
         return {
@@ -83,6 +84,7 @@ class SemanticMappingResult:
             "semantic_model": self.semantic_model.to_dict() if self.semantic_model else None,
             "metric_results": self.metric_results.to_dict() if self.metric_results else None,
             "industry_intelligence": self.industry_intelligence.to_dict() if self.industry_intelligence else None,
+            "quality_intelligence": self.quality_intelligence.to_dict() if self.quality_intelligence else None,
         }
 
     def get_copilot(self, df: pd.DataFrame | None = None) -> "DataAnalystCopilot":
@@ -178,6 +180,11 @@ class SemanticMappingEngine:
         # Step 9: Industry-specific intelligence
         col_mapping = semantic.get_column_mapping()
         result.industry_intelligence = IndustryAnalyticsRegistry.analyze(industry, df, col_mapping)
+
+        # Step 10: Data quality intelligence
+        from data_quality import QualityEngine
+        quality_engine = QualityEngine()
+        result.quality_intelligence = quality_engine.run(df, col_mapping)
 
         return result
 
