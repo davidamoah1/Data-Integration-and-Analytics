@@ -47,6 +47,16 @@ def render_semantic_dashboard(
         _render_generic_dashboard(df, template)
         return
 
+    # Show value-based signals if any were detected
+    value_signals = getattr(mapping_result.semantic_result, "value_signals", [])
+    if value_signals:
+        with st.expander("Data Understanding Signals", expanded=False):
+            for sig in value_signals:
+                st.caption(
+                    f"• **{sig.column_name}** → {sig.signal_type.replace("_", " ").title()} "
+                    f"({sig.industry}): {sig.evidence}"
+                )
+
     cards = [widget for widget in template.widgets if widget.widget_type == "kpi_card"]
     charts = [widget for widget in template.widgets if widget.widget_type != "kpi_card"]
     _render_cards(df, cards, entity_columns)

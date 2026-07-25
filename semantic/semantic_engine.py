@@ -30,6 +30,8 @@ from semantic.entity_library import ENTITY_LIBRARY, get_all_synonyms
 MIN_INDUSTRY_CONFIDENCE = 40.0
 # Minimum vote margin between top two industries to avoid tie-breaking
 MIN_VOTE_MARGIN = 0.5
+# Weight multiplier for value-based signals relative to name-based signals
+VALUE_SIGNAL_WEIGHT = 1.0
 
 
 @dataclass
@@ -54,6 +56,8 @@ class SemanticResult:
     industry_confidence: float = 0.0
     detected_entities: list[str] = field(default_factory=list)
     business_concepts: dict = field(default_factory=dict)
+    value_signals: list = field(default_factory=list)
+    statistical_patterns: dict = field(default_factory=dict)
 
     def to_dict(self) -> dict:
         return {
@@ -73,6 +77,18 @@ class SemanticResult:
             "industry_confidence": round(self.industry_confidence, 2),
             "detected_entities": self.detected_entities,
             "business_concepts": self.business_concepts,
+            "value_signals": [
+                {
+                    "column": s.column_name,
+                    "signal_type": s.signal_type,
+                    "industry": s.industry,
+                    "confidence": round(s.confidence, 2),
+                    "evidence": s.evidence,
+                    "suggested_entity": s.suggested_entity,
+                }
+                for s in self.value_signals
+            ],
+            "statistical_patterns": self.statistical_patterns,
         }
 
     def get_column_mapping(self) -> dict[str, str]:
@@ -104,6 +120,9 @@ class SemanticEngine:
     def analyze(cls, df: pd.DataFrame) -> SemanticResult:
         """Analyze a DataFrame and produce semantic mappings.
 
+        Uses both column-name matching AND value-based signal detection
+        for industry classification.
+
         Args:
             df: DataFrame to analyze.
 
@@ -115,6 +134,7 @@ class SemanticEngine:
         industry_votes: dict[str, float] = {}
         entity_keys_found: set[str] = set()
 
+        # Phase 1: Column-name-based entity matching
         for col_name in df.columns:
             mapping = cls._map_column(df, col_name)
             if mapping:
@@ -126,6 +146,34 @@ class SemanticEngine:
                     industry_votes[mapping.industry] = (
                         industry_votes.get(mapping.industry, 0.0) + vote
                     )
+
+        # Phase 2: Value-based signal detection
+        from semantic.data_understanding import DataUnderstandingEngine
+
+        value_result = DataUnderstandingEngine.analyze(df)
+
+        # Merge value-based industry votes into the main votes
+        for industry, vote in value_result.industry_votes.items():
+            industry_votes[industry] = industry_votes.get(industry, 0.0) + vote * VALUE_SIGNAL_WEIGHT
+
+        # Use value signals to enhance entity mappings for unmapped columns
+        for sig in value_result.signals:
+            if sig.suggested_entity and sig.suggested_entity in ENTITY_LIBRARY:
+                # Check if this column is already mapped
+                already_mapped = any(m.column_name == sig.column_name for m in mappings)
+                if not already_mapped:
+                    entity = ENTITY_LIBRARY[sig.suggested_entity]
+                    new_mapping = SemanticMapping(
+                        column_name=sig.column_name,
+                        entity_key=sig.suggested_entity,
+                        entity_display=entity["display_name"],
+                        industry=entity["industry"],
+                        confidence=sig.confidence * 0.8,
+                        match_method="value_signal",
+                        role="attribute",
+                    )
+                    mappings.append(new_mapping)
+                    entity_keys_found.add(sig.suggested_entity)
 
         # Detect industry using weighted scoring with tie-breaking
         detected_industry = "unknown"
@@ -176,6 +224,8 @@ class SemanticEngine:
             industry_confidence=industry_confidence,
             detected_entities=sorted(entity_keys_found),
             business_concepts=business_concepts,
+            value_signals=value_result.signals,
+            statistical_patterns=value_result.statistical_patterns,
         )
 
     @classmethod

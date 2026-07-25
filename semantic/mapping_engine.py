@@ -52,6 +52,18 @@ class SemanticMappingResult:
             "ai_prompts": self.ai_prompts,
             "recommendations": self.recommendations,
             "overrides": self.overrides,
+            "value_signals": [
+                {
+                    "column": s.column_name,
+                    "signal_type": s.signal_type,
+                    "industry": s.industry,
+                    "confidence": round(s.confidence, 2),
+                    "evidence": s.evidence,
+                    "suggested_entity": s.suggested_entity,
+                }
+                for s in self.semantic_result.value_signals
+            ],
+            "statistical_patterns": self.semantic_result.statistical_patterns,
         }
 
 
