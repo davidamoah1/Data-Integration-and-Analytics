@@ -1,0 +1,31 @@
+order_id,customer_name,county,product_category,product_name,quantity,unit_price_kes,total_kes,sale_date,payment_method,store_location
+DF-KE-001,James Mwangi,Nairobi,Electronics,Smartphone Case,3,650.00,1950.00,2024-01-15,M-Pesa,Westgate Mall
+DF-KE-002,Grace Wanjiku,Kiambu,Clothing,Kitenge Fabric,2,1200.00,2400.00,2024-01-16,Cash,Thika Town
+DF-KE-003,Peter Otieno,Mombasa,Groceries,Maize Flour,10,120.00,1200.00,2024-01-17,M-Pesa,Nyali
+DF-KE-004,Mary Achieng,Nakuru,Electronics,Power Bank,1,2500.00,2500.00,2024-01-18,Bank Transfer,Nakuru Town
+DF-KE-005,John Kamau,Meru,Groceries,Tea Leaves,20,200.00,4000.00,2024-01-19,Cash,Meru Market
+DF-KE-006,Sarah Njeri,Kisumu,Clothing,Kikoy,2,800.00,1600.00,2024-01-20,M-Pesa,Kisumu City
+DF-KE-007,David Omondi,Uasin Gishu,Electronics,USB Cable,5,300.00,1500.00,2024-01-21,Cash,Eldoret
+DF-KE-008,Esther Wambui,Machakos,Groceries,Beans,15,150.00,2250.00,2024-01-22,Bank Transfer,Machakos Town
+DF-KE-009,Moses Kiprop,Nyeri,Clothing,Wool Sweater,1,1800.00,1800.00,2024-01-23,M-Pesa,Nyeri Town
+DF-KE-010,Rose Atieno,Kakamega,Groceries,Sugar,10,180.00,1800.00,2024-01-24,Cash,Kakamega Market
+DF-KE-011,James Onyango,Nairobi,Electronics,Earbuds,2,900.00,1800.00,2024-01-25,M-Pesa,Westgate Mall
+DF-KE-012,Grace Akoth,Kiambu,Groceries,Rice,8,220.00,1760.00,2024-01-26,Cash,Thika Town
+DF-KE-013,Peter Maina,Mombasa,Clothing,T-Shirt,4,500.00,2000.00,2024-01-27,M-Pesa,Nyali
+DF-KE-014,Mary Nyambura,Nakuru,Electronics,Phone Charger,2,400.00,800.00,2024-01-28,Bank Transfer,Nakuru Town
+DF-KE-015,John Waithaka,Meru,Groceries,Potatoes,25,80.00,2000.00,2024-01-29,Cash,Meru Market
+DF-KE-016,Sarah Chebet,Kisumu,Clothing,Scarf,3,350.00,1050.00,2024-01-30,M-Pesa,Kisumu City
+DF-KE-017,David Kibet,Uasin Gishu,Electronics,Bluetooth Speaker,1,3500.00,3500.00,2024-02-01,Cash,Eldoret
+DF-KE-018,Esther Jebet,Machakos,Groceries,Maize,20,100.00,2000.00,2024-02-02,Bank Transfer,Machakos Town
+DF-KE-019,Moses Mutua,Nyeri,Clothing,Leather Belt,2,700.00,1400.00,2024-02-03,M-Pesa,Nyeri Town
+DF-KE-020,Rose Wairimu,Kakamega,Groceries,Cabbages,15,60.00,900.00,2024-02-04,Cash,Kakamega Market
+DF-KE-021,James Kariuki,Nairobi,Electronics,Tablet,1,22000.00,22000.00,2024-02-05,M-Pesa,Westgate Mall
+DF-KE-022,Grace Wangari,Kiambu,Clothing,Dress,1,2500.00,2500.00,2024-02-06,Cash,Thika Town
+DF-KE-023,Peter Ochieng,Mombasa,Groceries,Coconut,10,100.00,1000.00,2024-02-07,M-Pesa,Nyali
+DF-KE-024,Mary Adhiambo,Nakuru,Electronics,Smart Watch,1,8500.00,8500.00,2024-02-08,Bank Transfer,Nakuru Town
+DF-KE-025,John Mwangi,Meru,Groceries,Bananas,30,50.00,1500.00,2024-02-09,Cash,Meru Market
+DF-KE-026,Sarah Otieno,Kisumu,Clothing,Shoes,2,2000.00,4000.00,2024-02-10,M-Pesa,Kisumu City
+DF-KE-027,David Kipngeno,Uasin Gishu,Electronics,Power Bank,2,2500.00,5000.00,2024-02-11,Cash,Eldoret
+DF-KE-028,Esther Njeri,Machakos,Groceries,Avocado,20,40.00,800.00,2024-02-12,Bank Transfer,Machakos Town
+DF-KE-029,Moses Omondi,Nyeri,Clothing,Cap,3,250.00,750.00,2024-02-13,M-Pesa,Nyeri Town
+DF-KE-030,Rose Achieng,Kakamega,Groceries,Tomatoes,25,70.00,1750.00,2024-02-14,Cash,Kakamega Market

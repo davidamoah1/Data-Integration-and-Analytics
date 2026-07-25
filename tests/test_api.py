@@ -37,8 +37,13 @@ def client(tmp_path, monkeypatch):
 def test_root_endpoint(client):
     response = client.get("/")
     assert response.status_code == 200
-    data = response.json()
-    assert data["name"] == "AEDIP Enterprise Data Intelligence API"
+    # Root now serves the landing page (HTML) or a JSON fallback
+    content_type = response.headers.get("content-type", "")
+    if "text/html" in content_type:
+        assert "DataFlow" in response.text
+    else:
+        data = response.json()
+        assert "message" in data or "name" in data
 
 
 def test_health_check(client):

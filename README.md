@@ -1,10 +1,21 @@
-# DataFlow — Enterprise Data Intelligence Platform (AEDIP) v1.0.0
+# DataFlow — Africa's Data Intelligence Platform (AEDIP) v2.0.0
 
-A production-ready ETL, analytics, and AI platform that ingests any tabular
-dataset, automatically maps business semantics, and generates governed KPIs and
-dashboards. It ships with a FastAPI REST layer, Streamlit dashboard, AI Copilot,
-job scheduling, audit logging, and multi-tenant IAM (SQLite for dev, MySQL for
-production).
+> **Built in Africa, for the world.**
+
+DataFlow is a production-ready ETL, analytics, and AI platform that ingests any
+tabular dataset, automatically maps business semantics, and generates governed
+KPIs and dashboards. It ships with a FastAPI REST layer, Streamlit dashboard,
+AI Copilot, job scheduling, audit logging, multi-tenant IAM, Africa Intelligence
+Layer, and performance infrastructure for millions of records.
+
+## Why DataFlow?
+
+- **Upload any spreadsheet → get insights in minutes** — no data engineer required
+- **Understands African data** — currencies (GHS, NGN, KES, ZAR), regions, industries
+- **AI-powered** — semantic column mapping, anomaly detection, forecasting, natural language queries
+- **Enterprise-grade** — RBAC, audit logs, multi-tenant, Argon2, JWT, rate limiting
+- **Scales to millions** — Redis caching, background workers, chunked queries, connection pooling
+- **1,150+ tests passing** — production-validated with comprehensive CI/CD
 
 ---
 
@@ -16,11 +27,14 @@ etl_project/
 ├── pyproject.toml                # Linting (ruff) + formatting (black) config
 ├── requirements.txt              # Pinned Python dependencies
 ├── Dockerfile                    # Container deployment
-├── docker-compose.yml            # Multi-service (API + Dashboard + MySQL)
+├── docker-compose.yml            # Dev: API + Dashboard + MySQL + Redis + Worker
+├── docker-compose.prod.yml       # Prod: + Nginx + SSL + Health checks
 ├── .env.example                  # Template for environment variables
-├── .github/workflows/ci.yml      # GitHub Actions CI pipeline (lint, test, Docker)
+├── .github/workflows/ci.yml      # GitHub Actions CI pipeline
+├── static/index.html             # Beautiful landing page
 ├── alembic/                      # Database migrations
 ├── dataset/                      # Sample datasets
+├── demo_datasets/                # 12 industry demo datasets (CSV)
 ├── data/                         # Raw + processed data
 ├── etl/                          # ETL engine (extract, transform, load, routes)
 ├── pipeline/                     # ETL orchestrator
@@ -35,11 +49,16 @@ etl_project/
 ├── authentication/               # IAM (users, roles, permissions, JWT, sessions)
 ├── organizations/                # Organization management
 ├── audit/                        # Audit logging
+├── africa_intelligence/          # Africa Layer (country profiles, recognizer, currency, industry)
+├── performance/                  # Queue, workers, cache, DB optimization, routes
+├── platform_features/            # Connector marketplace, workflow automation, notifications
+├── semantic/                     # Semantic mapping engine
+├── validation/                   # Data validation engine with approval workflow
 ├── shared/                       # Shared utilities (security, database, middleware, response)
 ├── monitoring/                   # Health checks
-├── tests/                        # Comprehensive test suite (430+ tests)
+├── tests/                        # Comprehensive test suite (1,150+ tests)
 ├── logs/                         # Application logs
-└── docs/                         # Documentation (audit report, architecture)
+└── docs/                         # Full documentation (60+ documents)
 ```
 
 ---
@@ -99,6 +118,15 @@ Services:
 - API: http://localhost:8000
 - Dashboard: http://localhost:8501
 - MySQL: localhost:3306
+- Redis: localhost:6379
+- Worker: Background task processor
+
+### 8. Production deployment
+```bash
+docker compose -f docker-compose.prod.yml up -d
+```
+Adds Nginx reverse proxy with SSL, health checks, and resource limits.
+See `docs/DEPLOYMENT.md` for details.
 
 ---
 
@@ -127,6 +155,13 @@ black .
 - Scheduled execution with retry logic
 - Pipeline run history and metadata tracking
 
+### Semantic Mapping Engine
+- AI-powered column recognition (100+ patterns)
+- Auto-maps abbreviations: `rev` → `revenue`, `dt` → `date`, `amt` → `amount`
+- Business domain detection (sales, HR, finance, operations)
+- Confidence scoring for each mapping
+- Africa-aware pattern matching
+
 ### Dashboard
 - Session-based authentication with RBAC (admin/viewer)
 - Live database queries or file upload mode
@@ -134,18 +169,25 @@ black .
 - KPI cards, 7 chart types, heatmap, data table
 - CSV export of filtered data
 - AI Copilot with natural language queries
-- Industry pack templates (Retail, Finance, Education, Healthcare)
+- 12 industry pack templates (Retail, Banking, Healthcare, Education, Government, NGO, etc.)
 - Onboarding wizard and quick-start checklist
 - Responsive dark theme with accessibility support
+- PWA support for mobile
+- Sector-specific dashboards
+- Semantic mapping dashboard
+- Validation dashboard with approval workflow
 
 ### REST API
 - FastAPI with Pydantic schemas and OpenAPI docs
 - JWT-based authentication (access + refresh tokens)
 - API key backward compatibility
 - Sales CRUD, KPIs, filter options, pipeline management
-- Enterprise IAM: users, roles, permissions, organizations
+- Enterprise IAM: users, roles, permissions, organizations, departments
 - AI endpoints: chat, assistants, quality scoring, anomaly detection, forecasting
 - Analytics endpoints: dashboards, widgets, KPIs, alerts
+- Africa intelligence: country profiles, currency conversion, industry mapping
+- Performance: queue stats, cache management, DB optimization, index management
+- Platform features: connectors, workflows, notifications, report builder, universal search
 - Rate limiting, security headers, request logging, GZip
 - Health, readiness, and metrics endpoints
 
@@ -159,18 +201,57 @@ black .
 - Document chat (PDF, DOCX, XLSX, PPTX)
 - Permission-aware AI access control
 - Usage limits (daily tokens, monthly cost)
+- Executive Decision Center with AI-powered recommendations
+
+### Africa Intelligence Layer
+- **4 country profiles**: Ghana, Nigeria, Kenya, South Africa
+- **Currency converter**: GHS, NGN, KES, ZAR, USD, EUR, GBP with live rates
+- **Industry mapper**: Agriculture, Mining, Telecommunications, Banking, Oil & Gas, Tourism
+- **Column recognizer**: Detects African data patterns (regions, phone formats, names)
+- **Education data**: Universities, programs, degree patterns
+- **Healthcare data**: Hospitals, diseases, insurance patterns
+- **Agriculture data**: Crops, livestock, rainfall, fertilizer patterns
+- Integrated into semantic mapping pipeline
+
+### Performance & Global Scale
+- **Task Queue**: Multi-priority (high, ETL, normal, reports, notifications, low) with Redis backend + in-memory fallback
+- **Background Workers**: Dynamic scaling (2-20 workers), health monitoring, graceful shutdown
+- **Redis Caching**: TTL-based, namespace isolation, pattern invalidation, `@cached` decorator
+- **DB Optimization**: 10 critical indexes, chunked queries for millions of rows, slow query tracking
+- **Connection Pooling**: Configurable pool size, timeout, recycle, max overflow
+- **Dead Letter Queue**: Permanently failed tasks with retry tracking
+
+### Enterprise Features
+- Multi-tenant architecture with organization isolation
+- 5 system roles: super_admin, org_admin, analyst, manager, viewer
+- Custom role creation with fine-grained permissions
+- White-label branding (logo, colors, custom domain)
+- Template marketplace with one-click install
+- Collaboration and activity tracking
+
+### Platform Features
+- **Connector Marketplace**: 12+ data connectors (CSV, Excel, MySQL, PostgreSQL, API, S3, etc.)
+- **Workflow Automation**: Visual workflow builder with triggers and conditions
+- **Notification Center**: Email, in-app, webhook notifications with templates
+- **Report Builder**: Drag-and-drop report creation with scheduling
+- **Universal Search**: Search across all data, dashboards, and reports
+- **Dashboard Builder**: Custom dashboard creation with widgets
+- **Formula/KPI Engine**: Custom KPI formulas with expression parser
+- **Plugin Framework**: Extensible plugin system for custom integrations
 
 ### Security
 - Argon2 password hashing
 - JWT with configurable expiry
 - Password policy enforcement
 - Account lockout after failed attempts
-- RBAC with fine-grained permissions
+- RBAC with fine-grained permissions (30+ permissions)
 - XSS sanitization in dashboard
 - Security headers (CSP, X-Frame-Options, etc.)
 - Rate limiting per client IP
 - Audit logging for all critical actions
 - File upload size limits and type validation
+- Session management with revocation
+- Login history and activity tracking
 
 ---
 
@@ -198,6 +279,19 @@ black .
 | `OPENAI_API_KEY` | (empty) | OpenAI API key |
 | `AUTH_ADMIN_PASSWORD` | `admin123` | Dashboard admin password |
 | `AUTH_VIEWER_PASSWORD` | `viewer123` | Dashboard viewer password |
+| `REDIS_URL` | (empty) | Redis connection URL for caching/queues |
+| `CACHE_ENABLED` | `true` | Enable Redis caching layer |
+| `CACHE_DEFAULT_TTL` | `300` | Default cache TTL in seconds |
+| `CACHE_KEY_PREFIX` | `aedip` | Cache key prefix for namespacing |
+| `WORKER_MIN_WORKERS` | `2` | Minimum background workers |
+| `WORKER_MAX_WORKERS` | `20` | Maximum background workers |
+| `WORKER_SCALE_UP_THRESHOLD` | `10` | Queue depth to trigger scale-up |
+| `WORKER_SCALE_DOWN_THRESHOLD` | `2` | Queue depth to trigger scale-down |
+| `CHUNK_SIZE_DEFAULT` | `5000` | Default chunk size for batch queries |
+| `POOL_SIZE` | `10` | Database connection pool size |
+| `POOL_TIMEOUT` | `30` | Connection pool timeout |
+| `POOL_RECYCLE` | `3600` | Connection recycle interval (seconds) |
+| `MAX_OVERFLOW` | `20` | Max overflow connections beyond pool size |
 
 See `.env.example` for the complete list.
 
@@ -237,6 +331,18 @@ See `.env.example` for the complete list.
 - **Plugins**: Extensible plugin system for custom AI capabilities
 - **Security**: Permission-aware AI access control
 
+### Africa Intelligence Layer
+- **Country Profiles**: Ghana, Nigeria, Kenya, South Africa with regions, currencies, industries
+- **Column Recognizer**: Detects African data patterns in uploaded datasets
+- **Currency Converter**: Real-time conversion between GHS, NGN, KES, ZAR, USD, EUR, GBP
+- **Industry Mapper**: Maps African industries to standardized categories
+
+### Performance Infrastructure
+- **Task Queue**: Redis-backed multi-priority queue with retry and dead letter
+- **Worker Pool**: Dynamic scaling with health monitoring
+- **Cache Layer**: Redis caching with `@cached` decorator and pattern invalidation
+- **DB Optimization**: Index management, chunked queries, slow query tracking
+
 ---
 
 ## Tech Stack
@@ -246,16 +352,18 @@ See `.env.example` for the complete list.
 | Language | Python 3.10+ |
 | Data handling | Pandas |
 | Database | SQLite / MySQL + SQLAlchemy |
+| Caching | Redis + in-memory fallback |
+| Task Queue | Redis-backed multi-priority queue |
 | Scheduling | APScheduler |
-| Dashboard | Streamlit |
-| Charts | Plotly |
+| Dashboard | Streamlit + Plotly |
 | REST API | FastAPI + Pydantic |
-| AI | OpenAI / Gemini / DeepSeek / Claude |
+| AI | OpenAI / Gemini / DeepSeek / Claude / Local LLM |
 | Auth | JWT + Argon2 |
-| Testing | Pytest (270+ tests) |
+| Testing | Pytest (1,150+ tests) |
 | Linting | Ruff + Black |
 | CI/CD | GitHub Actions + Docker |
-| Monitoring | Health checks + log rotation |
+| Monitoring | Health checks + log rotation + observability |
+| Deployment | Docker Compose + Nginx + SSL |
 
 ---
 
@@ -284,9 +392,112 @@ See `.env.example` for the complete list.
 | GET | `/ai/assistants` | List AI assistants |
 | GET | `/analytics/dashboards` | List dashboards |
 | GET | `/platform/industry-packs` | List industry packs |
+| GET | `/africa/countries` | List African country profiles |
+| POST | `/africa/convert-currency` | Convert between currencies |
+| GET | `/performance/overview` | Performance stats overview |
+| GET | `/performance/cache/stats` | Cache hit/miss statistics |
+| DELETE | `/performance/cache/clear` | Clear entire cache |
+| GET | `/performance/db/stats` | Database statistics |
+| POST | `/performance/db/ensure-indexes` | Create critical DB indexes |
 
-Full docs at http://localhost:8000/docs
+Full interactive docs at http://localhost:8000/docs
 
 ---
 
-*DataFlow v2.0.0 — Enterprise Data Intelligence Platform (AEDIP)*
+## Demo Datasets
+
+DataFlow ships with 12 industry-specific demo datasets in `demo_datasets/`:
+
+| Dataset | Records | Use Case |
+|---------|---------|----------|
+| Agriculture | 200 | Crop yields, livestock, rainfall |
+| Banking | 200 | Accounts, transactions, loans |
+| Church | 200 | Members, donations, events |
+| Education | 200 | Students, grades, enrollment |
+| Government | 200 | Programs, budgets, citizens |
+| Healthcare | 200 | Patients, diagnoses, billing |
+| Hospitality | 200 | Bookings, revenue, occupancy |
+| Insurance | 200 | Policies, claims, premiums |
+| Manufacturing | 200 | Production, defects, supply chain |
+| NGO | 200 | Beneficiaries, projects, funding |
+| Retail | 200 | Sales, products, regions |
+| Telecommunications | 200 | Subscribers, usage, churn |
+
+Plus Africa-specific datasets for Ghana, Nigeria, Kenya, and South Africa.
+
+---
+
+## Documentation
+
+Comprehensive documentation is in the `docs/` directory:
+
+| Document | Description |
+|----------|-------------|
+| `QUICK_START_GUIDE.md` | Get running in 5 minutes |
+| `ARCHITECTURE.md` | System architecture overview |
+| `API_ENDPOINTS.md` | Full API endpoint reference |
+| `DEVELOPER_GUIDE.md` | Development setup and conventions |
+| `END_USER_GUIDE.md` | End-user dashboard guide |
+| `ADMINISTRATOR_GUIDE.md` | Admin and configuration guide |
+| `DEPLOYMENT.md` | Production deployment guide |
+| `DATABASE_ARCHITECTURE.md` | Database design and schema |
+| `AUTH_ARCHITECTURE.md` | Authentication and RBAC design |
+| `RBAC_PERMISSION_MATRIX.md` | Role-permission matrix |
+| `TROUBLESHOOTING.md` | Common issues and solutions |
+| `PHASE9_PERFORMANCE_ENGINEERING.md` | Performance architecture |
+| `PHASE9_SECURITY_HARDENING.md` | Security hardening details |
+| `PHASE9_OBSERVABILITY_CENTER.md` | Monitoring and observability |
+| `PHASE9_BACKUP_DISASTER_RECOVERY.md` | Backup and DR procedures |
+
+---
+
+## Testing
+
+```bash
+# Full test suite (1,150+ tests)
+pytest tests/ -v
+
+# Run specific module tests
+pytest tests/test_performance.py -v
+pytest tests/test_africa_intelligence.py -v
+pytest tests/test_rbac.py -v
+
+# With coverage
+pytest tests/ --cov=. --cov-report=html
+```
+
+Test categories:
+- **ETL Pipeline**: Extraction, transformation, loading, validation
+- **Authentication**: JWT, RBAC, sessions, password policy
+- **AI Platform**: Chat, assistants, quality scoring, anomaly detection
+- **Africa Intelligence**: Country profiles, currency, industry mapping
+- **Performance**: Queue, workers, cache, DB optimization
+- **API Endpoints**: All REST endpoints with auth checks
+- **Dashboard**: Data service, charts, onboarding
+- **Enterprise**: Organizations, templates, branding
+
+---
+
+## Roadmap
+
+- [x] Phase 1-3: Core ETL, Dashboard, REST API
+- [x] Phase 4: Enterprise IAM (JWT, RBAC, Organizations)
+- [x] Phase 5: AI Intelligence Platform
+- [x] Phase 6: Analytics & Alerting
+- [x] Phase 7: Executive Decision Center
+- [x] Phase 8: Platform Features (Connectors, Workflows, Reports, Search)
+- [x] Phase 9: Enterprise Hardening (Security, Observability, Backup, Performance)
+- [x] Phase 10: Performance & Global Scale (Workers, Queue, Redis, DB Optimization)
+- [x] Phase 11: Final Product Polish (UI, Docs, Marketing, Demo Data, Investor Materials)
+- [ ] Phase 12: Mobile apps and offline-first sync
+
+---
+
+## License
+
+Proprietary. © 2025 DataFlow (AEDIP). All rights reserved.
+
+---
+
+*DataFlow v2.0.0 — Africa's Data Intelligence Platform (AEDIP)*
+*Built in Africa, for the world.*

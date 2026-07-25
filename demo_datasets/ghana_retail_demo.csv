@@ -1,0 +1,31 @@
+order_id,customer_name,region,product_category,product_name,quantity,unit_price_ghs,total_ghs,sale_date,payment_method,store_location
+DF-GH-001,Kwame Mensah,Greater Accra,Electronics,Smartphone Case,3,45.00,135.00,2024-01-15,Mobile Money,Accra Mall
+DF-GH-002,Abena Owusu,Ashanti,Clothing,Kente Cloth,2,120.00,240.00,2024-01-16,Cash,Kumasi Central Market
+DF-GH-003,Yaw Asante,Western,Groceries,Cocoa Beans,50,15.00,750.00,2024-01-17,Bank Transfer,Takoradi
+DF-GH-004,Ama Serwaa,Central,Electronics,Power Bank,1,85.00,85.00,2024-01-18,Mobile Money,Cape Coast
+DF-GH-005,Kofi Boateng,Eastern,Groceries,Palm Oil,10,25.00,250.00,2024-01-19,Cash,Koforidua
+DF-GH-006,Akua Fremah,Northern,Clothing,Smock,1,200.00,200.00,2024-01-20,Mobile Money,Tamale
+DF-GH-007,Kwabena Agyeman,Volta,Electronics,USB Cable,5,12.00,60.00,2024-01-21,Cash,Ho
+DF-GH-008,Adwoa Nkansah,Bono East,Groceries,Yam,20,8.00,160.00,2024-01-22,Bank Transfer,Techiman
+DF-GH-009,Kwesi Appiah,Ahafo,Clothing,Beads Necklace,3,35.00,105.00,2024-01-23,Mobile Money,Goaso
+DF-GH-010,Esi Mensah,Oti,Groceries,Cassava,30,5.00,150.00,2024-01-24,Cash,Dambai
+DF-GH-011,Kwame Asante,Greater Accra,Electronics,Earbuds,2,60.00,120.00,2024-01-25,Mobile Money,Accra Mall
+DF-GH-012,Abena Darko,Ashanti,Groceries,Plantain,15,7.00,105.00,2024-01-26,Cash,Kumasi
+DF-GH-013,Yaw Owusu,Western,Clothing,T-Shirt,4,30.00,120.00,2024-01-27,Mobile Money,Takoradi
+DF-GH-014,Ama Twum,Central,Electronics,Phone Charger,2,20.00,40.00,2024-01-28,Bank Transfer,Cape Coast
+DF-GH-015,Kofi Antwi,Eastern,Groceries,Rice Bag,5,80.00,400.00,2024-01-29,Mobile Money,Koforidua
+DF-GH-016,Akua Owusua,Northern,Clothing,Batakari,1,250.00,250.00,2024-01-30,Cash,Tamale
+DF-GH-017,Kwabena Nyame,Volta,Electronics,Bluetooth Speaker,1,150.00,150.00,2024-02-01,Mobile Money,Ho
+DF-GH-018,Adwoa Asare,Bono East,Groceries,Maize,25,6.00,150.00,2024-02-02,Bank Transfer,Techiman
+DF-GH-019,Kwesi Baah,Ahafo,Clothing,Kente Strip,2,45.00,90.00,2024-02-03,Mobile Money,Goaso
+DF-GH-020,Esi Ankomah,Oti,Groceries,Fresh Fish,10,30.00,300.00,2024-02-04,Cash,Dambai
+DF-GH-021,Kwame Tetteh,Greater Accra,Electronics,Tablet,1,800.00,800.00,2024-02-05,Bank Transfer,Accra Mall
+DF-GH-022,Abena Asiamah,Ashanti,Clothing,African Print Dress,1,180.00,180.00,2024-02-06,Mobile Money,Kumasi
+DF-GH-023,Yaw Mensah,Western,Groceries,Cocoa Powder,8,40.00,320.00,2024-02-07,Cash,Takoradi
+DF-GH-024,Ama Konadu,Central,Electronics,Smart Watch,1,350.00,350.00,2024-02-08,Mobile Money,Cape Coast
+DF-GH-025,Kofi Yeboah,Eastern,Groceries,Groundnut,12,18.00,216.00,2024-02-09,Bank Transfer,Koforidua
+DF-GH-026,Akua Prempeh,Northern,Clothing,Leather Sandals,2,55.00,110.00,2024-02-10,Cash,Tamale
+DF-GH-027,Kwabena Asante,Volta,Electronics,Power Bank,2,85.00,170.00,2024-02-11,Mobile Money,Ho
+DF-GH-028,Adwoa Frimpong,Bono East,Groceries,Sorghum,20,12.00,240.00,2024-02-12,Bank Transfer,Techiman
+DF-GH-029,Kwesi Osei,Ahafo,Clothing,Beads Bracelet,5,15.00,75.00,2024-02-13,Mobile Money,Goaso
+DF-GH-030,Esi Boateng,Oti,Groceries,Pepper,15,10.00,150.00,2024-02-14,Cash,Dambai

@@ -31,7 +31,7 @@ from datetime import date, datetime, timezone
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from config import validate_config
@@ -259,6 +259,19 @@ app.include_router(scheduler_router)
 app.include_router(semantic_router)
 app.include_router(validation_router)
 app.include_router(dataset_library_router)
+
+
+# ──────────────────────────────────────────────
+# Landing Page
+# ──────────────────────────────────────────────
+@app.get("/", include_in_schema=False)
+async def landing_page():
+    """Serve the DataFlow landing page."""
+    static_dir = os.path.join(os.path.dirname(__file__), "..", "static")
+    index_path = os.path.join(static_dir, "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    return JSONResponse({"message": "DataFlow API — visit /docs for API documentation"}, status_code=200)
 
 
 # ──────────────────────────────────────────────

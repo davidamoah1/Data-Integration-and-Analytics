@@ -1,0 +1,31 @@
+order_id,customer_name,province,product_category,product_name,quantity,unit_price_zar,total_zar,sale_date,payment_method,store_location
+DF-SA-001,Thabo Mthembu,Gauteng,Electronics,Smartphone Case,3,120.00,360.00,2024-01-15,Card Payment,Sandton City
+DF-SA-002,Nomsa Dlamini,Western Cape,Clothing,Shweshwe Fabric,2,180.00,360.00,2024-01-16,Cash,Greenmarket Square
+DF-SA-003,Johan van der Merwe,KwaZulu-Natal,Groceries,Biltong,5,250.00,1250.00,2024-01-17,EFT,Gateway Mall
+DF-SA-004,Lerato Mokoena,Eastern Cape,Electronics,Power Bank,1,350.00,350.00,2024-01-18,Card Payment,Hemmingways
+DF-SA-005,Pieter Botha,Free State,Groceries,Maize Meal,10,45.00,450.00,2024-01-19,Cash,Bloemfontein Market
+DF-SA-006,Zanele Khumalo,Mpumalanga,Clothing,Beaded Necklace,3,85.00,255.00,2024-01-20,Card Payment,Mbombela
+DF-SA-007,Sipho Ndlovu,Limpopo,Electronics,USB Cable,5,35.00,175.00,2024-01-21,Cash,Polokwane
+DF-SA-008,Annelize Pretorius,North West,Groceries,Sugar,8,30.00,240.00,2024-01-22,EFT,Mahikeng
+DF-SA-009,Tshepo Maluleke,Northern Cape,Clothing,Leather Belt,2,150.00,300.00,2024-01-23,Card Payment,Kimberley
+DF-SA-010,Hannelie Smit,Western Cape,Groceries,Wine,3,120.00,360.00,2024-01-24,Cash,Stellenbosch
+DF-SA-011,Thabo Radebe,Gauteng,Electronics,Earbuds,2,180.00,360.00,2024-01-25,Card Payment,Sandton City
+DF-SA-012,Nomsa Zulu,KwaZulu-Natal,Groceries,Rice,12,40.00,480.00,2024-01-26,EFT,Gateway Mall
+DF-SA-013,Johan Steyn,Eastern Cape,Clothing,T-Shirt,4,80.00,320.00,2024-01-27,Cash,Hemmingways
+DF-SA-014,Lerato Sithole,Free State,Electronics,Phone Charger,2,45.00,90.00,2024-01-28,Card Payment,Bloemfontein
+DF-SA-015,Pieter Nel,Mpumalanga,Groceries,Beef,5,120.00,600.00,2024-01-29,EFT,Mbombela
+DF-SA-016,Zanele Mthethwa,Limpopo,Clothing,Scarf,3,55.00,165.00,2024-01-30,Cash,Polokwane
+DF-SA-017,Sipho Khumalo,North West,Electronics,Bluetooth Speaker,1,450.00,450.00,2024-02-01,Card Payment,Mahikeng
+DF-SA-018,Annelize du Toit,Northern Cape,Groceries,Apples,20,8.00,160.00,2024-02-02,EFT,Kimberley
+DF-SA-019,Tshepo Botha,Western Cape,Clothing,Jeans,1,350.00,350.00,2024-02-03,Card Payment,Cape Town
+DF-SA-020,Hannelie Jacobs,Gauteng,Groceries,Bread,10,15.00,150.00,2024-02-04,Cash,Sandton
+DF-SA-021,Thabo Coetzee,KwaZulu-Natal,Electronics,Tablet,1,3200.00,3200.00,2024-02-05,EFT,Gateway Mall
+DF-SA-022,Nomsa Adams,Eastern Cape,Clothing,Dress,1,450.00,450.00,2024-02-06,Card Payment,Hemmingways
+DF-SA-023,Johan Pretorius,Free State,Groceries,Milk,15,18.00,270.00,2024-02-07,Cash,Bloemfontein
+DF-SA-024,Lerato van Wyk,Mpumalanga,Electronics,Smart Watch,1,1800.00,1800.00,2024-02-08,Card Payment,Mbombela
+DF-SA-025,Pieter Smith,Limpopo,Groceries,Potatoes,20,12.00,240.00,2024-02-09,EFT,Polokwane
+DF-SA-026,Zanele Ndlovu,North West,Clothing,Shoes,2,280.00,560.00,2024-02-10,Cash,Mahikeng
+DF-SA-027,Sipho Maluleke,Northern Cape,Electronics,Power Bank,2,350.00,700.00,2024-02-11,Card Payment,Kimberley
+DF-SA-028,Annelize Smit,Western Cape,Groceries,Cheese,5,85.00,425.00,2024-02-12,EFT,Stellenbosch
+DF-SA-029,Tshepo Khumalo,Gauteng,Clothing,Cap,3,65.00,195.00,2024-02-13,Card Payment,Sandton City
+DF-SA-030,Hannelie Meyer,KwaZulu-Natal,Groceries,Tomatoes,25,10.00,250.00,2024-02-14,Cash,Gateway Mall

@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DataFlow — Africa's Data Intelligence Platform</title>
+    <meta name="description" content="Enterprise ETL, analytics, and AI platform built for African businesses. Upload any dataset and get instant insights, KPIs, and dashboards.">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5568d3;
+            --secondary: #764ba2;
+            --accent: #f093fb;
+            --dark: #0f0c29;
+            --dark-2: #1a1a4e;
+            --light: #f8f9ff;
+            --gray: #6b7280;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --radius: 16px;
+            --shadow: 0 20px 60px rgba(0,0,0,0.15);
+            --shadow-lg: 0 40px 80px rgba(0,0,0,0.25);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+        /* ── Navbar ── */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+            padding: 16px 0;
+            transition: all 0.3s ease;
+        }
+        nav .container { display: flex; align-items: center; justify-content: space-between; }
+        .logo { display: flex; align-items: center; gap: 10px; font-family: 'Space Grotesk'; font-weight: 700; font-size: 1.4rem; color: var(--dark); text-decoration: none; }
+        .logo-icon {
+            width: 36px; height: 36px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 1.2rem;
+        }
+        .nav-links { display: flex; gap: 32px; align-items: center; }
+        .nav-links a { color: var(--gray); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--primary); }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white; padding: 10px 24px; border-radius: 10px;
+            font-weight: 600; text-decoration: none; display: inline-block;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: none; cursor: pointer; font-size: 0.95rem;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(102,126,234,0.4); }
+        .btn-secondary {
+            background: white; color: var(--dark); padding: 10px 24px;
+            border-radius: 10px; font-weight: 600; text-decoration: none;
+            display: inline-block; border: 2px solid rgba(0,0,0,0.08);
+            transition: all 0.2s; font-size: 0.95rem;
+        }
+        .btn-secondary:hover { border-color: var(--primary); color: var(--primary); }
+
+        /* ── Hero ── */
+        .hero {
+            background: linear-gradient(135deg, var(--dark), var(--dark-2), var(--dark));
+            min-height: 100vh; display: flex; align-items: center;
+            position: relative; overflow: hidden;
+            padding-top: 80px;
+        }
+        .hero::before {
+            content: ''; position: absolute; top: -200px; right: -200px;
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(102,126,234,0.15), transparent 70%);
+            border-radius: 50%;
+        }
+        .hero::after {
+            content: ''; position: absolute; bottom: -200px; left: -200px;
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(240,147,251,0.1), transparent 70%);
+            border-radius: 50%;
+        }
+        .hero .container { position: relative; z-index: 1; }
+        .hero-content { max-width: 720px; }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+            color: rgba(255,255,255,0.9); padding: 8px 16px; border-radius: 100px;
+            font-size: 0.85rem; font-weight: 500; margin-bottom: 24px;
+        }
+        .hero-badge .dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; }
+        .hero h1 {
+            font-family: 'Space Grotesk'; font-size: 3.8rem; font-weight: 700;
+            line-height: 1.1; color: white; margin-bottom: 24px;
+        }
+        .hero h1 .gradient {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero p { font-size: 1.25rem; color: rgba(255,255,255,0.7); margin-bottom: 36px; max-width: 580px; }
+        .hero-cta { display: flex; gap: 16px; flex-wrap: wrap; }
+        .hero-stats { display: flex; gap: 48px; margin-top: 64px; }
+        .hero-stat .num { font-family: 'Space Grotesk'; font-size: 2.5rem; font-weight: 700; color: white; }
+        .hero-stat .label { color: rgba(255,255,255,0.5); font-size: 0.9rem; }
+
+        /* ── Sections ── */
+        section { padding: 100px 0; }
+        .section-title { text-align: center; margin-bottom: 64px; }
+        .section-title h2 {
+            font-family: 'Space Grotesk'; font-size: 2.5rem; font-weight: 700;
+            color: var(--dark); margin-bottom: 16px;
+        }
+        .section-title p { font-size: 1.15rem; color: var(--gray); max-width: 600px; margin: 0 auto; }
+
+        /* ── Features Grid ── */
+        .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+        .feature-card {
+            background: white; border-radius: var(--radius); padding: 32px;
+            box-shadow: var(--shadow); transition: transform 0.3s, box-shadow 0.3s;
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+        .feature-card:hover { transform: translateY(-8px); box-shadow: var(--shadow-lg); }
+        .feature-icon {
+            width: 56px; height: 56px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; margin-bottom: 20px;
+        }
+        .feature-icon.purple { background: linear-gradient(135deg, #667eea20, #764ba220); color: var(--primary); }
+        .feature-icon.green { background: linear-gradient(135deg, #10b98120, #34d39920); color: var(--success); }
+        .feature-icon.orange { background: linear-gradient(135deg, #f59e0b20, #fbbf2420); color: var(--warning); }
+        .feature-icon.pink { background: linear-gradient(135deg, #ec489920, #f093fb20); color: #ec4899; }
+        .feature-icon.blue { background: linear-gradient(135deg, #3b82f620, #60a5fa20); color: #3b82f6; }
+        .feature-icon.red { background: linear-gradient(135deg, #ef444420, #f8717120); color: var(--danger); }
+        .feature-card h3 { font-size: 1.25rem; font-weight: 700; margin-bottom: 12px; }
+        .feature-card p { color: var(--gray); font-size: 0.95rem; }
+
+        /* ── Africa Section ── */
+        .africa-section { background: linear-gradient(135deg, var(--dark), var(--dark-2)); color: white; }
+        .africa-section .section-title h2 { color: white; }
+        .africa-section .section-title p { color: rgba(255,255,255,0.6); }
+        .africa-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+        .africa-card {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: var(--radius); padding: 28px; text-align: center;
+            transition: all 0.3s;
+        }
+        .africa-card:hover { background: rgba(255,255,255,0.08); transform: translateY(-4px); }
+        .africa-flag { font-size: 3rem; margin-bottom: 16px; }
+        .africa-card h4 { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
+        .africa-card p { color: rgba(255,255,255,0.5); font-size: 0.85rem; }
+        .africa-card .currency { color: var(--accent); font-weight: 600; margin-top: 8px; display: block; }
+
+        /* ── How It Works ── */
+        .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; position: relative; }
+        .steps::before { content: ''; position: absolute; top: 40px; left: 10%; right: 10%; height: 2px; background: linear-gradient(90deg, var(--primary), var(--accent)); opacity: 0.2; }
+        .step { text-align: center; position: relative; z-index: 1; }
+        .step-num {
+            width: 80px; height: 80px; margin: 0 auto 20px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 1.8rem; font-weight: 700; color: white;
+            box-shadow: 0 10px 30px rgba(102,126,234,0.3);
+        }
+        .step h4 { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
+        .step p { color: var(--gray); font-size: 0.9rem; }
+
+        /* ── Stats Bar ── */
+        .stats-bar { background: white; padding: 60px 0; }
+        .stats-bar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; text-align: center; }
+        .stat-item .num { font-family: 'Space Grotesk'; font-size: 3rem; font-weight: 700; background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .stat-item .label { color: var(--gray); font-size: 0.95rem; margin-top: 4px; }
+
+        /* ── CTA ── */
+        .cta-section { background: linear-gradient(135deg, var(--primary), var(--secondary)); padding: 80px 0; text-align: center; }
+        .cta-section h2 { font-family: 'Space Grotesk'; font-size: 2.5rem; font-weight: 700; color: white; margin-bottom: 16px; }
+        .cta-section p { color: rgba(255,255,255,0.8); font-size: 1.15rem; margin-bottom: 32px; }
+        .cta-section .btn-primary { background: white; color: var(--primary); }
+        .cta-section .btn-secondary { background: transparent; color: white; border-color: rgba(255,255,255,0.3); }
+        .cta-section .btn-secondary:hover { border-color: white; }
+
+        /* ── Footer ── */
+        footer { background: var(--dark); color: rgba(255,255,255,0.5); padding: 60px 0 30px; }
+        .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 40px; }
+        .footer-brand .logo { color: white; margin-bottom: 16px; }
+        .footer-brand p { font-size: 0.9rem; max-width: 300px; }
+        .footer-col h5 { color: white; font-size: 0.95rem; font-weight: 600; margin-bottom: 16px; }
+        .footer-col a { display: block; color: rgba(255,255,255,0.5); text-decoration: none; font-size: 0.9rem; margin-bottom: 8px; transition: color 0.2s; }
+        .footer-col a:hover { color: white; }
+        .footer-bottom { border-top: 1px solid rgba(255,255,255,0.08); padding-top: 24px; text-align: center; font-size: 0.85rem; }
+
+        /* ── Responsive ── */
+        @media (max-width: 900px) {
+            .features-grid, .africa-grid, .stats-bar-grid { grid-template-columns: repeat(2, 1fr); }
+            .steps { grid-template-columns: repeat(2, 1fr); }
+            .steps::before { display: none; }
+            .footer-grid { grid-template-columns: 1fr 1fr; }
+            .hero h1 { font-size: 2.5rem; }
+            .hero p { font-size: 1.1rem; }
+            .nav-links { display: none; }
+        }
+        @media (max-width: 600px) {
+            .features-grid, .africa-grid, .stats-bar-grid, .steps { grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: 1fr; }
+            .hero h1 { font-size: 2rem; }
+            .hero-stats { flex-direction: column; gap: 24px; }
+            section { padding: 60px 0; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav>
+    <div class="container">
+        <a href="#" class="logo">
+            <div class="logo-icon">📊</div>
+            DataFlow
+        </a>
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#africa">Africa</a>
+            <a href="#how">How It Works</a>
+            <a href="/docs">API Docs</a>
+            <a href="/dashboard">Dashboard</a>
+            <a href="#" class="btn-primary">Get Started</a>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+    <div class="container">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <span class="dot"></span>
+                v2.0 — Now with Africa Intelligence Layer
+            </div>
+            <h1>Turn raw data into <span class="gradient">intelligent decisions</span> in minutes</h1>
+            <p>Upload any spreadsheet and DataFlow automatically maps business semantics, generates KPIs, detects anomalies, and builds beautiful dashboards — with built-in understanding of African markets, currencies, and industries.</p>
+            <div class="hero-cta">
+                <a href="/dashboard" class="btn-primary">Launch Dashboard →</a>
+                <a href="/docs" class="btn-secondary">Explore API</a>
+            </div>
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <div class="num">1,150+</div>
+                    <div class="label">Tests Passing</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="num">4</div>
+                    <div class="label">African Countries</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="num">6</div>
+                    <div class="label">AI Providers</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="num">12+</div>
+                    <div class="label">Industry Templates</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Bar -->
+<section class="stats-bar">
+    <div class="container">
+        <div class="stats-bar-grid">
+            <div class="stat-item">
+                <div class="num">50+</div>
+                <div class="label">API Endpoints</div>
+            </div>
+            <div class="stat-item">
+                <div class="num">100+</div>
+                <div class="label">Semantic Mappings</div>
+            </div>
+            <div class="stat-item">
+                <div class="num">7</div>
+                <div class="label">Currencies Supported</div>
+            </div>
+            <div class="stat-item">
+                <div class="num">99.9%</div>
+                <div class="label">Uptime Target</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features -->
+<section id="features">
+    <div class="container">
+        <div class="section-title">
+            <h2>Everything you need to go from data to decisions</h2>
+            <p>From raw CSV to executive dashboards — DataFlow handles the entire pipeline with AI-powered automation.</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon purple">🔄</div>
+                <h3>ETL Pipeline</h3>
+                <p>Automatic extraction, cleaning, transformation, and loading of CSV/Excel data. Duplicate detection, type inference, and encoding handling built-in.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon blue">🧠</div>
+                <h3>Semantic Mapping</h3>
+                <p>AI-powered column recognition that understands business context — automatically maps "rev" to "revenue", "dt" to "date", and 100+ other patterns.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon green">📊</div>
+                <h3>Instant Dashboards</h3>
+                <p>Beautiful dark-themed dashboards with KPI cards, 7 chart types, heatmaps, interactive filters, and CSV export. No configuration needed.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon orange">🤖</div>
+                <h3>AI Copilot</h3>
+                <p>Chat with your data in natural language. Multi-provider support for OpenAI, Gemini, DeepSeek, Claude, and local LLMs. Forecasting and anomaly detection included.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon pink">🌍</div>
+                <h3>Africa Intelligence</h3>
+                <p>Built-in understanding of Ghana, Nigeria, Kenya, and South Africa — regions, currencies (GHS, NGN, KES, ZAR), local industries, education, healthcare, and agriculture.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon red">🔒</div>
+                <h3>Enterprise Security</h3>
+                <p>JWT auth, RBAC with 5 roles, Argon2 password hashing, audit logging, multi-tenant isolation, rate limiting, and security headers. Production-ready.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Africa Section -->
+<section id="africa" class="africa-section">
+    <div class="container">
+        <div class="section-title">
+            <h2>Built for Africa, ready for the world</h2>
+            <p>DataFlow understands African data patterns that other platforms miss — local currencies, regional names, industry terms, and more.</p>
+        </div>
+        <div class="africa-grid">
+            <div class="africa-card">
+                <div class="africa-flag">🇬🇭</div>
+                <h4>Ghana</h4>
+                <p>16 Regions, 8 Industries</p>
+                <span class="currency">GHS ₵</span>
+            </div>
+            <div class="africa-card">
+                <div class="africa-flag">🇳🇬</div>
+                <h4>Nigeria</h4>
+                <p>37 States, 5 Industries</p>
+                <span class="currency">NGN ₦</span>
+            </div>
+            <div class="africa-card">
+                <div class="africa-flag">🇰🇪</div>
+                <h4>Kenya</h4>
+                <p>10 Counties, 4 Industries</p>
+                <span class="currency">KES KSh</span>
+            </div>
+            <div class="africa-card">
+                <div class="africa-flag">🇿🇦</div>
+                <h4>South Africa</h4>
+                <p>9 Provinces, 5 Industries</p>
+                <span class="currency">ZAR R</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section id="how">
+    <div class="container">
+        <div class="section-title">
+            <h2>From spreadsheet to insights in 4 steps</h2>
+            <p>No data engineer required. DataFlow handles the complexity so you can focus on decisions.</p>
+        </div>
+        <div class="steps">
+            <div class="step">
+                <div class="step-num">1</div>
+                <h4>Upload Data</h4>
+                <p>Drop in any CSV or Excel file. DataFlow auto-detects encoding, types, and structure.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">2</div>
+                <h4>Auto-Map Semantics</h4>
+                <p>AI recognizes business columns, African patterns, and industry context automatically.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">3</div>
+                <h4>Generate Insights</h4>
+                <p>KPIs, charts, anomalies, and forecasts are computed instantly with AI explanations.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">4</div>
+                <h4>Share & Decide</h4>
+                <p>Export dashboards, schedule reports, and collaborate with your team — all in one place.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+    <div class="container">
+        <h2>Ready to transform your data?</h2>
+        <p>Start with a free demo dataset or upload your own. No credit card required.</p>
+        <div class="hero-cta" style="justify-content: center;">
+            <a href="/dashboard" class="btn-primary">Launch Dashboard →</a>
+            <a href="/docs" class="btn-secondary">Read the Docs</a>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <a href="#" class="logo">
+                    <div class="logo-icon">📊</div>
+                    DataFlow
+                </a>
+                <p>Africa's first AI-powered data intelligence platform. Built for businesses that need to go from raw data to decisions — fast.</p>
+            </div>
+            <div class="footer-col">
+                <h5>Product</h5>
+                <a href="#features">Features</a>
+                <a href="#africa">Africa Layer</a>
+                <a href="/dashboard">Dashboard</a>
+                <a href="/docs">API Docs</a>
+            </div>
+            <div class="footer-col">
+                <h5>Resources</h5>
+                <a href="/docs/QUICK_START_GUIDE.md">Quick Start</a>
+                <a href="/docs/ARCHITECTURE.md">Architecture</a>
+                <a href="/docs/DEVELOPER_GUIDE.md">Developer Guide</a>
+                <a href="/docs/END_USER_GUIDE.md">User Guide</a>
+            </div>
+            <div class="footer-col">
+                <h5>Company</h5>
+                <a href="#">About</a>
+                <a href="#">Contact</a>
+                <a href="#">Privacy</a>
+                <a href="#">Security</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            © 2025 DataFlow (AEDIP). Built in Africa, for the world. v2.0.0
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>
