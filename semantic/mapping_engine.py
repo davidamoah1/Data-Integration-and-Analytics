@@ -85,6 +85,24 @@ class SemanticMappingResult:
             "industry_intelligence": self.industry_intelligence.to_dict() if self.industry_intelligence else None,
         }
 
+    def get_copilot(self, df: pd.DataFrame | None = None) -> "DataAnalystCopilot":
+        """Get a DataAnalystCopilot for this mapping result.
+
+        Args:
+            df: DataFrame to analyze. If None, the copilot will have no data
+                and must be provided with data separately.
+
+        Returns:
+            DataAnalystCopilot instance configured with this mapping result.
+        """
+        from ai_copilot import DataAnalystCopilot
+
+        return DataAnalystCopilot(
+            df=df if df is not None else pd.DataFrame(),
+            mapping_result=self,
+            industry_intelligence=self.industry_intelligence,
+        )
+
 
 class SemanticMappingEngine:
     """Orchestrates the full semantic analysis pipeline."""
