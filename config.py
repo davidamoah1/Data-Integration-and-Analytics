@@ -53,6 +53,22 @@ POOL_TIMEOUT = int(os.getenv("POOL_TIMEOUT", "30"))
 POOL_RECYCLE = int(os.getenv("POOL_RECYCLE", "3600"))
 MAX_OVERFLOW = int(os.getenv("MAX_OVERFLOW", "20"))
 
+# --- Redis / Performance (Phase 10) ---
+REDIS_URL = os.getenv("REDIS_URL", "")
+CACHE_ENABLED = os.getenv("CACHE_ENABLED", "true").lower() == "true"
+CACHE_DEFAULT_TTL = int(os.getenv("CACHE_DEFAULT_TTL", "300"))
+CACHE_KEY_PREFIX = os.getenv("CACHE_KEY_PREFIX", "aedip")
+
+# Background workers
+WORKER_MIN_WORKERS = int(os.getenv("WORKER_MIN_WORKERS", "2"))
+WORKER_MAX_WORKERS = int(os.getenv("WORKER_MAX_WORKERS", "20"))
+WORKER_SCALE_UP_THRESHOLD = int(os.getenv("WORKER_SCALE_UP_THRESHOLD", "10"))
+WORKER_SCALE_DOWN_THRESHOLD = int(os.getenv("WORKER_SCALE_DOWN_THRESHOLD", "2"))
+WORKER_SCALE_CHECK_INTERVAL = int(os.getenv("WORKER_SCALE_CHECK_INTERVAL", "30"))
+
+# Chunked query default size
+CHUNK_SIZE_DEFAULT = int(os.getenv("CHUNK_SIZE_DEFAULT", "5000"))
+
 # Logging
 LOG_PATH = _resolve_path(os.getenv("LOG_PATH", "logs/pipeline.log"))
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")

@@ -20,8 +20,11 @@ services:
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
       - LOG_FORMAT=json
       - RATE_LIMIT_RPM=${RATE_LIMIT_RPM:-120}
+      - REDIS_URL=redis://redis:6379/0
     depends_on:
       db:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
@@ -87,5 +90,53 @@ services:
       retries: 5
       start_period: 30s
 
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["python", "-m", "performance.worker_entry"]
+    env_file:
+      - .env
+    environment:
+      - DB_TYPE=mysql
+      - MYSQL_HOST=db
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-etl_db}
+      - MYSQL_USER=${MYSQL_USER:-etl_user}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-etl_password}
+      - REDIS_URL=redis://redis:6379/0
+      - WORKER_MIN_WORKERS=${WORKER_MIN_WORKERS:-2}
+      - WORKER_MAX_WORKERS=${WORKER_MAX_WORKERS:-20}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '2.0'
+
 volumes:
   mysql_data:
+  redis_data:
