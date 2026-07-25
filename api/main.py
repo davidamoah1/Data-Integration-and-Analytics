@@ -62,7 +62,8 @@ from authentication.routes import roles_router, users_router
 from authentication.routes import router as auth_router
 from authentication.services import seed_default_data
 from database.repositories import PipelineRunRepository, SalesRepository
-from enterprise.routes import router as platform_router
+from enterprise.routes import router as enterprise_router
+from platform_features.routes import platform_router as platform_features_router
 from etl.logging_config import logger
 from etl.routes import router as etl_router
 from notifications.routes import router as notifications_router
@@ -249,7 +250,8 @@ app.include_router(audit_router)
 app.include_router(etl_router)
 app.include_router(ai_router)
 app.include_router(analytics_router)
-app.include_router(platform_router)
+app.include_router(enterprise_router)
+app.include_router(platform_features_router)
 app.include_router(notifications_router)
 app.include_router(scheduler_router)
 app.include_router(semantic_router)
