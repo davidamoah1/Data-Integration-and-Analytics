@@ -71,3 +71,5 @@ backups/
 # Stray test files
 /test.pdf
 
+
+.vercel

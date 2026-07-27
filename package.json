@@ -1,0 +1,20 @@
+{
+  "name": "dataflow-enterprise",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Root Vercel configuration package for the DataFlow Next.js frontend and FastAPI backend monorepo.",
+  "engines": {
+    "node": ">=20.0.0 <21.0.0"
+  },
+  "scripts": {
+    "dev": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "start": "cd frontend && npm start",
+    "lint": "cd frontend && npm run lint",
+    "type-check": "cd frontend && npm run type-check",
+    "test": "cd frontend && npm test"
+  },
+  "dependencies": {
+    "next": "^14.2.5"
+  }
+}
