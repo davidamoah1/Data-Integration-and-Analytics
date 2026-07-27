@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session as DbSession
 from audit.service import log_audit_event
 from shared.database import get_db
 from shared.dependencies import get_current_user, require_permissions
-from shared.tenant import get_current_organization_id
+from shared.tenant import get_current_organization_id, is_super_admin
 from validation.approval import ApprovalWorkflow
 from validation.audit import ValidationAuditLogger
 from validation.engine import ValidationEngine, ValidationStatus
@@ -99,7 +99,7 @@ async def run_validation(
     result = engine.validate(df, dataset_name=filename, schema_type=schema_type)
 
     session_id = _get_next_id()
-    org_id = get_current_organization_id(current_user)
+    org_id = current_user.get("organization_id") if is_super_admin(current_user) else get_current_organization_id(current_user)
     session = {
         "id": session_id,
         "result": result,
@@ -302,8 +302,8 @@ async def validation_history(
 ):
     """Get validation history scoped to the user's organization."""
     history = []
-    user_org = get_current_organization_id(current_user)
-    is_super = "super_admin" in current_user.get("roles", [])
+    user_org = current_user.get("organization_id")
+    is_super = is_super_admin(current_user)
     for sid, session in sorted(_sessions.items()):
         if not is_super and session.get("organization_id") != user_org:
             continue

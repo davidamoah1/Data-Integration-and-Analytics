@@ -56,12 +56,23 @@ def require_organization_access(current_user: dict, organization_id: int | None 
     Raises:
         AuthorizationError: If the user is forbidden from the target org.
     """
+    if is_super_admin(current_user):
+        if organization_id is not None:
+            return organization_id
+        user_org_id = current_user.get("organization_id")
+        if user_org_id is not None:
+            return int(user_org_id)
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Super admin without organization must specify an organization.",
+        )
+
     user_org_id = get_current_organization_id(current_user)
 
     if organization_id is None:
         return user_org_id
 
-    if organization_id != user_org_id and not is_super_admin(current_user):
+    if organization_id != user_org_id:
         raise AuthorizationError("Access to this organization is not permitted.")
 
     return organization_id

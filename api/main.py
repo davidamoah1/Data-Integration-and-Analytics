@@ -39,6 +39,7 @@ from shared.context import correlation_id, request_id
 from shared.middleware import (
     RateLimitMiddleware,
     RequestLoggingMiddleware,
+    RequestSizeLimitMiddleware,
     SecurityHeadersMiddleware,
 )
 
@@ -56,6 +57,7 @@ from api.schemas import (
     SalesListResponse,
     SalesRecordResponse,
 )
+from admin.routes import router as admin_router
 from audit.services import audit_router
 from authentication.routes import roles_router, users_router
 
@@ -237,6 +239,7 @@ app = FastAPI(
     root_path="/api" if _is_vercel else "",
 )
 
+app.add_middleware(RequestSizeLimitMiddleware, max_bytes=int(os.getenv("MAX_REQUEST_BODY_BYTES", "52428800")))
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 app.add_middleware(RequestContextMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
@@ -290,6 +293,7 @@ app.include_router(users_router)
 app.include_router(roles_router)
 app.include_router(org_router)
 app.include_router(dept_router)
+app.include_router(admin_router)
 app.include_router(audit_router)
 app.include_router(etl_router)
 app.include_router(ai_router)

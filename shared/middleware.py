@@ -26,6 +26,21 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         "X-XSS-Protection": "1; mode=block",
         "Referrer-Policy": "strict-origin-when-cross-origin",
         "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
+        "Content-Security-Policy": (
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
+            "style-src 'self' 'unsafe-inline'; "
+            "img-src 'self' data: https:; "
+            "font-src 'self'; "
+            "connect-src 'self'; "
+            "frame-ancestors 'none'; "
+            "base-uri 'self'; "
+            "form-action 'self';"
+        ),
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+        "Cross-Origin-Resource-Policy": "same-origin",
+        "Cross-Origin-Embedder-Policy": "require-corp",
+        "Cross-Origin-Opener-Policy": "same-origin",
     }
 
     async def dispatch(self, request: Request, call_next):
@@ -33,6 +48,39 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         for key, value in self._HEADERS.items():
             response.headers.setdefault(key, value)
         return response
+
+
+class RequestSizeLimitMiddleware(BaseHTTPMiddleware):
+    """Reject requests whose Content-Length exceeds a configured maximum.
+
+    This protects against memory exhaustion from oversized uploads before the
+    request body is read. The default maximum (50 MB) matches the platform's
+    file upload limit.
+    """
+
+    def __init__(self, app, max_bytes: int = 50 * 1024 * 1024):
+        super().__init__(app)
+        self.max_bytes = max_bytes
+
+    async def dispatch(self, request: Request, call_next):
+        content_length = request.headers.get("content-length")
+        if content_length:
+            try:
+                size = int(content_length)
+            except ValueError:
+                return Response(
+                    status_code=400,
+                    content='{"success":false,"message":"Invalid Content-Length","data":null}',
+                    media_type="application/json",
+                )
+            if size > self.max_bytes:
+                return Response(
+                    status_code=413,
+                    content='{"success":false,"message":"Request body too large","data":null}',
+                    media_type="application/json",
+                    headers={"Retry-After": "0"},
+                )
+        return await call_next(request)
 
 
 class RateLimitMiddleware(BaseHTTPMiddleware):

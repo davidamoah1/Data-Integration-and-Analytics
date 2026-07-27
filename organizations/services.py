@@ -236,7 +236,10 @@ async def list_departments(
     current_user: dict = Depends(get_current_user),
     db: DbSession = Depends(get_db),
 ):
-    effective_org_id = require_organization_access(current_user, organization_id)
+    if is_super_admin(current_user):
+        effective_org_id = organization_id
+    else:
+        effective_org_id = require_organization_access(current_user, organization_id)
     service = DepartmentService(db)
     return success_response(service.list_depts(effective_org_id))
 
@@ -247,9 +250,10 @@ async def create_department(
     current_user: dict = Depends(require_permissions("departments.manage")),
     db: DbSession = Depends(get_db),
 ):
-    user_org_id = get_current_organization_id(current_user)
-    if request.organization_id != user_org_id and not is_super_admin(current_user):
-        raise AuthorizationError("Cannot create department outside your organization.")
+    if not is_super_admin(current_user):
+        user_org_id = get_current_organization_id(current_user)
+        if request.organization_id != user_org_id:
+            raise AuthorizationError("Cannot create department outside your organization.")
     service = DepartmentService(db)
     dept = service.create_dept(request)
     return success_response(dept, "Department created")
@@ -278,9 +282,9 @@ async def update_department(
     existing = service.get_dept(dept_id)
     require_organization_access(current_user, existing["organization_id"])
     if (
-        request.organization_id is not None
+        not is_super_admin(current_user)
+        and request.organization_id is not None
         and request.organization_id != existing["organization_id"]
-        and not is_super_admin(current_user)
     ):
         raise AuthorizationError("Cannot move department to another organization.")
     dept = service.update_dept(dept_id, request)

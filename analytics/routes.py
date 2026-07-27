@@ -22,6 +22,7 @@ from analytics.schemas import (
     KPIRecord,
     WidgetCreate,
 )
+from analytics.usage import UsageAnalyticsService
 from shared.database import get_db
 from shared.dependencies import get_current_user
 
@@ -463,3 +464,27 @@ async def acknowledge_alert(
     alert.acknowledged_at = datetime.now(timezone.utc).replace(tzinfo=None)
     db.commit()
     return {"message": "Alert acknowledged"}
+
+
+# --- Usage analytics ---------------------------------------------------------
+
+
+@router.get("/usage/organizations")
+async def usage_by_organization(
+    organization_id: int | None = Query(None),
+    db: DbSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Return usage metrics scoped by organization."""
+    service = UsageAnalyticsService(db, current_user)
+    return service.get_organization_metrics(organization_id)
+
+
+@router.get("/usage/system")
+async def system_usage(
+    db: DbSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Return overall platform usage metrics."""
+    service = UsageAnalyticsService(db, current_user)
+    return service.get_system_metrics()
