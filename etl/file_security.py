@@ -5,9 +5,35 @@ Validates MIME types, file sizes, file structure, and records audit entries.
 
 import os
 
-import magic
-
 MAX_FILE_SIZE = 50 * 1024 * 1024  # 50 MB
+
+try:
+    import magic
+except Exception:
+    magic = None  # libmagic may not be available in serverless environments
+
+
+def get_mime_type(file_path: str) -> str:
+    """Detect MIME type using python-magic if available, otherwise fall back
+    to a simple extension-based mapping.
+    """
+    if magic is not None:
+        try:
+            return magic.from_file(file_path, mime=True)
+        except Exception:
+            pass
+
+    ext = os.path.splitext(file_path)[1].lower()
+    return {
+        ".csv": "text/csv",
+        ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        ".xls": "application/vnd.ms-excel",
+        ".pdf": "application/pdf",
+        ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        ".json": "application/json",
+        ".txt": "text/plain",
+        ".parquet": "application/octet-stream",
+    }.get(ext, "application/octet-stream")
 
 ALLOWED_MIME_TYPES = {
     "csv": {"text/csv", "text/plain", "application/csv"},
@@ -71,7 +97,7 @@ class FileValidator:
 
         # Detect MIME type
         try:
-            mime = magic.from_file(file_path, mime=True)
+            mime = get_mime_type(file_path)
         except Exception:
             mime = "unknown"
 

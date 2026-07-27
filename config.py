@@ -41,11 +41,17 @@ if DB_TYPE == "mysql":
 elif DB_TYPE == "sqlite":
     _sqlite_path = _resolve_path(os.getenv("SQLITE_DB_PATH", "database/etl_database.db"))
     DB_URL = f"sqlite:///{_sqlite_path}"
-else:
+elif DB_TYPE:
     raise ValueError(
         "DB_TYPE environment variable must be set to 'mysql' or 'sqlite'. "
         "Use 'mysql' for production and 'sqlite' only for local development/testing."
     )
+else:
+    # Default to SQLite for local dev and serverless cold starts when not configured.
+    # Production deployments should explicitly set DB_TYPE=mysql.
+    DB_TYPE = "sqlite"
+    _sqlite_path = _resolve_path(os.getenv("SQLITE_DB_PATH", "database/etl_database.db"))
+    DB_URL = f"sqlite:///{_sqlite_path}"
 
 # --- Connection Pool Settings (MySQL) ---
 POOL_SIZE = int(os.getenv("POOL_SIZE", "10"))
@@ -153,7 +159,13 @@ def validate_config() -> None:
     Fail fast when required settings are missing or insecure. SQLite is only
     permitted for development and testing; production deployments must use
     MySQL.
+
+    Validation can be disabled by setting DISABLE_CONFIG_VALIDATION=1 for
+    serverless cold starts where only a subset of the app is exercised.
     """
+    if os.getenv("DISABLE_CONFIG_VALIDATION", "").lower() in ("1", "true", "yes"):
+        return
+
     if DB_TYPE not in {"mysql", "sqlite"}:
         raise ValueError("DB_TYPE must be set to 'mysql' (production) or 'sqlite' (dev/test).")
 

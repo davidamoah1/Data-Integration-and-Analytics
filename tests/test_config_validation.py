@@ -23,7 +23,7 @@ class TestValidateConfig:
 
     def test_invalid_db_type_raises(self, monkeypatch):
         monkeypatch.setattr(config, "DB_TYPE", "postgres")
-        with pytest.raises(ValueError, match="DB_TYPE must be set"):
+        with pytest.raises(ValueError, match="DB_TYPE must be set to"):
             config.validate_config()
 
     def test_mysql_missing_variables_raises(self, monkeypatch):

@@ -39,17 +39,15 @@ class JSONFormatter(logging.Formatter):
 def setup_logging() -> logging.Logger:
     """Configure and return the project-level logger.
 
-    Uses RotatingFileHandler to prevent unbounded log growth.
-    Supports plain text (default) or JSON output via LOG_FORMAT env var.
+    Uses RotatingFileHandler to prevent unbounded log growth when a writable
+    LOG_PATH is configured; otherwise logs to stdout only (default for
+    serverless/readonly filesystems).
+
     Called once at import time. Subsequent calls are no-ops.
     """
     global _LOGGING_CONFIGURED
     if _LOGGING_CONFIGURED:
         return logging.getLogger("etl_project")
-
-    log_dir = os.path.dirname(LOG_PATH)
-    if log_dir:
-        os.makedirs(log_dir, exist_ok=True)
 
     level = getattr(logging, LOG_LEVEL.upper(), logging.INFO)
     use_json = os.getenv("LOG_FORMAT", "text").lower() == "json"
@@ -59,22 +57,33 @@ def setup_logging() -> logging.Logger:
     else:
         formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(request_id)s - %(message)s")
 
-    file_handler = RotatingFileHandler(
-        LOG_PATH, maxBytes=5 * 1024 * 1024, backupCount=5, encoding="utf-8"
-    )
-    file_handler.setFormatter(formatter)
-    file_handler.setLevel(level)
-    file_handler.addFilter(_ContextFilter())
+    logger = logging.getLogger("etl_project")
+    logger.setLevel(level)
 
+    # Console handler is always safe (serverless-friendly)
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setFormatter(formatter)
     console_handler.setLevel(level)
     console_handler.addFilter(_ContextFilter())
-
-    logger = logging.getLogger("etl_project")
-    logger.setLevel(level)
-    logger.addHandler(file_handler)
     logger.addHandler(console_handler)
+
+    # Optional file handler — only when LOG_PATH is explicitly configured and writable
+    log_path = os.getenv("LOG_PATH", "").strip()
+    if log_path:
+        try:
+            log_dir = os.path.dirname(log_path)
+            if log_dir:
+                os.makedirs(log_dir, exist_ok=True)
+            file_handler = RotatingFileHandler(
+                log_path, maxBytes=5 * 1024 * 1024, backupCount=5, encoding="utf-8"
+            )
+            file_handler.setFormatter(formatter)
+            file_handler.setLevel(level)
+            file_handler.addFilter(_ContextFilter())
+            logger.addHandler(file_handler)
+        except OSError as e:
+            logger.warning(f"Failed to configure file logging at {log_path}: {e}")
+
     logger.propagate = False
 
     _LOGGING_CONFIGURED = True

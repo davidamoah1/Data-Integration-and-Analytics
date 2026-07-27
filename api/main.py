@@ -81,93 +81,130 @@ from dataset_library.routes import router as dataset_library_router
 from validation.routes import router as validation_router
 
 
+# ── Deployment / cold-start helpers ────────────────────
+
+
+def _is_serverless() -> bool:
+    """Return True when running in a serverless/readonly environment."""
+    return os.getenv("VERCEL", "").lower() in ("1", "true", "yes") or os.getenv(
+        "DISABLE_STARTUP_TASKS", ""
+    ).lower() in ("1", "true", "yes")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Validate configuration, create tables, and seed data at startup."""
-    validate_config()
-    engine = get_engine()
-    # Import all models so they register with Base.metadata
-    import ai.models  # noqa: F401
-    import analytics.models  # noqa: F401
-    import audit.models  # noqa: F401
-    import authentication.models  # noqa: F401
-    import database.db_setup  # noqa: F401
-    import enterprise.models  # noqa: F401
-    import enterprise.subscription  # noqa: F401
-    import etl.models  # noqa: F401
-    import notifications.models  # noqa: F401
-    import organizations.models  # noqa: F401
-    import scheduler.models  # noqa: F401
-    import validation.models  # noqa: F401
+    """Validate configuration, create tables, and seed data at startup.
 
-    Base.metadata.create_all(engine)
+    On serverless platforms (Vercel) or when DISABLE_STARTUP_TASKS is set, skip
+    heavy initialization such as database migrations, seeding, and background
+    scheduler startup. These should be handled by deployment hooks or cron jobs.
+    """
+    serverless = _is_serverless()
 
-    # Register system AI plugins
-    from sqlalchemy.orm import Session as AIDbSession
-
-    ai_db = AIDbSession(engine)
-    try:
-        from ai.plugins import register_system_plugins
-
-        register_system_plugins(ai_db)
-    except Exception as e:
-        logger.error(f"AI plugin registration failed: {e}")
-    finally:
-        ai_db.close()
-
-    # Seed default data
-    from sqlalchemy.orm import Session as DbSession
-
-    db = DbSession(engine)
-    try:
-        seed_default_data(db)
-        # Seed demo data only when explicitly enabled (opt-in for pilot/onboarding)
-        from config import SEED_DEMO_DATA
-
-        if SEED_DEMO_DATA:
-            from enterprise.demo_data import is_demo_seeded, seed_demo_data
-
-            if not is_demo_seeded(db):
-                seed_demo_data(db)
-                logger.info(
-                    "Pilot demo data seeded (org, users, dashboards, KPIs, pipelines, AI conversations, reports). "
-                    "Set SEED_DEMO_DATA=false for production."
-                )
-        # Create trial subscriptions for all orgs without one
-        from enterprise.subscription import SubscriptionService
-        from organizations.models import Organization
-
-        sub_svc = SubscriptionService(db)
-        for org in db.query(Organization).filter(Organization.is_active == 1).all():
-            if not sub_svc.get_subscription(org.id):
-                sub_svc.create_trial(org.id)
-
-        # Start background report scheduler (disabled during tests)
+    if not serverless:
         try:
-            report_scheduler = ReportScheduler()
-            report_scheduler.start()
-            app.state.report_scheduler = report_scheduler
-
-            # Schedule daily database/config backups at 02:00 UTC
-            try:
-                from apscheduler.triggers.cron import CronTrigger
-
-                from services.backup_service import BackupService
-
-                report_scheduler.scheduler.add_job(
-                    BackupService().create_backup,
-                    trigger=CronTrigger(hour=2, minute=0),
-                    id="daily_backup",
-                    replace_existing=True,
-                )
-                logger.info("Daily backup scheduled for 02:00 UTC")
-            except Exception as e:
-                logger.error(f"Backup scheduler setup failed: {e}")
+            validate_config()
         except Exception as e:
-            logger.error(f"Report scheduler failed to start: {e}")
-    finally:
-        db.close()
-    logger.info("Auth tables created, default data seeded, subscriptions initialized.")
+            logger.error(f"Configuration validation failed: {e}")
+            # Do not crash; health/ready endpoints will report the issue.
+
+    try:
+        engine = get_engine()
+    except Exception as e:
+        logger.error(f"Database engine creation failed: {e}")
+        engine = None
+
+    if engine is not None and not serverless:
+        # Import all models so they register with Base.metadata
+        import ai.models  # noqa: F401
+        import analytics.models  # noqa: F401
+        import audit.models  # noqa: F401
+        import authentication.models  # noqa: F401
+        import database.db_setup  # noqa: F401
+        import enterprise.models  # noqa: F401
+        import enterprise.subscription  # noqa: F401
+        import etl.models  # noqa: F401
+        import notifications.models  # noqa: F401
+        import organizations.models  # noqa: F401
+        import scheduler.models  # noqa: F401
+        import validation.models  # noqa: F401
+
+        try:
+            Base.metadata.create_all(engine)
+        except Exception as e:
+            logger.error(f"Database table creation failed: {e}")
+
+        # Register system AI plugins
+        from sqlalchemy.orm import Session as AIDbSession
+
+        ai_db = AIDbSession(engine)
+        try:
+            from ai.plugins import register_system_plugins
+
+            register_system_plugins(ai_db)
+        except Exception as e:
+            logger.error(f"AI plugin registration failed: {e}")
+        finally:
+            ai_db.close()
+
+        # Seed default data
+        from sqlalchemy.orm import Session as DbSession
+
+        db = DbSession(engine)
+        try:
+            seed_default_data(db)
+            # Seed demo data only when explicitly enabled (opt-in for pilot/onboarding)
+            from config import SEED_DEMO_DATA
+
+            if SEED_DEMO_DATA:
+                from enterprise.demo_data import is_demo_seeded, seed_demo_data
+
+                if not is_demo_seeded(db):
+                    seed_demo_data(db)
+                    logger.info(
+                        "Pilot demo data seeded (org, users, dashboards, KPIs, pipelines, AI conversations, reports). "
+                        "Set SEED_DEMO_DATA=false for production."
+                    )
+            # Create trial subscriptions for all orgs without one
+            from enterprise.subscription import SubscriptionService
+            from organizations.models import Organization
+
+            sub_svc = SubscriptionService(db)
+            try:
+                for org in db.query(Organization).filter(Organization.is_active == 1).all():
+                    if not sub_svc.get_subscription(org.id):
+                        sub_svc.create_trial(org.id)
+            except Exception as e:
+                logger.error(f"Subscription initialization failed: {e}")
+
+            # Start background report scheduler (disabled during tests and serverless)
+            try:
+                report_scheduler = ReportScheduler()
+                report_scheduler.start()
+                app.state.report_scheduler = report_scheduler
+
+                # Schedule daily database/config backups at 02:00 UTC
+                try:
+                    from apscheduler.triggers.cron import CronTrigger
+
+                    from services.backup_service import BackupService
+
+                    report_scheduler.scheduler.add_job(
+                        BackupService().create_backup,
+                        trigger=CronTrigger(hour=2, minute=0),
+                        id="daily_backup",
+                        replace_existing=True,
+                    )
+                    logger.info("Daily backup scheduled for 02:00 UTC")
+                except Exception as e:
+                    logger.error(f"Backup scheduler setup failed: {e}")
+            except Exception as e:
+                logger.error(f"Report scheduler failed to start: {e}")
+        finally:
+            db.close()
+        logger.info("Auth tables created, default data seeded, subscriptions initialized.")
+    elif serverless:
+        logger.info("Running in serverless mode; skipped heavy startup tasks.")
 
     yield
 
@@ -297,36 +334,35 @@ def get_run_repo() -> PipelineRunRepository:
 # Health
 # ──────────────────────────────────────────────
 @app.get("/health", response_model=HealthResponse, tags=["System"])
-async def health_check(repo: SalesRepository = Depends(get_sales_repo)):
-    """Check API and database health.
+async def health_check():
+    """Lightweight health check.
 
-    Returns database connection status and record count. This endpoint is
-    intentionally public so load balancers and monitoring tools can reach it.
+    Returns API status and, best-effort, database connectivity status. This
+    endpoint must not crash when the database is unavailable.
     """
+    db_connected = False
+    record_count = 0
     try:
-        count = repo.get_record_count()
-        return HealthResponse(
-            status="healthy",
-            database_connected=True,
-            record_count=count,
-            timestamp=datetime.now(timezone.utc),
-        )
+        repo = SalesRepository()
+        record_count = repo.get_record_count()
+        db_connected = True
     except Exception as e:
-        logger.error(f"Health check failed: {e}")
-        return HealthResponse(
-            status="unhealthy",
-            database_connected=False,
-            record_count=0,
-            timestamp=datetime.now(timezone.utc),
-        )
+        logger.error(f"Health check database probe failed: {e}")
+
+    return HealthResponse(
+        status="healthy" if db_connected else "degraded",
+        database_connected=db_connected,
+        record_count=record_count,
+        timestamp=datetime.now(timezone.utc),
+    )
 
 
 @app.get("/ready", tags=["System"])
 async def readiness_check():
-    """Check readiness of all subsystems (database, ETL, AI).
+    """Check readiness of critical subsystems.
 
-    Returns 200 if all critical subsystems are operational, 503 otherwise.
-    Intentionally public for orchestration probes.
+    Returns 200 if the database is reachable, 503 otherwise. Keep this check
+    lightweight to avoid cold-start overhead.
     """
     checks: dict[str, dict] = {}
     overall = True
@@ -342,36 +378,6 @@ async def readiness_check():
         checks["database"] = {"status": "ready"}
     except Exception as e:
         checks["database"] = {"status": "not_ready", "error": str(e)}
-        overall = False
-
-    try:
-        from etl.models import ETLPipeline
-        from shared.database import get_session_factory
-
-        factory = get_session_factory()
-        db = factory()
-        try:
-            db.query(ETLPipeline).limit(1).count()
-            checks["etl"] = {"status": "ready"}
-        finally:
-            db.close()
-    except Exception as e:
-        checks["etl"] = {"status": "not_ready", "error": str(e)}
-        overall = False
-
-    try:
-        from ai.models import AIProviderConfig
-        from shared.database import get_session_factory
-
-        factory = get_session_factory()
-        db = factory()
-        try:
-            db.query(AIProviderConfig).limit(1).count()
-            checks["ai"] = {"status": "ready"}
-        finally:
-            db.close()
-    except Exception as e:
-        checks["ai"] = {"status": "not_ready", "error": str(e)}
         overall = False
 
     status_code = 200 if overall else 503

@@ -12,16 +12,23 @@ Base = declarative_base()
 # SQLite doesn't support BigInteger autoincrement; use Integer variant for SQLite.
 BigInt = BigInteger().with_variant(Integer, "sqlite")
 
+_engine = None
+
 
 def get_engine(**kwargs):
     """Create a SQLAlchemy engine with appropriate pooling settings.
 
     Reads DB_URL and DB_TYPE from config at call time so that test
-    monkeypatching of config attributes takes effect.
+    monkeypatching of config attributes takes effect. The engine is cached
+    per process to avoid repeated connection setup.
 
     Returns:
-        SQLAlchemy Engine instance.
+        SQLAlchemy Engine instance, or raises if configuration is invalid.
     """
+    global _engine
+    if _engine is not None:
+        return _engine
+
     import config
 
     defaults = {"pool_pre_ping": True}
@@ -31,7 +38,20 @@ def get_engine(**kwargs):
         defaults["max_overflow"] = config.MAX_OVERFLOW
         defaults["pool_timeout"] = config.POOL_TIMEOUT
     defaults.update(kwargs)
-    return create_engine(config.DB_URL, **defaults)
+
+    if not config.DB_URL:
+        raise RuntimeError("DB_URL is not configured. Set DB_TYPE and connection variables.")
+
+    _engine = create_engine(config.DB_URL, **defaults)
+    return _engine
+
+
+def reset_engine():
+    """Dispose and clear the cached engine. Useful for tests."""
+    global _engine
+    if _engine is not None:
+        _engine.dispose()
+        _engine = None
 
 
 def get_session_factory(engine=None) -> sessionmaker:

@@ -18,10 +18,14 @@ from etl.logging_config import logger
 
 
 def _backup_dir() -> Path:
-    """Return the configured backup directory, creating it if necessary."""
+    """Return the configured backup directory, creating it lazily when needed.
+
+    In serverless/readonly environments the directory creation is skipped if
+    the filesystem is not writable; callers must handle the resulting error.
+    """
     base = Path(__file__).resolve().parent.parent
     path = base / os.getenv("BACKUP_PATH", "backups")
-    path.mkdir(parents=True, exist_ok=True)
+    # Only create the directory when we are actually about to write a backup.
     return path
 
 
@@ -34,7 +38,11 @@ class BackupService:
 
     def __init__(self, backup_root: str | Path | None = None) -> None:
         self.backup_root = Path(backup_root) if backup_root else _backup_dir()
-        self.backup_root.mkdir(parents=True, exist_ok=True)
+        # Do not fail construction on read-only filesystems; create lazily on demand.
+        try:
+            self.backup_root.mkdir(parents=True, exist_ok=True)
+        except OSError:
+            pass
 
     def create_backup(self, name: str | None = None) -> dict[str, Any]:
         """Create a timestamped database and configuration backup.
@@ -43,6 +51,16 @@ class BackupService:
             Dict with backup id, paths, size bytes, and verification status.
         """
         import config
+
+        try:
+            self.backup_root.mkdir(parents=True, exist_ok=True)
+        except OSError as e:
+            return {
+                "id": _timestamp(),
+                "status": "failed",
+                "error": f"Backup directory not writable: {e}",
+                "verified": False,
+            }
 
         ts = _timestamp()
         label = f"{name}_" if name else ""
@@ -117,10 +135,13 @@ class BackupService:
         base = Path(__file__).resolve().parent.parent
         env_source = base / ".env"
         config_backup = backup_path / "env.backup"
-        if env_source.exists():
-            shutil.copy2(env_source, config_backup)
-            return {"status": "completed", "path": str(config_backup), "verified": config_backup.exists()}
-        return {"status": "skipped", "path": None, "verified": True, "error": ".env not found"}
+        try:
+            if env_source.exists():
+                shutil.copy2(env_source, config_backup)
+                return {"status": "completed", "path": str(config_backup), "verified": config_backup.exists()}
+            return {"status": "skipped", "path": None, "verified": True, "reason": ".env not found"}
+        except OSError as e:
+            return {"status": "failed", "path": None, "verified": False, "error": str(e)}
 
     @staticmethod
     def _verify_sqlite(db_file: Path) -> bool:

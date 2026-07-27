@@ -2,9 +2,20 @@
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
-  env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
-    NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,
+  output: 'standalone',
+  async rewrites() {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+    // Only proxy to an external backend when a full URL is provided.
+    // On Vercel, /api requests are handled by the Python function via vercel.json.
+    if (apiUrl && apiUrl.startsWith('http')) {
+      return [
+        {
+          source: '/api/:path*',
+          destination: `${apiUrl.replace(/\/$/, '')}/:path*`,
+        },
+      ];
+    }
+    return [];
   },
   async headers() {
     return [
