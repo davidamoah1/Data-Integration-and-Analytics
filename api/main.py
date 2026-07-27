@@ -227,11 +227,14 @@ class RequestContextMiddleware(BaseHTTPMiddleware):
             correlation_id.reset(corr_token)
 
 
+_is_vercel = os.getenv("VERCEL", "").lower() in ("1", "true", "yes")
+
 app = FastAPI(
     title="DataFlow — Enterprise Data Intelligence API",
     description="Enterprise REST API for ETL, analytics, IAM, and pipeline management.",
     version="1.0.0",
     lifespan=lifespan,
+    root_path="/api" if _is_vercel else "",
 )
 
 app.add_middleware(GZipMiddleware, minimum_size=1000)

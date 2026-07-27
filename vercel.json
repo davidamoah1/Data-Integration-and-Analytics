@@ -1,7 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
-  "name": "dataflow-enterprise",
   "framework": "nextjs",
   "buildCommand": "cd frontend && npm run build",
   "installCommand": "npm install --legacy-peer-deps && cd frontend && npm install --legacy-peer-deps",

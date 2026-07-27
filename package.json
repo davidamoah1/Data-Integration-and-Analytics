@@ -4,7 +4,7 @@
   "private": true,
   "description": "Root Vercel configuration package for the DataFlow Next.js frontend and FastAPI backend monorepo.",
   "engines": {
-    "node": ">=20.0.0 <21.0.0"
+    "node": ">=20.0.0 <25.0.0"
   },
   "scripts": {
     "dev": "cd frontend && npm run dev",
