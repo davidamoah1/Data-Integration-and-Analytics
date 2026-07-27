@@ -3,6 +3,37 @@ name = "etl-project"
 version = "1.0.0"
 description = "AEDIP — Enterprise Data Intelligence Platform with ETL, analytics, AI, and governance"
 requires-python = ">=3.10"
+dependencies = [
+  "pandas==2.2.3",
+  "SQLAlchemy==2.0.36",
+  "openpyxl==3.1.5",
+  "python-dotenv==1.0.1",
+  "pymysql==1.1.1",
+  "cryptography==44.0.0",
+  "fastapi==0.115.6",
+  "uvicorn==0.34.0",
+  "pydantic==2.10.4",
+  "httpx==0.28.1",
+  "PyJWT==2.10.1",
+  "PyYAML==6.0.2",
+  "passlib==1.7.4",
+  "argon2-cffi==23.1.0",
+  "slowapi==0.1.9",
+  "alembic==1.14.0",
+  "email-validator==2.2.0",
+  "chardet==5.2.0",
+  "xmltodict==0.14.2",
+  "requests==2.32.3",
+  "python-multipart==0.0.20",
+  "scipy==1.14.1",
+  "PyPDF2==3.0.1",
+  "python-docx==1.1.2",
+  "python-pptx==1.0.2",
+  "fpdf2==2.8.3",
+  "psutil==6.1.1",
+  "apscheduler==3.11.0",
+  "numpy==1.26.4",
+]
 
 [tool.ruff]
 line-length = 100
