@@ -103,7 +103,7 @@ streamlit run dashboard/app.py --server.port 8501
 ```
 Dashboard: http://localhost:8501
 
-Default credentials: `admin` / `admin123`, `viewer` / `viewer123`
+Default credentials (set via env vars): `admin@dataflow.io` / `Admin@12345` (configured by `SUPER_ADMIN_EMAIL` / `SUPER_ADMIN_PASSWORD`)
 
 ### 6. Run the scheduler (optional)
 ```bash
@@ -277,8 +277,8 @@ black .
 | `AI_DEFAULT_PROVIDER` | `openai` | Default AI provider |
 | `AI_DEFAULT_MODEL` | `gpt-4o-mini` | Default AI model |
 | `OPENAI_API_KEY` | (empty) | OpenAI API key |
-| `AUTH_ADMIN_PASSWORD` | `admin123` | Dashboard admin password |
-| `AUTH_VIEWER_PASSWORD` | `viewer123` | Dashboard viewer password |
+| `AUTH_ADMIN_PASSWORD` | (empty) | Dashboard admin password — must be set in production |
+| `AUTH_VIEWER_PASSWORD` | (empty) | Dashboard viewer password — must be set in production |
 | `REDIS_URL` | (empty) | Redis connection URL for caching/queues |
 | `CACHE_ENABLED` | `true` | Enable Redis caching layer |
 | `CACHE_DEFAULT_TTL` | `300` | Default cache TTL in seconds |

@@ -42,14 +42,18 @@ class PipelineRun(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     run_id = Column(String(50), unique=True, nullable=False, index=True)
-    started_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
+    started_at = Column(TIMESTAMP, server_default=func.now(), nullable=False, index=True)
     completed_at = Column(TIMESTAMP, nullable=True)
-    status = Column(String(20), nullable=False, default="running")
+    status = Column(String(20), nullable=False, default="running", index=True)
     rows_extracted = Column(Integer, default=0)
     rows_transformed = Column(Integer, default=0)
     rows_loaded = Column(Integer, default=0)
     duplicates_removed = Column(Integer, default=0)
     error_message = Column(String(1000), nullable=True)
+
+    __table_args__ = (
+        Index("idx_pipeline_status_started", "status", "started_at"),
+    )
 
 
 def init_db():

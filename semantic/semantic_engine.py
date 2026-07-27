@@ -27,7 +27,10 @@ import pandas as pd
 from semantic.entity_library import ENTITY_LIBRARY, get_all_synonyms
 
 # Minimum confidence to auto-select an industry (without user confirmation)
-MIN_INDUSTRY_CONFIDENCE = 40.0
+# Below 70%: do NOT auto-select — show "Industry detection uncertain. Please confirm."
+# 70%-85%: show recommendation with confidence
+# Above 85%: allow automatic selection
+MIN_INDUSTRY_CONFIDENCE = 70.0
 # Minimum vote margin between top two industries to avoid tie-breaking
 MIN_VOTE_MARGIN = 0.5
 # Weight multiplier for value-based signals relative to name-based signals

@@ -59,7 +59,7 @@
 | CAGR | 32.7% |
 | African SMEs | 44M |
 | SMEs using analytics | <5% |
-| Internet penetration (Africa) | 40% → 70% by 2025 |
+| Internet penetration (Africa) | 40% → 70% by 2027 |
 
 **Key drivers:**
 - Rapid digital transformation across Africa

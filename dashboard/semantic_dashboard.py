@@ -18,18 +18,38 @@ def render_semantic_dashboard(
     admin_confirmed: bool = False,
 ) -> None:
     confidence = mapping_result.industry_confidence
-    if confidence < 85.0 and not admin_confirmed and mapping_result.industry != "unknown":
+    industry = mapping_result.industry
+
+    # Below 70%: do not auto-select — show uncertainty message
+    if confidence < 70.0 and not admin_confirmed:
+        st.warning(
+            f"⚠️ **Industry detection uncertain.** "
+            f"Best guess: '{industry.title()}' ({confidence:.0f}% confidence). "
+            f"Please confirm the correct industry below to generate a sector-specific dashboard."
+        )
+        # Show generic dashboard while waiting for confirmation
+        from semantic.dashboard_registry import DashboardRegistry
+
+        template = DashboardRegistry.get("unknown")
+        if template:
+            _render_generic_dashboard(df, template)
+        return
+
+    # 70%-85%: show recommendation but require confirmation
+    if confidence < 85.0 and not admin_confirmed and industry != "unknown":
         st.warning(
             f"Industry confidence is {confidence:.0f}% (below 85% threshold). "
-            f"Detected industry: '{mapping_result.industry}'. "
+            f"Detected industry: '{industry}'. "
             f"Admin confirmation required to generate the dashboard."
         )
         return
-    template = DashboardRegistry.get(mapping_result.industry)
+
+    # Above 85% or admin-confirmed: render the dashboard
+    template = DashboardRegistry.get(industry)
     if template is None:
         st.warning(
-            f"No dashboard template found for industry '{mapping_result.industry}'. "
-            f"Confidence: {mapping_result.industry_confidence:.0f}%. "
+            f"No dashboard template found for industry '{industry}'. "
+            f"Confidence: {confidence:.0f}%. "
             f"Please confirm the industry or register a template."
         )
         return

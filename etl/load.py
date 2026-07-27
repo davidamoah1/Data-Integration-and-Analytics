@@ -1,4 +1,5 @@
 import pandas as pd
+from sqlalchemy.exc import SQLAlchemyError
 
 from etl.logging_config import logger
 from shared.database import get_engine
@@ -18,8 +19,16 @@ def load_data(df: pd.DataFrame) -> int:
 
     Returns:
         Number of new records inserted.
+
+    Raises:
+        ValueError: If df is empty or missing required columns.
+        SQLAlchemyError: If database operation fails (with rollback).
     """
     try:
+        if df.empty:
+            logger.warning("Load: DataFrame is empty, nothing to insert.")
+            return 0
+
         engine = get_engine()
 
         # Check for existing records to skip duplicates (only if order_id exists)
@@ -63,6 +72,9 @@ def load_data(df: pd.DataFrame) -> int:
         logger.info(f"Load complete. {total_inserted} new records inserted.")
         return total_inserted
 
+    except SQLAlchemyError as e:
+        logger.error(f"Load failed (database error): {e}")
+        raise
     except Exception as e:
         logger.error(f"Load failed: {e}")
         raise

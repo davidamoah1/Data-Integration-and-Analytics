@@ -350,6 +350,7 @@ else:
     try:
         with st.spinner("Reading your file..."):
             # Clear all previous session state related to prior uploads
+            # This ensures complete dataset isolation — no old metadata reuse
             for key in (
                 "semantic_dataset_context",
                 "admin_confirmed_industry",
@@ -358,8 +359,18 @@ else:
                 "validation_filename",
                 "copilot_messages",
                 "copilot_conversation_id",
+                "active_industry_pack",
+                "dataset_id",
+                "dataset_metadata",
+                "dataset_analysis_history",
             ):
                 st.session_state.pop(key, None)
+
+            # Generate unique dataset ID for this upload
+            import uuid as _uuid
+
+            dataset_id = str(_uuid.uuid4())
+            st.session_state["dataset_id"] = dataset_id
 
             if uploaded_file.name.endswith(".csv"):
                 try:
@@ -400,7 +411,15 @@ else:
     with st.spinner("Discovering business meaning in your data..."):
         semantic_mapping_result = SemanticMappingEngine.analyze(raw_df, uploaded_file.name)
         df = raw_df.copy()
+
+    from datetime import datetime as _dt
+
     st.session_state["semantic_dataset_context"] = {
+        "dataset_id": st.session_state.get("dataset_id"),
+        "filename": uploaded_file.name,
+        "upload_timestamp": _dt.now().isoformat(),
+        "record_count": len(df),
+        "column_count": len(df.columns),
         "industry": semantic_mapping_result.industry,
         "industry_confidence": semantic_mapping_result.industry_confidence,
         "business_entities": semantic_mapping_result.business_entities,
@@ -408,9 +427,14 @@ else:
         "kpi_definitions": semantic_mapping_result.kpi_definitions,
         "business_rules": semantic_mapping_result.recommendations,
     }
+    st.session_state["dataset_metadata"] = st.session_state["semantic_dataset_context"]
 
     # Admin confirmation for low-confidence industry detection
+    # Below 70%: "Industry detection uncertain. Please confirm."
+    # 70%-85%: Show recommendation, require confirmation
+    # Above 85%: Auto-select (no confirmation needed)
     confidence_threshold = 85.0
+    uncertainty_threshold = 70.0
     if (
         semantic_mapping_result.industry_confidence < confidence_threshold
         or semantic_mapping_result.industry == "unknown"
@@ -418,12 +442,21 @@ else:
         from semantic.entity_library import get_all_industries
 
         available_industries = get_all_industries()
-        st.info(
-            f"Detected industry: **{semantic_mapping_result.industry.title()}** "
-            f"({semantic_mapping_result.industry_confidence:.0f}% confidence). "
-            f"Confidence is below the {confidence_threshold:.0f}% threshold. "
-            f"Please confirm or select the correct industry below."
-        )
+
+        if semantic_mapping_result.industry_confidence < uncertainty_threshold:
+            st.warning(
+                f"⚠️ **Industry detection uncertain.** "
+                f"Best guess: **{semantic_mapping_result.industry.title()}** "
+                f"({semantic_mapping_result.industry_confidence:.0f}% confidence). "
+                f"Please confirm the correct industry below."
+            )
+        else:
+            st.info(
+                f"Detected industry: **{semantic_mapping_result.industry.title()}** "
+                f"({semantic_mapping_result.industry_confidence:.0f}% confidence). "
+                f"Confidence is below the {confidence_threshold:.0f}% threshold. "
+                f"Please confirm or select the correct industry below."
+            )
         selected_industry = st.selectbox(
             "Select Industry",
             options=["unknown"] + available_industries,
@@ -467,27 +500,39 @@ else:
         unsafe_allow_html=True,
     )
 
-    # File mode filters
+    # File mode filters — auto-detect filterable columns
     with st.sidebar:
         st.markdown('<div class="sidebar-section">Filters</div>', unsafe_allow_html=True)
-        if "region" in df.columns:
-            opts = ["All Regions"] + sorted(df["region"].dropna().unique().tolist())
-            sel = st.selectbox("Region", opts)
-            if sel != "All Regions":
-                df = df[df["region"] == sel]
 
-        if "category" in df.columns:
-            opts2 = ["All Categories"] + sorted(df["category"].dropna().unique().tolist())
-            sel2 = st.selectbox("Category", opts2)
-            if sel2 != "All Categories":
-                df = df[df["category"] == sel2]
+        # Auto-detect categorical columns for filtering (max 3 filters)
+        categorical_candidates = []
+        for col in df.columns:
+            if df[col].dtype == "object" and df[col].nunique() < 50 and df[col].notna().any():
+                categorical_candidates.append(col)
+        categorical_candidates = sorted(categorical_candidates[:3])
 
-        if "order_date" in df.columns and df["order_date"].notna().any():
-            mn = df["order_date"].min().date()
-            mx = df["order_date"].max().date()
-            dr = st.date_input("Date Range", value=(mn, mx))
-            if len(dr) == 2:
-                df = df[(df["order_date"].dt.date >= dr[0]) & (df["order_date"].dt.date <= dr[1])]
+        for col_name in categorical_candidates:
+            opts = [f"All {col_name.title()}"] + sorted(df[col_name].dropna().unique().tolist())
+            sel = st.selectbox(col_name.title(), opts)
+            if sel != f"All {col_name.title()}":
+                df = df[df[col_name] == sel]
+
+        # Auto-detect date columns for date range filter
+        date_col = None
+        for candidate in ("order_date", "sale_date", "transaction_date", "admission_date", "visit_date", "enrollment_date", "date", "timestamp"):
+            if candidate in df.columns and df[candidate].notna().any():
+                date_col = candidate
+                break
+        if date_col:
+            try:
+                df[date_col] = pd.to_datetime(df[date_col], errors="coerce")
+                mn = df[date_col].min().date()
+                mx = df[date_col].max().date()
+                dr = st.date_input("Date Range", value=(mn, mx))
+                if len(dr) == 2:
+                    df = df[(df[date_col].dt.date >= dr[0]) & (df[date_col].dt.date <= dr[1])]
+            except Exception:
+                pass
 
         st.markdown('<div class="sidebar-section">Export</div>', unsafe_allow_html=True)
         st.download_button(
@@ -562,7 +607,7 @@ render_copilot_panel()
 st.markdown(
     """
     <div class="app-footer">
-        DataFlow v1.0.1.0 &mdash; Enterprise Data Intelligence Platform<br>
+        DataFlow v2.0.0 &mdash; Enterprise Data Intelligence Platform<br>
         <a href="/docs" target="_blank">API Docs</a> &bull;
         <a href="https://github.com/davidamoah1/Data-Integration-and-Analytics" target="_blank">GitHub</a>
     </div>

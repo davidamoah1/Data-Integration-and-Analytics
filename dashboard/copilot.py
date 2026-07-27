@@ -119,6 +119,23 @@ def render_copilot_panel():
 
     user_input = st.chat_input("Ask the AI Copilot...")
 
+    # Suggested questions when chat is empty
+    if not st.session_state["copilot_messages"]:
+        suggested = [
+            "Give me a summary of this data",
+            "What are the top 5 items?",
+            "Are there any anomalies?",
+            "What's the trend over time?",
+        ]
+        st.markdown(
+            '<p style="color:rgba(255,255,255,0.4);font-size:0.75rem;margin-top:8px;">'
+            "Try asking:</p>",
+            unsafe_allow_html=True,
+        )
+        for q in suggested:
+            if st.button(q, key=f"sugg_{q}", use_container_width=True):
+                user_input = q
+
     if user_input:
         st.session_state["copilot_messages"].append({"role": "user", "content": user_input})
         with chat_container, st.chat_message("user"):

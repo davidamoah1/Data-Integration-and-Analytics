@@ -71,10 +71,13 @@ def transform_data(df: pd.DataFrame) -> pd.DataFrame:
         after = len(df)
         logger.info(f"Transform: Removed {before - after} duplicate rows.")
 
-        # Drop rows where key columns are missing (only if they exist)
-        key_cols = [c for c in ("order_id", "sales", "order_date") if c in df.columns]
-        if key_cols:
-            df = df.dropna(subset=key_cols)
+        # Drop rows where key identifier columns are missing (only if they exist)
+        # Only drop if order_id exists — don't assume sales/order_date are present
+        if "order_id" in df.columns:
+            df = df.dropna(subset=["order_id"])
+        # For sales-specific datasets, also drop rows missing critical sales data
+        if "sales" in df.columns and "order_date" in df.columns:
+            df = df.dropna(subset=["sales", "order_date"])
 
         # Fix data types — only for columns that exist
         numeric_cols = ("sales", "quantity", "discount", "profit")
@@ -85,8 +88,8 @@ def transform_data(df: pd.DataFrame) -> pd.DataFrame:
                 else:
                     df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0.0)
 
-        # Standardize date format (keep as datetime for proper DB Date columns)
-        for date_col in ("order_date", "ship_date"):
+        # Standardize date format for any column that looks like a date
+        for date_col in ("order_date", "ship_date", "sale_date", "transaction_date", "admission_date", "visit_date", "enrollment_date", "date"):
             if date_col in df.columns:
                 df[date_col] = pd.to_datetime(df[date_col], errors="coerce")
 

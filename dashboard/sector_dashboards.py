@@ -1339,10 +1339,102 @@ SECTOR_RENDERERS = {
 }
 
 
+def render_generic_sector_dashboard(df: pd.DataFrame, kpis: dict):
+    """Render a generic analytics dashboard for unknown/unclassified datasets.
+
+    Shows dataset overview, statistical summary, and auto-detected charts
+    without assuming any specific industry.
+    """
+    from dashboard.utils import fmt_number
+
+    _section_header("Generic Analytics Dashboard")
+
+    # Dataset overview cards
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        _kpi_card(fmt_number(len(df)), "Total Records", "📋", "kpi-purple")
+    with col2:
+        numeric_cols = [c for c in df.columns if pd.api.types.is_numeric_dtype(df[c])]
+        _kpi_card(str(len(numeric_cols)), "Numeric Columns", "🔢", "kpi-blue")
+    with col3:
+        text_cols = [c for c in df.columns if df[c].dtype == "object"]
+        _kpi_card(str(len(text_cols)), "Text Columns", "📝", "kpi-green")
+    with col4:
+        date_cols = [c for c in df.columns if pd.api.types.is_datetime64_any_dtype(df[c])]
+        _kpi_card(str(len(date_cols)), "Date Columns", "📅", "kpi-orange")
+
+    # Statistical summary
+    _section_header("Statistical Summary")
+    if numeric_cols:
+        st.dataframe(df[numeric_cols].describe(), use_container_width=True)
+    else:
+        st.info("No numeric columns found for statistical summary.")
+
+    # Auto-detect chart-worthy columns
+    _section_header("Data Visualizations")
+
+    # Try to find a date column for time series
+    date_col = _safe_col(df, "date", "order_date", "sale_date", "transaction_date", "timestamp")
+    numeric_col = None
+    if numeric_cols:
+        # Pick the first numeric column that isn't an ID
+        for col in numeric_cols:
+            if not col.lower().endswith("_id") and not col.lower() == "id":
+                numeric_col = col
+                break
+        if not numeric_col:
+            numeric_col = numeric_cols[0]
+
+    cat_col = _safe_col(df, "category", "type", "region", "department", "status", "class")
+
+    col_a, col_b = st.columns(2)
+    with col_a:
+        _chart_container("Distribution")
+        if numeric_col:
+            fig = px.histogram(df, x=numeric_col, template="none", nbins=30)
+            fig.update_layout(**CHART_LAYOUT, height=350)
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("No numeric column available for distribution chart.")
+        _close_container()
+
+    with col_b:
+        _chart_container("Category Breakdown")
+        if cat_col and numeric_col:
+            grouped = df.groupby(cat_col)[numeric_col].sum().reset_index()
+            fig = px.bar(grouped, x=cat_col, y=numeric_col, template="none")
+            fig.update_layout(**CHART_LAYOUT, height=350)
+            st.plotly_chart(fig, use_container_width=True)
+        elif cat_col:
+            counts = df[cat_col].value_counts().reset_index()
+            counts.columns = [cat_col, "count"]
+            fig = px.bar(counts, x=cat_col, y="count", template="none")
+            fig.update_layout(**CHART_LAYOUT, height=350)
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("No category column found for breakdown.")
+        _close_container()
+
+    # Industry selection prompt
+    st.markdown("---")
+    st.info(
+        "💡 **Industry not detected.** Select an industry pack from the sidebar "
+        "to see sector-specific dashboards with tailored KPIs and charts, "
+        "or continue with this generic analytics view."
+    )
+
+
 def render_sector_dashboard(df: pd.DataFrame, kpis: dict, pack_key: str | None = None):
     """Render the appropriate dashboard for the selected sector.
 
-    Falls back to SME dashboard if no pack is selected.
+    Falls back to generic analytics dashboard if no pack is selected.
+    Never silently defaults to a specific industry dashboard.
     """
-    renderer = SECTOR_RENDERERS.get(pack_key or "sme", render_sme_dashboard)
+    if not pack_key or pack_key == "unknown":
+        render_generic_sector_dashboard(df, kpis)
+        return
+    renderer = SECTOR_RENDERERS.get(pack_key)
+    if renderer is None:
+        render_generic_sector_dashboard(df, kpis)
+        return
     renderer(df, kpis)

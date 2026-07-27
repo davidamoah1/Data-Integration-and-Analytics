@@ -109,6 +109,8 @@ class QualityCheckEngine:
         findings.extend(QualityCheckEngine._check_constant_columns(df))
         findings.extend(QualityCheckEngine._check_negative_values(df))
         findings.extend(QualityCheckEngine._check_mixed_case(df))
+        findings.extend(QualityCheckEngine._check_invalid_dates(df))
+        findings.extend(QualityCheckEngine._check_invalid_numeric(df))
 
         # Sort by severity
         severity_order = {
@@ -558,6 +560,106 @@ class QualityCheckEngine:
                     message=f"Column '{col}' has {diff} values that differ only by case (e.g., 'Active' vs 'active').",
                     suggested_fix=f"Standardize '{col}' to consistent casing (e.g., all title-case or all lower-case).",
                     business_impact="Case inconsistencies cause duplicate categories in group-by operations.",
+                ))
+
+        return findings
+
+    # ── Date Validity Checks ────────────────────────────
+
+    @staticmethod
+    def _check_invalid_dates(df: pd.DataFrame) -> list[QualityFinding]:
+        """Detect invalid date values in date-like columns."""
+        findings = []
+        total_rows = max(len(df), 1)
+
+        date_keywords = ("date", "time", "timestamp", "created", "updated", "expiry", "deadline")
+        date_cols = [
+            c for c in df.columns
+            if any(kw in c.lower() for kw in date_keywords)
+            or pd.api.types.is_datetime64_any_dtype(df[c])
+        ]
+
+        for col in date_cols:
+            series = df[col].dropna()
+            if len(series) == 0:
+                continue
+
+            # If already datetime, skip
+            if pd.api.types.is_datetime64_any_dtype(series):
+                continue
+
+            # Try parsing as datetime
+            try:
+                parsed = pd.to_datetime(series, errors="coerce")
+                invalid_count = int(parsed.isna().sum())
+            except Exception:
+                invalid_count = len(series)
+
+            if invalid_count > 0:
+                pct = invalid_count / total_rows * 100
+                severity = Severity.ERROR if pct > 20 else Severity.WARNING
+                sample_vals = []
+                try:
+                    sample_vals = series[parsed.isna()].head(5).astype(str).tolist()
+                except Exception:
+                    pass
+                findings.append(QualityFinding(
+                    check_name="invalid_dates",
+                    category="validity",
+                    severity=severity,
+                    column=col,
+                    affected_rows=invalid_count,
+                    affected_pct=pct,
+                    message=f"Column '{col}': {invalid_count} values cannot be parsed as dates.",
+                    suggested_fix=f"Standardize date format in '{col}' (e.g., YYYY-MM-DD).",
+                    business_impact="Invalid dates prevent time-based analysis and trend detection.",
+                    sample_values=sample_vals,
+                ))
+
+        return findings
+
+    # ── Numeric Validity Checks ─────────────────────────
+
+    @staticmethod
+    def _check_invalid_numeric(df: pd.DataFrame) -> list[QualityFinding]:
+        """Detect non-numeric values in numeric-like columns."""
+        findings = []
+        total_rows = max(len(df), 1)
+
+        numeric_keywords = (
+            "amount", "price", "cost", "revenue", "sales", "total",
+            "quantity", "count", "sum", "avg", "average", "rate",
+            "salary", "balance", "fee", "charge", "payment",
+        )
+        numeric_cols = [
+            c for c in df.columns
+            if any(kw in c.lower() for kw in numeric_keywords)
+            and df[c].dtype == "object"
+        ]
+
+        for col in numeric_cols:
+            series = df[col].dropna()
+            if len(series) == 0:
+                continue
+
+            # Try converting to numeric
+            converted = pd.to_numeric(series, errors="coerce")
+            invalid_count = int(converted.isna().sum())
+
+            if invalid_count > 0:
+                pct = invalid_count / total_rows * 100
+                severity = Severity.WARNING if pct < 10 else Severity.ERROR
+                findings.append(QualityFinding(
+                    check_name="invalid_numeric",
+                    category="validity",
+                    severity=severity,
+                    column=col,
+                    affected_rows=invalid_count,
+                    affected_pct=pct,
+                    message=f"Column '{col}': {invalid_count} non-numeric values in a numeric column.",
+                    suggested_fix=f"Clean '{col}' by removing currency symbols, commas, and non-numeric characters.",
+                    business_impact="Non-numeric values in numeric columns prevent aggregation and statistical analysis.",
+                    sample_values=series[converted.isna()].head(5).astype(str).tolist(),
                 ))
 
         return findings

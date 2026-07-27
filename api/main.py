@@ -72,6 +72,8 @@ from organizations.services import dept_router, org_router
 from scheduler.report_scheduler import ReportScheduler
 from scheduler.routes import router as scheduler_router
 from semantic.routes import router as semantic_router
+from services.dataset_workflow_routes import router as dataset_workflow_router
+from services.dashboard_engine_routes import router as dashboard_engine_router
 from services.etl_service import ETLService
 from shared.database import Base, get_engine
 from dataset_library.routes import router as dataset_library_router
@@ -259,6 +261,8 @@ app.include_router(scheduler_router)
 app.include_router(semantic_router)
 app.include_router(validation_router)
 app.include_router(dataset_library_router)
+app.include_router(dataset_workflow_router)
+app.include_router(dashboard_engine_router)
 
 
 # ──────────────────────────────────────────────
