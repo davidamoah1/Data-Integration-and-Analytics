@@ -97,6 +97,8 @@ class WorkflowState:
 
     workflow_id: str
     dataset_name: str
+    created_by: int | None = None
+    organization_id: int | None = None
     current_stage: WorkflowStage = WorkflowStage.UPLOADED
     stages: dict[WorkflowStage, StageResult] = field(default_factory=dict)
     context: dict = field(default_factory=dict)
@@ -109,6 +111,8 @@ class WorkflowState:
         return {
             "workflow_id": self.workflow_id,
             "dataset_name": self.dataset_name,
+            "created_by": self.created_by,
+            "organization_id": self.organization_id,
             "current_stage": self.current_stage.value,
             "stages": {s.value: r.to_dict() for s, r in self.stages.items()},
             "created_at": self.created_at,
@@ -158,6 +162,8 @@ class DatasetWorkflowOrchestrator:
         dataset_name: str = "uploaded_dataset",
         admin_confirmed: bool = False,
         overrides: dict | None = None,
+        created_by: int | None = None,
+        organization_id: int | None = None,
     ) -> WorkflowState:
         """Start a new dataset workflow.
 
@@ -166,6 +172,8 @@ class DatasetWorkflowOrchestrator:
             dataset_name: Name of the dataset.
             admin_confirmed: Whether admin has confirmed industry detection.
             overrides: Optional column-to-entity overrides.
+            created_by: User id that initiated the workflow.
+            organization_id: Organization the workflow belongs to.
 
         Returns:
             WorkflowState after all stages complete (or fail).
@@ -178,7 +186,12 @@ class DatasetWorkflowOrchestrator:
             return cached_state
 
         workflow_id = str(uuid.uuid4())
-        state = WorkflowState(workflow_id=workflow_id, dataset_name=dataset_name)
+        state = WorkflowState(
+            workflow_id=workflow_id,
+            dataset_name=dataset_name,
+            created_by=created_by,
+            organization_id=organization_id,
+        )
         state.context["df"] = df
         state.context["admin_confirmed"] = admin_confirmed
         state.context["overrides"] = overrides or {}

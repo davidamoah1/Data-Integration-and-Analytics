@@ -17,8 +17,15 @@ from organizations.schemas import (
 )
 from shared.database import get_db
 from shared.dependencies import get_current_user, require_permissions
-from shared.exceptions import ConflictError, NotFoundError
+from shared.exceptions import AuthorizationError, ConflictError, NotFoundError
 from shared.response import success_response
+from shared.tenant import (
+    get_current_organization_id,
+    get_tenant_context,
+    is_super_admin,
+    require_organization_access,
+    require_super_admin,
+)
 
 
 class OrganizationService:
@@ -169,7 +176,10 @@ async def list_organizations(
     db: DbSession = Depends(get_db),
 ):
     service = OrganizationService(db)
-    return success_response(service.list_orgs())
+    if is_super_admin(current_user):
+        return success_response(service.list_orgs())
+    user_org_id = get_current_organization_id(current_user)
+    return success_response([service.get_org(user_org_id)])
 
 
 @org_router.post("")
@@ -189,6 +199,7 @@ async def get_organization(
     current_user: dict = Depends(get_current_user),
     db: DbSession = Depends(get_db),
 ):
+    require_organization_access(current_user, org_id)
     service = OrganizationService(db)
     return success_response(service.get_org(org_id))
 
@@ -225,8 +236,9 @@ async def list_departments(
     current_user: dict = Depends(get_current_user),
     db: DbSession = Depends(get_db),
 ):
+    effective_org_id = require_organization_access(current_user, organization_id)
     service = DepartmentService(db)
-    return success_response(service.list_depts(organization_id))
+    return success_response(service.list_depts(effective_org_id))
 
 
 @dept_router.post("")
@@ -235,6 +247,9 @@ async def create_department(
     current_user: dict = Depends(require_permissions("departments.manage")),
     db: DbSession = Depends(get_db),
 ):
+    user_org_id = get_current_organization_id(current_user)
+    if request.organization_id != user_org_id and not is_super_admin(current_user):
+        raise AuthorizationError("Cannot create department outside your organization.")
     service = DepartmentService(db)
     dept = service.create_dept(request)
     return success_response(dept, "Department created")
@@ -247,7 +262,9 @@ async def get_department(
     db: DbSession = Depends(get_db),
 ):
     service = DepartmentService(db)
-    return success_response(service.get_dept(dept_id))
+    dept = service.get_dept(dept_id)
+    require_organization_access(current_user, dept["organization_id"])
+    return success_response(dept)
 
 
 @dept_router.put("/{dept_id}")
@@ -258,6 +275,14 @@ async def update_department(
     db: DbSession = Depends(get_db),
 ):
     service = DepartmentService(db)
+    existing = service.get_dept(dept_id)
+    require_organization_access(current_user, existing["organization_id"])
+    if (
+        request.organization_id is not None
+        and request.organization_id != existing["organization_id"]
+        and not is_super_admin(current_user)
+    ):
+        raise AuthorizationError("Cannot move department to another organization.")
     dept = service.update_dept(dept_id, request)
     return success_response(dept, "Department updated")
 
@@ -269,5 +294,7 @@ async def delete_department(
     db: DbSession = Depends(get_db),
 ):
     service = DepartmentService(db)
+    existing = service.get_dept(dept_id)
+    require_organization_access(current_user, existing["organization_id"])
     service.delete_dept(dept_id)
     return success_response(None, "Department deleted")

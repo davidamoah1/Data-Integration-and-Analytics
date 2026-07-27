@@ -8,9 +8,14 @@ import os
 import tempfile
 
 import pandas as pd
-from fastapi import APIRouter, File, UploadFile, HTTPException
+from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
 from pydantic import BaseModel
+from sqlalchemy.orm import Session as DbSession
 
+from audit.service import log_audit_event
+from shared.database import get_db
+from shared.dependencies import get_current_user, require_permissions
+from shared.tenant import get_current_organization_id
 from validation.approval import ApprovalWorkflow
 from validation.audit import ValidationAuditLogger
 from validation.engine import ValidationEngine, ValidationStatus
@@ -55,8 +60,22 @@ def _detect_schema_type(filename: str) -> str:
     return "general"
 
 
+def _can_access_session(session: dict, current_user: dict) -> bool:
+    """Return True if the current user can access a validation session."""
+    if "super_admin" in current_user.get("roles", []):
+        return True
+    session_org = session.get("organization_id")
+    user_org = get_current_organization_id(current_user)
+    return session_org is None or session_org == user_org
+
+
 @router.post("/run")
-async def run_validation(file: UploadFile = File(...)):
+async def run_validation(
+    request: Request,
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user),
+    db: DbSession = Depends(get_db),
+):
     """Run validation on an uploaded dataset."""
     global _next_id
 
@@ -80,16 +99,31 @@ async def run_validation(file: UploadFile = File(...)):
     result = engine.validate(df, dataset_name=filename, schema_type=schema_type)
 
     session_id = _get_next_id()
+    org_id = get_current_organization_id(current_user)
     session = {
         "id": session_id,
         "result": result,
         "filename": filename,
         "schema_type": schema_type,
+        "created_by": current_user["id"],
+        "organization_id": org_id,
     }
     _sessions[session_id] = session
 
     ValidationAuditLogger.log_upload(filename)
     ValidationAuditLogger.log_validation(session_id, result.status.value, result.quality_score.overall if result.quality_score else None)
+
+    log_audit_event(
+        db=db,
+        action="validation.run",
+        user_id=current_user["id"],
+        organization_id=org_id,
+        resource_type="validation_session",
+        resource_id=session_id,
+        new_values={"filename": filename, "schema_type": schema_type},
+        request=request,
+    )
+    db.commit()
 
     return {
         "session_id": session_id,
@@ -104,11 +138,16 @@ async def run_validation(file: UploadFile = File(...)):
 
 
 @router.get("/status/{session_id}")
-async def get_validation_status(session_id: int):
+async def get_validation_status(
+    session_id: int,
+    current_user: dict = Depends(get_current_user),
+):
     """Get validation status for a session."""
     session = _sessions.get(session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Validation session not found.")
+    if not _can_access_session(session, current_user):
+        raise HTTPException(status_code=403, detail="Access denied.")
     result = session["result"]
     return {
         "session_id": session_id,
@@ -122,21 +161,32 @@ async def get_validation_status(session_id: int):
 
 
 @router.get("/report/{session_id}")
-async def get_validation_report(session_id: int):
+async def get_validation_report(
+    session_id: int,
+    current_user: dict = Depends(get_current_user),
+):
     """Get full validation report for a session."""
     session = _sessions.get(session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Validation session not found.")
+    if not _can_access_session(session, current_user):
+        raise HTTPException(status_code=403, detail="Access denied.")
     result = session["result"]
     return ValidationReportGenerator.generate_summary(result)
 
 
 @router.get("/report/{session_id}/export")
-async def export_validation_report(session_id: int, format: str = "csv"):
+async def export_validation_report(
+    session_id: int,
+    format: str = "csv",
+    current_user: dict = Depends(get_current_user),
+):
     """Export validation report in CSV, Excel, or PDF format."""
     session = _sessions.get(session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Validation session not found.")
+    if not _can_access_session(session, current_user):
+        raise HTTPException(status_code=403, detail="Access denied.")
     result = session["result"]
 
     if format == "csv":
@@ -176,11 +226,17 @@ async def export_validation_report(session_id: int, format: str = "csv"):
 
 
 @router.post("/approve/{session_id}")
-async def approve_validation(session_id: int, req: ApprovalRequest):
+async def approve_validation(
+    session_id: int,
+    req: ApprovalRequest,
+    current_user: dict = Depends(require_permissions("validation.approve")),
+):
     """Approve a validation session, allowing ETL to proceed."""
     session = _sessions.get(session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Validation session not found.")
+    if not _can_access_session(session, current_user):
+        raise HTTPException(status_code=403, detail="Access denied.")
     result = session["result"]
     if not ApprovalWorkflow.can_approve(result):
         raise HTTPException(status_code=400, detail=f"Cannot approve session with status '{result.status.value}'.")
@@ -195,11 +251,17 @@ async def approve_validation(session_id: int, req: ApprovalRequest):
 
 
 @router.post("/reject/{session_id}")
-async def reject_validation(session_id: int, req: ApprovalRequest):
+async def reject_validation(
+    session_id: int,
+    req: ApprovalRequest,
+    current_user: dict = Depends(require_permissions("validation.reject")),
+):
     """Reject a validation session, blocking ETL."""
     session = _sessions.get(session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Validation session not found.")
+    if not _can_access_session(session, current_user):
+        raise HTTPException(status_code=403, detail="Access denied.")
     result = session["result"]
     result, decision = ApprovalWorkflow.reject(result, req.approver, req.role, req.comments)
     ValidationAuditLogger.log_rejection(session_id, req.approver, req.comments)
@@ -212,14 +274,19 @@ async def reject_validation(session_id: int, req: ApprovalRequest):
 
 
 @router.get("/rules")
-async def list_validation_rules():
+async def list_validation_rules(
+    current_user: dict = Depends(get_current_user),
+):
     """List all configured validation rules."""
     engine = ValidationEngine()
     return {"rules": engine.business_rules.list_rules()}
 
 
 @router.post("/rules/toggle")
-async def toggle_validation_rule(req: RuleToggleRequest):
+async def toggle_validation_rule(
+    req: RuleToggleRequest,
+    current_user: dict = Depends(require_permissions("validation.manage_rules")),
+):
     """Enable or disable a validation rule."""
     engine = ValidationEngine()
     if req.enabled:
@@ -230,10 +297,16 @@ async def toggle_validation_rule(req: RuleToggleRequest):
 
 
 @router.get("/history")
-async def validation_history():
-    """Get validation history."""
+async def validation_history(
+    current_user: dict = Depends(get_current_user),
+):
+    """Get validation history scoped to the user's organization."""
     history = []
+    user_org = get_current_organization_id(current_user)
+    is_super = "super_admin" in current_user.get("roles", [])
     for sid, session in sorted(_sessions.items()):
+        if not is_super and session.get("organization_id") != user_org:
+            continue
         result = session["result"]
         history.append({
             "session_id": sid,
@@ -248,7 +321,11 @@ async def validation_history():
 
 
 @router.get("/audit")
-async def validation_audit_log(event_type: str | None = None, session_id: int | None = None):
+async def validation_audit_log(
+    event_type: str | None = None,
+    session_id: int | None = None,
+    current_user: dict = Depends(get_current_user),
+):
     """Get validation audit log entries."""
     entries = ValidationAuditLogger.get_entries(event_type=event_type, session_id=session_id)
     return {"entries": entries, "total": len(entries)}

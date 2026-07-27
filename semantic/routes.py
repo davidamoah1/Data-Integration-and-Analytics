@@ -5,10 +5,15 @@ from __future__ import annotations
 import logging
 
 import pandas as pd
-from fastapi import APIRouter, File, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
 from pydantic import BaseModel
+from sqlalchemy.orm import Session as DbSession
 
+from audit.service import log_audit_event
 from semantic.service import SemanticIntelligenceService
+from shared.database import get_db
+from shared.dependencies import get_current_user
+from shared.tenant import get_current_organization_id
 
 logger = logging.getLogger(__name__)
 
@@ -112,79 +117,104 @@ async def get_industry_detail(industry: str):
     return knowledge
 
 
+def _read_semantic_upload(file: UploadFile) -> pd.DataFrame:
+    """Read an uploaded CSV/Excel file into a DataFrame."""
+    content = file.file.read()
+    file.file.seek(0)
+    if file.filename.endswith(".csv"):
+        from io import StringIO
+
+        return pd.read_csv(StringIO(content.decode("utf-8")))
+    elif file.filename.endswith((".xlsx", ".xls")):
+        from io import BytesIO
+
+        return pd.read_excel(BytesIO(content))
+    else:
+        raise HTTPException(status_code=400, detail="Unsupported file format. Use CSV or XLSX.")
+
+
 @router.post("/analyze")
-async def analyze_upload(file: UploadFile = File(...), admin_confirmed: bool = False):
+async def analyze_upload(
+    request: Request,
+    file: UploadFile = File(...),
+    admin_confirmed: bool = False,
+    current_user: dict = Depends(get_current_user),
+    db: DbSession = Depends(get_db),
+):
     """Analyze an uploaded dataset through the full semantic pipeline."""
-    try:
-        content = await file.read()
-        if file.filename.endswith(".csv"):
-            from io import StringIO
+    df = _read_semantic_upload(file)
+    org_id = get_current_organization_id(current_user)
 
-            df = pd.read_csv(StringIO(content.decode("utf-8")))
-        elif file.filename.endswith((".xlsx", ".xls")):
-            from io import BytesIO
-
-            df = pd.read_excel(BytesIO(content))
-        else:
-            return {"error": "Unsupported file format. Use CSV or XLSX."}, 400
-
-        result = SemanticIntelligenceService.analyze_dataset(
-            df, file.filename, admin_confirmed=admin_confirmed
-        )
-        return result
-    except Exception as e:
-        logger.error(f"Semantic analysis failed: {e}")
-        return {"error": str(e)}, 500
+    result = SemanticIntelligenceService.analyze_dataset(
+        df, file.filename, admin_confirmed=admin_confirmed
+    )
+    log_audit_event(
+        db=db,
+        action="semantic.analyze_upload",
+        user_id=current_user["id"],
+        organization_id=org_id,
+        resource_type="dataset",
+        resource_id=file.filename,
+        new_values={"admin_confirmed": admin_confirmed},
+        request=request,
+    )
+    db.commit()
+    return result
 
 
 @router.post("/analyze-with-overrides")
 async def analyze_with_overrides(
-    file: UploadFile = File(...), overrides: dict | None = None, admin_confirmed: bool = False
+    request: Request,
+    file: UploadFile = File(...),
+    overrides: dict | None = None,
+    admin_confirmed: bool = False,
+    current_user: dict = Depends(get_current_user),
+    db: DbSession = Depends(get_db),
 ):
     """Analyze a dataset with admin overrides applied."""
-    try:
-        content = await file.read()
-        if file.filename.endswith(".csv"):
-            from io import StringIO
+    df = _read_semantic_upload(file)
+    org_id = get_current_organization_id(current_user)
 
-            df = pd.read_csv(StringIO(content.decode("utf-8")))
-        elif file.filename.endswith((".xlsx", ".xls")):
-            from io import BytesIO
-
-            df = pd.read_excel(BytesIO(content))
-        else:
-            return {"error": "Unsupported file format. Use CSV or XLSX."}, 400
-
-        result = SemanticIntelligenceService.analyze_dataset(
-            df, file.filename, overrides, admin_confirmed=admin_confirmed
-        )
-        return result
-    except Exception as e:
-        logger.error(f"Semantic analysis with overrides failed: {e}")
-        return {"error": str(e)}, 500
+    result = SemanticIntelligenceService.analyze_dataset(
+        df, file.filename, overrides, admin_confirmed=admin_confirmed
+    )
+    log_audit_event(
+        db=db,
+        action="semantic.analyze_with_overrides",
+        user_id=current_user["id"],
+        organization_id=org_id,
+        resource_type="dataset",
+        resource_id=file.filename,
+        new_values={"overrides": overrides, "admin_confirmed": admin_confirmed},
+        request=request,
+    )
+    db.commit()
+    return result
 
 
 @router.post("/detect-industry")
-async def detect_industry(file: UploadFile = File(...)):
+async def detect_industry(
+    request: Request,
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user),
+    db: DbSession = Depends(get_db),
+):
     """Quick industry detection from an uploaded file."""
-    try:
-        content = await file.read()
-        if file.filename.endswith(".csv"):
-            from io import StringIO
+    df = _read_semantic_upload(file)
+    org_id = get_current_organization_id(current_user)
 
-            df = pd.read_csv(StringIO(content.decode("utf-8")))
-        elif file.filename.endswith((".xlsx", ".xls")):
-            from io import BytesIO
-
-            df = pd.read_excel(BytesIO(content))
-        else:
-            return {"error": "Unsupported file format. Use CSV or XLSX."}, 400
-
-        result = SemanticIntelligenceService.detect_industry(df)
-        return result
-    except Exception as e:
-        logger.error(f"Industry detection failed: {e}")
-        return {"error": str(e)}, 500
+    result = SemanticIntelligenceService.detect_industry(df)
+    log_audit_event(
+        db=db,
+        action="semantic.detect_industry",
+        user_id=current_user["id"],
+        organization_id=org_id,
+        resource_type="dataset",
+        resource_id=file.filename,
+        request=request,
+    )
+    db.commit()
+    return result
 
 
 @router.post("/search")
