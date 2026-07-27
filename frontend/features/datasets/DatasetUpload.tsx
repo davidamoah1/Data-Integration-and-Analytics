@@ -157,7 +157,7 @@ export function DatasetUpload() {
 
             <div className="flex gap-2">
               {stage === 'idle' || stage === 'error' ? (
-                <Button onClick={handleUpload} disabled={stage === 'uploading'}>
+                <Button onClick={handleUpload}>
                   <Upload className="mr-2 h-4 w-4" />
                   Upload & Analyze
                 </Button>

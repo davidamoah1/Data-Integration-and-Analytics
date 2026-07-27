@@ -15,51 +15,41 @@ export const workflowService = {
   async runWorkflow(file: File, adminConfirmed = false): Promise<WorkflowState> {
     const formData = new FormData();
     formData.append("file", file);
-    const res = await apiClient.post(
+    return await apiClient.upload<WorkflowState>(
       `${BASE}/run?admin_confirmed=${adminConfirmed}`,
       formData,
-      { headers: { "Content-Type": "multipart/form-data" } }
     );
-    return res.data as WorkflowState;
   },
 
   async getStatus(workflowId: string): Promise<WorkflowState> {
-    const res = await apiClient.get(`${BASE}/${workflowId}/status`);
-    return res.data as WorkflowState;
+    return await apiClient.get<WorkflowState>(`${BASE}/${workflowId}/status`);
   },
 
   async getProfile(workflowId: string): Promise<DatasetProfile> {
-    const res = await apiClient.get(`${BASE}/${workflowId}/profile`);
-    return res.data as DatasetProfile;
+    return await apiClient.get<DatasetProfile>(`${BASE}/${workflowId}/profile`);
   },
 
   async getQuality(workflowId: string): Promise<QualityReport> {
-    const res = await apiClient.get(`${BASE}/${workflowId}/quality`);
-    return res.data as QualityReport;
+    return await apiClient.get<QualityReport>(`${BASE}/${workflowId}/quality`);
   },
 
   async getIndustry(workflowId: string): Promise<IndustryResult> {
-    const res = await apiClient.get(`${BASE}/${workflowId}/industry`);
-    return res.data as IndustryResult;
+    return await apiClient.get<IndustryResult>(`${BASE}/${workflowId}/industry`);
   },
 
   async getInsights(workflowId: string): Promise<InsightsResult> {
-    const res = await apiClient.get(`${BASE}/${workflowId}/insights`);
-    return res.data as InsightsResult;
+    return await apiClient.get<InsightsResult>(`${BASE}/${workflowId}/insights`);
   },
 
   async getDashboard(workflowId: string): Promise<DashboardRecommendation> {
-    const res = await apiClient.get(`${BASE}/${workflowId}/dashboard`);
-    return res.data as DashboardRecommendation;
+    return await apiClient.get<DashboardRecommendation>(`${BASE}/${workflowId}/dashboard`);
   },
 
   async getSummary(workflowId: string): Promise<AnalysisSummary> {
-    const res = await apiClient.get(`${BASE}/${workflowId}/summary`);
-    return res.data as AnalysisSummary;
+    return await apiClient.get<AnalysisSummary>(`${BASE}/${workflowId}/summary`);
   },
 
   async retryStage(workflowId: string, stage: string): Promise<WorkflowState> {
-    const res = await apiClient.post(`${BASE}/${workflowId}/retry/${stage}`);
-    return res.data as WorkflowState;
+    return await apiClient.post<WorkflowState>(`${BASE}/${workflowId}/retry/${stage}`);
   },
 };

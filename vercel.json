@@ -4,7 +4,7 @@
   "name": "dataflow-enterprise",
   "framework": "nextjs",
   "buildCommand": "cd frontend && npm run build",
-  "installCommand": "cd frontend && npm install --legacy-peer-deps",
+  "installCommand": "npm install --legacy-peer-deps && cd frontend && npm install --legacy-peer-deps",
   "outputDirectory": "frontend/.next",
   "devCommand": "cd frontend && npm run dev",
   "rewrites": [
