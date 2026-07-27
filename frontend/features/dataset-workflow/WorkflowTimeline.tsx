@@ -112,7 +112,7 @@ export function WorkflowTimeline({ workflow, onRetry }: Props) {
                       {stageKey === "profiled" && (
                         <span>Quality score: {Number(stage.result.overall_quality_score || 0).toFixed(1)}/100</span>
                       )}
-                      {stageKey === "quality_checked" && stage.result.score && (
+                      {stageKey === "quality_checked" && !!stage.result.score && (
                         <span>
                           Score: {Number((stage.result.score as Record<string, number>).overall || 0).toFixed(1)}/100
                           {" — "}

@@ -51,7 +51,7 @@ export default function AICopilotPage() {
   const [conversationId, setConversationId] = useState<number | null>(null);
   const [datasetId] = useState<string | undefined>(undefined);
   const [industry, setIndustry] = useState<string>('unknown');
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -202,7 +202,7 @@ function ChatTab({
   setInput: (v: string) => void;
   loading: boolean;
   onSend: (text?: string) => void;
-  scrollRef: React.RefObject<HTMLDivElement | null>;
+  scrollRef: React.MutableRefObject<HTMLDivElement | null>;
 }) {
   return (
     <Card className="flex h-full flex-col overflow-hidden">
