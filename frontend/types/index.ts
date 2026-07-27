@@ -153,6 +153,182 @@ export interface ChatResponse {
   follow_ups?: string[];
 }
 
+// ─── Enterprise AI Types ─────────────────────────────────────
+
+export interface ExecutiveSummary {
+  id?: number;
+  title: string;
+  executive_summary: string;
+  kpi_highlights: KPIHighlight[];
+  main_drivers: string[];
+  risks: RiskItem[];
+  opportunities: string[];
+  forecast: {
+    direction: string;
+    expected_range: string;
+    horizon: string;
+    assumptions: string[];
+  };
+  recommended_actions: RecommendedAction[];
+  confidence: {
+    score: number;
+    methodology: string;
+    data_limitations: string[];
+  };
+  industry?: string;
+  dataset?: string;
+}
+
+export interface KPIHighlight {
+  metric: string;
+  value: string;
+  change: string;
+  direction: 'up' | 'down' | 'stable';
+}
+
+export interface RiskItem {
+  risk: string;
+  severity: 'low' | 'medium' | 'high';
+  evidence: string;
+}
+
+export interface RecommendedAction {
+  action: string;
+  priority: 'high' | 'medium' | 'low';
+  expected_impact: string;
+  feasibility: 'easy' | 'medium' | 'hard';
+}
+
+export interface RootCauseAnalysis {
+  id?: number;
+  observation: string;
+  magnitude: string;
+  root_causes: RootCause[];
+  ruled_out: string[];
+  conclusion: string;
+  recommended_actions: string[];
+  overall_confidence: number;
+}
+
+export interface RootCause {
+  cause: string;
+  evidence: string;
+  contribution: string;
+  confidence: number;
+}
+
+export interface ForecastResult {
+  id?: number;
+  metric: string;
+  method: string;
+  horizon: number;
+  predictions: ForecastPrediction[];
+  accuracy_score: number;
+  confidence_level: number;
+  assumptions: string[];
+  model_limitations: string[];
+  interpretation: string;
+  confidence: {
+    score: number;
+    methodology: string;
+    data_limitations: string[];
+  };
+}
+
+export interface ForecastPrediction {
+  date: string;
+  value: number;
+  lower_ci: number;
+  upper_ci: number;
+}
+
+export interface AnomalyResult {
+  alerts: AnomalyAlert[];
+  total_anomalies: number;
+  summary: string;
+  explanations: AnomalyExplanation[];
+  metric: string;
+  sensitivity: number;
+}
+
+export interface AnomalyAlert {
+  alert_type: string;
+  severity: 'info' | 'warning' | 'critical';
+  title: string;
+  description: string;
+  expected_value?: number;
+  actual_value?: number;
+  deviation_percentage?: number;
+  explanation: string;
+}
+
+export interface AnomalyExplanation {
+  alert_type: string;
+  title: string;
+  explanation: string;
+  impact: string;
+}
+
+export interface RecommendationResult {
+  recommendations: RecommendedAction[];
+  industry: string;
+  triggers_detected: Trigger[];
+  confidence: number;
+}
+
+export interface Trigger {
+  trigger: string;
+  evidence: string;
+}
+
+export interface NLAnalyticsResult {
+  intent: string;
+  query_interpretation: string;
+  analysis: {
+    method: string;
+    results: string;
+    data_points: string[];
+  };
+  explanation: string;
+  visualizations: {
+    type: string;
+    rationale: string;
+  }[];
+  confidence: number;
+}
+
+export interface ReportResult {
+  id?: number;
+  report_type: string;
+  title: string;
+  content: string;
+  summary: string;
+  sections: string[];
+  methodology: string;
+  appendix: string;
+  format: string;
+  exported?: {
+    format: string;
+    content?: string;
+    error?: string;
+  };
+  created_at: string;
+}
+
+export interface AIInsight {
+  id: number;
+  insight_type: string;
+  title: string;
+  summary: string;
+  details: Record<string, unknown>;
+  key_findings: unknown[];
+  recommendations: string[];
+  risks: string[];
+  opportunities: string[];
+  confidence_score?: number;
+  created_at: string;
+}
+
 // ─── ETL Types ───────────────────────────────────────────────
 
 export interface Pipeline {

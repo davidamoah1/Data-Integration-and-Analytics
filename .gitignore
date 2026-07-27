@@ -66,6 +66,7 @@ uploads/
 # Runtime artifacts
 *.pid
 *.log
+backups/
 
 # Stray test files
 /test.pdf

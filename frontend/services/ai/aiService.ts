@@ -1,5 +1,17 @@
 import { apiClient } from '../api/client';
-import type { ChatRequest, ChatResponse, Conversation } from '@/types';
+import type {
+  ChatRequest,
+  ChatResponse,
+  Conversation,
+  ExecutiveSummary,
+  RootCauseAnalysis,
+  ForecastResult,
+  AnomalyResult,
+  RecommendationResult,
+  NLAnalyticsResult,
+  ReportResult,
+  AIInsight,
+} from '@/types';
 
 export const aiService = {
   async chat(request: ChatRequest): Promise<ChatResponse> {
@@ -31,15 +43,73 @@ export const aiService = {
     await apiClient.post(`/ai/messages/${messageId}/feedback`, { feedback, comment });
   },
 
-  async getInsights(): Promise<unknown[]> {
+  async getInsights(): Promise<AIInsight[]> {
     return apiClient.get('/ai/insights');
   },
 
-  async generateForecast(payload: { metric: string; periods: number }): Promise<unknown> {
-    return apiClient.post('/ai/forecast', payload);
+  // ── Enterprise AI Endpoints ──────────────────────────
+
+  async generateExecutiveSummary(payload: {
+    dataset_id?: string;
+    industry?: string;
+    user_message?: string;
+  }): Promise<ExecutiveSummary> {
+    return apiClient.post('/ai/enterprise/executive-summary', payload);
   },
 
-  async detectAnomalies(payload: { metric: string }): Promise<unknown> {
-    return apiClient.post('/ai/anomaly/detect', payload);
+  async analyzeRootCause(payload: {
+    question: string;
+    dataset_id?: string;
+    industry?: string;
+  }): Promise<RootCauseAnalysis> {
+    return apiClient.post('/ai/enterprise/root-cause', payload);
+  },
+
+  async generateForecast(payload: {
+    metric: string;
+    dataset_id?: string;
+    industry?: string;
+    horizon?: string | number;
+    method?: string;
+  }): Promise<ForecastResult> {
+    return apiClient.post('/ai/enterprise/forecast', payload);
+  },
+
+  async detectAnomalies(payload: {
+    metric: string;
+    dataset_id?: string;
+    industry?: string;
+    sensitivity?: number;
+  }): Promise<AnomalyResult> {
+    return apiClient.post('/ai/enterprise/anomaly', payload);
+  },
+
+  async getRecommendations(payload: {
+    dataset_id?: string;
+    industry?: string;
+  }): Promise<RecommendationResult> {
+    return apiClient.post('/ai/enterprise/recommendations', payload);
+  },
+
+  async analyzeNaturalLanguage(payload: {
+    question: string;
+    dataset_id?: string;
+    industry?: string;
+  }): Promise<NLAnalyticsResult> {
+    return apiClient.post('/ai/enterprise/nl-analytics', payload);
+  },
+
+  async generateReport(payload: {
+    report_type?: string;
+    title?: string;
+    dataset_id?: string;
+    industry?: string;
+    format?: string;
+  }): Promise<ReportResult> {
+    return apiClient.post('/ai/enterprise/report', payload);
+  },
+
+  async listTaskTypes(): Promise<{ task_type: string; description: string; output_format: string }[]> {
+    return apiClient.get('/ai/enterprise/task-types');
   },
 };

@@ -44,6 +44,7 @@ from shared.middleware import (
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+from ai.enterprise_routes import router as ai_enterprise_router
 from ai.routes import router as ai_router
 from analytics.routes import router as analytics_router
 from api.auth import get_api_key
@@ -252,6 +253,7 @@ app.include_router(dept_router)
 app.include_router(audit_router)
 app.include_router(etl_router)
 app.include_router(ai_router)
+app.include_router(ai_enterprise_router)
 app.include_router(analytics_router)
 app.include_router(enterprise_router)
 app.include_router(platform_features_router)
