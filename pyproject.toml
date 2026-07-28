@@ -25,7 +25,7 @@ dependencies = [
   "xmltodict==0.14.2",
   "requests==2.32.3",
   "python-multipart==0.0.20",
-  "scipy==1.14.1",
+  "scipy==1.13.0",
   "PyPDF2==3.0.1",
   "python-docx==1.1.2",
   "python-pptx==1.0.2",
@@ -33,6 +33,9 @@ dependencies = [
   "psutil==6.1.1",
   "apscheduler==3.11.0",
   "numpy==1.26.4",
+  "scikit-learn==1.6.1",
+  "statsmodels==0.14.2",
+  "joblib==1.4.2",
 ]
 
 [tool.ruff]

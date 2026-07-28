@@ -801,6 +801,11 @@ def seed_default_data(db: DbSession):
         ("sessions.manage", "Manage Sessions", "sessions", "Revoke user sessions"),
         # Profile
         ("profile.update", "Update Profile", "profile", "Update own profile"),
+        # Machine Learning
+        ("ml.read", "View ML Models", "ml", "View machine learning models and dashboards"),
+        ("ml.write", "Create ML Models", "ml", "Create and edit machine learning models"),
+        ("ml.execute", "Execute ML Training", "ml", "Train, predict, and run ML jobs"),
+        ("ml.delete", "Delete ML Models", "ml", "Archive or delete ML models"),
     ]
 
     for name, display, module, desc in permissions_def:
@@ -860,6 +865,10 @@ def seed_default_data(db: DbSession):
                 "sessions.manage",
                 "profile.update",
                 "audit.view",
+                "ml.read",
+                "ml.write",
+                "ml.execute",
+                "ml.delete",
             ],
         ),
         (
@@ -879,6 +888,8 @@ def seed_default_data(db: DbSession):
                 "datasets.view",
                 "analytics.view",
                 "profile.update",
+                "ml.read",
+                "ml.execute",
             ],
         ),
         (
@@ -896,6 +907,8 @@ def seed_default_data(db: DbSession):
                 "datasets.view",
                 "dashboard.view",
                 "profile.update",
+                "ml.read",
+                "ml.execute",
             ],
         ),
         (
@@ -911,6 +924,8 @@ def seed_default_data(db: DbSession):
                 "analytics.view",
                 "etl.export",
                 "profile.update",
+                "ml.read",
+                "ml.execute",
             ],
         ),
         (

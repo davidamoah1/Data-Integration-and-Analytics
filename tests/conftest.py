@@ -29,6 +29,7 @@ import authentication.models  # noqa: F401
 import enterprise.models  # noqa: F401
 import enterprise.subscription  # noqa: F401
 import etl.models  # noqa: F401
+import ml.models  # noqa: F401
 import notifications.models  # noqa: F401
 import organizations.models  # noqa: F401
 import scheduler.models  # noqa: F401

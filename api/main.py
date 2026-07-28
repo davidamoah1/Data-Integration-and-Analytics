@@ -82,6 +82,7 @@ from shared.database import Base, get_engine
 from dataset_library.routes import router as dataset_library_router
 from validation.routes import router as validation_router
 from workflows.routes import router as workflow_router
+from ml.routes import router as ml_router
 
 
 # ── Deployment / cold-start helpers ────────────────────
@@ -318,6 +319,7 @@ app.include_router(dataset_library_router)
 app.include_router(dataset_workflow_router)
 app.include_router(dashboard_engine_router)
 app.include_router(workflow_router)
+app.include_router(ml_router)
 
 
 # ──────────────────────────────────────────────

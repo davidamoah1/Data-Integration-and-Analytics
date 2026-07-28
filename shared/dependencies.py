@@ -21,6 +21,15 @@ from authentication.repositories import (
 from shared.database import get_db
 from shared.security import decode_token
 
+
+class AuthorizationError(Exception):
+    """Raised when a user attempts to access a resource they are not authorized for."""
+
+
+class NotFoundError(Exception):
+    """Raised when a requested resource does not exist."""
+
+
 security_scheme = HTTPBearer(auto_error=False)
 
 

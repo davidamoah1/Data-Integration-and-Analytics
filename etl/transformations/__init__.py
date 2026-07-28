@@ -101,7 +101,7 @@ class TransformationEngine:
         column = config["column"]
         target_type = config["to"]
         if target_type in ("int", "integer"):
-            df[column] = pd.to_numeric(df[column], errors="coerce").fillna(0).astype(int)
+            df[column] = pd.to_numeric(df[column], errors="coerce").fillna(0).astype("int64")
         elif target_type in ("float", "decimal"):
             df[column] = pd.to_numeric(df[column], errors="coerce")
         elif target_type in ("str", "string"):
