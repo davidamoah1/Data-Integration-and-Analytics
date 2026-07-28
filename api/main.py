@@ -264,11 +264,18 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
-    """Catch unhandled exceptions and return a safe response without stack traces."""
+    """Catch unhandled exceptions and return a safe response.
+
+    In debug mode (DEBUG=1) the real message is returned to ease diagnostics
+    on Vercel and other serverless platforms.
+    """
     logger.exception("Unhandled exception")
+    message = "Internal server error"
+    if os.getenv("DEBUG", "").lower() in ("1", "true", "yes"):
+        message = f"Internal server error: {exc}"
     return JSONResponse(
         status_code=500,
-        content={"success": False, "message": "Internal server error", "data": None},
+        content={"success": False, "message": message, "data": None},
     )
 
 

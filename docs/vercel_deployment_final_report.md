@@ -249,3 +249,63 @@ The frontend uses `NEXT_PUBLIC_API_URL=http://localhost:8000` locally and `NEXT_
 ## 7. Conclusion
 
 The Vercel `functions` vs `builds` conflict is resolved, the Next.js frontend builds successfully, and the FastAPI backend deploys and responds correctly in production. The deployment is stable and the `FUNCTION_INVOCATION_FAILED` error is eliminated. Monitor function bundle size and cold-start latency as the next operational improvements.
+
+---
+
+## 8. Troubleshooting Login "Internal Server Error"
+
+If login or other API calls return **"Internal server error"** on Vercel, follow these steps:
+
+### 8.1 Set `DEBUG=1` to reveal the real error
+
+Add the environment variable in the Vercel dashboard and redeploy:
+
+```
+DEBUG=1
+```
+
+Retry login. The 500 response will now include the actual exception. Remove `DEBUG=1` after fixing.
+
+### 8.2 Database is not configured
+
+The most common cause is SQLite being used on Vercel. Vercel functions have a read-only/ephemeral filesystem, so a local SQLite file cannot be written or shared across invocations.
+
+**Fix:** Use a hosted MySQL-compatible database. In Vercel environment variables set:
+
+```
+DB_TYPE=mysql
+MYSQL_HOST=your-db-host
+MYSQL_PORT=3306
+MYSQL_DATABASE=dataflow
+MYSQL_USER=dataflow_user
+MYSQL_PASSWORD=your-strong-password
+```
+
+Serverless-friendly options: PlanetScale, Neon, Aiven, AWS RDS.
+
+### 8.3 Tables do not exist
+
+Because `VERCEL=1` skips heavy startup tasks, tables are now created **lazily** on the first database request. Trigger initialization by calling:
+
+```
+GET https://your-domain.vercel.app/api/ready
+```
+
+Then try login again.
+
+### 8.4 Default super admin not seeded
+
+If tables exist but login still fails, the default super admin may not have been seeded. With `DEBUG=1`, check the error. The seeding runs automatically when tables are created.
+
+### 8.5 JWT secret missing
+
+Ensure `JWT_SECRET_KEY` is set to a long random string in Vercel environment variables.
+
+### 8.6 CORS blocked
+
+If the frontend receives 500 or network errors, verify `CORS_ORIGINS` includes your production domain, e.g.:
+
+```
+CORS_ORIGINS=https://your-domain.vercel.app
+```
+

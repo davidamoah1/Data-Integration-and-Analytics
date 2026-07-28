@@ -40,6 +40,9 @@ if DB_TYPE == "mysql":
     )
 elif DB_TYPE == "sqlite":
     _sqlite_path = _resolve_path(os.getenv("SQLITE_DB_PATH", "database/etl_database.db"))
+    # Vercel's filesystem is read-only; use /tmp for SQLite so tables can be created.
+    if os.getenv("VERCEL", "").lower() in ("1", "true", "yes") and not os.path.isabs(_sqlite_path):
+        _sqlite_path = os.path.join("/tmp", _sqlite_path)
     DB_URL = f"sqlite:///{_sqlite_path}"
 elif DB_TYPE:
     raise ValueError(
@@ -51,6 +54,8 @@ else:
     # Production deployments should explicitly set DB_TYPE=mysql.
     DB_TYPE = "sqlite"
     _sqlite_path = _resolve_path(os.getenv("SQLITE_DB_PATH", "database/etl_database.db"))
+    if os.getenv("VERCEL", "").lower() in ("1", "true", "yes") and not os.path.isabs(_sqlite_path):
+        _sqlite_path = os.path.join("/tmp", _sqlite_path)
     DB_URL = f"sqlite:///{_sqlite_path}"
 
 # --- Connection Pool Settings (MySQL) ---

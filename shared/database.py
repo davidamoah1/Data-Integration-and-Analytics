@@ -13,6 +13,28 @@ Base = declarative_base()
 BigInt = BigInteger().with_variant(Integer, "sqlite")
 
 _engine = None
+_tables_initialized = False
+_default_data_initialized = False
+
+
+def ensure_tables(engine):
+    """Create all tables if they do not exist. Idempotent via module flag."""
+    global _tables_initialized
+    if _tables_initialized:
+        return
+    Base.metadata.create_all(engine)
+    _tables_initialized = True
+
+
+def ensure_default_data(db):
+    """Seed default roles, permissions, and super admin if missing."""
+    global _default_data_initialized
+    if _default_data_initialized:
+        return
+    from authentication.services import seed_default_data
+
+    seed_default_data(db)
+    _default_data_initialized = True
 
 
 def get_engine(**kwargs):
@@ -48,10 +70,12 @@ def get_engine(**kwargs):
 
 def reset_engine():
     """Dispose and clear the cached engine. Useful for tests."""
-    global _engine
+    global _engine, _tables_initialized, _default_data_initialized
     if _engine is not None:
         _engine.dispose()
         _engine = None
+    _tables_initialized = False
+    _default_data_initialized = False
 
 
 def get_session_factory(engine=None) -> sessionmaker:
@@ -68,12 +92,17 @@ def get_session_factory(engine=None) -> sessionmaker:
 def get_db():
     """FastAPI dependency that yields a database session.
 
-    Yields:
-        Session: SQLAlchemy session, auto-closed after request.
+    Lazily creates tables and seeds default data on the first request in a
+    process. This is especially important on serverless platforms where startup
+    tasks are skipped.
     """
-    factory = get_session_factory()
+    engine = get_engine()
+    ensure_tables(engine)
+    factory = get_session_factory(engine)
     db = factory()
     try:
+        ensure_default_data(db)
+        db.commit()
         yield db
     finally:
         db.close()
