@@ -4,10 +4,10 @@ import { Button } from '@/components/ui/Button';
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden bg-slate-950 pt-36 pb-24">
-      {/* Network mesh background image */}
+    <section className="relative overflow-hidden bg-slate-950 pt-28 pb-20 md:pt-36 md:pb-24">
+      {/* Network mesh background image - hidden on mobile for performance */}
       <div
-        className="absolute inset-x-0 top-0 -z-20 h-[700px] bg-cover bg-center"
+        className="absolute inset-x-0 top-0 -z-20 hidden h-[700px] bg-cover bg-center md:block"
         style={{ backgroundImage: 'url(/hero-bg.jpg)' }}
       />
 
@@ -18,7 +18,7 @@ export function Hero() {
 
       <div className="absolute inset-x-0 bottom-0 -z-10 h-40 bg-gradient-to-b from-transparent to-white" />
 
-      <div className="relative mx-auto max-w-7xl px-6">
+      <div className="relative mx-auto max-w-7xl px-4 md:px-6">
         <div className="mx-auto max-w-3xl text-center">
           <div className="animate-fade-in-up mb-6 inline-flex items-center gap-2 rounded-full border border-blue-400/30 bg-blue-500/10 px-4 py-1.5 text-sm font-medium text-blue-300 shadow-sm shadow-blue-900/30 backdrop-blur-sm">
             <span className="relative flex h-2 w-2">

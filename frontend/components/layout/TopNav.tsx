@@ -2,13 +2,13 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Bell, Sun, Moon, ChevronDown, LogOut, User as UserIcon, Settings } from 'lucide-react';
+import { Bell, Sun, Moon, ChevronDown, LogOut, User as UserIcon, Settings, Menu } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { useTheme } from '@/providers/ThemeProvider';
 import { getInitials } from '@/lib/utils';
 import { Badge } from '@/components/ui/Badge';
 
-export function TopNav() {
+export function TopNav({ onMenuClick }: { onMenuClick?: () => void }) {
   const router = useRouter();
   const { user, logout } = useAuthStore();
   const { theme, toggleTheme } = useTheme();
@@ -32,12 +32,22 @@ export function TopNav() {
   };
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background px-6">
-      {/* Page title space */}
-      <div className="flex-1" />
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background px-4 md:px-6">
+      {/* Mobile menu button + spacer */}
+      <div className="flex items-center gap-3">
+        {onMenuClick && (
+          <button
+            onClick={onMenuClick}
+            className="rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-foreground md:hidden"
+            aria-label="Open menu"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+        )}
+      </div>
 
       {/* Right actions */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 md:gap-4">
         {/* Theme toggle */}
         <button
           onClick={toggleTheme}
@@ -58,7 +68,7 @@ export function TopNav() {
             <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-destructive" />
           </button>
           {notifOpen && (
-            <div className="absolute right-0 mt-2 w-80 rounded-lg border bg-popover shadow-lg">
+            <div className="absolute right-0 mt-2 w-72 md:w-80 rounded-lg border bg-popover shadow-lg">
               <div className="border-b p-3 font-medium">Notifications</div>
               <div className="max-h-64 overflow-y-auto p-2">
                 <p className="py-4 text-center text-sm text-muted-foreground">No new notifications</p>
@@ -76,7 +86,7 @@ export function TopNav() {
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
               {user ? getInitials(user.full_name) : '?'}
             </div>
-            <span className="text-sm font-medium">{user?.full_name || 'User'}</span>
+            <span className="hidden text-sm font-medium sm:inline">{user?.full_name || 'User'}</span>
             <ChevronDown className="h-4 w-4 text-muted-foreground" />
           </button>
           {menuOpen && (

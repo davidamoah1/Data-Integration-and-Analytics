@@ -63,15 +63,25 @@
   }
   html {
     scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
   body {
     @apply bg-background text-foreground;
     font-feature-settings: 'rlig' 1, 'calt' 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overscroll-behavior-y: none;
+    -webkit-tap-highlight-color: transparent;
   }
   ::selection {
     background-color: hsl(var(--primary) / 0.15);
+  }
+  /* Ensure touch targets are at least 44px on mobile */
+  @media (max-width: 768px) {
+    button, a, [role="button"] {
+      touch-action: manipulation;
+    }
   }
 }
 
@@ -202,4 +212,31 @@
   background: rgba(15, 23, 42, 0.6);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+}
+
+/* ─── Mobile performance: reduce animations ──────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .animate-blob,
+  .animate-float,
+  .animate-pulse-glow,
+  .animate-gradient {
+    animation: none !important;
+  }
+  .text-shimmer {
+    animation: none !important;
+    background: none !important;
+    color: inherit !important;
+    -webkit-background-clip: unset !important;
+    background-clip: unset !important;
+  }
 }

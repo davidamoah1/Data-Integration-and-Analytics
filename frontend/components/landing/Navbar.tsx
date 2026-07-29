@@ -35,7 +35,7 @@ export function Navbar() {
           : 'border-b border-transparent bg-white/70 backdrop-blur-md',
       )}
     >
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+      <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-6 md:py-4">
         <Link href="/" className="group flex items-center gap-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-blue-500 text-lg font-bold text-white shadow-md shadow-blue-500/30 transition-transform group-hover:scale-105">
             D
