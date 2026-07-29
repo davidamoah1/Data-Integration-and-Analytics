@@ -216,11 +216,34 @@ export default function OnboardingPage() {
             <p className="mx-auto mt-3 max-w-md text-slate-500">
               Get started by uploading a CSV, Excel, or JSON file. You can also skip this step and upload later.
             </p>
-            <div className="mx-auto mt-8 max-w-md rounded-xl border-2 border-dashed border-slate-300 bg-white p-10 text-center">
+            <label
+              className="mx-auto mt-8 flex max-w-md cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-white p-10 text-center transition-colors hover:border-blue-400 hover:bg-blue-50"
+              onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('border-blue-400', 'bg-blue-50'); }}
+              onDragLeave={(e) => { e.currentTarget.classList.remove('border-blue-400', 'bg-blue-50'); }}
+              onDrop={(e) => {
+                e.preventDefault();
+                e.currentTarget.classList.remove('border-blue-400', 'bg-blue-50');
+                const file = e.dataTransfer.files[0];
+                if (file) {
+                  toast.success(`File "${file.name}" selected! Click Continue to upload.`);
+                }
+              }}
+            >
+              <input
+                type="file"
+                accept=".csv,.xlsx,.xls,.json"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    toast.success(`File "${file.name}" selected! Click Continue to upload.`);
+                  }
+                }}
+              />
               <Upload size={32} className="mx-auto mb-3 text-slate-400" />
               <p className="text-sm text-slate-500">Drag and drop a file here, or click to browse</p>
               <p className="mt-1 text-xs text-slate-400">CSV, Excel, JSON — up to 50MB</p>
-            </div>
+            </label>
             <div className="mt-6 flex justify-center gap-3">
               <Button variant="outline" onClick={() => finish(true)} disabled={loading} className="gap-2">
                 <SkipForward size={16} /> Skip for now

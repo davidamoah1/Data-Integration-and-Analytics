@@ -13,6 +13,7 @@ export default function AdminPortalPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selectedTenant, setSelectedTenant] = useState<Tenant | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadData();
@@ -20,6 +21,7 @@ export default function AdminPortalPage() {
 
   const loadData = async () => {
     setLoading(true);
+    setError(null);
     try {
       const [ovResp, tenantsResp] = await Promise.all([
         adminPortalService.overview(),
@@ -29,6 +31,7 @@ export default function AdminPortalPage() {
       setTenants(tenantsResp || []);
     } catch (e) {
       console.error("Failed to load admin data:", e);
+      setError("Failed to load admin portal data. Please try again later.");
     } finally {
       setLoading(false);
     }
@@ -60,6 +63,21 @@ export default function AdminPortalPage() {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#0a0a0a]">
         <Loader2 className="w-8 h-8 animate-spin text-gray-500" />
+      </div>
+    );
+  }
+
+  if (error && !overview) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-[#0a0a0a] text-white">
+        <AlertCircle className="w-12 h-12 text-red-400 mb-4" />
+        <p className="text-sm text-gray-400 mb-4">{error}</p>
+        <button
+          onClick={loadData}
+          className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition-colors"
+        >
+          Retry
+        </button>
       </div>
     );
   }
