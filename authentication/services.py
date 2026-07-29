@@ -977,6 +977,20 @@ def seed_default_data(db: DbSession):
     import os as _os
     admin_email = _os.getenv("SUPER_ADMIN_EMAIL", "admin@dataflow.io")
     admin_password = _os.getenv("SUPER_ADMIN_PASSWORD", "")
+
+    # Ensure a default organization exists for the super admin
+    from organizations.models import Organization
+    default_org = db.query(Organization).filter(Organization.slug == "system").first()
+    if not default_org:
+        default_org = Organization(
+            name="System Administration",
+            slug="system",
+            description="Default organization for platform administration",
+            is_active=1,
+        )
+        db.add(default_org)
+        db.flush()
+
     if admin_password and not user_repo.get_by_email(admin_email):
         admin = User(
             email=admin_email,
@@ -984,6 +998,7 @@ def seed_default_data(db: DbSession):
             full_name="System Administrator",
             is_active=1,
             email_verified_at=datetime.now(timezone.utc),
+            organization_id=default_org.id,
         )
         user_repo.create(admin)
         super_admin_role = role_repo.get_by_name("super_admin")

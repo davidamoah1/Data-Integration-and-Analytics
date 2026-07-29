@@ -12,6 +12,7 @@ from authentication.schemas import (
     ChangePasswordRequest,
     ForgotPasswordRequest,
     LoginRequest,
+    OnboardingRequest,
     ProfileUpdate,
     RefreshTokenRequest,
     ResetPasswordRequest,
@@ -20,13 +21,14 @@ from authentication.schemas import (
     SignupRequest,
     UserCreate,
     UserUpdate,
+    VerifyEmailRequest,
 )
 from authentication.services import AuthService, RoleService, UserService
 from shared.database import get_db
 from shared.dependencies import get_current_user, require_permissions
 from shared.response import success_response
 
-router = APIRouter(prefix="/auth", tags=["Authentication"])
+router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 
 
 # --- Authentication endpoints ------------------------------------------------
@@ -44,12 +46,15 @@ async def login(request: LoginRequest, req: Request, db: DbSession = Depends(get
 
 @router.post("/signup")
 async def signup(request: SignupRequest, db: DbSession = Depends(get_db)):
-    """Public self-registration. Creates a user and optionally a new organization."""
+    """Public self-registration. Creates a user and optionally a new organization.
+
+    Returns JWT tokens so the user is auto-logged in and can proceed to onboarding.
+    """
     from authentication.models import User
-    from authentication.repositories import UserRepository
-    from authentication.services import validate_password
+    from authentication.repositories import UserRepository, RoleRepository, UserRoleRepository
+    from authentication.services import AuthService, validate_password
     from organizations.models import Organization
-    from shared.security import hash_password
+    from shared.security import hash_password, create_access_token, create_refresh_token, generate_token
 
     user_repo = UserRepository(db)
     existing = user_repo.get_by_email(request.email)
@@ -63,35 +68,87 @@ async def signup(request: SignupRequest, db: DbSession = Depends(get_db)):
     org_id = None
     if request.organization_name:
         org = Organization(
-            name=request.organization_name, slug=request.organization_name.lower().replace(" ", "-")
+            name=request.organization_name,
+            slug=request.organization_name.lower().replace(" ", "-"),
         )
         db.add(org)
         db.flush()
         org_id = org.id
+
+    # Store signup extras in onboarding_data
+    onboarding_data: dict = {}
+    if request.country:
+        onboarding_data["country"] = request.country
+    if request.industry:
+        onboarding_data["industry"] = request.industry
+    if request.organization_type:
+        onboarding_data["organization_type"] = request.organization_type
 
     user = User(
         email=request.email,
         password_hash=hash_password(request.password),
         full_name=request.full_name,
         organization_id=org_id,
+        onboarding_data=onboarding_data if onboarding_data else None,
     )
     user_repo.create(user)
 
     # Assign default 'viewer' role if it exists
-    from authentication.repositories import RoleRepository, UserRoleRepository
-
     role_repo = RoleRepository(db)
     viewer_role = role_repo.get_by_name("viewer")
     if viewer_role:
         UserRoleRepository(db).set_user_roles(user.id, [viewer_role.id])
 
+    # Generate a verification token (stored in onboarding_data for now)
+    verify_token = generate_token()
+    onboarding_data["email_verify_token"] = verify_token
+    user_repo.update(user.id, onboarding_data=onboarding_data)
+
+    # Auto-login: issue tokens
+    role_names = UserRoleRepository(db).get_roles_for_user(user.id)
+    permission_names = UserRoleRepository(db).get_all_permissions_for_user(user.id)
+    access_token = create_access_token(
+        subject=str(user.id),
+        extra_claims={
+            "email": user.email,
+            "roles": role_names,
+            "permissions": permission_names,
+            "org_id": org_id,
+        },
+    )
+    refresh_token = create_refresh_token(subject=str(user.id))
+
+    # Create session
+    from authentication.models import Session as UserSession
+    from datetime import datetime, timedelta, timezone
+
+    session = UserSession(
+        user_id=user.id,
+        refresh_token=refresh_token,
+        expires_at=datetime.now(timezone.utc) + timedelta(days=7),
+    )
+    db.add(session)
+
     db.commit()
+
     return success_response(
         {
             "id": user.id,
             "email": user.email,
             "full_name": user.full_name,
             "organization_id": org_id,
+            "onboarding_completed": False,
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "token_type": "bearer",
+            "expires_in": 30 * 60,
+            "user": {
+                "id": user.id,
+                "email": user.email,
+                "full_name": user.full_name,
+                "roles": role_names,
+                "permissions": permission_names,
+            },
         },
         "Account created successfully",
     )
@@ -150,6 +207,101 @@ async def reset_password(
     service = AuthService(db)
     service.reset_password(request.token, request.new_password)
     return success_response(None, "Password reset successful")
+
+
+@router.post("/verify-email")
+async def verify_email(
+    request: VerifyEmailRequest,
+    db: DbSession = Depends(get_db),
+):
+    """Verify a user's email using a verification token."""
+    from authentication.repositories import UserRepository
+
+    user_repo = UserRepository(db)
+    # Search for user with matching verify token in onboarding_data
+    from sqlalchemy import select
+    from authentication.models import User
+
+    users = db.execute(select(User).where(User.is_deleted == 0)).scalars().all()
+    matched_user = None
+    for u in users:
+        data = u.onboarding_data or {}
+        if data.get("email_verify_token") == request.token:
+            matched_user = u
+            break
+
+    if not matched_user:
+        raise HTTPException(status_code=400, detail="Invalid verification token")
+
+    if matched_user.email_verified_at:
+        return success_response(None, "Email already verified")
+
+    service = AuthService(db)
+    service.verify_email(matched_user.id)
+
+    # Remove the verify token from onboarding_data
+    data = matched_user.onboarding_data or {}
+    data.pop("email_verify_token", None)
+    user_repo.update(matched_user.id, onboarding_data=data)
+    db.commit()
+
+    return success_response(None, "Email verified successfully")
+
+
+@router.get("/onboarding-status")
+async def get_onboarding_status(
+    current_user: dict = Depends(get_current_user),
+    db: DbSession = Depends(get_db),
+):
+    """Check if the current user has completed onboarding."""
+    from authentication.repositories import UserRepository
+
+    user = UserRepository(db).get_by_id(current_user["id"])
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return success_response({
+        "onboarding_completed": bool(user.onboarding_completed),
+        "onboarding_data": user.onboarding_data or {},
+    })
+
+
+@router.post("/onboarding")
+async def complete_onboarding(
+    request: OnboardingRequest,
+    current_user: dict = Depends(get_current_user),
+    db: DbSession = Depends(get_db),
+):
+    """Save onboarding selections and mark onboarding as complete."""
+    from authentication.repositories import UserRepository
+
+    user_repo = UserRepository(db)
+    user = user_repo.get_by_id(current_user["id"])
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Merge existing onboarding data with new data
+    existing = user.onboarding_data or {}
+    if request.industry:
+        existing["industry"] = request.industry
+    if request.organization_type:
+        existing["organization_type"] = request.organization_type
+    if request.primary_goal:
+        existing["primary_goal"] = request.primary_goal
+    if request.country:
+        existing["country"] = request.country
+    existing["skip_dataset"] = request.skip_dataset
+
+    user_repo.update(
+        user.id,
+        onboarding_data=existing,
+        onboarding_completed=1,
+    )
+    db.commit()
+
+    return success_response(
+        {"onboarding_completed": True, "onboarding_data": existing},
+        "Onboarding complete",
+    )
 
 
 # --- Profile endpoints ------------------------------------------------------
@@ -225,7 +377,7 @@ async def get_activity(
 
 # --- User management endpoints ----------------------------------------------
 
-users_router = APIRouter(prefix="/users", tags=["User Management"])
+users_router = APIRouter(prefix="/api/users", tags=["User Management"])
 
 
 @users_router.get("")
@@ -308,7 +460,7 @@ async def assign_roles(
 
 # --- Role management endpoints ---------------------------------------------
 
-roles_router = APIRouter(prefix="/roles", tags=["Role Management"])
+roles_router = APIRouter(prefix="/api/roles", tags=["Role Management"])
 
 
 @roles_router.get("")

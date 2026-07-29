@@ -49,6 +49,17 @@ class SignupRequest(BaseModel):
     organization_name: str | None = Field(
         None, max_length=200, description="Optional — creates a new org for this user"
     )
+    country: str | None = Field(None, max_length=100)
+    industry: str | None = Field(None, max_length=100)
+    organization_type: str | None = Field(None, max_length=100)
+
+
+class OnboardingRequest(BaseModel):
+    industry: str | None = None
+    organization_type: str | None = None
+    primary_goal: str | None = None
+    country: str | None = None
+    skip_dataset: bool = False
 
 
 # --- User -------------------------------------------------------------------

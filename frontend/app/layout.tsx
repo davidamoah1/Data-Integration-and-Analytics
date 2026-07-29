@@ -6,8 +6,8 @@ import { Providers } from '@/providers/Providers';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'DataFlow — Enterprise Data Intelligence Platform',
-  description: 'AI-powered data analytics, ETL, and business intelligence platform.',
+  title: 'DataFlow — Intelligent Analytics Platform',
+  description: 'A complete analytics platform that helps businesses, researchers, and organizations clean, analyze, visualize, and understand their data.',
   icons: { icon: '/favicon.ico' },
 };
 

@@ -58,6 +58,22 @@ export const datasetService = {
     return apiClient.upload('/semantic/analyze', formData);
   },
 
+  async semanticAnalyzeWithOverrides(
+    file: File,
+    overrides?: Record<string, string>,
+    adminConfirmed?: boolean,
+    forceIndustry?: string,
+  ): Promise<unknown> {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (overrides) formData.append('overrides', JSON.stringify(overrides));
+    if (forceIndustry) formData.append('force_industry', forceIndustry);
+    const params = new URLSearchParams();
+    if (adminConfirmed) params.set('admin_confirmed', 'true');
+    const qs = params.toString();
+    return apiClient.upload(`/semantic/analyze-with-overrides${qs ? `?${qs}` : ''}`, formData);
+  },
+
   async detectIndustry(file: File): Promise<unknown> {
     const formData = new FormData();
     formData.append('file', file);
@@ -68,5 +84,16 @@ export const datasetService = {
     const formData = new FormData();
     formData.append('file', file);
     return apiClient.upload('/validation/run', formData);
+  },
+
+  async persistAnalysis(payload: {
+    table_name: string;
+    industry?: string;
+    dashboard_config?: Record<string, unknown> | null;
+    kpis?: Array<Record<string, unknown>>;
+    recommendations?: string[];
+    alerts?: Array<Record<string, unknown>>;
+  }): Promise<{ dashboard_id: number | null; kpi_ids: number[]; report_id: number | null; message: string }> {
+    return apiClient.post('/semantic/persist-analysis', payload);
   },
 };

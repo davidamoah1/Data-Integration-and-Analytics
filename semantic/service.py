@@ -32,6 +32,7 @@ class SemanticIntelligenceService:
         table_name: str = "uploaded_dataset",
         overrides: dict | None = None,
         admin_confirmed: bool = False,
+        force_industry: str | None = None,
     ) -> dict:
         """Run the full semantic analysis pipeline on a dataset.
 
@@ -40,6 +41,7 @@ class SemanticIntelligenceService:
             table_name: Name for the dataset.
             overrides: Optional admin overrides {column_name: entity_key}.
             admin_confirmed: Whether admin has confirmed low-confidence industry detection.
+            force_industry: Optional industry to force (e.g. "healthcare") instead of auto-detecting.
 
         Returns:
             Complete analysis result as a dict.
@@ -50,6 +52,19 @@ class SemanticIntelligenceService:
 
         # Run the mapping engine
         mapping_result = SemanticMappingEngine.analyze(df, table_name, overrides)
+
+        # Force industry if specified
+        if force_industry and force_industry != "unknown":
+            mapping_result.industry = force_industry
+            mapping_result.industry_confidence = 100.0
+            # Reload industry knowledge for the forced industry
+            from semantic.industry_knowledge import get_industry_knowledge
+            knowledge = get_industry_knowledge(force_industry)
+            if knowledge:
+                mapping_result.kpi_definitions = knowledge.get("kpis", {})
+                mapping_result.alerts = knowledge.get("alerts", [])
+                mapping_result.ai_prompts = knowledge.get("ai_prompts", [])
+                mapping_result.recommendations = knowledge.get("recommendations", [])
 
         # Build knowledge graph
         knowledge_graph = KnowledgeGraphBuilder.build(mapping_result)

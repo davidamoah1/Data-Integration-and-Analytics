@@ -123,7 +123,7 @@ class KPIGenerator:
         revenue_label = KPIGenerator._revenue_label(industry)
 
         # Compute universal KPIs
-        if revenue_col and revenue_col in df.columns:
+        if revenue_col and revenue_col in df.columns and pd.api.types.is_numeric_dtype(df[revenue_col]):
             total_revenue = float(df[revenue_col].sum())
             kpis.append(
                 KPI(
@@ -194,10 +194,10 @@ class KPIGenerator:
             if col.lower() in ("profit", "net_profit", "earnings", "margin", "net"):
                 profit_col = col
                 break
-        if profit_col and profit_col in df.columns:
+        if profit_col and profit_col in df.columns and pd.api.types.is_numeric_dtype(df[profit_col]):
             total_profit = float(df[profit_col].sum())
             total_rev = (
-                float(df[revenue_col].sum()) if revenue_col and revenue_col in df.columns else 0
+                float(df[revenue_col].sum()) if revenue_col and revenue_col in df.columns and pd.api.types.is_numeric_dtype(df[revenue_col]) else 0
             )
             margin = (total_profit / total_rev * 100) if total_rev > 0 else 0
             kpis.append(

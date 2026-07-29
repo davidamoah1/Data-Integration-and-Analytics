@@ -25,6 +25,18 @@ PROCESSED_DATA_PATH = _resolve_path(
 DEMO_DATASETS_DIR = _resolve_path(os.getenv("DEMO_DATASETS_DIR", "demo_datasets"))
 SEED_DEMO_DATA = os.getenv("SEED_DEMO_DATA", "false").lower() in ("true", "1", "yes")
 
+# Smart Data Capture — original + enhanced uploaded document storage
+CAPTURE_STORAGE_DIR = _resolve_path(os.getenv("CAPTURE_STORAGE_DIR", "storage/capture"))
+if os.getenv("VERCEL", "").lower() in ("1", "true", "yes") and not os.path.isabs(
+    os.getenv("CAPTURE_STORAGE_DIR", "")
+):
+    CAPTURE_STORAGE_DIR = os.path.join("/tmp", "capture")
+CAPTURE_MAX_FILE_SIZE_MB = int(os.getenv("CAPTURE_MAX_FILE_SIZE_MB", "25"))
+CAPTURE_LOW_CONFIDENCE_THRESHOLD = float(os.getenv("CAPTURE_LOW_CONFIDENCE_THRESHOLD", "0.75"))
+CAPTURE_RETENTION_DAYS = int(os.getenv("CAPTURE_RETENTION_DAYS", "365"))
+# Path to the Tesseract OCR binary. Leave unset to use the system PATH.
+TESSERACT_CMD = os.getenv("TESSERACT_CMD", "")
+
 # Database
 DB_TYPE = os.getenv("DB_TYPE", "").lower()
 

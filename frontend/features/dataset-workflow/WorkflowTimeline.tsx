@@ -14,7 +14,7 @@ const STAGE_LABELS: Record<string, string> = {
   industry_identified: "Industry Detection",
   metadata_generated: "Metadata Generated",
   knowledge_extracted: "Knowledge Extraction",
-  insights_generated: "AI Insights",
+  insights_generated: "Smart Insights",
   dashboard_ready: "Dashboard Ready",
   analysis_complete: "Analysis Complete",
 };
@@ -84,7 +84,7 @@ export function WorkflowTimeline({ workflow, onRetry }: Props) {
                       <p className="text-sm text-muted-foreground capitalize">{stage.status}</p>
                     </div>
                     <div className="flex items-center gap-3">
-                      {stage.duration_seconds > 0 && (
+                      {stage.duration_seconds != null && stage.duration_seconds > 0 && (
                         <span className="text-xs text-muted-foreground">
                           {stage.duration_seconds.toFixed(2)}s
                         </span>

@@ -3,7 +3,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { User } from '@/types';
-import { authService } from '@/services/auth/authService';
+import { authService, type SignupPayload } from '@/services/auth/authService';
 import { getAccessToken, clearTokens } from '@/services/api/client';
 
 interface AuthState {
@@ -11,7 +11,8 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
+  signup: (payload: SignupPayload) => Promise<void>;
   fetchProfile: () => Promise<void>;
   logout: () => Promise<void>;
   clearError: () => void;
@@ -27,10 +28,10 @@ export const useAuthStore = create<AuthState>()(
       isLoading: false,
       error: null,
 
-      login: async (email, password) => {
+      login: async (email, password, rememberMe) => {
         set({ isLoading: true, error: null });
         try {
-          const result = await authService.login({ email, password });
+          const result = await authService.login({ email, password, remember_me: rememberMe });
           set({
             user: result.user,
             isAuthenticated: true,
@@ -38,6 +39,22 @@ export const useAuthStore = create<AuthState>()(
           });
         } catch (err) {
           const message = err instanceof Error ? err.message : 'Login failed';
+          set({ isLoading: false, error: message });
+          throw err;
+        }
+      },
+
+      signup: async (payload) => {
+        set({ isLoading: true, error: null });
+        try {
+          const result = await authService.signup(payload);
+          set({
+            user: result.user,
+            isAuthenticated: true,
+            isLoading: false,
+          });
+        } catch (err) {
+          const message = err instanceof Error ? err.message : 'Sign up failed';
           set({ isLoading: false, error: message });
           throw err;
         }

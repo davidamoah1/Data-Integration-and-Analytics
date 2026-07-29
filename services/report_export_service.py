@@ -16,6 +16,28 @@ from fpdf import FPDF
 SUPPORTED_FORMATS = {"csv", "excel", "xlsx", "pdf"}
 
 
+def _sanitize_pdf_text(text: str) -> str:
+    """Replace characters not supported by fpdf's latin-1 encoding."""
+    if not text:
+        return text
+    replacements = {
+        "\u2014": "-",   # em dash
+        "\u2013": "-",   # en dash
+        "\u2018": "'",   # left single quote
+        "\u2019": "'",   # right single quote
+        "\u201c": '"',   # left double quote
+        "\u201d": '"',   # right double quote
+        "\u2026": "...", # ellipsis
+        "\u00a0": " ",   # non-breaking space
+        "\u2022": "*",   # bullet
+        "\u2013": "-",   # en dash
+    }
+    for old, new in replacements.items():
+        text = text.replace(old, new)
+    # Remove any remaining non-latin-1 characters
+    return text.encode("latin-1", errors="replace").decode("latin-1")
+
+
 def _list_sources(data_sources: dict | None) -> list[tuple[str, list[dict]]]:
     sources: list[tuple[str, list[dict]]] = []
     if isinstance(data_sources, dict):
@@ -108,6 +130,13 @@ class ReportExportService:
         created_at: str,
         data_sources: dict,
     ) -> tuple[bytes, str, str]:
+        title = _sanitize_pdf_text(title)
+        report_type = _sanitize_pdf_text(report_type)
+        content = _sanitize_pdf_text(content)
+        summary = _sanitize_pdf_text(summary)
+        sections = [_sanitize_pdf_text(s) for s in sections]
+        created_at = _sanitize_pdf_text(str(created_at))
+
         pdf = FPDF(format="A4")
         pdf.set_auto_page_break(auto=True, margin=15)
         pdf.add_page()
@@ -139,16 +168,16 @@ class ReportExportService:
                 continue
             pdf.add_page()
             pdf.set_font("Helvetica", "B", 12)
-            pdf.cell(0, 8, name.replace("_", " ").title(), new_x="LMARGIN", new_y="NEXT")
+            pdf.cell(0, 8, _sanitize_pdf_text(name.replace("_", " ").title()), new_x="LMARGIN", new_y="NEXT")
             pdf.set_font("Helvetica", "", 9)
             cols = list(records[0].keys())
             width = 180 / max(len(cols), 1)
             for col in cols:
-                pdf.cell(width, 6, str(col)[:18], border=1)
+                pdf.cell(width, 6, _sanitize_pdf_text(str(col))[:18], border=1)
             pdf.ln()
             for row in records[:60]:
                 for col in cols:
-                    pdf.cell(width, 6, str(row.get(col, ""))[:18], border=1)
+                    pdf.cell(width, 6, _sanitize_pdf_text(str(row.get(col, "")))[:18], border=1)
                 pdf.ln()
 
         if content:

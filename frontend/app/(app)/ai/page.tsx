@@ -104,7 +104,7 @@ export default function AICopilotPage() {
   return (
     <div className="flex h-[calc(100vh-8rem)] flex-col space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Enterprise AI Copilot</h1>
+        <h1 className="text-2xl font-bold">Analytics Assistant</h1>
         <div className="flex items-center gap-2">
           <select
             value={industry}
@@ -212,7 +212,7 @@ function ChatTab({
             <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
               <Bot className="h-8 w-8 text-primary" />
             </div>
-            <h2 className="text-lg font-semibold">AI Data Analyst</h2>
+            <h2 className="text-lg font-semibold">Data Assistant</h2>
             <p className="mt-1 text-sm text-muted-foreground max-w-md">
               Ask questions about your data in natural language. I can analyze trends,
               find anomalies, and generate insights.
@@ -292,7 +292,7 @@ function ChatTab({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && onSend()}
-            placeholder="Ask the AI Copilot..."
+            placeholder="Ask the Analytics Assistant..."
             className="flex h-10 flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             disabled={loading}
           />
@@ -625,9 +625,9 @@ function ForecastTab({ datasetId, industry }: { datasetId?: string; industry: st
                       {data.predictions.map((p, i) => (
                         <tr key={i} className="border-t">
                           <td className="p-2">{p.date}</td>
-                          <td className="p-2 text-right font-medium">{p.value.toFixed(2)}</td>
-                          <td className="p-2 text-right text-muted-foreground">{p.lower_ci.toFixed(2)}</td>
-                          <td className="p-2 text-right text-muted-foreground">{p.upper_ci.toFixed(2)}</td>
+                          <td className="p-2 text-right font-medium">{Number(p.value || 0).toFixed(2)}</td>
+                          <td className="p-2 text-right text-muted-foreground">{Number(p.lower_ci || 0).toFixed(2)}</td>
+                          <td className="p-2 text-right text-muted-foreground">{Number(p.upper_ci || 0).toFixed(2)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -743,7 +743,7 @@ function AnomalyTab({ datasetId, industry }: { datasetId?: string; industry: str
                     <p className="mt-1 text-xs text-muted-foreground">{alert.description}</p>
                     {alert.deviation_percentage != null && (
                       <p className="mt-1 text-xs text-muted-foreground">
-                        Deviation: {alert.deviation_percentage.toFixed(1)}%
+                        Deviation: {Number(alert.deviation_percentage || 0).toFixed(1)}%
                       </p>
                     )}
                     <p className="mt-2 text-xs text-muted-foreground italic">{alert.explanation}</p>
@@ -794,7 +794,7 @@ function RecommendationsTab({ datasetId, industry }: { datasetId?: string; indus
       <CardContent className="space-y-4">
         {error && <p className="text-sm text-destructive">{error}</p>}
         {!data && !loading && !error && (
-          <p className="text-sm text-muted-foreground">Click Generate to get AI-powered recommendations.</p>
+          <p className="text-sm text-muted-foreground">Click Generate to get decision recommendations.</p>
         )}
         {data && (
           <>

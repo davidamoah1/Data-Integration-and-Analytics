@@ -52,6 +52,7 @@ type RequestOptions = {
   isFormData?: boolean;
   timeout?: number;
   retries?: number;
+  params?: Record<string, string | number | boolean | undefined | null>;
 };
 
 async function refreshAccessToken(): Promise<boolean> {
@@ -59,7 +60,7 @@ async function refreshAccessToken(): Promise<boolean> {
   if (!refreshToken) return false;
 
   try {
-    const res = await fetch(`${API_URL}/auth/refresh`, {
+    const res = await fetch(`${API_URL}/api/auth/refresh`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refresh_token: refreshToken }),
@@ -88,7 +89,22 @@ async function request<T = unknown>(
     isFormData = false,
     timeout = REQUEST_TIMEOUT,
     retries = MAX_RETRIES,
+    params,
   } = options;
+
+  let url = path;
+  if (params) {
+    const query = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) {
+      if (value !== undefined && value !== null) {
+        query.append(key, String(value));
+      }
+    }
+    const queryString = query.toString();
+    if (queryString) {
+      url += (path.includes('?') ? '&' : '?') + queryString;
+    }
+  }
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
@@ -110,7 +126,7 @@ async function request<T = unknown>(
 
   let response: Response;
   try {
-    response = await fetch(`${API_URL}${path}`, {
+    response = await fetch(`${API_URL}${url}`, {
       method,
       headers: requestHeaders,
       body: isFormData ? (body as FormData) : body ? JSON.stringify(body) : undefined,

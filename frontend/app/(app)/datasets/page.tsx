@@ -45,8 +45,8 @@ export default function DatasetsPage() {
   }
 
   const filtered = datasets.filter((d) =>
-    d.name.toLowerCase().includes(search.toLowerCase()) ||
-    d.industry.toLowerCase().includes(search.toLowerCase()),
+    (d.name || '').toLowerCase().includes(search.toLowerCase()) ||
+    (d.industry || '').toLowerCase().includes(search.toLowerCase()),
   );
 
   return (

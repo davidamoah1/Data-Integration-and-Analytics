@@ -25,7 +25,7 @@ const STAGE_LABELS: Record<string, string> = {
   industry_identified: "Industry Detection",
   metadata_generated: "Metadata Generated",
   knowledge_extracted: "Knowledge Extraction",
-  insights_generated: "AI Insights",
+  insights_generated: "Smart Insights",
   dashboard_ready: "Dashboard Ready",
   analysis_complete: "Analysis Complete",
 };

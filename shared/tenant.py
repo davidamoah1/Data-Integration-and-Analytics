@@ -18,13 +18,21 @@ from shared.dependencies import get_current_user
 from shared.exceptions import AuthorizationError, NotFoundError
 
 
-def get_current_organization_id(current_user: dict) -> int:
+def get_current_organization_id(current_user: dict, db: DbSession | None = None) -> int:
     """Return the organization id bound to the authenticated user.
+
+    Super admins without an organization fall back to the "system" org
+    when a db session is available.
 
     Raises:
         HTTPException: 403 if the user is not assigned to an organization.
     """
     org_id = current_user.get("organization_id")
+    if org_id is None and is_super_admin(current_user) and db is not None:
+        from organizations.models import Organization
+        org = db.query(Organization).filter(Organization.slug == "system").first()
+        if org:
+            return org.id
     if org_id is None:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -39,7 +47,11 @@ def is_super_admin(current_user: dict) -> bool:
     return "super_admin" in roles
 
 
-def require_organization_access(current_user: dict, organization_id: int | None = None) -> int:
+def require_organization_access(
+    current_user: dict,
+    organization_id: int | None = None,
+    db: DbSession | None = None,
+) -> int:
     """Ensure the user is allowed to access the requested organization.
 
     - Super admins may access any organization.
@@ -49,6 +61,7 @@ def require_organization_access(current_user: dict, organization_id: int | None 
         current_user: Decoded user dict from get_current_user.
         organization_id: Optional organization id to check. If None, the user's
             own organization is returned and no cross-org check is performed.
+        db: Optional database session for super admin org fallback.
 
     Returns:
         The organization id the user is authorized to access.
@@ -62,12 +75,17 @@ def require_organization_access(current_user: dict, organization_id: int | None 
         user_org_id = current_user.get("organization_id")
         if user_org_id is not None:
             return int(user_org_id)
+        if db is not None:
+            from organizations.models import Organization
+            org = db.query(Organization).filter(Organization.slug == "system").first()
+            if org:
+                return org.id
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Super admin without organization must specify an organization.",
         )
 
-    user_org_id = get_current_organization_id(current_user)
+    user_org_id = get_current_organization_id(current_user, db)
 
     if organization_id is None:
         return user_org_id
@@ -110,10 +128,21 @@ async def get_tenant_context(
             org_id = tenant["organization_id"]
             ...
     """
+    org_id = current_user.get("organization_id")
+    if org_id is None and is_super_admin(current_user):
+        from organizations.models import Organization
+        org = db.query(Organization).filter(Organization.slug == "system").first()
+        if org:
+            org_id = org.id
+    if org_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User is not assigned to an organization.",
+        )
     return {
         "user": current_user,
         "user_id": current_user["id"],
-        "organization_id": get_current_organization_id(current_user),
+        "organization_id": int(org_id),
         "is_super_admin": is_super_admin(current_user),
         "db": db,
     }
@@ -125,7 +154,10 @@ def tenant_scoped_dependency() -> Callable:
     Returns a dependency that resolves to the current user's organization id.
     """
 
-    async def _resolve(current_user: dict = Depends(get_current_user)) -> int:
-        return get_current_organization_id(current_user)
+    async def _resolve(
+        current_user: dict = Depends(get_current_user),
+        db: DbSession = Depends(get_db),
+    ) -> int:
+        return get_current_organization_id(current_user, db)
 
     return _resolve

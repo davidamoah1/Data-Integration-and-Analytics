@@ -40,6 +40,8 @@ class User(Base):
     email_verified_at = Column(TIMESTAMP, nullable=True)
     failed_login_count = Column(Integer, nullable=False, default=0)
     locked_until = Column(TIMESTAMP, nullable=True)
+    onboarding_completed = Column(Integer, nullable=False, default=0)
+    onboarding_data = Column(JSON, nullable=True)
     created_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
     updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now(), nullable=False)
 

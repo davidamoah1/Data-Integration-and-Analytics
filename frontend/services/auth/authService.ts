@@ -1,29 +1,61 @@
 import { apiClient, setTokens, clearTokens } from '../api/client';
 import type { LoginRequest, LoginResponse, RefreshResponse, User } from '@/types';
 
+export interface SignupPayload {
+  email: string;
+  password: string;
+  full_name: string;
+  organization_name?: string;
+  country?: string;
+  industry?: string;
+  organization_type?: string;
+}
+
+export interface SignupResponse {
+  id: number;
+  email: string;
+  full_name: string;
+  organization_id: number | null;
+  onboarding_completed: boolean;
+  access_token: string;
+  refresh_token: string;
+  token_type: string;
+  expires_in: number;
+  user: User;
+}
+
+export interface OnboardingPayload {
+  industry?: string;
+  organization_type?: string;
+  primary_goal?: string;
+  country?: string;
+  skip_dataset?: boolean;
+}
+
 export const authService = {
   async login(credentials: LoginRequest): Promise<LoginResponse> {
-    const data = await apiClient.post<LoginResponse>('/auth/login', credentials, {
+    const data = await apiClient.post<LoginResponse>('/api/auth/login', credentials, {
       skipAuth: true,
     });
     setTokens(data.access_token, data.refresh_token);
     return data;
   },
 
-  async signup(payload: {
-    email: string;
-    password: string;
-    full_name: string;
-    organization_name?: string;
-  }): Promise<{ id: number; email: string; full_name: string }> {
-    return apiClient.post('/auth/signup', payload, { skipAuth: true });
+  async signup(payload: SignupPayload): Promise<SignupResponse> {
+    const data = await apiClient.post<SignupResponse>('/api/auth/signup', payload, {
+      skipAuth: true,
+    });
+    if (data.access_token) {
+      setTokens(data.access_token, data.refresh_token);
+    }
+    return data;
   },
 
   async logout(): Promise<void> {
     const refreshToken = localStorage.getItem('dataflow_refresh_token');
     if (refreshToken) {
       try {
-        await apiClient.post('/auth/logout', { refresh_token: refreshToken });
+        await apiClient.post('/api/auth/logout', { refresh_token: refreshToken });
       } catch {
         // ignore — we clear tokens anyway
       }
@@ -32,37 +64,49 @@ export const authService = {
   },
 
   async getProfile(): Promise<User> {
-    return apiClient.get<User>('/auth/profile');
+    return apiClient.get<User>('/api/auth/profile');
   },
 
   async updateProfile(payload: Partial<User>): Promise<User> {
-    return apiClient.put<User>('/auth/profile', payload);
+    return apiClient.put<User>('/api/auth/profile', payload);
   },
 
   async changePassword(currentPassword: string, newPassword: string): Promise<void> {
-    await apiClient.post('/auth/change-password', {
+    await apiClient.post('/api/auth/change-password', {
       current_password: currentPassword,
       new_password: newPassword,
     });
   },
 
   async forgotPassword(email: string): Promise<void> {
-    await apiClient.post('/auth/forgot-password', { email }, { skipAuth: true });
+    await apiClient.post('/api/auth/forgot-password', { email }, { skipAuth: true });
   },
 
   async resetPassword(token: string, newPassword: string): Promise<void> {
-    await apiClient.post('/auth/reset-password', { token, new_password: newPassword }, { skipAuth: true });
+    await apiClient.post('/api/auth/reset-password', { token, new_password: newPassword }, { skipAuth: true });
+  },
+
+  async verifyEmail(token: string): Promise<void> {
+    await apiClient.post('/api/auth/verify-email', { token }, { skipAuth: true });
+  },
+
+  async getOnboardingStatus(): Promise<{ onboarding_completed: boolean; onboarding_data: Record<string, unknown> }> {
+    return apiClient.get('/api/auth/onboarding-status');
+  },
+
+  async completeOnboarding(payload: OnboardingPayload): Promise<{ onboarding_completed: boolean; onboarding_data: Record<string, unknown> }> {
+    return apiClient.post('/api/auth/onboarding', payload);
   },
 
   async getSessions(): Promise<unknown[]> {
-    return apiClient.get('/auth/sessions');
+    return apiClient.get('/api/auth/sessions');
   },
 
   async revokeSession(sessionId: number): Promise<void> {
-    await apiClient.delete(`/auth/sessions/${sessionId}`);
+    await apiClient.delete(`/api/auth/sessions/${sessionId}`);
   },
 
   async getLoginHistory(): Promise<unknown[]> {
-    return apiClient.get('/auth/login-history');
+    return apiClient.get('/api/auth/login-history');
   },
 };

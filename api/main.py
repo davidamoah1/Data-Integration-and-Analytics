@@ -84,6 +84,24 @@ from validation.routes import router as validation_router
 from workflows.routes import router as workflow_router
 from ml.routes import router as ml_router
 
+# Phase 12.9 — Enterprise Integration Ecosystem
+from connectors.routes import router as connectors_router
+from ecosystem.routes import router as platform_router
+from ecosystem.webhook_routes import webhook_router
+from ecosystem.plugin_routes import plugin_router
+from ecosystem.public_routes import public_router
+from ecosystem.monitoring_routes import monitoring_router
+
+# Phase 13 — Commercial SaaS Platform
+from saas.routes import saas_router
+from saas.admin_routes import admin_router
+
+# Phase 15 — AI Data Intelligence Operating System (Studios)
+from studios.routes import router as studios_router
+
+# Phase 16 — Smart Data Capture & Intelligent Document Processing
+from capture.routes import router as capture_router
+
 
 # ── Deployment / cold-start helpers ────────────────────
 
@@ -132,11 +150,50 @@ async def lifespan(app: FastAPI):
         import organizations.models  # noqa: F401
         import scheduler.models  # noqa: F401
         import validation.models  # noqa: F401
+        # Phase 12.9 — Ecosystem models
+        import connectors.models  # noqa: F401
+        import ecosystem.models  # noqa: F401
+        import ecosystem.plugin_models  # noqa: F401
+        import ecosystem.webhooks  # noqa: F401
+        # Phase 13 — SaaS models
+        import saas.models  # noqa: F401
+        # Phase 15 — Studios models
+        import studios.models  # noqa: F401
+        # Phase 16 — Smart Data Capture models
+        import capture.models  # noqa: F401
 
         try:
             Base.metadata.create_all(engine)
         except Exception as e:
             logger.error(f"Database table creation failed: {e}")
+
+        # Seed ecosystem marketplace data
+        try:
+            from sqlalchemy.orm import Session as EcoDbSession
+            from ecosystem.seed import seed_ecosystem_data
+            eco_db = EcoDbSession(engine)
+            seed_ecosystem_data(eco_db)
+            eco_db.close()
+        except Exception as e:
+            logger.error(f"Ecosystem seed failed: {e}")
+
+        # Seed SaaS plans and feature flags
+        try:
+            from saas.services import seed_saas_data
+            saas_db = EcoDbSession(engine)
+            seed_saas_data(saas_db)
+            saas_db.close()
+        except Exception as e:
+            logger.error(f"SaaS seed failed: {e}")
+
+        # Seed Studios industry data
+        try:
+            from studios.seed import seed_studios_data
+            studios_db = EcoDbSession(engine)
+            seed_studios_data(studios_db)
+            studios_db.close()
+        except Exception as e:
+            logger.error(f"Studios seed failed: {e}")
 
         # Register system AI plugins
         from sqlalchemy.orm import Session as AIDbSession
@@ -246,6 +303,8 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 app.add_middleware(RequestContextMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(RequestLoggingMiddleware)
+from saas.tenant_middleware import TenantIsolationMiddleware
+app.add_middleware(TenantIsolationMiddleware)
 _is_test_env = os.getenv("PYTEST_RUNNING", "").lower() in ("1", "true", "yes")
 if not _is_test_env:
     app.add_middleware(
@@ -320,6 +379,24 @@ app.include_router(dataset_workflow_router)
 app.include_router(dashboard_engine_router)
 app.include_router(workflow_router)
 app.include_router(ml_router)
+
+# Phase 12.9 — Enterprise Integration Ecosystem
+app.include_router(connectors_router)
+app.include_router(platform_router)
+app.include_router(webhook_router)
+app.include_router(plugin_router)
+app.include_router(public_router)
+app.include_router(monitoring_router)
+
+# Phase 13 — Commercial SaaS Platform
+app.include_router(saas_router)
+app.include_router(admin_router)
+
+# Phase 15 — AI Data Intelligence Operating System (Studios)
+app.include_router(studios_router)
+
+# Phase 16 — Smart Data Capture & Intelligent Document Processing
+app.include_router(capture_router)
 
 
 # ──────────────────────────────────────────────

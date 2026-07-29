@@ -1,16 +1,18 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { BarChart3, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { BarChart3, TrendingUp, TrendingDown, Minus, ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
 import { SkeletonCard } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { dashboardService } from '@/services/dashboard/dashboardService';
 import type { Dashboard, KPI } from '@/types';
-import { cn } from '@/lib/utils';
+import { cn, formatNumber } from '@/lib/utils';
 
 export default function AnalyticsPage() {
+  const router = useRouter();
   const [dashboards, setDashboards] = useState<Dashboard[]>([]);
   const [kpis, setKpis] = useState<KPI[]>([]);
   const [loading, setLoading] = useState(true);
@@ -63,7 +65,7 @@ export default function AnalyticsPage() {
                 <CardContent className="p-6">
                   <p className="text-sm text-muted-foreground">{kpi.name}</p>
                   <div className="mt-2 flex items-baseline gap-2">
-                    <span className="text-2xl font-bold">{kpi.value.toLocaleString()}</span>
+                    <span className="text-2xl font-bold">{formatNumber(kpi.value)}</span>
                     {kpi.unit && <span className="text-sm text-muted-foreground">{kpi.unit}</span>}
                     {kpi.trend_value != null && (
                       <span className={cn('flex items-center text-xs', trendColor)}>
@@ -74,7 +76,7 @@ export default function AnalyticsPage() {
                   </div>
                   {kpi.target && (
                     <p className="mt-1 text-xs text-muted-foreground">
-                      Target: {kpi.target.toLocaleString()}
+                      Target: {formatNumber(kpi.target)}
                     </p>
                   )}
                 </CardContent>
@@ -100,12 +102,24 @@ export default function AnalyticsPage() {
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {dashboards.map((dash) => (
-                <Card key={dash.id} className="hover:shadow-md transition-shadow cursor-pointer">
+                <Card
+                  key={dash.id}
+                  className="hover:shadow-md transition-shadow cursor-pointer"
+                  onClick={() => router.push(`/analytics/${dash.id}`)}
+                >
                   <CardContent className="p-4">
-                    <p className="font-medium">{dash.name}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {dash.widgets?.length || 0} widgets · v{dash.version}
-                    </p>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">{dash.name}</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {(dash as unknown as Record<string, unknown>).widget_count as number ?? dash.widgets?.length ?? 0} widgets · v{dash.version}
+                        </p>
+                        {dash.description && (
+                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{dash.description}</p>
+                        )}
+                      </div>
+                      <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                    </div>
                   </CardContent>
                 </Card>
               ))}

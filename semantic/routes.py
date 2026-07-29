@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 
 import pandas as pd
-from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from pydantic import BaseModel
 from sqlalchemy.orm import Session as DbSession
 
@@ -143,7 +143,7 @@ async def analyze_upload(
 ):
     """Analyze an uploaded dataset through the full semantic pipeline."""
     df = _read_semantic_upload(file)
-    org_id = get_current_organization_id(current_user)
+    org_id = get_current_organization_id(current_user, db)
 
     result = SemanticIntelligenceService.analyze_dataset(
         df, file.filename, admin_confirmed=admin_confirmed
@@ -166,17 +166,28 @@ async def analyze_upload(
 async def analyze_with_overrides(
     request: Request,
     file: UploadFile = File(...),
-    overrides: dict | None = None,
+    overrides: str | None = Form(None),
     admin_confirmed: bool = False,
+    force_industry: str | None = Form(None),
     current_user: dict = Depends(get_current_user),
     db: DbSession = Depends(get_db),
 ):
     """Analyze a dataset with admin overrides applied."""
+    import json as _json
+    parsed_overrides: dict | None = None
+    if overrides:
+        try:
+            parsed_overrides = _json.loads(overrides)
+        except (ValueError, TypeError):
+            parsed_overrides = None
+
     df = _read_semantic_upload(file)
-    org_id = get_current_organization_id(current_user)
+    org_id = get_current_organization_id(current_user, db)
 
     result = SemanticIntelligenceService.analyze_dataset(
-        df, file.filename, overrides, admin_confirmed=admin_confirmed
+        df, file.filename, parsed_overrides,
+        admin_confirmed=admin_confirmed,
+        force_industry=force_industry,
     )
     log_audit_event(
         db=db,
@@ -201,7 +212,7 @@ async def detect_industry(
 ):
     """Quick industry detection from an uploaded file."""
     df = _read_semantic_upload(file)
-    org_id = get_current_organization_id(current_user)
+    org_id = get_current_organization_id(current_user, db)
 
     result = SemanticIntelligenceService.detect_industry(df)
     log_audit_event(
@@ -304,4 +315,199 @@ async def semantic_health():
             "semantic_search",
             "governance",
         ],
+    }
+
+
+class PersistAnalysisRequest(BaseModel):
+    """Request body for persisting semantic analysis results."""
+    table_name: str = "uploaded_dataset"
+    industry: str | None = None
+    dashboard_config: dict | None = None
+    kpis: list[dict] | None = None
+    recommendations: list[str] | None = None
+    alerts: list[dict] | None = None
+
+
+@router.post("/persist-analysis")
+async def persist_analysis(
+    body: PersistAnalysisRequest,
+    request: Request,
+    current_user: dict = Depends(get_current_user),
+    db: DbSession = Depends(get_db),
+):
+    """Persist semantic analysis results (dashboard + KPIs) to the analytics database.
+
+    Creates a Dashboard with widgets and KPI records so they appear on the
+    Analytics and Dashboard pages.
+    """
+    from analytics.models import Dashboard, DashboardWidget, KPI, KPIHistory, AnalyticsAlert
+
+    org_id = current_user.get("organization_id")
+    if org_id is None:
+        from shared.tenant import get_current_organization_id
+        org_id = get_current_organization_id(current_user, db)
+
+    created_dashboard_id = None
+    created_kpi_ids: list[int] = []
+
+    # 1. Create dashboard if config provided
+    if body.dashboard_config:
+        dash = Dashboard(
+            owner_id=current_user["id"],
+            organization_id=org_id,
+            name=body.dashboard_config.get("title", f"{body.table_name} Dashboard"),
+            description=body.dashboard_config.get("subtitle", ""),
+            theme=body.industry or "default",
+            layout=body.dashboard_config.get("widgets", []),
+            is_public=True,
+        )
+        db.add(dash)
+        db.flush()
+        created_dashboard_id = dash.id
+
+        # Add widgets
+        for i, widget in enumerate(body.dashboard_config.get("widgets", [])):
+            w = DashboardWidget(
+                dashboard_id=dash.id,
+                widget_type=widget.get("type", "chart"),
+                title=widget.get("title", ""),
+                configuration={
+                    "entity": widget.get("entity", ""),
+                    "metric": widget.get("metric", ""),
+                    "available": widget.get("available", False),
+                },
+                position={"x": (i % 4) * 3, "y": (i // 4) * 4, "w": 3, "h": 4},
+                group_name=widget.get("entity", "general"),
+            )
+            db.add(w)
+
+    # 2. Create KPIs
+    if body.kpis:
+        for kpi_data in body.kpis:
+            kpi = KPI(
+                owner_id=current_user["id"],
+                organization_id=org_id,
+                name=kpi_data.get("label", kpi_data.get("key", "Unknown KPI")),
+                description=f"Auto-generated from semantic analysis of '{body.table_name}'",
+                category=kpi_data.get("category", "general"),
+                formula=kpi_data.get("key", "semantic"),
+                unit=kpi_data.get("unit", ""),
+            )
+            db.add(kpi)
+            db.flush()
+            created_kpi_ids.append(kpi.id)
+
+            # Record the value in history
+            if kpi_data.get("value") is not None:
+                hist = KPIHistory(
+                    kpi_id=kpi.id,
+                    value=float(kpi_data["value"]),
+                    status="healthy",
+                )
+                db.add(hist)
+
+    # 3. Create alerts if any
+    if body.alerts:
+        for alert_data in body.alerts:
+            alert = AnalyticsAlert(
+                organization_id=org_id,
+                alert_type="semantic",
+                severity=alert_data.get("severity", "warning"),
+                title=alert_data.get("title", "Semantic Alert"),
+                message=alert_data.get("description", ""),
+                source_type="semantic_analysis",
+            )
+            db.add(alert)
+
+    db.commit()
+
+    # 4. Generate a report from the analysis results
+    from ai.models import AIReportGeneration
+
+    report_sections = []
+    report_content_parts = []
+
+    industry_label = body.industry or "Unknown"
+    report_title = f"{industry_label.capitalize()} Analysis Report — {body.table_name}"
+
+    # Summary
+    summary_parts = []
+    if created_dashboard_id:
+        summary_parts.append(f"Dashboard created with {len(body.dashboard_config.get('widgets', [])) if body.dashboard_config else 0} widgets.")
+    if created_kpi_ids:
+        summary_parts.append(f"{len(created_kpi_ids)} KPIs tracked.")
+    if body.alerts:
+        summary_parts.append(f"{len(body.alerts)} alerts detected.")
+    summary = " ".join(summary_parts) if summary_parts else "Semantic analysis completed."
+
+    # KPI section
+    if body.kpis:
+        report_sections.append("Key Performance Indicators")
+        report_content_parts.append("## Key Performance Indicators\n")
+        for kpi in body.kpis:
+            label = kpi.get("label", kpi.get("key", "Unknown"))
+            value = kpi.get("value", "N/A")
+            unit = kpi.get("unit", "")
+            report_content_parts.append(f"- **{label}**: {value}{unit}\n")
+
+    # Dashboard section
+    if body.dashboard_config:
+        report_sections.append("Dashboard Configuration")
+        widgets = body.dashboard_config.get("widgets", [])
+        report_content_parts.append(f"\n## Dashboard Configuration\n")
+        report_content_parts.append(f"Title: {body.dashboard_config.get('title', 'N/A')}\n")
+        report_content_parts.append(f"Widgets: {len(widgets)}\n")
+        for w in widgets:
+            report_content_parts.append(f"- {w.get('title', 'Untitled')} ({w.get('type', 'chart')})\n")
+
+    # Alerts section
+    if body.alerts:
+        report_sections.append("Alerts")
+        report_content_parts.append(f"\n## Alerts\n")
+        for alert in body.alerts:
+            report_content_parts.append(f"- **{alert.get('title', 'Alert')}**: {alert.get('description', '')}\n")
+
+    # Recommendations section
+    if body.recommendations:
+        report_sections.append("Recommendations")
+        report_content_parts.append(f"\n## Recommendations\n")
+        for rec in body.recommendations:
+            report_content_parts.append(f"- {rec}\n")
+
+    report_content = "".join(report_content_parts) if report_content_parts else "No detailed content available."
+
+    report = AIReportGeneration(
+        report_type="semantic_analysis",
+        title=report_title,
+        content=report_content,
+        summary=summary,
+        sections=report_sections,
+        format="markdown",
+        user_id=current_user["id"],
+    )
+    db.add(report)
+    db.commit()
+    db.refresh(report)
+
+    log_audit_event(
+        db=db,
+        action="semantic.persist_analysis",
+        user_id=current_user["id"],
+        organization_id=org_id,
+        resource_type="dataset",
+        resource_id=body.table_name,
+        new_values={
+            "dashboard_id": created_dashboard_id,
+            "kpi_count": len(created_kpi_ids),
+            "report_id": report.id,
+        },
+        request=request,
+    )
+    db.commit()
+
+    return {
+        "dashboard_id": created_dashboard_id,
+        "kpi_ids": created_kpi_ids,
+        "report_id": report.id,
+        "message": f"Persisted {len(created_kpi_ids)} KPIs, {'1 dashboard' if created_dashboard_id else 'no dashboard'}, and 1 report",
     }

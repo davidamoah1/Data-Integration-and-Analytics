@@ -1,19 +1,42 @@
-'use client';
+import type { Metadata } from 'next';
+import { Navbar } from '@/components/landing/Navbar';
+import { Hero } from '@/components/landing/Hero';
+import { Problem } from '@/components/landing/Problem';
+import { Solution } from '@/components/landing/Solution';
+import { Features } from '@/components/landing/Features';
+import { Audience } from '@/components/landing/Audience';
+import { Comparison } from '@/components/landing/Comparison';
+import { Workflow } from '@/components/landing/Workflow';
+import { Trust } from '@/components/landing/Trust';
+import { Screenshots } from '@/components/landing/Screenshots';
+import { Testimonials } from '@/components/landing/Testimonials';
+import { PricingTeaser } from '@/components/landing/PricingTeaser';
+import { CTA } from '@/components/landing/CTA';
+import { Footer } from '@/components/landing/Footer';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+export const metadata: Metadata = {
+  title: 'DataFlow — Transform Your Data Into Meaningful Decisions',
+  description:
+    'A complete analytics platform that helps businesses, researchers, and organizations clean, analyze, visualize, and understand their data.',
+};
 
 export default function HomePage() {
-  const router = useRouter();
-
-  useEffect(() => {
-    const token = localStorage.getItem('dataflow_access_token');
-    router.push(token ? '/dashboard' : '/login');
-  }, [router]);
-
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="animate-pulse text-muted-foreground">Loading DataFlow...</div>
-    </div>
+    <main className="min-h-screen bg-white">
+      <Navbar />
+      <Hero />
+      <Problem />
+      <Solution />
+      <Features />
+      <Audience />
+      <Comparison />
+      <Workflow />
+      <Screenshots />
+      <Trust />
+      <Testimonials />
+      <PricingTeaser />
+      <CTA />
+      <Footer />
+    </main>
   );
 }

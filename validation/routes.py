@@ -60,12 +60,12 @@ def _detect_schema_type(filename: str) -> str:
     return "general"
 
 
-def _can_access_session(session: dict, current_user: dict) -> bool:
+def _can_access_session(session: dict, current_user: dict, db: DbSession | None = None) -> bool:
     """Return True if the current user can access a validation session."""
     if "super_admin" in current_user.get("roles", []):
         return True
     session_org = session.get("organization_id")
-    user_org = get_current_organization_id(current_user)
+    user_org = get_current_organization_id(current_user, db)
     return session_org is None or session_org == user_org
 
 
@@ -99,7 +99,7 @@ async def run_validation(
     result = engine.validate(df, dataset_name=filename, schema_type=schema_type)
 
     session_id = _get_next_id()
-    org_id = current_user.get("organization_id") if is_super_admin(current_user) else get_current_organization_id(current_user)
+    org_id = current_user.get("organization_id") if is_super_admin(current_user) else get_current_organization_id(current_user, db)
     session = {
         "id": session_id,
         "result": result,

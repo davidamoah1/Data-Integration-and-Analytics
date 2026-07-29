@@ -178,7 +178,7 @@ async def list_organizations(
     service = OrganizationService(db)
     if is_super_admin(current_user):
         return success_response(service.list_orgs())
-    user_org_id = get_current_organization_id(current_user)
+    user_org_id = get_current_organization_id(current_user, db)
     return success_response([service.get_org(user_org_id)])
 
 
@@ -251,7 +251,7 @@ async def create_department(
     db: DbSession = Depends(get_db),
 ):
     if not is_super_admin(current_user):
-        user_org_id = get_current_organization_id(current_user)
+        user_org_id = get_current_organization_id(current_user, db)
         if request.organization_id != user_org_id:
             raise AuthorizationError("Cannot create department outside your organization.")
     service = DepartmentService(db)

@@ -5,8 +5,10 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatDate(date: string | Date): string {
+export function formatDate(date: string | Date | undefined | null): string {
+  if (!date) return '—';
   const d = typeof date === 'string' ? new Date(date) : date;
+  if (isNaN(d.getTime())) return '—';
   return d.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
@@ -14,8 +16,10 @@ export function formatDate(date: string | Date): string {
   });
 }
 
-export function formatDateTime(date: string | Date): string {
+export function formatDateTime(date: string | Date | undefined | null): string {
+  if (!date) return '—';
   const d = typeof date === 'string' ? new Date(date) : date;
+  if (isNaN(d.getTime())) return '—';
   return d.toLocaleString('en-US', {
     year: 'numeric',
     month: 'short',
@@ -25,13 +29,15 @@ export function formatDateTime(date: string | Date): string {
   });
 }
 
-export function formatNumber(value: number): string {
+export function formatNumber(value: number | undefined | null): string {
+  if (value == null || isNaN(value)) return '0';
   if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
   if (value >= 1_000) return `${(value / 1_000).toFixed(1)}K`;
   return value.toLocaleString();
 }
 
-export function formatCurrency(value: number): string {
+export function formatCurrency(value: number | undefined | null): string {
+  if (value == null || isNaN(value)) return '$0';
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
@@ -40,12 +46,15 @@ export function formatCurrency(value: number): string {
   }).format(value);
 }
 
-export function formatPercent(value: number, decimals = 1): string {
+export function formatPercent(value: number | undefined | null, decimals = 1): string {
+  if (value == null || isNaN(value)) return '0%';
   return `${value.toFixed(decimals)}%`;
 }
 
-export function timeAgo(date: string | Date): string {
+export function timeAgo(date: string | Date | undefined | null): string {
+  if (!date) return '—';
   const d = typeof date === 'string' ? new Date(date) : date;
+  if (isNaN(d.getTime())) return '—';
   const seconds = Math.floor((Date.now() - d.getTime()) / 1000);
   if (seconds < 60) return 'just now';
   const minutes = Math.floor(seconds / 60);
@@ -57,7 +66,8 @@ export function timeAgo(date: string | Date): string {
   return formatDate(d);
 }
 
-export function getInitials(name: string): string {
+export function getInitials(name: string | undefined | null): string {
+  if (!name) return '?';
   return name
     .split(' ')
     .map((n) => n[0])

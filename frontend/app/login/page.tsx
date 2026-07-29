@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import Link from 'next/link';
+import { Eye, EyeOff, Loader2, ArrowLeft } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -16,12 +17,13 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     clearError();
     try {
-      await login(email, password);
+      await login(email, password, rememberMe);
       toast.success('Welcome back!');
       router.push('/dashboard');
     } catch {
@@ -31,6 +33,11 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      {/* Back to home */}
+      <Link href="/" className="absolute left-6 top-6 flex items-center gap-2 text-sm text-slate-400 transition-colors hover:text-white">
+        <ArrowLeft size={16} /> Back to home
+      </Link>
+
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="mb-8 flex flex-col items-center">
@@ -93,6 +100,21 @@ export default function LoginPage() {
                 </div>
               </div>
 
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="h-4 w-4 rounded border-input"
+                  />
+                  Remember me
+                </label>
+                <Link href="/forgot-password" className="text-sm text-muted-foreground hover:text-foreground">
+                  Forgot password?
+                </Link>
+              </div>
+
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? (
                   <>
@@ -105,18 +127,22 @@ export default function LoginPage() {
               </Button>
             </form>
 
-            <div className="mt-4 text-center">
-              <button
-                onClick={() => router.push('/forgot-password')}
-                className="text-sm text-muted-foreground hover:text-foreground"
-              >
-                Forgot password?
-              </button>
+            <div className="mt-4 text-center text-sm text-muted-foreground">
+              Don&apos;t have an account?{' '}
+              <Link href="/signup" className="font-medium text-primary hover:underline">
+                Sign up
+              </Link>
             </div>
           </CardContent>
         </Card>
 
-        <p className="mt-6 text-center text-xs text-slate-500">
+        <div className="mt-6 text-center">
+          <Link href="/" className="text-sm text-slate-400 transition-colors hover:text-white">
+            ← Back to home
+          </Link>
+        </div>
+
+        <p className="mt-4 text-center text-xs text-slate-500">
           © 2025 DataFlow. All rights reserved.
         </p>
       </div>

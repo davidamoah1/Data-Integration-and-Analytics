@@ -96,13 +96,14 @@ def _validate_uploaded_file(file: UploadFile) -> bytes:
 def _ensure_workflow_access(
     workflow_id: str,
     current_user: dict,
+    db: DbSession | None = None,
 ) -> None:
     """Raise 404/403 if the workflow is not visible to the current user."""
     state = _orchestrator.get_state(workflow_id)
     if not state:
         raise HTTPException(status_code=404, detail="Workflow not found")
     if "super_admin" not in current_user.get("roles", []):
-        user_org = get_current_organization_id(current_user)
+        user_org = get_current_organization_id(current_user, db)
         if state.organization_id is not None and state.organization_id != user_org:
             raise HTTPException(status_code=403, detail="Access to this workflow is not permitted")
 
@@ -129,7 +130,7 @@ async def run_workflow(
     if df.empty:
         raise HTTPException(status_code=400, detail="Uploaded file is empty")
 
-    org_id = get_current_organization_id(current_user)
+    org_id = get_current_organization_id(current_user, db)
 
     # Run a governance review before processing.
     governance = classify_dataset(df)
