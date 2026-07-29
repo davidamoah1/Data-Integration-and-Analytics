@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowRight, TrendingUp, BarChart3, PieChart, Sparkles } from 'lucide-react';
+import { ArrowRight, TrendingUp, BarChart3, PieChart } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
 export function Hero() {
@@ -10,12 +10,21 @@ export function Hero() {
         className="absolute inset-x-0 top-0 -z-20 h-[700px] bg-cover bg-center"
         style={{ backgroundImage: 'url(/hero-bg.jpg)' }}
       />
+
+      {/* Floating decorative blobs */}
+      <div className="absolute left-[10%] top-[20%] -z-10 h-72 w-72 rounded-full bg-blue-500/10 blur-3xl animate-pulse-glow" />
+      <div className="absolute right-[15%] top-[30%] -z-10 h-96 w-96 rounded-full bg-indigo-500/10 blur-3xl animate-pulse-glow" style={{ animationDelay: '2s' }} />
+      <div className="absolute left-[40%] bottom-[10%] -z-10 h-80 w-80 rounded-full bg-purple-500/8 blur-3xl animate-pulse-glow" style={{ animationDelay: '4s' }} />
+
       <div className="absolute inset-x-0 bottom-0 -z-10 h-40 bg-gradient-to-b from-transparent to-white" />
 
       <div className="relative mx-auto max-w-7xl px-6">
         <div className="mx-auto max-w-3xl text-center">
-          <div className="animate-fade-in-up mb-6 inline-flex items-center gap-2 rounded-full border border-blue-400/30 bg-blue-500/10 px-4 py-1.5 text-sm font-medium text-blue-300 shadow-sm shadow-blue-900/30">
-            <Sparkles size={14} className="text-blue-400" />
+          <div className="animate-fade-in-up mb-6 inline-flex items-center gap-2 rounded-full border border-blue-400/30 bg-blue-500/10 px-4 py-1.5 text-sm font-medium text-blue-300 shadow-sm shadow-blue-900/30 backdrop-blur-sm">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-400" />
+            </span>
             Trusted analytics for businesses, researchers &amp; institutions
           </div>
 
@@ -67,7 +76,9 @@ export function Hero() {
 
         {/* Dashboard preview mockup */}
         <div className="animate-fade-in-up mx-auto mt-16 max-w-5xl" style={{ animationDelay: '400ms' }}>
-          <div className="group rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl shadow-slate-300/50 ring-1 ring-slate-900/5 transition-shadow hover:shadow-blue-200/50">
+          {/* Glow behind mockup */}
+          <div className="absolute left-1/2 top-1/2 -z-10 h-[400px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-500/10 blur-3xl" />
+          <div className="group rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl shadow-slate-300/50 ring-1 ring-slate-900/5 transition-all duration-500 hover:shadow-blue-200/50 hover:ring-blue-200/50">
             <div className="rounded-xl bg-slate-50 p-6">
               {/* Fake window bar */}
               <div className="mb-4 flex items-center gap-2">

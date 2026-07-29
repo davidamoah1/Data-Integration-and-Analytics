@@ -17,7 +17,8 @@ const dataflow = [
 
 export function Comparison() {
   return (
-    <section className="bg-white py-24">
+    <section className="relative overflow-hidden bg-white py-24">
+      <div className="absolute inset-0 -z-10 bg-grid-slate opacity-20 [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_30%,transparent_100%)]" />
       <div className="mx-auto max-w-5xl px-6">
         <Reveal className="mx-auto max-w-2xl text-center">
           <span className="text-sm font-semibold uppercase tracking-wider text-blue-600">Why DataFlow</span>

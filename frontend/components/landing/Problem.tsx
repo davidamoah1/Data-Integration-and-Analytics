@@ -26,7 +26,8 @@ const problems = [
 
 export function Problem() {
   return (
-    <section className="bg-white py-24">
+    <section className="relative overflow-hidden bg-white py-24">
+      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-slate-50/50 to-white" />
       <div className="mx-auto max-w-7xl px-6">
         <Reveal className="mx-auto max-w-2xl text-center">
           <span className="text-sm font-semibold uppercase tracking-wider text-red-500">The problem</span>

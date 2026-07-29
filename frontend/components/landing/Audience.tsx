@@ -46,11 +46,11 @@ export function Audience() {
         <div className="mt-14 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
           {audiences.map((a, i) => (
             <Reveal key={a.title} delay={i * 80}>
-              <div className="group h-full rounded-2xl bg-white border border-slate-200 p-6 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-100/50">
-                <div className="mx-auto mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-indigo-500 text-white shadow-md shadow-blue-500/30 transition-transform duration-300 group-hover:scale-110">
+              <div className="group h-full rounded-2xl bg-white border border-slate-200 p-6 text-center transition-all duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl hover:shadow-blue-100/50">
+                <div className="mx-auto mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-indigo-500 text-white shadow-md shadow-blue-500/30 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-blue-300/40">
                   <a.icon size={22} />
                 </div>
-                <h3 className="text-base font-semibold text-slate-900">{a.title}</h3>
+                <h3 className="text-base font-semibold text-slate-900 transition-colors group-hover:text-blue-600">{a.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-slate-600">{a.description}</p>
               </div>
             </Reveal>

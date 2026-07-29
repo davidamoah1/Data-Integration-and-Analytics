@@ -31,8 +31,8 @@ export function Navbar() {
       className={cn(
         'fixed inset-x-0 top-0 z-50 transition-all duration-300',
         scrolled
-          ? 'border-b border-slate-200/80 bg-white/95 shadow-sm'
-          : 'border-b border-transparent bg-white/70',
+          ? 'border-b border-slate-200/80 bg-white/80 shadow-sm backdrop-blur-lg'
+          : 'border-b border-transparent bg-white/70 backdrop-blur-md',
       )}
     >
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">

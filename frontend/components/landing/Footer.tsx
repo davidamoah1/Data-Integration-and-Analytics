@@ -35,7 +35,8 @@ const columns = [
 
 export function Footer() {
   return (
-    <footer className="border-t border-slate-200 bg-white py-12">
+    <footer className="relative border-t border-slate-200 bg-white py-12">
+      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-500" />
       <div className="mx-auto max-w-7xl px-6">
         <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
           <div className="col-span-2 md:col-span-1">

@@ -7,8 +7,9 @@ export function CTA() {
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-blue-600 to-indigo-700 py-24">
       <div className="absolute inset-0 -z-10 animate-gradient bg-gradient-to-br from-blue-500 via-indigo-600 to-blue-700 opacity-90" />
-      <div className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
-      <div className="absolute -bottom-24 -right-10 h-80 w-80 rounded-full bg-indigo-400/20 blur-3xl" />
+      <div className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-white/10 blur-3xl animate-pulse-glow" />
+      <div className="absolute -bottom-24 -right-10 h-80 w-80 rounded-full bg-indigo-400/20 blur-3xl animate-pulse-glow" style={{ animationDelay: '2s' }} />
+      <div className="absolute left-1/2 top-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-purple-400/10 blur-3xl" />
 
       <Reveal className="relative mx-auto max-w-4xl px-6 text-center">
         <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">

@@ -12,6 +12,7 @@ import { Screenshots } from '@/components/landing/Screenshots';
 import { Testimonials } from '@/components/landing/Testimonials';
 import { PricingTeaser } from '@/components/landing/PricingTeaser';
 import { CTA } from '@/components/landing/CTA';
+import { Stats } from '@/components/landing/Stats';
 import { Footer } from '@/components/landing/Footer';
 
 export const metadata: Metadata = {
@@ -25,6 +26,7 @@ export default function HomePage() {
     <main className="min-h-screen bg-white">
       <Navbar />
       <Hero />
+      <Stats />
       <Problem />
       <Solution />
       <Features />
@@ -34,6 +36,7 @@ export default function HomePage() {
       <Screenshots />
       <Trust />
       <Testimonials />
+      <Stats />
       <PricingTeaser />
       <CTA />
       <Footer />

@@ -25,18 +25,18 @@ export function Workflow() {
         </Reveal>
 
         <div className="relative mt-14">
-          <div className="absolute left-0 right-0 top-8 hidden h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent lg:block" />
+          <div className="absolute left-0 right-0 top-8 hidden h-0.5 bg-gradient-to-r from-transparent via-blue-300 to-transparent lg:block" />
           <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-6">
             {steps.map((step, i) => (
               <Reveal key={step.label} delay={i * 90}>
                 <div className="group relative flex flex-col items-center text-center">
-                  <div className="relative z-10 mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-200 bg-white text-blue-600 shadow-sm transition-all duration-300 group-hover:-translate-y-1 group-hover:border-blue-300 group-hover:shadow-lg group-hover:shadow-blue-200/60">
+                  <div className="relative z-10 mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-200 bg-white text-blue-600 shadow-sm transition-all duration-300 group-hover:-translate-y-1.5 group-hover:border-blue-400 group-hover:bg-blue-50 group-hover:shadow-lg group-hover:shadow-blue-200/60">
                     <step.icon size={26} />
-                    <span className="absolute -right-1.5 -top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-[11px] font-bold text-white shadow-sm">
+                    <span className="absolute -right-1.5 -top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 text-[11px] font-bold text-white shadow-sm ring-2 ring-white">
                       {i + 1}
                     </span>
                   </div>
-                  <p className="text-sm font-medium text-slate-800">{step.label}</p>
+                  <p className="text-sm font-medium text-slate-800 transition-colors group-hover:text-blue-600">{step.label}</p>
                 </div>
               </Reveal>
             ))}
