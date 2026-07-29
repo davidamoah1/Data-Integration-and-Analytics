@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
-  output: 'standalone',
+  output: process.env.NODE_ENV === 'production' ? 'standalone' : undefined,
   async rewrites() {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
     // Only proxy to an external backend when a full URL is provided.
