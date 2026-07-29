@@ -20,6 +20,7 @@ import {
   Crown,
   Sparkles,
   ScanLine,
+  LayoutTemplate,
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -38,6 +39,7 @@ const navItems: NavItem[] = [
   { label: 'Smart Capture', href: '/capture', icon: ScanLine },
   { label: 'Datasets', href: '/datasets', icon: Database, permission: 'datasets.view' },
   { label: 'Analytics', href: '/analytics', icon: BarChart3, permission: 'analytics.view' },
+  { label: 'Templates', href: '/templates', icon: LayoutTemplate },
   { label: 'Analytics Assistant', href: '/ai', icon: Bot, permission: 'ai.use' },
   { label: 'Reports', href: '/reports', icon: FileText, permission: 'reports.view' },
   { label: 'Scheduler', href: '/scheduler', icon: CalendarClock },

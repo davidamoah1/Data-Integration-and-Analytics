@@ -7,14 +7,17 @@ const columns = [
       { label: 'Features', href: '#features' },
       { label: 'Solutions', href: '#solutions' },
       { label: 'Industries', href: '#industries' },
-      { label: 'Pricing', href: '#pricing' },
+      { label: 'Pricing', href: '/pricing' },
+      { label: 'Templates', href: '/templates' },
     ],
   },
   {
     title: 'Company',
     links: [
-      { label: 'About', href: '#' },
-      { label: 'Contact', href: 'mailto:hello@dataflow.io' },
+      { label: 'About', href: '/about' },
+      { label: 'Contact', href: '/contact' },
+      { label: 'Help Center', href: '/help' },
+      { label: 'System Status', href: '/status' },
     ],
   },
   {
@@ -22,6 +25,10 @@ const columns = [
     links: [
       { label: 'Workflow', href: '#workflow' },
       { label: 'Login', href: '/login' },
+      { label: 'Sign Up', href: '/signup' },
+      { label: 'Feedback', href: '/feedback' },
+      { label: 'Privacy Policy', href: '/privacy' },
+      { label: 'Terms of Service', href: '/terms' },
     ],
   },
 ];

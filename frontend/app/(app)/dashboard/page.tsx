@@ -10,14 +10,17 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { dashboardService } from '@/services/dashboard/dashboardService';
 import { datasetService } from '@/services/datasets/datasetService';
 import type { Dashboard, Dataset } from '@/types';
-import { BarChart3, Database, TrendingUp, Activity, ArrowRight } from 'lucide-react';
+import {
+  BarChart3, Database, TrendingUp, Activity, ArrowRight, Sparkles,
+} from 'lucide-react';
 import Link from 'next/link';
 import { formatNumber, timeAgo } from '@/lib/utils';
 import { Badge } from '@/components/ui/Badge';
+import { GUIDED_TASKS } from '@/lib/workflows';
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
   const [dashboards, setDashboards] = useState<Dashboard[]>([]);
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [loading, setLoading] = useState(true);
@@ -65,31 +68,64 @@ export default function DashboardPage() {
     { label: 'Processing', value: datasets.filter((d) => d.status === 'processing').length, icon: TrendingUp, color: 'text-orange-500' },
   ];
 
+  const firstName = user?.full_name?.split(' ')[0] || 'there';
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        <Link href="/datasets" className="text-sm text-primary hover:underline">
-          Upload Dataset →
-        </Link>
+    <div className="space-y-8">
+      {/* Welcome Header */}
+      <div>
+        <h1 className="text-2xl font-bold">Welcome back, {firstName}</h1>
+        <p className="mt-1 text-muted-foreground">What would you like to accomplish today?</p>
+      </div>
+
+      {/* Guided Tasks */}
+      <div>
+        <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
+          <Sparkles className="h-5 w-5 text-primary" />
+          Quick Start
+        </h2>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {GUIDED_TASKS.map((task) => {
+            const Icon = task.icon;
+            return (
+              <Link
+                key={task.id}
+                href={task.href}
+                className="group flex items-start gap-3 rounded-xl border bg-card p-4 transition-all hover:border-primary/50 hover:shadow-md"
+              >
+                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${task.color} text-white`}>
+                  <Icon className="h-5 w-5" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium text-foreground group-hover:text-primary">{task.title}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{task.description}</p>
+                </div>
+                <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-primary" />
+              </Link>
+            );
+          })}
+        </div>
       </div>
 
       {/* KPI Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <Card key={stat.label}>
-              <CardContent className="flex items-center justify-between p-6">
-                <div>
-                  <p className="text-sm text-muted-foreground">{stat.label}</p>
-                  <p className="text-2xl font-bold">{formatNumber(stat.value)}</p>
-                </div>
-                <Icon className={`h-8 w-8 ${stat.color}`} />
-              </CardContent>
-            </Card>
-          );
-        })}
+      <div>
+        <h2 className="mb-4 text-lg font-semibold">Overview</h2>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {stats.map((stat) => {
+            const Icon = stat.icon;
+            return (
+              <Card key={stat.label}>
+                <CardContent className="flex items-center justify-between p-6">
+                  <div>
+                    <p className="text-sm text-muted-foreground">{stat.label}</p>
+                    <p className="text-2xl font-bold">{formatNumber(stat.value)}</p>
+                  </div>
+                  <Icon className={`h-8 w-8 ${stat.color}`} />
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
       </div>
 
       {/* Recent Datasets */}

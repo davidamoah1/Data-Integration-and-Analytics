@@ -33,8 +33,8 @@ export function Hero() {
             className="animate-fade-in-up mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-300"
             style={{ animationDelay: '160ms' }}
           >
-            A complete analytics platform that helps businesses, researchers, and
-            organizations clean, analyze, visualize, and understand their data.
+            Easier than Excel. More powerful than traditional BI. DataFlow guides you
+            through complete workflows — from raw data to professional reports — in minutes, not hours.
           </p>
 
           <div

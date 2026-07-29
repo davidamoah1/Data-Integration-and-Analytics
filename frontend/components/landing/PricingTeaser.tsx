@@ -1,4 +1,6 @@
-import { Sparkles } from 'lucide-react';
+import { Sparkles, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
+import { Button } from '@/components/ui/Button';
 import { Reveal } from './Reveal';
 
 export function PricingTeaser() {
@@ -9,11 +11,16 @@ export function PricingTeaser() {
         <div className="mx-auto mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-indigo-500 text-white shadow-md shadow-blue-500/30">
           <Sparkles size={22} />
         </div>
-        <h2 className="text-2xl font-bold text-slate-900">Pricing — Coming Soon</h2>
+        <h2 className="text-2xl font-bold text-slate-900">Simple, transparent pricing</h2>
         <p className="mt-3 text-slate-600">
-          We&apos;re finalizing flexible plans for businesses, researchers, and institutions
-          of every size. Get started for free today and we&apos;ll notify you when pricing launches.
+          Start free, upgrade when you need more. Flexible plans for businesses, researchers,
+          and institutions of every size.
         </p>
+        <Link href="/pricing" className="mt-6 inline-block">
+          <Button size="lg" className="gap-2">
+            View Pricing <ArrowRight size={18} />
+          </Button>
+        </Link>
       </Reveal>
     </section>
   );
