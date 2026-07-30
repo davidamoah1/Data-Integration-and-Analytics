@@ -2,25 +2,29 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Bell, Sun, Moon, ChevronDown, LogOut, User as UserIcon, Settings, Menu } from 'lucide-react';
+import { Bell, Sun, Moon, Monitor, ChevronDown, LogOut, User as UserIcon, Settings, Menu } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { useTheme } from '@/providers/ThemeProvider';
 import { getInitials } from '@/lib/utils';
 import { Badge } from '@/components/ui/Badge';
+import { cn } from '@/lib/utils';
 
 export function TopNav({ onMenuClick }: { onMenuClick?: () => void }) {
   const router = useRouter();
   const { user, logout } = useAuthStore();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, resolvedTheme, setTheme, toggleTheme } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [themeOpen, setThemeOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
+  const themeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
       if (notifRef.current && !notifRef.current.contains(e.target as Node)) setNotifOpen(false);
+      if (themeRef.current && !themeRef.current.contains(e.target as Node)) setThemeOpen(false);
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -30,6 +34,8 @@ export function TopNav({ onMenuClick }: { onMenuClick?: () => void }) {
     await logout();
     router.push('/');
   };
+
+  const themeIcon = resolvedTheme === 'dark' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />;
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background px-4 md:px-6">
@@ -48,14 +54,46 @@ export function TopNav({ onMenuClick }: { onMenuClick?: () => void }) {
 
       {/* Right actions */}
       <div className="flex items-center gap-2 md:gap-4">
-        {/* Theme toggle */}
-        <button
-          onClick={toggleTheme}
-          className="rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-foreground"
-          aria-label="Toggle theme"
-        >
-          {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-        </button>
+        {/* Theme selector */}
+        <div ref={themeRef} className="relative">
+          <button
+            onClick={() => setThemeOpen(!themeOpen)}
+            className="rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-foreground"
+            aria-label="Theme settings"
+          >
+            {themeIcon}
+          </button>
+          {themeOpen && (
+            <div className="absolute right-0 mt-2 w-40 rounded-lg border bg-popover shadow-lg">
+              <div className="border-b p-2 text-xs font-semibold text-muted-foreground">Theme</div>
+              {([
+                { value: 'light' as const, label: 'Light', icon: Sun },
+                { value: 'dark' as const, label: 'Dark', icon: Moon },
+                { value: 'system' as const, label: 'System', icon: Monitor },
+              ]).map((opt) => {
+                const Icon = opt.icon;
+                return (
+                  <button
+                    key={opt.value}
+                    onClick={() => { setTheme(opt.value); setThemeOpen(false); }}
+                    className={cn(
+                      'flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors',
+                      theme === opt.value
+                        ? 'bg-accent font-medium text-foreground'
+                        : 'text-muted-foreground hover:bg-accent hover:text-foreground',
+                    )}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {opt.label}
+                    {theme === opt.value && (
+                      <span className="ml-auto h-2 w-2 rounded-full bg-primary" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
 
         {/* Notifications */}
         <div ref={notifRef} className="relative">

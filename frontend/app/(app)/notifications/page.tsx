@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { apiClient } from '@/services/api/client';
 import type { Notification } from '@/types';
 import { timeAgo } from '@/lib/utils';
@@ -13,20 +14,24 @@ import { timeAgo } from '@/lib/utils';
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function load() {
-      try {
-        const data = await apiClient.get<Notification[]>('/notifications');
-        setNotifications(data || []);
-      } catch {
-        // ignore
-      } finally {
-        setLoading(false);
-      }
-    }
     load();
   }, []);
+
+  async function load() {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await apiClient.get<Notification[]>('/notifications');
+      setNotifications(data || []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load notifications');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -40,6 +45,8 @@ export default function NotificationsPage() {
             <div className="space-y-3">
               {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-16 w-full" />)}
             </div>
+          ) : error ? (
+            <ErrorState message={error} onRetry={load} />
           ) : notifications.length === 0 ? (
             <EmptyState
               icon={<Bell className="h-10 w-10" />}

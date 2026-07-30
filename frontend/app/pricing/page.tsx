@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 const plans = [
   {
     name: 'Free',
-    price: '$0',
+    price: '₵0',
     period: 'forever',
     description: 'For individuals getting started with data analytics',
     features: [
@@ -28,7 +28,7 @@ const plans = [
   },
   {
     name: 'Professional',
-    price: '$49',
+    price: '₵600',
     period: 'per month',
     description: 'For analysts and researchers who need more power',
     features: [
@@ -68,7 +68,7 @@ const plans = [
 
 export default function PricingPage() {
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-background">
       <Navbar />
 
       <section className="mx-auto max-w-7xl px-6 py-20">
@@ -87,8 +87,8 @@ export default function PricingPage() {
               key={plan.name}
               className={`relative rounded-2xl border-2 p-8 ${
                 plan.highlighted
-                  ? 'border-blue-600 bg-blue-50/50 shadow-xl shadow-blue-200/50'
-                  : 'border-slate-200 bg-white'
+                  ? 'border-blue-600 bg-blue-50/50 shadow-xl shadow-blue-200/50 dark:bg-blue-950/30 dark:shadow-blue-900/30'
+                  : 'border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900'
               }`}
             >
               {plan.highlighted && (
@@ -107,7 +107,7 @@ export default function PricingPage() {
                 className={`mt-6 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
                   plan.highlighted
                     ? 'bg-blue-600 text-white hover:bg-blue-700'
-                    : 'border border-slate-300 text-slate-700 hover:bg-slate-50'
+                    : 'border border-slate-300 text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800'
                 }`}
               >
                 {plan.cta} <ArrowRight size={16} />
@@ -124,7 +124,7 @@ export default function PricingPage() {
           ))}
         </div>
 
-        <div className="mt-16 rounded-2xl bg-slate-50 p-8 text-center">
+        <div className="mt-16 rounded-2xl bg-slate-50 p-8 text-center dark:bg-slate-900">
           <h2 className="text-xl font-bold text-slate-900">Need a custom plan?</h2>
           <p className="mt-2 text-slate-600">We offer custom pricing for NGOs, educational institutions, and government agencies.</p>
           <Link href="/contact" className="mt-4 inline-block text-sm font-medium text-blue-600 hover:underline">

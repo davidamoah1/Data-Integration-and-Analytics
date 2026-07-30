@@ -8,8 +8,15 @@ export interface User {
   phone?: string;
   organization_id?: number;
   organization_name?: string;
+  department_id?: number;
+  position?: string;
+  language?: string;
+  timezone?: string;
   roles: string[];
   permissions: string[];
+  email_verified?: boolean;
+  last_login_at?: string;
+  created_at?: string;
 }
 
 export interface LoginRequest {

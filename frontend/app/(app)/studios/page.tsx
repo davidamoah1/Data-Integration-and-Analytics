@@ -83,8 +83,8 @@ export default function StudiosPage() {
   return (
     <div className="p-8 max-w-7xl mx-auto">
       <div className="mb-10">
-        <h1 className="text-3xl font-bold text-gray-900">Data Intelligence Studios</h1>
-        <p className="mt-2 text-lg text-gray-600">
+        <h1 className="text-3xl font-bold text-foreground">Data Intelligence Studios</h1>
+        <p className="mt-2 text-lg text-muted-foreground">
           One intelligent platform where data enters and decisions come out.
         </p>
       </div>
@@ -96,15 +96,15 @@ export default function StudiosPage() {
             <Link
               key={studio.href}
               href={studio.href}
-              className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-all hover:shadow-lg hover:border-gray-300"
+              className="group relative overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all hover:shadow-lg hover:border-primary/50"
             >
               <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl ${studio.color} text-white mb-4`}>
                 <Icon size={24} />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+              <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
                 {studio.title}
               </h3>
-              <p className="mt-2 text-sm text-gray-600 leading-relaxed">
+              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
                 {studio.description}
               </p>
             </Link>

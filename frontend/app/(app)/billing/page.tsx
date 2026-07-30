@@ -178,7 +178,7 @@ export default function BillingPage() {
                 </div>
                 <p className="text-xs text-gray-400 mb-3 line-clamp-2">{plan.description}</p>
                 <div className="mb-4">
-                  <span className="text-2xl font-bold">${price}</span>
+                  <span className="text-2xl font-bold">₵{price}</span>
                   <span className="text-xs text-gray-500">/{billingCycle === "yearly" ? "yr" : "mo"}</span>
                 </div>
                 <div className="space-y-1.5 mb-4 flex-1">

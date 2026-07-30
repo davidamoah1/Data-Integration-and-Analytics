@@ -1,45 +1,70 @@
 import type { Metadata } from 'next';
-import { Navbar } from '@/components/landing/Navbar';
-import { Hero } from '@/components/landing/Hero';
-import { Problem } from '@/components/landing/Problem';
-import { Solution } from '@/components/landing/Solution';
-import { Features } from '@/components/landing/Features';
-import { Audience } from '@/components/landing/Audience';
-import { Comparison } from '@/components/landing/Comparison';
-import { Workflow } from '@/components/landing/Workflow';
-import { Trust } from '@/components/landing/Trust';
-import { Screenshots } from '@/components/landing/Screenshots';
-import { Testimonials } from '@/components/landing/Testimonials';
-import { PricingTeaser } from '@/components/landing/PricingTeaser';
-import { CTA } from '@/components/landing/CTA';
-import { Stats } from '@/components/landing/Stats';
-import { Footer } from '@/components/landing/Footer';
+import { LandingContent } from '@/components/landing-v2/LandingContent';
 
 export const metadata: Metadata = {
-  title: 'DataFlow — Transform Your Data Into Meaningful Decisions',
+  title: 'DataFlow — Transform Data Into Decisions',
   description:
-    'A complete analytics platform that helps businesses, researchers, and organizations clean, analyze, visualize, and understand their data.',
+    'One platform for collecting, preparing, analyzing, visualizing, reporting, and presenting data across healthcare, education, business, government, research, and more.',
+  keywords: [
+    'data analytics platform',
+    'business intelligence',
+    'data visualization',
+    'reporting platform',
+    'ETL pipeline',
+    'dashboard builder',
+    'healthcare analytics',
+    'education analytics',
+    'research analytics',
+    'data integration',
+  ],
+  authors: [{ name: 'DataFlow' }],
+  creator: 'DataFlow',
+  openGraph: {
+    title: 'DataFlow — Transform Data Into Decisions',
+    description:
+      'One platform for collecting, preparing, analyzing, visualizing, reporting, and presenting data across healthcare, education, business, government, research, and more.',
+    type: 'website',
+    locale: 'en_US',
+    siteName: 'DataFlow',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'DataFlow — Transform Data Into Decisions',
+    description:
+      'One platform for collecting, preparing, analyzing, visualizing, reporting, and presenting data.',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  alternates: {
+    canonical: '/',
+  },
+};
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'DataFlow',
+  applicationCategory: 'BusinessApplication',
+  operatingSystem: 'Web',
+  description:
+    'One platform for collecting, preparing, analyzing, visualizing, reporting, and presenting data across healthcare, education, business, government, research, and more.',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+  },
 };
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-white">
-      <Navbar />
-      <Hero />
-      <Stats />
-      <Problem />
-      <Solution />
-      <Features />
-      <Audience />
-      <Comparison />
-      <Workflow />
-      <Screenshots />
-      <Trust />
-      <Testimonials />
-      <Stats />
-      <PricingTeaser />
-      <CTA />
-      <Footer />
+    <main className="relative min-h-screen bg-background">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <LandingContent />
     </main>
   );
 }

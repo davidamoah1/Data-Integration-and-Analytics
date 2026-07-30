@@ -42,7 +42,7 @@ export default function SystemStatusPage() {
   const allOperational = services.every((s) => s.status === 'operational');
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-background">
       <Navbar />
 
       <section className="mx-auto max-w-3xl px-6 py-20">

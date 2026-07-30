@@ -2,22 +2,24 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Menu, X, ArrowRight } from 'lucide-react';
+import { Menu, X, ArrowRight, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
+import { useTheme } from '@/providers/ThemeProvider';
 
 const navLinks = [
-  { label: 'Features', href: '#features' },
-  { label: 'Solutions', href: '#solutions' },
-  { label: 'Industries', href: '#industries' },
-  { label: 'Templates', href: '/templates' },
+  { label: 'Features', href: '/features' },
+  { label: 'Solutions', href: '/solutions' },
+  { label: 'Industries', href: '/industries' },
   { label: 'Pricing', href: '/pricing' },
+  { label: 'About', href: '/about' },
   { label: 'Help', href: '/help' },
 ];
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -56,6 +58,13 @@ export function Navbar() {
         </div>
 
         <div className="hidden items-center gap-3 md:flex">
+          <button
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
+            aria-label="Toggle theme"
+          >
+            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
           <Link href="/login">
             <Button variant="ghost" size="sm">Login</Button>
           </Link>
@@ -66,13 +75,22 @@ export function Navbar() {
           </Link>
         </div>
 
-        <button
-          className="text-slate-700 md:hidden"
-          onClick={() => setOpen(!open)}
+        <div className="flex items-center gap-1 md:hidden">
+          <button
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-700"
+            aria-label="Toggle theme"
+          >
+            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+          </button>
+          <button
+            className="text-slate-700"
+            onClick={() => setOpen(!open)}
           aria-label="Toggle menu"
         >
           {open ? <X size={24} /> : <Menu size={24} />}
-        </button>
+          </button>
+        </div>
       </nav>
 
       <div

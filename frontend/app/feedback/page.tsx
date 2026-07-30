@@ -33,7 +33,7 @@ export default function FeedbackPage() {
   };
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-background">
       <Navbar />
 
       <section className="mx-auto max-w-2xl px-6 py-20">

@@ -78,23 +78,23 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
       {/* Progress bar */}
-      <div className="border-b border-slate-200 bg-white">
+      <div className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
         <div className="mx-auto flex max-w-3xl items-center gap-2 px-6 py-4">
           {STEPS.map((label, i) => (
             <div key={label} className="flex flex-1 items-center gap-2">
               <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold transition-colors ${
                 i < step ? 'bg-green-500 text-white' :
                 i === step ? 'bg-primary text-primary-foreground' :
-                'bg-slate-200 text-slate-400'
+                'bg-slate-200 text-slate-400 dark:bg-slate-700 dark:text-slate-500'
               }`}>
                 {i < step ? <CheckCircle2 size={16} /> : i + 1}
               </div>
-              <span className={`hidden text-xs font-medium sm:inline ${i <= step ? 'text-slate-700' : 'text-slate-400'}`}>
+              <span className={`hidden text-xs font-medium sm:inline ${i <= step ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-600'}`}>
                 {label}
               </span>
-              {i < STEPS.length - 1 && <div className={`h-0.5 flex-1 ${i < step ? 'bg-green-500' : 'bg-slate-200'}`} />}
+              {i < STEPS.length - 1 && <div className={`h-0.5 flex-1 ${i < step ? 'bg-green-500' : 'bg-slate-200 dark:bg-slate-700'}`} />}
             </div>
           ))}
         </div>
@@ -107,10 +107,10 @@ export default function OnboardingPage() {
             <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg">
               <Sparkles size={36} />
             </div>
-            <h1 className="text-3xl font-bold text-slate-900">
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
               Welcome{user?.full_name ? `, ${user.full_name.split(' ')[0]}` : ''}! 👋
             </h1>
-            <p className="mx-auto mt-4 max-w-lg text-lg text-slate-600">
+            <p className="mx-auto mt-4 max-w-lg text-lg text-slate-600 dark:text-slate-400">
               Let&apos;s set up your workspace in a few quick steps. This helps us tailor DataFlow to your needs.
             </p>
             <div className="mt-8">
@@ -124,8 +124,8 @@ export default function OnboardingPage() {
         {/* Step 1: Industry */}
         {step === 1 && (
           <div>
-            <h2 className="mb-2 text-2xl font-bold text-slate-900">What industry are you in?</h2>
-            <p className="mb-6 text-slate-500">Select the industry that best describes your work.</p>
+            <h2 className="mb-2 text-2xl font-bold text-slate-900 dark:text-slate-100">What industry are you in?</h2>
+            <p className="mb-6 text-slate-500 dark:text-slate-400">Select the industry that best describes your work.</p>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
               {INDUSTRIES.map((ind) => (
                 <button
@@ -134,13 +134,13 @@ export default function OnboardingPage() {
                   className={`flex flex-col items-center gap-2 rounded-xl border-2 p-4 transition-all hover:shadow-md ${
                     data.industry === ind.key
                       ? 'border-primary bg-primary/5'
-                      : 'border-slate-200 bg-white hover:border-slate-300'
+                      : 'border-slate-200 bg-white hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600'
                   }`}
                 >
                   <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${ind.color} text-white`}>
                     <ind.icon size={20} />
                   </div>
-                  <span className="text-xs font-medium text-slate-700">{ind.key}</span>
+                  <span className="text-xs font-medium text-slate-700 dark:text-slate-300">{ind.key}</span>
                 </button>
               ))}
             </div>
@@ -150,8 +150,8 @@ export default function OnboardingPage() {
         {/* Step 2: Organization Type */}
         {step === 2 && (
           <div>
-            <h2 className="mb-2 text-2xl font-bold text-slate-900">What type of organization?</h2>
-            <p className="mb-6 text-slate-500">This helps us configure the right features for you.</p>
+            <h2 className="mb-2 text-2xl font-bold text-slate-900 dark:text-slate-100">What type of organization?</h2>
+            <p className="mb-6 text-slate-500 dark:text-slate-400">This helps us configure the right features for you.</p>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {ORG_TYPES.map((type) => (
                 <button
@@ -160,15 +160,15 @@ export default function OnboardingPage() {
                   className={`flex items-center gap-3 rounded-xl border-2 p-4 text-left transition-all hover:shadow-md ${
                     data.organization_type === type
                       ? 'border-primary bg-primary/5'
-                      : 'border-slate-200 bg-white hover:border-slate-300'
+                      : 'border-slate-200 bg-white hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600'
                   }`}
                 >
                   <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${
-                    data.organization_type === type ? 'bg-primary text-primary-foreground' : 'bg-slate-100 text-slate-400'
+                    data.organization_type === type ? 'bg-primary text-primary-foreground' : 'bg-slate-100 text-slate-400 dark:bg-slate-700 dark:text-slate-500'
                   }`}>
                     {data.organization_type === type ? <CheckCircle2 size={16} /> : <Building2 size={16} />}
                   </div>
-                  <span className="text-sm font-medium text-slate-700">{type}</span>
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{type}</span>
                 </button>
               ))}
             </div>
@@ -178,8 +178,8 @@ export default function OnboardingPage() {
         {/* Step 3: Primary Goal */}
         {step === 3 && (
           <div>
-            <h2 className="mb-2 text-2xl font-bold text-slate-900">What&apos;s your primary goal?</h2>
-            <p className="mb-6 text-slate-500">What do you want to achieve with DataFlow first?</p>
+            <h2 className="mb-2 text-2xl font-bold text-slate-900 dark:text-slate-100">What&apos;s your primary goal?</h2>
+            <p className="mb-6 text-slate-500 dark:text-slate-400">What do you want to achieve with DataFlow first?</p>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {GOALS.map((goal) => (
                 <button
@@ -188,17 +188,17 @@ export default function OnboardingPage() {
                   className={`flex items-start gap-3 rounded-xl border-2 p-5 text-left transition-all hover:shadow-md ${
                     data.primary_goal === goal.key
                       ? 'border-primary bg-primary/5'
-                      : 'border-slate-200 bg-white hover:border-slate-300'
+                      : 'border-slate-200 bg-white hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600'
                   }`}
                 >
                   <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${
-                    data.primary_goal === goal.key ? 'bg-primary text-primary-foreground' : 'bg-slate-100 text-slate-400'
+                    data.primary_goal === goal.key ? 'bg-primary text-primary-foreground' : 'bg-slate-100 text-slate-400 dark:bg-slate-700 dark:text-slate-500'
                   }`}>
                     <goal.icon size={20} />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-slate-800">{goal.label}</p>
-                    <p className="mt-0.5 text-xs text-slate-500">{goal.desc}</p>
+                    <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{goal.label}</p>
+                    <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{goal.desc}</p>
                   </div>
                 </button>
               ))}
@@ -212,12 +212,12 @@ export default function OnboardingPage() {
             <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-blue-100 text-blue-600">
               <Upload size={36} />
             </div>
-            <h2 className="text-2xl font-bold text-slate-900">Upload your first dataset</h2>
-            <p className="mx-auto mt-3 max-w-md text-slate-500">
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Upload your first dataset</h2>
+            <p className="mx-auto mt-3 max-w-md text-slate-500 dark:text-slate-400">
               Get started by uploading a CSV, Excel, or JSON file. You can also skip this step and upload later.
             </p>
             <label
-              className="mx-auto mt-8 flex max-w-md cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-white p-10 text-center transition-colors hover:border-blue-400 hover:bg-blue-50"
+              className="mx-auto mt-8 flex max-w-md cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-white p-10 text-center transition-colors hover:border-blue-400 hover:bg-blue-50 dark:border-slate-600 dark:bg-slate-800 dark:hover:border-blue-500 dark:hover:bg-blue-950/30"
               onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('border-blue-400', 'bg-blue-50'); }}
               onDragLeave={(e) => { e.currentTarget.classList.remove('border-blue-400', 'bg-blue-50'); }}
               onDrop={(e) => {
@@ -240,9 +240,9 @@ export default function OnboardingPage() {
                   }
                 }}
               />
-              <Upload size={32} className="mx-auto mb-3 text-slate-400" />
-              <p className="text-sm text-slate-500">Drag and drop a file here, or click to browse</p>
-              <p className="mt-1 text-xs text-slate-400">CSV, Excel, JSON — up to 50MB</p>
+              <Upload size={32} className="mx-auto mb-3 text-slate-400 dark:text-slate-500" />
+              <p className="text-sm text-slate-500 dark:text-slate-400">Drag and drop a file here, or click to browse</p>
+              <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">CSV, Excel, JSON — up to 50MB</p>
             </label>
             <div className="mt-6 flex justify-center gap-3">
               <Button variant="outline" onClick={() => finish(true)} disabled={loading} className="gap-2">
@@ -262,8 +262,8 @@ export default function OnboardingPage() {
             <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-green-100 text-green-600">
               <CheckCircle2 size={36} />
             </div>
-            <h2 className="text-2xl font-bold text-slate-900">You&apos;re all set!</h2>
-            <p className="mx-auto mt-3 max-w-md text-slate-500">
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">You&apos;re all set!</h2>
+            <p className="mx-auto mt-3 max-w-md text-slate-500 dark:text-slate-400">
               Your workspace is configured and ready. Let&apos;s start exploring DataFlow.
             </p>
             <div className="mt-8">

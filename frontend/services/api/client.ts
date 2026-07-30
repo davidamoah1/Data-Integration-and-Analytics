@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') || '/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') || 'http://localhost:8001';
 const REQUEST_TIMEOUT = 30000;
 const MAX_RETRIES = 2;
 

@@ -4,42 +4,31 @@ import { Button } from '@/components/ui/Button';
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden bg-slate-950 pt-28 pb-20 md:pt-36 md:pb-24">
-      {/* Network mesh background image - hidden on mobile for performance */}
-      <div
-        className="absolute inset-x-0 top-0 -z-20 hidden h-[700px] bg-cover bg-center md:block"
-        style={{ backgroundImage: 'url(/hero-bg.jpg)' }}
-      />
-
-      {/* Floating decorative blobs */}
-      <div className="absolute left-[10%] top-[20%] -z-10 h-72 w-72 rounded-full bg-blue-500/10 blur-3xl animate-pulse-glow" />
-      <div className="absolute right-[15%] top-[30%] -z-10 h-96 w-96 rounded-full bg-indigo-500/10 blur-3xl animate-pulse-glow" style={{ animationDelay: '2s' }} />
-      <div className="absolute left-[40%] bottom-[10%] -z-10 h-80 w-80 rounded-full bg-purple-500/8 blur-3xl animate-pulse-glow" style={{ animationDelay: '4s' }} />
-
+    <section className="relative overflow-hidden bg-white pt-28 pb-20 md:pt-36 md:pb-24">
       <div className="absolute inset-x-0 bottom-0 -z-10 h-40 bg-gradient-to-b from-transparent to-white" />
 
       <div className="relative mx-auto max-w-7xl px-4 md:px-6">
         <div className="mx-auto max-w-3xl text-center">
-          <div className="animate-fade-in-up mb-6 inline-flex items-center gap-2 rounded-full border border-blue-400/30 bg-blue-500/10 px-4 py-1.5 text-sm font-medium text-blue-300 shadow-sm shadow-blue-900/30 backdrop-blur-sm">
+          <div className="animate-fade-in-up mb-6 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-sm font-medium text-blue-700 shadow-sm shadow-blue-100">
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-400" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-500" />
             </span>
             Trusted analytics for businesses, researchers &amp; institutions
           </div>
 
           <h1
-            className="animate-fade-in-up text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl"
+            className="animate-fade-in-up text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl"
             style={{ animationDelay: '80ms' }}
           >
             Transform Your Data Into{' '}
-            <span className="bg-gradient-to-r from-blue-400 via-blue-300 to-indigo-300 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-500 bg-clip-text text-transparent">
               Meaningful Decisions
             </span>
           </h1>
 
           <p
-            className="animate-fade-in-up mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-300"
+            className="animate-fade-in-up mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-600"
             style={{ animationDelay: '160ms' }}
           >
             Easier than Excel. More powerful than traditional BI. DataFlow guides you
@@ -55,21 +44,21 @@ export function Hero() {
                 Get Started Free <ArrowRight size={18} />
               </Button>
             </Link>
-            <a href="#features">
-              <Button size="lg" variant="outline" className="border-white/20 bg-white/5 px-8 text-white transition-transform hover:-translate-y-0.5 hover:bg-white/10 hover:text-white">
+            <Link href="/features">
+              <Button size="lg" variant="outline" className="px-8 transition-transform hover:-translate-y-0.5">
                 Explore Features
               </Button>
-            </a>
+            </Link>
           </div>
 
           <div
-            className="animate-fade-in-up mt-8 flex items-center justify-center gap-6 text-xs font-medium text-slate-400"
+            className="animate-fade-in-up mt-8 flex items-center justify-center gap-6 text-xs font-medium text-slate-500"
             style={{ animationDelay: '320ms' }}
           >
             <span>No credit card required</span>
-            <span className="h-1 w-1 rounded-full bg-slate-600" />
+            <span className="h-1 w-1 rounded-full bg-slate-300" />
             <span>Free to get started</span>
-            <span className="h-1 w-1 rounded-full bg-slate-600" />
+            <span className="h-1 w-1 rounded-full bg-slate-300" />
             <span>Cancel anytime</span>
           </div>
         </div>

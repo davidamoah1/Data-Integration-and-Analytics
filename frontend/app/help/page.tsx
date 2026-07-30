@@ -50,7 +50,7 @@ const categories = [
 
 export default function HelpCenterPage() {
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-background">
       <Navbar />
 
       <section className="mx-auto max-w-5xl px-6 py-20">

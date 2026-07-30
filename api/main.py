@@ -71,6 +71,7 @@ from performance.routes import performance_router
 from etl.logging_config import logger
 from etl.routes import router as etl_router
 from notifications.routes import router as notifications_router
+from organizations.invitation_routes import invitation_router, registration_router
 from organizations.services import dept_router, org_router
 from scheduler.report_scheduler import ReportScheduler
 from scheduler.routes import router as scheduler_router
@@ -148,6 +149,7 @@ async def lifespan(app: FastAPI):
         import etl.models  # noqa: F401
         import notifications.models  # noqa: F401
         import organizations.models  # noqa: F401
+        import organizations.workspace_models  # noqa: F401
         import scheduler.models  # noqa: F401
         import validation.models  # noqa: F401
         # Phase 12.9 — Ecosystem models
@@ -339,21 +341,37 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
 
 
-_raw_cors = os.getenv("CORS_ORIGINS", "http://localhost:8501,http://localhost:3000")
+_raw_cors = os.getenv("CORS_ORIGINS", "")
 allow_origins = [origin.strip() for origin in _raw_cors.split(",") if origin.strip()]
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=allow_origins,
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allow_headers=[
-        "Authorization",
-        "Content-Type",
-        "X-API-Key",
-        "X-Correlation-ID",
-        "X-Request-ID",
-    ],
-)
+
+if allow_origins:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=allow_origins,
+        allow_credentials=True,
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        allow_headers=[
+            "Authorization",
+            "Content-Type",
+            "X-API-Key",
+            "X-Correlation-ID",
+            "X-Request-ID",
+        ],
+    )
+else:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?",
+        allow_credentials=True,
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        allow_headers=[
+            "Authorization",
+            "Content-Type",
+            "X-API-Key",
+            "X-Correlation-ID",
+            "X-Request-ID",
+        ],
+    )
 
 # Include Phase 4 routers
 app.include_router(auth_router)
@@ -361,6 +379,8 @@ app.include_router(users_router)
 app.include_router(roles_router)
 app.include_router(org_router)
 app.include_router(dept_router)
+app.include_router(invitation_router)
+app.include_router(registration_router)
 app.include_router(admin_router)
 app.include_router(audit_router)
 app.include_router(etl_router)

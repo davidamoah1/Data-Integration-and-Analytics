@@ -4,11 +4,10 @@ const columns = [
   {
     title: 'Product',
     links: [
-      { label: 'Features', href: '#features' },
-      { label: 'Solutions', href: '#solutions' },
-      { label: 'Industries', href: '#industries' },
+      { label: 'Features', href: '/features' },
+      { label: 'Solutions', href: '/solutions' },
+      { label: 'Industries', href: '/industries' },
       { label: 'Pricing', href: '/pricing' },
-      { label: 'Templates', href: '/templates' },
     ],
   },
   {
@@ -23,10 +22,9 @@ const columns = [
   {
     title: 'Resources',
     links: [
-      { label: 'Workflow', href: '#workflow' },
+      { label: 'Feedback', href: '/feedback' },
       { label: 'Login', href: '/login' },
       { label: 'Sign Up', href: '/signup' },
-      { label: 'Feedback', href: '/feedback' },
       { label: 'Privacy Policy', href: '/privacy' },
       { label: 'Terms of Service', href: '/terms' },
     ],
@@ -35,7 +33,7 @@ const columns = [
 
 export function Footer() {
   return (
-    <footer className="relative border-t border-slate-200 bg-white py-12">
+    <footer className="relative border-t border-slate-200 bg-white py-12 dark:border-slate-800 dark:bg-slate-950">
       <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-500" />
       <div className="mx-auto max-w-7xl px-6">
         <div className="grid grid-cols-2 gap-8 md:grid-cols-4">

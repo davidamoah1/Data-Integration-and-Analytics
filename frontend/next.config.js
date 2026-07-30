@@ -14,19 +14,28 @@ const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   output: process.env.NODE_ENV === 'production' ? 'standalone' : undefined,
+  experimental: {
+    optimizePackageImports: ['lucide-react'],
+  },
   async rewrites() {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
-    // Only proxy to an external backend when a full URL is provided.
-    // On Vercel, /api requests are handled by the Python function via vercel.json.
-    if (apiUrl && apiUrl.startsWith('http')) {
-      return [
-        {
-          source: '/api/:path*',
-          destination: `${apiUrl.replace(/\/$/, '')}/api/:path*`,
-        },
-      ];
-    }
-    return [];
+    const backendUrl = apiUrl && apiUrl.startsWith('http')
+      ? apiUrl.replace(/\/$/, '')
+      : process.env.NODE_ENV === 'development'
+        ? 'http://localhost:8001'
+        : '';
+    if (!backendUrl) return [];
+
+    return [
+      {
+        source: '/api/api/:path*',
+        destination: `${backendUrl}/api/:path*`,
+      },
+      {
+        source: '/api/:path*',
+        destination: `${backendUrl}/:path*`,
+      },
+    ];
   },
   async headers() {
     return [

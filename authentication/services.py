@@ -963,6 +963,36 @@ def seed_default_data(db: DbSession):
             True,
             ["dashboard.view", "profile.update"],
         ),
+        (
+            "researcher",
+            "Researcher",
+            "Upload research datasets and perform statistical analysis",
+            True,
+            [
+                "datasets.upload",
+                "datasets.view",
+                "dashboard.view",
+                "analytics.view",
+                "reports.generate",
+                "reports.view",
+                "reports.export",
+                "etl.export",
+                "profile.update",
+                "ml.read",
+                "ml.execute",
+            ],
+        ),
+        (
+            "data_entry_officer",
+            "Data Entry Officer",
+            "Upload documents and use Smart Data Capture",
+            True,
+            [
+                "datasets.upload",
+                "datasets.view",
+                "profile.update",
+            ],
+        ),
     ]
 
     for name, display, desc, is_system, perm_names in roles_def:

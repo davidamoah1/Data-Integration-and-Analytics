@@ -15,10 +15,10 @@ export default function AdminPage() {
   }
 
   const sections = [
-    { label: 'Users', desc: 'Manage user accounts and access', icon: Users, href: '/admin/users', permission: 'users.read' },
-    { label: 'Roles & Permissions', desc: 'Configure roles and access control', icon: Shield, href: '/admin/roles', permission: 'roles.read' },
-    { label: 'Organizations', desc: 'Manage organizations and tenants', icon: Building2, href: '/admin/organizations', permission: 'organizations.manage' },
-    { label: 'Audit Logs', desc: 'View system activity logs', icon: ScrollText, href: '/admin/audit', permission: 'audit.view' },
+    { label: 'Users', desc: 'Manage user accounts and access', icon: Users, href: '/settings?tab=members', permission: 'users.read' },
+    { label: 'Roles & Permissions', desc: 'Configure roles and access control', icon: Shield, href: '/settings?tab=permissions', permission: 'roles.read' },
+    { label: 'Organizations', desc: 'Manage organizations and tenants', icon: Building2, href: '/settings?tab=organization', permission: 'organizations.manage' },
+    { label: 'Audit Logs', desc: 'View system activity logs', icon: ScrollText, href: '/audit', permission: 'audit.view' },
   ];
 
   return (

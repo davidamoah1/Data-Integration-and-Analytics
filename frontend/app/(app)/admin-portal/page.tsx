@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import {
   Shield, Building2, Users, DollarSign, Package, AlertCircle,
-  Loader2, Search, Power, TrendingUp, Ticket,
+  Loader2, Search, Power, TrendingUp, Ticket, RefreshCw,
 } from "lucide-react";
 import { adminPortalService, type AdminOverview, type Tenant } from "@/services/saas/saasService";
 
@@ -37,21 +37,27 @@ export default function AdminPortalPage() {
     }
   };
 
+  const [actionError, setActionError] = useState<string | null>(null);
+
   const handleSuspend = async (orgId: number) => {
+    setActionError(null);
     try {
       await adminPortalService.suspendTenant(orgId);
       loadData();
     } catch (e) {
       console.error("Suspend failed:", e);
+      setActionError("Failed to suspend tenant. Please try again.");
     }
   };
 
   const handleActivate = async (orgId: number) => {
+    setActionError(null);
     try {
       await adminPortalService.activateTenant(orgId);
       loadData();
     } catch (e) {
       console.error("Activate failed:", e);
+      setActionError("Failed to activate tenant. Please try again.");
     }
   };
 
@@ -98,8 +104,16 @@ export default function AdminPortalPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <StatCard label="Organizations" value={overview.organizations.total} sub={`${overview.organizations.active} active`} icon={Building2} color="text-blue-400" />
             <StatCard label="Users" value={overview.users.total} sub={`${overview.users.active} active`} icon={Users} color="text-green-400" />
-            <StatCard label="Revenue/mo" value={`$${overview.monthly_revenue_estimate}`} sub={`${overview.subscriptions} subs`} icon={DollarSign} color="text-yellow-400" />
+            <StatCard label="Revenue/mo" value={`₵${overview.monthly_revenue_estimate}`} sub={`${overview.subscriptions} subs`} icon={DollarSign} color="text-yellow-400" />
             <StatCard label="Open Tickets" value={overview.support.open_tickets} sub={`${overview.marketplace.plugins} plugins`} icon={Ticket} color="text-red-400" />
+          </div>
+        )}
+
+        {/* Action Error */}
+        {actionError && (
+          <div className="flex items-center gap-2 rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            {actionError}
           </div>
         )}
 

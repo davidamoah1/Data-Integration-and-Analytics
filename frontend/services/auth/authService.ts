@@ -32,6 +32,24 @@ export interface OnboardingPayload {
   skip_dataset?: boolean;
 }
 
+export interface SignupV2Payload {
+  email: string;
+  password: string;
+  full_name: string;
+  registration_mode: 'create_organization' | 'join_organization' | 'personal';
+  organization_name?: string;
+  industry?: string;
+  country?: string;
+  organization_type?: string;
+  invitation_token?: string;
+}
+
+export interface InvitationPayload {
+  email: string;
+  role_name: string;
+  department_id?: number;
+}
+
 export const authService = {
   async login(credentials: LoginRequest): Promise<LoginResponse> {
     const data = await apiClient.post<LoginResponse>('/api/auth/login', credentials, {
@@ -43,6 +61,16 @@ export const authService = {
 
   async signup(payload: SignupPayload): Promise<SignupResponse> {
     const data = await apiClient.post<SignupResponse>('/api/auth/signup', payload, {
+      skipAuth: true,
+    });
+    if (data.access_token) {
+      setTokens(data.access_token, data.refresh_token);
+    }
+    return data;
+  },
+
+  async signupV2(payload: SignupV2Payload): Promise<SignupResponse> {
+    const data = await apiClient.post<SignupResponse>('/api/auth/signup-v2', payload, {
       skipAuth: true,
     });
     if (data.access_token) {
@@ -108,5 +136,33 @@ export const authService = {
 
   async getLoginHistory(): Promise<unknown[]> {
     return apiClient.get('/api/auth/login-history');
+  },
+
+  async getInvitationInfo(token: string): Promise<{ id: number; email: string; organization_name: string; organization_id: number; role_name: string; expires_at: string }> {
+    return apiClient.get(`/api/invitations/info/${token}`, { skipAuth: true });
+  },
+
+  async acceptInvitation(token: string, fullName: string, password: string): Promise<SignupResponse> {
+    const data = await apiClient.post<SignupResponse>('/api/invitations/accept', {
+      token,
+      full_name: fullName,
+      password,
+    }, { skipAuth: true });
+    if (data.access_token) {
+      setTokens(data.access_token, data.refresh_token);
+    }
+    return data;
+  },
+
+  async listInvitations(): Promise<unknown[]> {
+    return apiClient.get('/api/invitations');
+  },
+
+  async sendInvitation(payload: InvitationPayload): Promise<unknown> {
+    return apiClient.post('/api/invitations', payload);
+  },
+
+  async revokeInvitation(invitationId: number): Promise<void> {
+    await apiClient.delete(`/api/invitations/${invitationId}`);
   },
 };
