@@ -1,0 +1,296 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2026-07-30",
+  "naming_convention": "module.action",
+  "wildcard_permission": "*",
+  "roles": [
+    {
+      "name": "super_admin",
+      "display_name": "Super Administrator",
+      "description": "Full system access with all permissions",
+      "level": 100,
+      "is_system": true,
+      "assignable_via_invitation": false,
+      "permissions": ["*"]
+    },
+    {
+      "name": "org_owner",
+      "display_name": "Organization Owner",
+      "description": "Owner of an organization with full org access",
+      "level": 100,
+      "is_system": true,
+      "assignable_via_invitation": false,
+      "permissions": [
+        "users.create", "users.read", "users.edit", "users.delete", "users.manage",
+        "roles.create", "roles.read", "roles.manage",
+        "pipelines.create", "pipelines.execute", "pipelines.view",
+        "etl.import", "etl.export",
+        "dashboard.view", "dashboard.manage",
+        "reports.generate", "reports.export", "reports.view",
+        "datasets.upload", "datasets.delete", "datasets.view",
+        "analytics.view", "analytics.manage", "analytics.export",
+        "ai.use",
+        "audit.view",
+        "notifications.manage",
+        "organizations.manage", "departments.manage",
+        "sessions.manage",
+        "profile.update",
+        "ml.read", "ml.write", "ml.execute", "ml.delete"
+      ]
+    },
+    {
+      "name": "org_admin",
+      "display_name": "Organization Administrator",
+      "description": "Manage users and data within organization",
+      "level": 80,
+      "is_system": true,
+      "assignable_via_invitation": true,
+      "permissions": [
+        "users.create", "users.read", "users.edit", "users.delete", "users.manage",
+        "roles.read",
+        "pipelines.create", "pipelines.execute", "pipelines.view",
+        "etl.import", "etl.export",
+        "dashboard.view", "dashboard.manage",
+        "reports.generate", "reports.export", "reports.view",
+        "datasets.upload", "datasets.view",
+        "analytics.view",
+        "notifications.manage",
+        "departments.manage",
+        "sessions.manage",
+        "profile.update",
+        "audit.view",
+        "ml.read", "ml.write", "ml.execute", "ml.delete"
+      ]
+    },
+    {
+      "name": "dept_manager",
+      "display_name": "Department Manager",
+      "description": "Manage department operations",
+      "level": 60,
+      "is_system": true,
+      "assignable_via_invitation": true,
+      "permissions": [
+        "users.read",
+        "pipelines.view",
+        "etl.import", "etl.export",
+        "dashboard.view",
+        "reports.view", "reports.generate", "reports.export",
+        "datasets.view",
+        "analytics.view",
+        "profile.update",
+        "ml.read", "ml.execute"
+      ]
+    },
+    {
+      "name": "data_engineer",
+      "display_name": "Data Engineer",
+      "description": "Build and run ETL pipelines",
+      "level": 40,
+      "is_system": true,
+      "assignable_via_invitation": true,
+      "permissions": [
+        "pipelines.create", "pipelines.execute", "pipelines.view",
+        "etl.import", "etl.export",
+        "datasets.upload", "datasets.view",
+        "dashboard.view",
+        "profile.update",
+        "ml.read", "ml.execute"
+      ]
+    },
+    {
+      "name": "data_analyst",
+      "display_name": "Data Analyst",
+      "description": "Analyze data and create reports",
+      "level": 40,
+      "is_system": true,
+      "assignable_via_invitation": true,
+      "permissions": [
+        "dashboard.view",
+        "reports.generate", "reports.view",
+        "datasets.view",
+        "analytics.view",
+        "etl.export",
+        "profile.update",
+        "ml.read", "ml.execute"
+      ]
+    },
+    {
+      "name": "business_analyst",
+      "display_name": "Business Analyst",
+      "description": "View dashboards and reports",
+      "level": 40,
+      "is_system": true,
+      "assignable_via_invitation": true,
+      "permissions": [
+        "dashboard.view",
+        "reports.view",
+        "datasets.view",
+        "analytics.view",
+        "profile.update"
+      ]
+    },
+    {
+      "name": "executive",
+      "display_name": "Executive",
+      "description": "View high-level analytics and reports",
+      "level": 60,
+      "is_system": true,
+      "assignable_via_invitation": true,
+      "permissions": [
+        "dashboard.view",
+        "reports.view",
+        "analytics.view",
+        "profile.update"
+      ]
+    },
+    {
+      "name": "dept_officer",
+      "display_name": "Department Officer",
+      "description": "Department-level operations",
+      "level": 20,
+      "is_system": true,
+      "assignable_via_invitation": true,
+      "permissions": [
+        "dashboard.view",
+        "reports.view",
+        "datasets.view",
+        "profile.update"
+      ]
+    },
+    {
+      "name": "auditor",
+      "display_name": "Auditor",
+      "description": "View audit logs and security events",
+      "level": 40,
+      "is_system": true,
+      "assignable_via_invitation": true,
+      "permissions": [
+        "audit.view",
+        "users.read",
+        "profile.update"
+      ]
+    },
+    {
+      "name": "viewer",
+      "display_name": "Viewer",
+      "description": "Read-only access to dashboards",
+      "level": 20,
+      "is_system": true,
+      "assignable_via_invitation": true,
+      "permissions": [
+        "dashboard.view",
+        "profile.update"
+      ]
+    },
+    {
+      "name": "researcher",
+      "display_name": "Researcher",
+      "description": "Upload research datasets and perform statistical analysis",
+      "level": 40,
+      "is_system": true,
+      "assignable_via_invitation": true,
+      "permissions": [
+        "datasets.upload", "datasets.view",
+        "dashboard.view",
+        "analytics.view",
+        "reports.generate", "reports.view", "reports.export",
+        "etl.export",
+        "profile.update",
+        "ml.read", "ml.execute"
+      ]
+    },
+    {
+      "name": "data_entry_officer",
+      "display_name": "Data Entry Officer",
+      "description": "Upload documents and use Smart Data Capture",
+      "level": 20,
+      "is_system": true,
+      "assignable_via_invitation": true,
+      "permissions": [
+        "datasets.upload", "datasets.view",
+        "profile.update"
+      ]
+    }
+  ],
+  "permissions": [
+    { "name": "users.create", "display_name": "Create Users", "module": "users", "description": "Create new user accounts within the organization" },
+    { "name": "users.read", "display_name": "View Users", "module": "users", "description": "View user profiles within the organization" },
+    { "name": "users.edit", "display_name": "Edit Users", "module": "users", "description": "Edit user information within the organization" },
+    { "name": "users.delete", "display_name": "Delete Users", "module": "users", "description": "Soft-delete user accounts" },
+    { "name": "users.manage", "display_name": "Manage Users", "module": "users", "description": "Full user management (superset of create, read, edit, delete)" },
+    { "name": "roles.create", "display_name": "Create Roles", "module": "roles", "description": "Create custom roles with specific permissions" },
+    { "name": "roles.read", "display_name": "View Roles", "module": "roles", "description": "View roles and their permission assignments" },
+    { "name": "roles.manage", "display_name": "Manage Roles", "module": "roles", "description": "Full role management (create, update, delete, assign permissions)" },
+    { "name": "pipelines.create", "display_name": "Create Pipelines", "module": "pipelines", "description": "Create new ETL pipelines" },
+    { "name": "pipelines.execute", "display_name": "Execute Pipelines", "module": "pipelines", "description": "Run ETL pipelines" },
+    { "name": "pipelines.view", "display_name": "View Pipelines", "module": "pipelines", "description": "View pipeline status and configuration" },
+    { "name": "etl.import", "display_name": "Import Data", "module": "etl", "description": "Import data via ETL pipelines" },
+    { "name": "etl.export", "display_name": "Export Data", "module": "etl", "description": "Export data from ETL pipelines" },
+    { "name": "dashboard.view", "display_name": "View Dashboards", "module": "dashboard", "description": "View dashboards" },
+    { "name": "dashboard.manage", "display_name": "Manage Dashboards", "module": "dashboard", "description": "Create, edit, and delete dashboards" },
+    { "name": "reports.generate", "display_name": "Generate Reports", "module": "reports", "description": "Generate new reports from data" },
+    { "name": "reports.export", "display_name": "Export Reports", "module": "reports", "description": "Export report files (PDF, CSV, Excel)" },
+    { "name": "reports.view", "display_name": "View Reports", "module": "reports", "description": "View existing reports" },
+    { "name": "datasets.upload", "display_name": "Upload Datasets", "module": "datasets", "description": "Upload new datasets" },
+    { "name": "datasets.delete", "display_name": "Delete Datasets", "module": "datasets", "description": "Delete datasets" },
+    { "name": "datasets.view", "display_name": "View Datasets", "module": "datasets", "description": "View datasets and their metadata" },
+    { "name": "analytics.view", "display_name": "View Analytics", "module": "analytics", "description": "View analytics dashboards and KPIs" },
+    { "name": "analytics.manage", "display_name": "Manage Analytics", "module": "analytics", "description": "Create and manage dashboards and KPIs" },
+    { "name": "analytics.export", "display_name": "Export Analytics", "module": "analytics", "description": "Export dashboards and analytics data" },
+    { "name": "ai.use", "display_name": "Use AI Features", "module": "ai", "description": "Access AI predictions, insights, and conversational analytics" },
+    { "name": "ml.read", "display_name": "View ML Models", "module": "ml", "description": "View machine learning models and dashboards" },
+    { "name": "ml.write", "display_name": "Create ML Models", "module": "ml", "description": "Create and edit machine learning models" },
+    { "name": "ml.execute", "display_name": "Execute ML Training", "module": "ml", "description": "Train, predict, and run ML jobs" },
+    { "name": "ml.delete", "display_name": "Delete ML Models", "module": "ml", "description": "Archive or delete ML models" },
+    { "name": "settings.manage", "display_name": "Manage Settings", "module": "settings", "description": "Manage system-level settings (platform-level only)" },
+    { "name": "audit.view", "display_name": "View Audit Logs", "module": "audit", "description": "View audit logs and security events" },
+    { "name": "notifications.manage", "display_name": "Manage Notifications", "module": "notifications", "description": "Manage notification settings" },
+    { "name": "organizations.manage", "display_name": "Manage Organizations", "module": "organizations", "description": "Manage organization settings and configuration" },
+    { "name": "departments.manage", "display_name": "Manage Departments", "module": "organizations", "description": "Create and manage departments within the organization" },
+    { "name": "sessions.manage", "display_name": "Manage Sessions", "module": "sessions", "description": "Revoke user sessions and manage active sessions" },
+    { "name": "profile.update", "display_name": "Update Profile", "module": "profile", "description": "Update own profile information" }
+  ],
+  "modules": [
+    { "name": "landing", "label": "Landing Page", "permissions_required": [], "public": true },
+    { "name": "auth", "label": "Authentication", "permissions_required": [], "public": true },
+    { "name": "registration", "label": "Registration", "permissions_required": [], "public": true },
+    { "name": "organizations", "label": "Organizations", "permissions_required": ["organizations.manage"], "public": false },
+    { "name": "workspaces", "label": "Workspaces", "permissions_required": [], "public": false, "note": "Auto-created on signup" },
+    { "name": "departments", "label": "Departments", "permissions_required": ["departments.manage"], "public": false },
+    { "name": "users", "label": "Users", "permissions_required": ["users.read"], "public": false },
+    { "name": "roles", "label": "Roles", "permissions_required": ["roles.read"], "public": false },
+    { "name": "datasets", "label": "Dataset Management", "permissions_required": ["datasets.view"], "public": false },
+    { "name": "dashboard", "label": "Dashboards", "permissions_required": ["dashboard.view"], "public": false },
+    { "name": "analytics", "label": "Analytics Studio", "permissions_required": ["analytics.view"], "public": false },
+    { "name": "reports", "label": "Reports", "permissions_required": ["reports.view"], "public": false },
+    { "name": "pipelines", "label": "Data Integration", "permissions_required": ["pipelines.view"], "public": false },
+    { "name": "etl", "label": "ETL Operations", "permissions_required": ["etl.import"], "public": false },
+    { "name": "capture", "label": "Smart Data Capture", "permissions_required": ["datasets.upload"], "public": false },
+    { "name": "ai", "label": "AI Assistant", "permissions_required": ["ai.use"], "public": false },
+    { "name": "ml", "label": "Machine Learning", "permissions_required": ["ml.read"], "public": false },
+    { "name": "studios", "label": "Studios", "permissions_required": ["dashboard.view"], "public": false },
+    { "name": "templates", "label": "Template Library", "permissions_required": ["dashboard.view"], "public": false },
+    { "name": "notifications", "label": "Notifications", "permissions_required": [], "public": false },
+    { "name": "settings", "label": "Settings", "permissions_required": ["profile.update"], "public": false },
+    { "name": "audit", "label": "Audit Logs", "permissions_required": ["audit.view"], "public": false },
+    { "name": "sessions", "label": "Sessions", "permissions_required": ["sessions.manage"], "public": false },
+    { "name": "billing", "label": "Billing (placeholder)", "permissions_required": [], "public": false, "status": "placeholder" },
+    { "name": "api_keys", "label": "API Keys (future)", "permissions_required": [], "public": false, "status": "future" },
+    { "name": "connectors", "label": "Integrations", "permissions_required": [], "public": false, "status": "placeholder" },
+    { "name": "webhooks", "label": "Webhooks", "permissions_required": [], "public": false, "status": "placeholder" },
+    { "name": "marketplace", "label": "Marketplace", "permissions_required": [], "public": false, "status": "placeholder" },
+    { "name": "scheduler", "label": "Scheduler", "permissions_required": [], "public": false, "status": "placeholder" },
+    { "name": "help", "label": "Help Center", "permissions_required": [], "public": true },
+    { "name": "admin_portal", "label": "Admin Portal", "permissions_required": [], "public": false, "role_required": "super_admin" }
+  ],
+  "restriction_rules": [
+    "Non-super-admin users can only access resources within their organization_id",
+    "Platform-level roles (super_admin, org_owner) cannot be assigned via invitation",
+    "Non-super-admin users cannot assign super_admin or org_owner roles",
+    "All API routes enforce require_organization_access for org-scoped resources",
+    "Non-super-admin users see only users within their organization",
+    "Organization update/delete requires require_organization_access in addition to organizations.manage",
+    "System roles cannot be soft-deleted",
+    "Invitations cannot specify super_admin or org_owner roles"
+  ]
+}
