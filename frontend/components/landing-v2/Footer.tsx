@@ -37,7 +37,6 @@ const columns = [
     title: 'Resources',
     links: [
       { label: 'Help Center', href: '/help' },
-      { label: 'Status', href: '/status' },
       { label: 'Feedback', href: '/feedback' },
       { label: 'Contact', href: '/contact' },
     ],
