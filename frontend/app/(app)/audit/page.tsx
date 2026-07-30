@@ -39,8 +39,9 @@ export default function AuditPage() {
   async function loadLogs() {
     try {
       setLoading(true);
-      const data = await apiClient.get<AuditLog[]>('/audit/logs');
-      setLogs(data || []);
+      const data = await apiClient.get<{ logs: AuditLog[] } | AuditLog[]>('/audit/logs');
+      const logsArray = Array.isArray(data) ? data : (data?.logs ?? []);
+      setLogs(logsArray);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load audit logs');
     } finally {
