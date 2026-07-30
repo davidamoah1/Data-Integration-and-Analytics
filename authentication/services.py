@@ -19,6 +19,7 @@ from authentication.models import (
 from authentication.models import (
     Session as UserSession,
 )
+from audit.models import AuditLog
 from authentication.repositories import (
     ActivityLogRepository,
     LoginHistoryRepository,
@@ -535,6 +536,15 @@ class UserService:
             )
         )
 
+        self.db.add(AuditLog(
+            user_id=created_by,
+            organization_id=user.organization_id,
+            action="user.created",
+            resource_type="user",
+            resource_id=user.id,
+            new_values={"email": user.email, "full_name": user.full_name},
+        ))
+
         self.db.commit()
         return self._user_to_dict(user)
 
@@ -555,6 +565,14 @@ class UserService:
                     resource_id=user_id,
                 )
             )
+            self.db.add(AuditLog(
+                user_id=updated_by,
+                organization_id=user.organization_id,
+                action="user.updated",
+                resource_type="user",
+                resource_id=user_id,
+                new_values=kwargs,
+            ))
 
         self.db.commit()
         return self._user_to_dict(self.user_repo.get_by_id(user_id))
@@ -576,11 +594,28 @@ class UserService:
                 resource_id=user_id,
             )
         )
+        self.db.add(AuditLog(
+            user_id=deleted_by,
+            organization_id=user.organization_id,
+            action="user.deleted",
+            resource_type="user",
+            resource_id=user_id,
+        ))
         self.db.commit()
 
     def list_users(self, page: int = 1, page_size: int = 20) -> dict:
         """List users with pagination."""
         users, total = self.user_repo.list_users(page, page_size)
+        return {
+            "users": [self._user_to_dict(u) for u in users],
+            "total": total,
+            "page": page,
+            "page_size": page_size,
+        }
+
+    def list_users_by_org(self, org_id: int, page: int = 1, page_size: int = 20) -> dict:
+        """List users within a specific organization."""
+        users, total = self.user_repo.list_users_by_org(org_id, page, page_size)
         return {
             "users": [self._user_to_dict(u) for u in users],
             "total": total,
@@ -610,6 +645,14 @@ class UserService:
                 resource_id=user_id,
             )
         )
+        self.db.add(AuditLog(
+            user_id=assigned_by,
+            organization_id=user.organization_id,
+            action="role.assigned",
+            resource_type="user",
+            resource_id=user_id,
+            new_values={"roles": role_names},
+        ))
         self.db.commit()
 
     def _user_to_dict(self, user: User) -> dict:

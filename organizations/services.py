@@ -211,8 +211,19 @@ async def update_organization(
     current_user: dict = Depends(require_permissions("organizations.manage")),
     db: DbSession = Depends(get_db),
 ):
+    require_organization_access(current_user, org_id, db)
     service = OrganizationService(db)
     org = service.update_org(org_id, request)
+    from audit.models import AuditLog
+    db.add(AuditLog(
+        user_id=current_user["id"],
+        organization_id=org_id,
+        action="organization.updated",
+        resource_type="organization",
+        resource_id=org_id,
+        new_values=request.model_dump(exclude_none=True),
+    ))
+    db.commit()
     return success_response(org, "Organization updated")
 
 
@@ -222,8 +233,18 @@ async def delete_organization(
     current_user: dict = Depends(require_permissions("organizations.manage")),
     db: DbSession = Depends(get_db),
 ):
+    require_organization_access(current_user, org_id, db)
     service = OrganizationService(db)
     service.delete_org(org_id)
+    from audit.models import AuditLog
+    db.add(AuditLog(
+        user_id=current_user["id"],
+        organization_id=org_id,
+        action="organization.deleted",
+        resource_type="organization",
+        resource_id=org_id,
+    ))
+    db.commit()
     return success_response(None, "Organization deleted")
 
 

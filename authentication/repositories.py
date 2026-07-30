@@ -76,6 +76,23 @@ class UserRepository:
         )
         return list(users), total
 
+    def list_users_by_org(self, org_id: int, page: int = 1, page_size: int = 20) -> tuple[list[User], int]:
+        offset = (page - 1) * page_size
+        total = self.db.execute(
+            select(func.count()).select_from(User).where(
+                User.is_deleted == 0, User.organization_id == org_id
+            )
+        ).scalar()
+        users = (
+            self.db.execute(
+                select(User).where(User.is_deleted == 0, User.organization_id == org_id)
+                .offset(offset).limit(page_size)
+            )
+            .scalars()
+            .all()
+        )
+        return list(users), total
+
     def increment_failed_login(self, user_id: int) -> int:
         user = self.get_by_id(user_id)
         if not user:

@@ -31,8 +31,8 @@ class InvitationService:
         if not role:
             raise NotFoundError(f"Role '{request.role_name}' not found")
 
-        if role.name in ("super_admin",):
-            raise AuthorizationError("Cannot invite users as Super Admin")
+        if role.name in ("super_admin", "org_owner"):
+            raise AuthorizationError("Cannot invite users as platform-level roles")
 
         existing = self.db.execute(
             select(Invitation).where(
@@ -89,8 +89,11 @@ class InvitationService:
             self.db.commit()
             raise ValidationError("Invitation has expired")
 
+        if invitation.email != request.email:
+            raise ValidationError("Email does not match the invitation")
+
         user_repo = UserRepository(self.db)
-        existing_user = user_repo.get_by_email(request.email)
+        existing_user = user_repo.get_by_email(invitation.email)
         if existing_user:
             raise ConflictError("A user with this email already exists")
 

@@ -61,14 +61,14 @@ class TenantFilter:
     """Applies organization filters to queries for tenant isolation."""
 
     @staticmethod
-    def apply_org_filter(query, ctx: TenantContext, org_column=None):
+    def apply_org_filter(query, ctx: TenantContext, model_class=None, org_column=None):
         """Apply organization filter to a SQLAlchemy query.
 
         Args:
             query: SQLAlchemy select query.
             ctx: Current tenant context.
-            org_column: The organization_id column to filter on.
-                       If None, uses the model's organization_id.
+            model_class: The model class to extract organization_id from (required if org_column is None).
+            org_column: The specific organization_id column to filter on.
 
         Returns:
             Filtered query (super_admin sees all, others see only their org).
@@ -79,6 +79,8 @@ class TenantFilter:
             return query
         if org_column is not None:
             return query.where(org_column == ctx.organization_id)
+        if model_class is not None and hasattr(model_class, "organization_id"):
+            return query.where(model_class.organization_id == ctx.organization_id)
         return query
 
     @staticmethod

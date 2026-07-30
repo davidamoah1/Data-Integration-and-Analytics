@@ -26,6 +26,9 @@ from authentication.schemas import (
 from authentication.services import AuthService, RoleService, UserService
 from shared.database import get_db
 from shared.dependencies import get_current_user, require_permissions
+from shared.tenant import get_current_organization_id, is_super_admin
+from datetime import datetime, timedelta, timezone
+
 from shared.response import success_response
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
@@ -67,13 +70,30 @@ async def signup(request: SignupRequest, db: DbSession = Depends(get_db)):
 
     org_id = None
     if request.organization_name:
+        slug = request.organization_name.lower().strip().replace(" ", "-").replace("&", "and")
+        existing_org = db.query(Organization).filter(Organization.slug == slug).first()
+        if existing_org:
+            raise HTTPException(
+                status_code=409,
+                detail="This organization already exists. Please request an invitation from your administrator.",
+            )
         org = Organization(
             name=request.organization_name,
-            slug=request.organization_name.lower().replace(" ", "-"),
+            slug=slug,
+            is_active=1,
         )
         db.add(org)
         db.flush()
         org_id = org.id
+
+        from organizations.workspace_models import Workspace
+        workspace = Workspace(
+            organization_id=org.id,
+            name=f"{request.organization_name} Workspace",
+            type="organization",
+        )
+        db.add(workspace)
+        db.flush()
 
     # Store signup extras in onboarding_data
     onboarding_data: dict = {}
@@ -89,15 +109,48 @@ async def signup(request: SignupRequest, db: DbSession = Depends(get_db)):
         password_hash=hash_password(request.password),
         full_name=request.full_name,
         organization_id=org_id,
+        email_verified_at=datetime.now(timezone.utc),
+        is_active=1,
         onboarding_data=onboarding_data if onboarding_data else None,
     )
     user_repo.create(user)
 
-    # Assign default 'viewer' role if it exists
+    # Assign org_admin role when creating an org, viewer for personal accounts
     role_repo = RoleRepository(db)
-    viewer_role = role_repo.get_by_name("viewer")
-    if viewer_role:
-        UserRoleRepository(db).set_user_roles(user.id, [viewer_role.id])
+    if org_id:
+        assigned_role = role_repo.get_by_name("org_admin") or role_repo.get_by_name("viewer")
+    else:
+        assigned_role = role_repo.get_by_name("viewer")
+    if assigned_role:
+        UserRoleRepository(db).set_user_roles(user.id, [assigned_role.id])
+
+    # Audit log
+    from audit.models import AuditLog
+    if org_id:
+        db.add(AuditLog(
+            user_id=user.id,
+            organization_id=org_id,
+            action="organization.created",
+            resource_type="organization",
+            resource_id=org_id,
+            new_values={"name": request.organization_name},
+        ))
+        db.add(AuditLog(
+            user_id=user.id,
+            organization_id=org_id,
+            action="role.assigned",
+            resource_type="user",
+            resource_id=user.id,
+            new_values={"role": assigned_role.name if assigned_role else "viewer"},
+        ))
+    db.add(AuditLog(
+        user_id=user.id,
+        organization_id=org_id,
+        action="user.registered",
+        resource_type="user",
+        resource_id=user.id,
+        new_values={"email": user.email, "mode": "create_organization" if org_id else "personal"},
+    ))
 
     # Generate a verification token (stored in onboarding_data for now)
     verify_token = generate_token()
@@ -120,7 +173,6 @@ async def signup(request: SignupRequest, db: DbSession = Depends(get_db)):
 
     # Create session
     from authentication.models import Session as UserSession
-    from datetime import datetime, timedelta, timezone
 
     session = UserSession(
         user_id=user.id,
@@ -387,9 +439,13 @@ async def list_users(
     current_user: dict = Depends(require_permissions("users.read")),
     db: DbSession = Depends(get_db),
 ):
-    """List all users (requires users.read permission)."""
+    """List users (requires users.read permission). Super admins see all; others see only their org."""
     service = UserService(db)
-    result = service.list_users(page, page_size)
+    if is_super_admin(current_user):
+        result = service.list_users(page, page_size)
+    else:
+        org_id = get_current_organization_id(current_user, db)
+        result = service.list_users_by_org(org_id, page, page_size)
     return success_response(result)
 
 
@@ -400,6 +456,10 @@ async def create_user(
     db: DbSession = Depends(get_db),
 ):
     """Create a new user (requires users.create permission)."""
+    if not is_super_admin(current_user):
+        org_id = get_current_organization_id(current_user, db)
+        if request.organization_id and request.organization_id != org_id:
+            raise HTTPException(status_code=403, detail="Cannot create users outside your organization")
     service = UserService(db)
     user = service.create_user(request, created_by=current_user["id"])
     return success_response(user, "User created")
@@ -416,6 +476,10 @@ async def get_user(
     user_model = service.user_repo.get_by_id(user_id)
     if not user_model:
         raise HTTPException(status_code=404, detail="User not found")
+    if not is_super_admin(current_user):
+        org_id = get_current_organization_id(current_user, db)
+        if user_model.organization_id != org_id:
+            raise HTTPException(status_code=403, detail="Access to this user is not permitted")
     user = service._user_to_dict(user_model)
     return success_response(user)
 
@@ -429,6 +493,13 @@ async def update_user(
 ):
     """Update a user."""
     service = UserService(db)
+    user_model = service.user_repo.get_by_id(user_id)
+    if not user_model:
+        raise HTTPException(status_code=404, detail="User not found")
+    if not is_super_admin(current_user):
+        org_id = get_current_organization_id(current_user, db)
+        if user_model.organization_id != org_id:
+            raise HTTPException(status_code=403, detail="Access to this user is not permitted")
     user = service.update_user(user_id, request, updated_by=current_user["id"])
     return success_response(user, "User updated")
 
@@ -441,6 +512,13 @@ async def delete_user(
 ):
     """Soft delete a user."""
     service = UserService(db)
+    user_model = service.user_repo.get_by_id(user_id)
+    if not user_model:
+        raise HTTPException(status_code=404, detail="User not found")
+    if not is_super_admin(current_user):
+        org_id = get_current_organization_id(current_user, db)
+        if user_model.organization_id != org_id:
+            raise HTTPException(status_code=403, detail="Access to this user is not permitted")
     service.delete_user(user_id, deleted_by=current_user["id"])
     return success_response(None, "User deleted")
 
@@ -454,6 +532,15 @@ async def assign_roles(
 ):
     """Assign roles to a user."""
     service = UserService(db)
+    user_model = service.user_repo.get_by_id(user_id)
+    if not user_model:
+        raise HTTPException(status_code=404, detail="User not found")
+    if not is_super_admin(current_user):
+        org_id = get_current_organization_id(current_user, db)
+        if user_model.organization_id != org_id:
+            raise HTTPException(status_code=403, detail="Access to this user is not permitted")
+        if "super_admin" in role_names or "org_owner" in role_names:
+            raise HTTPException(status_code=403, detail="Cannot assign platform-level roles")
     service.assign_roles(user_id, role_names, assigned_by=current_user["id"])
     return success_response(None, "Roles assigned")
 
