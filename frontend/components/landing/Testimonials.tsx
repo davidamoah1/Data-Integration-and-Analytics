@@ -20,10 +20,10 @@ const testimonials = [
   },
   {
     quote: 'Our board meetings used to start with outdated numbers. Now we have a live executive dashboard that updates in real-time. The board is impressed, and decisions happen faster.',
-    name: 'Sarah Johnson',
+    name: 'Ama Boateng',
     role: 'COO',
     org: 'Atlantic Logistics',
-    initials: 'SJ',
+    initials: 'AB',
     color: 'bg-blue-100 text-blue-700',
   },
 ];

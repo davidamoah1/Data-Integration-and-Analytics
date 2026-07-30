@@ -16,11 +16,11 @@ interface AuditEntry {
 }
 
 const mockEntries: AuditEntry[] = [
-  { id: 1, action: 'login', user: 'admin@dataflow.io', ip: '192.168.1.1', timestamp: '2026-07-29 20:00:00', details: 'Successful login' },
-  { id: 2, action: 'dataset.upload', user: 'admin@dataflow.io', ip: '192.168.1.1', timestamp: '2026-07-29 19:30:00', details: 'Uploaded sales_data.csv (2.4 MB)' },
-  { id: 3, action: 'report.generate', user: 'analyst@dataflow.io', ip: '10.0.0.5', timestamp: '2026-07-29 18:00:00', details: 'Generated Q3 Executive Summary' },
-  { id: 4, action: 'user.invite', user: 'admin@dataflow.io', ip: '192.168.1.1', timestamp: '2026-07-29 17:00:00', details: 'Invited user@example.com as viewer' },
-  { id: 5, action: 'role.update', user: 'admin@dataflow.io', ip: '192.168.1.1', timestamp: '2026-07-29 16:00:00', details: 'Updated permissions for analyst role' },
+  { id: 1, action: 'login', user: 'kwame.mensah@org.com', ip: '192.168.1.1', timestamp: '2026-07-29 20:00:00', details: 'Successful login' },
+  { id: 2, action: 'dataset.upload', user: 'kwame.mensah@org.com', ip: '192.168.1.1', timestamp: '2026-07-29 19:30:00', details: 'Uploaded sales_data.csv (2.4 MB)' },
+  { id: 3, action: 'report.generate', user: 'ama.boateng@org.com', ip: '10.0.0.5', timestamp: '2026-07-29 18:00:00', details: 'Generated Q3 Executive Summary' },
+  { id: 4, action: 'user.invite', user: 'kwame.mensah@org.com', ip: '192.168.1.1', timestamp: '2026-07-29 17:00:00', details: 'Invited kojo.asante@org.com as viewer' },
+  { id: 5, action: 'role.update', user: 'kwame.mensah@org.com', ip: '192.168.1.1', timestamp: '2026-07-29 16:00:00', details: 'Updated permissions for analyst role' },
 ];
 
 export function AuditLogSettings() {

@@ -154,7 +154,7 @@ function AcceptInvitationContent() {
                     <label className="text-sm font-medium" htmlFor="full_name">Full Name *</label>
                     <div className="relative">
                       <UserIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                      <Input id="full_name" className="pl-9" placeholder="John Doe" value={form.full_name} onChange={(e) => update('full_name', e.target.value)} />
+                      <Input id="full_name" className="pl-9" placeholder="Kwame Mensah" value={form.full_name} onChange={(e) => update('full_name', e.target.value)} />
                     </div>
                     {validationErrors.full_name && <p className="text-xs text-red-500">{validationErrors.full_name}</p>}
                   </div>

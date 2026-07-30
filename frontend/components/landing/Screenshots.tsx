@@ -122,7 +122,7 @@ export function Screenshots() {
                               {col === 3 && `${(Math.random() * 1000).toFixed(0)}`}
                               {col === 4 && <span className={`rounded-full px-2 py-0.5 text-[10px] ${row % 3 === 0 ? 'bg-green-100 text-green-700' : row % 3 === 1 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}`}>{row % 3 === 0 ? 'Active' : row % 3 === 1 ? 'Pending' : 'Error'}</span>}
                               {col === 5 && `2025-07-${String(15 + row).padStart(2, '0')}`}
-                              {col === 6 && ['J. Doe', 'A. Smith', 'K. Lee', 'M. Chen', 'R. Patel', 'S. Brown'][row]}
+                              {col === 6 && ['K. Mensah', 'A. Boateng', 'K. Asante', 'M. Osei', 'R. Adjei', 'S. Frimpong'][row]}
                               {col === 7 && `${(0.5 + Math.random() * 0.5).toFixed(2)}`}
                             </div>
                           ))}
