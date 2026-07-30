@@ -2,102 +2,27 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-  LayoutDashboard,
-  Database,
-  BarChart3,
-  Bot,
-  FileText,
-  CalendarClock,
-  Bell,
-  Shield,
-  Settings,
-  Zap,
-  Package,
-  Key,
-  Webhook,
-  CreditCard,
-  Crown,
-  Sparkles,
-  ScanLine,
-  LayoutTemplate,
-  Users,
-  Building2,
-  ScrollText,
-  type LucideIcon,
-} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/authStore';
-
-interface NavItem {
-  label: string;
-  href: string;
-  icon: LucideIcon;
-  permission?: string;
-  role?: string;
-}
-
-interface NavGroup {
-  label: string;
-  items: NavItem[];
-}
-
-const navGroups: NavGroup[] = [
-  {
-    label: 'Overview',
-    items: [
-      { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-      { label: 'Studios', href: '/studios', icon: Sparkles },
-      { label: 'Templates', href: '/templates', icon: LayoutTemplate },
-    ],
-  },
-  {
-    label: 'Data',
-    items: [
-      { label: 'Smart Capture', href: '/capture', icon: ScanLine },
-      { label: 'Datasets', href: '/datasets', icon: Database, permission: 'datasets.view' },
-      { label: 'Analytics', href: '/analytics', icon: BarChart3, permission: 'analytics.view' },
-      { label: 'Reports', href: '/reports', icon: FileText, permission: 'reports.view' },
-    ],
-  },
-  {
-    label: 'Intelligence',
-    items: [
-      { label: 'Analytics Assistant', href: '/ai', icon: Bot, permission: 'ai.use' },
-      { label: 'Scheduler', href: '/scheduler', icon: CalendarClock },
-    ],
-  },
-  {
-    label: 'Administration',
-    items: [
-      { label: 'Notifications', href: '/notifications', icon: Bell },
-      { label: 'Members', href: '/admin', icon: Users, permission: 'users.read' },
-      { label: 'Admin Portal', href: '/admin-portal', icon: Crown, role: 'super_admin' },
-      { label: 'Audit Logs', href: '/audit', icon: ScrollText, permission: 'audit.view' },
-    ],
-  },
-  {
-    label: 'Platform',
-    items: [
-      { label: 'Billing', href: '/billing', icon: CreditCard },
-      { label: 'Connectors', href: '/connectors', icon: Zap },
-      { label: 'Marketplace', href: '/marketplace', icon: Package },
-      { label: 'API Keys', href: '/api-keys', icon: Key },
-      { label: 'Webhooks', href: '/webhooks', icon: Webhook },
-      { label: 'Settings', href: '/settings', icon: Settings },
-    ],
-  },
-];
+import { buildNavigation, getNavigationPurpose, getPrimaryRole } from '@/lib/navigation';
+import { ROLE_LABELS } from '@/lib/permissions';
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { hasPermission, hasRole, user } = useAuthStore();
+  const { user } = useAuthStore();
 
-  const isVisible = (item: NavItem) => {
-    if (item.permission && !hasPermission(item.permission)) return false;
-    if (item.role && !hasRole(item.role)) return false;
-    return true;
-  };
+  const navGroups = user
+    ? buildNavigation({
+        roles: user.roles,
+        permissions: user.permissions,
+        organizationType: user.organization_name,
+        departmentId: user.department_id,
+        workspaceType: user.organization_id ? 'organization' : 'personal',
+      })
+    : [];
+
+  const purpose = user ? getNavigationPurpose(user.roles) : '';
+  const primaryRole = user ? getPrimaryRole(user.roles) : '';
 
   return (
     <aside className="flex h-full w-64 flex-col bg-sidebar text-sidebar-foreground">
@@ -121,10 +46,13 @@ export function Sidebar() {
                   key={role}
                   className="rounded bg-sidebar-accent/30 px-1.5 py-0.5 text-[10px] font-medium text-sidebar-foreground/70"
                 >
-                  {role.replace(/_/g, ' ')}
+                  {ROLE_LABELS[role] || role.replace(/_/g, ' ')}
                 </span>
               ))}
             </div>
+          )}
+          {purpose && (
+            <p className="mt-1.5 text-[10px] italic text-sidebar-foreground/40">{purpose}</p>
           )}
         </div>
       )}
@@ -132,16 +60,13 @@ export function Sidebar() {
       {/* Navigation */}
       <nav className="flex-1 space-y-4 overflow-y-auto scrollbar-thin px-3 py-4">
         {navGroups.map((group) => {
-          const visibleItems = group.items.filter(isVisible);
-          if (visibleItems.length === 0) return null;
-
           return (
             <div key={group.label}>
               <p className="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/40">
                 {group.label}
               </p>
               <div className="space-y-0.5">
-                {visibleItems.map((item) => {
+                {group.items.map((item) => {
                   const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
                   const Icon = item.icon;
 
@@ -170,6 +95,9 @@ export function Sidebar() {
       {/* Version */}
       <div className="border-t border-sidebar-border px-6 py-3 text-xs text-sidebar-foreground/50">
         DataFlow v2.0.0
+        {primaryRole && (
+          <span className="ml-1 text-sidebar-foreground/30">· {ROLE_LABELS[primaryRole]}</span>
+        )}
       </div>
     </aside>
   );

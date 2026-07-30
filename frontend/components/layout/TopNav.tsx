@@ -8,6 +8,8 @@ import { useTheme } from '@/providers/ThemeProvider';
 import { getInitials } from '@/lib/utils';
 import { Badge } from '@/components/ui/Badge';
 import { cn } from '@/lib/utils';
+import { AdaptiveSearch } from '@/components/adaptive/AdaptiveSearch';
+import { AdaptiveHelp } from '@/components/adaptive/AdaptiveHelp';
 
 export function TopNav({ onMenuClick }: { onMenuClick?: () => void }) {
   const router = useRouter();
@@ -50,10 +52,17 @@ export function TopNav({ onMenuClick }: { onMenuClick?: () => void }) {
             <Menu className="h-5 w-5" />
           </button>
         )}
+        {/* Adaptive Search */}
+        <div className="hidden flex-1 sm:block">
+          <AdaptiveSearch />
+        </div>
       </div>
 
       {/* Right actions */}
       <div className="flex items-center gap-2 md:gap-4">
+        {/* Adaptive Help */}
+        <AdaptiveHelp />
+
         {/* Theme selector */}
         <div ref={themeRef} className="relative">
           <button
