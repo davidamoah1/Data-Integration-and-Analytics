@@ -122,11 +122,11 @@ export default function DemoPage() {
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-slate-700">Full Name</label>
-                    <Input value={name} onChange={(e) => setName(e.target.value)} required placeholder="Jane Doe" />
+                    <Input value={name} onChange={(e) => setName(e.target.value)} required placeholder="Your full name" />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-slate-700">Work Email</label>
-                    <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="jane@company.com" />
+                    <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="you@company.com" />
                   </div>
                 </div>
 

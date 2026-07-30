@@ -42,11 +42,11 @@ describe('formatCurrency', () => {
 
 describe('getInitials', () => {
   it('gets initials from full name', () => {
-    expect(getInitials('John Doe')).toBe('JD');
+    expect(getInitials('Alice Smith')).toBe('AS');
   });
 
   it('handles single name', () => {
-    expect(getInitials('John')).toBe('J');
+    expect(getInitials('Alice')).toBe('A');
   });
 });
 
