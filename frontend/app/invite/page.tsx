@@ -205,7 +205,7 @@ function AcceptInvitationContent() {
         </div>
 
         <p className="mt-4 text-center text-xs text-slate-500">
-          © 2025 DataFlow. All rights reserved.
+          © 2026 DataFlow. All rights reserved.
         </p>
       </div>
     </div>
