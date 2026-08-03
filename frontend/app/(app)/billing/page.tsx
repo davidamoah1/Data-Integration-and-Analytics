@@ -6,24 +6,33 @@ import {
   Crown, Sparkles, X, Calendar, AlertCircle,
 } from "lucide-react";
 import { saasService, type SubscriptionPlan, type SubscriptionStatus } from "@/services/saas/saasService";
-
-const planIcons: Record<string, any> = {
-  free: Zap,
-  starter: TrendingUp,
-  professional: Building2,
-  business: Crown,
-  enterprise: Sparkles,
-};
-
-const planColors: Record<string, string> = {
-  free: "border-gray-500/30",
-  starter: "border-blue-500/30",
-  professional: "border-purple-500/30",
-  business: "border-orange-500/30",
-  enterprise: "border-yellow-500/30",
-};
+import { RouteGuard } from "@/components/auth/RouteGuard";
 
 export default function BillingPage() {
+  return (
+    <RouteGuard role="super_admin">
+      <BillingContent />
+    </RouteGuard>
+  );
+}
+
+function BillingContent() {
+  const planIcons: Record<string, any> = {
+    free: Zap,
+    starter: TrendingUp,
+    professional: Building2,
+    business: Crown,
+    enterprise: Sparkles,
+  };
+
+  const planColors: Record<string, string> = {
+    free: "border-gray-500/30",
+    starter: "border-blue-500/30",
+    professional: "border-purple-500/30",
+    business: "border-orange-500/30",
+    enterprise: "border-yellow-500/30",
+  };
+
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [subscription, setSubscription] = useState<SubscriptionStatus | null>(null);
   const [loading, setLoading] = useState(true);

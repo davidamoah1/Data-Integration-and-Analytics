@@ -42,6 +42,7 @@ def log_audit_event(
     resource_id: int | str | None = None,
     old_values: dict[str, Any] | None = None,
     new_values: dict[str, Any] | None = None,
+    metadata: dict[str, Any] | None = None,
     request: Request | None = None,
 ) -> AuditLog:
     """Create a single audit-log entry.
@@ -55,6 +56,7 @@ def log_audit_event(
         resource_id: Identifier of the resource.
         old_values: Previous state for update/delete events.
         new_values: New state for create/update events.
+        metadata: Extra context (e.g., file size, export format, role names).
         request: Optional FastAPI request for IP / user-agent capture.
 
     Returns:
@@ -68,6 +70,7 @@ def log_audit_event(
         resource_id=resource_id if isinstance(resource_id, int) else None,
         old_values=old_values,
         new_values=new_values,
+        audit_metadata=metadata,
         ip_address=_get_client_ip(request),
         user_agent=_get_user_agent(request),
         request_id=request_id.get() or None,

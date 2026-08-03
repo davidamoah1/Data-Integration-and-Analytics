@@ -38,6 +38,7 @@ from authentication.schemas import (
     ProfileUpdate,
     RoleCreate,
     RoleUpdate,
+    ScopedRoleAssign,
     UserCreate,
     UserUpdate,
 )
@@ -56,6 +57,8 @@ from shared.security import (
     create_access_token,
     create_refresh_token,
     decode_token,
+    encrypt_secret,
+    decrypt_secret,
     generate_token,
     hash_password,
     validate_password,
@@ -167,6 +170,24 @@ class AuthService:
             )
         )
 
+        # Audit log
+        self.db.add(AuditLog(
+            user_id=user.id,
+            organization_id=user.organization_id,
+            action="auth.login",
+            resource_type="user",
+            resource_id=user.id,
+            ip_address=ip,
+            new_values={"device": self._parse_device(user_agent)},
+        ))
+
+        # Security notification for new login
+        self._create_security_notification(
+            user_id=user.id,
+            subject="New Login",
+            body=f"A successful login to your account was recorded from {ip or 'an unknown IP'} on {self._parse_device(user_agent)}. If this was not you, please change your password immediately.",
+        )
+
         self.db.commit()
 
         return {
@@ -198,7 +219,11 @@ class AuthService:
         self.db.commit()
 
     def refresh_tokens(self, refresh_token: str) -> dict:
-        """Exchange a refresh token for a new access token."""
+        """Exchange a refresh token for a new access token.
+
+        Implements refresh token rotation: the old refresh token is revoked
+        and a new one is issued, preventing token reuse attacks.
+        """
         try:
             payload = decode_token(refresh_token)
         except Exception:
@@ -217,6 +242,9 @@ class AuthService:
         role_names = self.user_role_repo.get_roles_for_user(user.id)
         permission_names = self.user_role_repo.get_all_permissions_for_user(user.id)
 
+        # Rotate: revoke old session, create new one
+        self.session_repo.revoke(session.id)
+
         new_access = create_access_token(
             subject=str(user.id),
             extra_claims={
@@ -226,12 +254,26 @@ class AuthService:
                 "org_id": user.organization_id,
             },
         )
+        new_refresh = create_refresh_token(
+            subject=str(user.id),
+            expires_days=JWT_REFRESH_EXPIRE_DAYS,
+        )
 
-        self.session_repo.update_activity(session.id)
+        new_session = UserSession(
+            user_id=user.id,
+            refresh_token=new_refresh,
+            ip_address=session.ip_address,
+            user_agent=session.user_agent,
+            device=session.device,
+            expires_at=datetime.now(timezone.utc) + timedelta(days=JWT_REFRESH_EXPIRE_DAYS),
+        )
+        self.session_repo.create(new_session)
+
         self.db.commit()
 
         return {
             "access_token": new_access,
+            "refresh_token": new_refresh,
             "token_type": "bearer",
             "expires_in": 30 * 60,
         }
@@ -272,6 +314,22 @@ class AuthService:
                 action="password_change",
             )
         )
+
+        # Security notification
+        self._create_security_notification(
+            user_id=user_id,
+            subject="Password Changed",
+            body="Your account password was changed. If this was not you, please contact your administrator immediately.",
+        )
+
+        # Audit log
+        self.db.add(AuditLog(
+            user_id=user_id,
+            organization_id=user.organization_id,
+            action="security.password_changed",
+            resource_type="user",
+            resource_id=user_id,
+        ))
 
         self.db.commit()
 
@@ -342,6 +400,22 @@ class AuthService:
             )
         )
 
+        # Security notification
+        self._create_security_notification(
+            user_id=user.id,
+            subject="Password Reset",
+            body="Your account password was reset. If this was not you, please contact your administrator immediately.",
+        )
+
+        # Audit log
+        self.db.add(AuditLog(
+            user_id=user.id,
+            organization_id=user.organization_id,
+            action="security.password_reset",
+            resource_type="user",
+            resource_id=user.id,
+        ))
+
         self.db.commit()
 
     def verify_email(self, user_id: int):
@@ -353,6 +427,100 @@ class AuthService:
                 action="email_verified",
             )
         )
+        self.db.add(AuditLog(
+            user_id=user_id,
+            action="security.email_verified",
+            resource_type="user",
+            resource_id=user_id,
+        ))
+        self.db.commit()
+
+    def resend_email_verification(self, email: str) -> str:
+        """Generate a new email verification token.
+
+        Returns the token (for email delivery). Returns empty string
+        if user not found to prevent enumeration.
+        """
+        user = self.user_repo.get_by_email(email)
+        if not user or user.email_verified_at:
+            return ""
+
+        token = generate_token()
+        onboarding_data = user.onboarding_data or {}
+        onboarding_data["email_verify_token"] = token
+        self.user_repo.update(user.id, onboarding_data=onboarding_data)
+
+        self.activity_repo.create(
+            ActivityLog(
+                user_id=user.id,
+                action="email_verification_resent",
+            )
+        )
+        self.db.commit()
+        return token
+
+    def activate_account(self, user_id: int, reason: str = None, activated_by: int = None):
+        """Activate a deactivated user account."""
+        user = self.user_repo.get_by_id(user_id)
+        if not user:
+            raise NotFoundError("User not found")
+        if user.is_active:
+            raise ValidationError("Account is already active")
+
+        self.user_repo.update(user_id, is_active=1, failed_login_count=0, locked_until=None)
+        self.activity_repo.create(
+            ActivityLog(
+                user_id=activated_by,
+                action="account_activated",
+                resource_type="user",
+                resource_id=user_id,
+            )
+        )
+        self.db.add(AuditLog(
+            user_id=activated_by,
+            organization_id=user.organization_id,
+            action="user.activated",
+            resource_type="user",
+            resource_id=user_id,
+            new_values={"reason": reason} if reason else None,
+        ))
+        self.db.commit()
+
+    def deactivate_account(self, user_id: int, reason: str = None, deactivated_by: int = None):
+        """Deactivate an active user account. Revokes all sessions."""
+        user = self.user_repo.get_by_id(user_id)
+        if not user:
+            raise NotFoundError("User not found")
+        if not user.is_active:
+            raise ValidationError("Account is already deactivated")
+
+        self.user_repo.update(user_id, is_active=0)
+        self.session_repo.revoke_all_for_user(user_id)
+
+        self.activity_repo.create(
+            ActivityLog(
+                user_id=deactivated_by,
+                action="account_deactivated",
+                resource_type="user",
+                resource_id=user_id,
+            )
+        )
+        self.db.add(AuditLog(
+            user_id=deactivated_by,
+            organization_id=user.organization_id,
+            action="user.deactivated",
+            resource_type="user",
+            resource_id=user_id,
+            new_values={"reason": reason} if reason else None,
+        ))
+
+        # Security notification
+        self._create_security_notification(
+            user_id=user_id,
+            subject="Account Deactivated",
+            body=f"Your account has been deactivated{f': {reason}' if reason else ''}. Contact your administrator if you believe this is an error.",
+        )
+
         self.db.commit()
 
     def get_profile(self, user_id: int) -> dict:
@@ -364,6 +532,17 @@ class AuthService:
         roles = self.user_role_repo.get_roles_for_user(user_id)
         permissions = self.user_role_repo.get_all_permissions_for_user(user_id)
 
+        org_name = None
+        org_type = None
+        industry = None
+        if user.organization_id:
+            from organizations.models import Organization
+            org = self.db.query(Organization).filter(Organization.id == user.organization_id).first()
+            if org:
+                org_name = org.name
+                org_type = org.organization_type
+                industry = org.industry
+
         return {
             "id": user.id,
             "email": user.email,
@@ -371,6 +550,9 @@ class AuthService:
             "avatar_url": user.avatar_url,
             "phone": user.phone,
             "organization_id": user.organization_id,
+            "organization_name": org_name,
+            "organization_type": org_type,
+            "industry": industry,
             "department_id": user.department_id,
             "position": user.position,
             "language": user.language,
@@ -462,6 +644,20 @@ class AuthService:
             }
             for r in records
         ]
+
+    def _create_security_notification(self, user_id: int, subject: str, body: str):
+        """Create an in-app security notification for a user."""
+        from notifications.models import Notification
+        self.db.add(Notification(
+            user_id=user_id,
+            channel="in_app",
+            subject=subject,
+            body=body,
+            status="sent",
+            read=False,
+            created_at=datetime.now(timezone.utc),
+            sent_at=datetime.now(timezone.utc),
+        ))
 
     @staticmethod
     def _parse_device(user_agent: str) -> str:
@@ -764,9 +960,134 @@ class RoleService:
             "name": role.name,
             "display_name": role.display_name,
             "description": role.description,
+            "level": role.level,
             "is_system": bool(role.is_system),
+            "is_assignable": bool(role.is_assignable),
             "permissions": perms,
         }
+
+    def list_roles_by_level(self, level: str) -> list[dict]:
+        """List all roles at a specific level (platform, organization, department, personal)."""
+        roles = self.role_repo.list_roles_by_level(level)
+        return [self._role_to_dict(r) for r in roles]
+
+    def list_assignable_roles(self) -> list[dict]:
+        """List all roles that can be assigned to users."""
+        roles = self.role_repo.list_assignable_roles()
+        return [self._role_to_dict(r) for r in roles]
+
+    def assign_scoped_role(self, request: ScopedRoleAssign, assigned_by: int) -> dict:
+        """Assign a role to a user with optional scope (organization, department, resource)."""
+        from authentication.repositories import UserRepository
+        user_repo = UserRepository(self.db)
+        user = user_repo.get_by_id(request.user_id)
+        if not user:
+            raise NotFoundError("User not found")
+
+        role = self.role_repo.get_by_name(request.role_name)
+        if not role:
+            raise NotFoundError(f"Role '{request.role_name}' not found")
+
+        if not role.is_assignable:
+            raise AuthorizationError(f"Role '{request.role_name}' is not assignable")
+
+        # Validate scope matches role level
+        if role.level == "platform" and request.scope_type not in (None, "platform"):
+            raise ValidationError("Platform roles can only have platform scope")
+        if role.level == "organization" and request.scope_type not in (None, "organization"):
+            raise ValidationError("Organization roles can only have organization scope")
+        if role.level == "department" and request.scope_type != "department":
+            raise ValidationError("Department roles require department scope")
+        if role.level == "personal" and request.scope_type not in (None, "personal"):
+            raise ValidationError("Personal roles can only have personal scope")
+
+        # Use user's org as default scope for org-level roles
+        scope_type = request.scope_type or ("organization" if role.level == "organization" else None)
+        scope_id = request.scope_id or (user.organization_id if scope_type == "organization" else None)
+
+        from authentication.repositories import UserRoleRepository
+        user_role_repo = UserRoleRepository(self.db)
+        user_role_repo.assign_role(
+            user_id=request.user_id,
+            role_id=role.id,
+            assigned_by=assigned_by,
+            scope_type=scope_type,
+            scope_id=scope_id,
+        )
+
+        self.db.add(AuditLog(
+            user_id=assigned_by,
+            organization_id=user.organization_id,
+            action="role.scoped_assign",
+            resource_type="user",
+            resource_id=request.user_id,
+            new_values={"role": request.role_name, "scope_type": scope_type, "scope_id": scope_id},
+        ))
+        self.db.commit()
+        return {"user_id": request.user_id, "role": request.role_name, "scope_type": scope_type, "scope_id": scope_id}
+
+    def get_user_permissions(self, user_id: int) -> dict:
+        """Get a user's roles, permissions, and scoped role assignments."""
+        from authentication.repositories import UserRepository, UserRoleRepository
+        user_repo = UserRepository(self.db)
+        user_role_repo = UserRoleRepository(self.db)
+
+        user = user_repo.get_by_id(user_id)
+        if not user:
+            raise NotFoundError("User not found")
+
+        roles = user_role_repo.get_roles_for_user(user_id)
+        permissions = user_role_repo.get_all_permissions_for_user(user_id)
+        scoped_roles = user_role_repo.get_scoped_roles_for_user(user_id)
+
+        return {
+            "user_id": user_id,
+            "roles": roles,
+            "permissions": sorted(permissions),
+            "scoped_roles": scoped_roles,
+        }
+
+    def check_permission(self, user_id: int, permission: str,
+                          scope_type: str = None, scope_id: int = None,
+                          resource_type: str = None, resource_id: int = None) -> dict:
+        """Check if a user has a specific permission, optionally within a scope or resource."""
+        from authentication.repositories import UserRoleRepository, UserRepository, ResourceRepository
+        user_role_repo = UserRoleRepository(self.db)
+        user_repo = UserRepository(self.db)
+
+        user = user_repo.get_by_id(user_id)
+        if not user:
+            return {"has_permission": False, "reason": "User not found"}
+
+        # Super admin / platform_owner has all permissions
+        roles = user_role_repo.get_roles_for_user(user_id)
+        if "super_admin" in roles or "platform_owner" in roles:
+            return {"has_permission": True}
+
+        # Check global permission
+        has_perm = user_role_repo.has_permission(user_id, permission)
+        if not has_perm and scope_type:
+            # Check scoped permissions
+            scoped_perms = user_role_repo.get_permissions_for_scope(user_id, scope_type, scope_id)
+            has_perm = permission in scoped_perms
+
+        if not has_perm:
+            return {"has_permission": False, "reason": f"Missing permission: {permission}"}
+
+        # Resource-level check
+        if resource_type and resource_id:
+            resource_repo = ResourceRepository(self.db)
+            can_access = resource_repo.can_access(
+                user_id=user_id,
+                resource_type=resource_type,
+                resource_id=resource_id,
+                user_org_id=user.organization_id,
+                user_dept_id=user.department_id,
+            )
+            if not can_access:
+                return {"has_permission": False, "reason": "Resource access denied"}
+
+        return {"has_permission": True}
 
 
 def seed_default_data(db: DbSession):
@@ -780,75 +1101,70 @@ def seed_default_data(db: DbSession):
     user_repo = UserRepository(db)
     user_role_repo = UserRoleRepository(db)
 
-    # Define all permissions
+    # Enterprise RBAC permissions
     permissions_def = [
-        # User management
+        ("organization.create", "Create Organization", "organization", "Create new organizations"),
+        ("organization.manage", "Manage Organization", "organization", "Manage organization settings"),
+        ("organization.read", "View Organization", "organization", "View organization details"),
+        ("organization.delete", "Delete Organization", "organization", "Delete an organization"),
+        ("department.create", "Create Department", "department", "Create departments"),
+        ("department.manage", "Manage Departments", "department", "Manage department settings"),
+        ("department.read", "View Departments", "department", "View department info"),
+        ("member.invite", "Invite Members", "member", "Invite users to organization"),
+        ("member.remove", "Remove Members", "member", "Remove users from organization"),
+        ("member.read", "View Members", "member", "View organization members"),
+        ("member.manage", "Manage Members", "member", "Manage member roles"),
+        ("role.assign", "Assign Roles", "role", "Assign roles to users"),
+        ("role.revoke", "Revoke Roles", "role", "Revoke roles from users"),
+        ("role.create", "Create Roles", "role", "Create custom roles"),
+        ("role.read", "View Roles", "role", "View roles and permissions"),
+        ("role.manage", "Manage Roles", "role", "Full role management"),
         ("users.create", "Create Users", "users", "Create new user accounts"),
         ("users.read", "View Users", "users", "View user profiles"),
         ("users.edit", "Edit Users", "users", "Edit user information"),
         ("users.delete", "Delete Users", "users", "Delete user accounts"),
         ("users.manage", "Manage Users", "users", "Full user management"),
-        # Role management
-        ("roles.create", "Create Roles", "roles", "Create new roles"),
-        ("roles.read", "View Roles", "roles", "View roles and permissions"),
-        ("roles.manage", "Manage Roles", "roles", "Full role management"),
-        # Pipeline
+        ("dataset.create", "Create Dataset", "dataset", "Create and upload datasets"),
+        ("dataset.read", "View Dataset", "dataset", "View datasets"),
+        ("dataset.update", "Update Dataset", "dataset", "Edit dataset data"),
+        ("dataset.delete", "Delete Dataset", "dataset", "Delete datasets"),
+        ("dataset.share", "Share Dataset", "dataset", "Share datasets with others"),
+        ("dataset.export", "Export Dataset", "dataset", "Export dataset data"),
+        ("dashboard.create", "Create Dashboard", "dashboard", "Create dashboards"),
+        ("dashboard.read", "View Dashboard", "dashboard", "View dashboards"),
+        ("dashboard.update", "Update Dashboard", "dashboard", "Edit dashboards"),
+        ("dashboard.delete", "Delete Dashboard", "dashboard", "Delete dashboards"),
+        ("dashboard.export", "Export Dashboard", "dashboard", "Export dashboard as PDF/image"),
+        ("dashboard.share", "Share Dashboard", "dashboard", "Share dashboards"),
+        ("report.generate", "Generate Report", "report", "Generate reports"),
+        ("report.read", "View Report", "report", "View reports"),
+        ("report.update", "Update Report", "report", "Edit report configs"),
+        ("report.delete", "Delete Report", "report", "Delete reports"),
+        ("report.export", "Export Report", "report", "Export report files"),
         ("pipelines.create", "Create Pipelines", "pipelines", "Create ETL pipelines"),
         ("pipelines.execute", "Execute Pipelines", "pipelines", "Run ETL pipelines"),
         ("pipelines.view", "View Pipelines", "pipelines", "View pipeline status"),
-        # ETL
+        ("pipelines.delete", "Delete Pipelines", "pipelines", "Delete ETL pipelines"),
         ("etl.import", "Import Data", "etl", "Import data via ETL"),
         ("etl.export", "Export Data", "etl", "Export data from ETL"),
-        # Dashboard
-        ("dashboard.view", "View Dashboard", "dashboard", "View dashboards"),
-        ("dashboard.manage", "Manage Dashboard", "dashboard", "Create and edit dashboards"),
-        # Reports
-        ("reports.generate", "Generate Reports", "reports", "Generate reports"),
-        ("reports.export", "Export Reports", "reports", "Export report files"),
-        ("reports.view", "View Reports", "reports", "View reports"),
-        # Datasets
-        ("datasets.upload", "Upload Datasets", "datasets", "Upload new datasets"),
-        ("datasets.delete", "Delete Datasets", "datasets", "Delete datasets"),
-        ("datasets.view", "View Datasets", "datasets", "View datasets"),
-        # Analytics
         ("analytics.view", "View Analytics", "analytics", "View analytics"),
-        (
-            "analytics.manage",
-            "Manage Analytics",
-            "analytics",
-            "Create and manage dashboards and KPIs",
-        ),
-        (
-            "analytics.export",
-            "Export Analytics",
-            "analytics",
-            "Export dashboards and analytics data",
-        ),
-        # AI
+        ("analytics.manage", "Manage Analytics", "analytics", "Create and manage dashboards and KPIs"),
+        ("analytics.export", "Export Analytics", "analytics", "Export dashboards and analytics data"),
         ("ai.use", "Use AI Features", "ai", "Access AI predictions and insights"),
-        # Settings
         ("settings.manage", "Manage Settings", "settings", "Manage system settings"),
-        # Audit
         ("audit.view", "View Audit Logs", "audit", "View audit logs"),
-        # Notifications
-        (
-            "notifications.manage",
-            "Manage Notifications",
-            "notifications",
-            "Manage notification settings",
-        ),
-        # Organization
-        ("organizations.manage", "Manage Organizations", "organizations", "Manage organizations"),
-        ("departments.manage", "Manage Departments", "departments", "Manage departments"),
-        # Sessions
+        ("notifications.manage", "Manage Notifications", "notifications", "Manage notification settings"),
         ("sessions.manage", "Manage Sessions", "sessions", "Revoke user sessions"),
-        # Profile
         ("profile.update", "Update Profile", "profile", "Update own profile"),
-        # Machine Learning
         ("ml.read", "View ML Models", "ml", "View machine learning models and dashboards"),
         ("ml.write", "Create ML Models", "ml", "Create and edit machine learning models"),
         ("ml.execute", "Execute ML Training", "ml", "Train, predict, and run ML jobs"),
         ("ml.delete", "Delete ML Models", "ml", "Archive or delete ML models"),
+        ("capture.upload", "Upload Documents", "capture", "Upload documents for smart data capture"),
+        ("capture.process", "Process Documents", "capture", "Run OCR and document processing"),
+        ("capture.read", "View Captured Data", "capture", "View captured document data"),
+        ("workspace.create", "Create Workspace", "workspace", "Create personal or shared workspaces"),
+        ("workspace.manage", "Manage Workspace", "workspace", "Manage workspace settings"),
     ]
 
     for name, display, module, desc in permissions_def:
@@ -862,187 +1178,83 @@ def seed_default_data(db: DbSession):
                 )
             )
 
-    # Define roles and their permissions
+    ALL_PERMS = [p[0] for p in permissions_def]
+
+    # Enterprise roles: (name, display, desc, level, is_system, is_assignable, [perms])
     roles_def = [
-        (
-            "super_admin",
-            "Super Administrator",
-            "Full system access with all permissions",
-            True,
-            [p[0] for p in permissions_def],
-        ),
-        (
-            "org_owner",
-            "Organization Owner",
-            "Owner of an organization with full org access",
-            True,
-            [p[0] for p in permissions_def if not p[0].startswith("settings.manage")],
-        ),
-        (
-            "org_admin",
-            "Organization Administrator",
-            "Manage users and data within organization",
-            True,
-            [
-                "users.create",
-                "users.read",
-                "users.edit",
-                "users.delete",
-                "users.manage",
-                "roles.read",
-                "pipelines.create",
-                "pipelines.execute",
-                "pipelines.view",
-                "etl.import",
-                "etl.export",
-                "dashboard.view",
-                "dashboard.manage",
-                "reports.generate",
-                "reports.export",
-                "reports.view",
-                "datasets.upload",
-                "datasets.view",
-                "analytics.view",
-                "notifications.manage",
-                "departments.manage",
-                "sessions.manage",
-                "profile.update",
-                "audit.view",
-                "ml.read",
-                "ml.write",
-                "ml.execute",
-                "ml.delete",
-            ],
-        ),
-        (
-            "dept_manager",
-            "Department Manager",
-            "Manage department operations",
-            True,
-            [
-                "users.read",
-                "pipelines.view",
-                "etl.import",
-                "etl.export",
-                "dashboard.view",
-                "reports.view",
-                "reports.generate",
-                "reports.export",
-                "datasets.view",
-                "analytics.view",
-                "profile.update",
-                "ml.read",
-                "ml.execute",
-            ],
-        ),
-        (
-            "data_engineer",
-            "Data Engineer",
-            "Build and run ETL pipelines",
-            True,
-            [
-                "pipelines.create",
-                "pipelines.execute",
-                "pipelines.view",
-                "etl.import",
-                "etl.export",
-                "datasets.upload",
-                "datasets.view",
-                "dashboard.view",
-                "profile.update",
-                "ml.read",
-                "ml.execute",
-            ],
-        ),
-        (
-            "data_analyst",
-            "Data Analyst",
-            "Analyze data and create reports",
-            True,
-            [
-                "dashboard.view",
-                "reports.generate",
-                "reports.view",
-                "datasets.view",
-                "analytics.view",
-                "etl.export",
-                "profile.update",
-                "ml.read",
-                "ml.execute",
-            ],
-        ),
-        (
-            "business_analyst",
-            "Business Analyst",
-            "View dashboards and reports",
-            True,
-            ["dashboard.view", "reports.view", "datasets.view", "analytics.view", "profile.update"],
-        ),
-        (
-            "executive",
-            "Executive",
-            "View high-level analytics and reports",
-            True,
-            ["dashboard.view", "reports.view", "analytics.view", "profile.update"],
-        ),
-        (
-            "dept_officer",
-            "Department Officer",
-            "Department-level operations",
-            True,
-            ["dashboard.view", "reports.view", "datasets.view", "profile.update"],
-        ),
-        (
-            "auditor",
-            "Auditor",
-            "View audit logs and security events",
-            True,
-            ["audit.view", "users.read", "profile.update"],
-        ),
-        (
-            "viewer",
-            "Viewer",
-            "Read-only access to dashboards",
-            True,
-            ["dashboard.view", "profile.update"],
-        ),
-        (
-            "researcher",
-            "Researcher",
-            "Upload research datasets and perform statistical analysis",
-            True,
-            [
-                "datasets.upload",
-                "datasets.view",
-                "dashboard.view",
-                "analytics.view",
-                "reports.generate",
-                "reports.view",
-                "reports.export",
-                "etl.export",
-                "profile.update",
-                "ml.read",
-                "ml.execute",
-            ],
-        ),
-        (
-            "data_entry_officer",
-            "Data Entry Officer",
-            "Upload documents and use Smart Data Capture",
-            True,
-            [
-                "datasets.upload",
-                "datasets.view",
-                "profile.update",
-            ],
-        ),
+        ("super_admin", "Super Administrator", "Full system access — backward compatible", "platform", True, False, ALL_PERMS),
+        ("platform_owner", "Platform Owner", "Owns the platform, full control over all organizations", "platform", True, False, ALL_PERMS),
+        ("platform_admin", "Platform Administrator", "Manages platform operations and all organizations", "platform", True, True, ALL_PERMS),
+        ("org_admin", "Organization Administrator", "Manages users, roles, departments, and resources within an organization", "organization", True, True, [
+            "organization.read", "organization.manage", "department.create", "department.manage", "department.read",
+            "member.invite", "member.remove", "member.read", "member.manage",
+            "role.assign", "role.revoke", "role.read",
+            "users.create", "users.read", "users.edit", "users.delete", "users.manage",
+            "dataset.create", "dataset.read", "dataset.update", "dataset.delete", "dataset.share", "dataset.export",
+            "dashboard.create", "dashboard.read", "dashboard.update", "dashboard.delete", "dashboard.export", "dashboard.share",
+            "report.generate", "report.read", "report.update", "report.delete", "report.export",
+            "pipelines.create", "pipelines.execute", "pipelines.view", "pipelines.delete",
+            "etl.import", "etl.export", "analytics.view", "analytics.manage", "analytics.export",
+            "ai.use", "audit.view", "notifications.manage", "sessions.manage", "profile.update",
+            "ml.read", "ml.write", "ml.execute", "ml.delete",
+            "capture.upload", "capture.process", "capture.read", "workspace.create", "workspace.manage",
+        ]),
+        ("dept_manager", "Department Manager", "Manages department operations, members, and resources", "department", True, True, [
+            "organization.read", "department.read", "department.manage",
+            "member.invite", "member.read", "role.read", "users.read",
+            "dataset.create", "dataset.read", "dataset.update", "dataset.delete", "dataset.share", "dataset.export",
+            "dashboard.create", "dashboard.read", "dashboard.update", "dashboard.export",
+            "report.generate", "report.read", "report.export",
+            "pipelines.create", "pipelines.execute", "pipelines.view",
+            "etl.import", "etl.export", "analytics.view", "analytics.manage", "ai.use", "audit.view",
+            "profile.update", "ml.read", "ml.execute",
+            "capture.upload", "capture.process", "capture.read", "workspace.create", "workspace.manage",
+        ]),
+        ("analyst", "Analyst", "Analyzes data, creates dashboards and reports, runs ML models", "organization", True, True, [
+            "organization.read", "department.read", "member.read", "role.read", "users.read",
+            "dataset.read", "dataset.update", "dataset.export", "dataset.share",
+            "dashboard.create", "dashboard.read", "dashboard.update", "dashboard.export", "dashboard.share",
+            "report.generate", "report.read", "report.update", "report.export",
+            "pipelines.view", "etl.export", "analytics.view", "analytics.manage", "analytics.export", "ai.use",
+            "profile.update", "ml.read", "ml.write", "ml.execute", "capture.read",
+            "workspace.create", "workspace.manage",
+        ]),
+        ("researcher", "Researcher", "Uploads research datasets, performs statistical analysis, generates reports", "organization", True, True, [
+            "organization.read", "department.read", "member.read",
+            "dataset.create", "dataset.read", "dataset.update", "dataset.export",
+            "dashboard.create", "dashboard.read", "dashboard.export",
+            "report.generate", "report.read", "report.export",
+            "pipelines.view", "etl.import", "etl.export", "analytics.view", "analytics.export", "ai.use",
+            "profile.update", "ml.read", "ml.execute",
+            "capture.upload", "capture.read", "workspace.create",
+        ]),
+        ("data_entry_officer", "Data Entry Officer", "Uploads documents, uses Smart Data Capture, enters and updates data", "department", True, True, [
+            "organization.read", "department.read",
+            "dataset.create", "dataset.read", "dataset.update",
+            "dashboard.read", "report.read", "etl.import",
+            "profile.update", "capture.upload", "capture.process", "capture.read",
+        ]),
+        ("viewer", "Viewer", "Read-only access to dashboards, reports, and shared resources", "organization", True, True, [
+            "organization.read", "member.read", "dataset.read",
+            "dashboard.read", "report.read", "analytics.view", "profile.update",
+        ]),
+        ("personal_user", "Personal Workspace User", "Individual user with personal workspace — limited to own resources", "personal", True, True, [
+            "dataset.create", "dataset.read", "dataset.update", "dataset.delete", "dataset.export",
+            "dashboard.create", "dashboard.read", "dashboard.update", "dashboard.export",
+            "report.generate", "report.read", "report.export",
+            "analytics.view", "ai.use", "profile.update",
+            "ml.read", "ml.execute", "capture.upload", "capture.read",
+            "workspace.create", "workspace.manage",
+        ]),
     ]
 
-    for name, display, desc, is_system, perm_names in roles_def:
+    for name, display, desc, level, is_system, is_assignable, perm_names in roles_def:
         role = role_repo.get_by_name(name)
         if not role:
-            role = Role(name=name, display_name=display, description=desc, is_system=is_system)
+            role = Role(name=name, display_name=display, description=desc, level=level, is_system=is_system, is_assignable=is_assignable)
             role_repo.create(role)
+        else:
+            role_repo.update(role.id, level=level, is_assignable=is_assignable, display_name=display, description=desc)
         perm_ids = role_perm_repo.get_permission_ids_by_names(perm_names)
         role_perm_repo.set_role_permissions(role.id, perm_ids)
 

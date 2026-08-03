@@ -46,12 +46,12 @@ class TestHealthAndReadiness:
         assert "database" in data["checks"]
 
     def test_metrics_endpoint(self, client):
-        """Metrics endpoint should return counts."""
+        """Metrics endpoint should return Prometheus-format text."""
         response = client.get("/metrics")
         assert response.status_code == 200
-        data = response.json()
-        assert "metrics" in data
-        assert "timestamp" in data
+        assert "text/plain" in response.headers.get("content-type", "")
+        body = response.text
+        assert len(body) > 0
 
 
 class TestResilience:

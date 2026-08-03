@@ -72,8 +72,8 @@ class IndexManager:
         {"table": "audit_logs", "columns": ["user_id"], "name": "idx_audit_user"},
         {"table": "security_logs", "columns": ["organization_id", "created_at"], "name": "idx_security_org_date"},
         {"table": "organizations", "columns": ["slug"], "name": "idx_org_slug"},
-        {"table": "sales", "columns": ["date"], "name": "idx_sales_date"},
-        {"table": "pipeline_runs", "columns": ["run_at"], "name": "idx_pipeline_runs_date"},
+        {"table": "sales", "columns": ["order_date"], "name": "idx_sales_date"},
+        {"table": "pipeline_runs", "columns": ["started_at"], "name": "idx_pipeline_runs_date"},
     ]
 
     def __init__(self, db: DbSession):

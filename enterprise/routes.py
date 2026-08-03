@@ -34,6 +34,7 @@ from services.backup_service import BackupService
 from shared.database import get_db
 from shared.dependencies import get_current_user
 from shared.response import success_response
+from shared.tenant import get_current_organization_id
 
 router = APIRouter(prefix="/platform", tags=["Platform"])
 
@@ -199,9 +200,11 @@ async def list_comments(
     current_user: dict = Depends(get_current_user),
 ):
     """List comments for a resource."""
+    org_id = get_current_organization_id(current_user, db)
     comments = (
         db.query(Comment)
         .filter(
+            Comment.organization_id == org_id,
             Comment.resource_type == resource_type,
             Comment.resource_id == resource_id,
         )
@@ -229,7 +232,9 @@ async def create_comment(
     current_user: dict = Depends(get_current_user),
 ):
     """Create a comment on a resource."""
+    org_id = get_current_organization_id(current_user, db)
     comment = Comment(
+        organization_id=org_id,
         resource_type=body.resource_type,
         resource_id=body.resource_id,
         author_id=current_user["id"],
@@ -261,8 +266,9 @@ async def resolve_comment(
     current_user: dict = Depends(get_current_user),
 ):
     """Mark a comment as resolved."""
+    org_id = get_current_organization_id(current_user, db)
     comment = db.query(Comment).filter(Comment.id == comment_id).first()
-    if not comment:
+    if not comment or comment.organization_id != org_id:
         raise HTTPException(status_code=404, detail="Comment not found")
     if (
         comment.author_id != current_user["id"]

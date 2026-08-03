@@ -27,6 +27,13 @@ import {
   AlertTriangle,
   Stethoscope,
   GraduationCap,
+  ClipboardList,
+  CheckSquare,
+  BookOpen,
+  Newspaper,
+  Globe2,
+  ListChecks,
+  HardDrive,
   type LucideIcon,
 } from 'lucide-react';
 import { ROLES } from './permissions';
@@ -64,25 +71,36 @@ const ALL_NAV_ITEMS: Record<string, NavItem> = {
   templates: { label: 'Templates', href: '/templates', icon: LayoutTemplate, order: 2 },
 
   smartCapture: { label: 'Smart Data Capture', href: '/capture', icon: ScanLine, order: 0 },
-  datasets: { label: 'Datasets', href: '/datasets', icon: Database, permission: 'datasets.view', order: 1 },
-  analytics: { label: 'Analytics', href: '/analytics', icon: BarChart3, permission: 'analytics.view', order: 2 },
-  reports: { label: 'Reports', href: '/reports', icon: FileText, permission: 'reports.view', order: 3 },
+  captureQueue: { label: 'Capture Queue', href: '/capture/queue', icon: ClipboardList, order: 1 },
+  assignedTasks: { label: 'Assigned Tasks', href: '/capture/tasks', icon: CheckSquare, order: 2 },
+  validation: { label: 'Validation', href: '/capture/review', icon: CheckSquare, order: 3 },
+  datasets: { label: 'Datasets', href: '/datasets', icon: Database, permission: 'datasets.view', order: 4 },
+  analytics: { label: 'Analytics', href: '/analytics', icon: BarChart3, permission: 'analytics.view', order: 5 },
+  reports: { label: 'Reports', href: '/reports', icon: FileText, permission: 'reports.view', order: 6 },
+  reportBuilder: { label: 'Report Builder', href: '/reports/builder', icon: LayoutTemplate, permission: 'reports.view', order: 6.5 },
+  dashboards: { label: 'Dashboards', href: '/dashboard', icon: LayoutDashboard, permission: 'dashboard.view', order: 7 },
+  dashboardBuilder: { label: 'Dashboard Builder', href: '/dashboard/builder', icon: LayoutTemplate, permission: 'dashboard.manage', order: 8 },
 
   aiAssistant: { label: 'Analytics Assistant', href: '/ai', icon: Bot, permission: 'ai.use', order: 0 },
   scheduler: { label: 'Scheduler', href: '/scheduler', icon: CalendarClock, order: 1 },
+  backgroundJobs: { label: 'Background Jobs', href: '/jobs', icon: ListChecks, order: 1.5 },
+  fileStorage: { label: 'File Storage', href: '/storage', icon: HardDrive, order: 1.6 },
 
   notifications: { label: 'Notifications', href: '/notifications', icon: Bell, order: 0 },
   members: { label: 'Members', href: '/admin', icon: Users, permission: 'users.read', order: 1 },
   adminPortal: { label: 'Admin Portal', href: '/admin-portal', icon: Crown, role: 'super_admin', order: 2 },
   auditLogs: { label: 'Audit Logs', href: '/audit', icon: ScrollText, permission: 'audit.view', order: 3 },
   departments: { label: 'Departments', href: '/admin/departments', icon: Building2, permission: 'departments.manage', order: 4 },
+  orgSettings: { label: 'Organization Settings', href: '/settings', icon: Settings, permission: 'settings.manage', order: 5 },
 
   billing: { label: 'Billing', href: '/billing', icon: CreditCard, order: 0 },
-  connectors: { label: 'Connectors', href: '/connectors', icon: Zap, order: 1 },
-  marketplace: { label: 'Marketplace', href: '/marketplace', icon: Package, order: 2 },
-  apiKeys: { label: 'API Keys', href: '/api-keys', icon: Key, order: 3 },
-  webhooks: { label: 'Webhooks', href: '/webhooks', icon: Webhook, order: 4 },
-  settings: { label: 'Settings', href: '/settings', icon: Settings, order: 5 },
+  subscriptions: { label: 'Subscriptions', href: '/admin-portal/subscriptions', icon: CreditCard, role: 'super_admin', order: 1 },
+  organizations: { label: 'Organizations', href: '/admin-portal/organizations', icon: Building2, role: 'super_admin', order: 2 },
+  connectors: { label: 'Connectors', href: '/connectors', icon: Zap, order: 3 },
+  marketplace: { label: 'Marketplace', href: '/marketplace', icon: Package, order: 4 },
+  apiKeys: { label: 'API Keys', href: '/api-keys', icon: Key, order: 5 },
+  webhooks: { label: 'Webhooks', href: '/webhooks', icon: Webhook, order: 6 },
+  settings: { label: 'Settings', href: '/settings', icon: Settings, order: 7 },
 
   platformAnalytics: { label: 'Platform Analytics', href: '/admin-portal/analytics', icon: TrendingUp, role: 'super_admin', order: 0 },
   platformMonitoring: { label: 'Monitoring', href: '/admin-portal/monitoring', icon: Activity, role: 'super_admin', order: 1 },
@@ -92,6 +110,7 @@ const ALL_NAV_ITEMS: Record<string, NavItem> = {
 
   researchStudio: { label: 'Research Studio', href: '/studios/research', icon: FlaskConical, order: 0 },
   statistics: { label: 'Statistics', href: '/studios/statistics', icon: BarChart3, order: 1 },
+  publications: { label: 'Publications', href: '/studios/publications', icon: Newspaper, order: 2 },
 
   healthcareStudio: { label: 'Healthcare Studio', href: '/studios/healthcare', icon: Stethoscope, order: 0 },
   educationStudio: { label: 'Education Studio', href: '/studios/education', icon: GraduationCap, order: 0 },
@@ -109,6 +128,7 @@ const ROLE_PROFILES: Record<RoleKey, RoleProfile> = {
     groups: [
       group('Platform', [
         ALL_NAV_ITEMS.dashboard,
+        ALL_NAV_ITEMS.organizations,
         ALL_NAV_ITEMS.platformAnalytics,
         ALL_NAV_ITEMS.platformMonitoring,
         ALL_NAV_ITEMS.platformSecurity,
@@ -127,6 +147,7 @@ const ROLE_PROFILES: Record<RoleKey, RoleProfile> = {
         ALL_NAV_ITEMS.marketplace,
         ALL_NAV_ITEMS.apiKeys,
         ALL_NAV_ITEMS.webhooks,
+        ALL_NAV_ITEMS.subscriptions,
         ALL_NAV_ITEMS.billing,
       ], 2),
       group('System', [
@@ -141,6 +162,8 @@ const ROLE_PROFILES: Record<RoleKey, RoleProfile> = {
     groups: [
       group('Overview', [
         ALL_NAV_ITEMS.dashboard,
+        ALL_NAV_ITEMS.dashboards,
+        ALL_NAV_ITEMS.dashboardBuilder,
         ALL_NAV_ITEMS.studios,
         ALL_NAV_ITEMS.templates,
       ], 0),
@@ -149,20 +172,23 @@ const ROLE_PROFILES: Record<RoleKey, RoleProfile> = {
         ALL_NAV_ITEMS.datasets,
         ALL_NAV_ITEMS.analytics,
         ALL_NAV_ITEMS.reports,
+        ALL_NAV_ITEMS.reportBuilder,
       ], 1),
       group('Intelligence', [
         ALL_NAV_ITEMS.aiAssistant,
         ALL_NAV_ITEMS.scheduler,
+        ALL_NAV_ITEMS.backgroundJobs,
+        ALL_NAV_ITEMS.fileStorage,
       ], 2),
       group('Administration', [
         ALL_NAV_ITEMS.notifications,
         ALL_NAV_ITEMS.members,
         ALL_NAV_ITEMS.departments,
         ALL_NAV_ITEMS.auditLogs,
+        ALL_NAV_ITEMS.orgSettings,
       ], 3),
       group('Platform', [
         ALL_NAV_ITEMS.connectors,
-        ALL_NAV_ITEMS.settings,
       ], 4),
     ],
   },
@@ -172,6 +198,8 @@ const ROLE_PROFILES: Record<RoleKey, RoleProfile> = {
     groups: [
       group('Overview', [
         ALL_NAV_ITEMS.dashboard,
+        ALL_NAV_ITEMS.dashboards,
+        ALL_NAV_ITEMS.dashboardBuilder,
         ALL_NAV_ITEMS.studios,
         ALL_NAV_ITEMS.templates,
       ], 0),
@@ -180,20 +208,23 @@ const ROLE_PROFILES: Record<RoleKey, RoleProfile> = {
         ALL_NAV_ITEMS.datasets,
         ALL_NAV_ITEMS.analytics,
         ALL_NAV_ITEMS.reports,
+        ALL_NAV_ITEMS.reportBuilder,
       ], 1),
       group('Intelligence', [
         ALL_NAV_ITEMS.aiAssistant,
         ALL_NAV_ITEMS.scheduler,
+        ALL_NAV_ITEMS.backgroundJobs,
+        ALL_NAV_ITEMS.fileStorage,
       ], 2),
       group('Administration', [
         ALL_NAV_ITEMS.notifications,
         ALL_NAV_ITEMS.members,
         ALL_NAV_ITEMS.departments,
         ALL_NAV_ITEMS.auditLogs,
+        ALL_NAV_ITEMS.orgSettings,
       ], 3),
       group('Platform', [
         ALL_NAV_ITEMS.connectors,
-        ALL_NAV_ITEMS.settings,
       ], 4),
     ],
   },
@@ -208,6 +239,7 @@ const ROLE_PROFILES: Record<RoleKey, RoleProfile> = {
         ALL_NAV_ITEMS.members,
         ALL_NAV_ITEMS.datasets,
         ALL_NAV_ITEMS.reports,
+        ALL_NAV_ITEMS.reportBuilder,
       ], 1),
       group('Intelligence', [
         ALL_NAV_ITEMS.analytics,
@@ -230,6 +262,8 @@ const ROLE_PROFILES: Record<RoleKey, RoleProfile> = {
         ALL_NAV_ITEMS.datasets,
         ALL_NAV_ITEMS.connectors,
         ALL_NAV_ITEMS.scheduler,
+        ALL_NAV_ITEMS.backgroundJobs,
+        ALL_NAV_ITEMS.fileStorage,
       ], 1),
       group('Intelligence', [
         ALL_NAV_ITEMS.analytics,
@@ -247,16 +281,21 @@ const ROLE_PROFILES: Record<RoleKey, RoleProfile> = {
     groups: [
       group('Overview', [
         ALL_NAV_ITEMS.dashboard,
+        ALL_NAV_ITEMS.dashboards,
+        ALL_NAV_ITEMS.dashboardBuilder,
         ALL_NAV_ITEMS.templates,
       ], 0),
       group('Analytics Studio', [
         ALL_NAV_ITEMS.datasets,
         ALL_NAV_ITEMS.analytics,
         ALL_NAV_ITEMS.reports,
+        ALL_NAV_ITEMS.reportBuilder,
       ], 1),
       group('Intelligence', [
         ALL_NAV_ITEMS.aiAssistant,
         ALL_NAV_ITEMS.scheduler,
+        ALL_NAV_ITEMS.backgroundJobs,
+        ALL_NAV_ITEMS.fileStorage,
       ], 2),
       group('Personal', [
         ALL_NAV_ITEMS.notifications,
@@ -274,6 +313,7 @@ const ROLE_PROFILES: Record<RoleKey, RoleProfile> = {
       group('Analytics', [
         ALL_NAV_ITEMS.analytics,
         ALL_NAV_ITEMS.reports,
+        ALL_NAV_ITEMS.reportBuilder,
         ALL_NAV_ITEMS.datasets,
       ], 1),
       group('Intelligence', [
@@ -295,6 +335,8 @@ const ROLE_PROFILES: Record<RoleKey, RoleProfile> = {
       group('Insights', [
         ALL_NAV_ITEMS.analytics,
         ALL_NAV_ITEMS.reports,
+        ALL_NAV_ITEMS.reportBuilder,
+        ALL_NAV_ITEMS.datasets,
       ], 1),
       group('Personal', [
         ALL_NAV_ITEMS.notifications,
@@ -310,14 +352,19 @@ const ROLE_PROFILES: Record<RoleKey, RoleProfile> = {
         ALL_NAV_ITEMS.dashboard,
         ALL_NAV_ITEMS.templates,
       ], 0),
-      group('Research Studio', [
-        ALL_NAV_ITEMS.datasets,
+      group('Research', [
+        ALL_NAV_ITEMS.researchStudio,
         ALL_NAV_ITEMS.statistics,
+        ALL_NAV_ITEMS.publications,
         ALL_NAV_ITEMS.reports,
+        ALL_NAV_ITEMS.reportBuilder,
+        ALL_NAV_ITEMS.datasets,
       ], 1),
       group('Intelligence', [
         ALL_NAV_ITEMS.aiAssistant,
         ALL_NAV_ITEMS.scheduler,
+        ALL_NAV_ITEMS.backgroundJobs,
+        ALL_NAV_ITEMS.fileStorage,
       ], 2),
       group('Personal', [
         ALL_NAV_ITEMS.notifications,
@@ -339,6 +386,7 @@ const ROLE_PROFILES: Record<RoleKey, RoleProfile> = {
       group('Data', [
         ALL_NAV_ITEMS.datasets,
         ALL_NAV_ITEMS.reports,
+        ALL_NAV_ITEMS.reportBuilder,
       ], 2),
       group('Personal', [
         ALL_NAV_ITEMS.notifications,
@@ -356,6 +404,7 @@ const ROLE_PROFILES: Record<RoleKey, RoleProfile> = {
       group('Data', [
         ALL_NAV_ITEMS.datasets,
         ALL_NAV_ITEMS.reports,
+        ALL_NAV_ITEMS.reportBuilder,
       ], 1),
       group('Personal', [
         ALL_NAV_ITEMS.notifications,
@@ -369,14 +418,14 @@ const ROLE_PROFILES: Record<RoleKey, RoleProfile> = {
     groups: [
       group('Capture', [
         ALL_NAV_ITEMS.smartCapture,
+        ALL_NAV_ITEMS.captureQueue,
+        ALL_NAV_ITEMS.assignedTasks,
+        ALL_NAV_ITEMS.validation,
       ], 0),
-      group('Data', [
-        ALL_NAV_ITEMS.datasets,
-      ], 1),
       group('Personal', [
         ALL_NAV_ITEMS.notifications,
         ALL_NAV_ITEMS.profile,
-      ], 2),
+      ], 1),
     ],
   },
 
@@ -384,9 +433,9 @@ const ROLE_PROFILES: Record<RoleKey, RoleProfile> = {
     purpose: 'Consume information',
     groups: [
       group('View', [
-        ALL_NAV_ITEMS.dashboard,
-        ALL_NAV_ITEMS.analytics,
+        ALL_NAV_ITEMS.dashboards,
         ALL_NAV_ITEMS.reports,
+        ALL_NAV_ITEMS.reportBuilder,
       ], 0),
       group('Personal', [
         ALL_NAV_ITEMS.notifications,
@@ -413,6 +462,7 @@ export interface NavContext {
   roles: string[];
   permissions: string[];
   organizationType?: string;
+  industry?: string;
   departmentId?: number;
   workspaceType?: 'organization' | 'personal';
   featureFlags?: Record<string, boolean>;
@@ -486,7 +536,27 @@ export function buildNavigation(ctx: NavContext): NavGroup[] {
     return true;
   };
 
-  const filteredGroups = profile.groups
+  const INDUSTRY_STUDIOS: Record<string, NavItem> = {
+    healthcare: ALL_NAV_ITEMS.healthcareStudio,
+    education: ALL_NAV_ITEMS.educationStudio,
+  };
+
+  let groups = profile.groups;
+
+  if (ctx.industry && INDUSTRY_STUDIOS[ctx.industry]) {
+    const industryItem = INDUSTRY_STUDIOS[ctx.industry];
+    groups = groups.map((grp) => {
+      if (grp.label === 'Overview' || grp.label === 'Platform Tools') {
+        const hasItem = grp.items.some((i) => i.href === industryItem.href);
+        if (!hasItem) {
+          return { ...grp, items: [...grp.items, industryItem] };
+        }
+      }
+      return grp;
+    });
+  }
+
+  const filteredGroups = groups
     .filter(passesGroupFilter)
     .map((grp) => ({
       ...grp,

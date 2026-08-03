@@ -17,6 +17,7 @@ class TestPipelineBuilder:
                     "source_config": {"file_path": "test.csv"},
                 }
             ],
+            organization_id=1,
         )
         assert pipeline.id is not None
         assert pipeline.name == "Test Pipeline"
@@ -24,7 +25,7 @@ class TestPipelineBuilder:
 
     def test_get_pipeline(self, db_session):
         builder = PipelineBuilder(db_session)
-        builder.create_pipeline(name="Get Test", steps=[])
+        builder.create_pipeline(name="Get Test", steps=[], organization_id=1)
         pipelines = builder.list_pipelines()
         assert len(pipelines) >= 1
         p = builder.get_pipeline(pipelines[0]["id"])
@@ -35,6 +36,7 @@ class TestPipelineBuilder:
         pipeline = builder.create_pipeline(
             name="Version Test",
             steps=[{"type": "extract", "source_type": "csv", "source_config": {}}],
+            organization_id=1,
         )
         new_version = builder.update_pipeline(
             pipeline.id, steps=[{"type": "extract", "source_type": "json", "source_config": {}}]
@@ -43,7 +45,7 @@ class TestPipelineBuilder:
 
     def test_version_history(self, db_session):
         builder = PipelineBuilder(db_session)
-        pipeline = builder.create_pipeline(name="History Test", steps=[])
+        pipeline = builder.create_pipeline(name="History Test", steps=[], organization_id=1)
         builder.update_pipeline(pipeline.id, steps=[])
         builder.update_pipeline(pipeline.id, steps=[])
         history = builder.get_version_history(pipeline.id)
@@ -55,6 +57,7 @@ class TestPipelineBuilder:
         pipeline = builder.create_pipeline(
             name="Rollback Test",
             steps=[{"type": "extract", "source_type": "csv", "source_config": {}}],
+            organization_id=1,
         )
         builder.update_pipeline(
             pipeline.id, steps=[{"type": "extract", "source_type": "json", "source_config": {}}]
@@ -65,8 +68,8 @@ class TestPipelineBuilder:
 
     def test_list_pipelines(self, db_session):
         builder = PipelineBuilder(db_session)
-        builder.create_pipeline(name="List A", steps=[])
-        builder.create_pipeline(name="List B", steps=[])
+        builder.create_pipeline(name="List A", steps=[], organization_id=1)
+        builder.create_pipeline(name="List B", steps=[], organization_id=1)
         pipelines = builder.list_pipelines()
         assert len(pipelines) >= 2
 
@@ -85,7 +88,7 @@ class TestJobMonitor:
         assert "failure_rate" in stats
 
     def test_create_and_get_job(self, db_session):
-        job = ETLJob(job_type="import", status="completed", trigger_type="manual")
+        job = ETLJob(organization_id=1, job_type="import", status="completed", trigger_type="manual")
         db_session.add(job)
         db_session.commit()
         db_session.refresh(job)

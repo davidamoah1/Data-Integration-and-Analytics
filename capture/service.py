@@ -32,6 +32,13 @@ from capture.models import (
     CaptureField,
 )
 from capture.ocr_engine import OcrUnavailableError, is_ocr_available, render_pdf_to_images, run_ocr_on_document
+from capture.repositories import (
+    CaptureAuditLogRepository,
+    CaptureBatchRepository,
+    CaptureDocumentRepository,
+    CaptureFieldRepository,
+    CaptureTemplateRepository,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -47,23 +54,61 @@ class CaptureError(ValueError):
 class CaptureService:
     def __init__(self, db: DbSession):
         self.db = db
+        # Repository layer — all DB access goes through these
+        self.doc_repo = CaptureDocumentRepository(db)
+        self.field_repo = CaptureFieldRepository(db)
+        self.batch_repo = CaptureBatchRepository(db)
+        self.audit_repo = CaptureAuditLogRepository(db)
+        self.template_repo = CaptureTemplateRepository(db)
+        # File storage service (Phase 12)
+        from storage.service import FileService
+        self.file_service = FileService(db)
 
     # ── storage helpers ──────────────────────────────────────────────────
 
     def _doc_storage_dir(self, organization_id: int, token: str) -> str:
         return os.path.join(config.CAPTURE_STORAGE_DIR, str(organization_id), token)
 
+    def _resolve_local_path(self, storage_key: str) -> str:
+        """Resolve a storage key to a local filesystem path.
+
+        For the local backend, this is the direct file path.
+        For cloud backends (R2/S3/Supabase), the file is downloaded to a
+        temporary directory and the temp path is returned.
+        """
+        backend = self.file_service.backend
+        if backend.name == "local":
+            # Local backend — key is relative to base_dir
+            return os.path.join(backend.base_dir, storage_key)
+        # Cloud backend — download to temp file
+        import tempfile
+        ext = os.path.splitext(storage_key)[1]
+        fd, tmp_path = tempfile.mkstemp(suffix=ext)
+        os.close(fd)
+        data = backend.download(storage_key)
+        with open(tmp_path, "wb") as f:
+            f.write(data)
+        return tmp_path
+
+    def _upload_derived(self, doc: CaptureDocument, key_suffix: str, data: bytes, content_type: str = "image/png") -> str:
+        """Upload a derived file (enhanced image, thumbnail) to storage and return the key."""
+        key_prefix = f"capture/{doc.organization_id}/"
+        file_record = self.file_service.upload(
+            organization_id=doc.organization_id,
+            filename=f"{key_suffix}.png",
+            data=data,
+            content_type=content_type,
+            uploaded_by=doc.uploaded_by,
+            key_prefix=key_prefix + key_suffix + "/",
+        )
+        return file_record.storage_key
+
     def _log(self, organization_id: int, action: str, document_id: int | None = None,
               batch_id: int | None = None, actor_id: int | None = None, details: dict | None = None) -> None:
-        self.db.add(
-            CaptureAuditLog(
-                organization_id=organization_id,
-                document_id=document_id,
-                batch_id=batch_id,
-                action=action,
-                actor_id=actor_id,
-                details=details or {},
-            )
+        self.audit_repo.log(
+            organization_id, action,
+            document_id=document_id, batch_id=batch_id,
+            actor_id=actor_id, details=details,
         )
 
     # ── upload ───────────────────────────────────────────────────────────
@@ -89,12 +134,17 @@ class CaptureService:
                 f"File exceeds maximum size of {config.CAPTURE_MAX_FILE_SIZE_MB}MB."
             )
 
-        token = uuid.uuid4().hex[:16]
-        storage_dir = self._doc_storage_dir(organization_id, token)
-        os.makedirs(storage_dir, exist_ok=True)
-        original_path = os.path.join(storage_dir, f"original.{ext}")
-        with open(original_path, "wb") as f:
-            f.write(file_content)
+        # Upload to storage layer (Phase 12 — abstract object storage)
+        key_prefix = f"capture/{organization_id}/"
+        file_record = self.file_service.upload(
+            organization_id=organization_id,
+            filename=filename,
+            data=file_content,
+            content_type=f"image/{ext}" if ext in IMAGE_EXTENSIONS else "application/pdf",
+            uploaded_by=user_id,
+            key_prefix=key_prefix,
+        )
+        original_path = file_record.storage_key
 
         retention_expires = datetime.now(timezone.utc) + timedelta(days=config.CAPTURE_RETENTION_DAYS)
 
@@ -164,21 +214,10 @@ class CaptureService:
         return batch
 
     def get_batch(self, batch_id: int, organization_id: int) -> CaptureBatch | None:
-        return (
-            self.db.query(CaptureBatch)
-            .filter(CaptureBatch.id == batch_id, CaptureBatch.organization_id == organization_id)
-            .first()
-        )
+        return self.batch_repo.get_by_org(batch_id, organization_id)
 
     def list_batches(self, organization_id: int, limit: int = 50, offset: int = 0) -> list[CaptureBatch]:
-        return (
-            self.db.query(CaptureBatch)
-            .filter(CaptureBatch.organization_id == organization_id)
-            .order_by(CaptureBatch.id.desc())
-            .offset(offset)
-            .limit(limit)
-            .all()
-        )
+        return self.batch_repo.list_by_org(organization_id, limit, offset)
 
     def process_batch(self, batch_id: int) -> None:
         """Process every pending document in a batch sequentially.
@@ -189,14 +228,14 @@ class CaptureService:
         the per-document `process_document` call is already isolated and
         safe to parallelize.
         """
-        batch = self.db.query(CaptureBatch).filter(CaptureBatch.id == batch_id).first()
+        batch = self.batch_repo.get_by_id(batch_id)
         if not batch:
             return
 
         batch.status = "processing"
         self.db.commit()
 
-        docs = self.db.query(CaptureDocument).filter(CaptureDocument.batch_id == batch_id).all()
+        docs = self.doc_repo.list_by_batch(batch_id)
         for doc in docs:
             try:
                 self.process_document(doc.id)
@@ -213,7 +252,7 @@ class CaptureService:
     # ── pipeline ─────────────────────────────────────────────────────────
 
     def process_document(self, document_id: int) -> CaptureDocument:
-        doc = self.db.query(CaptureDocument).filter(CaptureDocument.id == document_id).first()
+        doc = self.doc_repo.get_by_id(document_id)
         if not doc:
             raise CaptureError("Document not found.")
 
@@ -283,34 +322,56 @@ class CaptureService:
             return doc
 
     def _preprocess(self, doc: CaptureDocument) -> list[str]:
-        storage_dir = os.path.dirname(doc.original_file_path)
-        enhanced_dir = os.path.join(storage_dir, "enhanced")
+        import tempfile
+
+        # Download original file from storage backend to local path for processing
+        local_original = self._resolve_local_path(doc.original_file_path)
+        work_dir = tempfile.mkdtemp(prefix="capture_preprocess_")
+        enhanced_dir = os.path.join(work_dir, "enhanced")
 
         if doc.file_type in PDF_EXTENSIONS:
-            raw_pages_dir = os.path.join(storage_dir, "pages")
-            raw_pages = render_pdf_to_images(doc.original_file_path, raw_pages_dir)
+            raw_pages_dir = os.path.join(work_dir, "pages")
+            raw_pages = render_pdf_to_images(local_original, raw_pages_dir)
             enhanced_paths = []
             os.makedirs(enhanced_dir, exist_ok=True)
             for i, page_path in enumerate(raw_pages, start=1):
                 out_path = os.path.join(enhanced_dir, f"page_{i}.png")
                 preprocessing.enhance_image(page_path, out_path)
                 enhanced_paths.append(out_path)
-            doc.enhanced_file_path = enhanced_paths[0] if enhanced_paths else None
+            # Upload first enhanced page to storage
+            if enhanced_paths:
+                with open(enhanced_paths[0], "rb") as f:
+                    doc.enhanced_file_path = self._upload_derived(doc, f"doc_{doc.id}_enhanced", f.read())
+            else:
+                doc.enhanced_file_path = None
             doc.page_count = len(enhanced_paths)
-            thumb_source = raw_pages[0] if raw_pages else doc.original_file_path
+            thumb_source = raw_pages[0] if raw_pages else local_original
         else:
             out_path = os.path.join(enhanced_dir, "enhanced.png")
-            preprocessing.enhance_image(doc.original_file_path, out_path)
-            doc.enhanced_file_path = out_path
+            os.makedirs(enhanced_dir, exist_ok=True)
+            preprocessing.enhance_image(local_original, out_path)
+            with open(out_path, "rb") as f:
+                doc.enhanced_file_path = self._upload_derived(doc, f"doc_{doc.id}_enhanced", f.read())
             enhanced_paths = [out_path]
-            thumb_source = doc.original_file_path
+            thumb_source = local_original
 
-        thumb_path = os.path.join(storage_dir, "thumbnail.png")
+        # Upload thumbnail to storage
+        thumb_path = os.path.join(work_dir, "thumbnail.png")
         try:
             preprocessing.make_thumbnail(thumb_source, thumb_path)
-            doc.thumbnail_path = thumb_path
+            with open(thumb_path, "rb") as f:
+                doc.thumbnail_path = self._upload_derived(doc, f"doc_{doc.id}_thumb", f.read())
         except Exception as e:
             logger.warning("Thumbnail generation failed for document %s: %s", doc.id, e)
+
+        # Clean up temp files
+        try:
+            import shutil
+            shutil.rmtree(work_dir, ignore_errors=True)
+            if self.file_service.backend.name != "local" and local_original != doc.original_file_path:
+                os.remove(local_original)
+        except Exception:
+            pass
 
         self._log(doc.organization_id, "preprocessed", document_id=doc.id,
                    details={"pages": len(enhanced_paths)})
@@ -319,7 +380,9 @@ class CaptureService:
 
     def _extract_and_validate(self, doc: CaptureDocument, ocr_result) -> None:
         # Clear any existing fields (retry scenario).
-        self.db.query(CaptureField).filter(CaptureField.document_id == doc.id).delete()
+        for f in self.field_repo.list_by_document(doc.id):
+            self.db.delete(f)
+        self.db.flush()
 
         doc_type_spec = get_document_type(doc.document_type) if doc.document_type else None
         template_boost = template_service.get_template_boost(self.db, doc.organization_id, doc.document_type)
@@ -379,11 +442,7 @@ class CaptureService:
     # ── review ───────────────────────────────────────────────────────────
 
     def get_document(self, document_id: int, organization_id: int) -> CaptureDocument | None:
-        return (
-            self.db.query(CaptureDocument)
-            .filter(CaptureDocument.id == document_id, CaptureDocument.organization_id == organization_id)
-            .first()
-        )
+        return self.doc_repo.get_by_org(document_id, organization_id)
 
     def list_documents(
         self,
@@ -394,22 +453,14 @@ class CaptureService:
         limit: int = 50,
         offset: int = 0,
     ) -> list[CaptureDocument]:
-        q = self.db.query(CaptureDocument).filter(CaptureDocument.organization_id == organization_id)
-        if status:
-            q = q.filter(CaptureDocument.status == status)
-        if document_type:
-            q = q.filter(CaptureDocument.document_type == document_type)
-        if batch_id:
-            q = q.filter(CaptureDocument.batch_id == batch_id)
-        return q.order_by(CaptureDocument.id.desc()).offset(offset).limit(limit).all()
+        return self.doc_repo.list_by_org(
+            organization_id,
+            status=status, document_type=document_type, batch_id=batch_id,
+            limit=limit, offset=offset,
+        )
 
     def get_fields(self, document_id: int) -> list[CaptureField]:
-        return (
-            self.db.query(CaptureField)
-            .filter(CaptureField.document_id == document_id)
-            .order_by(CaptureField.id.asc())
-            .all()
-        )
+        return self.field_repo.list_by_document(document_id)
 
     def update_field(
         self, document_id: int, field_id: int, organization_id: int, new_value: str, user_id: int
@@ -418,11 +469,7 @@ class CaptureService:
         if not doc:
             raise CaptureError("Document not found.")
 
-        field = (
-            self.db.query(CaptureField)
-            .filter(CaptureField.id == field_id, CaptureField.document_id == document_id)
-            .first()
-        )
+        field = self.field_repo.get_by_id_and_document(field_id, document_id)
         if not field:
             raise CaptureError("Field not found.")
 
@@ -498,6 +545,171 @@ class CaptureService:
         self.db.commit()
         return doc
 
+    # ── database entry (export approved data to dataset) ────────────────
+
+    def export_to_dataset(
+        self,
+        document_id: int,
+        organization_id: int,
+        user_id: int,
+        dataset_name: str | None = None,
+    ) -> dict:
+        """Export an approved document's extracted fields as a dataset CSV.
+
+        This is the final 'Database entry' step in the capture pipeline:
+        Upload → OCR → Field detection → Validation → Review → Approval → Database entry
+        """
+        doc = self.get_document(document_id, organization_id)
+        if not doc:
+            raise CaptureError("Document not found.")
+        if doc.status != "approved":
+            raise CaptureError("Only approved documents can be exported to the database.")
+
+        fields = self.get_fields(document_id)
+        if not fields:
+            raise CaptureError("Document has no extracted fields to export.")
+
+        # Build a row from the document's fields
+        row: dict[str, str] = {
+            "document_id": str(doc.id),
+            "filename": doc.filename,
+            "document_type": doc.document_type or "",
+            "document_type_label": doc.document_type_label or "",
+            "industry": doc.industry or "",
+            "approved_at": doc.approved_at.isoformat() if doc.approved_at else "",
+            "approved_by": str(doc.approved_by or ""),
+        }
+        for f in fields:
+            row[f.field_name] = f.value or ""
+
+        # Write to CSV in the dataset storage area
+        import csv
+        dataset_dir = os.path.join(config.CAPTURE_STORAGE_DIR, str(organization_id), "exports")
+        os.makedirs(dataset_dir, exist_ok=True)
+        safe_name = (dataset_name or f"capture_export_{doc.id}").replace(" ", "_").replace("/", "_")
+        csv_path = os.path.join(dataset_dir, f"{safe_name}.csv")
+
+        file_exists = os.path.exists(csv_path)
+        with open(csv_path, "a", newline="", encoding="utf-8") as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=list(row.keys()))
+            if not file_exists:
+                writer.writeheader()
+            writer.writerow(row)
+
+        # Register in dataset library if available
+        try:
+            from dataset_library import DatasetEntry, DataTier, get_dataset_library
+            lib = get_dataset_library()
+            ds_id = f"capture_export_{organization_id}_{safe_name}"
+            if not lib.get(ds_id):
+                entry = DatasetEntry(
+                    id=ds_id,
+                    name=dataset_name or f"Capture Export — {doc.document_type_label or doc.document_type or 'Unknown'}",
+                    tier=DataTier.PRODUCTION,
+                    file_path=csv_path,
+                    metadata={
+                        "source": "smart_data_capture",
+                        "document_type": doc.document_type or "",
+                        "industry": doc.industry or "",
+                        "description": f"Exported from approved capture document #{doc.id}",
+                    },
+                )
+                lib.register(entry)
+        except Exception as e:
+            logger.warning("Could not register capture export in dataset library: %s", e)
+
+        self._log(organization_id, "exported", document_id=document_id, actor_id=user_id,
+                  details={"dataset_name": safe_name, "csv_path": csv_path})
+        self.db.commit()
+
+        return {
+            "document_id": doc.id,
+            "csv_path": csv_path,
+            "dataset_name": safe_name,
+            "row_count": 1,
+            "field_count": len(fields),
+            "fields_exported": list(row.keys()),
+        }
+
+    def bulk_export_approved(
+        self,
+        organization_id: int,
+        user_id: int,
+        document_type: str | None = None,
+        dataset_name: str | None = None,
+    ) -> dict:
+        """Export all approved documents for an organization to a single dataset CSV."""
+        docs = self.list_documents(organization_id, status="approved", document_type=document_type, limit=10000)
+        if not docs:
+            raise CaptureError("No approved documents to export.")
+
+        import csv
+        dataset_dir = os.path.join(config.CAPTURE_STORAGE_DIR, str(organization_id), "exports")
+        os.makedirs(dataset_dir, exist_ok=True)
+        safe_name = (dataset_name or f"capture_bulk_export_{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}").replace(" ", "_").replace("/", "_")
+        csv_path = os.path.join(dataset_dir, f"{safe_name}.csv")
+
+        all_field_names: set[str] = set()
+        rows: list[dict[str, str]] = []
+
+        for doc in docs:
+            fields = self.get_fields(doc.id)
+            row: dict[str, str] = {
+                "document_id": str(doc.id),
+                "filename": doc.filename,
+                "document_type": doc.document_type or "",
+                "document_type_label": doc.document_type_label or "",
+                "industry": doc.industry or "",
+                "approved_at": doc.approved_at.isoformat() if doc.approved_at else "",
+            }
+            for f in fields:
+                row[f.field_name] = f.value or ""
+            all_field_names.update(row.keys())
+            rows.append(row)
+
+        # Write CSV with union of all field names
+        fieldnames = ["document_id", "filename", "document_type", "document_type_label", "industry", "approved_at"]
+        fieldnames.extend(sorted(all_field_names - set(fieldnames)))
+
+        with open(csv_path, "w", newline="", encoding="utf-8") as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames, extrasaction="ignore")
+            writer.writeheader()
+            for row in rows:
+                writer.writerow(row)
+
+        # Register in dataset library
+        try:
+            from dataset_library import DatasetEntry, DataTier, get_dataset_library
+            lib = get_dataset_library()
+            ds_id = f"capture_export_{organization_id}_{safe_name}"
+            entry = DatasetEntry(
+                id=ds_id,
+                name=dataset_name or f"Capture Bulk Export ({len(rows)} documents)",
+                tier=DataTier.PRODUCTION,
+                file_path=csv_path,
+                metadata={
+                    "source": "smart_data_capture",
+                    "document_type": document_type or "mixed",
+                    "industry": "",
+                    "description": f"Bulk export of {len(rows)} approved capture documents",
+                },
+            )
+            lib.register(entry)
+        except Exception as e:
+            logger.warning("Could not register bulk capture export in dataset library: %s", e)
+
+        self._log(organization_id, "bulk_exported", actor_id=user_id,
+                  details={"document_count": len(rows), "csv_path": csv_path})
+        self.db.commit()
+
+        return {
+            "csv_path": csv_path,
+            "dataset_name": safe_name,
+            "row_count": len(rows),
+            "field_count": len(fieldnames),
+            "fields_exported": fieldnames,
+        }
+
     def reject_document(self, document_id: int, organization_id: int, user_id: int, reason: str | None = None) -> CaptureDocument:
         doc = self.get_document(document_id, organization_id)
         if not doc:
@@ -537,15 +749,17 @@ class CaptureService:
         if not doc:
             raise CaptureError("Document not found.")
 
-        storage_dir = os.path.dirname(doc.original_file_path)
-        try:
-            import shutil
-            if os.path.isdir(storage_dir):
-                shutil.rmtree(storage_dir, ignore_errors=True)
-        except Exception as e:
-            logger.warning("Failed to remove storage for document %s: %s", document_id, e)
+        # Delete files from storage backend (original, enhanced, thumbnail)
+        backend = self.file_service.backend
+        for key in [doc.original_file_path, doc.enhanced_file_path, doc.thumbnail_path]:
+            if key:
+                try:
+                    backend.delete(key)
+                except Exception as e:
+                    logger.warning("Failed to delete storage key %s for document %s: %s", key, document_id, e)
 
-        self.db.query(CaptureField).filter(CaptureField.document_id == document_id).delete()
+        for f in self.field_repo.list_by_document(document_id):
+            self.db.delete(f)
         self._log(organization_id, "deleted", document_id=document_id, actor_id=user_id)
         self.db.delete(doc)
         self.db.commit()
@@ -553,32 +767,16 @@ class CaptureService:
     # ── analytics / dashboard integration ───────────────────────────────
 
     def get_analytics_summary(self, organization_id: int) -> dict:
-        """Live summary for dashboards — no manual import/sync required
-        since it's computed directly from current capture records."""
-        docs = self.db.query(CaptureDocument).filter(CaptureDocument.organization_id == organization_id).all()
-
-        by_status: dict[str, int] = {}
-        by_type: dict[str, int] = {}
-        by_industry: dict[str, int] = {}
-        total_confidence = 0.0
-        confidence_count = 0
-
-        for d in docs:
-            by_status[d.status] = by_status.get(d.status, 0) + 1
-            if d.document_type_label:
-                by_type[d.document_type_label] = by_type.get(d.document_type_label, 0) + 1
-            if d.industry:
-                by_industry[d.industry] = by_industry.get(d.industry, 0) + 1
-            if d.overall_confidence is not None:
-                total_confidence += d.overall_confidence
-                confidence_count += 1
-
-        approved = by_status.get("approved", 0)
-        avg_confidence = round(total_confidence / confidence_count, 3) if confidence_count else 0.0
+        """Live summary for dashboards — computed from repository queries."""
+        by_status = self.doc_repo.count_by_status(organization_id)
+        by_type = self.doc_repo.count_by_type(organization_id)
+        by_industry = self.doc_repo.count_by_industry(organization_id)
+        avg_confidence = self.doc_repo.avg_confidence(organization_id)
+        total = sum(by_status.values())
 
         return {
-            "total_documents": len(docs),
-            "approved_documents": approved,
+            "total_documents": total,
+            "approved_documents": by_status.get("approved", 0),
             "pending_review": by_status.get("ready_for_review", 0),
             "failed_documents": by_status.get("failed", 0),
             "average_confidence": avg_confidence,

@@ -7,6 +7,11 @@ load_dotenv()
 # Base directory
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+# Application environment: development | testing | production
+APP_ENV = os.getenv("APP_ENV", "development").lower()
+IS_PRODUCTION = APP_ENV == "production"
+IS_TESTING = APP_ENV == "testing"
+
 
 def _resolve_path(path_str: str) -> str:
     """Resolve a path string relative to BASE_DIR if not absolute."""
@@ -76,11 +81,48 @@ POOL_TIMEOUT = int(os.getenv("POOL_TIMEOUT", "30"))
 POOL_RECYCLE = int(os.getenv("POOL_RECYCLE", "3600"))
 MAX_OVERFLOW = int(os.getenv("MAX_OVERFLOW", "20"))
 
+# --- Query Optimization ---
+SLOW_QUERY_THRESHOLD_MS = int(os.getenv("SLOW_QUERY_THRESHOLD_MS", "500"))
+QUERY_TIMEOUT_SECONDS = int(os.getenv("QUERY_TIMEOUT_SECONDS", "30"))
+ENABLE_QUERY_LOGGING = os.getenv("ENABLE_QUERY_LOGGING", "false").lower() in ("true", "1", "yes")
+
+# --- Backup Strategy ---
+BACKUP_ENABLED = os.getenv("BACKUP_ENABLED", "false").lower() in ("true", "1", "yes")
+BACKUP_SCHEDULE = os.getenv("BACKUP_SCHEDULE", "0 2 * * *")  # Daily at 2 AM
+BACKUP_RETENTION_DAYS = int(os.getenv("BACKUP_RETENTION_DAYS", "30"))
+BACKUP_STORAGE_PATH = _resolve_path(os.getenv("BACKUP_STORAGE_PATH", "backups"))
+BACKUP_COMPRESS = os.getenv("BACKUP_COMPRESS", "true").lower() in ("true", "1", "yes")
+
 # --- Redis / Performance (Phase 10) ---
 REDIS_URL = os.getenv("REDIS_URL", "")
 CACHE_ENABLED = os.getenv("CACHE_ENABLED", "true").lower() == "true"
 CACHE_DEFAULT_TTL = int(os.getenv("CACHE_DEFAULT_TTL", "300"))
 CACHE_KEY_PREFIX = os.getenv("CACHE_KEY_PREFIX", "aedip")
+
+# --- File Storage (Phase 12) ---
+STORAGE_BACKEND = os.getenv("STORAGE_BACKEND", "local").lower()  # local | r2 | s3 | supabase
+STORAGE_LOCAL_DIR = _resolve_path(os.getenv("STORAGE_LOCAL_DIR", "storage/files"))
+STORAGE_PUBLIC_URL = os.getenv("STORAGE_PUBLIC_URL", "")
+
+# Cloudflare R2
+R2_BUCKET = os.getenv("R2_BUCKET", "")
+R2_ACCOUNT_ID = os.getenv("R2_ACCOUNT_ID", "")
+R2_ACCESS_KEY = os.getenv("R2_ACCESS_KEY", "")
+R2_SECRET_KEY = os.getenv("R2_SECRET_KEY", "")
+R2_PUBLIC_URL = os.getenv("R2_PUBLIC_URL", "")
+
+# AWS S3
+S3_BUCKET = os.getenv("S3_BUCKET", "")
+S3_REGION = os.getenv("S3_REGION", "us-east-1")
+S3_ACCESS_KEY = os.getenv("S3_ACCESS_KEY", "")
+S3_SECRET_KEY = os.getenv("S3_SECRET_KEY", "")
+S3_PUBLIC_URL = os.getenv("S3_PUBLIC_URL", "")
+
+# Supabase Storage
+SUPABASE_URL = os.getenv("SUPABASE_URL", "")
+SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY", "")
+SUPABASE_STORAGE_BUCKET = os.getenv("SUPABASE_STORAGE_BUCKET", "files")
+SUPABASE_STORAGE_PUBLIC_URL = os.getenv("SUPABASE_STORAGE_PUBLIC_URL", "")
 
 # Background workers
 WORKER_MIN_WORKERS = int(os.getenv("WORKER_MIN_WORKERS", "2"))
@@ -96,6 +138,20 @@ CHUNK_SIZE_DEFAULT = int(os.getenv("CHUNK_SIZE_DEFAULT", "5000"))
 LOG_PATH = _resolve_path(os.getenv("LOG_PATH", "logs/pipeline.log"))
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 
+# --- Monitoring (Phase 18) ---
+SENTRY_DSN = os.getenv("SENTRY_DSN", "")
+SENTRY_TRACES_SAMPLE_RATE = float(os.getenv("SENTRY_TRACES_SAMPLE_RATE", "0.1"))
+SENTRY_PROFILES_SAMPLE_RATE = float(os.getenv("SENTRY_PROFILES_SAMPLE_RATE", "0.1"))
+SENTRY_RELEASE = os.getenv("SENTRY_RELEASE", "aedip@1.0.0")
+
+OTEL_EXPORTER_OTLP_ENDPOINT = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "")
+OTEL_SERVICE_NAME = os.getenv("OTEL_SERVICE_NAME", "aedip-api")
+OTEL_SERVICE_VERSION = os.getenv("OTEL_SERVICE_VERSION", "1.0.0")
+OTEL_METRIC_EXPORT_INTERVAL = int(os.getenv("OTEL_METRIC_EXPORT_INTERVAL", "60000"))
+
+PROMETHEUS_ENABLED = os.getenv("PROMETHEUS_ENABLED", "true").lower() in ("true", "1", "yes")
+MONITORING_ENABLED = os.getenv("MONITORING_ENABLED", "true").lower() in ("true", "1", "yes")
+
 # Schedule (24-hour format)
 PIPELINE_RUN_TIME = os.getenv("PIPELINE_RUN_TIME", "08:00")
 
@@ -105,6 +161,24 @@ JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", _JWT_DEFAULT_SECRET)
 JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 JWT_ACCESS_EXPIRE_MINUTES = int(os.getenv("JWT_ACCESS_EXPIRE_MINUTES", "30"))
 JWT_REFRESH_EXPIRE_DAYS = int(os.getenv("JWT_REFRESH_EXPIRE_DAYS", "7"))
+
+# --- Encryption Key (separate from JWT for Fernet encryption of API keys, etc.) ---
+# Derives from JWT_SECRET_KEY only as a fallback for dev. Production must set ENCRYPTION_KEY explicitly.
+ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY", "")
+
+# --- MFA Configuration (future-ready) ---
+MFA_ENABLED = os.getenv("MFA_ENABLED", "false").lower() in ("true", "1", "yes")
+MFA_ISSUER = os.getenv("MFA_ISSUER", "DataFlow")
+MFA_TOTP_ISSUER = os.getenv("MFA_TOTP_ISSUER", MFA_ISSUER)
+
+# --- SSO Configuration (future-ready) ---
+SSO_ENABLED = os.getenv("SSO_ENABLED", "false").lower() in ("true", "1", "yes")
+SSO_GOOGLE_CLIENT_ID = os.getenv("SSO_GOOGLE_CLIENT_ID", "")
+SSO_GOOGLE_CLIENT_SECRET = os.getenv("SSO_GOOGLE_CLIENT_SECRET", "")
+SSO_MICROSOFT_CLIENT_ID = os.getenv("SSO_MICROSOFT_CLIENT_ID", "")
+SSO_MICROSOFT_CLIENT_SECRET = os.getenv("SSO_MICROSOFT_CLIENT_SECRET", "")
+SSO_SAML_ENTITY_ID = os.getenv("SSO_SAML_ENTITY_ID", "")
+SSO_SAML_ACS_URL = os.getenv("SSO_SAML_ACS_URL", "")
 
 # --- Password Policy ---
 PASSWORD_MIN_LENGTH = int(os.getenv("PASSWORD_MIN_LENGTH", "8"))
@@ -215,7 +289,33 @@ def validate_config() -> None:
     if DB_TYPE == "mysql" and len(JWT_SECRET_KEY) < 32:
         raise ValueError("JWT_SECRET_KEY must be at least 32 characters in production.")
 
+    # ENCRYPTION_KEY should be separate from JWT_SECRET_KEY in production
+    if DB_TYPE == "mysql" and not ENCRYPTION_KEY:
+        import warnings
+        warnings.warn(
+            "ENCRYPTION_KEY is not set. Falling back to JWT_SECRET_KEY derivation. "
+            "Set a separate ENCRYPTION_KEY for production.",
+            stacklevel=2,
+        )
+
     if CORS_ORIGINS == "*":
         raise ValueError(
             "CORS_ORIGINS cannot be '*'. Set allowed origins explicitly."
         )
+
+    # Production-specific hardening
+    if IS_PRODUCTION:
+        if DB_TYPE == "sqlite":
+            raise ValueError(
+                "SQLite is not permitted in production. Set DB_TYPE=mysql for production deployments."
+            )
+        if not ENCRYPTION_KEY:
+            raise ValueError(
+                "ENCRYPTION_KEY must be set explicitly for production (separate from JWT_SECRET_KEY)."
+            )
+        if BACKUP_ENABLED and not os.path.isabs(os.getenv("BACKUP_STORAGE_PATH", "")):
+            import warnings
+            warnings.warn(
+                "BACKUP_STORAGE_PATH should be an absolute path in production.",
+                stacklevel=2,
+            )

@@ -19,6 +19,10 @@ interface AuthState {
   clearError: () => void;
   hasPermission: (permission: string) => boolean;
   hasRole: (role: string) => boolean;
+  hasAnyPermission: (permissions: string[]) => boolean;
+  hasAllPermissions: (permissions: string[]) => boolean;
+  hasAnyRole: (roles: string[]) => boolean;
+  isPlatformLevel: () => boolean;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -104,7 +108,7 @@ export const useAuthStore = create<AuthState>()(
       hasPermission: (permission) => {
         const { user } = get();
         if (!user) return false;
-        if (user.roles.includes('super_admin')) return true;
+        if (user.roles.includes('super_admin') || user.roles.includes('platform_owner')) return true;
         return user.permissions.includes(permission);
       },
 
@@ -112,6 +116,34 @@ export const useAuthStore = create<AuthState>()(
         const { user } = get();
         if (!user) return false;
         return user.roles.includes(role);
+      },
+
+      hasAnyPermission: (permissions) => {
+        const { user } = get();
+        if (!user) return false;
+        if (user.roles.includes('super_admin') || user.roles.includes('platform_owner')) return true;
+        return permissions.some((p) => user.permissions.includes(p));
+      },
+
+      hasAllPermissions: (permissions) => {
+        const { user } = get();
+        if (!user) return false;
+        if (user.roles.includes('super_admin') || user.roles.includes('platform_owner')) return true;
+        return permissions.every((p) => user.permissions.includes(p));
+      },
+
+      hasAnyRole: (roles) => {
+        const { user } = get();
+        if (!user) return false;
+        return roles.some((r) => user.roles.includes(r));
+      },
+
+      isPlatformLevel: () => {
+        const { user } = get();
+        if (!user) return false;
+        return user.roles.some((r) =>
+          ['super_admin', 'platform_owner', 'platform_admin'].includes(r),
+        );
       },
     }),
     {

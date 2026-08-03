@@ -2,18 +2,23 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { FileText, Download, ChevronRight, BarChart3 } from 'lucide-react';
+import { FileText, Download, ChevronRight, BarChart3, Plus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Skeleton, SkeletonCard } from '@/components/ui/Skeleton';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { SmartEmptyState } from '@/components/onboarding/SmartEmptyState';
+import { ReportWorkflow } from '@/components/reports/ReportWorkflow';
 import { reportService, type AIReport } from '@/services/reports/reportService';
+import { reportEngineService, type ReportListItem } from '@/services/reports/reportEngineService';
 import { formatDate } from '@/lib/utils';
 
 export default function ReportsPage() {
   const router = useRouter();
   const [reports, setReports] = useState<AIReport[]>([]);
+  const [engineReports, setEngineReports] = useState<ReportListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -21,8 +26,12 @@ export default function ReportsPage() {
     async function load() {
       try {
         setLoading(true);
-        const data = await reportService.listReports();
+        const [data, engineData] = await Promise.all([
+          reportService.listReports(),
+          reportEngineService.listReports(),
+        ]);
         setReports(data || []);
+        setEngineReports(engineData || []);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load reports');
       } finally {
@@ -49,8 +58,16 @@ export default function ReportsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Reports</h1>
-        <Badge variant="secondary">{reports.length} report{reports.length !== 1 ? 's' : ''}</Badge>
+        <div className="flex items-center gap-2">
+          <Badge variant="secondary">{reports.length + engineReports.length} report{reports.length + engineReports.length !== 1 ? 's' : ''}</Badge>
+          <Button onClick={() => router.push('/reports/builder')} className="gap-2">
+            <Plus className="h-4 w-4" /> Create Report
+          </Button>
+        </div>
       </div>
+
+      {/* Report Generation Workflow */}
+      <ReportWorkflow />
 
       <Card>
         <CardHeader>
@@ -98,6 +115,44 @@ export default function ReportsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Report Engine Reports */}
+      {engineReports.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Report Engine Reports</CardTitle>
+            <CardDescription>Executive-ready reports with PDF & PowerPoint export</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {engineReports.map((report) => (
+                <div
+                  key={report.report_id}
+                  className="flex items-center justify-between rounded-lg border p-4 hover:bg-accent cursor-pointer"
+                  onClick={() => router.push(`/reports/builder?id=${report.report_id}`)}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                      <FileText className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium">{report.title}</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <Badge variant="outline" className="text-xs">{report.template}</Badge>
+                        <span className="text-xs text-muted-foreground">{report.section_count} sections</span>
+                        {report.created_at && (
+                          <span className="text-xs text-muted-foreground">{formatDate(report.created_at)}</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

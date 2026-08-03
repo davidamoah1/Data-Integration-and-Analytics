@@ -119,6 +119,7 @@ from services.report_export_service import ReportExportService
 from shared.database import get_db
 from shared.dependencies import get_current_user, require_permissions
 from shared.security import encrypt_secret
+from shared.tenant import get_tenant_context, verify_resource_ownership
 
 router = APIRouter(prefix="/ai", tags=["AI Intelligence Platform"])
 
@@ -130,9 +131,11 @@ router = APIRouter(prefix="/ai", tags=["AI Intelligence Platform"])
 async def ai_chat(
     request: ChatRequest,
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Send a message to an AI assistant and get a response."""
+    current_user = tenant["user"]
+    org_id = tenant["organization_id"]
     gateway = AIGateway(db)
     try:
         result = gateway.chat(
@@ -143,6 +146,7 @@ async def ai_chat(
             context=request.context,
             stream=False,
             permissions=current_user.get("permissions", []),
+            organization_id=org_id,
         )
         return ChatResponse(
             conversation_id=result["conversation_id"],
@@ -166,11 +170,13 @@ async def ai_chat(
 async def ai_chat_stream(
     request: ChatRequest,
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Stream a chat response from an AI assistant."""
     from fastapi.responses import StreamingResponse
 
+    current_user = tenant["user"]
+    org_id = tenant["organization_id"]
     gateway = AIGateway(db)
     try:
         generator = gateway.chat(
@@ -181,6 +187,7 @@ async def ai_chat_stream(
             context=request.context,
             stream=True,
             permissions=current_user.get("permissions", []),
+            organization_id=org_id,
         )
         return StreamingResponse(
             generator,
@@ -198,23 +205,31 @@ async def ai_chat_stream(
 async def list_conversations(
     assistant_type: str | None = Query(None),
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """List user's AI conversations."""
+    current_user = tenant["user"]
+    org_id = tenant["organization_id"]
     memory = AIMemory(db)
-    return memory.get_conversations(current_user["id"], assistant_type)
+    return memory.get_conversations(current_user["id"], assistant_type, org_id)
 
 
 @router.get("/conversations/{conversation_id}/messages", response_model=list[MessageSummary])
 async def get_conversation_messages(
     conversation_id: int,
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Get all messages in a conversation."""
+    current_user = tenant["user"]
+    org_id = tenant["organization_id"]
     conversation = (
         db.query(AIConversation)
-        .filter(AIConversation.id == conversation_id, AIConversation.user_id == current_user["id"])
+        .filter(
+            AIConversation.id == conversation_id,
+            AIConversation.user_id == current_user["id"],
+            AIConversation.organization_id == org_id,
+        )
         .first()
     )
     if not conversation:
@@ -227,12 +242,18 @@ async def get_conversation_messages(
 async def delete_conversation(
     conversation_id: int,
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Delete (archive) a conversation."""
+    current_user = tenant["user"]
+    org_id = tenant["organization_id"]
     conversation = (
         db.query(AIConversation)
-        .filter(AIConversation.id == conversation_id, AIConversation.user_id == current_user["id"])
+        .filter(
+            AIConversation.id == conversation_id,
+            AIConversation.user_id == current_user["id"],
+            AIConversation.organization_id == org_id,
+        )
         .first()
     )
     if not conversation:
@@ -247,9 +268,10 @@ async def search_conversations(
     q: str = Query(..., min_length=1, max_length=200),
     limit: int = Query(20, ge=1, le=100),
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Search user's AI conversations by title and message content."""
+    current_user = tenant["user"]
     memory = AIMemory(db)
     return memory.search_conversations(current_user["id"], q, limit)
 
@@ -258,9 +280,10 @@ async def search_conversations(
 async def export_conversation(
     conversation_id: int,
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Export a conversation with all messages as structured data."""
+    current_user = tenant["user"]
     memory = AIMemory(db)
     result = memory.export_conversation(conversation_id, current_user["id"])
     if not result:
@@ -273,9 +296,11 @@ async def message_feedback(
     message_id: int,
     request: MessageFeedbackRequest,
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Provide feedback (positive/negative) on an AI message."""
+    current_user = tenant["user"]
+    org_id = tenant["organization_id"]
     msg = db.query(AIMessage).filter(AIMessage.id == message_id).first()
     if not msg:
         raise HTTPException(status_code=404, detail="Message not found")
@@ -284,6 +309,7 @@ async def message_feedback(
         .filter(
             AIConversation.id == msg.conversation_id,
             AIConversation.user_id == current_user["id"],
+            AIConversation.organization_id == org_id,
         )
         .first()
     )
@@ -299,7 +325,7 @@ async def message_feedback(
 
 @router.get("/assistants")
 async def list_all_assistants(
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """List all available AI assistants."""
     return list_assistants()
@@ -438,9 +464,10 @@ async def test_provider(
 async def generate_sql(
     request: NLToSQLRequest,
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Generate SQL from a natural language question."""
+    current_user = tenant["user"]
     engine = NLToSQLEngine(db)
     result = engine.generate_sql(
         question=request.question,
@@ -456,7 +483,7 @@ async def execute_sql(
     sql: str = Query(..., description="Validated SQL query to execute"),
     limit: int = Query(100, ge=1, le=1000),
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Execute a validated SQL query safely."""
     engine = NLToSQLEngine(db)
@@ -470,9 +497,10 @@ async def execute_sql(
 async def generate_etl(
     request: NLToETLRequest,
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Generate ETL pipeline steps from natural language."""
+    current_user = tenant["user"]
     engine = NLToETLEngine(db)
     result = engine.generate_pipeline(
         instruction=request.instruction,
@@ -490,9 +518,10 @@ async def generate_etl(
 async def generate_dashboard(
     request: NLToDashboardRequest,
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Generate a dashboard configuration from a description."""
+    current_user = tenant["user"]
     engine = NLToDashboardEngine(db)
     result = engine.generate_dashboard(
         description=request.description,
@@ -509,9 +538,10 @@ async def generate_dashboard(
 async def ai_quality_analyze(
     request: AIQualityRequest,
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Analyze data quality with AI enhancement."""
+    current_user = tenant["user"]
     engine = AIDataQualityEngine(db)
     result = engine.analyze(
         source_type=request.source_type,
@@ -530,9 +560,11 @@ async def ai_quality_analyze(
 async def generate_report(
     request: ReportGenerateRequest,
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Generate an AI-powered report."""
+    current_user = tenant["user"]
+    org_id = tenant["organization_id"]
     engine = AIReportWriter(db)
     result = engine.generate_report(
         report_type=request.report_type,
@@ -542,6 +574,7 @@ async def generate_report(
         department=request.department,
         format=request.format,
         user_id=current_user["id"],
+        organization_id=org_id,
     )
     return ReportGenerateResponse(**result)
 
@@ -551,10 +584,11 @@ async def list_reports(
     report_type: str | None = Query(None),
     limit: int = Query(20, ge=1, le=100),
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """List AI-generated reports."""
-    query = db.query(AIReportGeneration)
+    org_id = tenant["organization_id"]
+    query = db.query(AIReportGeneration).filter(AIReportGeneration.organization_id == org_id)
     if report_type:
         query = query.filter(AIReportGeneration.report_type == report_type)
     reports = query.order_by(AIReportGeneration.created_at.desc()).limit(limit).all()
@@ -574,12 +608,11 @@ async def list_reports(
 async def get_report(
     report_id: int,
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Get a specific AI-generated report."""
-    report = db.query(AIReportGeneration).filter(AIReportGeneration.id == report_id).first()
-    if not report:
-        raise HTTPException(status_code=404, detail="Report not found")
+    org_id = tenant["organization_id"]
+    report = verify_resource_ownership(db, AIReportGeneration, report_id, org_id)
     return {
         "id": report.id,
         "report_type": report.report_type,
@@ -597,12 +630,11 @@ async def export_report(
     report_id: int,
     format: str = Query("pdf", pattern="^(csv|excel|xlsx|pdf)$"),
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Export an AI-generated report to CSV, Excel, or PDF."""
-    report = db.query(AIReportGeneration).filter(AIReportGeneration.id == report_id).first()
-    if not report:
-        raise HTTPException(status_code=404, detail="Report not found")
+    org_id = tenant["organization_id"]
+    report = verify_resource_ownership(db, AIReportGeneration, report_id, org_id)
     try:
         data, media_type, ext = ReportExportService().export(report, format)
     except ValueError as exc:
@@ -621,9 +653,10 @@ async def export_report(
 async def decision_analyze(
     request: DecisionCenterRequest,
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Generate a decision intelligence analysis."""
+    current_user = tenant["user"]
     engine = DecisionCenterEngine(db)
     result = engine.analyze(
         metric=request.metric,
@@ -640,11 +673,30 @@ async def list_insights(
     insight_type: str | None = Query(None),
     limit: int = Query(20, ge=1, le=100),
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """List AI-generated insights."""
-    engine = DecisionCenterEngine(db)
-    return engine.get_insights(insight_type, limit)
+    org_id = tenant["organization_id"]
+    query = db.query(AIInsight).filter(AIInsight.organization_id == org_id)
+    if insight_type:
+        query = query.filter(AIInsight.insight_type == insight_type)
+    insights = query.order_by(AIInsight.created_at.desc()).limit(limit).all()
+    return [
+        InsightResponse(
+            id=i.id,
+            title=i.title,
+            insight_type=i.insight_type,
+            summary=i.summary,
+            key_findings=i.key_findings,
+            recommendations=i.recommendations,
+            risks=i.risks,
+            opportunities=i.opportunities,
+            confidence_score=i.confidence_score,
+            data_sources=i.data_sources,
+            created_at=str(i.created_at) if i.created_at else None,
+        )
+        for i in insights
+    ]
 
 
 # --- AI Forecasting ---------------------------------------------------------
@@ -654,9 +706,11 @@ async def list_insights(
 async def generate_forecast(
     request: ForecastRequest,
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Generate a time series forecast."""
+    current_user = tenant["user"]
+    org_id = tenant["organization_id"]
     engine = ForecastingEngine(db)
     result = engine.forecast(
         source_type=request.source_type,
@@ -667,6 +721,7 @@ async def generate_forecast(
         frequency=request.frequency,
         confidence_level=request.confidence_level,
         user_id=current_user["id"],
+        organization_id=org_id,
     )
     if "error" in result:
         raise HTTPException(status_code=400, detail=result["error"])
@@ -677,10 +732,17 @@ async def generate_forecast(
 async def list_forecasts(
     limit: int = Query(20, ge=1, le=100),
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """List forecasts."""
-    forecasts = db.query(AIForecast).order_by(AIForecast.created_at.desc()).limit(limit).all()
+    org_id = tenant["organization_id"]
+    forecasts = (
+        db.query(AIForecast)
+        .filter(AIForecast.organization_id == org_id)
+        .order_by(AIForecast.created_at.desc())
+        .limit(limit)
+        .all()
+    )
     return [
         {
             "id": f.id,
@@ -699,12 +761,11 @@ async def list_forecasts(
 async def get_forecast(
     forecast_id: int,
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Get a specific forecast with predictions."""
-    forecast = db.query(AIForecast).filter(AIForecast.id == forecast_id).first()
-    if not forecast:
-        raise HTTPException(status_code=404, detail="Forecast not found")
+    org_id = tenant["organization_id"]
+    forecast = verify_resource_ownership(db, AIForecast, forecast_id, org_id)
     return {
         "id": forecast.id,
         "forecast_type": forecast.forecast_type,
@@ -726,9 +787,11 @@ async def get_forecast(
 async def detect_anomalies(
     request: AnomalyRequest,
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Detect anomalies in data."""
+    current_user = tenant["user"]
+    org_id = tenant["organization_id"]
     engine = AnomalyDetectionEngine(db)
     result = engine.detect(
         source_type=request.source_type,
@@ -737,6 +800,7 @@ async def detect_anomalies(
         date_column=request.date_column,
         sensitivity=request.sensitivity,
         user_id=current_user["id"],
+        organization_id=org_id,
     )
     return AnomalyResponse(**result)
 
@@ -746,23 +810,49 @@ async def list_alerts(
     is_resolved: bool = Query(False),
     limit: int = Query(50, ge=1, le=200),
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """List anomaly alerts."""
-    engine = AnomalyDetectionEngine(db)
-    return engine.get_alerts(is_resolved, limit)
+    org_id = tenant["organization_id"]
+    alerts = (
+        db.query(AIAnomalyAlert)
+        .filter(
+            AIAnomalyAlert.organization_id == org_id,
+            AIAnomalyAlert.is_resolved == is_resolved,
+        )
+        .order_by(AIAnomalyAlert.created_at.desc())
+        .limit(limit)
+        .all()
+    )
+    return [
+        {
+            "id": a.id,
+            "title": a.title,
+            "description": a.description,
+            "severity": a.severity,
+            "metric": a.metric_name,
+            "detected_value": a.actual_value,
+            "expected_value": a.expected_value,
+            "is_resolved": a.is_resolved,
+            "created_at": str(a.created_at) if a.created_at else None,
+        }
+        for a in alerts
+    ]
 
 
 @router.post("/anomaly/alerts/{alert_id}/resolve")
 async def resolve_alert(
     alert_id: int,
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Resolve an anomaly alert."""
-    engine = AnomalyDetectionEngine(db)
-    if not engine.resolve_alert(alert_id, current_user["id"]):
-        raise HTTPException(status_code=404, detail="Alert not found")
+    current_user = tenant["user"]
+    org_id = tenant["organization_id"]
+    alert = verify_resource_ownership(db, AIAnomalyAlert, alert_id, org_id)
+    alert.is_resolved = True
+    alert.resolved_by = current_user["id"]
+    db.commit()
     return {"message": "Alert resolved"}
 
 
@@ -773,14 +863,17 @@ async def resolve_alert(
 async def recommend_kpis(
     request: KPIRecommendRequest,
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Get AI-recommended KPIs."""
+    current_user = tenant["user"]
+    org_id = tenant["organization_id"]
     engine = KPIEngine(db)
     result = engine.recommend_kpis(
         domain=request.domain,
         data_source=request.data_source,
         user_id=current_user["id"],
+        organization_id=org_id,
     )
     return KPIRecommendResponse(**result)
 
@@ -788,7 +881,7 @@ async def recommend_kpis(
 @router.get("/kpi/monitor", response_model=KPIMonitorResponse)
 async def monitor_kpis(
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Monitor active KPIs and get alerts."""
     engine = KPIEngine(db)
@@ -802,9 +895,10 @@ async def monitor_kpis(
 async def generate_dashboard_insights(
     request: DashboardInsightsRequest,
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Generate AI insights for a dashboard."""
+    current_user = tenant["user"]
     engine = DashboardInsightsEngine(db)
     result = engine.generate_insights(
         dashboard_id=request.dashboard_id,
@@ -822,9 +916,10 @@ async def generate_dashboard_insights(
 async def ai_search(
     request: AISearchRequest,
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Global AI-powered search across the platform."""
+    current_user = tenant["user"]
     engine = AISearchEngine(db)
     result = engine.search(
         query=request.query,
@@ -841,9 +936,11 @@ async def ai_search(
 async def upload_document(
     file: UploadFile = File(...),
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Upload a document for AI chat."""
+    current_user = tenant["user"]
+    org_id = tenant["organization_id"]
     engine = DocumentChatEngine(db)
     content = await file.read()
     file_type = file.filename.split(".")[-1].lower() if "." in file.filename else "txt"
@@ -853,6 +950,7 @@ async def upload_document(
             file_content=content,
             file_type=file_type,
             user_id=current_user["id"],
+            organization_id=org_id,
         )
         return DocumentUploadResponse(**result)
     except ValueError as e:
@@ -864,9 +962,10 @@ async def document_chat(
     document_id: int,
     request: DocumentChatRequest,
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Chat with an uploaded document."""
+    current_user = tenant["user"]
     engine = DocumentChatEngine(db)
     result = engine.chat(
         document_id=document_id,
@@ -879,11 +978,13 @@ async def document_chat(
 @router.get("/documents", response_model=list[dict])
 async def list_documents(
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """List uploaded documents."""
+    current_user = tenant["user"]
+    org_id = tenant["organization_id"]
     engine = DocumentChatEngine(db)
-    return engine.list_documents(current_user["id"])
+    return engine.list_documents(current_user["id"], org_id)
 
 
 # --- AI Workflow ------------------------------------------------------------
@@ -893,9 +994,11 @@ async def list_documents(
 async def create_workflow(
     request: WorkflowCreate,
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Create a new AI workflow."""
+    current_user = tenant["user"]
+    org_id = tenant["organization_id"]
     engine = WorkflowEngine(db)
     result = engine.create_workflow(
         name=request.name,
@@ -904,6 +1007,7 @@ async def create_workflow(
         trigger_type=request.trigger_type,
         trigger_config=request.trigger_config,
         user_id=current_user["id"],
+        organization_id=org_id,
     )
     return WorkflowResponse(**result)
 
@@ -911,20 +1015,39 @@ async def create_workflow(
 @router.get("/workflows", response_model=list[WorkflowResponse])
 async def list_workflows(
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """List AI workflows."""
-    engine = WorkflowEngine(db)
-    return engine.list_workflows(current_user["id"])
+    org_id = tenant["organization_id"]
+    workflows = (
+        db.query(AIWorkflow)
+        .filter(AIWorkflow.organization_id == org_id)
+        .order_by(AIWorkflow.created_at.desc())
+        .all()
+    )
+    return [
+        WorkflowResponse(
+            id=w.id,
+            name=w.name,
+            description=w.description,
+            trigger_type=w.trigger_type,
+            is_active=w.is_active,
+            created_at=str(w.created_at) if w.created_at else None,
+        )
+        for w in workflows
+    ]
 
 
 @router.post("/workflows/{workflow_id}/execute", response_model=WorkflowRunResponse)
 async def execute_workflow(
     workflow_id: int,
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Execute an AI workflow."""
+    current_user = tenant["user"]
+    org_id = tenant["organization_id"]
+    verify_resource_ownership(db, AIWorkflow, workflow_id, org_id)
     engine = WorkflowEngine(db)
     result = engine.execute_workflow(workflow_id, current_user["id"])
     if "error" in result:
@@ -937,9 +1060,11 @@ async def get_workflow_runs(
     workflow_id: int,
     limit: int = Query(20, ge=1, le=100),
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Get execution history for a workflow."""
+    org_id = tenant["organization_id"]
+    verify_resource_ownership(db, AIWorkflow, workflow_id, org_id)
     engine = WorkflowEngine(db)
     return engine.get_workflow_runs(workflow_id, limit)
 
@@ -951,7 +1076,7 @@ async def get_workflow_runs(
 async def list_prompt_templates(
     assistant_type: str | None = Query(None),
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """List prompt templates."""
     query = db.query(AIPromptTemplate)
@@ -978,7 +1103,7 @@ async def list_prompt_templates(
 async def create_prompt_template(
     request: PromptTemplateCreate,
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Create a custom prompt template."""
     manager = PromptManager(db)
@@ -1009,7 +1134,7 @@ async def create_prompt_template(
 async def usage_stats(
     days: int = Query(30, ge=1, le=365),
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Get AI usage statistics."""
     tracker = UsageTracker(db)
@@ -1020,9 +1145,10 @@ async def usage_stats(
 async def my_usage(
     days: int = Query(30, ge=1, le=365),
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Get current user's AI usage."""
+    current_user = tenant["user"]
     tracker = UsageTracker(db)
     return tracker.get_user_usage(current_user["id"], days)
 
@@ -1030,9 +1156,10 @@ async def my_usage(
 @router.get("/usage/limits")
 async def usage_limits(
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Check usage limits for the current user."""
+    current_user = tenant["user"]
     tracker = UsageTracker(db)
     return tracker.check_limits(current_user["id"])
 
@@ -1041,10 +1168,17 @@ async def usage_limits(
 async def audit_logs(
     limit: int = Query(50, ge=1, le=200),
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(require_permissions("audit.view")),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Get AI audit logs."""
-    logs = db.query(AIAuditLog).order_by(AIAuditLog.created_at.desc()).limit(limit).all()
+    org_id = tenant["organization_id"]
+    logs = (
+        db.query(AIAuditLog)
+        .filter(AIAuditLog.organization_id == org_id)
+        .order_by(AIAuditLog.created_at.desc())
+        .limit(limit)
+        .all()
+    )
     return [
         AuditLogResponse(
             id=log.id,
@@ -1107,18 +1241,36 @@ async def deactivate_plugin(
 @router.get("/dashboard", response_model=AIDashboardResponse)
 async def ai_dashboard(
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Get AI platform dashboard metrics."""
+    org_id = tenant["organization_id"]
     tracker = UsageTracker(db)
     stats = tracker.get_stats(30)
 
-    total_conversations = db.query(AIConversation).count()
-    total_messages = db.query(AIMessage).filter(AIMessage.role != "system").count()
-    active_workflows = db.query(AIWorkflow).filter(AIWorkflow.is_active.is_(True)).count()
-    total_insights = db.query(AIInsight).filter(AIInsight.is_archived.is_(False)).count()
-    total_forecasts = db.query(AIForecast).count()
-    active_alerts = db.query(AIAnomalyAlert).filter(AIAnomalyAlert.is_resolved.is_(False)).count()
+    total_conversations = db.query(AIConversation).filter(AIConversation.organization_id == org_id).count()
+    total_messages = (
+        db.query(AIMessage)
+        .join(AIConversation, AIMessage.conversation_id == AIConversation.id)
+        .filter(AIConversation.organization_id == org_id, AIMessage.role != "system")
+        .count()
+    )
+    active_workflows = (
+        db.query(AIWorkflow)
+        .filter(AIWorkflow.organization_id == org_id, AIWorkflow.is_active.is_(True))
+        .count()
+    )
+    total_insights = (
+        db.query(AIInsight)
+        .filter(AIInsight.organization_id == org_id, AIInsight.is_archived.is_(False))
+        .count()
+    )
+    total_forecasts = db.query(AIForecast).filter(AIForecast.organization_id == org_id).count()
+    active_alerts = (
+        db.query(AIAnomalyAlert)
+        .filter(AIAnomalyAlert.organization_id == org_id, AIAnomalyAlert.is_resolved.is_(False))
+        .count()
+    )
 
     # Provider status
     manager = ProviderManager(db)
@@ -1127,7 +1279,7 @@ async def ai_dashboard(
     # Recent insights
     recent_insights = (
         db.query(AIInsight)
-        .filter(AIInsight.is_archived.is_(False))
+        .filter(AIInsight.organization_id == org_id, AIInsight.is_archived.is_(False))
         .order_by(AIInsight.created_at.desc())
         .limit(5)
         .all()
@@ -1145,7 +1297,7 @@ async def ai_dashboard(
     # Recent alerts
     recent_alerts = (
         db.query(AIAnomalyAlert)
-        .filter(AIAnomalyAlert.is_resolved.is_(False))
+        .filter(AIAnomalyAlert.organization_id == org_id, AIAnomalyAlert.is_resolved.is_(False))
         .order_by(AIAnomalyAlert.created_at.desc())
         .limit(5)
         .all()

@@ -36,6 +36,7 @@ class AIReportWriter:
         department: str | None = None,
         format: str = "markdown",
         user_id: int | None = None,
+        organization_id: int | None = None,
     ) -> dict:
         """Generate a report of the specified type.
 
@@ -77,6 +78,7 @@ class AIReportWriter:
             format=format,
             data_sources=report_data,
             user_id=user_id,
+            organization_id=organization_id,
         )
         self.db.add(report)
         self.db.commit()

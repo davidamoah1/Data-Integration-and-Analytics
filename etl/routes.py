@@ -55,6 +55,8 @@ from etl.schemas import (
 from etl.transformations import TransformationEngine
 from shared.database import get_db
 from shared.dependencies import get_current_user
+from shared.tenant import get_current_organization_id, get_tenant_context, verify_resource_ownership
+from audit.service import log_audit_event
 
 router = APIRouter(prefix="/etl", tags=["ETL Engine"])
 
@@ -136,6 +138,17 @@ async def upload_file(
             df = connector.extract()
 
         preview_rows = df.head(10).to_dict(orient="records")
+
+        log_audit_event(
+            db=db,
+            action="dataset.upload",
+            user_id=current_user.get("id"),
+            organization_id=get_current_organization_id(current_user, db),
+            resource_type="dataset",
+            metadata={"filename": file.filename, "rows": len(df), "columns": len(df.columns)},
+        )
+        db.commit()
+
         return ImportPreviewResponse(
             columns=list(df.columns),
             rows=preview_rows,
@@ -169,11 +182,14 @@ async def preview_import(
 async def execute_import(
     request: ImportRequest,
     db: DbSession = Depends(get_db),
-    current_user=Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Execute a full import: extract, validate, transform, profile, and optionally load."""
+    current_user = tenant["user"]
+    org_id = tenant["organization_id"]
     # Create job record
     job = ETLJob(
+        organization_id=org_id,
         job_type="import",
         status="running",
         trigger_type="api",
@@ -217,10 +233,12 @@ async def execute_import(
             destination_type="dataframe",
             job_id=job.id,
             user_id=current_user["id"] if current_user else None,
+            organization_id=org_id,
         )
 
         # Save profile
         profile_rec = ETLDataProfile(
+            organization_id=org_id,
             job_id=job.id,
             source_name=request.source_config.get("file_path", request.source_type),
             source_type=request.source_type,
@@ -233,6 +251,7 @@ async def execute_import(
 
         # Save quality report
         quality_rec = ETLQualityReport(
+            organization_id=org_id,
             job_id=job.id,
             source_name=request.source_type,
             overall_score=quality["overall_score"],
@@ -247,6 +266,7 @@ async def execute_import(
         # Save template if requested
         if request.template_name:
             template = ETLImportTemplate(
+                organization_id=org_id,
                 name=request.template_name,
                 source_type=request.source_type,
                 source_config=request.source_config,
@@ -310,10 +330,15 @@ async def profile_data(
 async def get_profile(
     job_id: int,
     db: DbSession = Depends(get_db),
-    current_user=Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Get a saved data profile by job ID."""
-    profile = db.query(ETLDataProfile).filter(ETLDataProfile.job_id == job_id).first()
+    org_id = tenant["organization_id"]
+    profile = (
+        db.query(ETLDataProfile)
+        .filter(ETLDataProfile.job_id == job_id, ETLDataProfile.organization_id == org_id)
+        .first()
+    )
     if not profile:
         raise HTTPException(status_code=404, detail="Profile not found")
     return {
@@ -369,10 +394,15 @@ async def apply_fixes(
 async def get_quality_report(
     job_id: int,
     db: DbSession = Depends(get_db),
-    current_user=Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Get a saved quality report by job ID."""
-    report = db.query(ETLQualityReport).filter(ETLQualityReport.job_id == job_id).first()
+    org_id = tenant["organization_id"]
+    report = (
+        db.query(ETLQualityReport)
+        .filter(ETLQualityReport.job_id == job_id, ETLQualityReport.organization_id == org_id)
+        .first()
+    )
     if not report:
         raise HTTPException(status_code=404, detail="Quality report not found")
     return {
@@ -417,10 +447,13 @@ async def transform_data(
 async def create_transformation_template(
     template: TransformationTemplateCreate,
     db: DbSession = Depends(get_db),
-    current_user=Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Create a reusable transformation template."""
+    current_user = tenant["user"]
+    org_id = tenant["organization_id"]
     t = ETLTransformation(
+        organization_id=org_id,
         name=template.name,
         description=template.description,
         transformation_type=template.transformation_type,
@@ -436,10 +469,11 @@ async def create_transformation_template(
 @router.get("/transformations/templates", response_model=list[dict])
 async def list_transformation_templates(
     db: DbSession = Depends(get_db),
-    current_user=Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """List all transformation templates."""
-    templates = db.query(ETLTransformation).all()
+    org_id = tenant["organization_id"]
+    templates = db.query(ETLTransformation).filter(ETLTransformation.organization_id == org_id).all()
     return [
         {
             "id": t.id,
@@ -460,15 +494,18 @@ async def list_transformation_templates(
 async def create_pipeline(
     request: PipelineCreate,
     db: DbSession = Depends(get_db),
-    current_user=Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Create a new ETL pipeline."""
+    current_user = tenant["user"]
+    org_id = tenant["organization_id"]
     builder = PipelineBuilder(db)
     pipeline = builder.create_pipeline(
         name=request.name,
         description=request.description or "",
         steps=request.steps,
         created_by=current_user["id"] if current_user else None,
+        organization_id=org_id,
     )
     return PipelineResponse(
         id=pipeline.id,
@@ -484,25 +521,38 @@ async def create_pipeline(
 @router.get("/pipelines", response_model=list[dict])
 async def list_pipelines(
     db: DbSession = Depends(get_db),
-    current_user=Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """List all pipelines."""
-    builder = PipelineBuilder(db)
-    return builder.list_pipelines()
+    org_id = tenant["organization_id"]
+    pipelines = db.query(ETLPipeline).filter(ETLPipeline.organization_id == org_id).all()
+    return [
+        {
+            "id": p.id,
+            "name": p.name,
+            "description": p.description,
+            "status": p.status,
+            "current_version": p.current_version,
+            "created_at": str(p.created_at) if p.created_at else None,
+        }
+        for p in pipelines
+    ]
 
 
 @router.get("/pipelines/{pipeline_id}", response_model=PipelineResponse)
 async def get_pipeline(
     pipeline_id: int,
     db: DbSession = Depends(get_db),
-    current_user=Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Get a pipeline by ID."""
+    org_id = tenant["organization_id"]
+    pipeline = verify_resource_ownership(db, ETLPipeline, pipeline_id, org_id)
     builder = PipelineBuilder(db)
-    pipeline = builder.get_pipeline(pipeline_id)
-    if not pipeline:
+    pipeline_data = builder.get_pipeline(pipeline_id)
+    if not pipeline_data:
         raise HTTPException(status_code=404, detail="Pipeline not found")
-    return PipelineResponse(**pipeline)
+    return PipelineResponse(**pipeline_data)
 
 
 @router.put("/pipelines/{pipeline_id}", response_model=dict)
@@ -510,9 +560,12 @@ async def update_pipeline(
     pipeline_id: int,
     request: PipelineUpdate,
     db: DbSession = Depends(get_db),
-    current_user=Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Update a pipeline (creates a new version)."""
+    current_user = tenant["user"]
+    org_id = tenant["organization_id"]
+    verify_resource_ownership(db, ETLPipeline, pipeline_id, org_id)
     builder = PipelineBuilder(db)
     version = builder.update_pipeline(
         pipeline_id=pipeline_id,
@@ -526,9 +579,11 @@ async def update_pipeline(
 async def get_version_history(
     pipeline_id: int,
     db: DbSession = Depends(get_db),
-    current_user=Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Get version history for a pipeline."""
+    org_id = tenant["organization_id"]
+    verify_resource_ownership(db, ETLPipeline, pipeline_id, org_id)
     builder = PipelineBuilder(db)
     return builder.get_version_history(pipeline_id)
 
@@ -538,9 +593,11 @@ async def rollback_pipeline(
     pipeline_id: int,
     request: RollbackRequest,
     db: DbSession = Depends(get_db),
-    current_user=Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Rollback a pipeline to a previous version."""
+    org_id = tenant["organization_id"]
+    verify_resource_ownership(db, ETLPipeline, pipeline_id, org_id)
     builder = PipelineBuilder(db)
     version = builder.rollback_version(pipeline_id, request.version_number)
     return {"pipeline_id": pipeline_id, "rolled_back_to": version.version_number}
@@ -551,9 +608,12 @@ async def execute_pipeline(
     pipeline_id: int,
     background_tasks: BackgroundTasks,
     db: DbSession = Depends(get_db),
-    current_user=Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Execute a pipeline. Runs in the background for large datasets."""
+    current_user = tenant["user"]
+    org_id = tenant["organization_id"]
+    verify_resource_ownership(db, ETLPipeline, pipeline_id, org_id)
     executor = PipelineExecutor(db)
 
     def run():
@@ -562,6 +622,7 @@ async def execute_pipeline(
                 pipeline_id=pipeline_id,
                 user_id=current_user["id"] if current_user else None,
                 trigger_type="api",
+                organization_id=org_id,
             )
         except Exception as e:
             logger.error(f"Pipeline execution failed: {e}")
@@ -586,44 +647,83 @@ async def list_jobs(
     status: str | None = Query(None, description="Filter by status"),
     limit: int = Query(50, ge=1, le=200),
     db: DbSession = Depends(get_db),
-    current_user=Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """List ETL jobs with optional status filter."""
-    monitor = JobMonitor(db)
-    return monitor.list_jobs(status=status, limit=limit)
+    org_id = tenant["organization_id"]
+    query = db.query(ETLJob).filter(ETLJob.organization_id == org_id)
+    if status:
+        query = query.filter(ETLJob.status == status)
+    jobs = query.order_by(ETLJob.created_at.desc()).limit(limit).all()
+    return [
+        JobResponse(
+            id=j.id,
+            pipeline_id=j.pipeline_id,
+            job_type=j.job_type,
+            status=j.status,
+            trigger_type=j.trigger_type,
+            rows_extracted=j.rows_extracted,
+            rows_transformed=j.rows_transformed,
+            rows_loaded=j.rows_loaded,
+            rows_rejected=j.rows_rejected,
+            error_message=j.error_message,
+            started_at=str(j.started_at) if j.started_at else None,
+            completed_at=str(j.completed_at) if j.completed_at else None,
+            duration_seconds=j.duration_seconds,
+            created_at=str(j.created_at) if j.created_at else None,
+        )
+        for j in jobs
+    ]
 
 
 @router.get("/jobs/stats", response_model=JobStatsResponse)
 async def get_job_stats(
     db: DbSession = Depends(get_db),
-    current_user=Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Get aggregate job statistics."""
+    org_id = tenant["organization_id"]
     monitor = JobMonitor(db)
-    return JobStatsResponse(**monitor.get_stats())
+    stats = monitor.get_stats(organization_id=org_id)
+    return JobStatsResponse(**stats)
 
 
 @router.get("/jobs/{job_id}", response_model=JobResponse)
 async def get_job(
     job_id: int,
     db: DbSession = Depends(get_db),
-    current_user=Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Get a specific job by ID."""
-    monitor = JobMonitor(db)
-    job = monitor.get_job(job_id)
-    if not job:
-        raise HTTPException(status_code=404, detail="Job not found")
-    return JobResponse(**job)
+    org_id = tenant["organization_id"]
+    job = verify_resource_ownership(db, ETLJob, job_id, org_id)
+    return JobResponse(
+        id=job.id,
+        pipeline_id=job.pipeline_id,
+        job_type=job.job_type,
+        status=job.status,
+        trigger_type=job.trigger_type,
+        rows_extracted=job.rows_extracted,
+        rows_transformed=job.rows_transformed,
+        rows_loaded=job.rows_loaded,
+        rows_rejected=job.rows_rejected,
+        error_message=job.error_message,
+        started_at=str(job.started_at) if job.started_at else None,
+        completed_at=str(job.completed_at) if job.completed_at else None,
+        duration_seconds=job.duration_seconds,
+        created_at=str(job.created_at) if job.created_at else None,
+    )
 
 
 @router.get("/jobs/{job_id}/steps", response_model=list[dict])
 async def get_job_steps(
     job_id: int,
     db: DbSession = Depends(get_db),
-    current_user=Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Get step-level execution details for a job."""
+    org_id = tenant["organization_id"]
+    verify_resource_ownership(db, ETLJob, job_id, org_id)
     monitor = JobMonitor(db)
     return monitor.get_steps(job_id)
 
@@ -635,11 +735,14 @@ async def get_job_steps(
 async def get_lineage_graph(
     job_id: int | None = Query(None),
     db: DbSession = Depends(get_db),
-    current_user=Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Get data lineage graph (nodes + edges)."""
+    org_id = tenant["organization_id"]
+    if job_id is not None:
+        verify_resource_ownership(db, ETLJob, job_id, org_id)
     lineage = LineageTracker(db)
-    graph = lineage.build_graph(job_id=job_id)
+    graph = lineage.build_graph(job_id=job_id, organization_id=org_id)
     return LineageResponse(**graph)
 
 
@@ -649,11 +752,16 @@ async def get_lineage_entries(
     job_id: int | None = Query(None),
     limit: int = Query(100, ge=1, le=500),
     db: DbSession = Depends(get_db),
-    current_user=Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Get raw lineage entries."""
+    org_id = tenant["organization_id"]
+    if job_id is not None:
+        verify_resource_ownership(db, ETLJob, job_id, org_id)
     lineage = LineageTracker(db)
-    return lineage.get_lineage(source_name=source_name, job_id=job_id, limit=limit)
+    return lineage.get_lineage(
+        source_name=source_name, job_id=job_id, organization_id=org_id, limit=limit
+    )
 
 
 # --- Schedule endpoints -----------------------------------------------------
@@ -663,10 +771,15 @@ async def get_lineage_entries(
 async def create_schedule(
     request: ScheduleCreate,
     db: DbSession = Depends(get_db),
-    current_user=Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Create a pipeline execution schedule."""
+    current_user = tenant["user"]
+    org_id = tenant["organization_id"]
+    # Verify pipeline belongs to org
+    verify_resource_ownership(db, ETLPipeline, request.pipeline_id, org_id)
     schedule = ETLSchedule(
+        organization_id=org_id,
         pipeline_id=request.pipeline_id,
         schedule_type=request.schedule_type,
         cron_expr=request.cron_expr,
@@ -689,10 +802,15 @@ async def create_schedule(
 @router.get("/schedules", response_model=list[ScheduleResponse])
 async def list_schedules(
     db: DbSession = Depends(get_db),
-    current_user=Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """List all schedules."""
-    schedules = db.query(ETLSchedule).filter(ETLSchedule.is_active == 1).all()
+    org_id = tenant["organization_id"]
+    schedules = (
+        db.query(ETLSchedule)
+        .filter(ETLSchedule.is_active == 1, ETLSchedule.organization_id == org_id)
+        .all()
+    )
     return [
         ScheduleResponse(
             id=s.id,
@@ -711,12 +829,11 @@ async def list_schedules(
 async def delete_schedule(
     schedule_id: int,
     db: DbSession = Depends(get_db),
-    current_user=Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Deactivate a schedule."""
-    schedule = db.query(ETLSchedule).filter(ETLSchedule.id == schedule_id).first()
-    if not schedule:
-        raise HTTPException(status_code=404, detail="Schedule not found")
+    org_id = tenant["organization_id"]
+    schedule = verify_resource_ownership(db, ETLSchedule, schedule_id, org_id)
     schedule.is_active = 0
     db.commit()
     return {"id": schedule_id, "status": "deactivated"}
@@ -728,10 +845,11 @@ async def delete_schedule(
 @router.get("/templates", response_model=list[ImportTemplateResponse])
 async def list_templates(
     db: DbSession = Depends(get_db),
-    current_user=Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """List all import templates."""
-    templates = db.query(ETLImportTemplate).all()
+    org_id = tenant["organization_id"]
+    templates = db.query(ETLImportTemplate).filter(ETLImportTemplate.organization_id == org_id).all()
     return [
         ImportTemplateResponse(
             id=t.id,
@@ -750,12 +868,11 @@ async def list_templates(
 async def get_template(
     template_id: int,
     db: DbSession = Depends(get_db),
-    current_user=Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Get an import template by ID."""
-    template = db.query(ETLImportTemplate).filter(ETLImportTemplate.id == template_id).first()
-    if not template:
-        raise HTTPException(status_code=404, detail="Template not found")
+    org_id = tenant["organization_id"]
+    template = verify_resource_ownership(db, ETLImportTemplate, template_id, org_id)
     return ImportTemplateResponse(
         id=template.id,
         name=template.name,
@@ -773,15 +890,26 @@ async def get_template(
 @router.get("/dashboard", response_model=DashboardResponse)
 async def get_dashboard(
     db: DbSession = Depends(get_db),
-    current_user=Depends(get_current_user),
+    tenant: dict = Depends(get_tenant_context),
 ):
     """Get ETL dashboard metrics."""
+    org_id = tenant["organization_id"]
     monitor = JobMonitor(db)
-    stats = monitor.get_stats()
+    stats = monitor.get_stats(organization_id=org_id)
 
-    pipelines = db.query(ETLPipeline).filter(ETLPipeline.status == "active").count()
+    pipelines = (
+        db.query(ETLPipeline)
+        .filter(ETLPipeline.status == "active", ETLPipeline.organization_id == org_id)
+        .count()
+    )
 
-    recent_jobs = db.query(ETLJob).order_by(ETLJob.created_at.desc()).limit(10).all()
+    recent_jobs = (
+        db.query(ETLJob)
+        .filter(ETLJob.organization_id == org_id)
+        .order_by(ETLJob.created_at.desc())
+        .limit(10)
+        .all()
+    )
     recent_activity = [
         {
             "job_id": j.id,
@@ -792,7 +920,14 @@ async def get_dashboard(
         for j in recent_jobs
     ]
 
-    avg_quality = db.query(ETLDataProfile).filter(ETLDataProfile.quality_score.isnot(None)).all()
+    avg_quality = (
+        db.query(ETLDataProfile)
+        .filter(
+            ETLDataProfile.quality_score.isnot(None),
+            ETLDataProfile.organization_id == org_id,
+        )
+        .all()
+    )
     avg_q = (
         round(sum(p.quality_score for p in avg_quality) / len(avg_quality), 2)
         if avg_quality

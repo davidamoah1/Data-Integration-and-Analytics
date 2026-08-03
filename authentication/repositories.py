@@ -15,6 +15,7 @@ from authentication.models import (
     PasswordHistory,
     PasswordReset,
     Permission,
+    Resource,
     Role,
     RolePermission,
     Session,
@@ -164,6 +165,24 @@ class RoleRepository:
             .all()
         )
 
+    def list_roles_by_level(self, level: str) -> list[Role]:
+        return list(
+            self.db.execute(
+                select(Role).where(Role.is_deleted == 0, Role.level == level).order_by(Role.id)
+            )
+            .scalars()
+            .all()
+        )
+
+    def list_assignable_roles(self) -> list[Role]:
+        return list(
+            self.db.execute(
+                select(Role).where(Role.is_deleted == 0, Role.is_assignable == 1).order_by(Role.id)
+            )
+            .scalars()
+            .all()
+        )
+
     def create(self, role: Role) -> Role:
         self.db.add(role)
         self.db.flush()
@@ -274,12 +293,24 @@ class UserRoleRepository:
         )
         return list(results)
 
-    def assign_role(self, user_id: int, role_id: int, assigned_by: int = None):
+    def assign_role(self, user_id: int, role_id: int, assigned_by: int = None,
+                    scope_type: str = None, scope_id: int = None):
         existing = self.db.execute(
-            select(UserRole).where(UserRole.user_id == user_id, UserRole.role_id == role_id)
+            select(UserRole).where(
+                UserRole.user_id == user_id,
+                UserRole.role_id == role_id,
+                UserRole.scope_type == scope_type if scope_type else UserRole.scope_type.is_(None),
+                UserRole.scope_id == scope_id if scope_id else UserRole.scope_id.is_(None),
+            )
         ).scalar_one_or_none()
         if not existing:
-            self.db.add(UserRole(user_id=user_id, role_id=role_id, assigned_by=assigned_by))
+            self.db.add(UserRole(
+                user_id=user_id,
+                role_id=role_id,
+                assigned_by=assigned_by,
+                scope_type=scope_type,
+                scope_id=scope_id,
+            ))
             self.db.flush()
 
     def remove_role(self, user_id: int, role_id: int):
@@ -288,14 +319,36 @@ class UserRoleRepository:
         )
         self.db.flush()
 
-    def set_user_roles(self, user_id: int, role_ids: list[int], assigned_by: int = None):
-        self.db.execute(delete(UserRole).where(UserRole.user_id == user_id))
+    def set_user_roles(self, user_id: int, role_ids: list[int], assigned_by: int = None,
+                       scope_type: str = None, scope_id: int = None):
+        # Only remove roles matching the same scope
+        if scope_type:
+            self.db.execute(
+                delete(UserRole).where(
+                    UserRole.user_id == user_id,
+                    UserRole.scope_type == scope_type,
+                    UserRole.scope_id == scope_id if scope_id else UserRole.scope_id.is_(None),
+                )
+            )
+        else:
+            self.db.execute(
+                delete(UserRole).where(
+                    UserRole.user_id == user_id,
+                    UserRole.scope_type.is_(None),
+                )
+            )
         for rid in role_ids:
-            self.db.add(UserRole(user_id=user_id, role_id=rid, assigned_by=assigned_by))
+            self.db.add(UserRole(
+                user_id=user_id,
+                role_id=rid,
+                assigned_by=assigned_by,
+                scope_type=scope_type,
+                scope_id=scope_id,
+            ))
         self.db.flush()
 
     def get_all_permissions_for_user(self, user_id: int) -> list[str]:
-        """Get all permission names for a user via their roles."""
+        """Get all permission names for a user via their roles (global + scoped)."""
         results = (
             self.db.execute(
                 select(Permission.name)
@@ -306,7 +359,78 @@ class UserRoleRepository:
             .scalars()
             .all()
         )
-        return list(results)
+        return list(set(results))
+
+    def get_scoped_roles_for_user(self, user_id: int) -> list[dict]:
+        """Get all role assignments for a user including scope information."""
+        results = (
+            self.db.execute(
+                select(
+                    Role.name,
+                    Role.display_name,
+                    Role.level,
+                    UserRole.scope_type,
+                    UserRole.scope_id,
+                )
+                .join(UserRole, UserRole.role_id == Role.id)
+                .where(UserRole.user_id == user_id, Role.is_deleted == 0)
+            )
+            .all()
+        )
+        return [
+            {
+                "role_name": r[0],
+                "display_name": r[1],
+                "level": r[2],
+                "scope_type": r[3],
+                "scope_id": r[4],
+            }
+            for r in results
+        ]
+
+    def get_permissions_for_scope(self, user_id: int, scope_type: str, scope_id: int = None) -> list[str]:
+        """Get permissions for a user within a specific scope (e.g., department)."""
+        if scope_id:
+            results = (
+                self.db.execute(
+                    select(Permission.name)
+                    .join(RolePermission, RolePermission.permission_id == Permission.id)
+                    .join(UserRole, UserRole.role_id == RolePermission.role_id)
+                    .where(
+                        UserRole.user_id == user_id,
+                        UserRole.scope_type == scope_type,
+                        UserRole.scope_id == scope_id,
+                    )
+                )
+                .scalars()
+                .all()
+            )
+        else:
+            results = (
+                self.db.execute(
+                    select(Permission.name)
+                    .join(RolePermission, RolePermission.permission_id == Permission.id)
+                    .join(UserRole, UserRole.role_id == RolePermission.role_id)
+                    .where(
+                        UserRole.user_id == user_id,
+                        UserRole.scope_type == scope_type,
+                    )
+                )
+                .scalars()
+                .all()
+            )
+        return list(set(results))
+
+    def has_permission(self, user_id: int, permission_name: str) -> bool:
+        """Check if a user has a specific permission via any of their roles."""
+        result = self.db.execute(
+            select(func.count())
+            .select_from(Permission)
+            .join(RolePermission, RolePermission.permission_id == Permission.id)
+            .join(UserRole, UserRole.role_id == RolePermission.role_id)
+            .where(UserRole.user_id == user_id, Permission.name == permission_name)
+        ).scalar()
+        return result > 0
 
 
 class SessionRepository:
@@ -482,3 +606,61 @@ class PasswordHistoryRepository:
             .scalars()
             .all()
         )
+
+
+class ResourceRepository:
+    """Repository for resource-level access control."""
+
+    def __init__(self, db: DbSession):
+        self.db = db
+
+    def get(self, resource_type: str, resource_id: int) -> Resource | None:
+        return self.db.execute(
+            select(Resource).where(
+                Resource.resource_type == resource_type,
+                Resource.resource_id == resource_id,
+            )
+        ).scalar_one_or_none()
+
+    def create(self, resource: Resource) -> Resource:
+        self.db.add(resource)
+        self.db.flush()
+        return resource
+
+    def update(self, resource_id: int, **kwargs) -> Resource | None:
+        self.db.execute(update(Resource).where(Resource.id == resource_id).values(**kwargs))
+        self.db.flush()
+        return self.db.execute(
+            select(Resource).where(Resource.id == resource_id)
+        ).scalar_one_or_none()
+
+    def upsert(self, resource_type: str, resource_id: int, **kwargs) -> Resource:
+        existing = self.get(resource_type, resource_id)
+        if existing:
+            for k, v in kwargs.items():
+                setattr(existing, k, v)
+            self.db.flush()
+            return existing
+        resource = Resource(resource_type=resource_type, resource_id=resource_id, **kwargs)
+        return self.create(resource)
+
+    def can_access(self, user_id: int, resource_type: str, resource_id: int,
+                   user_org_id: int = None, user_dept_id: int = None) -> bool:
+        """Check if a user can access a specific resource."""
+        resource = self.get(resource_type, resource_id)
+        if not resource:
+            return True  # No resource record = no restriction
+
+        if resource.is_public:
+            return True
+
+        if resource.owner_id == user_id:
+            return True
+
+        if resource.access_level == "organization" and resource.organization_id == user_org_id:
+            return True
+
+        if resource.access_level == "department" and resource.department_id == user_dept_id:
+            return True
+
+        return False

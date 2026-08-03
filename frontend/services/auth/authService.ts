@@ -1,5 +1,5 @@
 import { apiClient, setTokens, clearTokens } from '../api/client';
-import type { LoginRequest, LoginResponse, RefreshResponse, User } from '@/types';
+import type { LoginRequest, LoginResponse, RefreshResponse, User, MFAStatus, MFASetupResult, MFALoginChallenge, SessionInfo, LoginHistoryEntry } from '@/types';
 
 export interface SignupPayload {
   email: string;
@@ -126,16 +126,67 @@ export const authService = {
     return apiClient.post('/api/auth/onboarding', payload);
   },
 
-  async getSessions(): Promise<unknown[]> {
-    return apiClient.get('/api/auth/sessions');
+  async getSessions(): Promise<SessionInfo[]> {
+    return apiClient.get<SessionInfo[]>('/api/auth/sessions');
   },
 
   async revokeSession(sessionId: number): Promise<void> {
     await apiClient.delete(`/api/auth/sessions/${sessionId}`);
   },
 
-  async getLoginHistory(): Promise<unknown[]> {
-    return apiClient.get('/api/auth/login-history');
+  async getLoginHistory(): Promise<LoginHistoryEntry[]> {
+    return apiClient.get<LoginHistoryEntry[]>('/api/auth/login-history');
+  },
+
+  async resendEmailVerification(email: string): Promise<void> {
+    await apiClient.post('/api/auth/resend-verification', { email }, { skipAuth: true });
+  },
+
+  async activateAccount(userId: number, reason?: string): Promise<void> {
+    await apiClient.post(`/api/auth/activate/${userId}`, { is_active: true, reason });
+  },
+
+  async deactivateAccount(userId: number, reason?: string): Promise<void> {
+    await apiClient.post(`/api/auth/deactivate/${userId}`, { is_active: false, reason });
+  },
+
+  // --- MFA ---
+
+  async getMFAStatus(): Promise<MFAStatus> {
+    return apiClient.get<MFAStatus>('/api/auth/mfa/status');
+  },
+
+  async setupMFA(): Promise<MFASetupResult> {
+    return apiClient.post<MFASetupResult>('/api/auth/mfa/setup');
+  },
+
+  async verifyMFA(code: string): Promise<void> {
+    await apiClient.post('/api/auth/mfa/verify', { code });
+  },
+
+  async disableMFA(code: string): Promise<void> {
+    await apiClient.post('/api/auth/mfa/disable', { code });
+  },
+
+  async mfaLoginChallenge(email: string, password: string, rememberMe?: boolean): Promise<MFALoginChallenge> {
+    const data = await apiClient.post<MFALoginChallenge>('/api/auth/mfa/login-challenge', {
+      email,
+      password,
+      remember_me: rememberMe,
+    }, { skipAuth: true });
+    if (!data.mfa_required && data.access_token) {
+      setTokens(data.access_token, data.refresh_token!);
+    }
+    return data;
+  },
+
+  async mfaLoginVerify(challengeToken: string, code: string): Promise<LoginResponse> {
+    const data = await apiClient.post<LoginResponse>('/api/auth/mfa/login-verify', {
+      challenge_token: challengeToken,
+      code,
+    }, { skipAuth: true });
+    setTokens(data.access_token, data.refresh_token);
+    return data;
   },
 
   async getInvitationInfo(token: string): Promise<{ id: number; email: string; organization_name: string; organization_id: number; role_name: string; expires_at: string }> {

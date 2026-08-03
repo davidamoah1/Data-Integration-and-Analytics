@@ -10,6 +10,7 @@ interface RouteGuardProps {
   role?: string;
   permissions?: string[];
   roles?: string[];
+  excludeRoles?: string[];
   requireAll?: boolean;
 }
 
@@ -19,6 +20,7 @@ export function RouteGuard({
   role,
   permissions,
   roles,
+  excludeRoles,
   requireAll = false,
 }: RouteGuardProps) {
   const router = useRouter();
@@ -49,10 +51,14 @@ export function RouteGuard({
       allowed = requireAll ? roles.every(checkRole) : roles.some(checkRole);
     }
 
+    if (allowed && excludeRoles && excludeRoles.length > 0) {
+      allowed = !excludeRoles.some((r) => hasRole(r));
+    }
+
     if (!allowed) {
       router.push('/forbidden');
     }
-  }, [router, user, isAuthenticated, hasPermission, hasRole, permission, role, permissions, roles, requireAll]);
+  }, [router, user, isAuthenticated, hasPermission, hasRole, permission, role, permissions, roles, excludeRoles, requireAll]);
 
   if (!isAuthenticated || !user) {
     return (
@@ -76,6 +82,10 @@ export function RouteGuard({
     allowed = hasRole(role);
   } else if (allowed && roles && roles.length > 0) {
     allowed = requireAll ? roles.every((r) => hasRole(r)) : roles.some((r) => hasRole(r));
+  }
+
+  if (allowed && excludeRoles && excludeRoles.length > 0) {
+    allowed = !excludeRoles.some((r) => hasRole(r));
   }
 
   if (!allowed) {

@@ -214,7 +214,7 @@ class TestAIMemory:
 
     def test_create_conversation_and_add_messages(self, ai_db):
         memory = AIMemory(ai_db)
-        conv = AIConversation(user_id=1, assistant_type="data_copilot", title="Test")
+        conv = AIConversation(organization_id=1, user_id=1, assistant_type="data_copilot", title="Test")
         ai_db.add(conv)
         ai_db.commit()
 
@@ -228,7 +228,7 @@ class TestAIMemory:
 
     def test_get_conversations(self, ai_db):
         memory = AIMemory(ai_db)
-        conv = AIConversation(user_id=1, assistant_type="data_copilot", title="Test")
+        conv = AIConversation(organization_id=1, user_id=1, assistant_type="data_copilot", title="Test")
         ai_db.add(conv)
         ai_db.commit()
 
@@ -238,7 +238,7 @@ class TestAIMemory:
 
     def test_feedback(self, ai_db):
         memory = AIMemory(ai_db)
-        conv = AIConversation(user_id=1, assistant_type="data_copilot")
+        conv = AIConversation(organization_id=1, user_id=1, assistant_type="data_copilot")
         ai_db.add(conv)
         ai_db.commit()
         msg = memory.add_message(conv.id, "assistant", "Response")
@@ -448,7 +448,7 @@ class TestKPIEngine:
 
     def test_recommend_kpis(self, ai_db):
         engine = KPIEngine(ai_db)
-        result = engine.recommend_kpis(domain="sales")
+        result = engine.recommend_kpis(domain="sales", organization_id=1)
         assert "recommendations" in result
         assert isinstance(result["recommendations"], list)
         # Verify saved to DB
@@ -510,6 +510,7 @@ class TestForecasting:
             date_column="order_date",
             horizon=5,
             method="linear",
+            organization_id=1,
         )
         assert "predictions" in result
         assert len(result["predictions"]) == 5
@@ -551,6 +552,7 @@ class TestAnomalyDetection:
             metric_column="sales",
             date_column="order_date",
             sensitivity=2.0,
+            organization_id=1,
         )
         assert result["total_anomalies"] >= 1
 
@@ -569,6 +571,7 @@ class TestWorkflow:
                 {"type": "notify", "config": {"message": "Done"}},
             ],
             user_id=1,
+            organization_id=1,
         )
         assert result["id"] is not None
         assert len(result["steps"]) == 2
@@ -582,6 +585,7 @@ class TestWorkflow:
                 {"type": "archive", "config": {}},
             ],
             user_id=1,
+            organization_id=1,
         )
         run = engine.execute_workflow(wf["id"], user_id=1)
         assert run["status"] == "completed"
@@ -743,7 +747,7 @@ class TestAIAPI:
 class TestAIModels:
 
     def test_models_create(self, ai_db):
-        conv = AIConversation(user_id=1, assistant_type="data_copilot", title="Test")
+        conv = AIConversation(organization_id=1, user_id=1, assistant_type="data_copilot", title="Test")
         ai_db.add(conv)
         ai_db.commit()
         assert conv.id is not None

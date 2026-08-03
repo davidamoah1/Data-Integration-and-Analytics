@@ -17,6 +17,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import pytest
 from fastapi.testclient import TestClient
 
+from api.main import app
+
 
 @pytest.fixture(scope="module")
 def client():
@@ -25,7 +27,7 @@ def client():
 
 
 def get_auth_token(client: TestClient, email: str, password: str) -> str:
-    resp = client.post("/auth/login", json={"email": email, "password": password})
+    resp = client.post("/api/auth/login", json={"email": email, "password": password})
     if resp.status_code == 200 and "data" in resp.json():
         return resp.json()["data"]["access_token"]
     return ""

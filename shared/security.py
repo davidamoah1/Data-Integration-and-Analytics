@@ -22,6 +22,9 @@ from config import (
 from config import (
     JWT_SECRET_KEY,
 )
+from config import (
+    ENCRYPTION_KEY as _ENCRYPTION_KEY,
+)
 
 # --- Password hashing -------------------------------------------------------
 
@@ -191,8 +194,14 @@ from cryptography.fernet import Fernet, InvalidToken  # noqa: E402
 
 
 def _get_fernet_key() -> bytes:
-    """Derive a Fernet key from JWT_SECRET_KEY for symmetric encryption."""
-    secret = JWT_SECRET_KEY.encode()
+    """Derive a Fernet key for symmetric encryption.
+
+    Uses ENCRYPTION_KEY if set, otherwise falls back to deriving from
+    JWT_SECRET_KEY for development convenience. Production should set
+    ENCRYPTION_KEY explicitly to avoid coupling with JWT secrets.
+    """
+    source = _ENCRYPTION_KEY if _ENCRYPTION_KEY else JWT_SECRET_KEY
+    secret = source.encode()
     derived = _hashlib.sha256(secret).digest()
     return _base64.urlsafe_b64encode(derived)
 

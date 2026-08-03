@@ -102,7 +102,7 @@ def client(db_engine):
 def admin_token(client):
     """Login as the default super admin and return the access token."""
     response = client.post(
-        "/auth/login",
+        "/api/auth/login",
         json={
             "email": "admin@dataflow.io",
             "password": "Admin@12345",

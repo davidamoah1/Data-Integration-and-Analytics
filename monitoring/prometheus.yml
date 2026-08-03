@@ -1,0 +1,57 @@
+# Prometheus scrape configuration for AEDIP Platform
+# 
+# Deploy with:
+#   prometheus --config.file=monitoring/prometheus.yml
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: "aedip-platform"
+    environment: "production"
+
+rule_files:
+  # - "alerts.yml"
+
+scrape_configs:
+  # AEDIP API metrics
+  - job_name: "aedip-api"
+    metrics_path: "/metrics"
+    static_configs:
+      - targets:
+          - "localhost:8000"
+        labels:
+          service: "aedip-api"
+          environment: "production"
+
+  # AEDIP API (Docker)
+  - job_name: "aedip-api-docker"
+    metrics_path: "/metrics"
+    static_configs:
+      - targets:
+          - "api:8000"
+        labels:
+          service: "aedip-api"
+          environment: "docker"
+
+  # Frontend (if instrumented)
+  - job_name: "aedip-frontend"
+    metrics_path: "/metrics"
+    static_configs:
+      - targets:
+          - "dashboard:3000"
+        labels:
+          service: "aedip-frontend"
+    scrape_interval: 30s
+
+  # Prometheus self-monitoring
+  - job_name: "prometheus"
+    static_configs:
+      - targets:
+          - "localhost:9090"
+
+  # Node exporter (host metrics)
+  - job_name: "node"
+    static_configs:
+      - targets:
+          - "node-exporter:9100"

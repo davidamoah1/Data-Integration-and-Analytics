@@ -70,6 +70,7 @@ class Comment(Base):
     __tablename__ = "platform_comments"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
+    organization_id = Column(BigInteger, nullable=False, index=True)
     resource_type = Column(String(50), nullable=False, index=True)
     resource_id = Column(BigInteger, nullable=False, index=True)
     author_id = Column(BigInteger, nullable=False, index=True)
@@ -87,6 +88,7 @@ class SharedResource(Base):
     __tablename__ = "platform_shared_resources"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
+    organization_id = Column(BigInteger, nullable=False, index=True)
     resource_type = Column(String(50), nullable=False, index=True)
     resource_id = Column(BigInteger, nullable=False, index=True)
     shared_by = Column(BigInteger, nullable=False, index=True)

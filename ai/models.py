@@ -41,6 +41,7 @@ class AIConversation(Base):
     __tablename__ = "ai_conversations"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
+    organization_id = Column(BigInt, nullable=False, index=True)
     user_id = Column(BigInt, nullable=False, index=True)
     assistant_type = Column(String(50), nullable=False)  # data_copilot, etl_copilot, etc.
     title = Column(String(255), nullable=True)
@@ -100,6 +101,7 @@ class AIUsageLog(Base):
     __tablename__ = "ai_usage_logs"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
+    organization_id = Column(BigInt, nullable=True, index=True)
     user_id = Column(BigInt, nullable=True, index=True)
     provider = Column(String(50), nullable=False)
     model = Column(String(100), nullable=False)
@@ -123,6 +125,7 @@ class AIAuditLog(Base):
     __tablename__ = "ai_audit_logs"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
+    organization_id = Column(BigInt, nullable=True, index=True)
     user_id = Column(BigInt, nullable=True, index=True)
     action = Column(String(100), nullable=False)  # chat, generate_sql, generate_etl, etc.
     assistant_type = Column(String(50), nullable=True)
@@ -142,6 +145,7 @@ class AIWorkflow(Base):
     __tablename__ = "ai_workflows"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
+    organization_id = Column(BigInt, nullable=False, index=True)
     name = Column(String(200), nullable=False)
     description = Column(Text, nullable=True)
     user_id = Column(BigInt, nullable=True, index=True)
@@ -178,6 +182,7 @@ class AIInsight(Base):
     __tablename__ = "ai_insights"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
+    organization_id = Column(BigInt, nullable=False, index=True)
     insight_type = Column(
         String(50), nullable=False
     )  # decision, dashboard, trend, risk, opportunity
@@ -201,6 +206,7 @@ class AIForecast(Base):
     __tablename__ = "ai_forecasts"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
+    organization_id = Column(BigInt, nullable=False, index=True)
     forecast_type = Column(String(50), nullable=False)  # revenue, attendance, enrollment, etc.
     target_column = Column(String(100), nullable=False)
     horizon = Column(Integer, nullable=False)  # number of periods forecasted
@@ -219,6 +225,7 @@ class AIAnomalyAlert(Base):
     __tablename__ = "ai_anomaly_alerts"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
+    organization_id = Column(BigInt, nullable=False, index=True)
     alert_type = Column(String(50), nullable=False)  # spike, drop, fraud, trend, missing
     severity = Column(String(20), nullable=False, default="warning")  # info, warning, critical
     title = Column(String(255), nullable=False)
@@ -241,6 +248,7 @@ class AIDocument(Base):
     __tablename__ = "ai_documents"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
+    organization_id = Column(BigInt, nullable=False, index=True)
     filename = Column(String(255), nullable=False)
     file_type = Column(String(20), nullable=False)  # pdf, word, excel, csv, ppt
     file_size = Column(Integer, nullable=False)
@@ -258,6 +266,7 @@ class AIKPIRecommendation(Base):
     __tablename__ = "ai_kpi_recommendations"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
+    organization_id = Column(BigInt, nullable=False, index=True)
     kpi_name = Column(String(200), nullable=False)
     description = Column(Text, nullable=True)
     formula = Column(Text, nullable=True)  # how to calculate
@@ -279,6 +288,7 @@ class AIReportGeneration(Base):
     __tablename__ = "ai_report_generations"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
+    organization_id = Column(BigInt, nullable=False, index=True)
     report_type = Column(String(50), nullable=False)  # executive, monthly, annual, department, etc.
     title = Column(String(255), nullable=False)
     content = Column(Text, nullable=False)  # markdown content

@@ -485,11 +485,11 @@ const DASHBOARD_CONFIGS: Record<string, DashboardConfig> = {
       },
     ],
     quickActions: [
-      { id: 'view-dashboards', label: 'View Dashboards', icon: BarChart3, href: '/analytics', color: 'bg-purple-500' },
+      { id: 'view-dashboards', label: 'View Dashboards', icon: BarChart3, href: '/dashboard', color: 'bg-purple-500' },
       { id: 'view-reports', label: 'View Reports', icon: FileText, href: '/reports', color: 'bg-orange-500' },
     ],
     emptyStateActions: [
-      { id: 'browse-dashboards', label: 'Browse Dashboards', icon: BarChart3, href: '/analytics', description: 'Explore available dashboards' },
+      { id: 'browse-dashboards', label: 'Browse Dashboards', icon: BarChart3, href: '/dashboard', description: 'Explore available dashboards' },
       { id: 'view-reports', label: 'View Reports', icon: FileText, href: '/reports', description: 'See available reports' },
     ],
   },

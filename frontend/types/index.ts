@@ -8,6 +8,8 @@ export interface User {
   phone?: string;
   organization_id?: number;
   organization_name?: string;
+  organization_type?: string;
+  industry?: string;
   department_id?: number;
   position?: string;
   language?: string;
@@ -37,6 +39,53 @@ export interface RefreshResponse {
   access_token: string;
   refresh_token: string;
   expires_in: number;
+}
+
+export interface MFAStatus {
+  enabled: boolean;
+  method: string | null;
+  setup_pending: boolean;
+  enabled_at?: string;
+  last_used_at?: string;
+  backup_codes_remaining: number;
+}
+
+export interface MFASetupResult {
+  secret: string;
+  qr_uri: string;
+  backup_codes: string[];
+}
+
+export interface MFALoginChallenge {
+  mfa_required: boolean;
+  challenge_token?: string;
+  method?: string;
+  access_token?: string;
+  refresh_token?: string;
+  token_type?: string;
+  expires_in?: number;
+  user?: User;
+}
+
+export interface SessionInfo {
+  id: number;
+  ip_address: string | null;
+  user_agent: string | null;
+  device: string | null;
+  is_active: boolean;
+  last_activity_at: string;
+  created_at: string;
+  expires_at: string;
+}
+
+export interface LoginHistoryEntry {
+  id: number;
+  email: string;
+  ip_address: string | null;
+  user_agent: string | null;
+  success: boolean;
+  failure_reason: string | null;
+  created_at: string;
 }
 
 // ─── API Response Types ──────────────────────────────────────
@@ -104,12 +153,97 @@ export interface Dashboard {
   updated_at: string;
 }
 
+export type WidgetType = 'kpi_card' | 'chart' | 'table' | 'map' | 'trend' | 'alert' | 'report' | 'kpi' | 'text' | 'filter';
+
+export type ChartSubType = 'line' | 'bar' | 'pie' | 'donut' | 'scatter' | 'area' | 'heatmap' | 'gauge' | 'horizontal_bar';
+
+export type DataSourceType = 'dataset' | 'kpi' | 'analytics_alert' | 'report' | 'external_api' | 'aggregate';
+
+export interface DataSourceBinding {
+  source_type: DataSourceType;
+  source_id?: string | number;
+  query?: string;
+  filters: Record<string, unknown>;
+  aggregation: string;
+  group_by?: string;
+  time_field?: string;
+  limit?: number;
+}
+
 export interface Widget {
   id: number;
-  widget_type: 'kpi' | 'chart' | 'table' | 'text' | 'filter';
+  widget_type: WidgetType;
   title: string;
   config: Record<string, unknown>;
   position: { x: number; y: number; w: number; h: number };
+}
+
+export interface ComposedWidget {
+  key: string;
+  widget_type: WidgetType;
+  title: string;
+  description?: string;
+  chart_subtype?: ChartSubType;
+  data_source?: DataSourceBinding;
+  permission?: string;
+  industries?: string[];
+  roles?: string[];
+  config: Record<string, unknown>;
+  width: number;
+  height: number;
+  order: number;
+  group: string;
+}
+
+export interface ComposedDashboard {
+  dashboard_id: string;
+  name: string;
+  description?: string;
+  industry: string;
+  widgets: ComposedWidget[];
+  layout: Record<string, string[]>;
+  created_by?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface WidgetTypeMeta {
+  value: string;
+  label: string;
+  description: string;
+}
+
+export interface DashboardTemplate {
+  industry: string;
+  name: string;
+  description: string;
+  widget_count: number;
+  widget_keys: string[];
+}
+
+export interface WidgetData {
+  widget_key: string;
+  widget_type: WidgetType;
+  title: string;
+  value?: number | string;
+  unit?: string;
+  icon?: string;
+  trend?: { direction: string; change_pct: number };
+  data?: { labels: string[]; datasets: unknown[] };
+  columns?: string[];
+  rows?: Record<string, unknown>[];
+  regions?: unknown[];
+  current?: number;
+  previous?: number;
+  change_pct?: number;
+  direction?: string;
+  series?: unknown[];
+  alerts?: unknown[];
+  severity?: string;
+  report_type?: string;
+  status?: string;
+  url?: string;
+  chart_subtype?: string;
 }
 
 export interface KPI {
@@ -387,4 +521,62 @@ export interface SemanticAnalysisResult {
   column_mappings: Record<string, unknown>[];
   kpi_definitions: unknown[];
   recommendations: string[];
+}
+
+// ─── Enterprise RBAC Types ───────────────────────────────────
+
+export type RoleLevel = 'platform' | 'organization' | 'department' | 'personal';
+
+export interface RoleInfo {
+  id: number;
+  name: string;
+  display_name: string;
+  description?: string;
+  level: RoleLevel;
+  is_system: boolean;
+  is_assignable: boolean;
+  permissions: string[];
+}
+
+export interface PermissionInfo {
+  id: number;
+  name: string;
+  display_name: string;
+  module: string;
+  description?: string;
+}
+
+export interface ScopedRole {
+  role_name: string;
+  display_name: string;
+  level: RoleLevel;
+  scope_type: string | null;
+  scope_id: number | null;
+}
+
+export interface UserPermissions {
+  user_id: number;
+  roles: string[];
+  permissions: string[];
+  scoped_roles: ScopedRole[];
+}
+
+export interface PermissionCheckResult {
+  has_permission: boolean;
+  reason?: string;
+}
+
+export interface ScopedRoleAssignRequest {
+  user_id: number;
+  role_name: string;
+  scope_type?: 'platform' | 'organization' | 'department' | 'resource';
+  scope_id?: number;
+}
+
+export interface PermissionCheckRequest {
+  permission: string;
+  scope_type?: string;
+  scope_id?: number;
+  resource_type?: string;
+  resource_id?: number;
 }

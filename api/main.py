@@ -38,10 +38,13 @@ from config import validate_config
 from shared.context import correlation_id, request_id
 from shared.middleware import (
     RateLimitMiddleware,
-    RequestLoggingMiddleware,
     RequestSizeLimitMiddleware,
     SecurityHeadersMiddleware,
 )
+from monitoring.middleware import MonitoringMiddleware
+from monitoring.sentry_integration import init_sentry, capture_exception, set_user_context
+from monitoring.otel import init_otel, instrument_fastapi, record_pipeline_run
+from monitoring.prometheus import metrics_registry
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -59,10 +62,14 @@ from api.schemas import (
 )
 from admin.routes import router as admin_router
 from audit.services import audit_router
+from audit.routes import router as audit_enterprise_router
 from authentication.routes import roles_router, users_router
+from database.routes import router as database_router
 
 # Phase 4 — Enterprise IAM
 from authentication.routes import router as auth_router
+from authentication.routes import mfa_router
+from authentication.routes import sso_router
 from authentication.services import seed_default_data
 from database.repositories import PipelineRunRepository, SalesRepository
 from enterprise.routes import router as enterprise_router
@@ -78,6 +85,9 @@ from scheduler.routes import router as scheduler_router
 from semantic.routes import router as semantic_router
 from services.dataset_workflow_routes import router as dataset_workflow_router
 from services.dashboard_engine_routes import router as dashboard_engine_router
+from services.dashboard_composition_routes import router as dashboard_composition_router
+from services.onboarding_routes import router as onboarding_router
+from services.report_engine_routes import router as report_engine_router
 from services.etl_service import ETLService
 from shared.database import Base, get_engine
 from dataset_library.routes import router as dataset_library_router
@@ -103,6 +113,16 @@ from studios.routes import router as studios_router
 # Phase 16 — Smart Data Capture & Intelligent Document Processing
 from capture.routes import router as capture_router
 
+# Phase 11 — Background Processing & Job Queue
+from jobs.routes import router as jobs_router
+from jobs.handlers import register_builtin_handlers
+
+# Phase 12 — File Storage Architecture
+from storage.routes import router as storage_router
+
+# Phase 18 — Production Monitoring
+from monitoring.routes import router as phase18_monitoring_router
+
 
 # ── Deployment / cold-start helpers ────────────────────
 
@@ -124,6 +144,16 @@ async def lifespan(app: FastAPI):
     """
     serverless = _is_serverless()
 
+    # Initialise monitoring integrations (no-op if not configured)
+    sentry_ok = init_sentry()
+    otel_ok = init_otel()
+    if sentry_ok:
+        logger.info("Sentry error tracking initialised.")
+    if otel_ok:
+        logger.info("OpenTelemetry tracing initialised.")
+    if not sentry_ok and not otel_ok:
+        logger.info("Monitoring integrations not configured (set SENTRY_DSN / OTEL_EXPORTER_OTLP_ENDPOINT to enable).")
+
     if not serverless:
         try:
             validate_config()
@@ -143,6 +173,8 @@ async def lifespan(app: FastAPI):
         import analytics.models  # noqa: F401
         import audit.models  # noqa: F401
         import authentication.models  # noqa: F401
+        import authentication.mfa_models  # noqa: F401
+        import authentication.sso_models  # noqa: F401
         import database.db_setup  # noqa: F401
         import enterprise.models  # noqa: F401
         import enterprise.subscription  # noqa: F401
@@ -163,6 +195,10 @@ async def lifespan(app: FastAPI):
         import studios.models  # noqa: F401
         # Phase 16 — Smart Data Capture models
         import capture.models  # noqa: F401
+        # Phase 11 — Background Jobs
+        import jobs.models  # noqa: F401
+        # Phase 12 — File Storage
+        import storage.models  # noqa: F401
 
         try:
             Base.metadata.create_all(engine)
@@ -302,17 +338,22 @@ app = FastAPI(
 
 app.add_middleware(RequestSizeLimitMiddleware, max_bytes=int(os.getenv("MAX_REQUEST_BODY_BYTES", "52428800")))
 app.add_middleware(GZipMiddleware, minimum_size=1000)
-app.add_middleware(RequestContextMiddleware)
+app.add_middleware(MonitoringMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
-app.add_middleware(RequestLoggingMiddleware)
 from saas.tenant_middleware import TenantIsolationMiddleware
 app.add_middleware(TenantIsolationMiddleware)
+# Phase 13 — Enterprise audit middleware (auto-logs mutating requests)
+from audit.middleware import AuditMiddleware
+app.add_middleware(AuditMiddleware)
 _is_test_env = os.getenv("PYTEST_RUNNING", "").lower() in ("1", "true", "yes")
 if not _is_test_env:
     app.add_middleware(
         RateLimitMiddleware,
         requests_per_minute=int(os.getenv("RATE_LIMIT_RPM", "120")),
     )
+
+# Instrument FastAPI for OpenTelemetry (no-op if OTel not initialised)
+instrument_fastapi(app)
 
 
 @app.exception_handler(HTTPException)
@@ -332,6 +373,8 @@ async def global_exception_handler(request: Request, exc: Exception):
     on Vercel and other serverless platforms.
     """
     logger.exception("Unhandled exception")
+    capture_exception(exc)
+    metrics_registry.record_error(error_type=type(exc).__name__, component="api")
     message = "Internal server error"
     if os.getenv("DEBUG", "").lower() in ("1", "true", "yes"):
         message = f"Internal server error: {exc}"
@@ -375,6 +418,8 @@ else:
 
 # Include Phase 4 routers
 app.include_router(auth_router)
+app.include_router(mfa_router)
+app.include_router(sso_router)
 app.include_router(users_router)
 app.include_router(roles_router)
 app.include_router(org_router)
@@ -383,6 +428,8 @@ app.include_router(invitation_router)
 app.include_router(registration_router)
 app.include_router(admin_router)
 app.include_router(audit_router)
+app.include_router(audit_enterprise_router)
+app.include_router(database_router)
 app.include_router(etl_router)
 app.include_router(ai_router)
 app.include_router(ai_enterprise_router)
@@ -397,6 +444,9 @@ app.include_router(validation_router)
 app.include_router(dataset_library_router)
 app.include_router(dataset_workflow_router)
 app.include_router(dashboard_engine_router)
+app.include_router(dashboard_composition_router)
+app.include_router(onboarding_router)
+app.include_router(report_engine_router)
 app.include_router(workflow_router)
 app.include_router(ml_router)
 
@@ -417,6 +467,16 @@ app.include_router(studios_router)
 
 # Phase 16 — Smart Data Capture & Intelligent Document Processing
 app.include_router(capture_router)
+
+# Phase 11 — Background Processing & Job Queue
+app.include_router(jobs_router)
+register_builtin_handlers()
+
+# Phase 12 — File Storage Architecture
+app.include_router(storage_router)
+
+# Phase 18 — Production Monitoring
+app.include_router(phase18_monitoring_router)
 
 
 # ──────────────────────────────────────────────
@@ -519,40 +579,17 @@ async def detailed_health_check():
 
 
 @app.get("/metrics", tags=["System"])
-async def metrics():
-    """Expose basic platform metrics for monitoring.
+async def prometheus_metrics():
+    """Expose Prometheus-compatible metrics for scraping.
 
-    Returns counts for key entities. Intentionally public (no sensitive data).
+    Returns metrics in text exposition format with counters, histograms,
+    and gauges for HTTP requests, database queries, pipeline runs, errors,
+    session counts, and process uptime.
     """
-    from sqlalchemy import text
-
-    from shared.database import get_engine
-
-    metrics_data: dict[str, int] = {}
-    engine = get_engine()
-    try:
-        with engine.connect() as conn:
-            for table_name in [
-                "etl_pipelines",
-                "etl_jobs",
-                "ai_conversations",
-                "ai_messages",
-                "users",
-                "audit_logs",
-            ]:
-                try:
-                    result = conn.execute(text(f"SELECT COUNT(*) FROM {table_name}"))
-                    metrics_data[table_name] = result.scalar() or 0
-                except Exception:
-                    metrics_data[table_name] = -1
-    except Exception:
-        pass
-
-    return JSONResponse(
-        content={
-            "metrics": metrics_data,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-        }
+    from fastapi.responses import PlainTextResponse
+    return PlainTextResponse(
+        metrics_registry.render(),
+        media_type="text/plain; version=0.0.4; charset=utf-8",
     )
 
 
@@ -673,8 +710,13 @@ async def trigger_pipeline(
     def run_in_background():
         try:
             service.run_pipeline()
+            metrics_registry.record_pipeline_run(status="completed")
+            record_pipeline_run(status="completed")
         except Exception as e:
             logger.error(f"Background pipeline run failed: {e}")
+            metrics_registry.record_pipeline_run(status="failed")
+            record_pipeline_run(status="failed")
+            capture_exception(e)
 
     background_tasks.add_task(run_in_background)
 

@@ -83,7 +83,7 @@ async def role_hierarchy(
 
 @platform_router.get("/roles/permissions-matrix")
 async def permissions_matrix(
-    current_user: dict = Depends(require_permissions("roles.read")),
+    current_user: dict = Depends(require_permissions("role.read")),
 ):
     """Get the full permission matrix for all roles."""
     return success_response(PermissionMatrix.get_role_permissions_summary())

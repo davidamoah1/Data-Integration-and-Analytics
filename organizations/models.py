@@ -22,6 +22,8 @@ class Organization(Base):
     date_format = Column(String(32), nullable=False, default="YYYY-MM-DD")
     locale = Column(String(16), nullable=False, default="en")
     branding = Column(JSON, nullable=True)
+    industry = Column(String(100), nullable=True)
+    organization_type = Column(String(100), nullable=True)
     is_active = Column(Integer, nullable=False, default=1)
     is_deleted = Column(Integer, nullable=False, default=0)
     deleted_at = Column(TIMESTAMP, nullable=True)
@@ -68,6 +70,7 @@ class Team(Base):
     __tablename__ = "teams"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
+    organization_id = Column(BigInteger, nullable=False, index=True)
     department_id = Column(BigInteger, nullable=False, index=True)
     name = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)

@@ -1,19 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  Loader2, CheckCircle2, ArrowRight, ArrowLeft, Upload, SkipForward,
+  Loader2, CheckCircle2, ArrowRight, ArrowLeft,
   Building2, Heart, GraduationCap, Landmark, Store, Factory, Tractor,
-  Truck, Shield, BarChart3, FileText, Users, Sparkles,
+  Truck, Shield, Users, Sparkles,
 } from 'lucide-react';
 import { authService, type OnboardingPayload } from '@/services/auth/authService';
 import { useAuthStore } from '@/stores/authStore';
+import { onboardingService, type OnboardingStatus } from '@/services/onboarding/onboardingService';
+import { GuidedOnboarding } from '@/components/onboarding/GuidedOnboarding';
 import { Button } from '@/components/ui/Button';
-import { Select } from '@/components/ui/Select';
 import { toast } from '@/components/ui/Toaster';
 
-const STEPS = ['Welcome', 'Industry', 'Organization', 'Goal', 'Dataset', 'Done'];
+const STEPS = ['Industry', 'Organization', 'Goal', 'Setup'];
 
 const INDUSTRIES = [
   { key: 'Healthcare', icon: Heart, color: 'bg-red-500' },
@@ -35,14 +36,15 @@ const ORG_TYPES = [
 
 const GOALS = [
   { key: 'data_cleaning', label: 'Clean & Prepare Data', icon: Sparkles, desc: 'Automated data quality and transformation' },
-  { key: 'analytics', label: 'Analyze Data', icon: BarChart3, desc: 'Statistical analysis and insights' },
-  { key: 'reporting', label: 'Generate Reports', icon: FileText, desc: 'Automated reporting and dashboards' },
+  { key: 'analytics', label: 'Analyze Data', icon: Building2, desc: 'Statistical analysis and insights' },
+  { key: 'reporting', label: 'Generate Reports', icon: CheckCircle2, desc: 'Automated reporting and dashboards' },
   { key: 'collaboration', label: 'Team Collaboration', icon: Users, desc: 'Share and collaborate on data projects' },
 ];
 
 export default function OnboardingPage() {
   const router = useRouter();
   const { user } = useAuthStore();
+  const [phase, setPhase] = useState<'profile' | 'guided'>('profile');
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<OnboardingPayload>({
@@ -51,31 +53,46 @@ export default function OnboardingPage() {
     primary_goal: '',
   });
 
+  useEffect(() => {
+    async function check() {
+      try {
+        const existingUser = user as any;
+        if (existingUser?.industry && existingUser?.organization_type) {
+          setPhase('guided');
+        }
+      } catch {
+        // ignore
+      }
+    }
+    check();
+  }, [user]);
+
   const next = () => setStep((s) => Math.min(s + 1, STEPS.length - 1));
   const back = () => setStep((s) => Math.max(s - 1, 0));
 
-  const finish = async (skipDataset = false) => {
+  const finishProfile = async () => {
     setLoading(true);
     try {
-      await authService.completeOnboarding({
-        ...data,
-        skip_dataset: skipDataset,
-      });
-      toast.success('Welcome to DataFlow! Your workspace is ready.');
-      router.push('/dashboard');
+      await authService.completeOnboarding(data);
+      setPhase('guided');
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to complete onboarding');
+      toast.error(err instanceof Error ? err.message : 'Failed to save profile');
     } finally {
       setLoading(false);
     }
   };
 
   const canProceed = () => {
-    if (step === 1) return !!data.industry;
-    if (step === 2) return !!data.organization_type;
-    if (step === 3) return !!data.primary_goal;
+    if (step === 0) return !!data.industry;
+    if (step === 1) return !!data.organization_type;
+    if (step === 2) return !!data.primary_goal;
     return true;
   };
+
+  // Phase 2: Role-specific guided onboarding
+  if (phase === 'guided') {
+    return <GuidedOnboarding onComplete={() => router.push('/dashboard')} />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
@@ -101,28 +118,8 @@ export default function OnboardingPage() {
       </div>
 
       <div className="mx-auto max-w-3xl px-6 py-12">
-        {/* Step 0: Welcome */}
+        {/* Step 0: Industry */}
         {step === 0 && (
-          <div className="text-center">
-            <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg">
-              <Sparkles size={36} />
-            </div>
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
-              Welcome{user?.full_name ? `, ${user.full_name.split(' ')[0]}` : ''}! 👋
-            </h1>
-            <p className="mx-auto mt-4 max-w-lg text-lg text-slate-600 dark:text-slate-400">
-              Let&apos;s set up your workspace in a few quick steps. This helps us tailor DataFlow to your needs.
-            </p>
-            <div className="mt-8">
-              <Button size="lg" onClick={next} className="gap-2">
-                Get Started <ArrowRight size={18} />
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {/* Step 1: Industry */}
-        {step === 1 && (
           <div>
             <h2 className="mb-2 text-2xl font-bold text-slate-900 dark:text-slate-100">What industry are you in?</h2>
             <p className="mb-6 text-slate-500 dark:text-slate-400">Select the industry that best describes your work.</p>
@@ -147,8 +144,8 @@ export default function OnboardingPage() {
           </div>
         )}
 
-        {/* Step 2: Organization Type */}
-        {step === 2 && (
+        {/* Step 1: Organization Type */}
+        {step === 1 && (
           <div>
             <h2 className="mb-2 text-2xl font-bold text-slate-900 dark:text-slate-100">What type of organization?</h2>
             <p className="mb-6 text-slate-500 dark:text-slate-400">This helps us configure the right features for you.</p>
@@ -175,8 +172,8 @@ export default function OnboardingPage() {
           </div>
         )}
 
-        {/* Step 3: Primary Goal */}
-        {step === 3 && (
+        {/* Step 2: Primary Goal */}
+        {step === 2 && (
           <div>
             <h2 className="mb-2 text-2xl font-bold text-slate-900 dark:text-slate-100">What&apos;s your primary goal?</h2>
             <p className="mb-6 text-slate-500 dark:text-slate-400">What do you want to achieve with DataFlow first?</p>
@@ -206,90 +203,47 @@ export default function OnboardingPage() {
           </div>
         )}
 
-        {/* Step 4: Dataset Upload */}
-        {step === 4 && (
+        {/* Step 3: Preview & Continue to guided setup */}
+        {step === 3 && (
           <div className="text-center">
-            <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-blue-100 text-blue-600">
-              <Upload size={36} />
+            <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg">
+              <Sparkles size={36} />
             </div>
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Upload your first dataset</h2>
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Ready to set up your workspace!</h2>
             <p className="mx-auto mt-3 max-w-md text-slate-500 dark:text-slate-400">
-              Get started by uploading a CSV, Excel, or JSON file. You can also skip this step and upload later.
+              Based on your role, we&apos;ve prepared a guided setup. You&apos;ll get a blank workspace — no demo data.
             </p>
-            <label
-              className="mx-auto mt-8 flex max-w-md cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-white p-10 text-center transition-colors hover:border-blue-400 hover:bg-blue-50 dark:border-slate-600 dark:bg-slate-800 dark:hover:border-blue-500 dark:hover:bg-blue-950/30"
-              onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('border-blue-400', 'bg-blue-50'); }}
-              onDragLeave={(e) => { e.currentTarget.classList.remove('border-blue-400', 'bg-blue-50'); }}
-              onDrop={(e) => {
-                e.preventDefault();
-                e.currentTarget.classList.remove('border-blue-400', 'bg-blue-50');
-                const file = e.dataTransfer.files[0];
-                if (file) {
-                  toast.success(`File "${file.name}" selected! Click Continue to upload.`);
-                }
-              }}
-            >
-              <input
-                type="file"
-                accept=".csv,.xlsx,.xls,.json"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    toast.success(`File "${file.name}" selected! Click Continue to upload.`);
-                  }
-                }}
-              />
-              <Upload size={32} className="mx-auto mb-3 text-slate-400 dark:text-slate-500" />
-              <p className="text-sm text-slate-500 dark:text-slate-400">Drag and drop a file here, or click to browse</p>
-              <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">CSV, Excel, JSON — up to 50MB</p>
-            </label>
-            <div className="mt-6 flex justify-center gap-3">
-              <Button variant="outline" onClick={() => finish(true)} disabled={loading} className="gap-2">
-                <SkipForward size={16} /> Skip for now
-              </Button>
-              <Button onClick={() => finish(false)} disabled={loading} className="gap-2">
-                {loading ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
-                Continue to Dashboard
-              </Button>
+            <div className="mx-auto mt-6 max-w-sm rounded-xl border bg-white p-4 text-left dark:bg-slate-800">
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between"><span className="text-muted-foreground">Industry</span><span className="font-medium">{data.industry}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Organization</span><span className="font-medium">{data.organization_type}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Goal</span><span className="font-medium">{data.primary_goal?.replace(/_/g, ' ')}</span></div>
+              </div>
             </div>
-          </div>
-        )}
-
-        {/* Step 5: Done */}
-        {step === 5 && (
-          <div className="text-center">
-            <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-green-100 text-green-600">
-              <CheckCircle2 size={36} />
-            </div>
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">You&apos;re all set!</h2>
-            <p className="mx-auto mt-3 max-w-md text-slate-500 dark:text-slate-400">
-              Your workspace is configured and ready. Let&apos;s start exploring DataFlow.
-            </p>
             <div className="mt-8">
-              <Button size="lg" onClick={() => finish(true)} disabled={loading} className="gap-2">
+              <Button size="lg" onClick={finishProfile} disabled={loading} className="gap-2">
                 {loading ? <Loader2 size={18} className="animate-spin" /> : <ArrowRight size={18} />}
-                Open Dashboard
+                Start Guided Setup
               </Button>
             </div>
           </div>
         )}
 
         {/* Navigation buttons */}
-        {step > 0 && step < 4 && (
+        {step < 3 && (
           <div className="mt-8 flex items-center justify-between">
-            <Button variant="outline" onClick={back} className="gap-2">
-              <ArrowLeft size={16} /> Back
+            <Button variant="outline" onClick={back} disabled={step === 0} className="gap-2">
+              Back
             </Button>
             <Button onClick={next} disabled={!canProceed()} className="gap-2">
               Continue <ArrowRight size={16} />
             </Button>
           </div>
         )}
-        {step === 4 && (
+        {step === 3 && (
           <div className="mt-8 flex items-center justify-start">
             <Button variant="outline" onClick={back} className="gap-2">
-              <ArrowLeft size={16} /> Back
+              Back
             </Button>
           </div>
         )}

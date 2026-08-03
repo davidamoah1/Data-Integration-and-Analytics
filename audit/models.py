@@ -16,12 +16,17 @@ class AuditLog(Base):
     resource_id = Column(BigInteger, nullable=True)
     old_values = Column(JSON, nullable=True)
     new_values = Column(JSON, nullable=True)
+    audit_metadata = Column("metadata", JSON, nullable=True)
     ip_address = Column(String(45), nullable=True)
     user_agent = Column(String(500), nullable=True)
     request_id = Column(String(100), nullable=True)
     created_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
 
-    __table_args__ = (Index("idx_audit_org_created", "organization_id", "created_at"),)
+    __table_args__ = (
+        Index("idx_audit_org_created", "organization_id", "created_at"),
+        Index("idx_audit_action_resource", "action", "resource_type"),
+        Index("idx_audit_resource", "resource_type", "resource_id"),
+    )
 
 
 class SystemLog(Base):

@@ -347,10 +347,60 @@ BUSINESS_TYPES: list[DocumentTypeSpec] = [
     ),
 ]
 
+# ─── Generic Forms (cross-industry) ─────────────────────────────────────────
+
+FORM_TYPES: list[DocumentTypeSpec] = [
+    DocumentTypeSpec(
+        key="generic_form",
+        label="Generic Form",
+        industry="business",
+        keywords=["form", "application form", "registration form", "questionnaire"],
+        fields=[
+            FieldSpec("form_title", "Form Title", "text", False, ["form title", "title"]),
+            FieldSpec("applicant_name", "Applicant Name", "text", True, ["name", "applicant"]),
+            FieldSpec("date", "Date", "date", False, ["date"]),
+            FieldSpec("phone", "Phone", "phone", False, ["phone", "tel", "contact"]),
+            FieldSpec("email", "Email", "email", False, ["email", "e-mail"]),
+            FieldSpec("address", "Address", "text", False, ["address", "location"]),
+            FieldSpec("id_number", "ID Number", "text", False, ["id", "id number", "reference"]),
+            FieldSpec("signature", "Signature", "text", False, ["signature", "signed by"]),
+        ],
+    ),
+    DocumentTypeSpec(
+        key="survey_form",
+        label="Survey Form",
+        industry="business",
+        keywords=["survey", "questionnaire", "feedback form", "response"],
+        fields=[
+            FieldSpec("respondent_name", "Respondent Name", "text", False, ["name", "respondent"]),
+            FieldSpec("date", "Date", "date", False, ["date"]),
+            FieldSpec("location", "Location", "text", False, ["location", "area"]),
+            FieldSpec("response_1", "Response 1", "text", False, ["q1", "response 1"]),
+            FieldSpec("response_2", "Response 2", "text", False, ["q2", "response 2"]),
+            FieldSpec("response_3", "Response 3", "text", False, ["q3", "response 3"]),
+        ],
+    ),
+    DocumentTypeSpec(
+        key="application_form",
+        label="Application Form",
+        industry="business",
+        keywords=["application form", "apply", "applicant details"],
+        fields=[
+            FieldSpec("applicant_name", "Applicant Name", "text", True, ["name", "applicant"]),
+            FieldSpec("date_of_birth", "Date of Birth", "date", False, ["dob", "date of birth"]),
+            FieldSpec("phone", "Phone", "phone", False, ["phone", "tel", "contact"]),
+            FieldSpec("email", "Email", "email", False, ["email", "e-mail"]),
+            FieldSpec("address", "Address", "text", False, ["address"]),
+            FieldSpec("id_number", "ID Number", "text", False, ["id", "id number"]),
+            FieldSpec("application_date", "Application Date", "date", False, ["application date", "date"]),
+        ],
+    ),
+]
+
 # ─── Combined registry ──────────────────────────────────────────────────────
 
 ALL_DOCUMENT_TYPES: list[DocumentTypeSpec] = (
-    HEALTHCARE_TYPES + EDUCATION_TYPES + GOVERNMENT_TYPES + BUSINESS_TYPES
+    HEALTHCARE_TYPES + EDUCATION_TYPES + GOVERNMENT_TYPES + BUSINESS_TYPES + FORM_TYPES
 )
 
 DOCUMENT_TYPES_BY_KEY: dict[str, DocumentTypeSpec] = {d.key: d for d in ALL_DOCUMENT_TYPES}

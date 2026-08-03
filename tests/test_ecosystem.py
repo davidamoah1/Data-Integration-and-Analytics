@@ -53,7 +53,7 @@ def client():
 @pytest.fixture(scope="module")
 def auth_token(client):
     """Get an auth token for testing."""
-    resp = client.post("/auth/login", json={
+    resp = client.post("/api/auth/login", json={
         "email": "admin@dataflow.io",
         "password": "Admin@12345",
     })

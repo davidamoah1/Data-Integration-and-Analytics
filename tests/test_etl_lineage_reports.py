@@ -15,6 +15,7 @@ class TestLineageTracker:
             transformation="rename, filter",
             destination_name="sales",
             destination_type="database",
+            organization_id=1,
         )
         assert entry.id is not None
         assert entry.source_name == "test.csv"
@@ -26,19 +27,21 @@ class TestLineageTracker:
             source_type="csv",
             destination_name="table_a",
             destination_type="database",
+            organization_id=1,
         )
         tracker.record(
             source_name="b.csv",
             source_type="csv",
             destination_name="table_b",
             destination_type="database",
+            organization_id=1,
         )
         entries = tracker.get_lineage()
         assert len(entries) >= 2
 
     def test_get_lineage_by_source(self, db_session):
         tracker = LineageTracker(db_session)
-        tracker.record(source_name="unique.csv", source_type="csv")
+        tracker.record(source_name="unique.csv", source_type="csv", organization_id=1)
         entries = tracker.get_lineage(source_name="unique.csv")
         assert all(e["source_name"] == "unique.csv" for e in entries)
 
@@ -50,6 +53,7 @@ class TestLineageTracker:
             destination_name="dest_table",
             destination_type="database",
             transformation="rename",
+            organization_id=1,
         )
         graph = tracker.build_graph()
         assert "nodes" in graph

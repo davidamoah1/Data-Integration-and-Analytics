@@ -51,12 +51,14 @@ class WorkflowEngine:
         trigger_type: str = "manual",
         trigger_config: dict | None = None,
         user_id: int | None = None,
+        organization_id: int | None = None,
     ) -> dict:
         """Create a new AI workflow."""
         workflow = AIWorkflow(
             name=name,
             description=description,
             user_id=user_id,
+            organization_id=organization_id,
             trigger_type=trigger_type,
             trigger_config=trigger_config,
             steps=steps,

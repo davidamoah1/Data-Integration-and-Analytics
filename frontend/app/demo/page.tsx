@@ -66,7 +66,7 @@ export default function DemoPage() {
             Book a <span className="gradient-text">Demo</span>
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-600">
-            See how DataFlow can transform your organization's data workflow — from collection to decision-making. Our team will tailor the demo to your industry and use case.
+            See how DataFlow can transform your organization&apos;s data workflow — from collection to decision-making. Our team will tailor the demo to your industry and use case.
           </p>
         </div>
       </section>

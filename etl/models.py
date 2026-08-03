@@ -26,6 +26,7 @@ class ETLPipeline(Base):
     __tablename__ = "etl_pipelines"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
+    organization_id = Column(BigInteger, nullable=False, index=True)
     name = Column(String(200), nullable=False, index=True)
     description = Column(Text, nullable=True)
     status = Column(String(20), nullable=False, default="active")  # active, inactive, archived
@@ -79,6 +80,7 @@ class ETLJob(Base):
     __tablename__ = "etl_jobs"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
+    organization_id = Column(BigInteger, nullable=False, index=True)
     pipeline_id = Column(BigInteger, nullable=True, index=True)
     job_type = Column(String(50), nullable=False)  # pipeline, import, export, profile, quality
     status = Column(
@@ -111,6 +113,7 @@ class ETLImportTemplate(Base):
     __tablename__ = "etl_import_templates"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
+    organization_id = Column(BigInteger, nullable=False, index=True)
     name = Column(String(200), nullable=False)
     source_type = Column(String(50), nullable=False)  # csv, excel, json, xml, mysql, api
     source_config = Column(JSON, nullable=False)  # connector-specific config
@@ -128,6 +131,7 @@ class ETLDataProfile(Base):
     __tablename__ = "etl_data_profiles"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
+    organization_id = Column(BigInteger, nullable=False, index=True)
     job_id = Column(BigInteger, nullable=True, index=True)
     source_name = Column(String(255), nullable=False)
     source_type = Column(String(50), nullable=False)
@@ -144,6 +148,7 @@ class ETLQualityReport(Base):
     __tablename__ = "etl_quality_reports"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
+    organization_id = Column(BigInteger, nullable=False, index=True)
     job_id = Column(BigInteger, nullable=True, index=True)
     source_name = Column(String(255), nullable=False)
     overall_score = Column(Integer, nullable=False, default=0)  # 0-100
@@ -161,6 +166,7 @@ class ETLDataLineage(Base):
     __tablename__ = "etl_data_lineage"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
+    organization_id = Column(BigInteger, nullable=False, index=True)
     job_id = Column(BigInteger, nullable=True, index=True)
     pipeline_id = Column(BigInteger, nullable=True, index=True)
     source_name = Column(String(255), nullable=False)
@@ -179,6 +185,7 @@ class ETLSchedule(Base):
     __tablename__ = "etl_schedules"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
+    organization_id = Column(BigInteger, nullable=False, index=True)
     pipeline_id = Column(BigInteger, nullable=False, index=True)
     schedule_type = Column(String(30), nullable=False)  # once, hourly, daily, weekly, monthly, cron
     cron_expr = Column(String(100), nullable=True)  # for custom cron
@@ -196,6 +203,7 @@ class ETLTransformation(Base):
     __tablename__ = "etl_transformations"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
+    organization_id = Column(BigInteger, nullable=False, index=True)
     name = Column(String(200), nullable=False)
     description = Column(Text, nullable=True)
     transformation_type = Column(

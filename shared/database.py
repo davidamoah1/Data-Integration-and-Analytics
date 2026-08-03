@@ -4,8 +4,13 @@ All ORM models across the platform import Base from here to ensure
 a single metadata registry for create_all and Alembic autogenerate.
 """
 
-from sqlalchemy import BigInteger, Integer, create_engine
+import logging
+import time
+
+from sqlalchemy import BigInteger, Integer, create_engine, event
 from sqlalchemy.orm import declarative_base, sessionmaker
+
+logger = logging.getLogger("database")
 
 Base = declarative_base()
 
@@ -15,6 +20,27 @@ BigInt = BigInteger().with_variant(Integer, "sqlite")
 _engine = None
 _tables_initialized = False
 _default_data_initialized = False
+
+
+def _attach_slow_query_listener(engine, threshold_ms: int):
+    """Attach a before/after cursor event listener that logs slow queries."""
+
+    @event.listens_for(engine, "before_cursor_execute")
+    def _before_cursor_execute(conn, cursor, statement, parameters, context, executemany):
+        context._query_start_time = time.perf_counter()
+
+    @event.listens_for(engine, "after_cursor_execute")
+    def _after_cursor_execute(conn, cursor, statement, parameters, context, executemany):
+        start = getattr(context, "_query_start_time", None)
+        if start is None:
+            return
+        duration_ms = (time.perf_counter() - start) * 1000
+        if duration_ms >= threshold_ms:
+            stmt_preview = statement[:200].replace("\n", " ")
+            logger.warning(
+                "Slow query %.1fms (threshold %dms): %s",
+                duration_ms, threshold_ms, stmt_preview,
+            )
 
 
 def ensure_tables(engine):
@@ -65,6 +91,11 @@ def get_engine(**kwargs):
         raise RuntimeError("DB_URL is not configured. Set DB_TYPE and connection variables.")
 
     _engine = create_engine(config.DB_URL, **defaults)
+
+    # Attach slow query logging
+    threshold = getattr(config, "SLOW_QUERY_THRESHOLD_MS", 500)
+    _attach_slow_query_listener(_engine, threshold)
+
     return _engine
 
 

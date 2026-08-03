@@ -124,13 +124,15 @@ class AIMemory:
                 self.db.commit()
 
     def get_conversations(
-        self, user_id: int, assistant_type: str | None = None, limit: int = 50
+        self, user_id: int, assistant_type: str | None = None, organization_id: int | None = None, limit: int = 50
     ) -> list[dict]:
         """List conversations for a user."""
         query = self.db.query(AIConversation).filter(
             AIConversation.user_id == user_id,
             AIConversation.is_active.is_(True),
         )
+        if organization_id is not None:
+            query = query.filter(AIConversation.organization_id == organization_id)
         if assistant_type:
             query = query.filter(AIConversation.assistant_type == assistant_type)
         conversations = query.order_by(AIConversation.updated_at.desc()).limit(limit).all()

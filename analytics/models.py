@@ -34,6 +34,7 @@ class DashboardWidget(Base):
     __tablename__ = "analytics_dashboard_widgets"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
+    organization_id = Column(BigInteger, nullable=False, index=True)
     dashboard_id = Column(BigInteger, nullable=False, index=True)
     widget_type = Column(String(50), nullable=False)
     title = Column(String(255), nullable=False)
@@ -48,6 +49,7 @@ class DashboardFavorite(Base):
     __tablename__ = "analytics_dashboard_favorites"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
+    organization_id = Column(BigInteger, nullable=False, index=True)
     dashboard_id = Column(BigInteger, nullable=False, index=True)
     user_id = Column(BigInteger, nullable=False, index=True)
     created_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)

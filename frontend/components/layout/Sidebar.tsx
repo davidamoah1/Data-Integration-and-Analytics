@@ -15,7 +15,8 @@ export function Sidebar() {
     ? buildNavigation({
         roles: user.roles,
         permissions: user.permissions,
-        organizationType: user.organization_name,
+        organizationType: user.organization_type || user.organization_name,
+        industry: user.industry,
         departmentId: user.department_id,
         workspaceType: user.organization_id ? 'organization' : 'personal',
       })

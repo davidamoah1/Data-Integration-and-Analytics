@@ -37,6 +37,7 @@ class AnomalyDetectionEngine:
         date_column: str,
         sensitivity: float = AI_ANOMALY_SENSITIVITY,
         user_id: int | None = None,
+        organization_id: int | None = None,
     ) -> dict:
         """Detect anomalies in the given data.
 
@@ -92,6 +93,7 @@ class AnomalyDetectionEngine:
                 deviation_percentage=alert_data.get("deviation_percentage"),
                 context_data=alert_data.get("context_data"),
                 user_id=user_id,
+                organization_id=organization_id,
             )
             self.db.add(alert)
         self.db.commit()

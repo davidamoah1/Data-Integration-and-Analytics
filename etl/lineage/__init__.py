@@ -21,10 +21,12 @@ class LineageTracker:
         job_id: int | None = None,
         pipeline_id: int | None = None,
         user_id: int | None = None,
+        organization_id: int | None = None,
         extra_data: dict | None = None,
     ):
         """Record a single lineage entry."""
         entry = ETLDataLineage(
+            organization_id=organization_id,
             job_id=job_id,
             pipeline_id=pipeline_id,
             source_name=source_name,
@@ -40,10 +42,16 @@ class LineageTracker:
         return entry
 
     def get_lineage(
-        self, source_name: str | None = None, job_id: int | None = None, limit: int = 100
+        self,
+        source_name: str | None = None,
+        job_id: int | None = None,
+        organization_id: int | None = None,
+        limit: int = 100,
     ) -> list[dict]:
         """Retrieve lineage entries."""
         query = self.db.query(ETLDataLineage)
+        if organization_id is not None:
+            query = query.filter(ETLDataLineage.organization_id == organization_id)
         if source_name:
             query = query.filter(ETLDataLineage.source_name == source_name)
         if job_id:
@@ -66,9 +74,9 @@ class LineageTracker:
             for e in entries
         ]
 
-    def build_graph(self, job_id: int | None = None) -> dict:
+    def build_graph(self, job_id: int | None = None, organization_id: int | None = None) -> dict:
         """Build a lineage graph (nodes + edges) for visualization."""
-        entries = self.get_lineage(job_id=job_id, limit=1000)
+        entries = self.get_lineage(job_id=job_id, organization_id=organization_id, limit=1000)
         nodes = set()
         edges = []
         for e in entries:

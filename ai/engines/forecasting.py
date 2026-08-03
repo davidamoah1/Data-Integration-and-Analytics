@@ -41,6 +41,7 @@ class ForecastingEngine:
         confidence_level: float = AI_FORECAST_CONFIDENCE_LEVEL,
         method: str = "auto",
         user_id: int | None = None,
+        organization_id: int | None = None,
     ) -> dict:
         """Generate a forecast for the given data.
 
@@ -96,6 +97,7 @@ class ForecastingEngine:
             confidence_level=confidence_level,
             input_summary=input_summary,
             user_id=user_id,
+            organization_id=organization_id,
         )
         self.db.add(forecast)
         self.db.commit()

@@ -39,9 +39,11 @@ class PipelineBuilder:
         description: str = "",
         steps: list[dict] = None,
         created_by: int | None = None,
+        organization_id: int | None = None,
     ) -> ETLPipeline:
         """Create a new pipeline with an initial version."""
         pipeline = ETLPipeline(
+            organization_id=organization_id,
             name=name,
             description=description,
             status="active",
@@ -198,7 +200,11 @@ class PipelineExecutor:
         self.lineage = LineageTracker(db)
 
     def execute(
-        self, pipeline_id: int, user_id: int | None = None, trigger_type: str = "manual"
+        self,
+        pipeline_id: int,
+        user_id: int | None = None,
+        trigger_type: str = "manual",
+        organization_id: int | None = None,
     ) -> dict:
         """Execute a pipeline by ID.
 
@@ -225,6 +231,7 @@ class PipelineExecutor:
 
         # Create job record
         job = ETLJob(
+            organization_id=organization_id if organization_id is not None else pipeline.organization_id,
             pipeline_id=pipeline_id,
             job_type="pipeline",
             status="running",
@@ -255,7 +262,9 @@ class PipelineExecutor:
 
         try:
             for step_config in steps:
-                step_record = self._execute_step(job.id, step_config, df, user_id, pipeline_id)
+                step_record = self._execute_step(
+                    job.id, step_config, df, user_id, pipeline_id, job.organization_id
+                )
                 step_records.append(step_record)
                 if step_config["type"] == "extract" and step_record["status"] == "completed":
                     df = step_record.get("data")
@@ -308,6 +317,7 @@ class PipelineExecutor:
         df: pd.DataFrame | None,
         user_id: int | None,
         pipeline_id: int,
+        organization_id: int | None = None,
     ) -> dict:
         """Execute a single pipeline step."""
         step_type = config["type"]
@@ -347,6 +357,7 @@ class PipelineExecutor:
                     job_id=job_id,
                     pipeline_id=pipeline_id,
                     user_id=user_id,
+                    organization_id=organization_id,
                 )
 
             elif step_type == "validate":
@@ -355,6 +366,7 @@ class PipelineExecutor:
                     result["quality_result"] = quality_result
                     result["rows_processed"] = len(df)
                     report = ETLQualityReport(
+                        organization_id=organization_id,
                         job_id=job_id,
                         source_name=config.get("source_name", "pipeline"),
                         overall_score=quality_result["overall_score"],
@@ -388,6 +400,7 @@ class PipelineExecutor:
                         job_id=job_id,
                         pipeline_id=pipeline_id,
                         user_id=user_id,
+                        organization_id=organization_id,
                     )
 
             elif step_type == "profile":
@@ -396,6 +409,7 @@ class PipelineExecutor:
                     result["profile"] = profile
                     result["rows_processed"] = len(df)
                     profile_rec = ETLDataProfile(
+                        organization_id=organization_id,
                         job_id=job_id,
                         source_name=config.get("source_name", "pipeline"),
                         source_type="pipeline",
@@ -425,6 +439,7 @@ class PipelineExecutor:
                         destination_type="database",
                         job_id=job_id,
                         pipeline_id=pipeline_id,
+                        organization_id=organization_id,
                         user_id=user_id,
                     )
 
@@ -477,8 +492,11 @@ class JobMonitor:
         jobs = query.order_by(ETLJob.created_at.desc()).limit(limit).all()
         return [self._job_to_dict(j) for j in jobs]
 
-    def get_stats(self) -> dict:
-        jobs = self.db.query(ETLJob).all()
+    def get_stats(self, organization_id: int | None = None) -> dict:
+        query = self.db.query(ETLJob)
+        if organization_id is not None:
+            query = query.filter(ETLJob.organization_id == organization_id)
+        jobs = query.all()
         total = len(jobs)
         running = sum(1 for j in jobs if j.status == "running")
         completed = sum(1 for j in jobs if j.status == "completed")

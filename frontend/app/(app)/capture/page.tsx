@@ -13,8 +13,10 @@ import {
   BarChart3,
   Settings,
   ArrowRight,
+  ListChecks,
 } from "lucide-react";
 import { captureService, type CaptureAnalyticsSummary, type CaptureEngineStatus } from "@/services/capture/captureService";
+import { CaptureWorkflowTracker } from "@/components/capture/CaptureWorkflowTracker";
 import { Button } from "@/components/ui/Button";
 
 const STATUS_COLORS: Record<string, string> = {
@@ -93,8 +95,13 @@ export default function CaptureHubPage() {
               ))}
         </div>
 
+        {/* Pipeline tracker */}
+        <div className="mb-8">
+          <CaptureWorkflowTracker />
+        </div>
+
         {/* Action cards */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3 lg:grid-cols-4">
           <Link href="/capture/upload" className="group">
             <div className="flex h-full flex-col rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
               <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
@@ -135,6 +142,21 @@ export default function CaptureHubPage() {
                 View capture statistics, document type breakdowns, confidence trends, and processing performance.
               </p>
               <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-blue-600 group-hover:gap-2 transition-all">
+                View <ArrowRight size={16} />
+              </span>
+            </div>
+          </Link>
+
+          <Link href="/jobs" className="group">
+            <div className="flex h-full flex-col rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+              <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
+                <ListChecks size={24} />
+              </div>
+              <h3 className="text-lg font-semibold text-slate-900">Background Jobs</h3>
+              <p className="mt-1 flex-1 text-sm text-slate-500">
+                Monitor long-running tasks: ETL pipelines, OCR batch processing, report generation, and large data imports.
+              </p>
+              <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-purple-600 group-hover:gap-2 transition-all">
                 View <ArrowRight size={16} />
               </span>
             </div>

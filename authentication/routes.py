@@ -9,29 +9,52 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session as DbSession
 
 from authentication.schemas import (
+    AccountStatusUpdate,
     ChangePasswordRequest,
     ForgotPasswordRequest,
     LoginRequest,
+    MFADisableRequest,
+    MFALoginRequest,
+    MFASetupResponse,
+    MFAVerifyRequest,
     OnboardingRequest,
+    PermissionCheckRequest,
     ProfileUpdate,
     RefreshTokenRequest,
+    ResendVerificationRequest,
     ResetPasswordRequest,
     RoleCreate,
     RoleUpdate,
+    ScopedRoleAssign,
+    SSOCallbackRequest,
+    SSOConnectionCreate,
+    SSOInitiateRequest,
     SignupRequest,
     UserCreate,
     UserUpdate,
     VerifyEmailRequest,
 )
 from authentication.services import AuthService, RoleService, UserService
+from authentication.mfa_service import MFAService
+from authentication.sso_service import SSOService
+from authentication.models import ActivityLog
+from audit.models import AuditLog
+from audit.service import log_audit_event
 from shared.database import get_db
 from shared.dependencies import get_current_user, require_permissions
+from shared.security import create_access_token, create_refresh_token, verify_password
 from shared.tenant import get_current_organization_id, is_super_admin
 from datetime import datetime, timedelta, timezone
 
 from shared.response import success_response
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
+
+# MFA router
+mfa_router = APIRouter(prefix="/api/auth/mfa", tags=["MFA"])
+
+# SSO router
+sso_router = APIRouter(prefix="/api/auth/sso", tags=["SSO"])
 
 
 # --- Authentication endpoints ------------------------------------------------
@@ -300,6 +323,296 @@ async def verify_email(
     return success_response(None, "Email verified successfully")
 
 
+@router.post("/resend-verification")
+async def resend_verification(
+    request: ResendVerificationRequest,
+    db: DbSession = Depends(get_db),
+):
+    """Resend email verification token."""
+    service = AuthService(db)
+    service.resend_email_verification(request.email)
+    return success_response(None, "If the email exists and is not verified, a verification link has been sent")
+
+
+@router.post("/activate/{user_id}")
+async def activate_account(
+    user_id: int,
+    request: AccountStatusUpdate,
+    current_user: dict = Depends(require_permissions("users.edit")),
+    db: DbSession = Depends(get_db),
+):
+    """Activate a deactivated user account (requires users.edit permission)."""
+    service = AuthService(db)
+    service.activate_account(user_id, reason=request.reason, activated_by=current_user["id"])
+    return success_response(None, "Account activated")
+
+
+@router.post("/deactivate/{user_id}")
+async def deactivate_account(
+    user_id: int,
+    request: AccountStatusUpdate,
+    current_user: dict = Depends(require_permissions("users.edit")),
+    db: DbSession = Depends(get_db),
+):
+    """Deactivate a user account (requires users.edit permission)."""
+    service = AuthService(db)
+    service.deactivate_account(user_id, reason=request.reason, deactivated_by=current_user["id"])
+    return success_response(None, "Account deactivated")
+
+
+# --- MFA endpoints ----------------------------------------------------------
+
+
+@mfa_router.get("/status")
+async def get_mfa_status(
+    current_user: dict = Depends(get_current_user),
+    db: DbSession = Depends(get_db),
+):
+    """Get MFA status for the current user."""
+    service = MFAService(db)
+    status = service.get_status(current_user["id"])
+    return success_response(status)
+
+
+@mfa_router.post("/setup")
+async def setup_mfa(
+    current_user: dict = Depends(get_current_user),
+    db: DbSession = Depends(get_db),
+):
+    """Begin MFA setup — generates TOTP secret and backup codes."""
+    service = MFAService(db)
+    result = service.setup(current_user["id"])
+    return success_response(result, "MFA setup initiated. Verify with a code to enable.")
+
+
+@mfa_router.post("/verify")
+async def verify_mfa(
+    request: MFAVerifyRequest,
+    current_user: dict = Depends(get_current_user),
+    db: DbSession = Depends(get_db),
+):
+    """Verify MFA setup code and enable MFA."""
+    service = MFAService(db)
+    service.verify_and_enable(current_user["id"], request.code)
+    return success_response(None, "MFA enabled successfully")
+
+
+@mfa_router.post("/disable")
+async def disable_mfa(
+    request: MFADisableRequest,
+    current_user: dict = Depends(get_current_user),
+    db: DbSession = Depends(get_db),
+):
+    """Disable MFA for the current user. Requires a valid TOTP code."""
+    service = MFAService(db)
+    service.disable(current_user["id"], request.code)
+    return success_response(None, "MFA disabled")
+
+
+@mfa_router.post("/login-challenge")
+async def mfa_login_challenge(
+    request: LoginRequest,
+    db: DbSession = Depends(get_db),
+):
+    """Step 1 of MFA login: verify credentials, return MFA challenge if enabled.
+
+    If MFA is not enabled, returns tokens directly (standard login).
+    """
+    auth_service = AuthService(db)
+    mfa_service = MFAService(db)
+
+    # First verify credentials without issuing tokens
+    user = auth_service.user_repo.get_by_email(request.email)
+    if not user or not user.is_active:
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    if auth_service.user_repo.is_locked(user.id):
+        raise HTTPException(status_code=423, detail="Account is locked")
+    if not verify_password(request.password, user.password_hash):
+        count = auth_service.user_repo.increment_failed_login(user.id)
+        db.commit()
+        if count >= 5:
+            raise HTTPException(status_code=423, detail="Account is locked")
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+
+    # Check if MFA is enabled
+    if mfa_service.is_mfa_enabled(user.id):
+        challenge_token = mfa_service.create_challenge(user.id)
+        return success_response({
+            "mfa_required": True,
+            "challenge_token": challenge_token,
+            "method": "totp",
+        }, "MFA verification required")
+
+    # MFA not enabled — proceed with standard login
+    result = auth_service.login(request, ip=None, user_agent=None)
+    result["mfa_required"] = False
+    return success_response(result, "Login successful")
+
+
+@mfa_router.post("/login-verify")
+async def mfa_login_verify(
+    request: MFALoginRequest,
+    req: Request,
+    db: DbSession = Depends(get_db),
+):
+    """Step 2 of MFA login: verify TOTP code and issue tokens."""
+    mfa_service = MFAService(db)
+    auth_service = AuthService(db)
+
+    result = mfa_service.verify_challenge(request.challenge_token, request.code)
+    user_id = result["user_id"]
+
+    # Reset failed logins and update last login
+    auth_service.user_repo.reset_failed_logins(user_id)
+    auth_service.user_repo.update_last_login(user_id)
+
+    # Get roles and permissions
+    role_names = auth_service.user_role_repo.get_roles_for_user(user_id)
+    permission_names = auth_service.user_role_repo.get_all_permissions_for_user(user_id)
+    user = auth_service.user_repo.get_by_id(user_id)
+
+    ip = req.client.host if req.client else None
+    ua = req.headers.get("user-agent")
+
+    # Create tokens
+    access_token = create_access_token(
+        subject=str(user_id),
+        extra_claims={
+            "email": user.email,
+            "roles": role_names,
+            "permissions": permission_names,
+            "org_id": user.organization_id,
+        },
+    )
+    refresh_token = create_refresh_token(subject=str(user_id))
+
+    # Store session
+    from authentication.models import Session as UserSession
+    session = UserSession(
+        user_id=user_id,
+        refresh_token=refresh_token,
+        ip_address=ip,
+        user_agent=ua,
+        device=auth_service._parse_device(ua),
+        expires_at=datetime.now(timezone.utc) + timedelta(days=7),
+    )
+    auth_service.session_repo.create(session)
+
+    # Log activity
+    auth_service.activity_repo.create(
+        ActivityLog(
+            user_id=user_id,
+            action="login_mfa",
+            ip_address=ip,
+            user_agent=ua,
+        )
+    )
+
+    db.commit()
+
+    return success_response({
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+        "expires_in": 30 * 60,
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "full_name": user.full_name,
+            "roles": role_names,
+            "permissions": permission_names,
+        },
+    }, "Login successful")
+
+
+# --- SSO endpoints ----------------------------------------------------------
+
+
+@sso_router.get("/providers")
+async def list_sso_providers(
+    current_user: dict = Depends(get_current_user),
+    db: DbSession = Depends(get_db),
+):
+    """List available SSO providers for the user's organization."""
+    service = SSOService(db)
+    org_id = current_user.get("org_id")
+    if not org_id:
+        return success_response([], "No organization configured")
+    providers = service.list_connections(org_id)
+    return success_response(providers)
+
+
+@sso_router.post("/initiate")
+async def initiate_sso(
+    request: SSOInitiateRequest,
+    db: DbSession = Depends(get_db),
+):
+    """Initiate SSO login flow."""
+    service = SSOService(db)
+    result = service.initiate(request.provider, request.redirect_url)
+    return success_response(result, "SSO flow initiated")
+
+
+@sso_router.post("/callback")
+async def sso_callback(
+    request: SSOCallbackRequest,
+    db: DbSession = Depends(get_db),
+):
+    """Handle SSO provider callback."""
+    service = SSOService(db)
+    result = service.handle_callback(
+        provider=request.provider,
+        code=request.code,
+        state=request.state,
+        saml_response=request.saml_response,
+    )
+    return success_response(result, "SSO login successful")
+
+
+@sso_router.post("/connections")
+async def create_sso_connection(
+    request: SSOConnectionCreate,
+    current_user: dict = Depends(require_permissions("organization.manage")),
+    db: DbSession = Depends(get_db),
+):
+    """Configure an SSO provider for the organization."""
+    service = SSOService(db)
+    org_id = get_current_organization_id(current_user, db)
+    conn = service.create_connection(
+        org_id=org_id,
+        provider=request.provider,
+        client_id=request.client_id,
+        client_secret=request.client_secret,
+        metadata_url=request.metadata_url,
+        scopes=request.scopes,
+        field_mapping=request.field_mapping,
+    )
+    return success_response(conn, "SSO connection created")
+
+
+@sso_router.get("/identities")
+async def list_sso_identities(
+    current_user: dict = Depends(get_current_user),
+    db: DbSession = Depends(get_db),
+):
+    """List SSO identities linked to the current user."""
+    service = SSOService(db)
+    identities = service.get_user_sso_identities(current_user["id"])
+    return success_response(identities)
+
+
+@sso_router.delete("/identities/{provider}")
+async def unlink_sso_identity(
+    provider: str,
+    current_user: dict = Depends(get_current_user),
+    db: DbSession = Depends(get_db),
+):
+    """Unlink an SSO identity from the current user."""
+    service = SSOService(db)
+    service.unlink_identity(current_user["id"], provider)
+    return success_response(None, "SSO identity unlinked")
+
+
 @router.get("/onboarding-status")
 async def get_onboarding_status(
     current_user: dict = Depends(get_current_user),
@@ -380,6 +693,394 @@ async def update_profile(
     service = AuthService(db)
     profile = service.update_profile(current_user["id"], request)
     return success_response(profile, "Profile updated")
+
+
+@router.get("/navigation")
+async def get_navigation(
+    current_user: dict = Depends(get_current_user),
+    db: DbSession = Depends(get_db),
+):
+    """Get role-aware navigation configuration for the current user.
+
+    Returns navigation groups with items filtered by:
+    - Role (platform owner, org admin, analyst, researcher, data entry, viewer)
+    - Permissions
+    - Organization type and industry
+    - Workspace type (organization vs personal)
+    """
+    service = AuthService(db)
+    profile = service.get_profile(current_user["id"])
+
+    roles = profile.get("roles", [])
+    permissions = profile.get("permissions", [])
+    org_type = profile.get("organization_type")
+    industry = profile.get("industry")
+    org_id = profile.get("organization_id")
+    dept_id = profile.get("department_id")
+
+    is_super_admin = "super_admin" in roles or "platform_owner" in roles
+
+    ROLE_NAVIGATION: dict[str, dict] = {
+        "super_admin": {
+            "purpose": "Operate the platform",
+            "groups": [
+                {
+                    "label": "Platform",
+                    "order": 0,
+                    "items": [
+                        {"label": "Dashboard", "href": "/dashboard", "icon": "LayoutDashboard", "order": 0},
+                        {"label": "Organizations", "href": "/admin-portal/organizations", "icon": "Building2", "order": 1},
+                        {"label": "Platform Analytics", "href": "/admin-portal/analytics", "icon": "TrendingUp", "order": 2},
+                        {"label": "Monitoring", "href": "/admin-portal/monitoring", "icon": "Activity", "order": 3},
+                        {"label": "Security", "href": "/admin-portal/security", "icon": "Shield", "order": 4},
+                    ],
+                },
+                {
+                    "label": "Administration",
+                    "order": 1,
+                    "items": [
+                        {"label": "Admin Portal", "href": "/admin-portal", "icon": "Crown", "order": 0},
+                        {"label": "Members", "href": "/admin", "icon": "Users", "order": 1},
+                        {"label": "Audit Logs", "href": "/audit", "icon": "ScrollText", "order": 2},
+                        {"label": "Feature Flags", "href": "/admin-portal/feature-flags", "icon": "Zap", "order": 3},
+                        {"label": "Platform Settings", "href": "/admin-portal/settings", "icon": "Server", "order": 4},
+                    ],
+                },
+                {
+                    "label": "Platform Tools",
+                    "order": 2,
+                    "items": [
+                        {"label": "Studios", "href": "/studios", "icon": "Sparkles", "order": 0},
+                        {"label": "Templates", "href": "/templates", "icon": "LayoutTemplate", "order": 1},
+                        {"label": "Connectors", "href": "/connectors", "icon": "Zap", "order": 2},
+                        {"label": "Marketplace", "href": "/marketplace", "icon": "Package", "order": 3},
+                        {"label": "API Keys", "href": "/api-keys", "icon": "Key", "order": 4},
+                        {"label": "Webhooks", "href": "/webhooks", "icon": "Webhook", "order": 5},
+                        {"label": "Subscriptions", "href": "/admin-portal/subscriptions", "icon": "CreditCard", "order": 6},
+                        {"label": "Billing", "href": "/billing", "icon": "CreditCard", "order": 7},
+                    ],
+                },
+                {
+                    "label": "System",
+                    "order": 3,
+                    "items": [
+                        {"label": "Notifications", "href": "/notifications", "icon": "Bell", "order": 0},
+                        {"label": "Settings", "href": "/settings", "icon": "Settings", "order": 1},
+                    ],
+                },
+            ],
+        },
+        "org_owner": {
+            "purpose": "Own and operate their organization",
+            "groups": [
+                {
+                    "label": "Overview",
+                    "order": 0,
+                    "items": [
+                        {"label": "Dashboard", "href": "/dashboard", "icon": "LayoutDashboard", "order": 0},
+                        {"label": "Dashboards", "href": "/dashboard", "icon": "LayoutDashboard", "permission": "dashboard.view", "order": 1},
+                        {"label": "Studios", "href": "/studios", "icon": "Sparkles", "order": 2},
+                        {"label": "Templates", "href": "/templates", "icon": "LayoutTemplate", "order": 3},
+                    ],
+                },
+                {
+                    "label": "Data",
+                    "order": 1,
+                    "items": [
+                        {"label": "Smart Data Capture", "href": "/capture", "icon": "ScanLine", "order": 0},
+                        {"label": "Datasets", "href": "/datasets", "icon": "Database", "permission": "datasets.view", "order": 1},
+                        {"label": "Analytics", "href": "/analytics", "icon": "BarChart3", "permission": "analytics.view", "order": 2},
+                        {"label": "Reports", "href": "/reports", "icon": "FileText", "permission": "reports.view", "order": 3},
+                    ],
+                },
+                {
+                    "label": "Intelligence",
+                    "order": 2,
+                    "items": [
+                        {"label": "Analytics Assistant", "href": "/ai", "icon": "Bot", "permission": "ai.use", "order": 0},
+                        {"label": "Scheduler", "href": "/scheduler", "icon": "CalendarClock", "order": 1},
+                    ],
+                },
+                {
+                    "label": "Administration",
+                    "order": 3,
+                    "items": [
+                        {"label": "Notifications", "href": "/notifications", "icon": "Bell", "order": 0},
+                        {"label": "Members", "href": "/admin", "icon": "Users", "permission": "users.read", "order": 1},
+                        {"label": "Departments", "href": "/admin/departments", "icon": "Building2", "permission": "departments.manage", "order": 2},
+                        {"label": "Audit Logs", "href": "/audit", "icon": "ScrollText", "permission": "audit.view", "order": 3},
+                        {"label": "Organization Settings", "href": "/settings", "icon": "Settings", "permission": "settings.manage", "order": 4},
+                    ],
+                },
+                {
+                    "label": "Platform",
+                    "order": 4,
+                    "items": [
+                        {"label": "Connectors", "href": "/connectors", "icon": "Zap", "order": 0},
+                    ],
+                },
+            ],
+        },
+        "org_admin": {
+            "purpose": "Operate their organization",
+            "groups": [
+                {
+                    "label": "Overview",
+                    "order": 0,
+                    "items": [
+                        {"label": "Dashboard", "href": "/dashboard", "icon": "LayoutDashboard", "order": 0},
+                        {"label": "Dashboards", "href": "/dashboard", "icon": "LayoutDashboard", "permission": "dashboard.view", "order": 1},
+                        {"label": "Studios", "href": "/studios", "icon": "Sparkles", "order": 2},
+                        {"label": "Templates", "href": "/templates", "icon": "LayoutTemplate", "order": 3},
+                    ],
+                },
+                {
+                    "label": "Data",
+                    "order": 1,
+                    "items": [
+                        {"label": "Smart Data Capture", "href": "/capture", "icon": "ScanLine", "order": 0},
+                        {"label": "Datasets", "href": "/datasets", "icon": "Database", "permission": "datasets.view", "order": 1},
+                        {"label": "Analytics", "href": "/analytics", "icon": "BarChart3", "permission": "analytics.view", "order": 2},
+                        {"label": "Reports", "href": "/reports", "icon": "FileText", "permission": "reports.view", "order": 3},
+                    ],
+                },
+                {
+                    "label": "Intelligence",
+                    "order": 2,
+                    "items": [
+                        {"label": "Analytics Assistant", "href": "/ai", "icon": "Bot", "permission": "ai.use", "order": 0},
+                        {"label": "Scheduler", "href": "/scheduler", "icon": "CalendarClock", "order": 1},
+                    ],
+                },
+                {
+                    "label": "Administration",
+                    "order": 3,
+                    "items": [
+                        {"label": "Notifications", "href": "/notifications", "icon": "Bell", "order": 0},
+                        {"label": "Members", "href": "/admin", "icon": "Users", "permission": "users.read", "order": 1},
+                        {"label": "Departments", "href": "/admin/departments", "icon": "Building2", "permission": "departments.manage", "order": 2},
+                        {"label": "Audit Logs", "href": "/audit", "icon": "ScrollText", "permission": "audit.view", "order": 3},
+                        {"label": "Organization Settings", "href": "/settings", "icon": "Settings", "permission": "settings.manage", "order": 4},
+                    ],
+                },
+                {
+                    "label": "Platform",
+                    "order": 4,
+                    "items": [
+                        {"label": "Connectors", "href": "/connectors", "icon": "Zap", "order": 0},
+                    ],
+                },
+            ],
+        },
+        "data_analyst": {
+            "purpose": "Prepare and analyze data",
+            "groups": [
+                {
+                    "label": "Overview",
+                    "order": 0,
+                    "items": [
+                        {"label": "Dashboard", "href": "/dashboard", "icon": "LayoutDashboard", "order": 0},
+                        {"label": "Dashboards", "href": "/dashboard", "icon": "LayoutDashboard", "permission": "dashboard.view", "order": 1},
+                        {"label": "Templates", "href": "/templates", "icon": "LayoutTemplate", "order": 2},
+                    ],
+                },
+                {
+                    "label": "Analytics Studio",
+                    "order": 1,
+                    "items": [
+                        {"label": "Datasets", "href": "/datasets", "icon": "Database", "permission": "datasets.view", "order": 0},
+                        {"label": "Analytics", "href": "/analytics", "icon": "BarChart3", "permission": "analytics.view", "order": 1},
+                        {"label": "Reports", "href": "/reports", "icon": "FileText", "permission": "reports.view", "order": 2},
+                    ],
+                },
+                {
+                    "label": "Intelligence",
+                    "order": 2,
+                    "items": [
+                        {"label": "Analytics Assistant", "href": "/ai", "icon": "Bot", "permission": "ai.use", "order": 0},
+                        {"label": "Scheduler", "href": "/scheduler", "icon": "CalendarClock", "order": 1},
+                    ],
+                },
+                {
+                    "label": "Personal",
+                    "order": 3,
+                    "items": [
+                        {"label": "Notifications", "href": "/notifications", "icon": "Bell", "order": 0},
+                        {"label": "Profile", "href": "/settings", "icon": "Settings", "order": 99},
+                    ],
+                },
+            ],
+        },
+        "researcher": {
+            "purpose": "Research and statistical analysis",
+            "groups": [
+                {
+                    "label": "Overview",
+                    "order": 0,
+                    "items": [
+                        {"label": "Dashboard", "href": "/dashboard", "icon": "LayoutDashboard", "order": 0},
+                        {"label": "Templates", "href": "/templates", "icon": "LayoutTemplate", "order": 1},
+                    ],
+                },
+                {
+                    "label": "Research",
+                    "order": 1,
+                    "items": [
+                        {"label": "Research Studio", "href": "/studios/research", "icon": "FlaskConical", "order": 0},
+                        {"label": "Statistics", "href": "/studios/statistics", "icon": "BarChart3", "order": 1},
+                        {"label": "Publications", "href": "/studios/publications", "icon": "Newspaper", "order": 2},
+                        {"label": "Reports", "href": "/reports", "icon": "FileText", "permission": "reports.view", "order": 3},
+                        {"label": "Datasets", "href": "/datasets", "icon": "Database", "permission": "datasets.view", "order": 4},
+                    ],
+                },
+                {
+                    "label": "Intelligence",
+                    "order": 2,
+                    "items": [
+                        {"label": "Analytics Assistant", "href": "/ai", "icon": "Bot", "permission": "ai.use", "order": 0},
+                        {"label": "Scheduler", "href": "/scheduler", "icon": "CalendarClock", "order": 1},
+                    ],
+                },
+                {
+                    "label": "Personal",
+                    "order": 3,
+                    "items": [
+                        {"label": "Notifications", "href": "/notifications", "icon": "Bell", "order": 0},
+                        {"label": "Profile", "href": "/settings", "icon": "Settings", "order": 99},
+                    ],
+                },
+            ],
+        },
+        "data_entry_officer": {
+            "purpose": "Capture and validate data",
+            "groups": [
+                {
+                    "label": "Capture",
+                    "order": 0,
+                    "items": [
+                        {"label": "Smart Data Capture", "href": "/capture", "icon": "ScanLine", "order": 0},
+                        {"label": "Capture Queue", "href": "/capture/queue", "icon": "ClipboardList", "order": 1},
+                        {"label": "Assigned Tasks", "href": "/capture/tasks", "icon": "CheckSquare", "order": 2},
+                        {"label": "Validation", "href": "/capture/review", "icon": "CheckSquare", "order": 3},
+                    ],
+                },
+                {
+                    "label": "Personal",
+                    "order": 1,
+                    "items": [
+                        {"label": "Notifications", "href": "/notifications", "icon": "Bell", "order": 0},
+                        {"label": "Profile", "href": "/settings", "icon": "Settings", "order": 99},
+                    ],
+                },
+            ],
+        },
+        "viewer": {
+            "purpose": "Consume information",
+            "groups": [
+                {
+                    "label": "View",
+                    "order": 0,
+                    "items": [
+                        {"label": "Dashboards", "href": "/dashboard", "icon": "LayoutDashboard", "permission": "dashboard.view", "order": 0},
+                        {"label": "Reports", "href": "/reports", "icon": "FileText", "permission": "reports.view", "order": 1},
+                    ],
+                },
+                {
+                    "label": "Personal",
+                    "order": 1,
+                    "items": [
+                        {"label": "Notifications", "href": "/notifications", "icon": "Bell", "order": 0},
+                        {"label": "Profile", "href": "/settings", "icon": "Settings", "order": 99},
+                    ],
+                },
+            ],
+        },
+    }
+
+    DEFAULT_NAV = {
+        "purpose": "Access the platform",
+        "groups": [
+            {
+                "label": "Overview",
+                "order": 0,
+                "items": [
+                    {"label": "Dashboard", "href": "/dashboard", "icon": "LayoutDashboard", "order": 0},
+                ],
+            },
+            {
+                "label": "Personal",
+                "order": 1,
+                "items": [
+                    {"label": "Notifications", "href": "/notifications", "icon": "Bell", "order": 0},
+                    {"label": "Profile", "href": "/settings", "icon": "Settings", "order": 99},
+                ],
+            },
+        ],
+    }
+
+    ROLE_PRIORITY = [
+        "super_admin", "org_owner", "org_admin", "dept_manager",
+        "auditor", "data_engineer", "data_analyst", "researcher",
+        "business_analyst", "executive", "dept_officer",
+        "data_entry_officer", "viewer",
+    ]
+
+    primary_role = next((r for r in ROLE_PRIORITY if r in roles), roles[0] if roles else "viewer")
+    nav_config = ROLE_NAVIGATION.get(primary_role, DEFAULT_NAV)
+
+    def _has_perm(perm: str | None) -> bool:
+        if not perm:
+            return True
+        if is_super_admin:
+            return True
+        return perm in permissions
+
+    filtered_groups = []
+    for grp in nav_config["groups"]:
+        filtered_items = [
+            item for item in grp["items"]
+            if _has_perm(item.get("permission"))
+        ]
+        filtered_items.sort(key=lambda x: x.get("order", 99))
+        if filtered_items:
+            filtered_groups.append({
+                "label": grp["label"],
+                "order": grp.get("order", 0),
+                "items": filtered_items,
+            })
+
+    if industry in ("healthcare", "education"):
+        industry_item = {
+            "healthcare": {"label": "Healthcare Studio", "href": "/studios/healthcare", "icon": "Stethoscope", "order": 10},
+            "education": {"label": "Education Studio", "href": "/studios/education", "icon": "GraduationCap", "order": 10},
+        }[industry]
+        for grp in filtered_groups:
+            if grp["label"] in ("Overview", "Platform Tools"):
+                grp["items"].append(industry_item)
+                grp["items"].sort(key=lambda x: x.get("order", 99))
+
+    workspace_type = "organization" if org_id else "personal"
+    if workspace_type == "personal":
+        filtered_groups = [
+            {**g, "items": [i for i in g["items"] if not i.get("role")]}
+            for g in filtered_groups
+            if g["label"] not in ("Administration", "Platform", "Platform Tools")
+        ]
+        filtered_groups = [g for g in filtered_groups if g["items"]]
+
+    return success_response({
+        "purpose": nav_config["purpose"],
+        "primary_role": primary_role,
+        "groups": filtered_groups,
+        "context": {
+            "roles": roles,
+            "permissions": permissions,
+            "organization_type": org_type,
+            "industry": industry,
+            "workspace_type": workspace_type,
+            "department_id": dept_id,
+        },
+    })
 
 
 @router.get("/sessions")
@@ -527,7 +1228,7 @@ async def delete_user(
 async def assign_roles(
     user_id: int,
     role_names: list[str],
-    current_user: dict = Depends(require_permissions("users.manage")),
+    current_user: dict = Depends(require_permissions("role.assign")),
     db: DbSession = Depends(get_db),
 ):
     """Assign roles to a user."""
@@ -542,6 +1243,16 @@ async def assign_roles(
         if "super_admin" in role_names or "org_owner" in role_names:
             raise HTTPException(status_code=403, detail="Cannot assign platform-level roles")
     service.assign_roles(user_id, role_names, assigned_by=current_user["id"])
+    log_audit_event(
+        db=db,
+        action="user.roles.assign",
+        user_id=current_user["id"],
+        organization_id=user_model.organization_id,
+        resource_type="user",
+        resource_id=user_id,
+        metadata={"roles": role_names, "target_user": user_model.email},
+    )
+    db.commit()
     return success_response(None, "Roles assigned")
 
 
@@ -552,7 +1263,7 @@ roles_router = APIRouter(prefix="/api/roles", tags=["Role Management"])
 
 @roles_router.get("")
 async def list_roles(
-    current_user: dict = Depends(require_permissions("roles.read")),
+    current_user: dict = Depends(require_permissions("role.read")),
     db: DbSession = Depends(get_db),
 ):
     """List all roles with their permissions."""
@@ -564,7 +1275,7 @@ async def list_roles(
 @roles_router.post("")
 async def create_role(
     request: RoleCreate,
-    current_user: dict = Depends(require_permissions("roles.manage")),
+    current_user: dict = Depends(require_permissions("role.manage")),
     db: DbSession = Depends(get_db),
 ):
     """Create a new role."""
@@ -577,33 +1288,122 @@ async def create_role(
 async def update_role(
     role_id: int,
     request: RoleUpdate,
-    current_user: dict = Depends(require_permissions("roles.manage")),
+    current_user: dict = Depends(require_permissions("role.manage")),
     db: DbSession = Depends(get_db),
 ):
     """Update a role."""
     service = RoleService(db)
     role = service.update_role(role_id, request)
+    log_audit_event(
+        db=db,
+        action="role.update",
+        user_id=current_user["id"],
+        organization_id=current_user.get("organization_id"),
+        resource_type="role",
+        resource_id=role_id,
+        new_values=role,
+    )
+    db.commit()
     return success_response(role, "Role updated")
 
 
 @roles_router.delete("/{role_id}")
 async def delete_role(
     role_id: int,
-    current_user: dict = Depends(require_permissions("roles.manage")),
+    current_user: dict = Depends(require_permissions("role.manage")),
     db: DbSession = Depends(get_db),
 ):
     """Delete a role (system roles cannot be deleted)."""
     service = RoleService(db)
     service.delete_role(role_id)
+    log_audit_event(
+        db=db,
+        action="role.delete",
+        user_id=current_user["id"],
+        organization_id=current_user.get("organization_id"),
+        resource_type="role",
+        resource_id=role_id,
+    )
+    db.commit()
     return success_response(None, "Role deleted")
 
 
 @roles_router.get("/permissions")
 async def list_permissions(
-    current_user: dict = Depends(require_permissions("roles.read")),
+    current_user: dict = Depends(require_permissions("role.read")),
     db: DbSession = Depends(get_db),
 ):
     """List all available permissions."""
     service = RoleService(db)
     perms = service.list_permissions()
     return success_response(perms)
+
+
+# ─── Enterprise RBAC Routes ──────────────────────────────────────────
+
+
+@roles_router.get("/level/{level}")
+async def list_roles_by_level(
+    level: str,
+    current_user: dict = Depends(require_permissions("role.read")),
+    db: DbSession = Depends(get_db),
+):
+    """List all roles at a specific level (platform, organization, department, personal)."""
+    service = RoleService(db)
+    roles = service.list_roles_by_level(level)
+    return success_response(roles)
+
+
+@roles_router.get("/assignable")
+async def list_assignable_roles(
+    current_user: dict = Depends(require_permissions("role.read")),
+    db: DbSession = Depends(get_db),
+):
+    """List all roles that can be assigned to users."""
+    service = RoleService(db)
+    roles = service.list_assignable_roles()
+    return success_response(roles)
+
+
+@roles_router.post("/assign-scoped")
+async def assign_scoped_role(
+    request: ScopedRoleAssign,
+    current_user: dict = Depends(require_permissions("role.assign")),
+    db: DbSession = Depends(get_db),
+):
+    """Assign a role to a user with optional scope (organization, department, resource)."""
+    service = RoleService(db)
+    result = service.assign_scoped_role(request, assigned_by=current_user["id"])
+    return success_response(result, "Scoped role assigned")
+
+
+@users_router.get("/{user_id}/permissions")
+async def get_user_permissions(
+    user_id: int,
+    current_user: dict = Depends(require_permissions("role.read")),
+    db: DbSession = Depends(get_db),
+):
+    """Get a user's roles, permissions, and scoped role assignments."""
+    service = RoleService(db)
+    result = service.get_user_permissions(user_id)
+    return success_response(result)
+
+
+@users_router.post("/{user_id}/check-permission")
+async def check_user_permission(
+    user_id: int,
+    request: PermissionCheckRequest,
+    current_user: dict = Depends(require_permissions("role.read")),
+    db: DbSession = Depends(get_db),
+):
+    """Check if a user has a specific permission."""
+    service = RoleService(db)
+    result = service.check_permission(
+        user_id=user_id,
+        permission=request.permission,
+        scope_type=request.scope_type,
+        scope_id=request.scope_id,
+        resource_type=request.resource_type,
+        resource_id=request.resource_id,
+    )
+    return success_response(result)

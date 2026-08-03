@@ -11,6 +11,7 @@ import { Table, TableRow, TableCell } from '@/components/ui/Table';
 import { SkeletonTable } from '@/components/ui/Skeleton';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { SmartEmptyState } from '@/components/onboarding/SmartEmptyState';
 import { DatasetUpload } from '@/features/datasets/DatasetUpload';
 import { datasetService } from '@/services/datasets/datasetService';
 import type { Dataset } from '@/types';
@@ -85,11 +86,15 @@ export default function DatasetsPage() {
           ) : error ? (
             <ErrorState message={error} onRetry={loadDatasets} />
           ) : filtered.length === 0 ? (
-            <EmptyState
-              icon={<Database className="h-10 w-10" />}
-              title="No datasets found"
-              description={search ? 'Try a different search term.' : 'Upload your first dataset to get started.'}
-            />
+            search ? (
+              <EmptyState
+                icon={<Database className="h-10 w-10" />}
+                title="No datasets found"
+                description="Try a different search term."
+              />
+            ) : (
+              <SmartEmptyState context="datasets" />
+            )
           ) : (
             <Table headers={['Name', 'Industry', 'Rows', 'Status', 'Quality', 'Created']}>
               {filtered.map((ds) => (

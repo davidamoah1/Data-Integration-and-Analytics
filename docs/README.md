@@ -1,7 +1,7 @@
 # DataFlow — Enterprise Documentation System
 
-> **Version**: 2.0.0  
-> **Last Updated**: 2026-07-30  
+> **Version**: 3.1.0  
+> **Last Updated**: 2026-08-01  
 > **Status**: Active  
 > **Owner**: Enterprise Architecture Board
 
@@ -20,6 +20,7 @@ All documentation is version-controlled alongside the source code and must remai
 | Section | Path | Description |
 |---------|------|-------------|
 | Architecture | [architecture/](architecture/) | System design, components, data flow, deployment, ADRs |
+| Security | [security/](security/) | Security architecture, auth, data protection, compliance, vulnerability management |
 | Governance | [governance/](governance/) | Roles, permissions, authorization, security, compliance |
 | Database | [database/](database/) | Schema, ER diagrams, migrations, indexing, backup |
 | Backend | [backend/](backend/) | API, authentication, services, error handling, logging |
@@ -51,7 +52,21 @@ All documentation is version-controlled alongside the source code and must remai
 | [architecture/integrations.md](architecture/integrations.md) | External system integration points |
 | [architecture/scalability.md](architecture/scalability.md) | Scalability strategy and bottlenecks |
 | [architecture/technology-stack.md](architecture/technology-stack.md) | Complete technology stack with versions |
-| [architecture/adr/](architecture/adr/) | Architecture Decision Records (ADR-0001 through ADR-0012) |
+| [architecture/adr/](architecture/adr/) | Architecture Decision Records (ADR-0001 through ADR-0018) |
+
+## Security Documentation
+
+| Document | Description |
+|----------|-------------|
+| [security/README.md](security/README.md) | Security documentation index |
+| [security/overview.md](security/overview.md) | Security architecture overview and defense-in-depth strategy |
+| [security/authentication.md](security/authentication.md) | Authentication mechanisms: JWT, password hashing, MFA, session management |
+| [security/authorization.md](security/authorization.md) | RBAC model, permission enforcement, tenant isolation |
+| [security/data-protection.md](security/data-protection.md) | Encryption at rest, data retention, PII handling, soft deletes |
+| [security/api-security.md](security/api-security.md) | API security: CORS, rate limiting, security headers, input validation |
+| [security/vulnerability-management.md](security/vulnerability-management.md) | Dependency scanning, SAST, security patching, incident response |
+| [security/compliance.md](security/compliance.md) | SOC 2, ISO 27001, GDPR, HIPAA compliance mapping |
+| [security/checklist.md](security/checklist.md) | Production security hardening checklist |
 
 ## Governance Documentation
 
@@ -153,7 +168,7 @@ All documentation is version-controlled alongside the source code and must remai
 | [deployment/production.md](deployment/production.md) | Production deployment checklist |
 | [deployment/environments.md](deployment/environments.md) | Environment configuration (dev, staging, prod) |
 | [deployment/ci-cd.md](deployment/ci-cd.md) | CI/CD pipeline configuration |
-| [deployment/monitoring.md](deployment/monitoring.md) | Monitoring and alerting setup |
+| [deployment/monitoring.md](deployment/monitoring.md) | Production monitoring: Sentry, OpenTelemetry, Prometheus, Grafana, health checks |
 
 ## Testing Documentation
 

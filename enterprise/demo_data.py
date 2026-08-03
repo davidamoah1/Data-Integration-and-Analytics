@@ -220,6 +220,7 @@ def seed_demo_data(db: DbSession) -> dict:
         existing_pipe = db.query(ETLPipeline).filter(ETLPipeline.name == name).first()
         if not existing_pipe:
             pipeline = ETLPipeline(
+                organization_id=org_id,
                 name=name,
                 description=desc,
                 status=status,
@@ -270,6 +271,7 @@ def seed_demo_data(db: DbSession) -> dict:
         )
         if not existing_conv:
             conv = AIConversation(
+                organization_id=org_id,
                 user_id=user_id,
                 assistant_type=assistant_type,
                 title=title,
@@ -316,6 +318,7 @@ def seed_demo_data(db: DbSession) -> dict:
         )
         if not existing_report:
             report = AIReportGeneration(
+                organization_id=org_id,
                 report_type=report_type,
                 title=title,
                 content=content,

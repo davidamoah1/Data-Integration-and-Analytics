@@ -7,7 +7,7 @@ class TestLogin:
     def test_login_success(self, client):
         """Test successful login with correct credentials."""
         response = client.post(
-            "/auth/login",
+            "/api/auth/login",
             json={
                 "email": "admin@dataflow.io",
                 "password": "Admin@12345",
@@ -26,7 +26,7 @@ class TestLogin:
     def test_login_wrong_password(self, client):
         """Test login with incorrect password."""
         response = client.post(
-            "/auth/login",
+            "/api/auth/login",
             json={
                 "email": "admin@dataflow.io",
                 "password": "WrongPassword1!",
@@ -37,7 +37,7 @@ class TestLogin:
     def test_login_nonexistent_user(self, client):
         """Test login with email that doesn't exist."""
         response = client.post(
-            "/auth/login",
+            "/api/auth/login",
             json={
                 "email": "nobody@nowhere.com",
                 "password": "SomePassword1!",
@@ -48,7 +48,7 @@ class TestLogin:
     def test_login_remember_me(self, client):
         """Test login with remember_me flag."""
         response = client.post(
-            "/auth/login",
+            "/api/auth/login",
             json={
                 "email": "admin@dataflow.io",
                 "password": "Admin@12345",
@@ -60,7 +60,7 @@ class TestLogin:
 
     def test_login_invalid_payload(self, client):
         """Test login with missing fields."""
-        response = client.post("/auth/login", json={"email": "admin@dataflow.io"})
+        response = client.post("/api/auth/login", json={"email": "admin@dataflow.io"})
         assert response.status_code == 422
 
 
@@ -70,7 +70,7 @@ class TestTokenRefresh:
     def test_refresh_token_success(self, client):
         """Test refreshing an access token."""
         login_resp = client.post(
-            "/auth/login",
+            "/api/auth/login",
             json={
                 "email": "admin@dataflow.io",
                 "password": "Admin@12345",
@@ -78,7 +78,7 @@ class TestTokenRefresh:
         )
         refresh_token = login_resp.json()["data"]["refresh_token"]
 
-        response = client.post("/auth/refresh", json={"refresh_token": refresh_token})
+        response = client.post("/api/auth/refresh", json={"refresh_token": refresh_token})
         assert response.status_code == 200
         data = response.json()
         assert "access_token" in data["data"]
@@ -86,7 +86,7 @@ class TestTokenRefresh:
 
     def test_refresh_token_invalid(self, client):
         """Test refreshing with an invalid token."""
-        response = client.post("/auth/refresh", json={"refresh_token": "invalid-token"})
+        response = client.post("/api/auth/refresh", json={"refresh_token": "invalid-token"})
         assert response.status_code == 401
 
 
@@ -96,7 +96,7 @@ class TestLogout:
     def test_logout_success(self, client):
         """Test successful logout."""
         login_resp = client.post(
-            "/auth/login",
+            "/api/auth/login",
             json={
                 "email": "admin@dataflow.io",
                 "password": "Admin@12345",
@@ -104,11 +104,11 @@ class TestLogout:
         )
         refresh_token = login_resp.json()["data"]["refresh_token"]
 
-        response = client.post("/auth/logout", json={"refresh_token": refresh_token})
+        response = client.post("/api/auth/logout", json={"refresh_token": refresh_token})
         assert response.status_code == 200
 
         # Verify token is revoked
-        refresh_resp = client.post("/auth/refresh", json={"refresh_token": refresh_token})
+        refresh_resp = client.post("/api/auth/refresh", json={"refresh_token": refresh_token})
         assert refresh_resp.status_code == 401
 
 
@@ -118,7 +118,7 @@ class TestChangePassword:
     def test_change_password_success(self, client, auth_headers):
         """Test changing password with correct current password."""
         response = client.post(
-            "/auth/change-password",
+            "/api/auth/change-password",
             json={
                 "current_password": "Admin@12345",
                 "new_password": "NewPassword@123",
@@ -129,7 +129,7 @@ class TestChangePassword:
 
         # Verify old password no longer works
         login_resp = client.post(
-            "/auth/login",
+            "/api/auth/login",
             json={
                 "email": "admin@dataflow.io",
                 "password": "Admin@12345",
@@ -139,7 +139,7 @@ class TestChangePassword:
 
         # Verify new password works
         login_resp = client.post(
-            "/auth/login",
+            "/api/auth/login",
             json={
                 "email": "admin@dataflow.io",
                 "password": "NewPassword@123",
@@ -150,7 +150,7 @@ class TestChangePassword:
     def test_change_password_wrong_current(self, client, auth_headers):
         """Test changing password with wrong current password."""
         response = client.post(
-            "/auth/change-password",
+            "/api/auth/change-password",
             json={
                 "current_password": "WrongPassword1!",
                 "new_password": "NewPassword@123",
@@ -162,7 +162,7 @@ class TestChangePassword:
     def test_change_password_weak(self, client, auth_headers):
         """Test changing to a weak password (should fail validation)."""
         response = client.post(
-            "/auth/change-password",
+            "/api/auth/change-password",
             json={
                 "current_password": "Admin@12345",
                 "new_password": "weak",
@@ -178,7 +178,7 @@ class TestForgotResetPassword:
     def test_forgot_password(self, client):
         """Test requesting a password reset."""
         response = client.post(
-            "/auth/forgot-password",
+            "/api/auth/forgot-password",
             json={
                 "email": "admin@dataflow.io",
             },
@@ -188,7 +188,7 @@ class TestForgotResetPassword:
     def test_forgot_password_nonexistent(self, client):
         """Test requesting reset for nonexistent email (should still return 200)."""
         response = client.post(
-            "/auth/forgot-password",
+            "/api/auth/forgot-password",
             json={
                 "email": "nobody@nowhere.com",
             },
@@ -201,7 +201,7 @@ class TestProfile:
 
     def test_get_profile(self, client, auth_headers):
         """Test getting the current user's profile."""
-        response = client.get("/auth/profile", headers=auth_headers)
+        response = client.get("/api/auth/profile", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()["data"]
         assert data["email"] == "admin@dataflow.io"
@@ -211,13 +211,13 @@ class TestProfile:
 
     def test_get_profile_no_auth(self, client):
         """Test getting profile without authentication."""
-        response = client.get("/auth/profile")
+        response = client.get("/api/auth/profile")
         assert response.status_code == 401
 
     def test_update_profile(self, client, auth_headers):
         """Test updating profile."""
         response = client.put(
-            "/auth/profile",
+            "/api/auth/profile",
             json={
                 "phone": "+1234567890",
                 "language": "es",
@@ -239,13 +239,13 @@ class TestSessions:
         """Test getting active sessions."""
         # Login to create a session
         client.post(
-            "/auth/login",
+            "/api/auth/login",
             json={
                 "email": "admin@dataflow.io",
                 "password": "Admin@12345",
             },
         )
-        response = client.get("/auth/sessions", headers=auth_headers)
+        response = client.get("/api/auth/sessions", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()["data"]
         assert isinstance(data, list)
@@ -259,13 +259,13 @@ class TestLoginHistory:
         """Test getting login history."""
         # Login to create history
         client.post(
-            "/auth/login",
+            "/api/auth/login",
             json={
                 "email": "admin@dataflow.io",
                 "password": "Admin@12345",
             },
         )
-        response = client.get("/auth/login-history", headers=auth_headers)
+        response = client.get("/api/auth/login-history", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()["data"]
         assert isinstance(data, list)
@@ -278,7 +278,7 @@ class TestSignup:
     def test_signup_success(self, client):
         """Test successful self-registration."""
         response = client.post(
-            "/auth/signup",
+            "/api/auth/signup",
             json={
                 "email": "newuser@test.com",
                 "password": "StrongPass1!",
@@ -294,7 +294,7 @@ class TestSignup:
     def test_signup_with_org(self, client):
         """Test signup with organization creation."""
         response = client.post(
-            "/auth/signup",
+            "/api/auth/signup",
             json={
                 "email": "orgadmin@test.com",
                 "password": "StrongPass1!",
@@ -309,7 +309,7 @@ class TestSignup:
     def test_signup_duplicate_email(self, client):
         """Test signup with existing email fails."""
         response = client.post(
-            "/auth/signup",
+            "/api/auth/signup",
             json={
                 "email": "admin@dataflow.io",
                 "password": "StrongPass1!",
@@ -321,7 +321,7 @@ class TestSignup:
     def test_signup_weak_password(self, client):
         """Test signup with weak password fails."""
         response = client.post(
-            "/auth/signup",
+            "/api/auth/signup",
             json={
                 "email": "weakpass@test.com",
                 "password": "weak",

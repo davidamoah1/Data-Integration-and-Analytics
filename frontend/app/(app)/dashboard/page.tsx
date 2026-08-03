@@ -2,6 +2,7 @@
 
 import { useAuthStore } from '@/stores/authStore';
 import { AdaptiveDashboard } from '@/components/adaptive/AdaptiveDashboard';
+import { OnboardingBanner } from '@/components/onboarding/OnboardingBanner';
 
 export default function DashboardPage() {
   const { isAuthenticated } = useAuthStore();
@@ -14,5 +15,10 @@ export default function DashboardPage() {
     );
   }
 
-  return <AdaptiveDashboard />;
+  return (
+    <div className="space-y-6">
+      <OnboardingBanner />
+      <AdaptiveDashboard />
+    </div>
+  );
 }

@@ -14,6 +14,7 @@ import {
   Table2,
   ChevronLeft,
   ChevronRight,
+  Database,
 } from "lucide-react";
 import {
   captureService,
@@ -99,6 +100,19 @@ export default function CaptureReviewDetailPage() {
     }
   };
 
+  const handleExport = async () => {
+    setActionLoading(true);
+    try {
+      const result = await captureService.exportToDataset(documentId);
+      alert(`Exported ${result.field_count} fields to dataset: ${result.dataset_name}`);
+    } catch (err: any) {
+      console.error("Failed to export:", err);
+      alert(err.message || "Failed to export to dataset");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50">
@@ -155,6 +169,12 @@ export default function CaptureReviewDetailPage() {
             {doc.status === "draft" && (
               <Button size="sm" onClick={() => handleAction("approve")} disabled={actionLoading} className="gap-1.5 bg-green-600 hover:bg-green-700">
                 <CheckCircle2 size={14} /> Approve
+              </Button>
+            )}
+            {doc.status === "approved" && (
+              <Button size="sm" onClick={handleExport} disabled={actionLoading} className="gap-1.5 bg-indigo-600 hover:bg-indigo-700">
+                {actionLoading ? <Loader2 size={14} className="animate-spin" /> : <Database size={14} />}
+                Export to Dataset
               </Button>
             )}
           </div>

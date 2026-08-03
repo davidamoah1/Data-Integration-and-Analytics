@@ -7,11 +7,20 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { SkeletonCard } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ErrorState } from '@/components/ui/ErrorState';
+import { RouteGuard } from '@/components/auth/RouteGuard';
 import { dashboardService } from '@/services/dashboard/dashboardService';
 import type { Dashboard, KPI } from '@/types';
 import { cn, formatNumber } from '@/lib/utils';
 
 export default function AnalyticsPage() {
+  return (
+    <RouteGuard permission="analytics.view" excludeRoles={['viewer', 'data_entry_officer']}>
+      <AnalyticsContent />
+    </RouteGuard>
+  );
+}
+
+function AnalyticsContent() {
   const router = useRouter();
   const [dashboards, setDashboards] = useState<Dashboard[]>([]);
   const [kpis, setKpis] = useState<KPI[]>([]);

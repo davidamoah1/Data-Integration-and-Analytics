@@ -6,8 +6,17 @@ import {
   Loader2, Search, Power, TrendingUp, Ticket, RefreshCw,
 } from "lucide-react";
 import { adminPortalService, type AdminOverview, type Tenant } from "@/services/saas/saasService";
+import { RouteGuard } from "@/components/auth/RouteGuard";
 
 export default function AdminPortalPage() {
+  return (
+    <RouteGuard role="super_admin">
+      <AdminPortalContent />
+    </RouteGuard>
+  );
+}
+
+function AdminPortalContent() {
   const [overview, setOverview] = useState<AdminOverview | null>(null);
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [loading, setLoading] = useState(true);

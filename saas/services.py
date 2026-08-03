@@ -240,12 +240,22 @@ class SubscriptionService:
         ).scalar_one_or_none()
 
         now = datetime.now(timezone.utc)
-        if sub.status == "trial" and sub.trial_end and sub.trial_end < now:
+
+        def _aware(dt):
+            """Normalize a possibly-naive DB timestamp to UTC-aware for comparison."""
+            if dt is None:
+                return None
+            return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+
+        trial_end = _aware(sub.trial_end)
+        grace_period_end = _aware(sub.grace_period_end)
+
+        if sub.status == "trial" and trial_end and trial_end < now:
             sub.status = "past_due"
             sub.grace_period_end = now + timedelta(days=7)
             self.db.commit()
 
-        if sub.status == "past_due" and sub.grace_period_end and sub.grace_period_end < now:
+        if sub.status == "past_due" and grace_period_end and grace_period_end < now:
             sub.status = "expired"
             self.db.commit()
 

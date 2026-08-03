@@ -17,7 +17,8 @@ class KPIEngine:
         self.gateway = AIGateway(db)
 
     def recommend_kpis(
-        self, domain: str | None = None, data_source: dict | None = None, user_id: int | None = None
+        self, domain: str | None = None, data_source: dict | None = None, user_id: int | None = None,
+        organization_id: int | None = None,
     ) -> dict:
         """Recommend KPIs based on domain and available data.
 
@@ -57,6 +58,7 @@ class KPIEngine:
                 threshold_warning=rec.get("threshold_warning"),
                 threshold_critical=rec.get("threshold_critical"),
                 rationale=rec.get("rationale", ""),
+                organization_id=organization_id,
                 user_id=user_id,
             )
             self.db.add(kpi)

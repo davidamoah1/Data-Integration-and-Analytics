@@ -1,7 +1,7 @@
 # Feature Catalog
 
-> **Version**: 1.0.0  
-> **Last Updated**: 2026-07-30  
+> **Version**: 2.0.0  
+> **Last Updated**: 2026-08-01  
 > **Status**: Active  
 > **Owner**: Product Manager
 
@@ -36,7 +36,7 @@ Product managers, sales, and customers.
 | User CRUD | ✅ | Create, read, update, delete |
 | Role management | ✅ | 13 system roles + custom |
 | Permission management | ✅ | 30+ permissions |
-| MFA | ⚠️ Planned | TOTP-based |
+| MFA | ✅ | TOTP-based (pyotp) |
 | SSO | ⚠️ Planned | SAML/OIDC |
 | API Keys | ⚠️ Planned | Scoped tokens |
 
@@ -118,7 +118,13 @@ Product managers, sales, and customers.
 | Security headers | ✅ | CSP, HSTS, etc. |
 | Rate limiting | ✅ | 120 RPM default |
 | Request size limit | ✅ | 50MB max |
-| Compliance reporting | ⚠️ Planned | SOC 2, ISO 27001 |
+| Encryption at rest | ✅ | AES-256 field-level encryption |
+| MFA (TOTP) | ✅ | Per-user multi-factor auth |
+| Account lockout | ✅ | 5 attempts / 15 min lockout |
+| Vulnerability scanning | ✅ | pip-audit, npm audit, Bandit, Trivy |
+| Dependabot | ✅ | Automated dependency updates |
+| Compliance mapping | ✅ | SOC 2, ISO 27001, GDPR, HIPAA |
+| Security checklist | ✅ | Production hardening checklist |
 
 ## 9. Platform & Ecosystem
 
@@ -130,6 +136,70 @@ Product managers, sales, and customers.
 | Connectors | ✅ | Data source connectors |
 | SaaS subscriptions | ✅ | Trial management |
 | Feature flags | ✅ | Plan-based gating |
+
+## 10. Database & Infrastructure
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| Alembic migrations | ✅ | Version-controlled schema changes |
+| Production indexes | ✅ | 56 indexes across all major tables |
+| Backup system | ✅ | BackupManager (MySQL + SQLite) |
+| Recovery system | ✅ | CLI + API restore, recovery plan |
+| Slow query logging | ✅ | Configurable threshold (default 500ms) |
+| Query timeout | ✅ | Configurable (default 30s) |
+| Connection pooling | ✅ | Production-tuned pool sizing |
+| Multi-env config | ✅ | Development, testing, production |
+| Database CLI | ✅ | init, migrate, backup, restore, status |
+| Database API | ✅ | Super admin DB management routes |
+| IndexManager | ✅ | Runtime index verification and creation |
+
+## 11. CI/CD & DevOps
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| 6-stage CI pipeline | ✅ | Lint → Security → Unit → Integration → Build → Deploy |
+| PR checks workflow | ✅ | Fast feedback on pull requests |
+| Build verification | ✅ | Backend, frontend, Docker build checks |
+| Dependency check | ✅ | Weekly pip-audit + npm audit with auto-issues |
+| Dependabot | ✅ | Weekly PRs for pip, npm, GitHub Actions |
+| Docker build caching | ✅ | GHA cache backend |
+| Security scanning | ✅ | pip-audit, Bandit, npm audit, Trivy (SARIF) |
+| Vercel deployment | ✅ | Automated with health check |
+
+## 13. Production Monitoring
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| Sentry error tracking | ✅ | Exception capture, breadcrumbs, release tracking, data scrubbing |
+| OpenTelemetry tracing | ✅ | Distributed spans for FastAPI, SQLAlchemy, Redis, logging |
+| OTel custom metrics | ✅ | 7 application metrics (HTTP, DB, pipeline, errors, sessions) |
+| Prometheus metrics | ✅ | 12 metrics in text exposition format, no external dependency |
+| Prometheus /metrics endpoint | ✅ | Counters, histograms, gauges with path normalisation |
+| Grafana dashboard | ✅ | 10-panel dashboard, auto-provisioned |
+| Monitoring Docker stack | ✅ | Prometheus + Grafana + Node Exporter via docker-compose |
+| Unified monitoring middleware | ✅ | Metrics + tracing + error capture + correlation IDs |
+| Liveness probe | ✅ | /monitoring/health/live (process-only check) |
+| Readiness probe | ✅ | /monitoring/health/ready (DB + Redis + integrations) |
+| Detailed health check | ✅ | /monitoring/health/detailed (all subsystems) |
+| Monitoring status endpoint | ✅ | /monitoring/status (Sentry/OTel/Prometheus enablement) |
+| Structured JSON logging | ✅ | LOG_FORMAT=json with request_id and correlation_id |
+| Correlation IDs | ✅ | X-Request-ID and X-Correlation-ID headers |
+| Pipeline run metrics | ✅ | Pipeline success/failure recorded in Prometheus and OTel |
+
+## 14. Documentation
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| Architecture docs | ✅ | Overview, system design, diagrams, ADRs |
+| Security docs | ✅ | Auth, authz, data protection, compliance |
+| Database docs | ✅ | Schema, migrations, indexing, backup |
+| API reference | ✅ | OpenAPI, authentication, examples |
+| User guides | ✅ | Role-specific guides (8 roles) |
+| Deployment docs | ✅ | Local, Docker, Vercel, production, CI/CD |
+| Testing docs | ✅ | Strategy, unit, integration, e2e, security |
+| ADR catalog | ✅ | 18 Architecture Decision Records |
+| Product docs | ✅ | Vision, roadmap, personas, features |
+| Workflow docs | ✅ | Onboarding, ETL, dashboards, capture |
 
 ## Related Documents
 

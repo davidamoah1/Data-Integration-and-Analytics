@@ -37,6 +37,12 @@ All developers, architects, and technical stakeholders.
 | [ADR-0010](../../governance/adr/ADR-0010-audit-logging.md) | Audit Logging | Accepted | 2026-07-30 |
 | [ADR-0011](../../governance/adr/ADR-0011-template-architecture.md) | Template Architecture | Accepted | 2026-07-30 |
 | [ADR-0012](../../governance/adr/ADR-0012-future-enterprise-readiness.md) | Future Enterprise Readiness | Proposed | 2026-07-30 |
+| [ADR-0013](../../governance/adr/ADR-0013-multi-environment-database-configuration.md) | Multi-Environment Database Configuration | Accepted | 2026-08-01 |
+| [ADR-0014](../../governance/adr/ADR-0014-production-database-hardening.md) | Production Database Hardening | Accepted | 2026-08-01 |
+| [ADR-0015](../../governance/adr/ADR-0015-slow-query-logging.md) | Slow Query Logging and Query Optimization | Accepted | 2026-08-01 |
+| [ADR-0016](../../governance/adr/ADR-0016-cicd-pipeline-architecture.md) | CI/CD Pipeline Architecture | Accepted | 2026-08-01 |
+| [ADR-0017](../../governance/adr/ADR-0017-backup-and-recovery-strategy.md) | Backup and Recovery Strategy | Accepted | 2026-08-01 |
+| [ADR-0018](../../governance/adr/ADR-0018-production-monitoring-architecture.md) | Production Monitoring Architecture | Accepted | 2026-08-01 |
 
 ---
 

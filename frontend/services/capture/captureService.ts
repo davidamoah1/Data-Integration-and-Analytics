@@ -159,4 +159,16 @@ export const captureService = {
 
   getAnalyticsSummary: () =>
     apiClient.get<CaptureAnalyticsSummary>(`${BASE}/analytics/summary`),
+
+  exportToDataset: (documentId: number, datasetName?: string) =>
+    apiClient.post<{ document_id: number; csv_path: string; dataset_name: string; row_count: number; field_count: number; fields_exported: string[] }>(
+      `${BASE}/documents/${documentId}/export`,
+      datasetName ? { dataset_name: datasetName } : undefined,
+    ),
+
+  bulkExportApproved: (documentType?: string, datasetName?: string) =>
+    apiClient.post<{ csv_path: string; dataset_name: string; row_count: number; field_count: number; fields_exported: string[] }>(
+      `${BASE}/documents/bulk-export`,
+      { document_type: documentType, dataset_name: datasetName },
+    ),
 };

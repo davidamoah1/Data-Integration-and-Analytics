@@ -161,3 +161,141 @@ def tenant_scoped_dependency() -> Callable:
         return get_current_organization_id(current_user, db)
 
     return _resolve
+
+
+# ─── Automatic Tenant Query Filtering ────────────────────────────────
+
+
+class TenantQueryManager:
+    """Automatic tenant isolation for SQLAlchemy queries.
+
+    Provides scoped query helpers that automatically filter by organization_id.
+    All customer-owned resource queries should go through this manager to
+    guarantee no cross-organization data leakage.
+
+    Usage:
+        mgr = TenantQueryManager(db, org_id)
+        dashboards = mgr.list(Dashboard)
+        dataset = mgr.get(Dashboard, dataset_id)
+    """
+
+    def __init__(self, db: DbSession, organization_id: int, *, allow_cross_org: bool = False):
+        self.db = db
+        self.organization_id = organization_id
+        self.allow_cross_org = allow_cross_org
+
+    def _apply_filter(self, model_cls: Any, query: Any) -> Any:
+        """Apply organization_id filter if the model has the column."""
+        if self.allow_cross_org:
+            return query
+        if hasattr(model_cls, "organization_id"):
+            return query.where(model_cls.organization_id == self.organization_id)
+        return query
+
+    def list(self, model_cls: Any, **filters: Any) -> list[Any]:
+        """List all records for the current organization with optional filters."""
+        query = self.db.query(model_cls)
+        query = self._apply_filter(model_cls, query)
+        for key, value in filters.items():
+            col = getattr(model_cls, key, None)
+            if col is not None:
+                query = query.where(col == value)
+        return query.all()
+
+    def get(self, model_cls: Any, resource_id: int) -> Any | None:
+        """Get a single record by ID, scoped to the current organization.
+
+        Returns None if the record doesn't exist OR belongs to a different org.
+        This prevents both ID manipulation and cross-org access.
+        """
+        query = self.db.query(model_cls).where(model_cls.id == resource_id)
+        query = self._apply_filter(model_cls, query)
+        return query.first()
+
+    def get_or_404(self, model_cls: Any, resource_id: int) -> Any:
+        """Get a single record by ID or raise NotFoundError."""
+        record = self.get(model_cls, resource_id)
+        if record is None:
+            raise NotFoundError(
+                f"{model_cls.__name__} with id {resource_id} not found in your organization."
+            )
+        return record
+
+    def create(self, model_cls: Any, **data: Any) -> Any:
+        """Create a new record with organization_id automatically set."""
+        if hasattr(model_cls, "organization_id") and "organization_id" not in data:
+            data["organization_id"] = self.organization_id
+        record = model_cls(**data)
+        self.db.add(record)
+        self.db.flush()
+        return record
+
+    def update(self, model_cls: Any, resource_id: int, **data: Any) -> Any:
+        """Update a record scoped to the current organization."""
+        record = self.get_or_404(model_cls, resource_id)
+        for key, value in data.items():
+            if hasattr(record, key):
+                setattr(record, key, value)
+        self.db.flush()
+        return record
+
+    def delete(self, model_cls: Any, resource_id: int) -> None:
+        """Delete a record scoped to the current organization."""
+        record = self.get_or_404(model_cls, resource_id)
+        self.db.delete(record)
+        self.db.flush()
+
+    def count(self, model_cls: Any, **filters: Any) -> int:
+        """Count records for the current organization."""
+        query = self.db.query(model_cls)
+        query = self._apply_filter(model_cls, query)
+        for key, value in filters.items():
+            col = getattr(model_cls, key, None)
+            if col is not None:
+                query = query.where(col == value)
+        return query.count()
+
+
+def verify_resource_ownership(
+    db: DbSession,
+    model_cls: Any,
+    resource_id: int,
+    organization_id: int,
+) -> Any:
+    """Verify that a resource belongs to the current organization.
+
+    This is the core cross-org access prevention guard. It fetches the resource
+    by ID and checks that its organization_id matches the caller's org.
+
+    Raises:
+        NotFoundError: If the resource doesn't exist or belongs to another org.
+    """
+    record = db.query(model_cls).filter(model_cls.id == resource_id).first()
+    if record is None:
+        raise NotFoundError(f"{model_cls.__name__} with id {resource_id} not found.")
+
+    if hasattr(record, "organization_id") and record.organization_id is not None:
+        if int(record.organization_id) != int(organization_id):
+            raise NotFoundError(
+                f"{model_cls.__name__} with id {resource_id} not found in your organization."
+            )
+    return record
+
+
+def assert_same_organization(
+    current_user: dict,
+    resource_organization_id: int,
+    resource_type: str = "Resource",
+) -> None:
+    """Assert that a resource belongs to the same organization as the user.
+
+    Raises:
+        AuthorizationError: If the resource belongs to a different organization.
+    """
+    if is_super_admin(current_user):
+        return
+    user_org_id = current_user.get("organization_id")
+    if user_org_id is None or int(user_org_id) != int(resource_organization_id):
+        raise AuthorizationError(
+            f"{resource_type} does not belong to your organization."
+        )

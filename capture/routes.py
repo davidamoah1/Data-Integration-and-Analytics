@@ -6,7 +6,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, Qu
 from sqlalchemy.orm import Session as DbSession
 
 from capture.document_types import ALL_DOCUMENT_TYPES, INDUSTRIES
-from capture.models import CaptureAuditLog
+from capture.repositories import CaptureAuditLogRepository
 from capture.ocr_engine import is_ocr_available
 from capture.service import CaptureError, CaptureService
 from shared.database import get_db
@@ -130,8 +130,23 @@ async def upload_zip_batch(
         org_id, current_user["id"], file.filename or "batch.zip", content, batch_name, industry
     )
 
-    if background_tasks is not None:
-        background_tasks.add_task(_process_batch_task, batch.id)
+    # Create a background job for OCR processing
+    job = None
+    try:
+        from jobs.service import JobService
+        job_svc = JobService(db)
+        job = job_svc.create_job(
+            organization_id=org_id,
+            user_id=current_user["id"],
+            job_type="ocr_batch",
+            name=f"OCR Batch: {batch.name}",
+            description=f"Processing {batch.total_documents} documents from batch '{batch.name}'",
+            payload={"batch_id": batch.id, "organization_id": org_id},
+        )
+    except Exception:
+        # Fall back to BackgroundTasks if job system isn't available
+        if background_tasks is not None:
+            background_tasks.add_task(_process_batch_task, batch.id)
 
     return {
         "batch_id": batch.id,
@@ -139,6 +154,7 @@ async def upload_zip_batch(
         "total_documents": batch.total_documents,
         "status": batch.status,
         "documents": [_serialize_document(d) for d in docs],
+        "job_id": job.id if job else None,
     }
 
 
@@ -361,12 +377,8 @@ async def get_audit_log(
     current_user: dict = Depends(get_current_user),
 ):
     org_id = get_current_organization_id(current_user, db)
-    logs = (
-        db.query(CaptureAuditLog)
-        .filter(CaptureAuditLog.document_id == document_id, CaptureAuditLog.organization_id == org_id)
-        .order_by(CaptureAuditLog.id.asc())
-        .all()
-    )
+    audit_repo = CaptureAuditLogRepository(db)
+    logs = audit_repo.list_by_document(document_id, org_id)
     return {
         "logs": [
             {
@@ -378,6 +390,51 @@ async def get_audit_log(
             for log in logs
         ]
     }
+
+
+# ═══════════════════════════════════════════════════════════════
+# Database Entry (export approved documents to dataset)
+# ═══════════════════════════════════════════════════════════════
+
+
+@router.post("/documents/{document_id}/export")
+async def export_document_to_dataset(
+    document_id: int,
+    payload: dict | None = None,
+    db: DbSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Export an approved document's extracted fields to a dataset CSV (Database Entry step)."""
+    org_id = get_current_organization_id(current_user, db)
+    svc = CaptureService(db)
+    try:
+        result = svc.export_to_dataset(
+            document_id, org_id, current_user["id"],
+            dataset_name=(payload or {}).get("dataset_name"),
+        )
+    except CaptureError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    return result
+
+
+@router.post("/documents/bulk-export")
+async def bulk_export_approved_documents(
+    payload: dict | None = None,
+    db: DbSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Export all approved documents to a single dataset CSV."""
+    org_id = get_current_organization_id(current_user, db)
+    svc = CaptureService(db)
+    try:
+        result = svc.bulk_export_approved(
+            org_id, current_user["id"],
+            document_type=(payload or {}).get("document_type"),
+            dataset_name=(payload or {}).get("dataset_name"),
+        )
+    except CaptureError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    return result
 
 
 # ═══════════════════════════════════════════════════════════════

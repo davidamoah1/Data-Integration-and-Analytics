@@ -102,35 +102,35 @@ class TestRoleHierarchy:
         assert RoleHierarchy.get_level("viewer") == RoleLevel.VIEWER
 
     def test_org_admin_above_manager(self):
-        assert RoleHierarchy.get_level("org_admin") > RoleHierarchy.get_level("manager")
+        assert RoleHierarchy.get_level("org_admin") > RoleHierarchy.get_level("dept_manager")
 
     def test_manager_above_analyst(self):
-        assert RoleHierarchy.get_level("manager") > RoleHierarchy.get_level("analyst")
+        assert RoleHierarchy.get_level("dept_manager") > RoleHierarchy.get_level("analyst")
 
     def test_analyst_above_viewer(self):
         assert RoleHierarchy.get_level("analyst") > RoleHierarchy.get_level("viewer")
 
     def test_get_highest_role(self):
-        roles = ["viewer", "analyst", "manager"]
+        roles = ["viewer", "analyst", "dept_manager"]
         highest = RoleHierarchy.get_highest_role(roles)
-        assert highest == "manager"
+        assert highest == "dept_manager"
 
     def test_get_highest_role_empty(self):
         assert RoleHierarchy.get_highest_role([]) is None
 
     def test_is_at_least(self):
-        assert RoleHierarchy.is_at_least("manager", RoleLevel.MANAGER) is True
+        assert RoleHierarchy.is_at_least("dept_manager", RoleLevel.MANAGER) is True
         assert RoleHierarchy.is_at_least("org_admin", RoleLevel.MANAGER) is True
         assert RoleHierarchy.is_at_least("analyst", RoleLevel.MANAGER) is False
 
     def test_can_manage(self):
         assert RoleHierarchy.can_manage("org_admin", "analyst") is True
-        assert RoleHierarchy.can_manage("manager", "viewer") is True
-        assert RoleHierarchy.can_manage("analyst", "manager") is False
+        assert RoleHierarchy.can_manage("dept_manager", "viewer") is True
+        assert RoleHierarchy.can_manage("analyst", "dept_manager") is False
 
     def test_display_name(self):
-        assert RoleHierarchy.get_display_name("super_admin") == "Super Admin"
-        assert RoleHierarchy.get_display_name("org_admin") == "Organization Admin"
+        assert RoleHierarchy.get_display_name("super_admin") == "Super Administrator"
+        assert RoleHierarchy.get_display_name("org_admin") == "Organization Administrator"
         assert RoleHierarchy.get_display_name("viewer") == "Viewer"
 
     def test_all_roles_sorted(self):
@@ -144,7 +144,7 @@ class TestRoleHierarchy:
         assert RoleHierarchy.get_level("analyst") == RoleLevel.ANALYST
 
     def test_manager_alias(self):
-        assert RoleHierarchy.get_level("manager") == RoleLevel.MANAGER
+        assert RoleHierarchy.get_level("dept_manager") == RoleLevel.MANAGER
 
 
 class TestPermissionMatrix:
@@ -159,12 +159,12 @@ class TestPermissionMatrix:
 
     def test_analyst_has_reports(self):
         perms = PermissionMatrix.get_permissions("analyst")
-        assert "reports.generate" in perms
+        assert "report.generate" in perms
         assert "analytics.view" in perms
 
     def test_viewer_read_only(self):
         perms = PermissionMatrix.get_permissions("viewer")
-        assert "dashboard.view" in perms
+        assert "dashboard.read" in perms
         assert "users.create" not in perms
 
     def test_has_permission_true(self):
@@ -177,11 +177,11 @@ class TestPermissionMatrix:
         assert PermissionMatrix.has_permission("super_admin", "anything") is True
 
     def test_user_has_permission(self):
-        assert PermissionMatrix.user_has_permission(["analyst"], "reports.generate") is True
+        assert PermissionMatrix.user_has_permission(["analyst"], "report.generate") is True
         assert PermissionMatrix.user_has_permission(["viewer"], "users.create") is False
 
     def test_user_has_permission_multiple_roles(self):
-        assert PermissionMatrix.user_has_permission(["viewer", "analyst"], "reports.generate") is True
+        assert PermissionMatrix.user_has_permission(["viewer", "analyst"], "report.generate") is True
 
     def test_get_role_permissions_summary(self):
         summary = PermissionMatrix.get_role_permissions_summary()
@@ -191,13 +191,13 @@ class TestPermissionMatrix:
 
 class TestRBACHelpers:
     def test_has_role_or_higher_true(self):
-        assert has_role_or_higher(["org_admin"], "manager") is True
+        assert has_role_or_higher(["org_admin"], "dept_manager") is True
 
     def test_has_role_or_higher_false(self):
-        assert has_role_or_higher(["viewer"], "manager") is False
+        assert has_role_or_higher(["viewer"], "dept_manager") is False
 
     def test_has_role_or_higher_exact(self):
-        assert has_role_or_higher(["manager"], "manager") is True
+        assert has_role_or_higher(["dept_manager"], "dept_manager") is True
 
     def test_get_role_level(self):
         assert get_role_level("super_admin") == 100

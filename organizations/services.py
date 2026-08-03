@@ -185,7 +185,7 @@ async def list_organizations(
 @org_router.post("")
 async def create_organization(
     request: OrganizationCreate,
-    current_user: dict = Depends(require_permissions("organizations.manage")),
+    current_user: dict = Depends(require_permissions("organization.manage")),
     db: DbSession = Depends(get_db),
 ):
     service = OrganizationService(db)
@@ -208,7 +208,7 @@ async def get_organization(
 async def update_organization(
     org_id: int,
     request: OrganizationUpdate,
-    current_user: dict = Depends(require_permissions("organizations.manage")),
+    current_user: dict = Depends(require_permissions("organization.manage")),
     db: DbSession = Depends(get_db),
 ):
     require_organization_access(current_user, org_id, db)
@@ -230,7 +230,7 @@ async def update_organization(
 @org_router.delete("/{org_id}")
 async def delete_organization(
     org_id: int,
-    current_user: dict = Depends(require_permissions("organizations.manage")),
+    current_user: dict = Depends(require_permissions("organization.manage")),
     db: DbSession = Depends(get_db),
 ):
     require_organization_access(current_user, org_id, db)
@@ -268,7 +268,7 @@ async def list_departments(
 @dept_router.post("")
 async def create_department(
     request: DepartmentCreate,
-    current_user: dict = Depends(require_permissions("departments.manage")),
+    current_user: dict = Depends(require_permissions("department.manage")),
     db: DbSession = Depends(get_db),
 ):
     if not is_super_admin(current_user):
@@ -296,7 +296,7 @@ async def get_department(
 async def update_department(
     dept_id: int,
     request: DepartmentUpdate,
-    current_user: dict = Depends(require_permissions("departments.manage")),
+    current_user: dict = Depends(require_permissions("department.manage")),
     db: DbSession = Depends(get_db),
 ):
     service = DepartmentService(db)
@@ -315,7 +315,7 @@ async def update_department(
 @dept_router.delete("/{dept_id}")
 async def delete_department(
     dept_id: int,
-    current_user: dict = Depends(require_permissions("departments.manage")),
+    current_user: dict = Depends(require_permissions("department.manage")),
     db: DbSession = Depends(get_db),
 ):
     service = DepartmentService(db)

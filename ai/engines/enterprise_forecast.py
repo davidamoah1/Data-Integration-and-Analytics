@@ -56,6 +56,7 @@ class EnterpriseForecastEngine:
         confidence_level: float = 0.95,
         method: str = "auto",
         user_id: int | None = None,
+        organization_id: int | None = None,
         context: EnterpriseAIContext | None = None,
     ) -> dict:
         """Generate a forecast for the given metric.
@@ -166,6 +167,7 @@ class EnterpriseForecastEngine:
                     confidence_level=confidence_level,
                     input_summary=result["input_summary"],
                     user_id=user_id,
+                    organization_id=organization_id,
                 )
                 self.db.add(forecast)
                 self.db.commit()

@@ -24,7 +24,8 @@ class DocumentChatEngine:
         self.security = AISecurityLayer(db)
 
     def upload_document(
-        self, filename: str, file_content: bytes, file_type: str, user_id: int | None = None
+        self, filename: str, file_content: bytes, file_type: str, user_id: int | None = None,
+        organization_id: int | None = None,
     ) -> dict:
         """Upload and index a document for chat.
 
@@ -60,6 +61,7 @@ class DocumentChatEngine:
             extracted_text=extracted_text,
             metadata=metadata,
             user_id=user_id,
+            organization_id=organization_id,
             is_indexed=True,
         )
         self.db.add(doc)
@@ -251,9 +253,11 @@ class DocumentChatEngine:
         except Exception as e:
             return f"Error reading text file: {e}", metadata
 
-    def list_documents(self, user_id: int | None = None) -> list[dict]:
+    def list_documents(self, user_id: int | None = None, organization_id: int | None = None) -> list[dict]:
         """List uploaded documents."""
         query = self.db.query(AIDocument)
+        if organization_id is not None:
+            query = query.filter(AIDocument.organization_id == organization_id)
         if user_id:
             query = query.filter(AIDocument.user_id == user_id)
         docs = query.order_by(AIDocument.created_at.desc()).all()
