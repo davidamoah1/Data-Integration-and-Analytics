@@ -8,11 +8,11 @@ factory function to `NODE_REGISTRY`.
 from __future__ import annotations
 
 import io
-import json
 import logging
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable
+from typing import Any
 
 import pandas as pd
 
@@ -163,6 +163,7 @@ class ReadSqlNode(WorkflowNode):
         query = _get_param(self.config, "query", required=True)
         try:
             from sqlalchemy import create_engine
+
             engine = create_engine(connection)
             df = pd.read_sql(query, engine)
             return NodeResult(status="completed", data=df, rows_processed=len(df))
@@ -178,13 +179,11 @@ class ReadRestNode(WorkflowNode):
         url = _get_param(self.config, "url", required=True)
         try:
             import requests
+
             response = requests.get(url, timeout=30)
             response.raise_for_status()
             data = response.json()
-            if isinstance(data, list):
-                df = pd.DataFrame(data)
-            else:
-                df = pd.DataFrame([data])
+            df = pd.DataFrame(data) if isinstance(data, list) else pd.DataFrame([data])
             return NodeResult(status="completed", data=df, rows_processed=len(df))
         except Exception as e:
             logger.exception("read_rest failed")
@@ -213,6 +212,7 @@ class ValidateDataNode(WorkflowNode):
             return NodeResult(status="failed", errors=["validate_data requires a DataFrame input"])
         try:
             from validation.engine import ValidationEngine
+
             engine = ValidationEngine()
             result = engine.validate(df, dataset_name=self.config.get("dataset_name", "dataset"))
             return NodeResult(
@@ -220,7 +220,10 @@ class ValidateDataNode(WorkflowNode):
                 data=result,
                 rows_processed=len(df),
                 rows_failed=result.total_errors,
-                metadata={"status": result.status.value, "score": result.quality_score.overall if result.quality_score else None},
+                metadata={
+                    "status": result.status.value,
+                    "score": result.quality_score.overall if result.quality_score else None,
+                },
             )
         except Exception as e:
             logger.exception("validate_data failed")
@@ -259,6 +262,7 @@ class TransformDataNode(WorkflowNode):
             return NodeResult(status="failed", errors=["transform_data requires a DataFrame input"])
         try:
             from etl.transformations import TransformationEngine
+
             engine = TransformationEngine()
             operations = self.config.get("operations", [])
             for op in operations:
@@ -321,6 +325,7 @@ class ExecuteSqlNode(WorkflowNode):
             return NodeResult(status="failed", errors=["execute_sql requires a DataFrame input"])
         try:
             import duckdb
+
             con = duckdb.connect(":memory:")
             con.register("source_df", df)
             result = con.execute(query).fetchdf()
@@ -340,7 +345,11 @@ class ExecutePythonNode(WorkflowNode):
         try:
             exec(code, {"__builtins__": {}}, local_ns)
             result = local_ns.get("result", df)
-            return NodeResult(status="completed", data=result, rows_processed=len(result) if isinstance(result, pd.DataFrame) else 0)
+            return NodeResult(
+                status="completed",
+                data=result,
+                rows_processed=len(result) if isinstance(result, pd.DataFrame) else 0,
+            )
         except Exception as e:
             logger.exception("execute_python failed")
             return NodeResult(status="failed", errors=[str(e)])
@@ -357,8 +366,13 @@ class AiAnalysisNode(WorkflowNode):
         prompt = _get_param(self.config, "prompt", required=True)
         try:
             from ai.services import AIService
+
             service = AIService()
-            summary = service.analyze_dataset(df, prompt) if hasattr(service, "analyze_dataset") else f"AI analysis placeholder: {prompt}"
+            summary = (
+                service.analyze_dataset(df, prompt)
+                if hasattr(service, "analyze_dataset")
+                else f"AI analysis placeholder: {prompt}"
+            )
             return NodeResult(status="completed", data=summary, metadata={"provider": "ai"})
         except Exception as e:
             logger.exception("ai_analysis failed")
@@ -371,12 +385,20 @@ class SemanticMappingNode(WorkflowNode):
     def run(self, ctx: WorkflowContext) -> NodeResult:
         df = ctx.resolve_ref(_get_param(self.config, "dataset"))
         if not isinstance(df, pd.DataFrame):
-            return NodeResult(status="failed", errors=["semantic_mapping requires a DataFrame input"])
+            return NodeResult(
+                status="failed", errors=["semantic_mapping requires a DataFrame input"]
+            )
         try:
             from semantic.analyzer import SemanticAnalyzer
+
             analyzer = SemanticAnalyzer()
             mappings = analyzer.map_columns(df.columns.tolist())
-            return NodeResult(status="completed", data=mappings, rows_processed=len(df), metadata={"mappings": mappings})
+            return NodeResult(
+                status="completed",
+                data=mappings,
+                rows_processed=len(df),
+                metadata={"mappings": mappings},
+            )
         except Exception as e:
             logger.exception("semantic_mapping failed")
             return NodeResult(status="failed", errors=[str(e)])
@@ -388,7 +410,9 @@ class MetadataGenerationNode(WorkflowNode):
     def run(self, ctx: WorkflowContext) -> NodeResult:
         df = ctx.resolve_ref(_get_param(self.config, "dataset"))
         if not isinstance(df, pd.DataFrame):
-            return NodeResult(status="failed", errors=["metadata_generation requires a DataFrame input"])
+            return NodeResult(
+                status="failed", errors=["metadata_generation requires a DataFrame input"]
+            )
         metadata = {
             "columns": [
                 {"name": c, "dtype": str(df[c].dtype), "sample": df[c].dropna().head(5).tolist()}
@@ -396,7 +420,9 @@ class MetadataGenerationNode(WorkflowNode):
             ],
             "row_count": len(df),
         }
-        return NodeResult(status="completed", data=metadata, rows_processed=len(df), metadata=metadata)
+        return NodeResult(
+            status="completed", data=metadata, rows_processed=len(df), metadata=metadata
+        )
 
 
 class DashboardGenerationNode(WorkflowNode):
@@ -405,8 +431,14 @@ class DashboardGenerationNode(WorkflowNode):
     def run(self, ctx: WorkflowContext) -> NodeResult:
         df = ctx.resolve_ref(_get_param(self.config, "dataset"))
         if not isinstance(df, pd.DataFrame):
-            return NodeResult(status="failed", errors=["dashboard_generation requires a DataFrame input"])
-        return NodeResult(status="completed", data={"dashboard_type": "auto", "widgets": []}, metadata={"columns": df.columns.tolist()})
+            return NodeResult(
+                status="failed", errors=["dashboard_generation requires a DataFrame input"]
+            )
+        return NodeResult(
+            status="completed",
+            data={"dashboard_type": "auto", "widgets": []},
+            metadata={"columns": df.columns.tolist()},
+        )
 
 
 class ReportGenerationNode(WorkflowNode):
@@ -414,7 +446,11 @@ class ReportGenerationNode(WorkflowNode):
 
     def run(self, ctx: WorkflowContext) -> NodeResult:
         data = ctx.resolve_ref(_get_param(self.config, "dataset"))
-        return NodeResult(status="completed", data={"report_type": "summary", "sections": []}, metadata={"input_type": type(data).__name__})
+        return NodeResult(
+            status="completed",
+            data={"report_type": "summary", "sections": []},
+            metadata={"input_type": type(data).__name__},
+        )
 
 
 # --- Export & sink nodes -------------------------------------------------------
@@ -439,7 +475,9 @@ class ExportDatasetNode(WorkflowNode):
                 content = buffer.getvalue()
             else:
                 return NodeResult(status="failed", errors=[f"Unsupported export format: {fmt}"])
-            return NodeResult(status="completed", data=content, rows_processed=len(df), metadata={"format": fmt})
+            return NodeResult(
+                status="completed", data=content, rows_processed=len(df), metadata={"format": fmt}
+            )
         except Exception as e:
             logger.exception("export_dataset failed")
             return NodeResult(status="failed", errors=[str(e)])
@@ -481,7 +519,11 @@ class ArchiveDatasetNode(WorkflowNode):
 
     def run(self, ctx: WorkflowContext) -> NodeResult:
         df = ctx.resolve_ref(_get_param(self.config, "dataset"))
-        return NodeResult(status="completed", data={"archived": True}, rows_processed=len(df) if isinstance(df, pd.DataFrame) else 0)
+        return NodeResult(
+            status="completed",
+            data={"archived": True},
+            rows_processed=len(df) if isinstance(df, pd.DataFrame) else 0,
+        )
 
 
 # --- Notification nodes ------------------------------------------------------
@@ -493,8 +535,10 @@ class SendEmailNode(WorkflowNode):
     def run(self, ctx: WorkflowContext) -> NodeResult:
         to = _get_param(self.config, "to", required=True)
         subject = _get_param(self.config, "subject", "Workflow notification")
-        body = _get_param(self.config, "body", "")
-        return NodeResult(status="completed", data={"to": to, "subject": subject}, metadata={"channel": "email"})
+        _get_param(self.config, "body", "")
+        return NodeResult(
+            status="completed", data={"to": to, "subject": subject}, metadata={"channel": "email"}
+        )
 
 
 class SendSmsNode(WorkflowNode):
@@ -512,9 +556,14 @@ class SendWebhookNode(WorkflowNode):
         url = _get_param(self.config, "url", required=True)
         try:
             import requests
+
             payload = self.config.get("payload", {})
             response = requests.post(url, json=payload, timeout=10)
-            return NodeResult(status="completed", data={"status_code": response.status_code}, metadata={"channel": "webhook"})
+            return NodeResult(
+                status="completed",
+                data={"status_code": response.status_code},
+                metadata={"channel": "webhook"},
+            )
         except Exception as e:
             logger.exception("send_webhook failed")
             return NodeResult(status="failed", errors=[str(e)])
@@ -539,7 +588,11 @@ class ManualReviewNode(WorkflowNode):
     NODE_TYPE = "manual_review"
 
     def run(self, ctx: WorkflowContext) -> NodeResult:
-        return NodeResult(status="pending_approval", data={"review_required": True}, metadata={"manual_review": True})
+        return NodeResult(
+            status="pending_approval",
+            data={"review_required": True},
+            metadata={"manual_review": True},
+        )
 
 
 # --- Registry ----------------------------------------------------------------
@@ -604,11 +657,30 @@ def list_node_types() -> list[dict]:
 def _category(node_type: str) -> str:
     if node_type.startswith("read_"):
         return "source"
-    if node_type in ("validate_data", "clean_data", "transform_data", "aggregate_data", "merge_data", "join_data", "execute_sql", "execute_python"):
+    if node_type in (
+        "validate_data",
+        "clean_data",
+        "transform_data",
+        "aggregate_data",
+        "merge_data",
+        "join_data",
+        "execute_sql",
+        "execute_python",
+    ):
         return "processing"
-    if node_type in ("ai_analysis", "semantic_mapping", "metadata_generation", "dashboard_generation", "report_generation"):
+    if node_type in (
+        "ai_analysis",
+        "semantic_mapping",
+        "metadata_generation",
+        "dashboard_generation",
+        "report_generation",
+    ):
         return "intelligence"
-    if node_type.startswith("export_") or node_type in ("save_dataset", "archive_dataset", "export_dataset"):
+    if node_type.startswith("export_") or node_type in (
+        "save_dataset",
+        "archive_dataset",
+        "export_dataset",
+    ):
         return "export"
     if node_type.startswith("send_"):
         return "notification"

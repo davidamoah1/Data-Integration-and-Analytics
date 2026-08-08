@@ -75,7 +75,9 @@ class MLService:
 
     def _audit(self, action: str, resource: str, details: dict[str, Any] | None = None) -> None:
         try:
-            resource_type, resource_id = resource.split(":", 1) if ":" in resource else (resource, None)
+            resource_type, resource_id = (
+                resource.split(":", 1) if ":" in resource else (resource, None)
+            )
             log_audit_event(
                 db=self.db,
                 action=action,
@@ -91,7 +93,9 @@ class MLService:
     # -------------------------------------------------------------------------
     # Readiness
     # -------------------------------------------------------------------------
-    def readiness(self, source: str, target_column: str | None = None, sample_limit: int = 10000) -> dict[str, Any]:
+    def readiness(
+        self, source: str, target_column: str | None = None, sample_limit: int = 10000
+    ) -> dict[str, Any]:
         df = self._load_dataset(source)
         if len(df) > sample_limit:
             df = df.sample(sample_limit, random_state=42)
@@ -118,7 +122,11 @@ class MLService:
 
         self._audit("ml.features", f"dataset:{source}", {"operations": engineer.log})
         return {
-            "original_shape": clean_log["operations"][0].get("shape_before") if clean_log["operations"] else list(df.shape),
+            "original_shape": (
+                clean_log["operations"][0].get("shape_before")
+                if clean_log["operations"]
+                else list(df.shape)
+            ),
             "transformed_shape": list(X.shape),
             "output_columns": X.columns.tolist(),
             "log": engineer.log + clean_log["operations"],
@@ -143,7 +151,11 @@ class MLService:
         self.db.add(model)
         self.db.commit()
         self.db.refresh(model)
-        self._audit("ml.model.create", f"ml_model:{model.id}", {"name": model.name, "type": model.model_type.value})
+        self._audit(
+            "ml.model.create",
+            f"ml_model:{model.id}",
+            {"name": model.name, "type": model.model_type.value},
+        )
         return model
 
     def get_model(self, model_id: str) -> MLModel:
@@ -196,7 +208,10 @@ class MLService:
 
         try:
             feature_config = payload.get("feature_config", {})
-            feature_config.setdefault("target_type", "regression" if model.model_type == ModelType.REGRESSION else "classification")
+            feature_config.setdefault(
+                "target_type",
+                "regression" if model.model_type == ModelType.REGRESSION else "classification",
+            )
             if model.model_type == ModelType.CLASSIFICATION:
                 feature_config["target_type"] = "classification"
 
@@ -219,7 +234,12 @@ class MLService:
                     algorithm=run.algorithm,
                     hyperparameters=run.hyperparameters,
                 )
-                result = automl.run(X_transformed, y, test_size=payload.get("test_size", 0.2), include_all=payload.get("include_all", False))
+                result = automl.run(
+                    X_transformed,
+                    y,
+                    test_size=payload.get("test_size", 0.2),
+                    include_all=payload.get("include_all", False),
+                )
                 best = result["best"]
                 if best:
                     run.algorithm = best["algorithm"]
@@ -228,10 +248,19 @@ class MLService:
                     run.comparison_metrics = {"ranking": result["ranking"]}
                     model.algorithm = best["algorithm"]
                     model.metrics = best.get("metrics", {})
-                    artifact_dir = os.environ.get("ML_ARTIFACT_DIR", os.path.join(os.getcwd(), "ml_artifacts"))
+                    artifact_dir = os.environ.get(
+                        "ML_ARTIFACT_DIR", os.path.join(os.getcwd(), "ml_artifacts")
+                    )
                     os.makedirs(artifact_dir, exist_ok=True)
                     artifact_path = os.path.join(artifact_dir, f"{model.id}.joblib")
-                    joblib.dump({"model": automl.best_model, "label_encoder": automl.label_encoder, "features": model.feature_columns}, artifact_path)
+                    joblib.dump(
+                        {
+                            "model": automl.best_model,
+                            "label_encoder": automl.label_encoder,
+                            "features": model.feature_columns,
+                        },
+                        artifact_path,
+                    )
                     run.artifact_path = artifact_path
                     model.artifact_path = artifact_path
 
@@ -247,10 +276,14 @@ class MLService:
             self.db.commit()
             self.db.refresh(run)
             self.db.refresh(model)
-            self._audit("ml.model.train", f"ml_model:{model_id}", {"run_id": run.id, "status": run.status})
+            self._audit(
+                "ml.model.train", f"ml_model:{model_id}", {"run_id": run.id, "status": run.status}
+            )
         return run
 
-    def _train_forecasting(self, model: MLModel, df: pd.DataFrame, payload: dict[str, Any], run: MLTrainingRun) -> dict[str, Any]:
+    def _train_forecasting(
+        self, model: MLModel, df: pd.DataFrame, payload: dict[str, Any], run: MLTrainingRun
+    ) -> dict[str, Any]:
         date_col = payload.get("date_column", "date")
         target_col = model.target_column
         horizon = payload.get("horizon", 30)
@@ -308,7 +341,9 @@ class MLService:
         self.db.refresh(child)
         return self.train_model(child.id, payload)
 
-    def predict(self, model_id: str, features: list[dict[str, Any]], horizon: int = 30) -> list[Any]:
+    def predict(
+        self, model_id: str, features: list[dict[str, Any]], horizon: int = 30
+    ) -> list[Any]:
         model = self.get_model(model_id)
         if not model.artifact_path or not os.path.exists(model.artifact_path):
             raise RuntimeError("Model artifact not found")
@@ -325,7 +360,9 @@ class MLService:
         automl.label_encoder = artifact.get("label_encoder")
         preds = automl.predict(df)
 
-        prediction_record = MLPrediction(model_id=model.id, input_features=features, prediction={"values": preds.tolist()})
+        prediction_record = MLPrediction(
+            model_id=model.id, input_features=features, prediction={"values": preds.tolist()}
+        )
         self.db.add(prediction_record)
         self.db.commit()
         return preds.tolist()
@@ -344,15 +381,14 @@ class MLService:
 
         series = df[[date_col, target_col]].copy()
 
-        if algorithm == "auto":
-            algorithms = ["ExponentialSmoothing", "ARIMA"]
-        else:
-            algorithms = [algorithm]
+        algorithms = ["ExponentialSmoothing", "ARIMA"] if algorithm == "auto" else [algorithm]
 
         results = []
         for algo in algorithms:
             if algo == "ARIMA":
-                result = forecast_arima(series.set_index(date_col)[target_col].sort_index(), horizon)
+                result = forecast_arima(
+                    series.set_index(date_col)[target_col].sort_index(), horizon
+                )
             elif algo == "ExponentialSmoothing":
                 result = forecast_ets(series.set_index(date_col)[target_col].sort_index(), horizon)
             elif algo == "Prophet":
@@ -364,7 +400,11 @@ class MLService:
         # Return first successful; if all fail, return errors
         for result in results:
             if "error" not in result:
-                self._audit("ml.forecast", f"dataset:{payload['dataset_source']}", {"algorithm": result["algorithm"], "horizon": horizon})
+                self._audit(
+                    "ml.forecast",
+                    f"dataset:{payload['dataset_source']}",
+                    {"algorithm": result["algorithm"], "horizon": horizon},
+                )
                 return result
         return {"status": "failed", "errors": results}
 
@@ -383,7 +423,11 @@ class MLService:
                 **payload.get("config", {}),
             )
             result = engine.detect(df)
-        self._audit("ml.anomaly", f"dataset:{payload['dataset_source']}", {"algorithm": result.get("algorithm")})
+        self._audit(
+            "ml.anomaly",
+            f"dataset:{payload['dataset_source']}",
+            {"algorithm": result.get("algorithm")},
+        )
 
         # Persist job record
         job = MLAnomalyJob(
@@ -407,14 +451,16 @@ class MLService:
         df, _ = auto_clean(df)
         forecast_values = None
         if payload.get("include_forecast"):
-            forecast_result = self.forecast({
-                "dataset_source": payload["dataset_source"],
-                "date_column": payload.get("date_column", "date"),
-                "target_column": payload["metric_column"],
-                "horizon": payload.get("forecast_horizon", 30),
-                "frequency": "D",
-                "algorithm": "auto",
-            })
+            forecast_result = self.forecast(
+                {
+                    "dataset_source": payload["dataset_source"],
+                    "date_column": payload.get("date_column", "date"),
+                    "target_column": payload["metric_column"],
+                    "horizon": payload.get("forecast_horizon", 30),
+                    "frequency": "D",
+                    "algorithm": "auto",
+                }
+            )
             if "values" in forecast_result:
                 forecast_values = forecast_result["values"]
         recommendation = generate_recommendation(
@@ -423,7 +469,11 @@ class MLService:
             segment_column=payload.get("segment_column"),
             forecast_values=forecast_values,
         )
-        self._audit("ml.recommend", f"dataset:{payload['dataset_source']}", {"metric": payload["metric_column"]})
+        self._audit(
+            "ml.recommend",
+            f"dataset:{payload['dataset_source']}",
+            {"metric": payload["metric_column"]},
+        )
         return recommendation
 
     def what_if(self, payload: dict[str, Any]) -> list[dict[str, Any]]:
@@ -435,7 +485,9 @@ class MLService:
             driver_column=payload.get("driver_column"),
             scenarios=payload.get("scenarios"),
         )
-        self._audit("ml.what_if", f"dataset:{payload['dataset_source']}", {"scenarios": len(scenarios)})
+        self._audit(
+            "ml.what_if", f"dataset:{payload['dataset_source']}", {"scenarios": len(scenarios)}
+        )
         return scenarios
 
     # -------------------------------------------------------------------------
@@ -458,7 +510,9 @@ class MLService:
         )
         self.db.add(drift_record)
         self.db.commit()
-        self._audit("ml.drift", f"ml_model:{model.id}", {"drift_detected": report["drift_detected"]})
+        self._audit(
+            "ml.drift", f"ml_model:{model.id}", {"drift_detected": report["drift_detected"]}
+        )
         return report
 
     # -------------------------------------------------------------------------
@@ -467,11 +521,27 @@ class MLService:
     def dashboard_summary(self) -> dict[str, Any]:
         query = self._org_filter(self.db.query(MLModel))
         models = query.all()
-        forecasts = self.db.query(MLForecast).filter(MLForecast.model_id.in_([m.id for m in models])).count()
-        training_runs = self.db.query(MLTrainingRun).filter(MLTrainingRun.organization_id == self.organization_id).count()
-        drift_records = self.db.query(MLDriftRecord).filter(MLDriftRecord.model_id.in_([m.id for m in models])).count()
+        forecasts = (
+            self.db.query(MLForecast)
+            .filter(MLForecast.model_id.in_([m.id for m in models]))
+            .count()
+        )
+        training_runs = (
+            self.db.query(MLTrainingRun)
+            .filter(MLTrainingRun.organization_id == self.organization_id)
+            .count()
+        )
+        drift_records = (
+            self.db.query(MLDriftRecord)
+            .filter(MLDriftRecord.model_id.in_([m.id for m in models]))
+            .count()
+        )
         return {
-            "active_models": sum(1 for m in models if m.status == ModelStatus.READY and m.deployment_status == "deployed"),
+            "active_models": sum(
+                1
+                for m in models
+                if m.status == ModelStatus.READY and m.deployment_status == "deployed"
+            ),
             "total_models": len(models),
             "deployed_models": sum(1 for m in models if m.deployment_status == "deployed"),
             "failed_models": sum(1 for m in models if m.status == ModelStatus.FAILED),
@@ -479,7 +549,13 @@ class MLService:
             "forecasts": forecasts,
             "drift_records": drift_records,
             "recent_models": [
-                {"id": m.id, "name": m.name, "type": m.model_type.value, "status": m.status.value, "algorithm": m.algorithm}
+                {
+                    "id": m.id,
+                    "name": m.name,
+                    "type": m.model_type.value,
+                    "status": m.status.value,
+                    "algorithm": m.algorithm,
+                }
                 for m in models[:10]
             ],
         }

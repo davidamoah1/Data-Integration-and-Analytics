@@ -15,27 +15,31 @@ import pandas as pd
 import pytest
 
 from ai_copilot import DataAnalystCopilot
-from ai_copilot.query_engine import QueryEngine, QueryIntent, ParsedQuery
-from ai_copilot.root_cause import RootCauseAnalyzer, RootCauseResult, Contribution
-from ai_copilot.insight_generator import InsightGenerator, AutoInsight, InsightType, Severity
-from ai_copilot.report_generator import ReportGenerator, Report
-
+from ai_copilot.insight_generator import AutoInsight, InsightGenerator, InsightType
+from ai_copilot.query_engine import QueryEngine, QueryIntent
+from ai_copilot.report_generator import Report, ReportGenerator
+from ai_copilot.root_cause import RootCauseAnalyzer, RootCauseResult
 
 # ── Fixtures ──────────────────────────────────────────────
+
 
 @pytest.fixture
 def retail_df():
     """Retail dataset with a sales decline in the second half."""
     dates = pd.date_range("2024-01-01", periods=60, freq="D")
-    return pd.DataFrame({
-        "order_id": range(1, 61),
-        "customer_id": [f"C{i % 10}" for i in range(60)],
-        "product": ["Product_A"] * 30 + ["Product_B"] * 20 + ["Product_C"] * 10,
-        "region": (["North"] * 20 + ["South"] * 20 + ["East"] * 10 + ["West"] * 10),
-        "sales": [1000 - i * 10 for i in range(30)] + [500 - i * 5 for i in range(20)] + [300] * 10,
-        "profit": [200 - i * 2 for i in range(30)] + [100 - i for i in range(20)] + [60] * 10,
-        "order_date": dates,
-    })
+    return pd.DataFrame(
+        {
+            "order_id": range(1, 61),
+            "customer_id": [f"C{i % 10}" for i in range(60)],
+            "product": ["Product_A"] * 30 + ["Product_B"] * 20 + ["Product_C"] * 10,
+            "region": (["North"] * 20 + ["South"] * 20 + ["East"] * 10 + ["West"] * 10),
+            "sales": [1000 - i * 10 for i in range(30)]
+            + [500 - i * 5 for i in range(20)]
+            + [300] * 10,
+            "profit": [200 - i * 2 for i in range(30)] + [100 - i for i in range(20)] + [60] * 10,
+            "order_date": dates,
+        }
+    )
 
 
 @pytest.fixture
@@ -54,15 +58,17 @@ def retail_col_mapping():
 @pytest.fixture
 def healthcare_df():
     dates = pd.date_range("2024-01-01", periods=40, freq="D")
-    return pd.DataFrame({
-        "patient_id": [f"P{i % 15}" for i in range(40)],
-        "doctor_name": [f"Dr.{i % 4}" for i in range(40)],
-        "department": (["Cardiology"] * 20 + ["Neurology"] * 20),
-        "diagnosis_code": ["A00", "B01", "C50"] * 13 + ["A00"],
-        "billing_amount": [2000 - i * 20 for i in range(40)],
-        "visit_date": dates,
-        "gender": ["M", "F"] * 20,
-    })
+    return pd.DataFrame(
+        {
+            "patient_id": [f"P{i % 15}" for i in range(40)],
+            "doctor_name": [f"Dr.{i % 4}" for i in range(40)],
+            "department": (["Cardiology"] * 20 + ["Neurology"] * 20),
+            "diagnosis_code": ["A00", "B01", "C50"] * 13 + ["A00"],
+            "billing_amount": [2000 - i * 20 for i in range(40)],
+            "visit_date": dates,
+            "gender": ["M", "F"] * 20,
+        }
+    )
 
 
 @pytest.fixture
@@ -80,14 +86,17 @@ def healthcare_col_mapping():
 
 @pytest.fixture
 def simple_df():
-    return pd.DataFrame({
-        "category": ["A", "B", "C", "A", "B", "C"] * 5,
-        "value": [10, 20, 30, 15, 25, 35] * 5,
-        "date": pd.date_range("2024-01-01", periods=30, freq="D"),
-    })
+    return pd.DataFrame(
+        {
+            "category": ["A", "B", "C", "A", "B", "C"] * 5,
+            "value": [10, 20, 30, 15, 25, 35] * 5,
+            "date": pd.date_range("2024-01-01", periods=30, freq="D"),
+        }
+    )
 
 
 # ── Query Engine Tests ────────────────────────────────────
+
 
 class TestQueryEngine:
     def test_why_change_intent(self):
@@ -169,10 +178,13 @@ class TestQueryEngine:
 
 # ── Root Cause Analyzer Tests ─────────────────────────────
 
+
 class TestRootCauseAnalyzer:
     def test_analyze_returns_result(self, retail_df):
         result = RootCauseAnalyzer.analyze(
-            retail_df, "sales", "order_date",
+            retail_df,
+            "sales",
+            "order_date",
             dimension_cols=["product", "region"],
             metric_label="Sales",
         )
@@ -181,7 +193,9 @@ class TestRootCauseAnalyzer:
 
     def test_detects_decline(self, retail_df):
         result = RootCauseAnalyzer.analyze(
-            retail_df, "sales", "order_date",
+            retail_df,
+            "sales",
+            "order_date",
             dimension_cols=["product", "region"],
         )
         assert result.direction == "decrease"
@@ -190,7 +204,9 @@ class TestRootCauseAnalyzer:
 
     def test_contributions_sorted(self, retail_df):
         result = RootCauseAnalyzer.analyze(
-            retail_df, "sales", "order_date",
+            retail_df,
+            "sales",
+            "order_date",
             dimension_cols=["product", "region"],
         )
         assert len(result.contributions) > 0
@@ -200,7 +216,9 @@ class TestRootCauseAnalyzer:
 
     def test_contribution_has_dimension(self, retail_df):
         result = RootCauseAnalyzer.analyze(
-            retail_df, "sales", "order_date",
+            retail_df,
+            "sales",
+            "order_date",
             dimension_cols=["product", "region"],
         )
         dims = {c.dimension for c in result.contributions}
@@ -208,14 +226,18 @@ class TestRootCauseAnalyzer:
 
     def test_recommendations_generated(self, retail_df):
         result = RootCauseAnalyzer.analyze(
-            retail_df, "sales", "order_date",
+            retail_df,
+            "sales",
+            "order_date",
             dimension_cols=["product", "region"],
         )
         assert len(result.recommendations) > 0
 
     def test_summary_generated(self, retail_df):
         result = RootCauseAnalyzer.analyze(
-            retail_df, "sales", "order_date",
+            retail_df,
+            "sales",
+            "order_date",
             dimension_cols=["product", "region"],
             metric_label="Sales",
         )
@@ -224,7 +246,9 @@ class TestRootCauseAnalyzer:
 
     def test_to_dict(self, retail_df):
         result = RootCauseAnalyzer.analyze(
-            retail_df, "sales", "order_date",
+            retail_df,
+            "sales",
+            "order_date",
             dimension_cols=["product"],
         )
         d = result.to_dict()
@@ -238,12 +262,15 @@ class TestRootCauseAnalyzer:
 
     def test_no_date_column_returns_none(self, retail_df):
         result = RootCauseAnalyzer.analyze(
-            retail_df, "sales", "nonexistent_col",
+            retail_df,
+            "sales",
+            "nonexistent_col",
         )
         assert result is None
 
 
 # ── Insight Generator Tests ───────────────────────────────
+
 
 class TestInsightGenerator:
     def test_generates_insights(self, retail_df):
@@ -266,19 +293,23 @@ class TestInsightGenerator:
         assert len(corr_insights) > 0
 
     def test_detects_dominance(self):
-        df = pd.DataFrame({
-            "category": ["A"] * 70 + ["B"] * 20 + ["C"] * 10,
-            "value": range(100),
-        })
+        df = pd.DataFrame(
+            {
+                "category": ["A"] * 70 + ["B"] * 20 + ["C"] * 10,
+                "value": range(100),
+            }
+        )
         insights = InsightGenerator.generate(df)
         dom_insights = [i for i in insights if i.type == InsightType.DOMINANCE]
         assert len(dom_insights) > 0
 
     def test_detects_quality_issues(self):
-        df = pd.DataFrame({
-            "a": [1, 2, None, None, None, None, None, None, None, None] * 3,
-            "b": range(30),
-        })
+        df = pd.DataFrame(
+            {
+                "a": [1, 2, None, None, None, None, None, None, None, None] * 3,
+                "b": range(30),
+            }
+        )
         insights = InsightGenerator.generate(df)
         quality_insights = [i for i in insights if i.type == InsightType.QUALITY]
         assert len(quality_insights) > 0
@@ -301,6 +332,7 @@ class TestInsightGenerator:
 
 
 # ── Report Generator Tests ────────────────────────────────
+
 
 class TestReportGenerator:
     def test_generates_report(self, retail_df):
@@ -343,6 +375,7 @@ class TestReportGenerator:
 
 
 # ── DataAnalystCopilot Tests ──────────────────────────────
+
 
 class TestDataAnalystCopilot:
     def test_init(self, retail_df, retail_col_mapping):
@@ -428,6 +461,7 @@ class TestDataAnalystCopilot:
 
 # ── Healthcare Copilot Tests ──────────────────────────────
 
+
 class TestHealthcareCopilot:
     def test_why_billing_dropped(self, healthcare_df):
         copilot = DataAnalystCopilot(healthcare_df)
@@ -450,9 +484,11 @@ class TestHealthcareCopilot:
 
 # ── Pipeline Integration Tests ────────────────────────────
 
+
 class TestPipelineIntegration:
     def test_get_copilot_from_mapping_result(self, healthcare_df):
         from semantic.mapping_engine import SemanticMappingEngine
+
         result = SemanticMappingEngine.analyze(healthcare_df, "hospital.csv")
         copilot = result.get_copilot(healthcare_df)
         assert copilot is not None
@@ -460,6 +496,7 @@ class TestPipelineIntegration:
 
     def test_copilot_with_pipeline_result(self, healthcare_df):
         from semantic.mapping_engine import SemanticMappingEngine
+
         result = SemanticMappingEngine.analyze(healthcare_df, "hospital.csv")
         copilot = result.get_copilot(healthcare_df)
         response = copilot.ask("Give me a summary")
@@ -468,6 +505,7 @@ class TestPipelineIntegration:
 
     def test_copilot_report_with_pipeline(self, healthcare_df):
         from semantic.mapping_engine import SemanticMappingEngine
+
         result = SemanticMappingEngine.analyze(healthcare_df, "hospital.csv")
         copilot = result.get_copilot(healthcare_df)
         report = copilot.generate_report()

@@ -24,10 +24,10 @@ from __future__ import annotations
 
 import logging
 import time
+from collections.abc import Generator, Iterable
 from dataclasses import dataclass, field
-from typing import Any, Generator, Iterable
 
-from sqlalchemy import Index, MetaData, Table, text, inspect
+from sqlalchemy import inspect, text
 from sqlalchemy.orm import Session as DbSession
 
 logger = logging.getLogger("performance.db")
@@ -64,13 +64,29 @@ class IndexManager:
 
     # Critical indexes for production performance
     CRITICAL_INDEXES: list[dict] = [
-        {"table": "users", "columns": ["organization_id", "is_deleted"], "name": "idx_users_org_active"},
+        {
+            "table": "users",
+            "columns": ["organization_id", "is_deleted"],
+            "name": "idx_users_org_active",
+        },
         {"table": "users", "columns": ["email"], "name": "idx_users_email"},
-        {"table": "activity_logs", "columns": ["user_id", "created_at"], "name": "idx_activity_user_date"},
+        {
+            "table": "activity_logs",
+            "columns": ["user_id", "created_at"],
+            "name": "idx_activity_user_date",
+        },
         {"table": "activity_logs", "columns": ["action"], "name": "idx_activity_action"},
-        {"table": "audit_logs", "columns": ["organization_id", "created_at"], "name": "idx_audit_org_date"},
+        {
+            "table": "audit_logs",
+            "columns": ["organization_id", "created_at"],
+            "name": "idx_audit_org_date",
+        },
         {"table": "audit_logs", "columns": ["user_id"], "name": "idx_audit_user"},
-        {"table": "security_logs", "columns": ["organization_id", "created_at"], "name": "idx_security_org_date"},
+        {
+            "table": "security_logs",
+            "columns": ["organization_id", "created_at"],
+            "name": "idx_security_org_date",
+        },
         {"table": "organizations", "columns": ["slug"], "name": "idx_org_slug"},
         {"table": "sales", "columns": ["order_date"], "name": "idx_sales_date"},
         {"table": "pipeline_runs", "columns": ["started_at"], "name": "idx_pipeline_runs_date"},
@@ -89,14 +105,14 @@ class IndexManager:
                     return False  # Already exists
 
             # Get the table's columns to build index
-            table_columns = {
-                col["name"]: col for col in self._inspector.get_columns(table_name)
-            }
+            table_columns = {col["name"]: col for col in self._inspector.get_columns(table_name)}
 
             # Only create if all columns exist
             for col in columns:
                 if col not in table_columns:
-                    logger.warning(f"Column '{col}' not found on table '{table_name}', skipping index '{name}'")
+                    logger.warning(
+                        f"Column '{col}' not found on table '{table_name}', skipping index '{name}'"
+                    )
                     return False
 
             column_defs = ", ".join(columns)
@@ -117,9 +133,7 @@ class IndexManager:
         failed = []
 
         for idx_def in self.CRITICAL_INDEXES:
-            result = self.ensure_index(
-                idx_def["table"], idx_def["columns"], idx_def["name"]
-            )
+            result = self.ensure_index(idx_def["table"], idx_def["columns"], idx_def["name"])
             if result:
                 created.append(idx_def["name"])
             else:
@@ -170,27 +184,33 @@ class QueryOptimizer:
         # Check for missing WHERE clause
         query_str = str(query)
         if "WHERE" not in query_str.upper() and "LIMIT" not in query_str.upper():
-            suggestions.append({
-                "type": "missing_filter",
-                "message": "Query has no WHERE clause — will scan entire table. Add filters or use LIMIT.",
-                "severity": "high",
-            })
+            suggestions.append(
+                {
+                    "type": "missing_filter",
+                    "message": "Query has no WHERE clause — will scan entire table. Add filters or use LIMIT.",
+                    "severity": "high",
+                }
+            )
 
         # Check for SELECT *
         if "SELECT" in query_str.upper() and "*" not in query_str.upper():
-            suggestions.append({
-                "type": "column_selection",
-                "message": "Good — query selects specific columns.",
-                "severity": "info",
-            })
+            suggestions.append(
+                {
+                    "type": "column_selection",
+                    "message": "Good — query selects specific columns.",
+                    "severity": "info",
+                }
+            )
 
         # Check for missing LIMIT on potentially large queries
         if "LIMIT" not in query_str.upper():
-            suggestions.append({
-                "type": "missing_limit",
-                "message": "Consider adding LIMIT for large result sets. Use ChunkedQuery for processing.",
-                "severity": "medium",
-            })
+            suggestions.append(
+                {
+                    "type": "missing_limit",
+                    "message": "Consider adding LIMIT for large result sets. Use ChunkedQuery for processing.",
+                    "severity": "medium",
+                }
+            )
 
         return {
             "query": query_str[:500],
@@ -201,12 +221,14 @@ class QueryOptimizer:
     def track_slow_query(self, query_str: str, duration_ms: float, module: str = "") -> None:
         """Record a slow query for analysis."""
         if duration_ms >= self._slow_threshold_ms:
-            self._slow_queries.append({
-                "query": query_str[:500],
-                "duration_ms": round(duration_ms, 1),
-                "module": module,
-                "timestamp": time.time(),
-            })
+            self._slow_queries.append(
+                {
+                    "query": query_str[:500],
+                    "duration_ms": round(duration_ms, 1),
+                    "module": module,
+                    "timestamp": time.time(),
+                }
+            )
             # Keep last 100 slow queries
             if len(self._slow_queries) > 100:
                 self._slow_queries = self._slow_queries[-100:]

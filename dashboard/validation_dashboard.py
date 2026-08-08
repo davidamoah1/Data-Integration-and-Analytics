@@ -2,17 +2,12 @@
 
 from __future__ import annotations
 
-import html
-import io
-
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-from validation.engine import ValidationResult, ValidationStatus
+from validation.engine import ValidationResult
 from validation.report_generator import ValidationReportGenerator
-
 
 TRAFFIC_COLORS = {
     "green": "#28a745",
@@ -100,10 +95,14 @@ def _render_quality_score_cards(result: ValidationResult):
     cards = [
         ("Overall Score", f"{score.overall:.1f}", score.traffic_light),
         ("Errors", str(result.total_errors), "red" if result.total_errors > 0 else "green"),
-        ("Warnings", str(result.total_warnings), "yellow" if result.total_warnings > 0 else "green"),
+        (
+            "Warnings",
+            str(result.total_warnings),
+            "yellow" if result.total_warnings > 0 else "green",
+        ),
         ("Info", str(result.total_info), "green"),
     ]
-    for col, (label, value, color) in zip(cols, cards):
+    for col, (label, value, color) in zip(cols, cards, strict=False):
         bg = TRAFFIC_COLORS.get(color, "#6c757d")
         col.markdown(
             f"""
@@ -121,7 +120,7 @@ def _render_quality_score_cards(result: ValidationResult):
         ("Columns", f"{result.profile.column_count}"),
         ("Completeness", f"{result.profile.overall_completeness:.1f}%"),
     ]
-    for col, (label, value) in zip(cols2, cards2):
+    for col, (label, value) in zip(cols2, cards2, strict=False):
         col.markdown(
             f"""
             <div style="background:#f8f9fa;padding:10px;border-radius:4px;">
@@ -156,21 +155,37 @@ def _render_findings_summary(result: ValidationResult):
     col1, col2 = st.columns(2)
 
     with col1:
-        fig = go.Figure(data=[go.Bar(
-            x=list(sev_counts.keys()),
-            y=list(sev_counts.values()),
-            marker_color=[TRAFFIC_COLORS["red"], TRAFFIC_COLORS["yellow"], TRAFFIC_COLORS["green"]],
-        )])
-        fig.update_layout(title="Findings by Severity", xaxis_title="Severity", yaxis_title="Count", height=300)
+        fig = go.Figure(
+            data=[
+                go.Bar(
+                    x=list(sev_counts.keys()),
+                    y=list(sev_counts.values()),
+                    marker_color=[
+                        TRAFFIC_COLORS["red"],
+                        TRAFFIC_COLORS["yellow"],
+                        TRAFFIC_COLORS["green"],
+                    ],
+                )
+            ]
+        )
+        fig.update_layout(
+            title="Findings by Severity", xaxis_title="Severity", yaxis_title="Count", height=300
+        )
         st.plotly_chart(fig, use_container_width=True)
 
     with col2:
-        fig2 = go.Figure(data=[go.Bar(
-            x=list(cat_counts.keys()),
-            y=list(cat_counts.values()),
-            marker_color="#007bff",
-        )])
-        fig2.update_layout(title="Findings by Category", xaxis_title="Category", yaxis_title="Count", height=300)
+        fig2 = go.Figure(
+            data=[
+                go.Bar(
+                    x=list(cat_counts.keys()),
+                    y=list(cat_counts.values()),
+                    marker_color="#007bff",
+                )
+            ]
+        )
+        fig2.update_layout(
+            title="Findings by Category", xaxis_title="Category", yaxis_title="Count", height=300
+        )
         st.plotly_chart(fig2, use_container_width=True)
 
 
@@ -189,11 +204,20 @@ def _render_quality_dimensions(result: ValidationResult):
         "Integrity": score.integrity,
     }
 
-    fig = go.Figure(data=go.Bar(
-        x=list(dimensions.keys()),
-        y=list(dimensions.values()),
-        marker_color=[TRAFFIC_COLORS["green"] if v >= 85 else TRAFFIC_COLORS["yellow"] if v >= 60 else TRAFFIC_COLORS["red"] for v in dimensions.values()],
-    ))
+    fig = go.Figure(
+        data=go.Bar(
+            x=list(dimensions.keys()),
+            y=list(dimensions.values()),
+            marker_color=[
+                (
+                    TRAFFIC_COLORS["green"]
+                    if v >= 85
+                    else TRAFFIC_COLORS["yellow"] if v >= 60 else TRAFFIC_COLORS["red"]
+                )
+                for v in dimensions.values()
+            ],
+        )
+    )
     fig.update_layout(
         title="Quality Score by Dimension",
         xaxis_title="Dimension",
@@ -219,19 +243,25 @@ def _render_detailed_findings(result: ValidationResult):
         key="validation_severity_filter",
     )
 
-    filtered = [f for f in findings if f.get("severity") in severity_filter] if severity_filter else findings
+    filtered = (
+        [f for f in findings if f.get("severity") in severity_filter]
+        if severity_filter
+        else findings
+    )
 
     rows = []
     for f in filtered:
-        rows.append({
-            "Rule": f.get("rule_name", ""),
-            "Category": f.get("category", ""),
-            "Severity": f.get("severity", "").upper(),
-            "Column": f.get("column", ""),
-            "Affected Rows": f.get("affected_rows", 0),
-            "Message": f.get("message", ""),
-            "Suggested Fix": f.get("suggested_fix", ""),
-        })
+        rows.append(
+            {
+                "Rule": f.get("rule_name", ""),
+                "Category": f.get("category", ""),
+                "Severity": f.get("severity", "").upper(),
+                "Column": f.get("column", ""),
+                "Affected Rows": f.get("affected_rows", 0),
+                "Message": f.get("message", ""),
+                "Suggested Fix": f.get("suggested_fix", ""),
+            }
+        )
 
     df_findings = pd.DataFrame(rows)
     st.dataframe(df_findings, use_container_width=True, height=400)
@@ -249,15 +279,17 @@ def _render_data_profile(result: ValidationResult):
     # Column profiles table
     col_data = []
     for cp in profile.column_profiles:
-        col_data.append({
-            "Column": cp.name,
-            "Type": cp.dtype,
-            "Null %": f"{cp.null_percentage:.1f}%",
-            "Unique": cp.unique_count,
-            "Min": f"{cp.min_value:.2f}" if cp.min_value is not None else "-",
-            "Max": f"{cp.max_value:.2f}" if cp.max_value is not None else "-",
-            "Mean": f"{cp.mean_value:.2f}" if cp.mean_value is not None else "-",
-        })
+        col_data.append(
+            {
+                "Column": cp.name,
+                "Type": cp.dtype,
+                "Null %": f"{cp.null_percentage:.1f}%",
+                "Unique": cp.unique_count,
+                "Min": f"{cp.min_value:.2f}" if cp.min_value is not None else "-",
+                "Max": f"{cp.max_value:.2f}" if cp.max_value is not None else "-",
+                "Mean": f"{cp.mean_value:.2f}" if cp.mean_value is not None else "-",
+            }
+        )
 
     st.dataframe(pd.DataFrame(col_data), use_container_width=True)
 
@@ -272,13 +304,15 @@ def _render_schema_issues(result: ValidationResult):
     st.markdown("### Schema Validation Issues")
     rows = []
     for issue in schema.issues:
-        rows.append({
-            "Rule": issue.rule_name,
-            "Severity": issue.severity.upper(),
-            "Column": issue.column or "-",
-            "Message": issue.message,
-            "Fix": issue.suggested_fix or "-",
-        })
+        rows.append(
+            {
+                "Rule": issue.rule_name,
+                "Severity": issue.severity.upper(),
+                "Column": issue.column or "-",
+                "Message": issue.message,
+                "Fix": issue.suggested_fix or "-",
+            }
+        )
     st.dataframe(pd.DataFrame(rows), use_container_width=True)
 
 
@@ -288,12 +322,14 @@ def _render_recommendations(result: ValidationResult):
     for f in result.all_findings:
         fix = f.get("suggested_fix")
         if fix:
-            recs.append({
-                "Rule": f.get("rule_name", ""),
-                "Severity": f.get("severity", "").upper(),
-                "Recommendation": fix,
-                "Affected Rows": f.get("affected_rows", 0),
-            })
+            recs.append(
+                {
+                    "Rule": f.get("rule_name", ""),
+                    "Severity": f.get("severity", "").upper(),
+                    "Recommendation": fix,
+                    "Affected Rows": f.get("affected_rows", 0),
+                }
+            )
 
     if not recs:
         st.info("No recommendations — all checks passed.")
@@ -301,7 +337,9 @@ def _render_recommendations(result: ValidationResult):
 
     for rec in recs[:20]:
         sev = rec["Severity"]
-        color = TRAFFIC_COLORS.get("red" if sev == "ERROR" else "yellow" if sev == "WARNING" else "green", "#6c757d")
+        color = TRAFFIC_COLORS.get(
+            "red" if sev == "ERROR" else "yellow" if sev == "WARNING" else "green", "#6c757d"
+        )
         st.markdown(
             f"""
             <div style="border-left:3px solid {color};padding:8px 12px;margin-bottom:6px;background:#f8f9fa;">
@@ -331,8 +369,9 @@ def _render_export_buttons(result: ValidationResult):
 
     with col2:
         if st.button("Export Excel", key="export_excel"):
-            import tempfile
             import os
+            import tempfile
+
             with tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False) as tmp:
                 ValidationReportGenerator.export_excel(result, tmp.name)
                 with open(tmp.name, "rb") as f:
@@ -347,8 +386,9 @@ def _render_export_buttons(result: ValidationResult):
 
     with col3:
         if st.button("Export PDF", key="export_pdf"):
-            import tempfile
             import os
+            import tempfile
+
             with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
                 ValidationReportGenerator.export_pdf(result, tmp.name)
                 with open(tmp.name, "rb") as f:
@@ -362,12 +402,12 @@ def _render_export_buttons(result: ValidationResult):
             )
 
 
-def render_approval_section(result: ValidationResult, session_key: str = "validation_result") -> bool:
+def render_approval_section(
+    result: ValidationResult, session_key: str = "validation_result"
+) -> bool:
     """Render the approval workflow section. Returns True if approved."""
     if result.can_proceed_to_etl:
-        st.success(
-            f"Validation {result.status.value.replace('_', ' ')} — ETL can proceed."
-        )
+        st.success(f"Validation {result.status.value.replace('_', ' ')} — ETL can proceed.")
         return True
 
     st.warning(
@@ -392,7 +432,9 @@ def render_approval_section(result: ValidationResult, session_key: str = "valida
             st.write(f"Errors: {result.total_errors}")
             st.write(f"Warnings: {result.total_warnings}")
             if result.quality_score:
-                st.write(f"Quality Score: {result.quality_score.overall:.1f} ({result.quality_score.traffic_light})")
+                st.write(
+                    f"Quality Score: {result.quality_score.overall:.1f} ({result.quality_score.traffic_light})"
+                )
 
         col_btn1, col_btn2 = st.columns(2)
         with col_btn1:
@@ -401,6 +443,7 @@ def render_approval_section(result: ValidationResult, session_key: str = "valida
                     st.error("Please enter approver name.")
                     return False
                 from validation.approval import ApprovalWorkflow
+
                 ApprovalWorkflow.approve(result, approver, role, comments)
                 st.success("Validation approved! ETL can now proceed.")
                 st.rerun()
@@ -412,6 +455,7 @@ def render_approval_section(result: ValidationResult, session_key: str = "valida
                     st.error("Please enter approver name.")
                     return False
                 from validation.approval import ApprovalWorkflow
+
                 ApprovalWorkflow.reject(result, approver, role, comments)
                 st.error("Validation rejected. ETL remains blocked.")
                 st.rerun()

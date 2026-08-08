@@ -16,11 +16,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session as DbSession
 
+from authentication.repositories import UserRepository
+from services.onboarding_service import OnboardingService
 from shared.database import get_db
 from shared.dependencies import get_current_user
 from shared.response import success_response
-from services.onboarding_service import OnboardingService
-from authentication.repositories import UserRepository
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/onboarding", tags=["Onboarding"])
@@ -65,13 +65,15 @@ async def complete_onboarding_step(
         db.commit()
 
         # Return updated status
-        status = _service.get_status({
-            "roles": current_user.get("roles", []),
-            "onboarding_data": updated_data,
-        })
+        status = _service.get_status(
+            {
+                "roles": current_user.get("roles", []),
+                "onboarding_data": updated_data,
+            }
+        )
         return success_response(status, f"Step '{request.step_key}' completed")
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from None
 
 
 @router.post("/skip")
@@ -85,9 +87,11 @@ async def skip_onboarding(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    updated_data = _service.skip_onboarding({
-        "onboarding_data": user.onboarding_data,
-    })
+    updated_data = _service.skip_onboarding(
+        {
+            "onboarding_data": user.onboarding_data,
+        }
+    )
     user_repo.update(user.id, onboarding_data=updated_data, onboarding_completed=1)
     db.commit()
 
@@ -105,16 +109,20 @@ async def reset_onboarding(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    updated_data = _service.reset_onboarding({
-        "onboarding_data": user.onboarding_data,
-    })
+    updated_data = _service.reset_onboarding(
+        {
+            "onboarding_data": user.onboarding_data,
+        }
+    )
     user_repo.update(user.id, onboarding_data=updated_data, onboarding_completed=0)
     db.commit()
 
-    status = _service.get_status({
-        "roles": current_user.get("roles", []),
-        "onboarding_data": updated_data,
-    })
+    status = _service.get_status(
+        {
+            "roles": current_user.get("roles", []),
+            "onboarding_data": updated_data,
+        }
+    )
     return success_response(status, "Onboarding reset")
 
 

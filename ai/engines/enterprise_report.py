@@ -8,11 +8,9 @@ Supports export to PDF, DOCX, HTML, and Markdown.
 from __future__ import annotations
 
 import io
-import json
 import logging
 import re
 from datetime import datetime, timezone
-from typing import Any
 
 import pandas as pd
 from sqlalchemy.orm import Session as DbSession
@@ -23,7 +21,7 @@ from ai.engines.executive_summary import ExecutiveSummaryEngine
 from ai.engines.recommendation_engine import RecommendationEngine
 from ai.gateway import AIGateway
 from ai.models import AIReportGeneration
-from ai.prompt_orchestrator import PromptOrchestrator, PromptTaskType
+from ai.prompt_orchestrator import PromptOrchestrator
 
 logger = logging.getLogger(__name__)
 
@@ -178,93 +176,111 @@ class EnterpriseReportEngine:
         sections = []
 
         # 1. Executive Summary
-        sections.append({
-            "title": "Executive Summary",
-            "content": exec_summary.get("executive_summary", ""),
-            "charts": [],
-            "tables": [],
-        })
+        sections.append(
+            {
+                "title": "Executive Summary",
+                "content": exec_summary.get("executive_summary", ""),
+                "charts": [],
+                "tables": [],
+            }
+        )
 
         # 2. KPI Highlights
         kpi_highlights = exec_summary.get("kpi_highlights", [])
         if kpi_highlights:
             kpi_table = self._build_kpi_table(kpi_highlights)
-            sections.append({
-                "title": "KPI Highlights",
-                "content": "The following key performance indicators were identified:",
-                "charts": [],
-                "tables": [kpi_table],
-            })
+            sections.append(
+                {
+                    "title": "KPI Highlights",
+                    "content": "The following key performance indicators were identified:",
+                    "charts": [],
+                    "tables": [kpi_table],
+                }
+            )
 
         # 3. Main Drivers
         main_drivers = exec_summary.get("main_drivers", [])
         if main_drivers:
-            sections.append({
-                "title": "Main Drivers",
-                "content": "\n".join(f"- {d}" for d in main_drivers),
-                "charts": [],
-                "tables": [],
-            })
+            sections.append(
+                {
+                    "title": "Main Drivers",
+                    "content": "\n".join(f"- {d}" for d in main_drivers),
+                    "charts": [],
+                    "tables": [],
+                }
+            )
 
         # 4. Data Overview
         overall = data.get("overall", {})
         if overall:
-            sections.append({
-                "title": "Data Overview",
-                "content": self._build_data_overview(overall),
-                "charts": [],
-                "tables": [],
-            })
+            sections.append(
+                {
+                    "title": "Data Overview",
+                    "content": self._build_data_overview(overall),
+                    "charts": [],
+                    "tables": [],
+                }
+            )
 
         # 5. Trend Analysis
         trends = data.get("time_trends", {})
         if trends:
-            sections.append({
-                "title": "Trend Analysis",
-                "content": self._build_trend_section(trends),
-                "charts": ["line"],
-                "tables": [],
-            })
+            sections.append(
+                {
+                    "title": "Trend Analysis",
+                    "content": self._build_trend_section(trends),
+                    "charts": ["line"],
+                    "tables": [],
+                }
+            )
 
         # 6. Top Contributors
         contributors = data.get("top_contributors", {})
         if contributors:
-            sections.append({
-                "title": "Top Contributors",
-                "content": self._build_contributors_section(contributors),
-                "charts": ["bar"],
-                "tables": [],
-            })
+            sections.append(
+                {
+                    "title": "Top Contributors",
+                    "content": self._build_contributors_section(contributors),
+                    "charts": ["bar"],
+                    "tables": [],
+                }
+            )
 
         # 7. Risks
         risks = exec_summary.get("risks", [])
         if risks:
-            sections.append({
-                "title": "Risks",
-                "content": self._build_risks_section(risks),
-                "charts": [],
-                "tables": [],
-            })
+            sections.append(
+                {
+                    "title": "Risks",
+                    "content": self._build_risks_section(risks),
+                    "charts": [],
+                    "tables": [],
+                }
+            )
 
         # 8. Opportunities
         opportunities = exec_summary.get("opportunities", [])
         if opportunities:
-            sections.append({
-                "title": "Opportunities",
-                "content": "\n".join(f"- {o}" for o in opportunities),
-                "charts": [],
-                "tables": [],
-            })
+            sections.append(
+                {
+                    "title": "Opportunities",
+                    "content": "\n".join(f"- {o}" for o in opportunities),
+                    "charts": [],
+                    "tables": [],
+                }
+            )
 
         # 9. Recommendations
         recs = recommendations.get("recommendations", [])
         if recs:
-            sections.append({
-                "title": "Recommendations",
-                "content": self._build_recommendations_section(recs),
-                "charts": [],
-                "tables": [],
-            })
+            sections.append(
+                {
+                    "title": "Recommendations",
+                    "content": self._build_recommendations_section(recs),
+                    "charts": [],
+                    "tables": [],
+                }
+            )
 
         return sections
 
@@ -307,7 +323,9 @@ class EnterpriseReportEngine:
                 change = last - first
                 pct = (change / first * 100) if first != 0 else 0
                 direction = "increasing" if change > 0 else "decreasing" if change < 0 else "stable"
-                lines.append(f"- **{metric.title()}**: {direction} ({pct:+.1f}%) from {first:,.2f} to {last:,.2f}")
+                lines.append(
+                    f"- **{metric.title()}**: {direction} ({pct:+.1f}%) from {first:,.2f} to {last:,.2f}"
+                )
         return "\n".join(lines) if lines else "No trend data available."
 
     def _build_contributors_section(self, contributors: dict) -> str:
@@ -374,10 +392,16 @@ class EnterpriseReportEngine:
         lines.append(f"- **Records Analyzed**: {data.get('overall', {}).get('row_count', 0):,}")
         lines.append(f"- **Columns Analyzed**: {data.get('overall', {}).get('column_count', 0)}")
         if context.industry.industry != "unknown":
-            lines.append(f"- **Industry Context**: {context.industry.display_name or context.industry.industry}")
-        lines.append("- **Analysis Methods**: Statistical aggregation, trend analysis, contribution analysis")
+            lines.append(
+                f"- **Industry Context**: {context.industry.display_name or context.industry.industry}"
+            )
+        lines.append(
+            "- **Analysis Methods**: Statistical aggregation, trend analysis, contribution analysis"
+        )
         lines.append("- **AI Model**: Enterprise AI Decision Support System")
-        lines.append("- **Report Generated**: " + str(datetime.now(timezone.utc).replace(tzinfo=None)))
+        lines.append(
+            "- **Report Generated**: " + str(datetime.now(timezone.utc).replace(tzinfo=None))
+        )
         if data.get("data_sources"):
             lines.append(f"- **Data Sources**: {len(data['data_sources'])} source(s)")
         return "\n".join(lines)
@@ -417,6 +441,7 @@ class EnterpriseReportEngine:
         """Convert markdown content to HTML."""
         try:
             import markdown as md
+
             html_body = md.markdown(content, extensions=["tables", "fenced_code"])
             return f"<!DOCTYPE html>\n<html>\n<head>\n<title>{title}</title>\n<style>\nbody {{ font-family: Arial, sans-serif; margin: 40px; }}\ntable {{ border-collapse: collapse; width: 100%; }}\nth, td {{ border: 1px solid #ddd; padding: 8px; text-align: left; }}\nth {{ background-color: #f2f2f2; }}\n</style>\n</head>\n<body>\n{html_body}\n</body>\n</html>"
         except ImportError:
@@ -431,8 +456,8 @@ class EnterpriseReportEngine:
         pdf.set_font("Helvetica", size=12)
 
         # Strip markdown formatting for PDF
-        clean = re.sub(r'[#*|_`>]', '', content)
-        clean = clean.replace('\n\n', '\n')
+        clean = re.sub(r"[#*|_`>]", "", content)
+        clean = clean.replace("\n\n", "\n")
 
         pdf.multi_cell(0, 6, clean[:5000])  # Limit content for PDF
         return pdf.output(dest="S")
@@ -446,7 +471,7 @@ class EnterpriseReportEngine:
             doc.add_heading(title, 0)
 
             for line in content.split("\n"):
-                clean = re.sub(r'[#*|_`>]', '', line).strip()
+                clean = re.sub(r"[#*|_`>]", "", line).strip()
                 if clean:
                     if line.startswith("# "):
                         doc.add_heading(clean, 1)

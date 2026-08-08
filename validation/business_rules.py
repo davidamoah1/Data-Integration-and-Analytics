@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-import json
 from dataclasses import dataclass, field
-from datetime import datetime, date
 
 import pandas as pd
 
@@ -12,6 +10,7 @@ import pandas as pd
 @dataclass
 class BusinessRule:
     """A configurable business rule."""
+
     name: str
     description: str
     category: str  # business, clinical, administrative
@@ -78,14 +77,16 @@ class BusinessRuleEngine:
                 if result:
                     findings.extend(result)
             except Exception as e:
-                findings.append(BusinessRuleFinding(
-                    rule_name=rule.name,
-                    category=rule.category,
-                    severity="warning",
-                    column=None,
-                    affected_rows=0,
-                    message=f"Rule '{rule.name}' could not be evaluated: {e}",
-                ))
+                findings.append(
+                    BusinessRuleFinding(
+                        rule_name=rule.name,
+                        category=rule.category,
+                        severity="warning",
+                        column=None,
+                        affected_rows=0,
+                        message=f"Rule '{rule.name}' could not be evaluated: {e}",
+                    )
+                )
         return findings
 
     def _register_default_rules(self):
@@ -200,16 +201,18 @@ class BusinessRuleEngine:
             return []
         dup_count = int(df[col].duplicated(keep=False).sum())
         if dup_count > 0:
-            return [BusinessRuleFinding(
-                rule_name="unique_patient_id",
-                category="business",
-                severity="error",
-                column=col,
-                affected_rows=dup_count,
-                message=f"{dup_count} duplicate patient IDs found in '{col}'.",
-                suggested_fix="Ensure each patient has a unique ID.",
-                business_impact="Duplicate patient IDs can cause record merging errors and patient safety issues.",
-            )]
+            return [
+                BusinessRuleFinding(
+                    rule_name="unique_patient_id",
+                    category="business",
+                    severity="error",
+                    column=col,
+                    affected_rows=dup_count,
+                    message=f"{dup_count} duplicate patient IDs found in '{col}'.",
+                    suggested_fix="Ensure each patient has a unique ID.",
+                    business_impact="Duplicate patient IDs can cause record merging errors and patient safety issues.",
+                )
+            ]
         return []
 
     @staticmethod
@@ -225,20 +228,24 @@ class BusinessRuleEngine:
         future_mask = dob > today
         future_count = int(future_mask.sum())
         if future_count > 0:
-            return [BusinessRuleFinding(
-                rule_name="dob_not_future",
-                category="business",
-                severity="error",
-                column=col,
-                affected_rows=future_count,
-                message=f"{future_count} records have date of birth in the future.",
-                suggested_fix="Correct dates of birth to valid past dates.",
-                business_impact="Future birth dates indicate data entry errors.",
-            )]
+            return [
+                BusinessRuleFinding(
+                    rule_name="dob_not_future",
+                    category="business",
+                    severity="error",
+                    column=col,
+                    affected_rows=future_count,
+                    message=f"{future_count} records have date of birth in the future.",
+                    suggested_fix="Correct dates of birth to valid past dates.",
+                    business_impact="Future birth dates indicate data entry errors.",
+                )
+            ]
         return []
 
     @staticmethod
-    def _check_admission_before_discharge(df: pd.DataFrame, config: dict) -> list[BusinessRuleFinding]:
+    def _check_admission_before_discharge(
+        df: pd.DataFrame, config: dict
+    ) -> list[BusinessRuleFinding]:
         adm_col = BusinessRuleEngine._find_col(df, ["admission_date", "admit_date", "admission"])
         dis_col = BusinessRuleEngine._find_col(df, ["discharge_date", "discharge"])
         if not adm_col or not dis_col:
@@ -253,16 +260,18 @@ class BusinessRuleEngine:
         invalid_mask = (adm > dis) & adm.notna() & dis.notna()
         invalid_count = int(invalid_mask.sum())
         if invalid_count > 0:
-            return [BusinessRuleFinding(
-                rule_name="admission_before_discharge",
-                category="clinical",
-                severity="error",
-                column=f"{adm_col} / {dis_col}",
-                affected_rows=invalid_count,
-                message=f"{invalid_count} records have admission date after discharge date.",
-                suggested_fix="Correct admission or discharge dates so admission precedes discharge.",
-                business_impact="Invalid date sequences affect length-of-stay calculations and billing.",
-            )]
+            return [
+                BusinessRuleFinding(
+                    rule_name="admission_before_discharge",
+                    category="clinical",
+                    severity="error",
+                    column=f"{adm_col} / {dis_col}",
+                    affected_rows=invalid_count,
+                    message=f"{invalid_count} records have admission date after discharge date.",
+                    suggested_fix="Correct admission or discharge dates so admission precedes discharge.",
+                    business_impact="Invalid date sequences affect length-of-stay calculations and billing.",
+                )
+            ]
         return []
 
     @staticmethod
@@ -273,16 +282,18 @@ class BusinessRuleEngine:
         invalid_mask = (df[col] < 0) | (df[col] > 150)
         invalid_count = int(invalid_mask.sum())
         if invalid_count > 0:
-            return [BusinessRuleFinding(
-                rule_name="realistic_age",
-                category="clinical",
-                severity="error",
-                column=col,
-                affected_rows=invalid_count,
-                message=f"{invalid_count} records have age outside 0-150 range.",
-                suggested_fix="Correct age values to be between 0 and 150.",
-                business_impact="Impossible ages indicate data entry errors and affect patient demographics.",
-            )]
+            return [
+                BusinessRuleFinding(
+                    rule_name="realistic_age",
+                    category="clinical",
+                    severity="error",
+                    column=col,
+                    affected_rows=invalid_count,
+                    message=f"{invalid_count} records have age outside 0-150 range.",
+                    suggested_fix="Correct age values to be between 0 and 150.",
+                    business_impact="Impossible ages indicate data entry errors and affect patient demographics.",
+                )
+            ]
         return []
 
     @staticmethod
@@ -292,16 +303,18 @@ class BusinessRuleEngine:
             return []
         neg_count = int((df[col] < 0).sum())
         if neg_count > 0:
-            return [BusinessRuleFinding(
-                rule_name="no_negative_weight",
-                category="clinical",
-                severity="error",
-                column=col,
-                affected_rows=neg_count,
-                message=f"{neg_count} records have negative weight values.",
-                suggested_fix="Remove or correct negative weight values.",
-                business_impact="Negative weights are physiologically impossible.",
-            )]
+            return [
+                BusinessRuleFinding(
+                    rule_name="no_negative_weight",
+                    category="clinical",
+                    severity="error",
+                    column=col,
+                    affected_rows=neg_count,
+                    message=f"{neg_count} records have negative weight values.",
+                    suggested_fix="Remove or correct negative weight values.",
+                    business_impact="Negative weights are physiologically impossible.",
+                )
+            ]
         return []
 
     @staticmethod
@@ -311,36 +324,48 @@ class BusinessRuleEngine:
             return []
         neg_count = int((df[col] < 0).sum())
         if neg_count > 0:
-            return [BusinessRuleFinding(
-                rule_name="no_negative_height",
-                category="clinical",
-                severity="error",
-                column=col,
-                affected_rows=neg_count,
-                message=f"{neg_count} records have negative height values.",
-                suggested_fix="Remove or correct negative height values.",
-                business_impact="Negative heights are physiologically impossible.",
-            )]
+            return [
+                BusinessRuleFinding(
+                    rule_name="no_negative_height",
+                    category="clinical",
+                    severity="error",
+                    column=col,
+                    affected_rows=neg_count,
+                    message=f"{neg_count} records have negative height values.",
+                    suggested_fix="Remove or correct negative height values.",
+                    business_impact="Negative heights are physiologically impossible.",
+                )
+            ]
         return []
 
     @staticmethod
     def _check_negative_lab_values(df: pd.DataFrame, config: dict) -> list[BusinessRuleFinding]:
         findings = []
-        lab_cols = [c for c in df.columns if "lab" in c.lower() and pd.api.types.is_numeric_dtype(df[c])]
-        lab_cols += [c for c in df.columns if "result" in c.lower() and "test" not in c.lower() and pd.api.types.is_numeric_dtype(df[c])]
+        lab_cols = [
+            c for c in df.columns if "lab" in c.lower() and pd.api.types.is_numeric_dtype(df[c])
+        ]
+        lab_cols += [
+            c
+            for c in df.columns
+            if "result" in c.lower()
+            and "test" not in c.lower()
+            and pd.api.types.is_numeric_dtype(df[c])
+        ]
         for col in lab_cols:
             neg_count = int((df[col] < 0).sum())
             if neg_count > 0:
-                findings.append(BusinessRuleFinding(
-                    rule_name="no_negative_lab_values",
-                    category="clinical",
-                    severity="error",
-                    column=col,
-                    affected_rows=neg_count,
-                    message=f"Column '{col}': {neg_count} negative laboratory values.",
-                    suggested_fix="Remove or correct negative lab values.",
-                    business_impact="Negative lab values are typically impossible and indicate data errors.",
-                ))
+                findings.append(
+                    BusinessRuleFinding(
+                        rule_name="no_negative_lab_values",
+                        category="clinical",
+                        severity="error",
+                        column=col,
+                        affected_rows=neg_count,
+                        message=f"Column '{col}': {neg_count} negative laboratory values.",
+                        suggested_fix="Remove or correct negative lab values.",
+                        business_impact="Negative lab values are typically impossible and indicate data errors.",
+                    )
+                )
         return findings
 
     @staticmethod
@@ -353,19 +378,23 @@ class BusinessRuleEngine:
             return []
         gender_lower = df[gender_col].astype(str).str.strip().str.lower()
         preg_lower = df[preg_col].astype(str).str.strip().str.lower()
-        male_pregnant = gender_lower.isin(["m", "male"]) & preg_lower.isin(["yes", "true", "1", "pregnant"])
+        male_pregnant = gender_lower.isin(["m", "male"]) & preg_lower.isin(
+            ["yes", "true", "1", "pregnant"]
+        )
         count = int(male_pregnant.sum())
         if count > 0:
-            return [BusinessRuleFinding(
-                rule_name="male_not_pregnant",
-                category="clinical",
-                severity="error",
-                column=f"{gender_col} / {preg_col}",
-                affected_rows=count,
-                message=f"{count} male patients marked as pregnant.",
-                suggested_fix="Correct gender or pregnancy status.",
-                business_impact="Clinically impossible records indicate data entry errors.",
-            )]
+            return [
+                BusinessRuleFinding(
+                    rule_name="male_not_pregnant",
+                    category="clinical",
+                    severity="error",
+                    column=f"{gender_col} / {preg_col}",
+                    affected_rows=count,
+                    message=f"{count} male patients marked as pregnant.",
+                    suggested_fix="Correct gender or pregnancy status.",
+                    business_impact="Clinically impossible records indicate data entry errors.",
+                )
+            ]
         return []
 
     @staticmethod
@@ -379,22 +408,28 @@ class BusinessRuleEngine:
         null_patients = df[patient_col].isna() | (df[patient_col].astype(str).str.strip() == "")
         count = int(null_patients.sum())
         if count > 0:
-            return [BusinessRuleFinding(
-                rule_name="visit_requires_patient",
-                category="administrative",
-                severity="error",
-                column=patient_col,
-                affected_rows=count,
-                message=f"{count} visit/admission records have no patient ID.",
-                suggested_fix="Link all visits to valid patient IDs.",
-                business_impact="Orphaned visits cannot be attributed to patients.",
-            )]
+            return [
+                BusinessRuleFinding(
+                    rule_name="visit_requires_patient",
+                    category="administrative",
+                    severity="error",
+                    column=patient_col,
+                    affected_rows=count,
+                    message=f"{count} visit/admission records have no patient ID.",
+                    suggested_fix="Link all visits to valid patient IDs.",
+                    business_impact="Orphaned visits cannot be attributed to patients.",
+                )
+            ]
         return []
 
     @staticmethod
-    def _check_diagnosis_requires_clinician(df: pd.DataFrame, config: dict) -> list[BusinessRuleFinding]:
+    def _check_diagnosis_requires_clinician(
+        df: pd.DataFrame, config: dict
+    ) -> list[BusinessRuleFinding]:
         diag_col = BusinessRuleEngine._find_col(df, ["diagnosis"])
-        clin_col = BusinessRuleEngine._find_col(df, ["doctor", "clinician", "physician", "attending"])
+        clin_col = BusinessRuleEngine._find_col(
+            df, ["doctor", "clinician", "physician", "attending"]
+        )
         if not diag_col or not clin_col:
             return []
         if diag_col not in df.columns or clin_col not in df.columns:
@@ -403,22 +438,28 @@ class BusinessRuleEngine:
         no_clin = df[clin_col].isna() | (df[clin_col].astype(str).str.strip() == "")
         count = int((has_diag & no_clin).sum())
         if count > 0:
-            return [BusinessRuleFinding(
-                rule_name="diagnosis_requires_clinician",
-                category="clinical",
-                severity="warning",
-                column=clin_col,
-                affected_rows=count,
-                message=f"{count} diagnosis records have no attending clinician.",
-                suggested_fix="Assign a clinician to each diagnosis record.",
-                business_impact="Diagnoses without clinicians may not be valid for billing.",
-            )]
+            return [
+                BusinessRuleFinding(
+                    rule_name="diagnosis_requires_clinician",
+                    category="clinical",
+                    severity="warning",
+                    column=clin_col,
+                    affected_rows=count,
+                    message=f"{count} diagnosis records have no attending clinician.",
+                    suggested_fix="Assign a clinician to each diagnosis record.",
+                    business_impact="Diagnoses without clinicians may not be valid for billing.",
+                )
+            ]
         return []
 
     @staticmethod
-    def _check_medication_requires_prescriber(df: pd.DataFrame, config: dict) -> list[BusinessRuleFinding]:
+    def _check_medication_requires_prescriber(
+        df: pd.DataFrame, config: dict
+    ) -> list[BusinessRuleFinding]:
         med_col = BusinessRuleEngine._find_col(df, ["medication", "drug", "medicine"])
-        presc_col = BusinessRuleEngine._find_col(df, ["prescribed_by", "prescriber", "prescription"])
+        presc_col = BusinessRuleEngine._find_col(
+            df, ["prescribed_by", "prescriber", "prescription"]
+        )
         if not med_col or not presc_col:
             return []
         if med_col not in df.columns or presc_col not in df.columns:
@@ -427,22 +468,28 @@ class BusinessRuleEngine:
         no_presc = df[presc_col].isna() | (df[presc_col].astype(str).str.strip() == "")
         count = int((has_med & no_presc).sum())
         if count > 0:
-            return [BusinessRuleFinding(
-                rule_name="medication_requires_prescription",
-                category="clinical",
-                severity="warning",
-                column=presc_col,
-                affected_rows=count,
-                message=f"{count} medication records have no prescriber.",
-                suggested_fix="Assign a prescriber to each medication record.",
-                business_impact="Medications without prescribers may not be valid for billing.",
-            )]
+            return [
+                BusinessRuleFinding(
+                    rule_name="medication_requires_prescription",
+                    category="clinical",
+                    severity="warning",
+                    column=presc_col,
+                    affected_rows=count,
+                    message=f"{count} medication records have no prescriber.",
+                    suggested_fix="Assign a prescriber to each medication record.",
+                    business_impact="Medications without prescribers may not be valid for billing.",
+                )
+            ]
         return []
 
     @staticmethod
-    def _check_lab_result_requires_order(df: pd.DataFrame, config: dict) -> list[BusinessRuleFinding]:
+    def _check_lab_result_requires_order(
+        df: pd.DataFrame, config: dict
+    ) -> list[BusinessRuleFinding]:
         result_col = BusinessRuleEngine._find_col(df, ["test_result", "lab_result", "result"])
-        order_col = BusinessRuleEngine._find_col(df, ["test_order", "ordered_by", "order_id", "lab_order"])
+        order_col = BusinessRuleEngine._find_col(
+            df, ["test_order", "ordered_by", "order_id", "lab_order"]
+        )
         if not result_col or not order_col:
             return []
         if result_col not in df.columns or order_col not in df.columns:
@@ -451,16 +498,18 @@ class BusinessRuleEngine:
         no_order = df[order_col].isna() | (df[order_col].astype(str).str.strip() == "")
         count = int((has_result & no_order).sum())
         if count > 0:
-            return [BusinessRuleFinding(
-                rule_name="lab_result_requires_order",
-                category="clinical",
-                severity="warning",
-                column=order_col,
-                affected_rows=count,
-                message=f"{count} lab results have no corresponding test order.",
-                suggested_fix="Link lab results to test orders.",
-                business_impact="Lab results without orders may not be billable.",
-            )]
+            return [
+                BusinessRuleFinding(
+                    rule_name="lab_result_requires_order",
+                    category="clinical",
+                    severity="warning",
+                    column=order_col,
+                    affected_rows=count,
+                    message=f"{count} lab results have no corresponding test order.",
+                    suggested_fix="Link lab results to test orders.",
+                    business_impact="Lab results without orders may not be billable.",
+                )
+            ]
         return []
 
     @staticmethod
@@ -475,17 +524,21 @@ class BusinessRuleEngine:
             return []
         children = df[age_col] < 18
         dept_lower = df[dept_col].astype(str).str.strip().str.lower()
-        not_pediatric = ~dept_lower.isin(["pediatric", "paediatric", "pediatrics", "paediatrics", "children", "child"])
+        not_pediatric = ~dept_lower.isin(
+            ["pediatric", "paediatric", "pediatrics", "paediatrics", "children", "child"]
+        )
         count = int((children & not_pediatric).sum())
         if count > 0:
-            return [BusinessRuleFinding(
-                rule_name="child_age_pediatric",
-                category="clinical",
-                severity="info",
-                column=dept_col,
-                affected_rows=count,
-                message=f"{count} patients under 18 are not in a pediatric department.",
-                suggested_fix="Review department assignment for pediatric patients.",
-                business_impact="Pediatric patients in adult wards may require special protocols.",
-            )]
+            return [
+                BusinessRuleFinding(
+                    rule_name="child_age_pediatric",
+                    category="clinical",
+                    severity="info",
+                    column=dept_col,
+                    affected_rows=count,
+                    message=f"{count} patients under 18 are not in a pediatric department.",
+                    suggested_fix="Review department assignment for pediatric patients.",
+                    business_impact="Pediatric patients in adult wards may require special protocols.",
+                )
+            ]
         return []

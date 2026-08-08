@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 from typing import Any
 
 import numpy as np
@@ -35,10 +36,8 @@ def classification_metrics(y_true, y_pred, y_proba=None, average="weighted") -> 
         }
 
     if y_proba is not None and len(np.unique(y_true)) == 2:
-        try:
+        with contextlib.suppress(Exception):
             metrics["roc_auc"] = float(roc_auc_score(y_true, y_proba[:, 1]))
-        except Exception:
-            pass
     return metrics
 
 
@@ -78,4 +77,8 @@ def anomaly_metrics(labels) -> dict[str, int]:
     """Summarize anomaly detection results."""
     total = int(len(labels))
     anomalies = int(sum(1 for l in labels if l == -1))
-    return {"total": total, "anomalies": anomalies, "anomaly_rate": round(anomalies / total, 4) if total else 0.0}
+    return {
+        "total": total,
+        "anomalies": anomalies,
+        "anomaly_rate": round(anomalies / total, 4) if total else 0.0,
+    }

@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session as DbSession
 from performance.cache import get_cache_manager
 from performance.db_optimization import IndexManager, get_db_stats
 from shared.database import get_db
-from shared.dependencies import get_current_user, require_permissions
+from shared.dependencies import require_permissions
 from shared.response import success_response
 
 performance_router = APIRouter(prefix="/performance", tags=["Performance"])
@@ -31,11 +31,13 @@ async def performance_overview(
     cache = get_cache_manager()
     db_stats = get_db_stats(db)
 
-    return success_response({
-        "cache": cache.get_stats().to_dict(),
-        "cache_backend": "redis" if cache.is_redis_backend else "memory",
-        "database": db_stats.to_dict(),
-    })
+    return success_response(
+        {
+            "cache": cache.get_stats().to_dict(),
+            "cache_backend": "redis" if cache.is_redis_backend else "memory",
+            "database": db_stats.to_dict(),
+        }
+    )
 
 
 # --- Queue endpoints ---
@@ -46,18 +48,19 @@ async def queue_stats(
     current_user: dict = Depends(require_permissions("settings.manage")),
 ):
     """Get task queue statistics."""
-    from performance.queue import TaskQueue
 
     # Return empty stats if no queue is active
-    return success_response({
-        "message": "Queue stats are available when workers are running.",
-        "stats": {
-            "total_enqueued": 0,
-            "total_completed": 0,
-            "total_failed": 0,
-            "pending": 0,
-        },
-    })
+    return success_response(
+        {
+            "message": "Queue stats are available when workers are running.",
+            "stats": {
+                "total_enqueued": 0,
+                "total_completed": 0,
+                "total_failed": 0,
+                "pending": 0,
+            },
+        }
+    )
 
 
 # --- Cache endpoints ---
@@ -69,11 +72,13 @@ async def cache_stats(
 ):
     """Get cache statistics."""
     cache = get_cache_manager()
-    return success_response({
-        **cache.get_stats().to_dict(),
-        "backend": "redis" if cache.is_redis_backend else "memory",
-        "memory_size": cache.get_memory_size(),
-    })
+    return success_response(
+        {
+            **cache.get_stats().to_dict(),
+            "backend": "redis" if cache.is_redis_backend else "memory",
+            "memory_size": cache.get_memory_size(),
+        }
+    )
 
 
 @performance_router.delete("/cache/clear")

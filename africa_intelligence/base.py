@@ -11,8 +11,6 @@ Defines:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from abc import ABC, abstractmethod
-from typing import Any
 
 
 @dataclass
@@ -257,8 +255,8 @@ class AfricaIntelligenceRegistry:
     def _ensure_initialized(cls) -> None:
         if not cls._initialized:
             from africa_intelligence.ghana import GHANA_PROFILE
-            from africa_intelligence.nigeria import NIGERIA_PROFILE
             from africa_intelligence.kenya import KENYA_PROFILE
+            from africa_intelligence.nigeria import NIGERIA_PROFILE
             from africa_intelligence.south_africa import SOUTH_AFRICA_PROFILE
 
             cls._countries = {
@@ -298,7 +296,6 @@ class AfricaIntelligenceRegistry:
           - Local industry terms
         """
         cls._ensure_initialized()
-        import pandas as pd
 
         scores: dict[str, int] = {code: 0 for code in cls._countries}
 

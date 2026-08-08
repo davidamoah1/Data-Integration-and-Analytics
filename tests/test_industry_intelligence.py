@@ -9,32 +9,33 @@ from __future__ import annotations
 import pandas as pd
 import pytest
 
+from industry_intelligence.agriculture import AgricultureAnalytics
+from industry_intelligence.banking import BankingAnalytics
 from industry_intelligence.base import (
     AnalyticsResult,
-    IndustryAnalytics,
     IndustryAnalyticsRegistry,
 )
-from industry_intelligence.healthcare import HealthcareAnalytics
 from industry_intelligence.education import EducationAnalytics
-from industry_intelligence.banking import BankingAnalytics
-from industry_intelligence.agriculture import AgricultureAnalytics
 from industry_intelligence.government import GovernmentAnalytics
-from industry_intelligence.retail import RetailAnalytics
+from industry_intelligence.healthcare import HealthcareAnalytics
 from industry_intelligence.manufacturing import ManufacturingAnalytics
 from industry_intelligence.ngo import NGOAnalytics
+from industry_intelligence.retail import RetailAnalytics
 
 
 @pytest.fixture
 def healthcare_df():
-    return pd.DataFrame({
-        "patient_id": range(1, 21),
-        "doctor_name": [f"Dr. {i % 5}" for i in range(20)],
-        "department": ["Cardiology"] * 10 + ["Neurology"] * 10,
-        "diagnosis_code": ["A00.1", "B01.0", "C50.2", "D45.0", "E11.9"] * 4,
-        "billing_amount": [1000 + i * 50 for i in range(20)],
-        "visit_date": pd.date_range("2024-01-01", periods=20, freq="3D"),
-        "gender": ["M", "F"] * 10,
-    })
+    return pd.DataFrame(
+        {
+            "patient_id": range(1, 21),
+            "doctor_name": [f"Dr. {i % 5}" for i in range(20)],
+            "department": ["Cardiology"] * 10 + ["Neurology"] * 10,
+            "diagnosis_code": ["A00.1", "B01.0", "C50.2", "D45.0", "E11.9"] * 4,
+            "billing_amount": [1000 + i * 50 for i in range(20)],
+            "visit_date": pd.date_range("2024-01-01", periods=20, freq="3D"),
+            "gender": ["M", "F"] * 10,
+        }
+    )
 
 
 @pytest.fixture
@@ -52,16 +53,18 @@ def healthcare_col_mapping():
 
 @pytest.fixture
 def education_df():
-    return pd.DataFrame({
-        "student_id": range(1, 21),
-        "teacher_name": [f"Teacher_{i % 4}" for i in range(20)],
-        "course_name": [f"Course_{chr(65 + i % 3)}" for i in range(20)],
-        "department": ["Science"] * 10 + ["Arts"] * 10,
-        "grade": ["A", "B", "C", "D", "F"] * 4,
-        "attendance_rate": [80 + i for i in range(20)],
-        "fee_amount": [500 + i * 10 for i in range(20)],
-        "enrollment_date": pd.date_range("2024-01-01", periods=20, freq="3D"),
-    })
+    return pd.DataFrame(
+        {
+            "student_id": range(1, 21),
+            "teacher_name": [f"Teacher_{i % 4}" for i in range(20)],
+            "course_name": [f"Course_{chr(65 + i % 3)}" for i in range(20)],
+            "department": ["Science"] * 10 + ["Arts"] * 10,
+            "grade": ["A", "B", "C", "D", "F"] * 4,
+            "attendance_rate": [80 + i for i in range(20)],
+            "fee_amount": [500 + i * 10 for i in range(20)],
+            "enrollment_date": pd.date_range("2024-01-01", periods=20, freq="3D"),
+        }
+    )
 
 
 @pytest.fixture
@@ -80,14 +83,16 @@ def education_col_mapping():
 
 @pytest.fixture
 def banking_df():
-    return pd.DataFrame({
-        "account_number": [f"ACC{i:04d}" for i in range(20)],
-        "transaction_id": range(1, 21),
-        "loan_id": [f"LN{i:04d}" for i in range(20)],
-        "amount": [5000 + i * 100 for i in range(20)],
-        "transaction_date": pd.date_range("2024-01-01", periods=20, freq="D"),
-        "customer_id": [i % 10 + 1 for i in range(20)],
-    })
+    return pd.DataFrame(
+        {
+            "account_number": [f"ACC{i:04d}" for i in range(20)],
+            "transaction_id": range(1, 21),
+            "loan_id": [f"LN{i:04d}" for i in range(20)],
+            "amount": [5000 + i * 100 for i in range(20)],
+            "transaction_date": pd.date_range("2024-01-01", periods=20, freq="D"),
+            "customer_id": [i % 10 + 1 for i in range(20)],
+        }
+    )
 
 
 @pytest.fixture
@@ -104,16 +109,18 @@ def banking_col_mapping():
 
 @pytest.fixture
 def agriculture_df():
-    return pd.DataFrame({
-        "farm_id": [f"Farm_{i % 5}" for i in range(20)],
-        "crop_name": ["Maize", "Rice", "Wheat", "Cassava"] * 5,
-        "harvest_kg": [1000 + i * 50 for i in range(20)],
-        "livestock_type": ["Cattle", "Goat", "Sheep"] * 6 + ["Cattle", "Goat"],
-        "rainfall_mm": [800 + i * 5 for i in range(20)],
-        "hectares": [10 + i for i in range(20)],
-        "region": ["North", "South", "East", "West"] * 5,
-        "record_date": pd.date_range("2024-01-01", periods=20, freq="3D"),
-    })
+    return pd.DataFrame(
+        {
+            "farm_id": [f"Farm_{i % 5}" for i in range(20)],
+            "crop_name": ["Maize", "Rice", "Wheat", "Cassava"] * 5,
+            "harvest_kg": [1000 + i * 50 for i in range(20)],
+            "livestock_type": ["Cattle", "Goat", "Sheep"] * 6 + ["Cattle", "Goat"],
+            "rainfall_mm": [800 + i * 5 for i in range(20)],
+            "hectares": [10 + i for i in range(20)],
+            "region": ["North", "South", "East", "West"] * 5,
+            "record_date": pd.date_range("2024-01-01", periods=20, freq="3D"),
+        }
+    )
 
 
 @pytest.fixture
@@ -132,15 +139,17 @@ def agriculture_col_mapping():
 
 @pytest.fixture
 def government_df():
-    return pd.DataFrame({
-        "project_id": [f"PRJ{i:03d}" for i in range(20)],
-        "department": ["Health", "Education", "Infrastructure"] * 6 + ["Health", "Education"],
-        "budget_amount": [100000 + i * 5000 for i in range(20)],
-        "revenue_amount": [120000 + i * 4000 for i in range(20)],
-        "contractor": [f"Contractor_{i % 4}" for i in range(20)],
-        "region": ["North", "South", "East", "West"] * 5,
-        "project_date": pd.date_range("2024-01-01", periods=20, freq="3D"),
-    })
+    return pd.DataFrame(
+        {
+            "project_id": [f"PRJ{i:03d}" for i in range(20)],
+            "department": ["Health", "Education", "Infrastructure"] * 6 + ["Health", "Education"],
+            "budget_amount": [100000 + i * 5000 for i in range(20)],
+            "revenue_amount": [120000 + i * 4000 for i in range(20)],
+            "contractor": [f"Contractor_{i % 4}" for i in range(20)],
+            "region": ["North", "South", "East", "West"] * 5,
+            "project_date": pd.date_range("2024-01-01", periods=20, freq="3D"),
+        }
+    )
 
 
 @pytest.fixture
@@ -158,16 +167,18 @@ def government_col_mapping():
 
 @pytest.fixture
 def retail_df():
-    return pd.DataFrame({
-        "order_id": range(1, 31),
-        "customer_id": [i % 10 + 1 for i in range(30)],
-        "product_name": [f"Product_{chr(65 + i % 5)}" for i in range(30)],
-        "category": ["Electronics", "Clothing", "Food"] * 10,
-        "sales_amount": [100.0 + i * 10 for i in range(30)],
-        "profit": [20.0 + i * 2 for i in range(30)],
-        "order_date": pd.date_range("2024-01-01", periods=30, freq="D"),
-        "region": ["North", "South", "East", "West"] * 7 + ["North", "South"],
-    })
+    return pd.DataFrame(
+        {
+            "order_id": range(1, 31),
+            "customer_id": [i % 10 + 1 for i in range(30)],
+            "product_name": [f"Product_{chr(65 + i % 5)}" for i in range(30)],
+            "category": ["Electronics", "Clothing", "Food"] * 10,
+            "sales_amount": [100.0 + i * 10 for i in range(30)],
+            "profit": [20.0 + i * 2 for i in range(30)],
+            "order_date": pd.date_range("2024-01-01", periods=30, freq="D"),
+            "region": ["North", "South", "East", "West"] * 7 + ["North", "South"],
+        }
+    )
 
 
 @pytest.fixture
@@ -186,14 +197,16 @@ def retail_col_mapping():
 
 @pytest.fixture
 def manufacturing_df():
-    return pd.DataFrame({
-        "machine_id": [f"M{i % 5}" for i in range(20)],
-        "production_volume": [500 + i * 10 for i in range(20)],
-        "downtime_hours": [2 + i * 0.5 for i in range(20)],
-        "product_line": ["WidgetA", "WidgetB", "WidgetC"] * 6 + ["WidgetA", "WidgetB"],
-        "yield_rate": [95 + i * 0.2 for i in range(20)],
-        "production_date": pd.date_range("2024-01-01", periods=20, freq="D"),
-    })
+    return pd.DataFrame(
+        {
+            "machine_id": [f"M{i % 5}" for i in range(20)],
+            "production_volume": [500 + i * 10 for i in range(20)],
+            "downtime_hours": [2 + i * 0.5 for i in range(20)],
+            "product_line": ["WidgetA", "WidgetB", "WidgetC"] * 6 + ["WidgetA", "WidgetB"],
+            "yield_rate": [95 + i * 0.2 for i in range(20)],
+            "production_date": pd.date_range("2024-01-01", periods=20, freq="D"),
+        }
+    )
 
 
 @pytest.fixture
@@ -210,14 +223,16 @@ def manufacturing_col_mapping():
 
 @pytest.fixture
 def ngo_df():
-    return pd.DataFrame({
-        "donor_id": [f"Donor_{i % 8}" for i in range(20)],
-        "beneficiary_id": range(1, 21),
-        "program_name": ["Education", "Health", "Agriculture"] * 6 + ["Education", "Health"],
-        "donation_amount": [500 + i * 20 for i in range(20)],
-        "region": ["North", "South", "East", "West"] * 5,
-        "donation_date": pd.date_range("2024-01-01", periods=20, freq="3D"),
-    })
+    return pd.DataFrame(
+        {
+            "donor_id": [f"Donor_{i % 8}" for i in range(20)],
+            "beneficiary_id": range(1, 21),
+            "program_name": ["Education", "Health", "Agriculture"] * 6 + ["Education", "Health"],
+            "donation_amount": [500 + i * 20 for i in range(20)],
+            "region": ["North", "South", "East", "West"] * 5,
+            "donation_date": pd.date_range("2024-01-01", periods=20, freq="3D"),
+        }
+    )
 
 
 @pytest.fixture
@@ -235,8 +250,16 @@ def ngo_col_mapping():
 class TestRegistry:
     def test_all_industries_registered(self):
         industries = IndustryAnalyticsRegistry.industries()
-        for expected in ("healthcare", "education", "banking", "agriculture",
-                         "government", "retail", "manufacturing", "ngo"):
+        for expected in (
+            "healthcare",
+            "education",
+            "banking",
+            "agriculture",
+            "government",
+            "retail",
+            "manufacturing",
+            "ngo",
+        ):
             assert expected in industries, f"{expected} not registered"
 
     def test_get_engine(self):
@@ -247,7 +270,9 @@ class TestRegistry:
         assert IndustryAnalyticsRegistry.get("nonexistent") is None
 
     def test_analyze_dispatches_correctly(self, healthcare_df, healthcare_col_mapping):
-        result = IndustryAnalyticsRegistry.analyze("healthcare", healthcare_df, healthcare_col_mapping)
+        result = IndustryAnalyticsRegistry.analyze(
+            "healthcare", healthcare_df, healthcare_col_mapping
+        )
         assert result is not None
         assert result.industry == "healthcare"
 
@@ -487,12 +512,14 @@ class TestNGOAnalytics:
 class TestFullPipeline:
     def test_pipeline_includes_intelligence(self, healthcare_df):
         from semantic.mapping_engine import SemanticMappingEngine
+
         result = SemanticMappingEngine.analyze(healthcare_df, "hospital.csv")
         assert result.industry_intelligence is not None
         assert result.industry_intelligence.industry == "healthcare"
 
     def test_pipeline_to_dict_includes_intelligence(self, healthcare_df):
         from semantic.mapping_engine import SemanticMappingEngine
+
         result = SemanticMappingEngine.analyze(healthcare_df, "hospital.csv")
         d = result.to_dict()
         assert "industry_intelligence" in d

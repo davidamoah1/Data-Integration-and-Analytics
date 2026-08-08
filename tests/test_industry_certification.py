@@ -20,7 +20,6 @@ from semantic.kpi_registry import KPIRegistry
 from semantic.mapping_engine import SemanticMappingEngine
 from semantic.report_registry import ReportRegistry
 
-
 # ── Industry-specific test datasets ──
 
 
@@ -249,18 +248,18 @@ class TestIndustryCertification:
         if industry == "retail":
             pytest.skip("Retail is expected to detect as retail")
         mapping = SemanticMappingEngine.analyze(df)
-        assert mapping.industry != "retail", (
-            f"Industry '{industry}' was incorrectly detected as 'retail'"
-        )
+        assert (
+            mapping.industry != "retail"
+        ), f"Industry '{industry}' was incorrectly detected as 'retail'"
 
     def test_dashboard_template_matches_industry(self, industry_data):
         industry, df = industry_data
         mapping = SemanticMappingEngine.analyze(df)
         config = DashboardGenerator.generate(df, mapping, admin_confirmed=True)
         assert config.industry == industry
-        assert config.template == f"{industry}_executive", (
-            f"Expected template '{industry}_executive', got '{config.template}'"
-        )
+        assert (
+            config.template == f"{industry}_executive"
+        ), f"Expected template '{industry}_executive', got '{config.template}'"
 
     def test_dashboard_has_kpi_cards(self, industry_data):
         industry, df = industry_data
@@ -316,9 +315,9 @@ class TestIndustryCertification:
         }
         forbidden_set = forbidden.get(industry, set())
         contamination = widget_keys & forbidden_set
-        assert not contamination, (
-            f"Industry '{industry}' dashboard contains cross-industry widgets: {contamination}"
-        )
+        assert (
+            not contamination
+        ), f"Industry '{industry}' dashboard contains cross-industry widgets: {contamination}"
 
     def test_dashboard_registry_template_exists(self, industry_data):
         industry, _ = industry_data

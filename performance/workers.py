@@ -17,12 +17,12 @@ Usage:
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import logging
 import time
 from dataclasses import dataclass, field
-from typing import Any
 
-from performance.queue import Task, TaskQueue, TaskStatus
+from performance.queue import TaskQueue, TaskStatus
 
 logger = logging.getLogger("performance.workers")
 
@@ -74,10 +74,8 @@ class Worker:
         self._running = False
         if self._task:
             self._task.cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await self._task
-            except asyncio.CancelledError:
-                pass
         logger.info(f"Worker {self.worker_id} stopped")
 
     async def _loop(self) -> None:
@@ -150,8 +148,7 @@ class WorkerPool:
             await self._add_worker()
         self._manager_task = asyncio.create_task(self._manage_pool())
         logger.info(
-            f"WorkerPool started with {self.min_workers} workers "
-            f"(max: {self.max_workers})"
+            f"WorkerPool started with {self.min_workers} workers " f"(max: {self.max_workers})"
         )
 
     async def stop(self) -> None:
@@ -159,10 +156,8 @@ class WorkerPool:
         self._running = False
         if self._manager_task:
             self._manager_task.cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await self._manager_task
-            except asyncio.CancelledError:
-                pass
 
         # Stop all workers
         stop_tasks = [worker.stop() for worker in self._workers.values()]
@@ -202,9 +197,7 @@ class WorkerPool:
                     break
 
                 queue_depth = self.task_queue.pending_count
-                active_workers = sum(
-                    1 for s in self._worker_stats.values() if s.is_busy
-                )
+                active_workers = sum(1 for s in self._worker_stats.values() if s.is_busy)
                 total_workers = len(self._workers)
 
                 # Scale up
@@ -214,10 +207,7 @@ class WorkerPool:
                     and active_workers / max(total_workers, 1) > 0.7
                 ):
                     new_id = await self._add_worker()
-                    logger.info(
-                        f"Scaled up: added {new_id}, "
-                        f"{len(self._workers)} workers now"
-                    )
+                    logger.info(f"Scaled up: added {new_id}, " f"{len(self._workers)} workers now")
 
                 # Scale down
                 elif (

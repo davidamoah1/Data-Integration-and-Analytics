@@ -41,7 +41,11 @@ def get_mysql_url() -> str:
 
 def _get_all_table_names(metadata) -> list[str]:
     """Get all table names from metadata, ordered by dependency."""
-    return list(metadata.sorted_tables.keys()) if hasattr(metadata, "sorted_tables") else list(metadata.tables.keys())
+    return (
+        list(metadata.sorted_tables.keys())
+        if hasattr(metadata, "sorted_tables")
+        else list(metadata.tables.keys())
+    )
 
 
 def migrate():
@@ -56,8 +60,6 @@ def migrate():
     target_engine = get_engine()
 
     logger.info("Migration: Creating schema on MySQL target...")
-    from database.db_setup import Base
-
     # Import all model modules to ensure complete metadata
     import ai.models  # noqa: F401
     import analytics.models  # noqa: F401
@@ -69,6 +71,7 @@ def migrate():
     import notifications.models  # noqa: F401
     import organizations.models  # noqa: F401
     import scheduler.models  # noqa: F401
+    from database.db_setup import Base
 
     Base.metadata.create_all(target_engine)
 

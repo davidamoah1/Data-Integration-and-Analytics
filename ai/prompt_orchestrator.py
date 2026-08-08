@@ -26,9 +26,8 @@ from __future__ import annotations
 
 import json
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
-from typing import Any
 
 from ai.context_engine import EnterpriseAIContext
 
@@ -89,24 +88,28 @@ class PromptPipeline:
         # 2. Context injection
         context_str = context.to_prompt_context(max_chars=4000)
         if context_str:
-            messages.append({
-                "role": "system",
-                "content": f"Platform Context:\n{context_str}",
-            })
+            messages.append(
+                {
+                    "role": "system",
+                    "content": f"Platform Context:\n{context_str}",
+                }
+            )
 
         # 3. Task-specific prompt (output requirements)
         task_content = self.task_prompt
         if self.output_format == "json":
             task_content += f"\n\nRespond with JSON matching this schema:\n{json.dumps(self.output_schema, indent=2)}"
-        task_content += f"\n\nGuidelines:\n- Base every claim on the provided data\n- Quantify changes with specific numbers and percentages\n- Distinguish between data-backed analysis and assumptions\n- Include a confidence level (0-1) with brief justification\n- If data is insufficient, say so clearly"
+        task_content += "\n\nGuidelines:\n- Base every claim on the provided data\n- Quantify changes with specific numbers and percentages\n- Distinguish between data-backed analysis and assumptions\n- Include a confidence level (0-1) with brief justification\n- If data is insufficient, say so clearly"
         messages.append({"role": "system", "content": task_content})
 
         # 4. Additional data (e.g., pre-computed results)
         if additional_data:
-            messages.append({
-                "role": "system",
-                "content": f"Analysis Data:\n{json.dumps(additional_data, default=str)[:3000]}",
-            })
+            messages.append(
+                {
+                    "role": "system",
+                    "content": f"Analysis Data:\n{json.dumps(additional_data, default=str)[:3000]}",
+                }
+            )
 
         # 5. User message
         messages.append({"role": "user", "content": user_message})
@@ -433,9 +436,7 @@ _OUTPUT_SCHEMAS = {
         "confidence": 0.0,
     },
     PromptTaskType.ETL_ASSISTANCE: {
-        "pipeline_steps": [
-            {"type": "string — extract|transform|load", "config": "dict"}
-        ],
+        "pipeline_steps": [{"type": "string — extract|transform|load", "config": "dict"}],
         "explanation": "string — Explanation of the pipeline",
         "quality_checks": ["string — Recommended quality checks"],
         "confidence": 0.0,
@@ -466,7 +467,9 @@ class PromptOrchestrator:
                 system_prompt=_BASE_SYSTEM,
                 task_prompt=_TASK_PROMPTS.get(task_type, ""),
                 output_schema=_OUTPUT_SCHEMAS.get(task_type, {}),
-                output_format="json" if task_type != PromptTaskType.GENERAL_CHAT else "structured_text",
+                output_format=(
+                    "json" if task_type != PromptTaskType.GENERAL_CHAT else "structured_text"
+                ),
                 temperature=0.3 if task_type != PromptTaskType.GENERAL_CHAT else 0.7,
             )
 
@@ -493,19 +496,52 @@ class PromptOrchestrator:
         msg_lower = user_message.lower()
 
         # Executive summary
-        if any(kw in msg_lower for kw in ["executive summary", "what happened", "brief", "overview", "summarize performance"]):
+        if any(
+            kw in msg_lower
+            for kw in [
+                "executive summary",
+                "what happened",
+                "brief",
+                "overview",
+                "summarize performance",
+            ]
+        ):
             return PromptTaskType.EXECUTIVE_SUMMARY
 
         # Root cause analysis
-        if any(kw in msg_lower for kw in ["why did", "why is", "why are", "what caused", "root cause", "reason for"]):
+        if any(
+            kw in msg_lower
+            for kw in ["why did", "why is", "why are", "what caused", "root cause", "reason for"]
+        ):
             return PromptTaskType.ROOT_CAUSE_ANALYSIS
 
         # Trend analysis
-        if any(kw in msg_lower for kw in ["trend", "over time", "month over month", "year over year", "quarter over quarter", "period comparison"]):
+        if any(
+            kw in msg_lower
+            for kw in [
+                "trend",
+                "over time",
+                "month over month",
+                "year over year",
+                "quarter over quarter",
+                "period comparison",
+            ]
+        ):
             return PromptTaskType.TREND_ANALYSIS
 
         # Forecasting
-        if any(kw in msg_lower for kw in ["forecast", "predict", "future", "next month", "next quarter", "projection", "expect"]):
+        if any(
+            kw in msg_lower
+            for kw in [
+                "forecast",
+                "predict",
+                "future",
+                "next month",
+                "next quarter",
+                "projection",
+                "expect",
+            ]
+        ):
             return PromptTaskType.FORECASTING
 
         # Risk analysis
@@ -513,27 +549,72 @@ class PromptOrchestrator:
             return PromptTaskType.RISK_ANALYSIS
 
         # Data quality
-        if any(kw in msg_lower for kw in ["data quality", "missing values", "duplicates", "outliers", "errors in data", "clean data"]):
+        if any(
+            kw in msg_lower
+            for kw in [
+                "data quality",
+                "missing values",
+                "duplicates",
+                "outliers",
+                "errors in data",
+                "clean data",
+            ]
+        ):
             return PromptTaskType.DATA_QUALITY
 
         # KPI explanation
-        if any(kw in msg_lower for kw in ["explain kpi", "what is this kpi", "kpi meaning", "metric explanation"]):
+        if any(
+            kw in msg_lower
+            for kw in ["explain kpi", "what is this kpi", "kpi meaning", "metric explanation"]
+        ):
             return PromptTaskType.KPI_EXPLANATION
 
         # NL Analytics
-        if any(kw in msg_lower for kw in ["compare", "top performing", "bottom performing", "rank", "highlight", "breakdown by"]):
+        if any(
+            kw in msg_lower
+            for kw in [
+                "compare",
+                "top performing",
+                "bottom performing",
+                "rank",
+                "highlight",
+                "breakdown by",
+            ]
+        ):
             return PromptTaskType.NL_ANALYTICS
 
         # Report generation
-        if any(kw in msg_lower for kw in ["generate report", "create report", "monthly report", "annual report", "export report"]):
+        if any(
+            kw in msg_lower
+            for kw in [
+                "generate report",
+                "create report",
+                "monthly report",
+                "annual report",
+                "export report",
+            ]
+        ):
             return PromptTaskType.REPORT_GENERATION
 
         # Dashboard assistance
-        if any(kw in msg_lower for kw in ["create chart", "add filter", "replace chart", "make dashboard", "resize", "change layout"]):
+        if any(
+            kw in msg_lower
+            for kw in [
+                "create chart",
+                "add filter",
+                "replace chart",
+                "make dashboard",
+                "resize",
+                "change layout",
+            ]
+        ):
             return PromptTaskType.DASHBOARD_ASSISTANCE
 
         # ETL assistance
-        if any(kw in msg_lower for kw in ["etl", "pipeline", "extract", "transform", "load", "ingest data"]):
+        if any(
+            kw in msg_lower
+            for kw in ["etl", "pipeline", "extract", "transform", "load", "ingest data"]
+        ):
             return PromptTaskType.ETL_ASSISTANCE
 
         return PromptTaskType.GENERAL_CHAT

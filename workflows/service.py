@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from sqlalchemy import func, select
+from sqlalchemy import func
 from sqlalchemy.orm import Session as DbSession
 
 from audit.service import log_audit_event
@@ -61,6 +61,7 @@ class WorkflowService:
 
     def create_definition(self, request) -> WorkflowDefinition:
         from workflows.schemas import WorkflowDefinitionCreate
+
         req: WorkflowDefinitionCreate = request
         wf = WorkflowDefinition(
             organization_id=self._org_id(),
@@ -87,15 +88,19 @@ class WorkflowService:
         return wf
 
     def list_definitions(self, category: str | None = None) -> list[WorkflowDefinition]:
-        query = self._query_org_scoped(WorkflowDefinition).filter(WorkflowDefinition.is_deleted == 0)
+        query = self._query_org_scoped(WorkflowDefinition).filter(
+            WorkflowDefinition.is_deleted == 0
+        )
         if category:
             query = query.filter(WorkflowDefinition.category == category)
         return query.order_by(WorkflowDefinition.updated_at.desc()).all()
 
     def get_definition(self, workflow_id: int) -> WorkflowDefinition:
-        wf = self._query_org_scoped(WorkflowDefinition).filter(
-            WorkflowDefinition.id == workflow_id, WorkflowDefinition.is_deleted == 0
-        ).first()
+        wf = (
+            self._query_org_scoped(WorkflowDefinition)
+            .filter(WorkflowDefinition.id == workflow_id, WorkflowDefinition.is_deleted == 0)
+            .first()
+        )
         if not wf:
             raise NotFoundError("Workflow not found")
         return wf
@@ -157,9 +162,11 @@ class WorkflowService:
     def publish_version(self, workflow_id: int, version_id: int) -> WorkflowVersion:
         wf = self.get_definition(workflow_id)
         self._ensure_org_access(wf.organization_id)
-        version = self.db.query(WorkflowVersion).filter(
-            WorkflowVersion.id == version_id, WorkflowVersion.workflow_id == workflow_id
-        ).first()
+        version = (
+            self.db.query(WorkflowVersion)
+            .filter(WorkflowVersion.id == version_id, WorkflowVersion.workflow_id == workflow_id)
+            .first()
+        )
         if not version:
             raise NotFoundError("Version not found")
         # Archive previously published versions
@@ -175,9 +182,11 @@ class WorkflowService:
     def archive_version(self, workflow_id: int, version_id: int) -> WorkflowVersion:
         wf = self.get_definition(workflow_id)
         self._ensure_org_access(wf.organization_id)
-        version = self.db.query(WorkflowVersion).filter(
-            WorkflowVersion.id == version_id, WorkflowVersion.workflow_id == workflow_id
-        ).first()
+        version = (
+            self.db.query(WorkflowVersion)
+            .filter(WorkflowVersion.id == version_id, WorkflowVersion.workflow_id == workflow_id)
+            .first()
+        )
         if not version:
             raise NotFoundError("Version not found")
         version.status = "archived"
@@ -195,9 +204,11 @@ class WorkflowService:
         version_id = request.version_id or wf.published_version_id
         if not version_id:
             raise NotFoundError("No published version available for execution")
-        version = self.db.query(WorkflowVersion).filter(
-            WorkflowVersion.id == version_id, WorkflowVersion.workflow_id == workflow_id
-        ).first()
+        version = (
+            self.db.query(WorkflowVersion)
+            .filter(WorkflowVersion.id == version_id, WorkflowVersion.workflow_id == workflow_id)
+            .first()
+        )
         if not version:
             raise NotFoundError("Version not found")
         execution = self.engine.execute(
@@ -225,9 +236,11 @@ class WorkflowService:
         return execution
 
     def get_execution(self, execution_id: str) -> WorkflowExecution:
-        execution = self.db.query(WorkflowExecution).filter(
-            WorkflowExecution.execution_id == execution_id
-        ).first()
+        execution = (
+            self.db.query(WorkflowExecution)
+            .filter(WorkflowExecution.execution_id == execution_id)
+            .first()
+        )
         if not execution:
             raise NotFoundError("Execution not found")
         self._ensure_org_access(execution.organization_id)
@@ -244,7 +257,12 @@ class WorkflowService:
             query = query.filter(WorkflowExecution.status == filters["status"])
         if filters.get("trigger_type"):
             query = query.filter(WorkflowExecution.trigger_type == filters["trigger_type"])
-        return query.order_by(WorkflowExecution.created_at.desc()).limit(filters.get("limit", 50)).offset(filters.get("offset", 0)).all()
+        return (
+            query.order_by(WorkflowExecution.created_at.desc())
+            .limit(filters.get("limit", 50))
+            .offset(filters.get("offset", 0))
+            .all()
+        )
 
     def cancel_execution(self, execution_id: str) -> WorkflowExecution:
         execution = self.get_execution(execution_id)
@@ -291,11 +309,14 @@ class WorkflowService:
         self.db.refresh(template)
         return template
 
-    def list_templates(self, include_public: bool = True, category: str | None = None) -> list[WorkflowTemplate]:
+    def list_templates(
+        self, include_public: bool = True, category: str | None = None
+    ) -> list[WorkflowTemplate]:
         query = self.db.query(WorkflowTemplate).filter(WorkflowTemplate.is_active == 1)
         if not is_super_admin(self.current_user):
             query = query.filter(
-                (WorkflowTemplate.created_by == self.current_user["id"]) | (WorkflowTemplate.is_public == 1)
+                (WorkflowTemplate.created_by == self.current_user["id"])
+                | (WorkflowTemplate.is_public == 1)
             )
         elif not include_public:
             query = query.filter(WorkflowTemplate.created_by == self.current_user["id"])
@@ -304,12 +325,18 @@ class WorkflowService:
         return query.order_by(WorkflowTemplate.created_at.desc()).all()
 
     def get_template(self, template_id: int) -> WorkflowTemplate:
-        template = self.db.query(WorkflowTemplate).filter(
-            WorkflowTemplate.id == template_id, WorkflowTemplate.is_active == 1
-        ).first()
+        template = (
+            self.db.query(WorkflowTemplate)
+            .filter(WorkflowTemplate.id == template_id, WorkflowTemplate.is_active == 1)
+            .first()
+        )
         if not template:
             raise NotFoundError("Template not found")
-        if not template.is_public and not is_super_admin(self.current_user) and template.created_by != self.current_user["id"]:
+        if (
+            not template.is_public
+            and not is_super_admin(self.current_user)
+            and template.created_by != self.current_user["id"]
+        ):
             raise AuthorizationError("Access denied for this template")
         return template
 

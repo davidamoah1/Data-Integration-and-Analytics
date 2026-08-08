@@ -29,14 +29,15 @@ from __future__ import annotations
 
 import asyncio
 import functools
-import hashlib
 import json
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable
+from typing import Any
 
 try:
     import redis as redis_lib
+
     HAS_REDIS = True
 except ImportError:
     HAS_REDIS = False
@@ -80,9 +81,7 @@ class CacheStats:
     def _record_ns(self, namespace: str, metric: str) -> None:
         if namespace not in self.by_namespace:
             self.by_namespace[namespace] = {"hits": 0, "misses": 0}
-        self.by_namespace[namespace][metric] = (
-            self.by_namespace[namespace].get(metric, 0) + 1
-        )
+        self.by_namespace[namespace][metric] = self.by_namespace[namespace].get(metric, 0) + 1
 
 
 class CacheManager:
@@ -147,7 +146,9 @@ class CacheManager:
         self.stats.record_miss(namespace)
         return None
 
-    async def set(self, key: str, value: Any, ttl: int | None = None, namespace: str = "default") -> None:
+    async def set(
+        self, key: str, value: Any, ttl: int | None = None, namespace: str = "default"
+    ) -> None:
         """Set a value in the cache with TTL."""
         full_key = self._make_key(f"{namespace}:{key}")
         ttl = ttl or self.default_ttl
@@ -247,6 +248,7 @@ def get_cache_manager() -> CacheManager:
     global _cache_manager
     if _cache_manager is None:
         import os
+
         redis_url = os.getenv("REDIS_URL")
         _cache_manager = CacheManager(redis_url=redis_url)
     return _cache_manager

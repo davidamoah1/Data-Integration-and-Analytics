@@ -174,39 +174,55 @@ class ReportComposition:
                     "content": s.content,
                     "kpis": [
                         {
-                            "label": k.label, "value": k.value, "unit": k.unit,
-                            "trend": k.trend, "trend_value": k.trend_value,
-                            "target": k.target, "color": k.color,
+                            "label": k.label,
+                            "value": k.value,
+                            "unit": k.unit,
+                            "trend": k.trend,
+                            "trend_value": k.trend_value,
+                            "target": k.target,
+                            "color": k.color,
                         }
                         for k in s.kpis
                     ],
                     "charts": [
                         {
-                            "title": c.title, "chart_type": c.chart_type.value,
-                            "data": c.data, "x_axis": c.x_axis, "y_axis": c.y_axis,
-                            "series": c.series, "config": c.config,
+                            "title": c.title,
+                            "chart_type": c.chart_type.value,
+                            "data": c.data,
+                            "x_axis": c.x_axis,
+                            "y_axis": c.y_axis,
+                            "series": c.series,
+                            "config": c.config,
                         }
                         for c in s.charts
                     ],
                     "tables": [
                         {
-                            "title": t.title, "columns": t.columns,
-                            "rows": t.rows, "summary": t.summary,
+                            "title": t.title,
+                            "columns": t.columns,
+                            "rows": t.rows,
+                            "summary": t.summary,
                         }
                         for t in s.tables
                     ],
                     "insights": [
                         {
-                            "title": i.title, "description": i.description,
-                            "severity": i.severity, "metric": i.metric, "impact": i.impact,
+                            "title": i.title,
+                            "description": i.description,
+                            "severity": i.severity,
+                            "metric": i.metric,
+                            "impact": i.impact,
                         }
                         for i in s.insights
                     ],
                     "recommendations": [
                         {
-                            "title": r.title, "description": r.description,
-                            "priority": r.priority, "action": r.action,
-                            "expected_impact": r.expected_impact, "timeline": r.timeline,
+                            "title": r.title,
+                            "description": r.description,
+                            "priority": r.priority,
+                            "action": r.action,
+                            "expected_impact": r.expected_impact,
+                            "timeline": r.timeline,
                         }
                         for r in s.recommendations
                     ],
@@ -463,9 +479,7 @@ class ReportCompositionService:
         dataset_id: int | None = None,
         analysis_id: int | None = None,
     ) -> ReportComposition:
-        report = ReportTemplateFactory.create_template(
-            template, title, org_name, author, industry
-        )
+        report = ReportTemplateFactory.create_template(template, title, org_name, author, industry)
         report.dataset_id = dataset_id
         report.analysis_id = analysis_id
         cls._store[report.report_id] = report
@@ -556,7 +570,9 @@ class ReportCompositionService:
         return report
 
     @classmethod
-    def add_kpis(cls, report_id: str, section_order: int, kpis: list[KPIMetric]) -> ReportComposition | None:
+    def add_kpis(
+        cls, report_id: str, section_order: int, kpis: list[KPIMetric]
+    ) -> ReportComposition | None:
         report = cls._store.get(report_id)
         if not report:
             return None
@@ -567,7 +583,9 @@ class ReportCompositionService:
         return report
 
     @classmethod
-    def add_chart(cls, report_id: str, section_order: int, chart: ChartDefinition) -> ReportComposition | None:
+    def add_chart(
+        cls, report_id: str, section_order: int, chart: ChartDefinition
+    ) -> ReportComposition | None:
         report = cls._store.get(report_id)
         if not report:
             return None
@@ -578,7 +596,9 @@ class ReportCompositionService:
         return report
 
     @classmethod
-    def add_insights(cls, report_id: str, section_order: int, insights: list[Insight]) -> ReportComposition | None:
+    def add_insights(
+        cls, report_id: str, section_order: int, insights: list[Insight]
+    ) -> ReportComposition | None:
         report = cls._store.get(report_id)
         if not report:
             return None
@@ -623,15 +643,21 @@ class ReportCompositionService:
             critical = [i for i in all_insights if i.severity == "critical"]
             positive = [i for i in all_insights if i.severity == "positive"]
             if critical:
-                summary_parts.append(f"\n\nCritical findings: {len(critical)} item(s) require immediate attention.")
+                summary_parts.append(
+                    f"\n\nCritical findings: {len(critical)} item(s) require immediate attention."
+                )
             if positive:
-                summary_parts.append(f"\nPositive trends: {len(positive)} item(s) show strong performance.")
+                summary_parts.append(
+                    f"\nPositive trends: {len(positive)} item(s) show strong performance."
+                )
 
         # Add top recommendations
         all_recs = [r for s in report.sections for r in s.recommendations]
         high_priority = [r for r in all_recs if r.priority == "high"]
         if high_priority:
-            summary_parts.append(f"\n\n{len(high_priority)} high-priority recommendation(s) identified for immediate action.")
+            summary_parts.append(
+                f"\n\n{len(high_priority)} high-priority recommendation(s) identified for immediate action."
+            )
 
         return " ".join(summary_parts)
 
@@ -690,17 +716,19 @@ class ReportCompositionService:
                 html_parts.append('<div class="page-break"></div>')
 
             if section.section_type == ReportSectionType.COVER:
-                html_parts.extend([
-                    '<div class="cover">',
-                    f"<h1>{section.title}</h1>",
-                    f'<div class="subtitle">{report.subtitle}</div>',
-                    '<div class="meta">',
-                    f"<p>Organization: {report.organization_name or 'N/A'}</p>",
-                    f"<p>Author: {report.author_name or 'N/A'}</p>",
-                    f"<p>Date: {datetime.now().strftime('%B %d, %Y')}</p>",
-                    "</div>",
-                    "</div>",
-                ])
+                html_parts.extend(
+                    [
+                        '<div class="cover">',
+                        f"<h1>{section.title}</h1>",
+                        f'<div class="subtitle">{report.subtitle}</div>',
+                        '<div class="meta">',
+                        f"<p>Organization: {report.organization_name or 'N/A'}</p>",
+                        f"<p>Author: {report.author_name or 'N/A'}</p>",
+                        f"<p>Date: {datetime.now().strftime('%B %d, %Y')}</p>",
+                        "</div>",
+                        "</div>",
+                    ]
+                )
                 continue
 
             html_parts.append(f"<h2>{section.title}</h2>")
@@ -714,27 +742,37 @@ class ReportCompositionService:
                 if section.kpis:
                     html_parts.append('<div class="kpi-grid">')
                     for kpi in section.kpis:
-                        trend_class = "up" if kpi.trend == "up" else "down" if kpi.trend == "down" else ""
-                        html_parts.extend([
-                            '<div class="kpi-card">',
-                            f'<div class="label">{kpi.label}</div>',
-                            f'<div class="value">{kpi.value}{kpi.unit}</div>',
-                            f'<div class="trend {trend_class}">{kpi.trend_value}</div>' if kpi.trend_value else "",
-                            "</div>",
-                        ])
+                        trend_class = (
+                            "up" if kpi.trend == "up" else "down" if kpi.trend == "down" else ""
+                        )
+                        html_parts.extend(
+                            [
+                                '<div class="kpi-card">',
+                                f'<div class="label">{kpi.label}</div>',
+                                f'<div class="value">{kpi.value}{kpi.unit}</div>',
+                                (
+                                    f'<div class="trend {trend_class}">{kpi.trend_value}</div>'
+                                    if kpi.trend_value
+                                    else ""
+                                ),
+                                "</div>",
+                            ]
+                        )
                     html_parts.append("</div>")
                 if section.content:
                     html_parts.append(f"<p>{section.content}</p>")
 
             elif section.section_type == ReportSectionType.CHART:
                 for chart in section.charts:
-                    html_parts.extend([
-                        f"<h3>{chart.title}</h3>",
-                        '<div class="chart-placeholder">',
-                        f"[{chart.chart_type.value.upper()} CHART: {chart.title}]",
-                        f"<br/><small>X: {chart.x_axis} | Y: {chart.y_axis}</small>",
-                        "</div>",
-                    ])
+                    html_parts.extend(
+                        [
+                            f"<h3>{chart.title}</h3>",
+                            '<div class="chart-placeholder">',
+                            f"[{chart.chart_type.value.upper()} CHART: {chart.title}]",
+                            f"<br/><small>X: {chart.x_axis} | Y: {chart.y_axis}</small>",
+                            "</div>",
+                        ]
+                    )
 
             elif section.section_type == ReportSectionType.TABLE:
                 for table in section.tables:
@@ -755,26 +793,38 @@ class ReportCompositionService:
 
             elif section.section_type == ReportSectionType.INSIGHTS:
                 for insight in section.insights:
-                    html_parts.extend([
-                        f'<div class="insight {insight.severity}">',
-                        f"<strong>{insight.title}</strong>",
-                        f"<p>{insight.description}</p>",
-                        f"<small>Impact: {insight.impact}</small>" if insight.impact else "",
-                        "</div>",
-                    ])
+                    html_parts.extend(
+                        [
+                            f'<div class="insight {insight.severity}">',
+                            f"<strong>{insight.title}</strong>",
+                            f"<p>{insight.description}</p>",
+                            f"<small>Impact: {insight.impact}</small>" if insight.impact else "",
+                            "</div>",
+                        ]
+                    )
 
             elif section.section_type == ReportSectionType.RECOMMENDATIONS:
                 for rec in section.recommendations:
-                    html_parts.extend([
-                        '<div class="recommendation">',
-                        f'<span class="priority {rec.priority}">{rec.priority.upper()}</span>',
-                        f"<strong> {rec.title}</strong>",
-                        f"<p>{rec.description}</p>",
-                        f"<p><small>Action: {rec.action}</small></p>" if rec.action else "",
-                        f"<p><small>Expected Impact: {rec.expected_impact}</small></p>" if rec.expected_impact else "",
-                        f"<p><small>Timeline: {rec.timeline}</small></p>" if rec.timeline else "",
-                        "</div>",
-                    ])
+                    html_parts.extend(
+                        [
+                            '<div class="recommendation">',
+                            f'<span class="priority {rec.priority}">{rec.priority.upper()}</span>',
+                            f"<strong> {rec.title}</strong>",
+                            f"<p>{rec.description}</p>",
+                            f"<p><small>Action: {rec.action}</small></p>" if rec.action else "",
+                            (
+                                f"<p><small>Expected Impact: {rec.expected_impact}</small></p>"
+                                if rec.expected_impact
+                                else ""
+                            ),
+                            (
+                                f"<p><small>Timeline: {rec.timeline}</small></p>"
+                                if rec.timeline
+                                else ""
+                            ),
+                            "</div>",
+                        ]
+                    )
 
             else:
                 if section.content:
@@ -794,9 +844,7 @@ class ReportCompositionService:
         page_width = pdf.w - pdf.l_margin - pdf.r_margin
 
         for section in sorted(report.sections, key=lambda x: x.order):
-            if section.page_break and pdf.page_no() > 0:
-                pdf.add_page()
-            elif pdf.page_no() == 0:
+            if section.page_break and pdf.page_no() > 0 or pdf.page_no() == 0:
                 pdf.add_page()
 
             # Cover page
@@ -809,9 +857,30 @@ class ReportCompositionService:
                 pdf.cell(0, 8, report.subtitle, new_x="LMARGIN", new_y="NEXT", align="C")
                 pdf.ln(20)
                 pdf.set_font("Helvetica", "", 11)
-                pdf.cell(0, 6, f"Organization: {report.organization_name or 'N/A'}", new_x="LMARGIN", new_y="NEXT", align="C")
-                pdf.cell(0, 6, f"Author: {report.author_name or 'N/A'}", new_x="LMARGIN", new_y="NEXT", align="C")
-                pdf.cell(0, 6, f"Date: {datetime.now().strftime('%B %d, %Y')}", new_x="LMARGIN", new_y="NEXT", align="C")
+                pdf.cell(
+                    0,
+                    6,
+                    f"Organization: {report.organization_name or 'N/A'}",
+                    new_x="LMARGIN",
+                    new_y="NEXT",
+                    align="C",
+                )
+                pdf.cell(
+                    0,
+                    6,
+                    f"Author: {report.author_name or 'N/A'}",
+                    new_x="LMARGIN",
+                    new_y="NEXT",
+                    align="C",
+                )
+                pdf.cell(
+                    0,
+                    6,
+                    f"Date: {datetime.now().strftime('%B %d, %Y')}",
+                    new_x="LMARGIN",
+                    new_y="NEXT",
+                    align="C",
+                )
                 continue
 
             # Section header
@@ -834,7 +903,7 @@ class ReportCompositionService:
                     col_count = min(len(section.kpis), 3)
                     col_width = page_width / col_count
                     for i in range(0, len(section.kpis), col_count):
-                        row = section.kpis[i:i + col_count]
+                        row = section.kpis[i : i + col_count]
                         for kpi in row:
                             pdf.set_font("Helvetica", "B", 9)
                             pdf.cell(col_width, 5, kpi.label[:20], border=1, align="C")
@@ -859,7 +928,13 @@ class ReportCompositionService:
                     pdf.set_font("Helvetica", "B", 11)
                     pdf.cell(0, 6, chart.title, new_x="LMARGIN", new_y="NEXT")
                     pdf.set_font("Helvetica", "", 9)
-                    pdf.cell(0, 5, f"[{chart.chart_type.value.upper()} Chart - X: {chart.x_axis}, Y: {chart.y_axis}]", new_x="LMARGIN", new_y="NEXT")
+                    pdf.cell(
+                        0,
+                        5,
+                        f"[{chart.chart_type.value.upper()} Chart - X: {chart.x_axis}, Y: {chart.y_axis}]",
+                        new_x="LMARGIN",
+                        new_y="NEXT",
+                    )
                     pdf.ln(2)
 
             # Tables
@@ -886,9 +961,16 @@ class ReportCompositionService:
             # Insights
             elif section.section_type == ReportSectionType.INSIGHTS:
                 for insight in section.insights:
-                    severity_marker = {"critical": "[!]", "warning": "[~]", "positive": "[+]", "info": "[i]"}.get(insight.severity, "[i]")
+                    severity_marker = {
+                        "critical": "[!]",
+                        "warning": "[~]",
+                        "positive": "[+]",
+                        "info": "[i]",
+                    }.get(insight.severity, "[i]")
                     pdf.set_font("Helvetica", "B", 10)
-                    pdf.cell(0, 6, f"{severity_marker} {insight.title}", new_x="LMARGIN", new_y="NEXT")
+                    pdf.cell(
+                        0, 6, f"{severity_marker} {insight.title}", new_x="LMARGIN", new_y="NEXT"
+                    )
                     pdf.set_font("Helvetica", "", 9)
                     pdf.multi_cell(page_width, 4, insight.description)
                     if insight.impact:
@@ -900,14 +982,22 @@ class ReportCompositionService:
             elif section.section_type == ReportSectionType.RECOMMENDATIONS:
                 for rec in section.recommendations:
                     pdf.set_font("Helvetica", "B", 10)
-                    pdf.cell(0, 6, f"[{rec.priority.upper()}] {rec.title}", new_x="LMARGIN", new_y="NEXT")
+                    pdf.cell(
+                        0, 6, f"[{rec.priority.upper()}] {rec.title}", new_x="LMARGIN", new_y="NEXT"
+                    )
                     pdf.set_font("Helvetica", "", 9)
                     pdf.multi_cell(page_width, 4, rec.description)
                     if rec.action:
                         pdf.set_font("Helvetica", "", 8)
                         pdf.multi_cell(page_width, 4, f"Action: {rec.action}")
                     if rec.expected_impact:
-                        pdf.cell(0, 4, f"Expected Impact: {rec.expected_impact}", new_x="LMARGIN", new_y="NEXT")
+                        pdf.cell(
+                            0,
+                            4,
+                            f"Expected Impact: {rec.expected_impact}",
+                            new_x="LMARGIN",
+                            new_y="NEXT",
+                        )
                     if rec.timeline:
                         pdf.cell(0, 4, f"Timeline: {rec.timeline}", new_x="LMARGIN", new_y="NEXT")
                     pdf.ln(2)
@@ -924,8 +1014,8 @@ class ReportCompositionService:
         """Export report as a PowerPoint-style presentation."""
         try:
             from pptx import Presentation as PptxPresentation
-            from pptx.util import Inches, Pt
             from pptx.dml.color import RGBColor
+            from pptx.util import Inches, Pt
         except ImportError:
             logger.warning("python-pptx not installed, generating JSON fallback")
             return cls.export_to_dict(report).__str__().encode("utf-8")
@@ -941,7 +1031,7 @@ class ReportCompositionService:
         GRAY = RGBColor(0x66, 0x66, 0x66)
         GREEN = RGBColor(0x16, 0xA3, 0x4A)
         RED = RGBColor(0xDC, 0x26, 0x26)
-        AMBER = RGBColor(0xF5, 0x9E, 0x0B)
+        RGBColor(0xF5, 0x9E, 0x0B)
 
         def add_title_slide(title: str, subtitle: str):
             slide = prs.slides.add_slide(prs.slide_layouts[6])  # blank
@@ -983,10 +1073,7 @@ class ReportCompositionService:
             tf2 = txBox2.text_frame
             tf2.word_wrap = True
             for i, bullet in enumerate(bullets):
-                if i == 0:
-                    p = tf2.paragraphs[0]
-                else:
-                    p = tf2.add_paragraph()
+                p = tf2.paragraphs[0] if i == 0 else tf2.add_paragraph()
                 p.text = f"• {bullet}"
                 p.font.size = Pt(16)
                 p.font.color.rgb = DARK
@@ -1027,7 +1114,9 @@ class ReportCompositionService:
                     p3 = tf.add_paragraph()
                     p3.text = kpi.trend_value
                     p3.font.size = Pt(11)
-                    p3.font.color.rgb = GREEN if kpi.trend == "up" else RED if kpi.trend == "down" else GRAY
+                    p3.font.color.rgb = (
+                        GREEN if kpi.trend == "up" else RED if kpi.trend == "down" else GRAY
+                    )
 
         def add_table_slide(title: str, table: TableDefinition):
             slide = prs.slides.add_slide(prs.slide_layouts[6])
@@ -1042,11 +1131,13 @@ class ReportCompositionService:
             rows = min(len(table.rows) + 1, 10)
             cols = min(len(table.columns), 6)
             if cols > 0 and rows > 1:
-                tbl = slide.shapes.add_table(rows, cols, Inches(0.5), Inches(1.5), Inches(12), Inches(5)).table
+                tbl = slide.shapes.add_table(
+                    rows, cols, Inches(0.5), Inches(1.5), Inches(12), Inches(5)
+                ).table
                 for j, col_name in enumerate(table.columns[:cols]):
                     tbl.cell(0, j).text = col_name
                     tbl.cell(0, j).text_frame.paragraphs[0].font.bold = True
-                for i, row in enumerate(table.rows[:rows - 1]):
+                for i, row in enumerate(table.rows[: rows - 1]):
                     for j, cell in enumerate(row[:cols]):
                         tbl.cell(i + 1, j).text = str(cell)[:30]
 
@@ -1064,7 +1155,9 @@ class ReportCompositionService:
                 if section.kpis:
                     add_kpi_slide(section.title, section.kpis)
                 else:
-                    add_content_slide(section.title, ["Key metrics will appear here once data is loaded."])
+                    add_content_slide(
+                        section.title, ["Key metrics will appear here once data is loaded."]
+                    )
 
             elif section.section_type == ReportSectionType.CHART:
                 chart_bullets = [f"{c.title} ({c.chart_type.value})" for c in section.charts]
@@ -1076,12 +1169,19 @@ class ReportCompositionService:
                 for table in section.tables:
                     add_table_slide(table.title, table)
                 if not section.tables:
-                    add_content_slide(section.title, ["Data tables will appear here once data is loaded."])
+                    add_content_slide(
+                        section.title, ["Data tables will appear here once data is loaded."]
+                    )
 
             elif section.section_type == ReportSectionType.INSIGHTS:
                 bullets = []
                 for insight in section.insights:
-                    prefix = {"critical": "⚠️", "warning": "⚡", "positive": "✅", "info": "ℹ️"}.get(insight.severity, "•")
+                    prefix = {
+                        "critical": "⚠️",
+                        "warning": "⚡",
+                        "positive": "✅",
+                        "info": "ℹ️",
+                    }.get(insight.severity, "•")
                     bullets.append(f"{prefix} {insight.title}: {insight.description}")
                 if not bullets:
                     bullets = ["Insights will appear here after analysis."]
@@ -1127,7 +1227,11 @@ class ReportCompositionService:
             return pdf_bytes, "application/pdf", "pdf"
         elif format == ExportFormat.PPTX:
             pptx_bytes = cls.export_to_pptx(report)
-            return pptx_bytes, "application/vnd.openxmlformats-officedocument.presentationml.presentation", "pptx"
+            return (
+                pptx_bytes,
+                "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                "pptx",
+            )
         else:
             raise ValueError(f"Unsupported format: {format}")
 
@@ -1146,96 +1250,119 @@ class PresentationGenerator:
 
         for section in sorted(report.sections, key=lambda x: x.order):
             if section.section_type == ReportSectionType.COVER:
-                slides.append({
-                    "slide_number": len(slides) + 1,
-                    "layout": "title",
-                    "title": section.title,
-                    "subtitle": report.subtitle or report.organization_name,
-                    "speaker_notes": f"Welcome. Today we'll cover {report.title}.",
-                })
+                slides.append(
+                    {
+                        "slide_number": len(slides) + 1,
+                        "layout": "title",
+                        "title": section.title,
+                        "subtitle": report.subtitle or report.organization_name,
+                        "speaker_notes": f"Welcome. Today we'll cover {report.title}.",
+                    }
+                )
 
             elif section.section_type == ReportSectionType.EXECUTIVE_SUMMARY:
                 exec_summary = svc.generate_executive_summary(report)
-                slides.append({
-                    "slide_number": len(slides) + 1,
-                    "layout": "bullets",
-                    "title": "Executive Summary",
-                    "content": exec_summary,
-                    "speaker_notes": "Provide a high-level overview of the main findings.",
-                })
+                slides.append(
+                    {
+                        "slide_number": len(slides) + 1,
+                        "layout": "bullets",
+                        "title": "Executive Summary",
+                        "content": exec_summary,
+                        "speaker_notes": "Provide a high-level overview of the main findings.",
+                    }
+                )
 
             elif section.section_type == ReportSectionType.KEY_METRICS and section.kpis:
-                slides.append({
-                    "slide_number": len(slides) + 1,
-                    "layout": "kpi",
-                    "title": section.title,
-                    "kpis": [
-                        {
-                            "label": k.label,
-                            "value": f"{k.value}{k.unit}",
-                            "trend": k.trend,
-                            "trend_value": k.trend_value,
-                        }
-                        for k in section.kpis
-                    ],
-                    "speaker_notes": "Walk through the most important metrics.",
-                })
+                slides.append(
+                    {
+                        "slide_number": len(slides) + 1,
+                        "layout": "kpi",
+                        "title": section.title,
+                        "kpis": [
+                            {
+                                "label": k.label,
+                                "value": f"{k.value}{k.unit}",
+                                "trend": k.trend,
+                                "trend_value": k.trend_value,
+                            }
+                            for k in section.kpis
+                        ],
+                        "speaker_notes": "Walk through the most important metrics.",
+                    }
+                )
 
             elif section.section_type == ReportSectionType.CHART and section.charts:
                 for chart in section.charts:
-                    slides.append({
-                        "slide_number": len(slides) + 1,
-                        "layout": "chart",
-                        "title": chart.title,
-                        "chart_type": chart.chart_type.value,
-                        "chart_data": chart.data,
-                        "x_axis": chart.x_axis,
-                        "y_axis": chart.y_axis,
-                        "speaker_notes": f"Discuss the {chart.chart_type.value} chart showing {chart.title}.",
-                    })
+                    slides.append(
+                        {
+                            "slide_number": len(slides) + 1,
+                            "layout": "chart",
+                            "title": chart.title,
+                            "chart_type": chart.chart_type.value,
+                            "chart_data": chart.data,
+                            "x_axis": chart.x_axis,
+                            "y_axis": chart.y_axis,
+                            "speaker_notes": f"Discuss the {chart.chart_type.value} chart showing {chart.title}.",
+                        }
+                    )
 
             elif section.section_type == ReportSectionType.TABLE and section.tables:
                 for table in section.tables:
-                    slides.append({
-                        "slide_number": len(slides) + 1,
-                        "layout": "table",
-                        "title": table.title,
-                        "columns": table.columns,
-                        "rows": table.rows[:15],
-                        "speaker_notes": f"Review the data in {table.title}.",
-                    })
+                    slides.append(
+                        {
+                            "slide_number": len(slides) + 1,
+                            "layout": "table",
+                            "title": table.title,
+                            "columns": table.columns,
+                            "rows": table.rows[:15],
+                            "speaker_notes": f"Review the data in {table.title}.",
+                        }
+                    )
 
             elif section.section_type == ReportSectionType.INSIGHTS and section.insights:
-                slides.append({
-                    "slide_number": len(slides) + 1,
-                    "layout": "bullets",
-                    "title": section.title,
-                    "content": "\n".join([
-                        f"{'⚠️' if i.severity == 'critical' else '✅' if i.severity == 'positive' else '•'} {i.title}: {i.description}"
-                        for i in section.insights
-                    ]),
-                    "speaker_notes": "Discuss each insight with supporting evidence.",
-                })
+                slides.append(
+                    {
+                        "slide_number": len(slides) + 1,
+                        "layout": "bullets",
+                        "title": section.title,
+                        "content": "\n".join(
+                            [
+                                f"{'⚠️' if i.severity == 'critical' else '✅' if i.severity == 'positive' else '•'} {i.title}: {i.description}"
+                                for i in section.insights
+                            ]
+                        ),
+                        "speaker_notes": "Discuss each insight with supporting evidence.",
+                    }
+                )
 
-            elif section.section_type == ReportSectionType.RECOMMENDATIONS and section.recommendations:
-                slides.append({
-                    "slide_number": len(slides) + 1,
-                    "layout": "bullets",
-                    "title": section.title,
-                    "content": "\n".join([
-                        f"[{r.priority.upper()}] {r.title}: {r.description}"
-                        for r in section.recommendations
-                    ]),
-                    "speaker_notes": "Present clear, actionable recommendations.",
-                })
+            elif (
+                section.section_type == ReportSectionType.RECOMMENDATIONS
+                and section.recommendations
+            ):
+                slides.append(
+                    {
+                        "slide_number": len(slides) + 1,
+                        "layout": "bullets",
+                        "title": section.title,
+                        "content": "\n".join(
+                            [
+                                f"[{r.priority.upper()}] {r.title}: {r.description}"
+                                for r in section.recommendations
+                            ]
+                        ),
+                        "speaker_notes": "Present clear, actionable recommendations.",
+                    }
+                )
 
         # Closing slide
-        slides.append({
-            "slide_number": len(slides) + 1,
-            "layout": "title",
-            "title": "Thank You",
-            "subtitle": "Questions & Discussion",
-            "speaker_notes": "Open the floor for questions.",
-        })
+        slides.append(
+            {
+                "slide_number": len(slides) + 1,
+                "layout": "title",
+                "title": "Thank You",
+                "subtitle": "Questions & Discussion",
+                "speaker_notes": "Open the floor for questions.",
+            }
+        )
 
         return slides

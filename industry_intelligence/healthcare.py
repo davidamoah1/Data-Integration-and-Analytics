@@ -48,13 +48,15 @@ class HealthcareAnalytics(IndustryAnalytics):
         # ── Patient Analytics ────────────────────────────
         if patient_col and patient_col in df.columns:
             patient_count = int(df[patient_col].nunique())
-            insights.append(Insight(
-                title="Total Patients",
-                value=patient_count,
-                formatted=cls._fmt_number(patient_count),
-                category="operational",
-                description=f"Unique patients identified by column '{patient_col}'.",
-            ))
+            insights.append(
+                Insight(
+                    title="Total Patients",
+                    value=patient_count,
+                    formatted=cls._fmt_number(patient_count),
+                    category="operational",
+                    description=f"Unique patients identified by column '{patient_col}'.",
+                )
+            )
 
             # Gender breakdown
             if gender_col and gender_col in df.columns:
@@ -66,35 +68,41 @@ class HealthcareAnalytics(IndustryAnalytics):
         # Visits/admissions
         if admission_col and admission_col in df.columns:
             visit_count = int(df[admission_col].nunique())
-            insights.append(Insight(
-                title="Total Admissions",
-                value=visit_count,
-                formatted=cls._fmt_number(visit_count),
-                category="operational",
-                description=f"Unique admissions/appointments recorded.",
-            ))
+            insights.append(
+                Insight(
+                    title="Total Admissions",
+                    value=visit_count,
+                    formatted=cls._fmt_number(visit_count),
+                    category="operational",
+                    description="Unique admissions/appointments recorded.",
+                )
+            )
 
             if patient_col and patient_col in df.columns and patient_count > 0:
                 visits_per_patient = len(df) / patient_count
-                insights.append(Insight(
-                    title="Visits per Patient",
-                    value=visits_per_patient,
-                    formatted=f"{visits_per_patient:.1f}",
-                    category="operational",
-                    description="Average number of visits per patient.",
-                    alert="warning" if visits_per_patient > 5 else "ok",
-                ))
+                insights.append(
+                    Insight(
+                        title="Visits per Patient",
+                        value=visits_per_patient,
+                        formatted=f"{visits_per_patient:.1f}",
+                        category="operational",
+                        description="Average number of visits per patient.",
+                        alert="warning" if visits_per_patient > 5 else "ok",
+                    )
+                )
 
         # ── Disease Trends ───────────────────────────────
         if diagnosis_col and diagnosis_col in df.columns:
             diag_count = int(df[diagnosis_col].nunique())
-            insights.append(Insight(
-                title="Unique Diagnoses",
-                value=diag_count,
-                formatted=cls._fmt_number(diag_count),
-                category="clinical",
-                description=f"Distinct diagnosis codes/types recorded.",
-            ))
+            insights.append(
+                Insight(
+                    title="Unique Diagnoses",
+                    value=diag_count,
+                    formatted=cls._fmt_number(diag_count),
+                    category="clinical",
+                    description="Distinct diagnosis codes/types recorded.",
+                )
+            )
 
             # Top diagnoses
             diag_bd = cls._compute_breakdown(df, diagnosis_col, diagnosis_col, "count")
@@ -113,13 +121,15 @@ class HealthcareAnalytics(IndustryAnalytics):
         # ── Doctor Performance ───────────────────────────
         if doctor_col and doctor_col in df.columns:
             doctor_count = int(df[doctor_col].nunique())
-            insights.append(Insight(
-                title="Active Doctors",
-                value=doctor_count,
-                formatted=cls._fmt_number(doctor_count),
-                category="operational",
-                description=f"Unique doctors providing care.",
-            ))
+            insights.append(
+                Insight(
+                    title="Active Doctors",
+                    value=doctor_count,
+                    formatted=cls._fmt_number(doctor_count),
+                    category="operational",
+                    description="Unique doctors providing care.",
+                )
+            )
 
             # Doctor workload (patients per doctor)
             if patient_col and patient_col in df.columns and doctor_count > 0:
@@ -130,36 +140,42 @@ class HealthcareAnalytics(IndustryAnalytics):
                     breakdowns.append(doc_bd)
 
                     avg_patients = sum(doc_bd.values.values()) / len(doc_bd.values)
-                    insights.append(Insight(
-                        title="Avg Patients per Doctor",
-                        value=avg_patients,
-                        formatted=cls._fmt_number(avg_patients),
-                        category="operational",
-                        description="Average patient load across all doctors.",
-                        alert="warning" if avg_patients > 50 else "ok",
-                    ))
+                    insights.append(
+                        Insight(
+                            title="Avg Patients per Doctor",
+                            value=avg_patients,
+                            formatted=cls._fmt_number(avg_patients),
+                            category="operational",
+                            description="Average patient load across all doctors.",
+                            alert="warning" if avg_patients > 50 else "ok",
+                        )
+                    )
 
         # ── Revenue / Billing ────────────────────────────
         if billing_col and billing_col in df.columns:
             total_billing = float(df[billing_col].sum())
-            insights.append(Insight(
-                title="Total Billing",
-                value=total_billing,
-                formatted=cls._fmt_currency(total_billing),
-                category="financial",
-                description="Total billing amount across all records.",
-            ))
+            insights.append(
+                Insight(
+                    title="Total Billing",
+                    value=total_billing,
+                    formatted=cls._fmt_currency(total_billing),
+                    category="financial",
+                    description="Total billing amount across all records.",
+                )
+            )
 
             if patient_col and patient_col in df.columns:
                 patient_count = max(int(df[patient_col].nunique()), 1)
                 avg_bill = total_billing / patient_count
-                insights.append(Insight(
-                    title="Avg Bill per Patient",
-                    value=avg_bill,
-                    formatted=cls._fmt_currency(avg_bill),
-                    category="financial",
-                    description="Average billing amount per unique patient.",
-                ))
+                insights.append(
+                    Insight(
+                        title="Avg Bill per Patient",
+                        value=avg_bill,
+                        formatted=cls._fmt_currency(avg_bill),
+                        category="financial",
+                        description="Average billing amount per unique patient.",
+                    )
+                )
 
             # Billing by department
             if dept_col and dept_col in df.columns:
@@ -178,13 +194,15 @@ class HealthcareAnalytics(IndustryAnalytics):
         # ── Department Efficiency ────────────────────────
         if dept_col and dept_col in df.columns:
             dept_count = int(df[dept_col].nunique())
-            insights.append(Insight(
-                title="Active Departments",
-                value=dept_count,
-                formatted=cls._fmt_number(dept_count),
-                category="operational",
-                description="Number of distinct departments/wards.",
-            ))
+            insights.append(
+                Insight(
+                    title="Active Departments",
+                    value=dept_count,
+                    formatted=cls._fmt_number(dept_count),
+                    category="operational",
+                    description="Number of distinct departments/wards.",
+                )
+            )
 
             if patient_col and patient_col in df.columns:
                 dept_patient_bd = cls._compute_breakdown(df, dept_col, patient_col, "count")
@@ -202,12 +220,14 @@ class HealthcareAnalytics(IndustryAnalytics):
                 breakdowns.append(ins_bd)
 
         # ── Recommendations ──────────────────────────────
-        recommendations.extend([
-            "Monitor patient volume by department to optimize staffing.",
-            "Track readmission rates to identify quality-of-care issues.",
-            "Analyze billing patterns by insurance provider for revenue optimization.",
-            "Review doctor workload distribution for burnout prevention.",
-        ])
+        recommendations.extend(
+            [
+                "Monitor patient volume by department to optimize staffing.",
+                "Track readmission rates to identify quality-of-care issues.",
+                "Analyze billing patterns by insurance provider for revenue optimization.",
+                "Review doctor workload distribution for burnout prevention.",
+            ]
+        )
 
         # ── Alerts ───────────────────────────────────────
         for insight in insights:

@@ -6,7 +6,6 @@ Covers PARTS 2-7 of the master audit prompt.
 
 import os
 import sys
-import tempfile
 
 import pandas as pd
 import pytest
@@ -18,26 +17,29 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 # PART 2-3: Semantic Engine — Confidence Threshold
 # ──────────────────────────────────────────────
 
+
 class TestConfidenceThreshold:
     """Verify MIN_INDUSTRY_CONFIDENCE is 70.0 (not 40.0)."""
 
     def test_min_confidence_is_70(self):
         from semantic.semantic_engine import MIN_INDUSTRY_CONFIDENCE
 
-        assert MIN_INDUSTRY_CONFIDENCE == 70.0, (
-            f"MIN_INDUSTRY_CONFIDENCE should be 70.0, got {MIN_INDUSTRY_CONFIDENCE}"
-        )
+        assert (
+            MIN_INDUSTRY_CONFIDENCE == 70.0
+        ), f"MIN_INDUSTRY_CONFIDENCE should be 70.0, got {MIN_INDUSTRY_CONFIDENCE}"
 
     def test_low_confidence_returns_unknown(self):
         """A dataset with weak signals should return 'unknown' industry."""
         from semantic.semantic_engine import SemanticEngine
 
-        df = pd.DataFrame({
-            "id": [1, 2, 3, 4, 5],
-            "amount": [100, 200, 300, 400, 500],
-            "date": ["2024-01-01", "2024-01-02", "2024-01-03", "2024-01-04", "2024-01-05"],
-            "status": ["active", "active", "inactive", "active", "active"],
-        })
+        df = pd.DataFrame(
+            {
+                "id": [1, 2, 3, 4, 5],
+                "amount": [100, 200, 300, 400, 500],
+                "date": ["2024-01-01", "2024-01-02", "2024-01-03", "2024-01-04", "2024-01-05"],
+                "status": ["active", "active", "inactive", "active", "active"],
+            }
+        )
 
         result = SemanticEngine.analyze(df)
         # With only generic columns, industry should be unknown
@@ -47,15 +49,23 @@ class TestConfidenceThreshold:
         """Healthcare columns should produce high-confidence healthcare detection."""
         from semantic.semantic_engine import SemanticEngine
 
-        df = pd.DataFrame({
-            "patient_id": ["P001", "P002", "P003", "P004", "P005"],
-            "patient_name": ["John", "Jane", "Bob", "Alice", "Charlie"],
-            "doctor_name": ["Dr. Smith", "Dr. Jones", "Dr. Lee", "Dr. Brown", "Dr. White"],
-            "diagnosis": ["Flu", "Cold", "Diabetes", "Hypertension", "Asthma"],
-            "admission_date": ["2024-01-01", "2024-01-02", "2024-01-03", "2024-01-04", "2024-01-05"],
-            "billing": [500, 300, 1200, 800, 450],
-            "ward": ["A", "B", "A", "C", "B"],
-        })
+        df = pd.DataFrame(
+            {
+                "patient_id": ["P001", "P002", "P003", "P004", "P005"],
+                "patient_name": ["John", "Jane", "Bob", "Alice", "Charlie"],
+                "doctor_name": ["Dr. Smith", "Dr. Jones", "Dr. Lee", "Dr. Brown", "Dr. White"],
+                "diagnosis": ["Flu", "Cold", "Diabetes", "Hypertension", "Asthma"],
+                "admission_date": [
+                    "2024-01-01",
+                    "2024-01-02",
+                    "2024-01-03",
+                    "2024-01-04",
+                    "2024-01-05",
+                ],
+                "billing": [500, 300, 1200, 800, 450],
+                "ward": ["A", "B", "A", "C", "B"],
+            }
+        )
 
         result = SemanticEngine.analyze(df)
         assert result.detected_industry == "healthcare"
@@ -65,14 +75,16 @@ class TestConfidenceThreshold:
         """Education columns should produce high-confidence education detection."""
         from semantic.semantic_engine import SemanticEngine
 
-        df = pd.DataFrame({
-            "student_id": ["S001", "S002", "S003", "S004", "S005"],
-            "student_name": ["John", "Jane", "Bob", "Alice", "Charlie"],
-            "teacher_name": ["Mr. Smith", "Mrs. Jones", "Mr. Lee", "Ms. Brown", "Mr. White"],
-            "course": ["Math", "Science", "English", "History", "Art"],
-            "grade": ["A", "B", "A", "C", "B"],
-            "attendance": [95, 88, 92, 78, 85],
-        })
+        df = pd.DataFrame(
+            {
+                "student_id": ["S001", "S002", "S003", "S004", "S005"],
+                "student_name": ["John", "Jane", "Bob", "Alice", "Charlie"],
+                "teacher_name": ["Mr. Smith", "Mrs. Jones", "Mr. Lee", "Ms. Brown", "Mr. White"],
+                "course": ["Math", "Science", "English", "History", "Art"],
+                "grade": ["A", "B", "A", "C", "B"],
+                "attendance": [95, 88, 92, 78, 85],
+            }
+        )
 
         result = SemanticEngine.analyze(df)
         assert result.detected_industry == "education"
@@ -82,12 +94,14 @@ class TestConfidenceThreshold:
         """A generic dataset with 'amount' and 'date' should not auto-select banking."""
         from semantic.semantic_engine import SemanticEngine
 
-        df = pd.DataFrame({
-            "transaction_id": ["T001", "T002", "T003"],
-            "amount": [100, 200, 300],
-            "date": ["2024-01-01", "2024-01-02", "2024-01-03"],
-            "type": ["A", "B", "A"],
-        })
+        df = pd.DataFrame(
+            {
+                "transaction_id": ["T001", "T002", "T003"],
+                "amount": [100, 200, 300],
+                "date": ["2024-01-01", "2024-01-02", "2024-01-03"],
+                "type": ["A", "B", "A"],
+            }
+        )
 
         result = SemanticEngine.analyze(df)
         # Should NOT be banking just because of amount/date
@@ -97,6 +111,7 @@ class TestConfidenceThreshold:
 # ──────────────────────────────────────────────
 # PART 3: Weighted Intelligence Scoring
 # ──────────────────────────────────────────────
+
 
 class TestWeightedScoring:
     """Verify strong signals have weight 3.0 and weak signals don't dominate."""
@@ -120,6 +135,7 @@ class TestWeightedScoring:
 # ──────────────────────────────────────────────
 # PART 7: ETL Hardening
 # ──────────────────────────────────────────────
+
 
 class TestETLExtract:
     """Test ETL extraction with multiple file formats."""
@@ -163,11 +179,13 @@ class TestETLTransform:
         """Transform should not drop rows from non-sales datasets."""
         from etl.transform import transform_data
 
-        df = pd.DataFrame({
-            "patient_id": ["P001", "P002", "P003"],
-            "diagnosis": ["Flu", "Cold", None],
-            "billing": [100, 200, 300],
-        })
+        df = pd.DataFrame(
+            {
+                "patient_id": ["P001", "P002", "P003"],
+                "diagnosis": ["Flu", "Cold", None],
+                "billing": [100, 200, 300],
+            }
+        )
 
         # Should not drop any rows just because 'sales' or 'order_date' don't exist
         result = transform_data(df)
@@ -177,11 +195,13 @@ class TestETLTransform:
         """Transform should drop rows with missing order_id for sales datasets."""
         from etl.transform import transform_data
 
-        df = pd.DataFrame({
-            "order_id": ["O001", None, "O003"],
-            "sales": [100, 200, 300],
-            "order_date": ["2024-01-01", "2024-01-02", "2024-01-03"],
-        })
+        df = pd.DataFrame(
+            {
+                "order_id": ["O001", None, "O003"],
+                "sales": [100, 200, 300],
+                "order_date": ["2024-01-01", "2024-01-02", "2024-01-03"],
+            }
+        )
 
         result = transform_data(df)
         # Should drop the row with missing order_id
@@ -191,10 +211,12 @@ class TestETLTransform:
         """Transform should not remove columns."""
         from etl.transform import transform_data
 
-        df = pd.DataFrame({
-            "custom_col": ["a", "b", "c"],
-            "another_col": [1, 2, 3],
-        })
+        df = pd.DataFrame(
+            {
+                "custom_col": ["a", "b", "c"],
+                "another_col": [1, 2, 3],
+            }
+        )
 
         result = transform_data(df)
         assert "custom_col" in result.columns
@@ -204,6 +226,7 @@ class TestETLTransform:
 # ──────────────────────────────────────────────
 # PART 6: Dataset Isolation
 # ──────────────────────────────────────────────
+
 
 class TestDatasetIsolation:
     """Verify unique dataset IDs are generated per upload."""
@@ -223,22 +246,33 @@ class TestDatasetIsolation:
 # PART 5: Dashboard Routing — Generic Fallback
 # ──────────────────────────────────────────────
 
+
 class TestDashboardRouting:
     """Verify unknown datasets get generic dashboard, not SME."""
 
     def test_sector_renderers_has_all_industries(self):
         from dashboard.sector_dashboards import SECTOR_RENDERERS
 
-        expected = {"sme", "retail", "education", "healthcare", "government",
-                    "church", "ngo", "manufacturing", "agriculture"}
+        expected = {
+            "sme",
+            "retail",
+            "education",
+            "healthcare",
+            "government",
+            "church",
+            "ngo",
+            "manufacturing",
+            "agriculture",
+        }
         assert expected.issubset(set(SECTOR_RENDERERS.keys()))
 
     def test_unknown_pack_key_returns_generic(self):
         """render_sector_dashboard with None pack_key should not raise."""
         # We can't call the function directly (requires Streamlit context),
         # but we can verify the logic doesn't default to SME
-        from dashboard.sector_dashboards import render_sector_dashboard
         import inspect
+
+        from dashboard.sector_dashboards import render_sector_dashboard
 
         source = inspect.getsource(render_sector_dashboard)
         # Must NOT contain the old pattern of defaulting to "sme"

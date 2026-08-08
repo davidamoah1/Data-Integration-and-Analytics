@@ -16,21 +16,25 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import Any
 
 from fastapi import Request, Response
-from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from sqlalchemy.orm import Session as DbSession
+from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 
 from audit.models import AuditLog
-from shared.database import get_session_factory, get_engine
+from shared.database import get_session_factory
 
 logger = logging.getLogger(__name__)
 
 # Paths to exclude from automatic audit logging
 EXCLUDED_PATHS = {
-    "/docs", "/openapi.json", "/redoc", "/health",
-    "/api/auth/login", "/api/auth/refresh", "/api/auth/register",
+    "/docs",
+    "/openapi.json",
+    "/redoc",
+    "/health",
+    "/api/auth/login",
+    "/api/auth/refresh",
+    "/api/auth/register",
 }
 
 # Action mapping based on HTTP method

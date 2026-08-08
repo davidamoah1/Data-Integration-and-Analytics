@@ -15,19 +15,18 @@ import pandas as pd
 import pytest
 
 from predictive_analytics import (
-    TimeSeriesForecaster,
-    RegressionPredictor,
-    RiskClassifier,
-    PredictiveAnalyticsRegistry,
-    PredictiveAnalyticsBase,
     ForecastResult,
     PredictionResult,
-    RiskAssessment,
+    PredictiveAnalyticsRegistry,
     PredictiveIntelligenceResult,
+    RegressionPredictor,
+    RiskAssessment,
+    RiskClassifier,
+    TimeSeriesForecaster,
 )
 
-
 # ── Fixtures ──────────────────────────────────────────────
+
 
 @pytest.fixture
 def retail_df():
@@ -36,15 +35,17 @@ def retail_df():
     dates = pd.date_range("2024-01-01", periods=60, freq="D")
     sales = [1000 + i * 20 + np.random.randint(-50, 50) for i in range(60)]
     profit = [s * 0.2 + np.random.randint(-10, 10) for s in sales]
-    return pd.DataFrame({
-        "order_id": range(1, 61),
-        "product": ["Product_A"] * 30 + ["Product_B"] * 30,
-        "region": ["North"] * 20 + ["South"] * 40,
-        "sales": sales,
-        "profit": profit,
-        "quantity": [10 + i for i in range(60)],
-        "order_date": dates,
-    })
+    return pd.DataFrame(
+        {
+            "order_id": range(1, 61),
+            "product": ["Product_A"] * 30 + ["Product_B"] * 30,
+            "region": ["North"] * 20 + ["South"] * 40,
+            "sales": sales,
+            "profit": profit,
+            "quantity": [10 + i for i in range(60)],
+            "order_date": dates,
+        }
+    )
 
 
 @pytest.fixture
@@ -65,14 +66,16 @@ def healthcare_df():
     """Healthcare data with admissions and patient info."""
     np.random.seed(42)
     dates = pd.date_range("2024-01-01", periods=60, freq="D")
-    return pd.DataFrame({
-        "patient_id": [f"P{i % 20}" for i in range(60)],
-        "department": (["Cardiology"] * 30 + ["Neurology"] * 30),
-        "age": [30 + i % 50 for i in range(60)],
-        "billing_amount": [2000 + i * 50 for i in range(60)],
-        "diagnosis_code": ["E11.9", "J45.909", "I10.0"] * 20,
-        "visit_date": dates,
-    })
+    return pd.DataFrame(
+        {
+            "patient_id": [f"P{i % 20}" for i in range(60)],
+            "department": (["Cardiology"] * 30 + ["Neurology"] * 30),
+            "age": [30 + i % 50 for i in range(60)],
+            "billing_amount": [2000 + i * 50 for i in range(60)],
+            "diagnosis_code": ["E11.9", "J45.909", "I10.0"] * 20,
+            "visit_date": dates,
+        }
+    )
 
 
 @pytest.fixture
@@ -91,14 +94,16 @@ def healthcare_col_mapping():
 def education_df():
     """Education data with student grades and attendance."""
     np.random.seed(42)
-    return pd.DataFrame({
-        "student_id": [f"S{i}" for i in range(1, 51)],
-        "grade": [40 + i * 1.2 for i in range(50)],
-        "attendance_rate": [60 + i * 0.8 for i in range(50)],
-        "days_absent": [20 - i * 0.3 for i in range(50)],
-        "participation_score": [30 + i * 1.4 for i in range(50)],
-        "enrollment_date": pd.date_range("2024-01-01", periods=50, freq="D"),
-    })
+    return pd.DataFrame(
+        {
+            "student_id": [f"S{i}" for i in range(1, 51)],
+            "grade": [40 + i * 1.2 for i in range(50)],
+            "attendance_rate": [60 + i * 0.8 for i in range(50)],
+            "days_absent": [20 - i * 0.3 for i in range(50)],
+            "participation_score": [30 + i * 1.4 for i in range(50)],
+            "enrollment_date": pd.date_range("2024-01-01", periods=50, freq="D"),
+        }
+    )
 
 
 @pytest.fixture
@@ -117,16 +122,18 @@ def education_col_mapping():
 def agriculture_df():
     """Agriculture data with yield and environmental factors."""
     np.random.seed(42)
-    return pd.DataFrame({
-        "farm_id": [f"F{i}" for i in range(1, 31)],
-        "crop": (["Maize"] * 10 + ["Rice"] * 10 + ["Wheat"] * 10),
-        "yield_per_hectare": [3 + i * 0.15 for i in range(30)],
-        "rainfall_mm": [800 + i * 10 for i in range(30)],
-        "fertilizer_kg": [100 + i * 5 for i in range(30)],
-        "temperature": [25 + i * 0.2 for i in range(30)],
-        "area_hectares": [10 + i * 0.5 for i in range(30)],
-        "harvest_date": pd.date_range("2024-01-01", periods=30, freq="D"),
-    })
+    return pd.DataFrame(
+        {
+            "farm_id": [f"F{i}" for i in range(1, 31)],
+            "crop": (["Maize"] * 10 + ["Rice"] * 10 + ["Wheat"] * 10),
+            "yield_per_hectare": [3 + i * 0.15 for i in range(30)],
+            "rainfall_mm": [800 + i * 10 for i in range(30)],
+            "fertilizer_kg": [100 + i * 5 for i in range(30)],
+            "temperature": [25 + i * 0.2 for i in range(30)],
+            "area_hectares": [10 + i * 0.5 for i in range(30)],
+            "harvest_date": pd.date_range("2024-01-01", periods=30, freq="D"),
+        }
+    )
 
 
 @pytest.fixture
@@ -145,11 +152,15 @@ def agriculture_col_mapping():
 
 # ── Time Series Forecaster Tests ──────────────────────────
 
+
 class TestTimeSeriesForecaster:
     def test_linear_forecast(self, retail_df):
         result = TimeSeriesForecaster.forecast(
-            retail_df, "sales", "order_date",
-            horizon=7, method="linear",
+            retail_df,
+            "sales",
+            "order_date",
+            horizon=7,
+            method="linear",
         )
         assert result is not None
         assert isinstance(result, ForecastResult)
@@ -158,8 +169,11 @@ class TestTimeSeriesForecaster:
 
     def test_exponential_forecast(self, retail_df):
         result = TimeSeriesForecaster.forecast(
-            retail_df, "sales", "order_date",
-            horizon=7, method="exponential",
+            retail_df,
+            "sales",
+            "order_date",
+            horizon=7,
+            method="exponential",
         )
         assert result is not None
         assert result.method == "exponential"
@@ -167,53 +181,73 @@ class TestTimeSeriesForecaster:
 
     def test_moving_average_forecast(self, retail_df):
         result = TimeSeriesForecaster.forecast(
-            retail_df, "sales", "order_date",
-            horizon=7, method="moving_average",
+            retail_df,
+            "sales",
+            "order_date",
+            horizon=7,
+            method="moving_average",
         )
         assert result is not None
         assert result.method == "moving_average"
 
     def test_seasonal_forecast(self, retail_df):
         result = TimeSeriesForecaster.forecast(
-            retail_df, "sales", "order_date",
-            horizon=7, method="seasonal",
+            retail_df,
+            "sales",
+            "order_date",
+            horizon=7,
+            method="seasonal",
         )
         assert result is not None
         assert result.method == "seasonal"
 
     def test_auto_method_selects(self, retail_df):
         result = TimeSeriesForecaster.forecast(
-            retail_df, "sales", "order_date",
-            horizon=7, method="auto",
+            retail_df,
+            "sales",
+            "order_date",
+            horizon=7,
+            method="auto",
         )
         assert result is not None
         assert result.method in ("linear", "exponential", "moving_average", "seasonal")
 
     def test_predictions_have_ci(self, retail_df):
         result = TimeSeriesForecaster.forecast(
-            retail_df, "sales", "order_date",
-            horizon=7, method="linear",
+            retail_df,
+            "sales",
+            "order_date",
+            horizon=7,
+            method="linear",
         )
         for p in result.predictions:
             assert p.lower_ci <= p.value <= p.upper_ci
 
     def test_accuracy_in_range(self, retail_df):
         result = TimeSeriesForecaster.forecast(
-            retail_df, "sales", "order_date",
-            horizon=7, method="linear",
+            retail_df,
+            "sales",
+            "order_date",
+            horizon=7,
+            method="linear",
         )
         assert 0 <= result.accuracy <= 1
 
     def test_trend_detected(self, retail_df):
         result = TimeSeriesForecaster.forecast(
-            retail_df, "sales", "order_date",
-            horizon=7, method="linear",
+            retail_df,
+            "sales",
+            "order_date",
+            horizon=7,
+            method="linear",
         )
         assert result.trend in ("increasing", "decreasing", "stable")
 
     def test_summary_generated(self, retail_df):
         result = TimeSeriesForecaster.forecast(
-            retail_df, "sales", "order_date",
+            retail_df,
+            "sales",
+            "order_date",
             horizon=7,
         )
         assert result.summary != ""
@@ -221,7 +255,9 @@ class TestTimeSeriesForecaster:
 
     def test_to_dict(self, retail_df):
         result = TimeSeriesForecaster.forecast(
-            retail_df, "sales", "order_date",
+            retail_df,
+            "sales",
+            "order_date",
             horizon=7,
         )
         d = result.to_dict()
@@ -242,10 +278,12 @@ class TestTimeSeriesForecaster:
 
 # ── Regression Predictor Tests ────────────────────────────
 
+
 class TestRegressionPredictor:
     def test_predict_returns_result(self, agriculture_df):
         result = RegressionPredictor.predict(
-            agriculture_df, "yield_per_hectare",
+            agriculture_df,
+            "yield_per_hectare",
             feature_cols=["rainfall_mm", "fertilizer_kg", "temperature"],
         )
         assert result is not None
@@ -253,14 +291,16 @@ class TestRegressionPredictor:
 
     def test_r_squared_in_range(self, agriculture_df):
         result = RegressionPredictor.predict(
-            agriculture_df, "yield_per_hectare",
+            agriculture_df,
+            "yield_per_hectare",
             feature_cols=["rainfall_mm", "fertilizer_kg"],
         )
         assert 0 <= result.r_squared <= 1
 
     def test_feature_importance(self, agriculture_df):
         result = RegressionPredictor.predict(
-            agriculture_df, "yield_per_hectare",
+            agriculture_df,
+            "yield_per_hectare",
             feature_cols=["rainfall_mm", "fertilizer_kg", "temperature"],
         )
         assert len(result.feature_importance) == 3
@@ -268,7 +308,8 @@ class TestRegressionPredictor:
 
     def test_predictions_generated(self, agriculture_df):
         result = RegressionPredictor.predict(
-            agriculture_df, "yield_per_hectare",
+            agriculture_df,
+            "yield_per_hectare",
             feature_cols=["rainfall_mm", "fertilizer_kg"],
         )
         assert len(result.predictions) > 0
@@ -279,7 +320,8 @@ class TestRegressionPredictor:
 
     def test_summary_generated(self, agriculture_df):
         result = RegressionPredictor.predict(
-            agriculture_df, "yield_per_hectare",
+            agriculture_df,
+            "yield_per_hectare",
             feature_cols=["rainfall_mm", "fertilizer_kg"],
         )
         assert result.summary != ""
@@ -287,7 +329,8 @@ class TestRegressionPredictor:
 
     def test_to_dict(self, agriculture_df):
         result = RegressionPredictor.predict(
-            agriculture_df, "yield_per_hectare",
+            agriculture_df,
+            "yield_per_hectare",
             feature_cols=["rainfall_mm"],
         )
         d = result.to_dict()
@@ -301,7 +344,8 @@ class TestRegressionPredictor:
 
     def test_auto_feature_selection(self, agriculture_df):
         result = RegressionPredictor.predict(
-            agriculture_df, "yield_per_hectare",
+            agriculture_df,
+            "yield_per_hectare",
         )
         assert result is not None
         assert len(result.feature_importance) > 0
@@ -309,32 +353,68 @@ class TestRegressionPredictor:
 
 # ── Risk Classifier Tests ─────────────────────────────────
 
+
 class TestRiskClassifier:
     def test_classify_returns_result(self, education_df):
         result = RiskClassifier.classify(
-            education_df, "student_id",
+            education_df,
+            "student_id",
             risk_factors=[
-                {"column": "grade", "condition": "below", "threshold": 60, "weight": 0.5, "label": "Low grade"},
-                {"column": "attendance_rate", "condition": "below", "threshold": 80, "weight": 0.5, "label": "Low attendance"},
+                {
+                    "column": "grade",
+                    "condition": "below",
+                    "threshold": 60,
+                    "weight": 0.5,
+                    "label": "Low grade",
+                },
+                {
+                    "column": "attendance_rate",
+                    "condition": "below",
+                    "threshold": 80,
+                    "weight": 0.5,
+                    "label": "Low attendance",
+                },
             ],
         )
         assert isinstance(result, RiskAssessment)
 
     def test_risk_counts(self, education_df):
         result = RiskClassifier.classify(
-            education_df, "student_id",
+            education_df,
+            "student_id",
             risk_factors=[
-                {"column": "grade", "condition": "below", "threshold": 60, "weight": 0.5, "label": "Low grade"},
-                {"column": "attendance_rate", "condition": "below", "threshold": 80, "weight": 0.5, "label": "Low attendance"},
+                {
+                    "column": "grade",
+                    "condition": "below",
+                    "threshold": 60,
+                    "weight": 0.5,
+                    "label": "Low grade",
+                },
+                {
+                    "column": "attendance_rate",
+                    "condition": "below",
+                    "threshold": 80,
+                    "weight": 0.5,
+                    "label": "Low attendance",
+                },
             ],
         )
-        assert result.high_risk_count + result.medium_risk_count + result.low_risk_count == len(education_df)
+        assert result.high_risk_count + result.medium_risk_count + result.low_risk_count == len(
+            education_df
+        )
 
     def test_at_risk_items_sorted(self, education_df):
         result = RiskClassifier.classify(
-            education_df, "student_id",
+            education_df,
+            "student_id",
             risk_factors=[
-                {"column": "grade", "condition": "below", "threshold": 60, "weight": 1.0, "label": "Low grade"},
+                {
+                    "column": "grade",
+                    "condition": "below",
+                    "threshold": 60,
+                    "weight": 1.0,
+                    "label": "Low grade",
+                },
             ],
         )
         scores = [i["risk_score"] for i in result.at_risk_items]
@@ -342,10 +422,23 @@ class TestRiskClassifier:
 
     def test_risk_factors_listed(self, education_df):
         result = RiskClassifier.classify(
-            education_df, "student_id",
+            education_df,
+            "student_id",
             risk_factors=[
-                {"column": "grade", "condition": "below", "threshold": 60, "weight": 0.5, "label": "Low grade"},
-                {"column": "attendance_rate", "condition": "below", "threshold": 80, "weight": 0.5, "label": "Low attendance"},
+                {
+                    "column": "grade",
+                    "condition": "below",
+                    "threshold": 60,
+                    "weight": 0.5,
+                    "label": "Low grade",
+                },
+                {
+                    "column": "attendance_rate",
+                    "condition": "below",
+                    "threshold": 80,
+                    "weight": 0.5,
+                    "label": "Low attendance",
+                },
             ],
         )
         assert "Low grade" in result.risk_factors
@@ -353,9 +446,16 @@ class TestRiskClassifier:
 
     def test_summary_generated(self, education_df):
         result = RiskClassifier.classify(
-            education_df, "student_id",
+            education_df,
+            "student_id",
             risk_factors=[
-                {"column": "grade", "condition": "below", "threshold": 60, "weight": 1.0, "label": "Low grade"},
+                {
+                    "column": "grade",
+                    "condition": "below",
+                    "threshold": 60,
+                    "weight": 1.0,
+                    "label": "Low grade",
+                },
             ],
         )
         assert result.summary != ""
@@ -363,9 +463,16 @@ class TestRiskClassifier:
 
     def test_to_dict(self, education_df):
         result = RiskClassifier.classify(
-            education_df, "student_id",
+            education_df,
+            "student_id",
             risk_factors=[
-                {"column": "grade", "condition": "below", "threshold": 60, "weight": 1.0, "label": "Low grade"},
+                {
+                    "column": "grade",
+                    "condition": "below",
+                    "threshold": 60,
+                    "weight": 1.0,
+                    "label": "Low grade",
+                },
             ],
         )
         d = result.to_dict()
@@ -374,9 +481,16 @@ class TestRiskClassifier:
 
     def test_triggered_factors_in_items(self, education_df):
         result = RiskClassifier.classify(
-            education_df, "student_id",
+            education_df,
+            "student_id",
             risk_factors=[
-                {"column": "grade", "condition": "below", "threshold": 60, "weight": 1.0, "label": "Low grade"},
+                {
+                    "column": "grade",
+                    "condition": "below",
+                    "threshold": 60,
+                    "weight": 1.0,
+                    "label": "Low grade",
+                },
             ],
         )
         for item in result.at_risk_items:
@@ -385,6 +499,7 @@ class TestRiskClassifier:
 
 
 # ── Business Predictive Analytics Tests ───────────────────
+
 
 class TestBusinessPredictiveAnalytics:
     def test_analyze_returns_result(self, retail_df, retail_col_mapping):
@@ -418,81 +533,111 @@ class TestBusinessPredictiveAnalytics:
 
 # ── Healthcare Predictive Analytics Tests ─────────────────
 
+
 class TestHealthcarePredictiveAnalytics:
     def test_analyze_returns_result(self, healthcare_df, healthcare_col_mapping):
-        result = PredictiveAnalyticsRegistry.analyze("healthcare", healthcare_df, healthcare_col_mapping)
+        result = PredictiveAnalyticsRegistry.analyze(
+            "healthcare", healthcare_df, healthcare_col_mapping
+        )
         assert isinstance(result, PredictiveIntelligenceResult)
         assert result.industry == "healthcare"
 
     def test_admission_forecast(self, healthcare_df, healthcare_col_mapping):
-        result = PredictiveAnalyticsRegistry.analyze("healthcare", healthcare_df, healthcare_col_mapping)
+        result = PredictiveAnalyticsRegistry.analyze(
+            "healthcare", healthcare_df, healthcare_col_mapping
+        )
         assert len(result.forecasts) > 0
 
     def test_patient_risk_assessment(self, healthcare_df, healthcare_col_mapping):
-        result = PredictiveAnalyticsRegistry.analyze("healthcare", healthcare_df, healthcare_col_mapping)
+        result = PredictiveAnalyticsRegistry.analyze(
+            "healthcare", healthcare_df, healthcare_col_mapping
+        )
         assert len(result.risk_assessments) > 0
         ra = result.risk_assessments[0]
         assert ra.high_risk_count + ra.medium_risk_count + ra.low_risk_count > 0
 
     def test_summary_generated(self, healthcare_df, healthcare_col_mapping):
-        result = PredictiveAnalyticsRegistry.analyze("healthcare", healthcare_df, healthcare_col_mapping)
+        result = PredictiveAnalyticsRegistry.analyze(
+            "healthcare", healthcare_df, healthcare_col_mapping
+        )
         assert result.summary != ""
 
 
 # ── Education Predictive Analytics Tests ──────────────────
 
+
 class TestEducationPredictiveAnalytics:
     def test_analyze_returns_result(self, education_df, education_col_mapping):
-        result = PredictiveAnalyticsRegistry.analyze("education", education_df, education_col_mapping)
+        result = PredictiveAnalyticsRegistry.analyze(
+            "education", education_df, education_col_mapping
+        )
         assert isinstance(result, PredictiveIntelligenceResult)
         assert result.industry == "education"
 
     def test_student_risk_prediction(self, education_df, education_col_mapping):
-        result = PredictiveAnalyticsRegistry.analyze("education", education_df, education_col_mapping)
+        result = PredictiveAnalyticsRegistry.analyze(
+            "education", education_df, education_col_mapping
+        )
         assert len(result.risk_assessments) > 0
         ra = result.risk_assessments[0]
         assert "Student Risk" in ra.name
 
     def test_at_risk_students_identified(self, education_df, education_col_mapping):
-        result = PredictiveAnalyticsRegistry.analyze("education", education_df, education_col_mapping)
+        result = PredictiveAnalyticsRegistry.analyze(
+            "education", education_df, education_col_mapping
+        )
         ra = result.risk_assessments[0]
         assert ra.high_risk_count > 0  # Some students should be high-risk
 
     def test_summary_generated(self, education_df, education_col_mapping):
-        result = PredictiveAnalyticsRegistry.analyze("education", education_df, education_col_mapping)
+        result = PredictiveAnalyticsRegistry.analyze(
+            "education", education_df, education_col_mapping
+        )
         assert result.summary != ""
         assert "risk" in result.summary.lower()
 
 
 # ── Agriculture Predictive Analytics Tests ────────────────
 
+
 class TestAgriculturePredictiveAnalytics:
     def test_analyze_returns_result(self, agriculture_df, agriculture_col_mapping):
-        result = PredictiveAnalyticsRegistry.analyze("agriculture", agriculture_df, agriculture_col_mapping)
+        result = PredictiveAnalyticsRegistry.analyze(
+            "agriculture", agriculture_df, agriculture_col_mapping
+        )
         assert isinstance(result, PredictiveIntelligenceResult)
         assert result.industry == "agriculture"
 
     def test_yield_prediction(self, agriculture_df, agriculture_col_mapping):
-        result = PredictiveAnalyticsRegistry.analyze("agriculture", agriculture_df, agriculture_col_mapping)
+        result = PredictiveAnalyticsRegistry.analyze(
+            "agriculture", agriculture_df, agriculture_col_mapping
+        )
         assert len(result.predictions) > 0
         pred = result.predictions[0]
         assert "Yield" in pred.name or "Production" in pred.name
 
     def test_production_forecast(self, agriculture_df, agriculture_col_mapping):
-        result = PredictiveAnalyticsRegistry.analyze("agriculture", agriculture_df, agriculture_col_mapping)
+        result = PredictiveAnalyticsRegistry.analyze(
+            "agriculture", agriculture_df, agriculture_col_mapping
+        )
         assert len(result.forecasts) > 0
 
     def test_r_squared_computed(self, agriculture_df, agriculture_col_mapping):
-        result = PredictiveAnalyticsRegistry.analyze("agriculture", agriculture_df, agriculture_col_mapping)
+        result = PredictiveAnalyticsRegistry.analyze(
+            "agriculture", agriculture_df, agriculture_col_mapping
+        )
         if result.predictions:
             assert result.predictions[0].r_squared >= 0
 
     def test_summary_generated(self, agriculture_df, agriculture_col_mapping):
-        result = PredictiveAnalyticsRegistry.analyze("agriculture", agriculture_df, agriculture_col_mapping)
+        result = PredictiveAnalyticsRegistry.analyze(
+            "agriculture", agriculture_df, agriculture_col_mapping
+        )
         assert result.summary != ""
 
 
 # ── Registry Tests ────────────────────────────────────────
+
 
 class TestPredictiveAnalyticsRegistry:
     def test_registered_industries(self):
@@ -511,14 +656,17 @@ class TestPredictiveAnalyticsRegistry:
 
 # ── Pipeline Integration Tests ────────────────────────────
 
+
 class TestPipelineIntegration:
     def test_predictive_in_mapping_result(self, retail_df):
         from semantic.mapping_engine import SemanticMappingEngine
+
         result = SemanticMappingEngine.analyze(retail_df, "retail.csv")
         assert result.predictive_intelligence is not None
 
     def test_predictive_in_to_dict(self, retail_df):
         from semantic.mapping_engine import SemanticMappingEngine
+
         result = SemanticMappingEngine.analyze(retail_df, "retail.csv")
         d = result.to_dict()
         assert "predictive_intelligence" in d
@@ -526,6 +674,7 @@ class TestPipelineIntegration:
 
     def test_healthcare_pipeline(self, healthcare_df):
         from semantic.mapping_engine import SemanticMappingEngine
+
         result = SemanticMappingEngine.analyze(healthcare_df, "hospital.csv")
         pi = result.predictive_intelligence
         assert pi is not None
@@ -533,6 +682,7 @@ class TestPipelineIntegration:
 
     def test_education_pipeline(self, education_df):
         from semantic.mapping_engine import SemanticMappingEngine
+
         result = SemanticMappingEngine.analyze(education_df, "school.csv")
         pi = result.predictive_intelligence
         assert pi is not None
@@ -540,6 +690,7 @@ class TestPipelineIntegration:
 
     def test_agriculture_pipeline(self, agriculture_df):
         from semantic.mapping_engine import SemanticMappingEngine
+
         result = SemanticMappingEngine.analyze(agriculture_df, "farm.csv")
         pi = result.predictive_intelligence
         assert pi is not None

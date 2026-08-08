@@ -11,7 +11,6 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
-from scipy import stats
 
 
 def assess_ml_readiness(df: pd.DataFrame, target_column: str | None = None) -> dict[str, Any]:
@@ -59,7 +58,10 @@ def assess_ml_readiness(df: pd.DataFrame, target_column: str | None = None) -> d
     # Class imbalance
     imbalance_report = {}
     if target_column and target_column in df.columns:
-        if df[target_column].dtype in ("object", "category", "bool") or df[target_column].nunique() <= 20:
+        if (
+            df[target_column].dtype in ("object", "category", "bool")
+            or df[target_column].nunique() <= 20
+        ):
             ratios = df[target_column].value_counts(normalize=True)
             imbalance_report = {
                 "classes": int(df[target_column].nunique()),
@@ -140,20 +142,46 @@ def assess_ml_readiness(df: pd.DataFrame, target_column: str | None = None) -> d
     }
 
 
-def _suggest_algorithms(df: pd.DataFrame, target_column: str | None, forecast_suitable: bool) -> list[dict[str, Any]]:
+def _suggest_algorithms(
+    df: pd.DataFrame, target_column: str | None, forecast_suitable: bool
+) -> list[dict[str, Any]]:
     suggestions = []
     if forecast_suitable:
-        suggestions.append({"family": "forecasting", "algorithms": ["ARIMA", "ExponentialSmoothing", "Prophet"]})
+        suggestions.append(
+            {"family": "forecasting", "algorithms": ["ARIMA", "ExponentialSmoothing", "Prophet"]}
+        )
 
     if target_column and target_column in df.columns:
         target = df[target_column]
         unique_ratio = target.nunique() / max(len(df), 1)
         if target.dtype in ("object", "category", "bool") or target.nunique() <= 20:
-            suggestions.append({"family": "classification", "algorithms": ["LogisticRegression", "RandomForestClassifier", "GradientBoostingClassifier"]})
+            suggestions.append(
+                {
+                    "family": "classification",
+                    "algorithms": [
+                        "LogisticRegression",
+                        "RandomForestClassifier",
+                        "GradientBoostingClassifier",
+                    ],
+                }
+            )
         elif np.issubdtype(target.dtype, np.number) and unique_ratio > 0.01:
-            suggestions.append({"family": "regression", "algorithms": ["LinearRegression", "RandomForestRegressor", "GradientBoostingRegressor"]})
+            suggestions.append(
+                {
+                    "family": "regression",
+                    "algorithms": [
+                        "LinearRegression",
+                        "RandomForestRegressor",
+                        "GradientBoostingRegressor",
+                    ],
+                }
+            )
     else:
         # No target: suggest unsupervised methods
-        suggestions.append({"family": "clustering", "algorithms": ["KMeans", "DBSCAN", "AgglomerativeClustering"]})
-        suggestions.append({"family": "anomaly_detection", "algorithms": ["IsolationForest", "LocalOutlierFactor"]})
+        suggestions.append(
+            {"family": "clustering", "algorithms": ["KMeans", "DBSCAN", "AgglomerativeClustering"]}
+        )
+        suggestions.append(
+            {"family": "anomaly_detection", "algorithms": ["IsolationForest", "LocalOutlierFactor"]}
+        )
     return suggestions

@@ -96,7 +96,9 @@ class EnterpriseColumnProfile:
             "kurtosis": round(self.kurtosis, 4) if self.kurtosis is not None else None,
             "date_range": self.date_range,
             "top_values": {str(k): v for k, v in list(self.top_values.items())[:10]},
-            "value_distribution": {str(k): v for k, v in list(self.value_distribution.items())[:20]},
+            "value_distribution": {
+                str(k): v for k, v in list(self.value_distribution.items())[:20]
+            },
             "pattern": self.pattern,
             "pattern_consistency": round(self.pattern_consistency, 2),
             "completeness": round(self.completeness, 2),
@@ -289,7 +291,9 @@ class EnterpriseDataProfiler:
 
         return profile.to_dict()
 
-    def _profile_column(self, df: pd.DataFrame, col_name: str, row_count: int) -> EnterpriseColumnProfile:
+    def _profile_column(
+        self, df: pd.DataFrame, col_name: str, row_count: int
+    ) -> EnterpriseColumnProfile:
         """Profile a single column comprehensively."""
         series = df[col_name]
         non_null = series.dropna()
@@ -395,6 +399,7 @@ class EnterpriseDataProfiler:
 
         for name, info in SENSITIVE_PATTERNS.items():
             import re
+
             if re.match(info["pattern"], sample):
                 return name
 
@@ -411,7 +416,6 @@ class EnterpriseDataProfiler:
         if pattern in ("text", "empty"):
             return 100.0
 
-        import re
         pat = SENSITIVE_PATTERNS.get(pattern, {}).get("pattern")
         if not pat:
             return 100.0
@@ -431,9 +435,8 @@ class EnterpriseDataProfiler:
 
         # Check sample values for patterns
         if len(series) > 0 and series.dtype == "object":
-            import re
             sample = series.head(50).astype(str)
-            for name, info in SENSITIVE_PATTERNS.items():
+            for _name, info in SENSITIVE_PATTERNS.items():
                 matches = sample.str.match(info["pattern"])
                 if matches.sum() > len(sample) * 0.5:
                     return True, info["type"]
@@ -499,13 +502,15 @@ class EnterpriseDataProfiler:
                     continue
 
                 if abs(val) >= 0.5:
-                    correlations.append({
-                        "column_1": c1,
-                        "column_2": c2,
-                        "correlation": round(float(val), 3),
-                        "strength": "strong" if abs(val) >= 0.8 else "moderate",
-                        "direction": "positive" if val > 0 else "negative",
-                    })
+                    correlations.append(
+                        {
+                            "column_1": c1,
+                            "column_2": c2,
+                            "correlation": round(float(val), 3),
+                            "strength": "strong" if abs(val) >= 0.8 else "moderate",
+                            "direction": "positive" if val > 0 else "negative",
+                        }
+                    )
 
         return sorted(correlations, key=lambda x: abs(x["correlation"]), reverse=True)
 
@@ -530,50 +535,63 @@ class EnterpriseDataProfiler:
                 "skewness": round(float(series.skew()), 4) if std > 0 else 0,
                 "kurtosis": round(float(series.kurtosis()), 4) if std > 0 else 0,
                 "distribution_type": (
-                    "normal" if abs(float(series.skew())) < 0.5 and abs(float(series.kurtosis())) < 3
-                    else "right_skewed" if float(series.skew()) > 0.5
-                    else "left_skewed" if float(series.skew()) < -0.5
-                    else "heavy_tailed"
+                    "normal"
+                    if abs(float(series.skew())) < 0.5 and abs(float(series.kurtosis())) < 3
+                    else (
+                        "right_skewed"
+                        if float(series.skew()) > 0.5
+                        else "left_skewed" if float(series.skew()) < -0.5 else "heavy_tailed"
+                    )
                 ),
             }
 
         return summary
 
-    def _collect_quality_issues(self, profile: EnterpriseDatasetProfile, cp: EnterpriseColumnProfile) -> None:
+    def _collect_quality_issues(
+        self, profile: EnterpriseDatasetProfile, cp: EnterpriseColumnProfile
+    ) -> None:
         """Collect quality issues from a column profile."""
         row_count = profile.row_count
         if cp.completeness < 50:
-            profile.quality_issues.append({
-                "column": cp.name,
-                "severity": "high",
-                "issue": "Low completeness",
-                "detail": f"{cp.completeness:.1f}% non-null",
-                "recommended_fix": "Consider dropping column or imputing missing values",
-            })
+            profile.quality_issues.append(
+                {
+                    "column": cp.name,
+                    "severity": "high",
+                    "issue": "Low completeness",
+                    "detail": f"{cp.completeness:.1f}% non-null",
+                    "recommended_fix": "Consider dropping column or imputing missing values",
+                }
+            )
         elif cp.completeness < 90:
-            profile.quality_issues.append({
-                "column": cp.name,
-                "severity": "medium",
-                "issue": "Missing values",
-                "detail": f"{cp.completeness:.1f}% non-null",
-                "recommended_fix": "Impute missing values or collect more data",
-            })
+            profile.quality_issues.append(
+                {
+                    "column": cp.name,
+                    "severity": "medium",
+                    "issue": "Missing values",
+                    "detail": f"{cp.completeness:.1f}% non-null",
+                    "recommended_fix": "Impute missing values or collect more data",
+                }
+            )
 
         if cp.outlier_count > 0:
             severity = "high" if cp.outlier_count > row_count * 0.1 else "low"
-            profile.quality_issues.append({
-                "column": cp.name,
-                "severity": severity,
-                "issue": "Outliers detected",
-                "detail": f"{cp.outlier_count} outliers found",
-                "recommended_fix": "Review outliers for data entry errors or exceptional cases",
-            })
+            profile.quality_issues.append(
+                {
+                    "column": cp.name,
+                    "severity": severity,
+                    "issue": "Outliers detected",
+                    "detail": f"{cp.outlier_count} outliers found",
+                    "recommended_fix": "Review outliers for data entry errors or exceptional cases",
+                }
+            )
 
         if cp.is_sensitive:
-            profile.quality_issues.append({
-                "column": cp.name,
-                "severity": "high",
-                "issue": f"Sensitive data detected ({cp.sensitive_type})",
-                "detail": f"Column appears to contain {cp.sensitive_type} information",
-                "recommended_fix": "Ensure proper access controls and data masking",
-            })
+            profile.quality_issues.append(
+                {
+                    "column": cp.name,
+                    "severity": "high",
+                    "issue": f"Sensitive data detected ({cp.sensitive_type})",
+                    "detail": f"Column appears to contain {cp.sensitive_type} information",
+                    "recommended_fix": "Ensure proper access controls and data masking",
+                }
+            )

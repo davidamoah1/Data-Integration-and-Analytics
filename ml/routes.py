@@ -6,8 +6,6 @@ from typing import Any
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 
-from shared.dependencies import DbSession, require_permissions
-from shared.database import get_db
 from ml.schemas import (
     AnomalyRequest,
     AnomalyResponse,
@@ -19,10 +17,10 @@ from ml.schemas import (
     FeatureEngineeringResponse,
     ForecastRequest,
     ForecastResponse,
-    ModelCompareRequest,
-    ModelCreateRequest,
     MLReadinessRequest,
     MLReadinessResponse,
+    ModelCompareRequest,
+    ModelCreateRequest,
     ModelResponse,
     PredictRequest,
     PredictResponse,
@@ -31,11 +29,15 @@ from ml.schemas import (
     WhatIfResponse,
 )
 from ml.service import MLService
+from shared.database import get_db
+from shared.dependencies import DbSession, require_permissions
 
 router = APIRouter(prefix="/ml", tags=["Machine Learning"])
 
 
-def get_ml_service(db: DbSession = Depends(), current_user: dict = Depends(require_permissions("ml.read"))) -> MLService:
+def get_ml_service(
+    db: DbSession = Depends(), current_user: dict = Depends(require_permissions("ml.read"))
+) -> MLService:
     return MLService(db, current_user)
 
 
@@ -86,7 +88,11 @@ async def delete_model(
     return {"success": True, "message": "Model archived"}
 
 
-@router.post("/models/{model_id}/train", response_model=TrainingRunResponse, dependencies=[Depends(require_permissions("ml.execute"))])
+@router.post(
+    "/models/{model_id}/train",
+    response_model=TrainingRunResponse,
+    dependencies=[Depends(require_permissions("ml.execute"))],
+)
 async def train_model(
     model_id: str,
     payload: dict[str, Any],
@@ -96,7 +102,11 @@ async def train_model(
     return _run_response(run)
 
 
-@router.post("/models/{model_id}/retrain", response_model=TrainingRunResponse, dependencies=[Depends(require_permissions("ml.execute"))])
+@router.post(
+    "/models/{model_id}/retrain",
+    response_model=TrainingRunResponse,
+    dependencies=[Depends(require_permissions("ml.execute"))],
+)
 async def retrain_model(
     model_id: str,
     payload: dict[str, Any],
@@ -127,7 +137,11 @@ async def train_model_async(
     return {"success": True, "message": "Training started in background", "model_id": model_id}
 
 
-@router.post("/models/{model_id}/predict", response_model=PredictResponse, dependencies=[Depends(require_permissions("ml.execute"))])
+@router.post(
+    "/models/{model_id}/predict",
+    response_model=PredictResponse,
+    dependencies=[Depends(require_permissions("ml.execute"))],
+)
 async def predict(
     model_id: str,
     req: PredictRequest,
@@ -156,7 +170,11 @@ async def undeploy_model(
     return {"success": True, "message": "Model undeployed"}
 
 
-@router.post("/forecast", response_model=ForecastResponse, dependencies=[Depends(require_permissions("ml.execute"))])
+@router.post(
+    "/forecast",
+    response_model=ForecastResponse,
+    dependencies=[Depends(require_permissions("ml.execute"))],
+)
 async def forecast(req: ForecastRequest, service: MLService = Depends(get_ml_service)):
     result = service.forecast(req.model_dump())
     if result.get("status") == "failed":
@@ -171,13 +189,21 @@ async def forecast(req: ForecastRequest, service: MLService = Depends(get_ml_ser
     )
 
 
-@router.post("/anomalies", response_model=AnomalyResponse, dependencies=[Depends(require_permissions("ml.execute"))])
+@router.post(
+    "/anomalies",
+    response_model=AnomalyResponse,
+    dependencies=[Depends(require_permissions("ml.execute"))],
+)
 async def detect_anomalies(req: AnomalyRequest, service: MLService = Depends(get_ml_service)):
     result = service.detect_anomalies(req.model_dump())
     return AnomalyResponse(**result)
 
 
-@router.post("/recommendations", response_model=DecisionRecommendationResponse, dependencies=[Depends(require_permissions("ml.execute"))])
+@router.post(
+    "/recommendations",
+    response_model=DecisionRecommendationResponse,
+    dependencies=[Depends(require_permissions("ml.execute"))],
+)
 async def recommend(
     req: DecisionRecommendationRequest,
     service: MLService = Depends(get_ml_service),
@@ -185,12 +211,20 @@ async def recommend(
     return service.recommend(req.model_dump())
 
 
-@router.post("/what-if", response_model=WhatIfResponse, dependencies=[Depends(require_permissions("ml.execute"))])
+@router.post(
+    "/what-if",
+    response_model=WhatIfResponse,
+    dependencies=[Depends(require_permissions("ml.execute"))],
+)
 async def what_if(req: WhatIfRequest, service: MLService = Depends(get_ml_service)):
     return WhatIfResponse(scenarios=service.what_if(req.model_dump()))
 
 
-@router.post("/drift", response_model=DriftResponse, dependencies=[Depends(require_permissions("ml.execute"))])
+@router.post(
+    "/drift",
+    response_model=DriftResponse,
+    dependencies=[Depends(require_permissions("ml.execute"))],
+)
 async def detect_drift(req: DriftRequest, service: MLService = Depends(get_ml_service)):
     return DriftResponse(**service.detect_drift(req.model_dump()))
 

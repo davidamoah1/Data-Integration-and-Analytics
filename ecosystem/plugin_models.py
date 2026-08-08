@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from sqlalchemy import JSON, TIMESTAMP, Boolean, Column, Integer, String, Text, func
+
 from shared.database import Base, BigInt
 
 
@@ -12,12 +13,16 @@ class Plugin(Base):
     __tablename__ = "ecosystem_plugins"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
-    plugin_id = Column(String(200), unique=True, nullable=False)  # unique identifier e.g. "healthcare-analytics"
+    plugin_id = Column(
+        String(200), unique=True, nullable=False
+    )  # unique identifier e.g. "healthcare-analytics"
     name = Column(String(255), nullable=False)
     version = Column(String(50), nullable=False)
     author = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
-    category = Column(String(100), nullable=False)  # connector, dashboard_template, ai_agent, industry_solution, data_processor
+    category = Column(
+        String(100), nullable=False
+    )  # connector, dashboard_template, ai_agent, industry_solution, data_processor
     icon = Column(String(100), nullable=True)
     permissions = Column(JSON, nullable=True)  # list of required permissions
     dependencies = Column(JSON, nullable=True)  # list of plugin_id:version
@@ -41,7 +46,9 @@ class PluginInstallation(Base):
     organization_id = Column(BigInt, nullable=False, index=True)
     plugin_id = Column(String(200), nullable=False, index=True)
     version = Column(String(50), nullable=False)
-    status = Column(String(20), nullable=False, default="installed")  # installed, enabled, disabled, uninstalled
+    status = Column(
+        String(20), nullable=False, default="installed"
+    )  # installed, enabled, disabled, uninstalled
     configuration = Column(JSON, nullable=True)
     installed_by = Column(BigInt, nullable=True)
     installed_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
@@ -55,7 +62,9 @@ class IndustryPackage(Base):
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
     package_id = Column(String(200), unique=True, nullable=False)
-    industry = Column(String(100), nullable=False)  # healthcare, education, banking, agriculture, retail, government
+    industry = Column(
+        String(100), nullable=False
+    )  # healthcare, education, banking, agriculture, retail, government
     name = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
     version = Column(String(50), nullable=False)

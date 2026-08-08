@@ -21,8 +21,6 @@ from __future__ import annotations
 
 import json
 import logging
-import re
-from typing import Any
 
 import pandas as pd
 from sqlalchemy.orm import Session as DbSession
@@ -31,7 +29,7 @@ from ai.context_engine import EnterpriseAIContext, EnterpriseContextEngine
 from ai.data_gatherer import DataGatherer
 from ai.gateway import AIGateway
 from ai.models import AIInsight
-from ai.prompt_orchestrator import PromptOrchestrator, PromptTaskType
+from ai.prompt_orchestrator import PromptOrchestrator
 
 logger = logging.getLogger(__name__)
 
@@ -40,55 +38,241 @@ logger = logging.getLogger(__name__)
 
 
 _RETAIL_RECOMMENDATIONS = [
-    {"trigger": "high_sales_product", "action": "Restock high-demand items", "expected_impact": "Prevent stockouts, maintain revenue", "priority": "high", "feasibility": "easy"},
-    {"trigger": "low_sales_product", "action": "Reduce excess inventory for slow-moving items", "expected_impact": "Free up working capital, reduce storage costs", "priority": "medium", "feasibility": "medium"},
-    {"trigger": "high_performing_region", "action": "Expand marketing in high-performing regions", "expected_impact": "10-15% revenue increase in target regions", "priority": "high", "feasibility": "easy"},
-    {"trigger": "low_performing_region", "action": "Investigate underperforming regions", "expected_impact": "Identify root causes, potential 5-10% recovery", "priority": "medium", "feasibility": "medium"},
-    {"trigger": "declining_profit_margin", "action": "Review pricing strategy and supplier costs", "expected_impact": "2-5% margin improvement", "priority": "high", "feasibility": "medium"},
-    {"trigger": "high_discount_usage", "action": "Optimize discount strategy", "expected_impact": "Improve margin while maintaining volume", "priority": "medium", "feasibility": "medium"},
+    {
+        "trigger": "high_sales_product",
+        "action": "Restock high-demand items",
+        "expected_impact": "Prevent stockouts, maintain revenue",
+        "priority": "high",
+        "feasibility": "easy",
+    },
+    {
+        "trigger": "low_sales_product",
+        "action": "Reduce excess inventory for slow-moving items",
+        "expected_impact": "Free up working capital, reduce storage costs",
+        "priority": "medium",
+        "feasibility": "medium",
+    },
+    {
+        "trigger": "high_performing_region",
+        "action": "Expand marketing in high-performing regions",
+        "expected_impact": "10-15% revenue increase in target regions",
+        "priority": "high",
+        "feasibility": "easy",
+    },
+    {
+        "trigger": "low_performing_region",
+        "action": "Investigate underperforming regions",
+        "expected_impact": "Identify root causes, potential 5-10% recovery",
+        "priority": "medium",
+        "feasibility": "medium",
+    },
+    {
+        "trigger": "declining_profit_margin",
+        "action": "Review pricing strategy and supplier costs",
+        "expected_impact": "2-5% margin improvement",
+        "priority": "high",
+        "feasibility": "medium",
+    },
+    {
+        "trigger": "high_discount_usage",
+        "action": "Optimize discount strategy",
+        "expected_impact": "Improve margin while maintaining volume",
+        "priority": "medium",
+        "feasibility": "medium",
+    },
 ]
 
 _HEALTHCARE_RECOMMENDATIONS = [
-    {"trigger": "high_readmission", "action": "Monitor departments with higher readmission rates", "expected_impact": "Reduce readmissions by 15-20%", "priority": "high", "feasibility": "medium"},
-    {"trigger": "peak_admission_period", "action": "Increase staffing during peak periods", "expected_impact": "Reduce wait times by 30%", "priority": "high", "feasibility": "medium"},
-    {"trigger": "high_billing_amount", "action": "Review high-cost procedures for efficiency", "expected_impact": "10-15% cost reduction", "priority": "medium", "feasibility": "hard"},
-    {"trigger": "low_bed_utilization", "action": "Optimize bed allocation and discharge planning", "expected_impact": "Improve utilization by 10-20%", "priority": "medium", "feasibility": "medium"},
-    {"trigger": "long_wait_times", "action": "Implement triage optimization and scheduling", "expected_impact": "Reduce average wait time by 25%", "priority": "high", "feasibility": "medium"},
+    {
+        "trigger": "high_readmission",
+        "action": "Monitor departments with higher readmission rates",
+        "expected_impact": "Reduce readmissions by 15-20%",
+        "priority": "high",
+        "feasibility": "medium",
+    },
+    {
+        "trigger": "peak_admission_period",
+        "action": "Increase staffing during peak periods",
+        "expected_impact": "Reduce wait times by 30%",
+        "priority": "high",
+        "feasibility": "medium",
+    },
+    {
+        "trigger": "high_billing_amount",
+        "action": "Review high-cost procedures for efficiency",
+        "expected_impact": "10-15% cost reduction",
+        "priority": "medium",
+        "feasibility": "hard",
+    },
+    {
+        "trigger": "low_bed_utilization",
+        "action": "Optimize bed allocation and discharge planning",
+        "expected_impact": "Improve utilization by 10-20%",
+        "priority": "medium",
+        "feasibility": "medium",
+    },
+    {
+        "trigger": "long_wait_times",
+        "action": "Implement triage optimization and scheduling",
+        "expected_impact": "Reduce average wait time by 25%",
+        "priority": "high",
+        "feasibility": "medium",
+    },
 ]
 
 _EDUCATION_RECOMMENDATIONS = [
-    {"trigger": "declining_attendance", "action": "Investigate courses with declining attendance", "expected_impact": "Identify root causes, improve retention", "priority": "high", "feasibility": "easy"},
-    {"trigger": "low_enrollment", "action": "Review curriculum relevance and marketing", "expected_impact": "5-10% enrollment increase", "priority": "medium", "feasibility": "medium"},
-    {"trigger": "high_performance_variance", "action": "Provide targeted support for underperforming programs", "expected_impact": "Reduce performance gap by 20%", "priority": "medium", "feasibility": "medium"},
-    {"trigger": "resource_underutilization", "action": "Optimize resource allocation across departments", "expected_impact": "10-15% efficiency improvement", "priority": "low", "feasibility": "hard"},
+    {
+        "trigger": "declining_attendance",
+        "action": "Investigate courses with declining attendance",
+        "expected_impact": "Identify root causes, improve retention",
+        "priority": "high",
+        "feasibility": "easy",
+    },
+    {
+        "trigger": "low_enrollment",
+        "action": "Review curriculum relevance and marketing",
+        "expected_impact": "5-10% enrollment increase",
+        "priority": "medium",
+        "feasibility": "medium",
+    },
+    {
+        "trigger": "high_performance_variance",
+        "action": "Provide targeted support for underperforming programs",
+        "expected_impact": "Reduce performance gap by 20%",
+        "priority": "medium",
+        "feasibility": "medium",
+    },
+    {
+        "trigger": "resource_underutilization",
+        "action": "Optimize resource allocation across departments",
+        "expected_impact": "10-15% efficiency improvement",
+        "priority": "low",
+        "feasibility": "hard",
+    },
 ]
 
 _GOVERNMENT_RECOMMENDATIONS = [
-    {"trigger": "budget_overrun", "action": "Review projects with budget overruns", "expected_impact": "Prevent further overruns, improve accountability", "priority": "high", "feasibility": "medium"},
-    {"trigger": "project_delay", "action": "Accelerate delayed projects with additional resources", "expected_impact": "Reduce delay by 30-50%", "priority": "high", "feasibility": "hard"},
-    {"trigger": "underutilized_budget", "action": "Reallocate underutilized budget to high-priority areas", "expected_impact": "Improve service delivery", "priority": "medium", "feasibility": "medium"},
-    {"trigger": "high_cost_project", "action": "Conduct cost-benefit analysis for high-cost projects", "expected_impact": "5-10% cost optimization", "priority": "medium", "feasibility": "easy"},
+    {
+        "trigger": "budget_overrun",
+        "action": "Review projects with budget overruns",
+        "expected_impact": "Prevent further overruns, improve accountability",
+        "priority": "high",
+        "feasibility": "medium",
+    },
+    {
+        "trigger": "project_delay",
+        "action": "Accelerate delayed projects with additional resources",
+        "expected_impact": "Reduce delay by 30-50%",
+        "priority": "high",
+        "feasibility": "hard",
+    },
+    {
+        "trigger": "underutilized_budget",
+        "action": "Reallocate underutilized budget to high-priority areas",
+        "expected_impact": "Improve service delivery",
+        "priority": "medium",
+        "feasibility": "medium",
+    },
+    {
+        "trigger": "high_cost_project",
+        "action": "Conduct cost-benefit analysis for high-cost projects",
+        "expected_impact": "5-10% cost optimization",
+        "priority": "medium",
+        "feasibility": "easy",
+    },
 ]
 
 _FINANCE_RECOMMENDATIONS = [
-    {"trigger": "declining_revenue", "action": "Diversify revenue streams and review pricing", "expected_impact": "5-10% revenue recovery", "priority": "high", "feasibility": "hard"},
-    {"trigger": "increasing_costs", "action": "Identify and reduce non-essential expenses", "expected_impact": "3-7% cost reduction", "priority": "high", "feasibility": "medium"},
-    {"trigger": "low_profit_margin", "action": "Optimize operational efficiency and pricing", "expected_impact": "2-5% margin improvement", "priority": "high", "feasibility": "medium"},
-    {"trigger": "high_transaction_volume", "action": "Automate high-volume processes", "expected_impact": "20-30% processing cost reduction", "priority": "medium", "feasibility": "hard"},
+    {
+        "trigger": "declining_revenue",
+        "action": "Diversify revenue streams and review pricing",
+        "expected_impact": "5-10% revenue recovery",
+        "priority": "high",
+        "feasibility": "hard",
+    },
+    {
+        "trigger": "increasing_costs",
+        "action": "Identify and reduce non-essential expenses",
+        "expected_impact": "3-7% cost reduction",
+        "priority": "high",
+        "feasibility": "medium",
+    },
+    {
+        "trigger": "low_profit_margin",
+        "action": "Optimize operational efficiency and pricing",
+        "expected_impact": "2-5% margin improvement",
+        "priority": "high",
+        "feasibility": "medium",
+    },
+    {
+        "trigger": "high_transaction_volume",
+        "action": "Automate high-volume processes",
+        "expected_impact": "20-30% processing cost reduction",
+        "priority": "medium",
+        "feasibility": "hard",
+    },
 ]
 
 _MANUFACTURING_RECOMMENDATIONS = [
-    {"trigger": "production_bottleneck", "action": "Identify and address production bottlenecks", "expected_impact": "10-20% throughput increase", "priority": "high", "feasibility": "medium"},
-    {"trigger": "high_defect_rate", "action": "Implement quality control improvements", "expected_impact": "Reduce defects by 30-50%", "priority": "high", "feasibility": "medium"},
-    {"trigger": "low_capacity_utilization", "action": "Optimize production scheduling", "expected_impact": "10-15% utilization improvement", "priority": "medium", "feasibility": "medium"},
-    {"trigger": "high_inventory_cost", "action": "Implement just-in-time inventory management", "expected_impact": "15-25% inventory cost reduction", "priority": "medium", "feasibility": "hard"},
+    {
+        "trigger": "production_bottleneck",
+        "action": "Identify and address production bottlenecks",
+        "expected_impact": "10-20% throughput increase",
+        "priority": "high",
+        "feasibility": "medium",
+    },
+    {
+        "trigger": "high_defect_rate",
+        "action": "Implement quality control improvements",
+        "expected_impact": "Reduce defects by 30-50%",
+        "priority": "high",
+        "feasibility": "medium",
+    },
+    {
+        "trigger": "low_capacity_utilization",
+        "action": "Optimize production scheduling",
+        "expected_impact": "10-15% utilization improvement",
+        "priority": "medium",
+        "feasibility": "medium",
+    },
+    {
+        "trigger": "high_inventory_cost",
+        "action": "Implement just-in-time inventory management",
+        "expected_impact": "15-25% inventory cost reduction",
+        "priority": "medium",
+        "feasibility": "hard",
+    },
 ]
 
 _LOGISTICS_RECOMMENDATIONS = [
-    {"trigger": "high_transportation_cost", "action": "Optimize routes and consolidate shipments", "expected_impact": "10-20% cost reduction", "priority": "high", "feasibility": "medium"},
-    {"trigger": "delivery_delay", "action": "Review and optimize delivery schedules", "expected_impact": "Reduce delays by 25-40%", "priority": "high", "feasibility": "medium"},
-    {"trigger": "low_capacity_utilization", "action": "Optimize load planning and capacity allocation", "expected_impact": "10-15% efficiency gain", "priority": "medium", "feasibility": "medium"},
-    {"trigger": "high_fuel_cost", "action": "Implement fuel-efficient practices and vehicle maintenance", "expected_impact": "5-10% fuel cost reduction", "priority": "medium", "feasibility": "easy"},
+    {
+        "trigger": "high_transportation_cost",
+        "action": "Optimize routes and consolidate shipments",
+        "expected_impact": "10-20% cost reduction",
+        "priority": "high",
+        "feasibility": "medium",
+    },
+    {
+        "trigger": "delivery_delay",
+        "action": "Review and optimize delivery schedules",
+        "expected_impact": "Reduce delays by 25-40%",
+        "priority": "high",
+        "feasibility": "medium",
+    },
+    {
+        "trigger": "low_capacity_utilization",
+        "action": "Optimize load planning and capacity allocation",
+        "expected_impact": "10-15% efficiency gain",
+        "priority": "medium",
+        "feasibility": "medium",
+    },
+    {
+        "trigger": "high_fuel_cost",
+        "action": "Implement fuel-efficient practices and vehicle maintenance",
+        "expected_impact": "5-10% fuel cost reduction",
+        "priority": "medium",
+        "feasibility": "easy",
+    },
 ]
 
 _INDUSTRY_TEMPLATES = {
@@ -103,10 +287,34 @@ _INDUSTRY_TEMPLATES = {
 
 # Generic recommendations for unknown industries
 _GENERIC_RECOMMENDATIONS = [
-    {"trigger": "declining_metric", "action": "Investigate the root cause of the decline", "expected_impact": "Identify and address underlying issues", "priority": "high", "feasibility": "easy"},
-    {"trigger": "high_variance", "action": "Investigate sources of variability", "expected_impact": "Improve consistency and predictability", "priority": "medium", "feasibility": "medium"},
-    {"trigger": "low_performing_segment", "action": "Focus resources on improving underperforming segments", "expected_impact": "10-15% improvement in targeted areas", "priority": "medium", "feasibility": "medium"},
-    {"trigger": "high_performing_segment", "action": "Replicate success factors from top performers", "expected_impact": "5-10% overall improvement", "priority": "low", "feasibility": "hard"},
+    {
+        "trigger": "declining_metric",
+        "action": "Investigate the root cause of the decline",
+        "expected_impact": "Identify and address underlying issues",
+        "priority": "high",
+        "feasibility": "easy",
+    },
+    {
+        "trigger": "high_variance",
+        "action": "Investigate sources of variability",
+        "expected_impact": "Improve consistency and predictability",
+        "priority": "medium",
+        "feasibility": "medium",
+    },
+    {
+        "trigger": "low_performing_segment",
+        "action": "Focus resources on improving underperforming segments",
+        "expected_impact": "10-15% improvement in targeted areas",
+        "priority": "medium",
+        "feasibility": "medium",
+    },
+    {
+        "trigger": "high_performing_segment",
+        "action": "Replicate success factors from top performers",
+        "expected_impact": "5-10% overall improvement",
+        "priority": "low",
+        "feasibility": "hard",
+    },
 ]
 
 
@@ -183,7 +391,9 @@ class RecommendationEngine:
                     key_findings=triggers,
                     recommendations=[r.get("action", str(r)) for r in all_recs],
                     risks=[],
-                    opportunities=[r.get("action", str(r)) for r in all_recs if r.get("priority") == "high"],
+                    opportunities=[
+                        r.get("action", str(r)) for r in all_recs if r.get("priority") == "high"
+                    ],
                     confidence_score=all_recs[0].get("confidence", 0.7) if all_recs else 0.5,
                     data_sources=analysis_data.get("data_sources", []),
                     user_id=user_id,
@@ -210,58 +420,70 @@ class RecommendationEngine:
         if period:
             pct = period.get("percentage_change", 0)
             if pct < -5:
-                triggers.append({
-                    "trigger": "declining_metric",
-                    "evidence": f"Metric declined by {abs(pct):.1f}%",
-                    "data": period,
-                })
+                triggers.append(
+                    {
+                        "trigger": "declining_metric",
+                        "evidence": f"Metric declined by {abs(pct):.1f}%",
+                        "data": period,
+                    }
+                )
             elif pct > 10:
-                triggers.append({
-                    "trigger": "high_performing_segment",
-                    "evidence": f"Metric increased by {pct:.1f}%",
-                    "data": period,
-                })
+                triggers.append(
+                    {
+                        "trigger": "high_performing_segment",
+                        "evidence": f"Metric increased by {pct:.1f}%",
+                        "data": period,
+                    }
+                )
 
         # Check top contributors for high/low performers
-        for key, items in data.get("top_contributors", {}).items():
+        for _key, items in data.get("top_contributors", {}).items():
             if items:
                 top = items[0]
                 if top.get("share", 0) > 40:
-                    triggers.append({
-                        "trigger": "high_sales_product",
-                        "evidence": f"Top item has {top['share']}% share",
-                        "data": top,
-                    })
+                    triggers.append(
+                        {
+                            "trigger": "high_sales_product",
+                            "evidence": f"Top item has {top['share']}% share",
+                            "data": top,
+                        }
+                    )
                 bottom = items[-1] if len(items) > 1 else None
                 if bottom and bottom.get("share", 100) < 5:
-                    triggers.append({
-                        "trigger": "low_sales_product",
-                        "evidence": f"Bottom item has only {bottom.get('share', 0)}% share",
-                        "data": bottom,
-                    })
+                    triggers.append(
+                        {
+                            "trigger": "low_sales_product",
+                            "evidence": f"Bottom item has only {bottom.get('share', 0)}% share",
+                            "data": bottom,
+                        }
+                    )
 
         # Check numeric stats for variance
         for col, stats in data.get("numeric_stats", {}).items():
             if stats.get("std", 0) > 0 and stats.get("mean", 0) != 0:
                 cv = stats["std"] / abs(stats["mean"])
                 if cv > 0.5:
-                    triggers.append({
-                        "trigger": "high_variance",
-                        "evidence": f"{col} has coefficient of variation {cv:.2f}",
-                        "data": {"column": col, "cv": round(cv, 2)},
-                    })
+                    triggers.append(
+                        {
+                            "trigger": "high_variance",
+                            "evidence": f"{col} has coefficient of variation {cv:.2f}",
+                            "data": {"column": col, "cv": round(cv, 2)},
+                        }
+                    )
 
         # Check by_dimension for low-performing segments
-        for key, items in data.get("by_dimension", {}).items():
+        for _key, items in data.get("by_dimension", {}).items():
             if items and len(items) > 1:
                 top_val = items[0].get(list(items[0].keys())[-1], 0)
                 bottom_val = items[-1].get(list(items[-1].keys())[-1], 0)
                 if top_val > 0 and bottom_val / top_val < 0.3:
-                    triggers.append({
-                        "trigger": "low_performing_segment",
-                        "evidence": f"Bottom segment is {bottom_val/top_val*100:.0f}% of top",
-                        "data": {"top": items[0], "bottom": items[-1]},
-                    })
+                    triggers.append(
+                        {
+                            "trigger": "low_performing_segment",
+                            "evidence": f"Bottom segment is {bottom_val/top_val*100:.0f}% of top",
+                            "data": {"top": items[0], "bottom": items[-1]},
+                        }
+                    )
 
         return triggers
 
@@ -273,15 +495,17 @@ class RecommendationEngine:
         matched = []
         for template in templates:
             if template["trigger"] in trigger_types or template["trigger"] == "declining_metric":
-                matched.append({
-                    "action": template["action"],
-                    "priority": template["priority"],
-                    "expected_impact": template["expected_impact"],
-                    "feasibility": template["feasibility"],
-                    "trigger": template["trigger"],
-                    "source": "template",
-                    "confidence": 0.8,
-                })
+                matched.append(
+                    {
+                        "action": template["action"],
+                        "priority": template["priority"],
+                        "expected_impact": template["expected_impact"],
+                        "feasibility": template["feasibility"],
+                        "trigger": template["trigger"],
+                        "source": "template",
+                        "confidence": 0.8,
+                    }
+                )
 
         return matched
 
@@ -298,10 +522,6 @@ class RecommendationEngine:
             return []
 
         try:
-            additional = {
-                "triggers": triggers,
-                "analysis_data": data,
-            }
 
             result = self.gateway.chat(
                 user_message=(
@@ -319,6 +539,7 @@ class RecommendationEngine:
             )
 
             import re
+
             json_match = re.search(r'\{.*"recommendations".*\}', result["response"], re.DOTALL)
             if json_match:
                 parsed = json.loads(json_match.group())
@@ -330,9 +551,7 @@ class RecommendationEngine:
 
         return []
 
-    def _merge_recommendations(
-        self, template_recs: list[dict], ai_recs: list[dict]
-    ) -> list[dict]:
+    def _merge_recommendations(self, template_recs: list[dict], ai_recs: list[dict]) -> list[dict]:
         """Merge template and AI recommendations, deduplicating by action."""
         seen_actions: set[str] = set()
         merged = []

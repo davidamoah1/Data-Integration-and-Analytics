@@ -15,9 +15,19 @@ Studios:
 
 from __future__ import annotations
 
-from sqlalchemy import JSON, TIMESTAMP, Boolean, Column, Float, ForeignKey, Integer, String, Text, func
-from shared.database import Base, BigInt
+from sqlalchemy import (
+    JSON,
+    TIMESTAMP,
+    Boolean,
+    Column,
+    Float,
+    Integer,
+    String,
+    Text,
+    func,
+)
 
+from shared.database import Base, BigInt
 
 # ═══════════════════════════════════════════════════════════════
 # Studio 1: Data Workspace
@@ -35,7 +45,9 @@ class DataWorkspace(Base):
     name = Column(String(200), nullable=False)
     description = Column(Text, nullable=True)
     created_by = Column(BigInt, nullable=False)
-    columns_config = Column(JSON, nullable=True)  # [{name, type, format, calculated_formula, validation_rules}]
+    columns_config = Column(
+        JSON, nullable=True
+    )  # [{name, type, format, calculated_formula, validation_rules}]
     filters = Column(JSON, nullable=True)  # active filters
     sort_config = Column(JSON, nullable=True)  # [{column, direction}]
     conditional_formatting = Column(JSON, nullable=True)  # rules
@@ -68,8 +80,12 @@ class CalculatedColumn(Base):
     workspace_id = Column(BigInt, nullable=False, index=True)
     column_name = Column(String(200), nullable=False)
     formula = Column(Text, nullable=False)  # e.g. "profit / revenue * 100"
-    formula_type = Column(String(20), default="expression", nullable=False)  # expression, python, sql
-    data_type = Column(String(20), default="float", nullable=False)  # float, int, string, date, boolean
+    formula_type = Column(
+        String(20), default="expression", nullable=False
+    )  # expression, python, sql
+    data_type = Column(
+        String(20), default="float", nullable=False
+    )  # float, int, string, date, boolean
     ai_generated = Column(Boolean, default=False, nullable=False)
     ai_explanation = Column(Text, nullable=True)
     created_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
@@ -88,7 +104,9 @@ class CleaningJob(Base):
     id = Column(BigInt, primary_key=True, autoincrement=True)
     organization_id = Column(BigInt, nullable=False, index=True)
     dataset_id = Column(BigInt, nullable=False, index=True)
-    status = Column(String(20), default="pending", nullable=False)  # pending, analyzing, awaiting_approval, applied, rejected
+    status = Column(
+        String(20), default="pending", nullable=False
+    )  # pending, analyzing, awaiting_approval, applied, rejected
     issues_found = Column(JSON, nullable=True)  # list of detected issues
     transformations = Column(JSON, nullable=True)  # proposed transformations
     approved_changes = Column(JSON, nullable=True)  # user-approved subset
@@ -112,10 +130,14 @@ class StatisticalAnalysis(Base):
     id = Column(BigInt, primary_key=True, autoincrement=True)
     organization_id = Column(BigInt, nullable=False, index=True)
     dataset_id = Column(BigInt, nullable=False, index=True)
-    analysis_type = Column(String(50), nullable=False)  # descriptive, ttest, anova, chi_square, correlation, regression, survival, timeseries, bayesian
+    analysis_type = Column(
+        String(50), nullable=False
+    )  # descriptive, ttest, anova, chi_square, correlation, regression, survival, timeseries, bayesian
     test_name = Column(String(100), nullable=True)  # specific test name
     parameters = Column(JSON, nullable=True)  # input parameters
-    results = Column(JSON, nullable=True)  # full results including statistics, p-values, confidence intervals
+    results = Column(
+        JSON, nullable=True
+    )  # full results including statistics, p-values, confidence intervals
     interpretation = Column(Text, nullable=True)  # plain-language explanation
     assumptions = Column(JSON, nullable=True)  # assumptions checked
     assumptions_met = Column(Boolean, nullable=True)
@@ -138,15 +160,21 @@ class MLExperiment(Base):
     organization_id = Column(BigInt, nullable=False, index=True)
     dataset_id = Column(BigInt, nullable=False, index=True)
     name = Column(String(200), nullable=False)
-    task_type = Column(String(30), nullable=False)  # classification, regression, clustering, forecasting, anomaly_detection
-    algorithm = Column(String(50), nullable=True)  # random_forest, xgboost, logistic_regression, kmeans, arima, etc.
+    task_type = Column(
+        String(30), nullable=False
+    )  # classification, regression, clustering, forecasting, anomaly_detection
+    algorithm = Column(
+        String(50), nullable=True
+    )  # random_forest, xgboost, logistic_regression, kmeans, arima, etc.
     features = Column(JSON, nullable=True)  # selected feature columns
     target = Column(String(200), nullable=True)  # target column (supervised)
     hyperparameters = Column(JSON, nullable=True)
     metrics = Column(JSON, nullable=True)  # accuracy, precision, recall, f1, rmse, mae, etc.
     feature_importance = Column(JSON, nullable=True)
     model_summary = Column(Text, nullable=True)  # AI-generated explanation
-    status = Column(String(20), default="created", nullable=False)  # created, training, completed, failed
+    status = Column(
+        String(20), default="created", nullable=False
+    )  # created, training, completed, failed
     is_no_code = Column(Boolean, default=True, nullable=False)
     created_by = Column(BigInt, nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
@@ -186,7 +214,9 @@ class ResearchProject(Base):
     title = Column(String(500), nullable=False)
     research_question = Column(Text, nullable=True)
     methodology = Column(Text, nullable=True)
-    status = Column(String(20), default="design", nullable=False)  # design, data_collection, analysis, interpretation, complete
+    status = Column(
+        String(20), default="design", nullable=False
+    )  # design, data_collection, analysis, interpretation, complete
     dataset_ids = Column(JSON, nullable=True)  # linked datasets
     industry = Column(String(100), nullable=True)
     created_by = Column(BigInt, nullable=False)
@@ -206,7 +236,9 @@ class ResearchHypothesis(Base):
     alternative_hypothesis = Column(Text, nullable=True)
     test_type = Column(String(50), nullable=True)  # suggested statistical test
     significance_level = Column(Float, default=0.05, nullable=False)
-    status = Column(String(20), default="pending", nullable=False)  # pending, testing, supported, rejected, inconclusive
+    status = Column(
+        String(20), default="pending", nullable=False
+    )  # pending, testing, supported, rejected, inconclusive
     analysis_id = Column(BigInt, nullable=True)  # link to StatisticalAnalysis
     result_summary = Column(Text, nullable=True)
     created_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
@@ -245,7 +277,9 @@ class Presentation(Base):
     source_id = Column(BigInt, nullable=True)
     slides = Column(JSON, nullable=True)  # [{title, content, chart_url, speaker_notes, layout}]
     format = Column(String(20), default="web", nullable=False)  # web, pptx, pdf
-    template = Column(String(50), default="executive", nullable=False)  # executive, analytical, research, pitch
+    template = Column(
+        String(50), default="executive", nullable=False
+    )  # executive, analytical, research, pitch
     is_generated = Column(Boolean, default=False, nullable=False)
     created_by = Column(BigInt, nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
@@ -262,9 +296,13 @@ class IndustryTemplate(Base):
     __tablename__ = "studio_industry_templates"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
-    industry = Column(String(50), nullable=False, index=True)  # healthcare, education, banking, etc.
+    industry = Column(
+        String(50), nullable=False, index=True
+    )  # healthcare, education, banking, etc.
     template_name = Column(String(200), nullable=False)
-    template_type = Column(String(30), nullable=False)  # kpi, dashboard, report, model, recommendation
+    template_type = Column(
+        String(30), nullable=False
+    )  # kpi, dashboard, report, model, recommendation
     config = Column(JSON, nullable=True)  # full template configuration
     description = Column(Text, nullable=True)
     is_active = Column(Boolean, default=True, nullable=False)
@@ -301,8 +339,12 @@ class ChartRecommendation(Base):
     id = Column(BigInt, primary_key=True, autoincrement=True)
     organization_id = Column(BigInt, nullable=False, index=True)
     dataset_id = Column(BigInt, nullable=True, index=True)
-    chart_type = Column(String(50), nullable=False)  # bar, line, scatter, heatmap, box, violin, geo, network, etc.
-    chart_category = Column(String(30), nullable=False)  # business, statistical, scientific, geographic, network
+    chart_type = Column(
+        String(50), nullable=False
+    )  # bar, line, scatter, heatmap, box, violin, geo, network, etc.
+    chart_category = Column(
+        String(30), nullable=False
+    )  # business, statistical, scientific, geographic, network
     title = Column(String(300), nullable=True)
     config = Column(JSON, nullable=True)  # full chart configuration
     reasoning = Column(Text, nullable=True)  # why this chart was recommended
@@ -324,7 +366,9 @@ class AIMentorSession(Base):
     id = Column(BigInt, primary_key=True, autoincrement=True)
     organization_id = Column(BigInt, nullable=False, index=True)
     user_id = Column(BigInt, nullable=False, index=True)
-    mentor_type = Column(String(50), nullable=False)  # data_mentor, research_assistant, business_consultant, statistical_advisor, dashboard_designer
+    mentor_type = Column(
+        String(50), nullable=False
+    )  # data_mentor, research_assistant, business_consultant, statistical_advisor, dashboard_designer
     title = Column(String(300), nullable=True)
     messages = Column(JSON, nullable=True)  # [{role, content, timestamp, metadata}]
     context = Column(JSON, nullable=True)  # dataset_id, analysis_id, etc.
@@ -345,7 +389,9 @@ class WorkspaceComment(Base):
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
     organization_id = Column(BigInt, nullable=False, index=True)
-    resource_type = Column(String(30), nullable=False)  # workspace, dataset, analysis, dashboard, presentation
+    resource_type = Column(
+        String(30), nullable=False
+    )  # workspace, dataset, analysis, dashboard, presentation
     resource_id = Column(BigInt, nullable=False, index=True)
     user_id = Column(BigInt, nullable=False)
     parent_id = Column(BigInt, nullable=True)  # for threaded replies

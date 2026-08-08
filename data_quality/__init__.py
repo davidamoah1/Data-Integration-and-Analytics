@@ -25,9 +25,9 @@ Usage:
 from __future__ import annotations
 
 from data_quality.checks import QualityCheckEngine, QualityFinding, Severity
-from data_quality.drift_detector import DriftDetector, DriftResult, ColumnDrift
-from data_quality.schema_monitor import SchemaMonitor, SchemaChangeResult, SchemaChange
+from data_quality.drift_detector import ColumnDrift, DriftDetector, DriftResult
 from data_quality.quality_engine import QualityEngine, QualityIntelligenceResult
+from data_quality.schema_monitor import SchemaChange, SchemaChangeResult, SchemaMonitor
 
 __all__ = [
     "QualityEngine",

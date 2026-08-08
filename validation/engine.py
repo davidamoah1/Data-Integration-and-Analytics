@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import enum
-import json
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -13,10 +12,10 @@ import pandas as pd
 from validation.business_rules import BusinessRuleEngine, BusinessRuleFinding
 from validation.clinical_checks import ClinicalValidationEngine
 from validation.outlier_detector import OutlierDetector
-from validation.profiler import ValidationProfiler, DataProfileResult
-from validation.quality_rules import QualityRulesEngine, QualityFinding
-from validation.schema_validator import SchemaValidator, SchemaValidationResult
-from validation.scoring import QualityScoreEngine, QualityScore
+from validation.profiler import DataProfileResult, ValidationProfiler
+from validation.quality_rules import QualityFinding, QualityRulesEngine
+from validation.schema_validator import SchemaValidationResult, SchemaValidator
+from validation.scoring import QualityScore, QualityScoreEngine
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +32,7 @@ class ValidationStatus(str, enum.Enum):
 @dataclass
 class ValidationResult:
     """Complete result of a validation run."""
+
     dataset_name: str
     status: ValidationStatus
     schema_result: SchemaValidationResult
@@ -51,9 +51,35 @@ class ValidationResult:
     def all_findings(self) -> list[dict]:
         all_f = []
         for f in self.quality_findings:
-            all_f.append({"source": "quality", **f.__dict__} if hasattr(f, "__dict__") else {"source": "quality", "rule_name": f.rule_name, "category": f.category, "severity": f.severity, "column": f.column, "affected_rows": f.affected_rows, "message": f.message, "suggested_fix": f.suggested_fix, "business_impact": f.business_impact})
+            all_f.append(
+                {"source": "quality", **f.__dict__}
+                if hasattr(f, "__dict__")
+                else {
+                    "source": "quality",
+                    "rule_name": f.rule_name,
+                    "category": f.category,
+                    "severity": f.severity,
+                    "column": f.column,
+                    "affected_rows": f.affected_rows,
+                    "message": f.message,
+                    "suggested_fix": f.suggested_fix,
+                    "business_impact": f.business_impact,
+                }
+            )
         for f in self.business_rule_findings + self.clinical_findings + self.outlier_findings:
-            all_f.append({"source": "rule", "rule_name": f.rule_name, "category": f.category, "severity": f.severity, "column": f.column, "affected_rows": f.affected_rows, "message": f.message, "suggested_fix": f.suggested_fix, "business_impact": f.business_impact})
+            all_f.append(
+                {
+                    "source": "rule",
+                    "rule_name": f.rule_name,
+                    "category": f.category,
+                    "severity": f.severity,
+                    "column": f.column,
+                    "affected_rows": f.affected_rows,
+                    "message": f.message,
+                    "suggested_fix": f.suggested_fix,
+                    "business_impact": f.business_impact,
+                }
+            )
         return all_f
 
     def to_dict(self) -> dict:
@@ -130,16 +156,18 @@ class ValidationEngine:
         # 7. Quality score
         all_findings_as_br = []
         for qf in quality_findings:
-            all_findings_as_br.append(BusinessRuleFinding(
-                rule_name=qf.rule_name,
-                category=qf.category,
-                severity=qf.severity,
-                column=qf.column,
-                affected_rows=qf.affected_rows,
-                message=qf.message,
-                suggested_fix=qf.suggested_fix,
-                business_impact=qf.business_impact,
-            ))
+            all_findings_as_br.append(
+                BusinessRuleFinding(
+                    rule_name=qf.rule_name,
+                    category=qf.category,
+                    severity=qf.severity,
+                    column=qf.column,
+                    affected_rows=qf.affected_rows,
+                    message=qf.message,
+                    suggested_fix=qf.suggested_fix,
+                    business_impact=qf.business_impact,
+                )
+            )
         all_findings_as_br.extend(business_findings)
         all_findings_as_br.extend(clinical_findings)
         all_findings_as_br.extend(outlier_findings)

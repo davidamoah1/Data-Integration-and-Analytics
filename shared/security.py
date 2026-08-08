@@ -14,6 +14,9 @@ import jwt
 from passlib.context import CryptContext
 
 from config import (
+    ENCRYPTION_KEY as _ENCRYPTION_KEY,
+)
+from config import (
     JWT_ACCESS_EXPIRE_MINUTES as _JWT_ACCESS_EXPIRE_MINUTES,
 )
 from config import (
@@ -21,9 +24,6 @@ from config import (
 )
 from config import (
     JWT_SECRET_KEY,
-)
-from config import (
-    ENCRYPTION_KEY as _ENCRYPTION_KEY,
 )
 
 # --- Password hashing -------------------------------------------------------

@@ -17,14 +17,10 @@ from __future__ import annotations
 import json
 import logging
 from dataclasses import dataclass, field
-from typing import Any
 
 import pandas as pd
 from sqlalchemy import inspect as sqlalchemy_inspect
-from sqlalchemy import text
 from sqlalchemy.orm import Session as DbSession
-
-from ai.config import AI_MAX_INPUT_LENGTH
 
 logger = logging.getLogger(__name__)
 
@@ -202,7 +198,9 @@ class EnterpriseAIContext:
 
         # User context (always include)
         if self.user.user_id:
-            sections.append(f"User: {self.user.username or 'Unknown'} (Role: {self.user.role or 'user'})")
+            sections.append(
+                f"User: {self.user.username or 'Unknown'} (Role: {self.user.role or 'user'})"
+            )
 
         # Dataset context (high priority)
         if self.dataset.dataset_id or self.dataset.columns:
@@ -213,7 +211,9 @@ class EnterpriseAIContext:
                 col_strs = [f"{c['name']}({c.get('type', '?')})" for c in self.dataset.columns[:15]]
                 ds_parts.append(f"Columns: {', '.join(col_strs)}")
             if self.dataset.semantic_mappings:
-                ds_parts.append(f"Semantic: {json.dumps(self.dataset.semantic_mappings, default=str)[:500]}")
+                ds_parts.append(
+                    f"Semantic: {json.dumps(self.dataset.semantic_mappings, default=str)[:500]}"
+                )
             if self.dataset.quality_score < 100:
                 ds_parts.append(f"Quality Score: {self.dataset.quality_score}/100")
             if self.dataset.date_range:
@@ -242,14 +242,17 @@ class EnterpriseAIContext:
                 kpis = self.industry.kpis
                 if isinstance(kpis, dict):
                     kpi_names = []
-                    for category, kpi_list in kpis.items():
+                    for _category, kpi_list in kpis.items():
                         if isinstance(kpi_list, list):
                             kpi_names.extend(kpi_list[:3])
                         else:
                             kpi_names.append(str(kpi_list))
                     kpi_names = kpi_names[:5]
                 elif isinstance(kpis, list):
-                    kpi_names = [k.get("name", k.get("label", str(k))) if isinstance(k, dict) else str(k) for k in kpis[:5]]
+                    kpi_names = [
+                        k.get("name", k.get("label", str(k))) if isinstance(k, dict) else str(k)
+                        for k in kpis[:5]
+                    ]
                 else:
                     kpi_names = [str(kpis)]
                 ind_parts.append(f"Key KPIs: {', '.join(str(k) for k in kpi_names)}")
@@ -284,8 +287,16 @@ class EnterpriseContextEngine:
 
     # Tables that are internal infrastructure, not user-facing datasets
     _INTERNAL_TABLE_PREFIXES = {
-        "ai_", "auth_", "audit_", "etl_", "org_", "department_",
-        "branch_", "team_", "analytics_", "alembic_",
+        "ai_",
+        "auth_",
+        "audit_",
+        "etl_",
+        "org_",
+        "department_",
+        "branch_",
+        "team_",
+        "analytics_",
+        "alembic_",
     }
 
     def __init__(self, db: DbSession | None = None):
@@ -330,9 +341,7 @@ class EnterpriseContextEngine:
         ctx = EnterpriseAIContext(assistant_type=assistant_type)
 
         # Build user context
-        ctx.user = self._build_user_context(
-            user_id, user_role, user_permissions or [], self.db
-        )
+        ctx.user = self._build_user_context(user_id, user_role, user_permissions or [], self.db)
 
         # Build dataset context
         ctx.dataset = self._build_dataset_context(
@@ -348,9 +357,7 @@ class EnterpriseContextEngine:
         ctx.industry = self._build_industry_context(industry)
 
         # Build conversation context
-        ctx.conversation = self._build_conversation_context(
-            conversation_id, self.db
-        )
+        ctx.conversation = self._build_conversation_context(conversation_id, self.db)
 
         # Extra context
         ctx.extra_context = extra_context or {}
@@ -399,6 +406,7 @@ class EnterpriseContextEngine:
         if db and user_id:
             try:
                 from authentication.models import User
+
                 user = db.query(User).filter(User.id == user_id).first()
                 if user:
                     ctx.username = user.username or ""
@@ -406,6 +414,7 @@ class EnterpriseContextEngine:
                     ctx.role = role or (user.roles[0].name if user.roles else "user")
 
                 from organizations.models import Organization
+
                 org = db.query(Organization).first()
                 if org:
                     ctx.organization_id = str(org.id)
@@ -434,7 +443,11 @@ class EnterpriseContextEngine:
             ctx.row_count = len(df)
             ctx.column_count = len(df.columns)
             ctx.columns = [
-                {"name": col, "type": str(df[col].dtype), "semantic_role": semantic_mappings.get(col, "")}
+                {
+                    "name": col,
+                    "type": str(df[col].dtype),
+                    "semantic_role": semantic_mappings.get(col, ""),
+                }
                 for col in df.columns
             ]
             ctx.sample_data = df.head(5).to_dict("records")
@@ -475,16 +488,25 @@ class EnterpriseContextEngine:
             ctx.profile_summary = {
                 "numeric_stats": {
                     col: {
-                        "mean": float(df[col].mean()) if pd.api.types.is_numeric_dtype(df[col]) else None,
-                        "std": float(df[col].std()) if pd.api.types.is_numeric_dtype(df[col]) else None,
-                        "min": float(df[col].min()) if pd.api.types.is_numeric_dtype(df[col]) else None,
-                        "max": float(df[col].max()) if pd.api.types.is_numeric_dtype(df[col]) else None,
+                        "mean": (
+                            float(df[col].mean())
+                            if pd.api.types.is_numeric_dtype(df[col])
+                            else None
+                        ),
+                        "std": (
+                            float(df[col].std()) if pd.api.types.is_numeric_dtype(df[col]) else None
+                        ),
+                        "min": (
+                            float(df[col].min()) if pd.api.types.is_numeric_dtype(df[col]) else None
+                        ),
+                        "max": (
+                            float(df[col].max()) if pd.api.types.is_numeric_dtype(df[col]) else None
+                        ),
                     }
                     for col in ctx.numeric_columns[:5]
                 },
                 "categorical_stats": {
-                    col: int(df[col].nunique())
-                    for col in ctx.categorical_columns[:5]
+                    col: int(df[col].nunique()) for col in ctx.categorical_columns[:5]
                 },
             }
 
@@ -522,6 +544,7 @@ class EnterpriseContextEngine:
         if dashboard_id:
             try:
                 from services.dashboard_engine import DashboardEngine
+
                 engine = DashboardEngine()
                 dashboard = engine.get(dashboard_id)
                 if dashboard:
@@ -565,6 +588,7 @@ class EnterpriseContextEngine:
         if db and conversation_id:
             try:
                 from ai.memory import AIMemory
+
                 memory = AIMemory(db)
                 history = memory.get_history(conversation_id)
                 ctx.message_count = len(history)

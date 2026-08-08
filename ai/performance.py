@@ -14,7 +14,6 @@ import time
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any
 
 from ai.context_engine import EnterpriseAIContext
 from ai.prompt_orchestrator import PromptTaskType
@@ -57,33 +56,48 @@ class PerformanceMonitor:
                 stats[task_type] = {
                     "total_requests": self._total_counts[task_type],
                     "failures": self._failure_counts[task_type],
-                    "failure_rate": round(self._failure_counts[task_type] / self._total_counts[task_type], 4),
+                    "failure_rate": round(
+                        self._failure_counts[task_type] / self._total_counts[task_type], 4
+                    ),
                     "avg_latency_ms": round(sum(latencies) / len(latencies), 2),
                     "min_latency_ms": round(min(latencies), 2),
                     "max_latency_ms": round(max(latencies), 2),
-                    "p95_latency_ms": round(sorted(latencies)[int(len(latencies) * 0.95)] if len(latencies) > 1 else latencies[0], 2),
+                    "p95_latency_ms": round(
+                        (
+                            sorted(latencies)[int(len(latencies) * 0.95)]
+                            if len(latencies) > 1
+                            else latencies[0]
+                        ),
+                        2,
+                    ),
                 }
         return stats
 
-    def get_alerts(self, latency_threshold_ms: float = 5000, failure_rate_threshold: float = 0.1) -> list[dict]:
+    def get_alerts(
+        self, latency_threshold_ms: float = 5000, failure_rate_threshold: float = 0.1
+    ) -> list[dict]:
         """Get performance alerts for slow or failing task types."""
         alerts = []
         stats = self.get_stats()
         for task_type, s in stats.items():
             if s["avg_latency_ms"] > latency_threshold_ms:
-                alerts.append({
-                    "type": "high_latency",
-                    "task_type": task_type,
-                    "avg_latency_ms": s["avg_latency_ms"],
-                    "threshold": latency_threshold_ms,
-                })
+                alerts.append(
+                    {
+                        "type": "high_latency",
+                        "task_type": task_type,
+                        "avg_latency_ms": s["avg_latency_ms"],
+                        "threshold": latency_threshold_ms,
+                    }
+                )
             if s["failure_rate"] > failure_rate_threshold:
-                alerts.append({
-                    "type": "high_failure_rate",
-                    "task_type": task_type,
-                    "failure_rate": s["failure_rate"],
-                    "threshold": failure_rate_threshold,
-                })
+                alerts.append(
+                    {
+                        "type": "high_failure_rate",
+                        "task_type": task_type,
+                        "failure_rate": s["failure_rate"],
+                        "threshold": failure_rate_threshold,
+                    }
+                )
         return alerts
 
 
@@ -96,10 +110,10 @@ class TokenBudgetManager:
 
     # Priority levels (higher = more important)
     PRIORITY_CRITICAL = 0  # System prompt, task prompt
-    PRIORITY_HIGH = 1      # Dataset schema, semantic mappings
-    PRIORITY_MEDIUM = 2    # KPI values, active filters
-    PRIORITY_LOW = 3       # Industry knowledge, conversation history
-    PRIORITY_MINIMAL = 4   # Extra context, sample data
+    PRIORITY_HIGH = 1  # Dataset schema, semantic mappings
+    PRIORITY_MEDIUM = 2  # KPI values, active filters
+    PRIORITY_LOW = 3  # Industry knowledge, conversation history
+    PRIORITY_MINIMAL = 4  # Extra context, sample data
 
     def __init__(self, max_tokens: int = 8000):
         self.max_tokens = max_tokens
@@ -123,7 +137,13 @@ class TokenBudgetManager:
         user_message_reserve = 500
         response_reserve = 2000
 
-        available = self.max_tokens - system_reserve - task_reserve - user_message_reserve - response_reserve
+        available = (
+            self.max_tokens
+            - system_reserve
+            - task_reserve
+            - user_message_reserve
+            - response_reserve
+        )
 
         # Allocate by priority
         allocation = {
@@ -180,7 +200,9 @@ class LazyContextLoader:
     def __init__(self, context_engine):
         self.context_engine = context_engine
 
-    def should_load_section(self, task_type: PromptTaskType, section: str, user_message: str) -> bool:
+    def should_load_section(
+        self, task_type: PromptTaskType, section: str, user_message: str
+    ) -> bool:
         """Determine if a context section should be loaded for this request.
 
         Args:
@@ -198,12 +220,12 @@ class LazyContextLoader:
             # Only load dataset context if the message references data
             if section == "dataset":
                 msg_lower = user_message.lower()
-                return any(kw in msg_lower for kw in ["data", "column", "row", "table", "metric", "value"])
+                return any(
+                    kw in msg_lower for kw in ["data", "column", "row", "table", "metric", "value"]
+                )
             if section == "industry":
                 return False
-            if section == "conversation":
-                return True
-            return False
+            return section == "conversation"
 
         # For other task types, load relevant sections
         if section == "dataset":
@@ -258,6 +280,7 @@ def track_performance(task_type: str):
         def generate_summary(...):
             ...
     """
+
     def decorator(func):
         def wrapper(*args, **kwargs):
             monitor = get_performance_monitor()
@@ -272,5 +295,7 @@ def track_performance(task_type: str):
             finally:
                 duration_ms = (time.time() - start) * 1000
                 monitor.record(task_type, duration_ms, success)
+
         return wrapper
+
     return decorator

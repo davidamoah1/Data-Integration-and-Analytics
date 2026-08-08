@@ -2,12 +2,21 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, Query, UploadFile, status
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    File,
+    HTTPException,
+    Query,
+    UploadFile,
+    status,
+)
 from sqlalchemy.orm import Session as DbSession
 
 from capture.document_types import ALL_DOCUMENT_TYPES, INDUSTRIES
-from capture.repositories import CaptureAuditLogRepository
 from capture.ocr_engine import is_ocr_available
+from capture.repositories import CaptureAuditLogRepository
 from capture.service import CaptureError, CaptureService
 from shared.database import get_db
 from shared.dependencies import get_current_user
@@ -31,7 +40,11 @@ async def capture_engine_status():
 
 @router.get("/document-types")
 async def list_document_types_route(industry: str | None = Query(None)):
-    types = ALL_DOCUMENT_TYPES if not industry else [d for d in ALL_DOCUMENT_TYPES if d.industry == industry]
+    types = (
+        ALL_DOCUMENT_TYPES
+        if not industry
+        else [d for d in ALL_DOCUMENT_TYPES if d.industry == industry]
+    )
     return {
         "document_types": [
             {
@@ -39,7 +52,12 @@ async def list_document_types_route(industry: str | None = Query(None)):
                 "label": d.label,
                 "industry": d.industry,
                 "fields": [
-                    {"name": f.name, "label": f.label, "data_type": f.data_type, "required": f.required}
+                    {
+                        "name": f.name,
+                        "label": f.label,
+                        "data_type": f.data_type,
+                        "required": f.required,
+                    }
                     for f in d.fields
                 ],
             }
@@ -134,6 +152,7 @@ async def upload_zip_batch(
     job = None
     try:
         from jobs.service import JobService
+
         job_svc = JobService(db)
         job = job_svc.create_job(
             organization_id=org_id,
@@ -272,7 +291,9 @@ async def update_field(
     org_id = get_current_organization_id(current_user, db)
     svc = CaptureService(db)
     try:
-        field = svc.update_field(document_id, field_id, org_id, payload.get("value", ""), current_user["id"])
+        field = svc.update_field(
+            document_id, field_id, org_id, payload.get("value", ""), current_user["id"]
+        )
     except CaptureError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     return _serialize_field(field)
@@ -288,7 +309,9 @@ async def set_document_type(
     org_id = get_current_organization_id(current_user, db)
     svc = CaptureService(db)
     try:
-        doc = svc.set_document_type(document_id, org_id, payload["document_type"], current_user["id"])
+        doc = svc.set_document_type(
+            document_id, org_id, payload["document_type"], current_user["id"]
+        )
     except CaptureError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     return _serialize_document(doc)
@@ -319,7 +342,9 @@ async def reject_document(
     org_id = get_current_organization_id(current_user, db)
     svc = CaptureService(db)
     try:
-        doc = svc.reject_document(document_id, org_id, current_user["id"], (payload or {}).get("reason"))
+        doc = svc.reject_document(
+            document_id, org_id, current_user["id"], (payload or {}).get("reason")
+        )
     except CaptureError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     return _serialize_document(doc)
@@ -409,7 +434,9 @@ async def export_document_to_dataset(
     svc = CaptureService(db)
     try:
         result = svc.export_to_dataset(
-            document_id, org_id, current_user["id"],
+            document_id,
+            org_id,
+            current_user["id"],
             dataset_name=(payload or {}).get("dataset_name"),
         )
     except CaptureError as e:
@@ -428,7 +455,8 @@ async def bulk_export_approved_documents(
     svc = CaptureService(db)
     try:
         result = svc.bulk_export_approved(
-            org_id, current_user["id"],
+            org_id,
+            current_user["id"],
             document_type=(payload or {}).get("document_type"),
             dataset_name=(payload or {}).get("dataset_name"),
         )

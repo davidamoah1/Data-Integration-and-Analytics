@@ -12,7 +12,6 @@ Used for:
 
 from __future__ import annotations
 
-import numpy as np
 import pandas as pd
 
 from predictive_analytics.base import RiskAssessment
@@ -78,11 +77,14 @@ class RiskClassifier:
                 weight = f.get("weight", 1.0)
 
                 triggered_flag = False
-                if condition == "below" and val < threshold:
-                    triggered_flag = True
-                elif condition == "above" and val > threshold:
-                    triggered_flag = True
-                elif condition == "equals" and val == threshold:
+                if (
+                    condition == "below"
+                    and val < threshold
+                    or condition == "above"
+                    and val > threshold
+                    or condition == "equals"
+                    and val == threshold
+                ):
                     triggered_flag = True
 
                 if triggered_flag:
@@ -100,12 +102,14 @@ class RiskClassifier:
                 risk_level = "low"
 
             item_id = row[id_col] if id_col in df.columns else idx
-            item_details.append({
-                "id": str(item_id),
-                "risk_score": round(normalized_score, 3),
-                "risk_level": risk_level,
-                "triggered_factors": triggered,
-            })
+            item_details.append(
+                {
+                    "id": str(item_id),
+                    "risk_score": round(normalized_score, 3),
+                    "risk_level": risk_level,
+                    "triggered_factors": triggered,
+                }
+            )
 
         high_count = sum(1 for i in item_details if i["risk_level"] == "high")
         medium_count = sum(1 for i in item_details if i["risk_level"] == "medium")

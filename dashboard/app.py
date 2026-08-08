@@ -35,10 +35,10 @@ from dashboard.sector_dashboards import render_sector_dashboard
 from dashboard.semantic_dashboard import render_semantic_dashboard
 from dashboard.styles import DARK_THEME_CSS, RESPONSIVE_CSS
 from dashboard.utils import MAX_UPLOAD_SIZE_BYTES, MAX_UPLOAD_SIZE_MB, sanitize_text
-from dashboard.validation_dashboard import render_validation_dashboard, render_approval_section
+from dashboard.validation_dashboard import render_approval_section, render_validation_dashboard
 from semantic.mapping_engine import SemanticMappingEngine, SemanticMappingResult
 from services.dashboard_data_service import DashboardDataService
-from validation.engine import ValidationEngine, ValidationStatus
+from validation.engine import ValidationEngine
 
 st.set_page_config(
     page_title="DataFlow - Business Analytics",
@@ -388,7 +388,10 @@ else:
         st.stop()
 
     # ── Hospital Data Validation (mandatory pre-ETL stage) ──
-    if "validation_result" not in st.session_state or st.session_state.get("validation_filename") != uploaded_file.name:
+    if (
+        "validation_result" not in st.session_state
+        or st.session_state.get("validation_filename") != uploaded_file.name
+    ):
         with st.spinner("Running hospital data validation..."):
             validation_engine = ValidationEngine()
             validation_result = validation_engine.validate(raw_df, dataset_name=uploaded_file.name)
@@ -460,13 +463,22 @@ else:
         selected_industry = st.selectbox(
             "Select Industry",
             options=["unknown"] + available_industries,
-            index=0 if semantic_mapping_result.industry == "unknown"
-            else (available_industries.index(semantic_mapping_result.industry) + 1
-                  if semantic_mapping_result.industry in available_industries else 0),
+            index=(
+                0
+                if semantic_mapping_result.industry == "unknown"
+                else (
+                    available_industries.index(semantic_mapping_result.industry) + 1
+                    if semantic_mapping_result.industry in available_industries
+                    else 0
+                )
+            ),
             format_func=lambda x: x.title(),
         )
         if st.button("Confirm Industry", type="primary"):
-            if selected_industry != "unknown" and selected_industry != semantic_mapping_result.industry:
+            if (
+                selected_industry != "unknown"
+                and selected_industry != semantic_mapping_result.industry
+            ):
                 # Override the industry
                 semantic_mapping_result = SemanticMappingResult(
                     table_metadata=semantic_mapping_result.table_metadata,
@@ -519,7 +531,16 @@ else:
 
         # Auto-detect date columns for date range filter
         date_col = None
-        for candidate in ("order_date", "sale_date", "transaction_date", "admission_date", "visit_date", "enrollment_date", "date", "timestamp"):
+        for candidate in (
+            "order_date",
+            "sale_date",
+            "transaction_date",
+            "admission_date",
+            "visit_date",
+            "enrollment_date",
+            "date",
+            "timestamp",
+        ):
             if candidate in df.columns and df[candidate].notna().any():
                 date_col = candidate
                 break

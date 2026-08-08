@@ -7,7 +7,6 @@ Events: workflow completed, dataset processed, subscription changes, security al
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
 from typing import Any
 
 from sqlalchemy import select
@@ -19,7 +18,6 @@ logger = logging.getLogger("etl_project.notifications")
 
 # Reuse existing notifications model
 from notifications.models import Notification  # noqa: E402
-
 
 # Event type mapping
 EVENT_TYPES = {
@@ -99,12 +97,18 @@ class NotificationService:
         if pref.channel_webhook:
             try:
                 from ecosystem.webhooks import WebhookDispatcher
-                WebhookDispatcher.dispatch(self.db, org_id, event_type, {
-                    "subject": subject,
-                    "body": body,
-                    "metadata": metadata or {},
-                    "user_id": user_id,
-                })
+
+                WebhookDispatcher.dispatch(
+                    self.db,
+                    org_id,
+                    event_type,
+                    {
+                        "subject": subject,
+                        "body": body,
+                        "metadata": metadata or {},
+                        "user_id": user_id,
+                    },
+                )
                 channels_sent.append("webhook")
             except Exception as e:
                 logger.error(f"Webhook notification failed: {e}")
@@ -139,13 +143,18 @@ class NotificationService:
     ) -> int:
         """Send a notification to all users in an organization."""
         from authentication.models import User
-        users = self.db.execute(
-            select(User).where(
-                User.organization_id == org_id,
-                User.is_active == 1,
-                User.is_deleted == 0,
+
+        users = (
+            self.db.execute(
+                select(User).where(
+                    User.organization_id == org_id,
+                    User.is_active == 1,
+                    User.is_deleted == 0,
+                )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
 
         count = 0
         for user in users:

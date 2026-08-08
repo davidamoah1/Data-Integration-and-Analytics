@@ -2,21 +2,19 @@
 
 # ruff: noqa: B008  # FastAPI Depends() calls in default arguments are intentional
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session as DbSession
 
 from organizations.invitation_schemas import (
     InvitationAccept,
     InvitationCreate,
-    InvitationResponse,
     SignupV2Request,
 )
 from organizations.invitation_service import InvitationService, RegistrationService
 from shared.database import get_db
-from shared.dependencies import get_current_user, require_permissions
-from shared.exceptions import AuthorizationError
+from shared.dependencies import require_permissions
 from shared.response import success_response
-from shared.tenant import get_current_organization_id, is_super_admin
+from shared.tenant import get_current_organization_id
 
 invitation_router = APIRouter(prefix="/api/invitations", tags=["Invitations"])
 registration_router = APIRouter(prefix="/api/auth", tags=["Authentication"])

@@ -232,7 +232,7 @@ class AIDashboardAssistant:
         return DashboardAction(
             action_type=ActionType.UNKNOWN.value,
             confidence=0.0,
-            explanation=f"I couldn't understand that request. Try asking me to show data by category, replace a chart, highlight top items, or compare periods.",
+            explanation="I couldn't understand that request. Try asking me to show data by category, replace a chart, highlight top items, or compare periods.",
             original_query=query,
         )
 
@@ -265,15 +265,21 @@ class AIDashboardAssistant:
 
         elif action.action_type == ActionType.REPLACE_CHART.value:
             result["updates"] = self._execute_replace_chart(action)
-            result["message"] = f"Replacing chart with {action.parameters.get('new_type', 'new type')}"
+            result["message"] = (
+                f"Replacing chart with {action.parameters.get('new_type', 'new type')}"
+            )
 
         elif action.action_type == ActionType.HIGHLIGHT_TOP.value:
             result["updates"] = self._execute_highlight_top(action, df_columns)
-            result["message"] = f"Highlighting top {action.parameters.get('n', 5)} {action.parameters.get('entity', 'items')}"
+            result["message"] = (
+                f"Highlighting top {action.parameters.get('n', 5)} {action.parameters.get('entity', 'items')}"
+            )
 
         elif action.action_type == ActionType.COMPARE_PERIODS.value:
             result["updates"] = self._execute_compare_periods(action)
-            result["message"] = f"Comparing {action.parameters.get('period1', 'current')} vs {action.parameters.get('period2', 'previous')}"
+            result["message"] = (
+                f"Comparing {action.parameters.get('period1', 'current')} vs {action.parameters.get('period2', 'previous')}"
+            )
 
         elif action.action_type == ActionType.ADD_FILTER.value:
             result["updates"] = self._execute_add_filter(action, df_columns)
@@ -316,10 +322,14 @@ class AIDashboardAssistant:
         categorical_cols = [c for c in df_columns if c not in numeric_cols]
 
         if len(numeric_cols) >= 2:
-            suggestions.append(f"Show {numeric_cols[0].replace('_', ' ')} by {categorical_cols[0].replace('_', ' ') if categorical_cols else 'category'}")
+            suggestions.append(
+                f"Show {numeric_cols[0].replace('_', ' ')} by {categorical_cols[0].replace('_', ' ') if categorical_cols else 'category'}"
+            )
 
         if len(numeric_cols) >= 1:
-            suggestions.append(f"Highlight the top 5 {categorical_cols[0].replace('_', ' ') if categorical_cols else 'items'}")
+            suggestions.append(
+                f"Highlight the top 5 {categorical_cols[0].replace('_', ' ') if categorical_cols else 'items'}"
+            )
 
         suggestions.append("Compare this month with last month")
         suggestions.append("Replace this chart with a heatmap")
@@ -327,13 +337,17 @@ class AIDashboardAssistant:
 
         existing_types = {c.get("chart_type") for c in dashboard_metadata.get("charts", [])}
         if "scatter_plot" not in existing_types and len(numeric_cols) >= 2:
-            suggestions.append(f"Show {numeric_cols[0].replace('_', ' ')} vs {numeric_cols[1].replace('_', ' ')}")
+            suggestions.append(
+                f"Show {numeric_cols[0].replace('_', ' ')} vs {numeric_cols[1].replace('_', ' ')}"
+            )
 
         return suggestions[:6]
 
     # ── Private: Action builders ───────────────────────
 
-    def _build_action(self, action_type: str, match: re.Match, query: str, confidence: float) -> DashboardAction:
+    def _build_action(
+        self, action_type: str, match: re.Match, query: str, confidence: float
+    ) -> DashboardAction:
         """Build a DashboardAction from a regex match."""
         groups = match.groups()
         params: dict[str, Any] = {}
@@ -346,8 +360,12 @@ class AIDashboardAssistant:
                 params["metric"] = metric
                 params["dimension"] = dimension
                 params["title"] = f"{metric.title()} by {dimension.title()}"
-                params["chart_type"] = "line_chart" if "time" in dimension or "trend" in dimension else "bar_chart"
-                explanation = f"Create a {params['chart_type']} showing {metric} grouped by {dimension}"
+                params["chart_type"] = (
+                    "line_chart" if "time" in dimension or "trend" in dimension else "bar_chart"
+                )
+                explanation = (
+                    f"Create a {params['chart_type']} showing {metric} grouped by {dimension}"
+                )
             elif len(groups) == 1:
                 metric = groups[0].strip()
                 params["metric"] = metric
@@ -407,11 +425,10 @@ class AIDashboardAssistant:
                 params["layout"] = self.LAYOUT_SYNONYMS.get(layout_name, layout_name)
                 explanation = f"Switch to {params['layout']} layout"
 
-        elif action_type == ActionType.EXPORT.value:
-            if groups:
-                fmt = groups[0].strip()
-                params["format"] = fmt
-                explanation = f"Export the dashboard as {fmt}"
+        elif action_type == ActionType.EXPORT.value and groups:
+            fmt = groups[0].strip()
+            params["format"] = fmt
+            explanation = f"Export the dashboard as {fmt}"
 
         return DashboardAction(
             action_type=action_type,

@@ -157,7 +157,9 @@ class SemanticEngine:
 
         # Merge value-based industry votes into the main votes
         for industry, vote in value_result.industry_votes.items():
-            industry_votes[industry] = industry_votes.get(industry, 0.0) + vote * VALUE_SIGNAL_WEIGHT
+            industry_votes[industry] = (
+                industry_votes.get(industry, 0.0) + vote * VALUE_SIGNAL_WEIGHT
+            )
 
         # Use value signals to enhance entity mappings for unmapped columns
         for sig in value_result.signals:
@@ -193,10 +195,9 @@ class SemanticEngine:
             # Tie-breaking: if top two industries are within MIN_VOTE_MARGIN, return unknown
             if len(sorted_votes) > 1:
                 second_votes = sorted_votes[1][1]
-                if (best_votes - second_votes) < MIN_VOTE_MARGIN:
-                    detected_industry = "unknown"
-                    industry_confidence = confidence_pct
-                elif confidence_pct < MIN_INDUSTRY_CONFIDENCE:
+                if (
+                    best_votes - second_votes
+                ) < MIN_VOTE_MARGIN or confidence_pct < MIN_INDUSTRY_CONFIDENCE:
                     detected_industry = "unknown"
                     industry_confidence = confidence_pct
                 else:

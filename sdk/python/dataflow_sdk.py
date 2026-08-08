@@ -21,7 +21,6 @@ Usage:
 
 from __future__ import annotations
 
-import json
 import os
 from typing import Any
 
@@ -35,10 +34,12 @@ class DataFlowClient:
         self.api_key = api_key or os.getenv("DATAFLOW_API_KEY", "")
         self.base_url = base_url.rstrip("/")
         self.session = requests.Session()
-        self.session.headers.update({
-            "X-API-Key": self.api_key,
-            "Content-Type": "application/json",
-        })
+        self.session.headers.update(
+            {
+                "X-API-Key": self.api_key,
+                "Content-Type": "application/json",
+            }
+        )
         self.datasets = DatasetsAPI(self)
         self.analytics = AnalyticsAPI(self)
         self.ai = AIAPI(self)
@@ -59,7 +60,9 @@ class DataFlowClient:
 
     def _upload(self, path: str, file_path: str) -> Any:
         with open(file_path, "rb") as f:
-            resp = self.session.post(f"{self.base_url}{path}", files={"file": f}, headers={"X-API-Key": self.api_key})
+            resp = self.session.post(
+                f"{self.base_url}{path}", files={"file": f}, headers={"X-API-Key": self.api_key}
+            )
         resp.raise_for_status()
         return resp.json()
 

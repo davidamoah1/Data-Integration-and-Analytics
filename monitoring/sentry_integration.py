@@ -32,9 +32,9 @@ def init_sentry() -> bool:
     try:
         import sentry_sdk
         from sentry_sdk.integrations.fastapi import FastApiIntegration
-        from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
-        from sentry_sdk.integrations.redis import RedisIntegration
         from sentry_sdk.integrations.logging import LoggingIntegration
+        from sentry_sdk.integrations.redis import RedisIntegration
+        from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
         from sentry_sdk.integrations.threading import ThreadingIntegration
     except ImportError:
         return False
@@ -93,6 +93,7 @@ def capture_exception(exc: Exception, **kwargs: Any) -> None:
     if not _sentry_initialised:
         return
     import sentry_sdk
+
     sentry_sdk.capture_exception(exc, **kwargs)
 
 
@@ -101,6 +102,7 @@ def capture_message(message: str, level: str = "info", **kwargs: Any) -> None:
     if not _sentry_initialised:
         return
     import sentry_sdk
+
     sentry_sdk.capture_message(message, level=level, **kwargs)
 
 
@@ -114,6 +116,7 @@ def set_user_context(
     if not _sentry_initialised:
         return
     import sentry_sdk
+
     user_data: dict[str, Any] = {}
     if user_id is not None:
         user_data["id"] = str(user_id)
@@ -136,6 +139,7 @@ def add_breadcrumb(
     if not _sentry_initialised:
         return
     import sentry_sdk
+
     sentry_sdk.add_breadcrumb(
         message=message,
         category=category,
@@ -149,6 +153,7 @@ def set_tag(key: str, value: str) -> None:
     if not _sentry_initialised:
         return
     import sentry_sdk
+
     sentry_sdk.set_tag(key, value)
 
 

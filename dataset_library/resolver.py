@@ -17,9 +17,8 @@ Test data sources:
 from __future__ import annotations
 
 import os
-from enum import Enum
 
-from dataset_library import DataTier, DatasetLibrary, get_dataset_library
+from dataset_library import DataTier, get_dataset_library
 
 
 class DataSourceError(Exception):

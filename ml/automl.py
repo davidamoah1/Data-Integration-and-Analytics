@@ -13,8 +13,14 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
-from sklearn.cluster import AgglomerativeClustering, DBSCAN, KMeans
-from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor, IsolationForest, RandomForestClassifier, RandomForestRegressor
+from sklearn.cluster import DBSCAN, AgglomerativeClustering, KMeans
+from sklearn.ensemble import (
+    GradientBoostingClassifier,
+    GradientBoostingRegressor,
+    IsolationForest,
+    RandomForestClassifier,
+    RandomForestRegressor,
+)
 from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import LocalOutlierFactor
@@ -24,10 +30,8 @@ from ml.metrics import (
     anomaly_metrics,
     classification_metrics,
     clustering_metrics,
-    forecast_metrics,
     regression_metrics,
 )
-
 
 ALGORITHM_REGISTRY: dict[str, dict[str, Any]] = {
     "classification": {
@@ -56,13 +60,22 @@ ALGORITHM_REGISTRY: dict[str, dict[str, Any]] = {
         },
     },
     "clustering": {
-        "KMeans": {"class": KMeans, "default": {"n_clusters": 3, "random_state": 42, "n_init": "auto"}},
+        "KMeans": {
+            "class": KMeans,
+            "default": {"n_clusters": 3, "random_state": 42, "n_init": "auto"},
+        },
         "DBSCAN": {"class": DBSCAN, "default": {"eps": 0.5, "min_samples": 5}},
         "AgglomerativeClustering": {"class": AgglomerativeClustering, "default": {"n_clusters": 3}},
     },
     "anomaly_detection": {
-        "IsolationForest": {"class": IsolationForest, "default": {"n_estimators": 100, "random_state": 42, "contamination": "auto"}},
-        "LocalOutlierFactor": {"class": LocalOutlierFactor, "default": {"n_neighbors": 20, "contamination": "auto"}},
+        "IsolationForest": {
+            "class": IsolationForest,
+            "default": {"n_estimators": 100, "random_state": 42, "contamination": "auto"},
+        },
+        "LocalOutlierFactor": {
+            "class": LocalOutlierFactor,
+            "default": {"n_neighbors": 20, "contamination": "auto"},
+        },
     },
 }
 
@@ -79,7 +92,12 @@ def _safe_split(X: pd.DataFrame, y: pd.Series | None, test_size: float = 0.2) ->
 class AutoMLEngine:
     """Train and compare models for a given problem type."""
 
-    def __init__(self, model_type: str, algorithm: str | None = None, hyperparameters: dict[str, Any] | None = None) -> None:
+    def __init__(
+        self,
+        model_type: str,
+        algorithm: str | None = None,
+        hyperparameters: dict[str, Any] | None = None,
+    ) -> None:
         self.model_type = model_type
         self.algorithm = algorithm
         self.hyperparameters = hyperparameters or {}
@@ -162,7 +180,9 @@ class AutoMLEngine:
             estimator.fit(X_train, y_train_enc)
             y_pred = estimator.predict(X_test)
             y_pred = self.label_encoder.inverse_transform(y_pred)
-            y_proba = estimator.predict_proba(X_test) if hasattr(estimator, "predict_proba") else None
+            y_proba = (
+                estimator.predict_proba(X_test) if hasattr(estimator, "predict_proba") else None
+            )
             metrics = classification_metrics(y_test, y_pred, y_proba)
         elif self.model_type == "regression":
             estimator.fit(X_train, y_train)
@@ -170,8 +190,14 @@ class AutoMLEngine:
             metrics = regression_metrics(y_test, y_pred)
         elif self.model_type == "clustering":
             estimator.fit(X_train)
-            labels_train = estimator.labels_ if hasattr(estimator, "labels_") else estimator.predict(X_train)
-            labels_test = estimator.predict(X_test) if hasattr(estimator, "predict") else labels_train[: len(X_test)]
+            labels_train = (
+                estimator.labels_ if hasattr(estimator, "labels_") else estimator.predict(X_train)
+            )
+            labels_test = (
+                estimator.predict(X_test)
+                if hasattr(estimator, "predict")
+                else labels_train[: len(X_test)]
+            )
             metrics = clustering_metrics(X_train, labels_train)
             metrics["test_labels"] = labels_test.tolist()[:5]
         elif self.model_type == "anomaly_detection":

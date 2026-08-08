@@ -53,7 +53,9 @@ class GlobalFilterEngine:
         if not date_cols:
             # Check for date-like string columns
             for col in df.columns:
-                if df[col].dtype == "object" and any(kw in col.lower() for kw in ("date", "time", "timestamp")):
+                if df[col].dtype == "object" and any(
+                    kw in col.lower() for kw in ("date", "time", "timestamp")
+                ):
                     try:
                         pd.to_datetime(df[col].dropna().head(10), errors="raise")
                         date_cols.append(col)
@@ -62,14 +64,16 @@ class GlobalFilterEngine:
 
         if date_cols:
             col = date_cols[0]
-            filters.append(FilterDefinition(
-                id=str(uuid.uuid4()),
-                filter_type=FilterType.DATE_RANGE.value,
-                label="Date Range",
-                column=col,
-                entity=col_mapping.get(col),
-                default_value=None,
-            ))
+            filters.append(
+                FilterDefinition(
+                    id=str(uuid.uuid4()),
+                    filter_type=FilterType.DATE_RANGE.value,
+                    label="Date Range",
+                    column=col,
+                    entity=col_mapping.get(col),
+                    default_value=None,
+                )
+            )
             seen_columns.add(col)
 
         # 2. Semantic entity filters
@@ -100,16 +104,22 @@ class GlobalFilterEngine:
             if col and col not in seen_columns and col in df.columns:
                 cardinality = df[col].nunique()
                 if cardinality <= 50:  # Reasonable for a filter
-                    filter_type = FilterType.SINGLE_SELECT.value if cardinality <= 10 else FilterType.MULTI_SELECT.value
+                    filter_type = (
+                        FilterType.SINGLE_SELECT.value
+                        if cardinality <= 10
+                        else FilterType.MULTI_SELECT.value
+                    )
                     options = df[col].dropna().unique().tolist()[:50]
-                    filters.append(FilterDefinition(
-                        id=str(uuid.uuid4()),
-                        filter_type=filter_type,
-                        label=label,
-                        column=col,
-                        entity=entity,
-                        options=options,
-                    ))
+                    filters.append(
+                        FilterDefinition(
+                            id=str(uuid.uuid4()),
+                            filter_type=filter_type,
+                            label=label,
+                            column=col,
+                            entity=entity,
+                            options=options,
+                        )
+                    )
                     seen_columns.add(col)
 
         # 3. Additional categorical filters (not semantically mapped)
@@ -121,14 +131,16 @@ class GlobalFilterEngine:
             if df[col].dtype == "object" and not col.lower().endswith("_id"):
                 cardinality = df[col].nunique()
                 if 2 <= cardinality <= 20:
-                    filters.append(FilterDefinition(
-                        id=str(uuid.uuid4()),
-                        filter_type=FilterType.SINGLE_SELECT.value,
-                        label=col.replace("_", " ").title(),
-                        column=col,
-                        entity=col_mapping.get(col),
-                        options=df[col].dropna().unique().tolist()[:20],
-                    ))
+                    filters.append(
+                        FilterDefinition(
+                            id=str(uuid.uuid4()),
+                            filter_type=FilterType.SINGLE_SELECT.value,
+                            label=col.replace("_", " ").title(),
+                            column=col,
+                            entity=col_mapping.get(col),
+                            options=df[col].dropna().unique().tolist()[:20],
+                        )
+                    )
                     seen_columns.add(col)
 
         return filters
@@ -184,7 +196,9 @@ class GlobalFilterEngine:
                         filtered = filtered[filtered[col] <= max_val]
             elif filter_def.filter_type == FilterType.SEARCH.value:
                 if isinstance(value, str) and value:
-                    filtered = filtered[filtered[col].astype(str).str.contains(value, case=False, na=False)]
+                    filtered = filtered[
+                        filtered[col].astype(str).str.contains(value, case=False, na=False)
+                    ]
 
         return filtered
 
@@ -210,11 +224,12 @@ class GlobalFilterEngine:
 
         affected = []
         for chart in charts:
-            if filter_def.column in chart.source_columns:
-                affected.append(chart.id)
-            elif chart.x_axis == filter_def.column or chart.y_axis == filter_def.column:
-                affected.append(chart.id)
-            elif chart.group_by == filter_def.column:
+            if (
+                filter_def.column in chart.source_columns
+                or chart.x_axis == filter_def.column
+                or chart.y_axis == filter_def.column
+                or chart.group_by == filter_def.column
+            ):
                 affected.append(chart.id)
 
         return affected

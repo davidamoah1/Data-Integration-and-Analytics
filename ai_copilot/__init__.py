@@ -22,10 +22,10 @@ Usage:
 from __future__ import annotations
 
 from ai_copilot.copilot import DataAnalystCopilot
-from ai_copilot.query_engine import QueryEngine, QueryIntent, ParsedQuery
-from ai_copilot.root_cause import RootCauseAnalyzer, RootCauseResult, Contribution
-from ai_copilot.insight_generator import InsightGenerator, AutoInsight
-from ai_copilot.report_generator import ReportGenerator, Report
+from ai_copilot.insight_generator import AutoInsight, InsightGenerator
+from ai_copilot.query_engine import ParsedQuery, QueryEngine, QueryIntent
+from ai_copilot.report_generator import Report, ReportGenerator
+from ai_copilot.root_cause import Contribution, RootCauseAnalyzer, RootCauseResult
 
 __all__ = [
     "DataAnalystCopilot",

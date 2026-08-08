@@ -15,61 +15,172 @@ Tests cover:
 
 from __future__ import annotations
 
-import pytest
 import pandas as pd
+import pytest
 
+from services.chart_recommender import ChartRecommendationEngine
+from services.dashboard_assistant import ActionType, AIDashboardAssistant
 from services.dashboard_engine import (
+    ChartDefinition,
     DashboardEngine,
     DashboardMetadata,
-    DashboardLayout,
-    KPIDefinition,
-    ChartDefinition,
-    FilterDefinition,
     DrilldownLevel,
-    DashboardPermissions,
+    KPIDefinition,
     PermissionLevel,
-    LayoutSection,
 )
-from services.kpi_intelligence import KPIIntelligenceEngine
-from services.chart_recommender import ChartRecommendationEngine
-from services.dashboard_layout import DashboardLayoutEngine
-from services.filter_engine import GlobalFilterEngine
-from services.drilldown_engine import DrilldownEngine, DrilldownPath
-from services.dashboard_assistant import AIDashboardAssistant, ActionType
 from services.dashboard_export import DashboardExportService
+from services.dashboard_layout import DashboardLayoutEngine
 from services.dashboard_performance import DashboardPerformanceLayer
-
+from services.drilldown_engine import DrilldownEngine
+from services.filter_engine import GlobalFilterEngine
+from services.kpi_intelligence import KPIIntelligenceEngine
 
 # ── Fixtures ───────────────────────────────────────────
 
 
 @pytest.fixture
 def healthcare_df():
-    return pd.DataFrame({
-        "patient_id": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        "patient_name": ["John", "Jane", "Bob", "Alice", "Charlie", "Diana", "Eve", "Frank", "Grace", "Henry"],
-        "age": [45, 32, 67, 28, 55, 41, 60, 35, 50, 72],
-        "diagnosis": ["E11.9", "J45.909", "I10", "E11.9", "M54.5", "I10", "E11.9", "J45.909", "M54.5", "I10"],
-        "doctor": ["Dr. Smith", "Dr. Jones", "Dr. Smith", "Dr. Lee", "Dr. Jones", "Dr. Smith", "Dr. Lee", "Dr. Jones", "Dr. Smith", "Dr. Lee"],
-        "ward": ["A", "B", "A", "C", "B", "A", "C", "B", "A", "C"],
-        "admission_date": pd.to_datetime(["2024-01-15", "2024-02-20", "2024-03-10", "2024-04-05", "2024-05-12",
-                                           "2024-06-01", "2024-07-15", "2024-08-20", "2024-09-10", "2024-10-05"]),
-        "billing_amount": [1500.00, 3200.50, 8900.00, 750.00, 4200.00, 2100.00, 5500.00, 1800.00, 3200.00, 7800.00],
-    })
+    return pd.DataFrame(
+        {
+            "patient_id": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            "patient_name": [
+                "John",
+                "Jane",
+                "Bob",
+                "Alice",
+                "Charlie",
+                "Diana",
+                "Eve",
+                "Frank",
+                "Grace",
+                "Henry",
+            ],
+            "age": [45, 32, 67, 28, 55, 41, 60, 35, 50, 72],
+            "diagnosis": [
+                "E11.9",
+                "J45.909",
+                "I10",
+                "E11.9",
+                "M54.5",
+                "I10",
+                "E11.9",
+                "J45.909",
+                "M54.5",
+                "I10",
+            ],
+            "doctor": [
+                "Dr. Smith",
+                "Dr. Jones",
+                "Dr. Smith",
+                "Dr. Lee",
+                "Dr. Jones",
+                "Dr. Smith",
+                "Dr. Lee",
+                "Dr. Jones",
+                "Dr. Smith",
+                "Dr. Lee",
+            ],
+            "ward": ["A", "B", "A", "C", "B", "A", "C", "B", "A", "C"],
+            "admission_date": pd.to_datetime(
+                [
+                    "2024-01-15",
+                    "2024-02-20",
+                    "2024-03-10",
+                    "2024-04-05",
+                    "2024-05-12",
+                    "2024-06-01",
+                    "2024-07-15",
+                    "2024-08-20",
+                    "2024-09-10",
+                    "2024-10-05",
+                ]
+            ),
+            "billing_amount": [
+                1500.00,
+                3200.50,
+                8900.00,
+                750.00,
+                4200.00,
+                2100.00,
+                5500.00,
+                1800.00,
+                3200.00,
+                7800.00,
+            ],
+        }
+    )
 
 
 @pytest.fixture
 def retail_df():
-    return pd.DataFrame({
-        "order_id": [101, 102, 103, 104, 105, 106, 107, 108, 109, 110],
-        "product_name": ["Widget A", "Widget B", "Gadget C", "Gadget D", "Tool E", "Widget A", "Gadget C", "Tool E", "Widget B", "Gadget D"],
-        "category": ["Electronics", "Electronics", "Tools", "Tools", "Tools", "Electronics", "Tools", "Tools", "Electronics", "Tools"],
-        "region": ["North", "South", "North", "East", "West", "South", "North", "West", "South", "East"],
-        "sales": [299.90, 499.90, 155.00, 250.00, 399.90, 299.90, 155.00, 399.90, 499.90, 250.00],
-        "profit": [89.90, 149.90, 45.00, 75.00, 119.90, 89.90, 45.00, 119.90, 149.90, 75.00],
-        "order_date": pd.to_datetime(["2024-01-01", "2024-01-15", "2024-02-01", "2024-02-15", "2024-03-01",
-                                       "2024-03-15", "2024-04-01", "2024-04-15", "2024-05-01", "2024-05-15"]),
-    })
+    return pd.DataFrame(
+        {
+            "order_id": [101, 102, 103, 104, 105, 106, 107, 108, 109, 110],
+            "product_name": [
+                "Widget A",
+                "Widget B",
+                "Gadget C",
+                "Gadget D",
+                "Tool E",
+                "Widget A",
+                "Gadget C",
+                "Tool E",
+                "Widget B",
+                "Gadget D",
+            ],
+            "category": [
+                "Electronics",
+                "Electronics",
+                "Tools",
+                "Tools",
+                "Tools",
+                "Electronics",
+                "Tools",
+                "Tools",
+                "Electronics",
+                "Tools",
+            ],
+            "region": [
+                "North",
+                "South",
+                "North",
+                "East",
+                "West",
+                "South",
+                "North",
+                "West",
+                "South",
+                "East",
+            ],
+            "sales": [
+                299.90,
+                499.90,
+                155.00,
+                250.00,
+                399.90,
+                299.90,
+                155.00,
+                399.90,
+                499.90,
+                250.00,
+            ],
+            "profit": [89.90, 149.90, 45.00, 75.00, 119.90, 89.90, 45.00, 119.90, 149.90, 75.00],
+            "order_date": pd.to_datetime(
+                [
+                    "2024-01-01",
+                    "2024-01-15",
+                    "2024-02-01",
+                    "2024-02-15",
+                    "2024-03-01",
+                    "2024-03-15",
+                    "2024-04-01",
+                    "2024-04-15",
+                    "2024-05-01",
+                    "2024-05-15",
+                ]
+            ),
+        }
+    )
 
 
 @pytest.fixture
@@ -170,9 +281,14 @@ class TestDashboardEngine:
 
     def test_list_by_dataset(self, engine):
         for i in range(3):
-            engine.create(DashboardMetadata(
-                dashboard_id=f"ds-test-{i}", dataset_id="ds-list", org_id="org-1", title=f"Dashboard {i}"
-            ))
+            engine.create(
+                DashboardMetadata(
+                    dashboard_id=f"ds-test-{i}",
+                    dataset_id="ds-list",
+                    org_id="org-1",
+                    title=f"Dashboard {i}",
+                )
+            )
         dashboards = engine.list_by_dataset("ds-list")
         assert len(dashboards) == 3
 
@@ -196,8 +312,18 @@ class TestDashboardEngine:
 
     def test_remove_widget(self, engine):
         dashboard = DashboardMetadata(
-            dashboard_id="remove-test", dataset_id="ds-1", org_id="org-1", title="Test",
-            charts=[ChartDefinition(id="chart-1", chart_type="bar_chart", title="Test Chart", section="primary_charts")],
+            dashboard_id="remove-test",
+            dataset_id="ds-1",
+            org_id="org-1",
+            title="Test",
+            charts=[
+                ChartDefinition(
+                    id="chart-1",
+                    chart_type="bar_chart",
+                    title="Test Chart",
+                    section="primary_charts",
+                )
+            ],
         )
         engine.create(dashboard)
         result = engine.remove_widget("remove-test", "chart-1")
@@ -205,9 +331,20 @@ class TestDashboardEngine:
         assert len(result.charts) == 0
 
     def test_resize_widget(self, engine):
-        chart = ChartDefinition(id="chart-1", chart_type="bar_chart", title="Test", section="primary_charts", width=6, height=300)
+        chart = ChartDefinition(
+            id="chart-1",
+            chart_type="bar_chart",
+            title="Test",
+            section="primary_charts",
+            width=6,
+            height=300,
+        )
         dashboard = DashboardMetadata(
-            dashboard_id="resize-test", dataset_id="ds-1", org_id="org-1", title="Test", charts=[chart]
+            dashboard_id="resize-test",
+            dataset_id="ds-1",
+            org_id="org-1",
+            title="Test",
+            charts=[chart],
         )
         engine.create(dashboard)
         result = engine.resize_widget("resize-test", "chart-1", 12, 400)
@@ -221,7 +358,11 @@ class TestDashboardEngine:
             ChartDefinition(id="c3", chart_type="pie", title="C3", section="primary", order=2),
         ]
         dashboard = DashboardMetadata(
-            dashboard_id="reorder-test", dataset_id="ds-1", org_id="org-1", title="Test", charts=charts
+            dashboard_id="reorder-test",
+            dataset_id="ds-1",
+            org_id="org-1",
+            title="Test",
+            charts=charts,
         )
         engine.create(dashboard)
         result = engine.reorder_widgets("reorder-test", "primary", ["c3", "c1", "c2"])
@@ -238,22 +379,36 @@ class TestDashboardEngine:
 
     def test_save_custom_layout(self, engine):
         parent = DashboardMetadata(
-            dashboard_id="parent-1", dataset_id="ds-1", org_id="org-1", title="Parent",
-            charts=[ChartDefinition(id="c1", chart_type="bar", title="C1", section="primary", width=6)],
+            dashboard_id="parent-1",
+            dataset_id="ds-1",
+            org_id="org-1",
+            title="Parent",
+            charts=[
+                ChartDefinition(id="c1", chart_type="bar", title="C1", section="primary", width=6)
+            ],
         )
         engine.create(parent)
-        custom = engine.save_custom_layout("parent-1", "user1", "My Custom", chart_updates=[{"id": "c1", "width": 12}])
+        custom = engine.save_custom_layout(
+            "parent-1", "user1", "My Custom", chart_updates=[{"id": "c1", "width": 12}]
+        )
         assert custom.is_custom is True
         assert custom.parent_dashboard_id == "parent-1"
         assert custom.charts[0].width == 12
 
     def test_reset_to_recommended(self, engine):
         parent = DashboardMetadata(
-            dashboard_id="parent-2", dataset_id="ds-1", org_id="org-1", title="Parent",
-            charts=[ChartDefinition(id="c1", chart_type="bar", title="C1", section="primary", width=6)],
+            dashboard_id="parent-2",
+            dataset_id="ds-1",
+            org_id="org-1",
+            title="Parent",
+            charts=[
+                ChartDefinition(id="c1", chart_type="bar", title="C1", section="primary", width=6)
+            ],
         )
         engine.create(parent)
-        custom = engine.save_custom_layout("parent-2", "user1", "Custom", chart_updates=[{"id": "c1", "width": 12}])
+        custom = engine.save_custom_layout(
+            "parent-2", "user1", "Custom", chart_updates=[{"id": "c1", "width": 12}]
+        )
         assert custom.charts[0].width == 12
         reset = engine.reset_to_recommended(custom.dashboard_id)
         assert reset.charts[0].width == 6
@@ -300,8 +455,13 @@ class TestDashboardEngine:
 
     def test_serialization(self, engine):
         dashboard = DashboardMetadata(
-            dashboard_id="ser-test", dataset_id="ds-1", org_id="org-1", title="Test",
-            kpis=[KPIDefinition(key="k1", label="K1", entity="e", metric="sum", category="financial")],
+            dashboard_id="ser-test",
+            dataset_id="ds-1",
+            org_id="org-1",
+            title="Test",
+            kpis=[
+                KPIDefinition(key="k1", label="K1", entity="e", metric="sum", category="financial")
+            ],
             charts=[ChartDefinition(id="c1", chart_type="bar", title="C1", section="primary")],
         )
         engine.create(dashboard)
@@ -396,11 +556,15 @@ class TestChartRecommendationEngine:
         assert len(bar_charts) > 0
 
     def test_max_charts_limit(self, chart_engine, healthcare_df, healthcare_mappings):
-        charts = chart_engine.recommend_charts(healthcare_df, "healthcare", healthcare_mappings, max_charts=5)
+        charts = chart_engine.recommend_charts(
+            healthcare_df, "healthcare", healthcare_mappings, max_charts=5
+        )
         assert len(charts) <= 5
 
     def test_replacement_recommendation(self, chart_engine):
-        result = chart_engine.recommend_replacement("bar_chart", ["horizontal_bar", "pie_chart", "line_chart"])
+        result = chart_engine.recommend_replacement(
+            "bar_chart", ["horizontal_bar", "pie_chart", "line_chart"]
+        )
         assert result is not None
         assert result in ("horizontal_bar", "pie_chart")
 
@@ -417,16 +581,28 @@ class TestDashboardLayoutEngine:
     """Tests for layout generation."""
 
     def test_standard_layout(self, layout_engine):
-        kpis = [KPIDefinition(key=f"k{i}", label=f"K{i}", entity="e", metric="sum", category="op") for i in range(1)]
-        charts = [ChartDefinition(id=f"c{i}", chart_type="bar", title=f"C{i}", section="primary_charts") for i in range(1)]
+        kpis = [
+            KPIDefinition(key=f"k{i}", label=f"K{i}", entity="e", metric="sum", category="op")
+            for i in range(1)
+        ]
+        charts = [
+            ChartDefinition(id=f"c{i}", chart_type="bar", title=f"C{i}", section="primary_charts")
+            for i in range(1)
+        ]
         layout = layout_engine.generate_layout(kpis, charts)
         assert layout.grid_columns == 12
         assert "filter_bar" in layout.sections
         assert "kpi_row" in layout.sections
 
     def test_compact_layout(self, layout_engine):
-        kpis = [KPIDefinition(key=f"k{i}", label=f"K{i}", entity="e", metric="sum", category="op") for i in range(8)]
-        charts = [ChartDefinition(id=f"c{i}", chart_type="bar", title=f"C{i}", section="primary_charts") for i in range(10)]
+        kpis = [
+            KPIDefinition(key=f"k{i}", label=f"K{i}", entity="e", metric="sum", category="op")
+            for i in range(8)
+        ]
+        charts = [
+            ChartDefinition(id=f"c{i}", chart_type="bar", title=f"C{i}", section="primary_charts")
+            for i in range(10)
+        ]
         layout = layout_engine.generate_compact_layout(kpis, charts)
         assert len(layout.sections["kpi_row"]) <= 4
 
@@ -437,8 +613,14 @@ class TestDashboardLayoutEngine:
         assert layout.responsive is True
 
     def test_executive_layout(self, layout_engine):
-        kpis = [KPIDefinition(key=f"k{i}", label=f"K{i}", entity="e", metric="sum", category="op") for i in range(8)]
-        charts = [ChartDefinition(id=f"c{i}", chart_type="bar", title=f"C{i}", section="primary_charts") for i in range(10)]
+        kpis = [
+            KPIDefinition(key=f"k{i}", label=f"K{i}", entity="e", metric="sum", category="op")
+            for i in range(8)
+        ]
+        charts = [
+            ChartDefinition(id=f"c{i}", chart_type="bar", title=f"C{i}", section="primary_charts")
+            for i in range(10)
+        ]
         layout = layout_engine.generate_executive_layout(kpis, charts)
         assert layout.show_filters is False
 
@@ -491,7 +673,16 @@ class TestGlobalFilterEngine:
     def test_get_affected_charts(self, filter_engine, healthcare_df, healthcare_mappings):
         filters = filter_engine.detect_filters(healthcare_df, healthcare_mappings)
         from services.dashboard_engine import ChartDefinition
-        charts = [ChartDefinition(id="c1", chart_type="bar", title="C1", section="primary", source_columns=["ward", "billing_amount"])]
+
+        charts = [
+            ChartDefinition(
+                id="c1",
+                chart_type="bar",
+                title="C1",
+                section="primary",
+                source_columns=["ward", "billing_amount"],
+            )
+        ]
         if filters:
             affected = filter_engine.get_affected_charts(filters[0].id, filters, charts)
             # Should be affected if filter column is in chart source columns
@@ -506,13 +697,24 @@ class TestDrilldownEngine:
 
     def test_generate_drilldowns(self, drilldown_engine, healthcare_df, healthcare_mappings):
         from services.dashboard_engine import ChartDefinition, KPIDefinition
+
         kpis = [KPIDefinition(key="k1", label="K1", entity="e", metric="sum", category="op")]
-        charts = [ChartDefinition(id="c1", chart_type="line", title="Billing Over Time", section="primary_charts", x_axis="admission_date", y_axis="billing_amount")]
-        levels = drilldown_engine.generate_drilldowns(healthcare_df, kpis, charts, healthcare_mappings)
+        charts = [
+            ChartDefinition(
+                id="c1",
+                chart_type="line",
+                title="Billing Over Time",
+                section="primary_charts",
+                x_axis="admission_date",
+                y_axis="billing_amount",
+            )
+        ]
+        levels = drilldown_engine.generate_drilldowns(
+            healthcare_df, kpis, charts, healthcare_mappings
+        )
         assert len(levels) >= 2
 
     def test_drill_down(self, drilldown_engine):
-        from services.dashboard_engine import DrilldownLevel
         levels = [
             DrilldownLevel(level=0, label="Summary"),
             DrilldownLevel(level=1, label="Chart"),
@@ -524,7 +726,6 @@ class TestDrilldownEngine:
         assert len(path.breadcrumbs) == 3
 
     def test_drill_up(self, drilldown_engine):
-        from services.dashboard_engine import DrilldownLevel
         levels = [
             DrilldownLevel(level=0, label="Summary"),
             DrilldownLevel(level=1, label="Chart"),
@@ -536,8 +737,9 @@ class TestDrilldownEngine:
         assert path.current_level == 1
 
     def test_get_detail_data_pagination(self, drilldown_engine, healthcare_df):
-        from services.dashboard_engine import DrilldownLevel
-        levels = [DrilldownLevel(level=0, label="Summary", table_columns=list(healthcare_df.columns))]
+        levels = [
+            DrilldownLevel(level=0, label="Summary", table_columns=list(healthcare_df.columns))
+        ]
         path = drilldown_engine.create_path(levels)
         result = drilldown_engine.get_detail_data(healthcare_df, path, page=1, page_size=5)
         assert result["total"] == 10
@@ -596,7 +798,9 @@ class TestAIDashboardAssistant:
 
     def test_execute_create_chart(self, assistant):
         action = assistant.parse_query("Show billing by ward")
-        result = assistant.execute_action(action, {"charts": []}, ["billing_amount", "ward", "patient_id"])
+        result = assistant.execute_action(
+            action, {"charts": []}, ["billing_amount", "ward", "patient_id"]
+        )
         assert result["success"] is True
         assert "create_chart" in result["updates"]
 
@@ -620,19 +824,40 @@ class TestDashboardExportService:
             title="Test Dashboard",
             subtitle="Test subtitle",
             industry="healthcare",
-            kpis=[KPIDefinition(key="k1", label="Total Billing", entity="billing", metric="sum", category="financial")],
-            charts=[ChartDefinition(id="c1", chart_type="bar_chart", title="Billing by Ward", section="primary_charts", x_axis="ward", y_axis="billing_amount")],
+            kpis=[
+                KPIDefinition(
+                    key="k1",
+                    label="Total Billing",
+                    entity="billing",
+                    metric="sum",
+                    category="financial",
+                )
+            ],
+            charts=[
+                ChartDefinition(
+                    id="c1",
+                    chart_type="bar_chart",
+                    title="Billing by Ward",
+                    section="primary_charts",
+                    x_axis="ward",
+                    y_axis="billing_amount",
+                )
+            ],
             ai_insights=["Billing is increasing"],
         )
 
     def test_export_csv(self, export_service, sample_dashboard, healthcare_df):
-        content, filename, content_type = export_service.export(sample_dashboard, healthcare_df, fmt="csv")
+        content, filename, content_type = export_service.export(
+            sample_dashboard, healthcare_df, fmt="csv"
+        )
         assert "csv" in filename
         assert "text/csv" in content_type
         assert len(content) > 0
 
     def test_export_excel(self, export_service, sample_dashboard, healthcare_df):
-        content, filename, content_type = export_service.export(sample_dashboard, healthcare_df, fmt="excel")
+        content, filename, content_type = export_service.export(
+            sample_dashboard, healthcare_df, fmt="excel"
+        )
         assert "xlsx" in filename
         assert len(content) > 0
 
@@ -645,7 +870,9 @@ class TestDashboardExportService:
         assert len(content) > 0
 
     def test_export_print(self, export_service, sample_dashboard, healthcare_df):
-        content, filename, content_type = export_service.export(sample_dashboard, healthcare_df, fmt="print")
+        content, filename, content_type = export_service.export(
+            sample_dashboard, healthcare_df, fmt="print"
+        )
         assert "html" in filename
         assert "text/html" in content_type
         assert b"<html" in content
@@ -669,8 +896,12 @@ class TestDashboardPerformanceLayer:
 
     def test_aggregation_caching(self, perf, healthcare_df):
         dataset_hash = perf.compute_dataset_hash(healthcare_df)
-        result1 = perf.compute_aggregation(healthcare_df, "ward", "billing_amount", "sum", dataset_hash)
-        result2 = perf.compute_aggregation(healthcare_df, "ward", "billing_amount", "sum", dataset_hash)
+        result1 = perf.compute_aggregation(
+            healthcare_df, "ward", "billing_amount", "sum", dataset_hash
+        )
+        result2 = perf.compute_aggregation(
+            healthcare_df, "ward", "billing_amount", "sum", dataset_hash
+        )
         assert len(result1) == len(result2)
 
     def test_pagination(self, perf, healthcare_df):

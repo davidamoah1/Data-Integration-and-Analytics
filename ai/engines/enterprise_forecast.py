@@ -11,10 +11,7 @@ Enhances the existing ForecastingEngine with:
 
 from __future__ import annotations
 
-import json
 import logging
-import re
-from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -30,9 +27,9 @@ logger = logging.getLogger(__name__)
 
 # Forecast horizons
 HORIZON_PRESETS = {
-    "short": 7,    # 1 week
+    "short": 7,  # 1 week
     "medium": 30,  # 1 month
-    "long": 90,    # 3 months
+    "long": 90,  # 3 months
 }
 
 
@@ -228,6 +225,7 @@ class EnterpriseForecastEngine:
         std_err = np.std(residuals) if len(residuals) > 1 else 0
         try:
             from scipy import stats
+
             z = stats.norm.ppf((1 + cl) / 2)
         except Exception:
             z = 1.96
@@ -237,17 +235,22 @@ class EnterpriseForecastEngine:
         predictions = []
         for date, value in zip(
             pd.date_range(ts.index[-1], periods=horizon + 1, freq=ts.index.freqstr)[1:],
-            preds, strict=False
+            preds,
+            strict=False,
         ):
-            predictions.append({
-                "date": str(date.date()),
-                "value": round(float(value), 2),
-                "lower_ci": round(float(value - z * std_err), 2),
-                "upper_ci": round(float(value + z * std_err), 2),
-            })
+            predictions.append(
+                {
+                    "date": str(date.date()),
+                    "value": round(float(value), 2),
+                    "lower_ci": round(float(value - z * std_err), 2),
+                    "upper_ci": round(float(value + z * std_err), 2),
+                }
+            )
         return predictions, round(float(r2), 4)
 
-    def _exponential_forecast(self, ts: pd.Series, horizon: int, cl: float) -> tuple[list[dict], float]:
+    def _exponential_forecast(
+        self, ts: pd.Series, horizon: int, cl: float
+    ) -> tuple[list[dict], float]:
         alpha = 0.3
         smoothed = [ts.iloc[0]]
         for i in range(1, len(ts)):
@@ -258,6 +261,7 @@ class EnterpriseForecastEngine:
         std_err = np.std(residuals) if len(residuals) > 1 else 0
         try:
             from scipy import stats
+
             z = stats.norm.ppf((1 + cl) / 2)
         except Exception:
             z = 1.96
@@ -266,17 +270,22 @@ class EnterpriseForecastEngine:
         predictions = []
         for date, value in zip(
             pd.date_range(ts.index[-1], periods=horizon + 1, freq=ts.index.freqstr)[1:],
-            preds_vals, strict=False
+            preds_vals,
+            strict=False,
         ):
-            predictions.append({
-                "date": str(date.date()),
-                "value": round(float(value), 2),
-                "lower_ci": round(float(value - z * std_err), 2),
-                "upper_ci": round(float(value + z * std_err), 2),
-            })
+            predictions.append(
+                {
+                    "date": str(date.date()),
+                    "value": round(float(value), 2),
+                    "lower_ci": round(float(value - z * std_err), 2),
+                    "upper_ci": round(float(value + z * std_err), 2),
+                }
+            )
         return predictions, round(float(accuracy), 4)
 
-    def _moving_average_forecast(self, ts: pd.Series, horizon: int, cl: float) -> tuple[list[dict], float]:
+    def _moving_average_forecast(
+        self, ts: pd.Series, horizon: int, cl: float
+    ) -> tuple[list[dict], float]:
         window = min(7, len(ts))
         ma_value = ts.iloc[-window:].mean()
         preds_vals = [ma_value] * horizon
@@ -284,23 +293,29 @@ class EnterpriseForecastEngine:
         std_err = np.std(residuals[~np.isnan(residuals)]) if len(residuals) > 1 else 0
         try:
             from scipy import stats
+
             z = stats.norm.ppf((1 + cl) / 2)
         except Exception:
             z = 1.96
         predictions = []
         for date, value in zip(
             pd.date_range(ts.index[-1], periods=horizon + 1, freq=ts.index.freqstr)[1:],
-            preds_vals, strict=False
+            preds_vals,
+            strict=False,
         ):
-            predictions.append({
-                "date": str(date.date()),
-                "value": round(float(value), 2),
-                "lower_ci": round(float(value - z * std_err), 2),
-                "upper_ci": round(float(value + z * std_err), 2),
-            })
+            predictions.append(
+                {
+                    "date": str(date.date()),
+                    "value": round(float(value), 2),
+                    "lower_ci": round(float(value - z * std_err), 2),
+                    "upper_ci": round(float(value + z * std_err), 2),
+                }
+            )
         return predictions, 0.5
 
-    def _seasonal_forecast(self, ts: pd.Series, horizon: int, cl: float) -> tuple[list[dict], float]:
+    def _seasonal_forecast(
+        self, ts: pd.Series, horizon: int, cl: float
+    ) -> tuple[list[dict], float]:
         period = min(12, len(ts) // 2)
         seasonal_avg = ts.iloc[-period:].values
         overall_avg = ts.mean()
@@ -316,6 +331,7 @@ class EnterpriseForecastEngine:
         std_err = np.std(residuals) if len(residuals) > 1 else 0
         try:
             from scipy import stats
+
             z = stats.norm.ppf((1 + cl) / 2)
         except Exception:
             z = 1.96
@@ -325,25 +341,34 @@ class EnterpriseForecastEngine:
         predictions = []
         for date, value in zip(
             pd.date_range(ts.index[-1], periods=horizon + 1, freq=ts.index.freqstr)[1:],
-            preds_vals, strict=False
+            preds_vals,
+            strict=False,
         ):
-            predictions.append({
-                "date": str(date.date()),
-                "value": round(float(value), 2),
-                "lower_ci": round(float(value - z * std_err), 2),
-                "upper_ci": round(float(value + z * std_err), 2),
-            })
+            predictions.append(
+                {
+                    "date": str(date.date()),
+                    "value": round(float(value), 2),
+                    "lower_ci": round(float(value - z * std_err), 2),
+                    "upper_ci": round(float(value + z * std_err), 2),
+                }
+            )
         return predictions, round(float(r2), 4)
 
-    def _build_assumptions(self, ts: pd.Series, method: str, horizon: int, context: EnterpriseAIContext) -> list[str]:
+    def _build_assumptions(
+        self, ts: pd.Series, method: str, horizon: int, context: EnterpriseAIContext
+    ) -> list[str]:
         """Document key assumptions for the forecast."""
         assumptions = []
 
         trend_dir = "increasing" if ts.iloc[-1] > ts.iloc[0] else "decreasing"
-        assumptions.append(f"Current {trend_dir} trend continues over the forecast horizon ({horizon} periods)")
+        assumptions.append(
+            f"Current {trend_dir} trend continues over the forecast horizon ({horizon} periods)"
+        )
 
         if method == "seasonal":
-            assumptions.append("Seasonal patterns from historical data will repeat in the forecast period")
+            assumptions.append(
+                "Seasonal patterns from historical data will repeat in the forecast period"
+            )
         elif method == "linear":
             assumptions.append("Linear trend is a reasonable approximation for future behavior")
         elif method == "exponential":
@@ -351,11 +376,15 @@ class EnterpriseForecastEngine:
         elif method == "moving_average":
             assumptions.append("Future values will be close to the recent average")
 
-        assumptions.append("No major external shocks or structural changes during the forecast period")
-        assumptions.append(f"Data quality remains consistent with the historical period")
+        assumptions.append(
+            "No major external shocks or structural changes during the forecast period"
+        )
+        assumptions.append("Data quality remains consistent with the historical period")
 
         if context.industry.industry != "unknown":
-            assumptions.append(f"Industry-specific factors for {context.industry.display_name} remain stable")
+            assumptions.append(
+                f"Industry-specific factors for {context.industry.display_name} remain stable"
+            )
 
         return assumptions
 
@@ -364,12 +393,18 @@ class EnterpriseForecastEngine:
         limitations = []
 
         if len(ts) < 30:
-            limitations.append(f"Limited historical data ({len(ts)} points) reduces forecast reliability")
+            limitations.append(
+                f"Limited historical data ({len(ts)} points) reduces forecast reliability"
+            )
         if len(ts) < 10:
-            limitations.append("Very few data points — forecast should be treated as indicative only")
+            limitations.append(
+                "Very few data points — forecast should be treated as indicative only"
+            )
 
         if accuracy < 0.5:
-            limitations.append(f"Low accuracy score ({accuracy:.2f}) — forecast has high uncertainty")
+            limitations.append(
+                f"Low accuracy score ({accuracy:.2f}) — forecast has high uncertainty"
+            )
         elif accuracy < 0.7:
             limitations.append(f"Moderate accuracy score ({accuracy:.2f}) — use with caution")
 
@@ -380,8 +415,12 @@ class EnterpriseForecastEngine:
         elif method == "exponential":
             limitations.append("Exponential smoothing may lag behind rapid changes")
 
-        limitations.append("Confidence intervals widen with forecast horizon — longer predictions are less certain")
-        limitations.append("Forecast does not account for external factors (market changes, policy shifts, etc.)")
+        limitations.append(
+            "Confidence intervals widen with forecast horizon — longer predictions are less certain"
+        )
+        limitations.append(
+            "Forecast does not account for external factors (market changes, policy shifts, etc.)"
+        )
 
         return limitations
 
@@ -399,7 +438,9 @@ class EnterpriseForecastEngine:
         return {
             "score": round(max(0.1, min(0.99, base)), 2),
             "methodology": f"Based on {method} model accuracy ({accuracy:.2f}) adjusted for data volume ({data_points} points)",
-            "data_limitations": [] if data_points >= 30 else [f"Only {data_points} data points available"],
+            "data_limitations": (
+                [] if data_points >= 30 else [f"Only {data_points} data points available"]
+            ),
         }
 
     def _ai_interpret(
@@ -442,7 +483,7 @@ class EnterpriseForecastEngine:
                 },
             }
 
-            messages = self.orchestrator.build_messages(
+            self.orchestrator.build_messages(
                 task_type=PromptTaskType.FORECASTING,
                 user_message=f"Interpret the forecast for {metric}.",
                 context=context,

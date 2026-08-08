@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, Query, UploadFile
 from sqlalchemy.orm import Session as DbSession
 
+from audit.service import log_audit_event
 from etl.ai_hooks import list_ai_hooks
 from etl.connectors.connectors import get_connector
 from etl.file_security import FileSecurityError, FileValidator
@@ -56,7 +57,6 @@ from etl.transformations import TransformationEngine
 from shared.database import get_db
 from shared.dependencies import get_current_user
 from shared.tenant import get_current_organization_id, get_tenant_context, verify_resource_ownership
-from audit.service import log_audit_event
 
 router = APIRouter(prefix="/etl", tags=["ETL Engine"])
 
@@ -473,7 +473,9 @@ async def list_transformation_templates(
 ):
     """List all transformation templates."""
     org_id = tenant["organization_id"]
-    templates = db.query(ETLTransformation).filter(ETLTransformation.organization_id == org_id).all()
+    templates = (
+        db.query(ETLTransformation).filter(ETLTransformation.organization_id == org_id).all()
+    )
     return [
         {
             "id": t.id,
@@ -547,7 +549,7 @@ async def get_pipeline(
 ):
     """Get a pipeline by ID."""
     org_id = tenant["organization_id"]
-    pipeline = verify_resource_ownership(db, ETLPipeline, pipeline_id, org_id)
+    verify_resource_ownership(db, ETLPipeline, pipeline_id, org_id)
     builder = PipelineBuilder(db)
     pipeline_data = builder.get_pipeline(pipeline_id)
     if not pipeline_data:
@@ -849,7 +851,9 @@ async def list_templates(
 ):
     """List all import templates."""
     org_id = tenant["organization_id"]
-    templates = db.query(ETLImportTemplate).filter(ETLImportTemplate.organization_id == org_id).all()
+    templates = (
+        db.query(ETLImportTemplate).filter(ETLImportTemplate.organization_id == org_id).all()
+    )
     return [
         ImportTemplateResponse(
             id=t.id,

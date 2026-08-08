@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -71,23 +72,48 @@ _FIELD_RE = re.compile(r"^(FLD|PLOT|FARM)-?\d{1,8}$", re.IGNORECASE)
 _DONATION_RE = re.compile(r"^(DON|GRANT|FUND)-?\d{3,10}$", re.IGNORECASE)
 _RESERVATION_RE = re.compile(r"^(RES|RNV|BOOK)-?\d{3,10}$", re.IGNORECASE)
 
-_CURRENCY_CODES = {"USD", "EUR", "GBP", "JPY", "CNY", "AUD", "CAD", "CHF", "GHS", "NGN", "ZAR", "KES"}
+_CURRENCY_CODES = {
+    "USD",
+    "EUR",
+    "GBP",
+    "JPY",
+    "CNY",
+    "AUD",
+    "CAD",
+    "CHF",
+    "GHS",
+    "NGN",
+    "ZAR",
+    "KES",
+}
 
 
 class DataUnderstandingEngine:
     """Analyzes column values to detect industry signals."""
 
     SIGNAL_WEIGHTS = {
-        "diagnosis_code": 3.0, "cpt_code": 2.5, "npi_number": 3.0,
-        "iban": 3.0, "account_number": 2.0, "swift_code": 3.0,
-        "grade": 3.0, "gpa": 3.0,
-        "claim_number": 3.0, "policy_number": 2.5,
-        "tithe_reference": 3.0, "ssn": 1.5,
-        "phone_number": 0.5, "imei": 3.0,
-        "sku_code": 2.0, "barcode": 2.0,
-        "part_number": 2.5, "field_code": 2.5,
-        "donation_reference": 2.5, "reservation_code": 2.5,
-        "currency_in_values": 0.5, "monetary_range": 0.3,
+        "diagnosis_code": 3.0,
+        "cpt_code": 2.5,
+        "npi_number": 3.0,
+        "iban": 3.0,
+        "account_number": 2.0,
+        "swift_code": 3.0,
+        "grade": 3.0,
+        "gpa": 3.0,
+        "claim_number": 3.0,
+        "policy_number": 2.5,
+        "tithe_reference": 3.0,
+        "ssn": 1.5,
+        "phone_number": 0.5,
+        "imei": 3.0,
+        "sku_code": 2.0,
+        "barcode": 2.0,
+        "part_number": 2.5,
+        "field_code": 2.5,
+        "donation_reference": 2.5,
+        "reservation_code": 2.5,
+        "currency_in_values": 0.5,
+        "monetary_range": 0.3,
     }
 
     @classmethod
@@ -114,12 +140,16 @@ class DataUnderstandingEngine:
                 statistical_patterns[col_name] = stats
 
         return DataUnderstandingResult(
-            signals=signals, industry_votes=industry_votes,
-            column_hints=column_hints, statistical_patterns=statistical_patterns,
+            signals=signals,
+            industry_votes=industry_votes,
+            column_hints=column_hints,
+            statistical_patterns=statistical_patterns,
         )
 
     @classmethod
-    def _analyze_column(cls, df: pd.DataFrame, col_name: str, sample_size: int) -> list[ValueSignal]:
+    def _analyze_column(
+        cls, df: pd.DataFrame, col_name: str, sample_size: int
+    ) -> list[ValueSignal]:
         series = df[col_name]
         non_null = series.dropna()
         if len(non_null) == 0:
@@ -134,10 +164,18 @@ class DataUnderstandingEngine:
 
         # Run all detectors
         for detector in [
-            cls._det_healthcare, cls._det_banking, cls._det_education,
-            cls._det_insurance, cls._det_church, cls._det_government,
-            cls._det_telecom, cls._det_retail, cls._det_manufacturing,
-            cls._det_agriculture, cls._det_ngo, cls._det_hospitality,
+            cls._det_healthcare,
+            cls._det_banking,
+            cls._det_education,
+            cls._det_insurance,
+            cls._det_church,
+            cls._det_government,
+            cls._det_telecom,
+            cls._det_retail,
+            cls._det_manufacturing,
+            cls._det_agriculture,
+            cls._det_ngo,
+            cls._det_hospitality,
             cls._det_universal,
         ]:
             signals.extend(detector(col_name, col_lower, sample, n, non_null))
@@ -150,16 +188,40 @@ class DataUnderstandingEngine:
         out = []
         m = s.str.match(_DIAGNOSIS_RE).sum()
         if m / n > 0.5:
-            out.append(ValueSignal(col, "diagnosis_code", "healthcare", min(m / n, 1.0),
-                f"{m}/{n} values match ICD-10 diagnosis code pattern", "diagnosis"))
+            out.append(
+                ValueSignal(
+                    col,
+                    "diagnosis_code",
+                    "healthcare",
+                    min(m / n, 1.0),
+                    f"{m}/{n} values match ICD-10 diagnosis code pattern",
+                    "diagnosis",
+                )
+            )
         m = s.str.match(_CPT_RE).sum()
         if m / n > 0.6:
-            out.append(ValueSignal(col, "cpt_code", "healthcare", min(m / n, 1.0),
-                f"{m}/{n} values match CPT procedure code pattern", "procedure"))
+            out.append(
+                ValueSignal(
+                    col,
+                    "cpt_code",
+                    "healthcare",
+                    min(m / n, 1.0),
+                    f"{m}/{n} values match CPT procedure code pattern",
+                    "procedure",
+                )
+            )
         m = s.str.match(_NPI_RE).sum()
         if m / n > 0.7:
-            out.append(ValueSignal(col, "npi_number", "healthcare", min(m / n, 1.0),
-                f"{m}/{n} values match NPI pattern", "doctor"))
+            out.append(
+                ValueSignal(
+                    col,
+                    "npi_number",
+                    "healthcare",
+                    min(m / n, 1.0),
+                    f"{m}/{n} values match NPI pattern",
+                    "doctor",
+                )
+            )
         return out
 
     # ── Banking ──
@@ -168,17 +230,41 @@ class DataUnderstandingEngine:
         out = []
         m = s.str.match(_IBAN_RE).sum()
         if m / n > 0.5:
-            out.append(ValueSignal(col, "iban", "banking", min(m / n, 1.0),
-                f"{m}/{n} values match IBAN pattern", "account"))
+            out.append(
+                ValueSignal(
+                    col,
+                    "iban",
+                    "banking",
+                    min(m / n, 1.0),
+                    f"{m}/{n} values match IBAN pattern",
+                    "account",
+                )
+            )
         m = s.str.match(_SWIFT_RE).sum()
         if m / n > 0.5:
-            out.append(ValueSignal(col, "swift_code", "banking", min(m / n, 1.0),
-                f"{m}/{n} values match SWIFT/BIC code pattern", "bank"))
+            out.append(
+                ValueSignal(
+                    col,
+                    "swift_code",
+                    "banking",
+                    min(m / n, 1.0),
+                    f"{m}/{n} values match SWIFT/BIC code pattern",
+                    "bank",
+                )
+            )
         m = s.str.match(_ACCOUNT_RE).sum()
         if m / n > 0.7 and len(s.iloc[0]) >= 8:
             if not any(kw in cl for kw in ("patient", "student", "teacher", "grade", "diagnosis")):
-                out.append(ValueSignal(col, "account_number", "banking", min(m / n * 0.7, 1.0),
-                    f"{m}/{n} values match bank account number (8–17 digits)", "account"))
+                out.append(
+                    ValueSignal(
+                        col,
+                        "account_number",
+                        "banking",
+                        min(m / n * 0.7, 1.0),
+                        f"{m}/{n} values match bank account number (8–17 digits)",
+                        "account",
+                    )
+                )
         return out
 
     # ── Education ──
@@ -187,16 +273,32 @@ class DataUnderstandingEngine:
         out = []
         m = s.str.match(_GRADE_RE).sum()
         if m / n > 0.5:
-            out.append(ValueSignal(col, "grade", "education", min(m / n, 1.0),
-                f"{m}/{n} values are letter grades (A–F)", "grade"))
+            out.append(
+                ValueSignal(
+                    col,
+                    "grade",
+                    "education",
+                    min(m / n, 1.0),
+                    f"{m}/{n} values are letter grades (A–F)",
+                    "grade",
+                )
+            )
         if np.issubdtype(nn.dtype, np.number):
             vals = nn.dropna()
             if len(vals) > 0:
                 mn, mx = float(vals.min()), float(vals.max())
                 if mn >= 0 and mx <= 4.0:
                     if any(kw in cl for kw in ("gpa", "score", "grade", "cgpa", "point")):
-                        out.append(ValueSignal(col, "gpa", "education", 0.85,
-                            "Numeric 0.0–4.0 range with GPA-like column name", "grade"))
+                        out.append(
+                            ValueSignal(
+                                col,
+                                "gpa",
+                                "education",
+                                0.85,
+                                "Numeric 0.0–4.0 range with GPA-like column name",
+                                "grade",
+                            )
+                        )
         return out
 
     # ── Insurance ──
@@ -205,12 +307,28 @@ class DataUnderstandingEngine:
         out = []
         m = s.str.match(_CLAIM_RE).sum()
         if m / n > 0.5:
-            out.append(ValueSignal(col, "claim_number", "insurance", min(m / n, 1.0),
-                f"{m}/{n} values match claim number pattern", "claim"))
+            out.append(
+                ValueSignal(
+                    col,
+                    "claim_number",
+                    "insurance",
+                    min(m / n, 1.0),
+                    f"{m}/{n} values match claim number pattern",
+                    "claim",
+                )
+            )
         m = s.str.match(_POLICY_RE).sum()
         if m / n > 0.5:
-            out.append(ValueSignal(col, "policy_number", "insurance", min(m / n, 1.0),
-                f"{m}/{n} values match policy number pattern", "policy"))
+            out.append(
+                ValueSignal(
+                    col,
+                    "policy_number",
+                    "insurance",
+                    min(m / n, 1.0),
+                    f"{m}/{n} values match policy number pattern",
+                    "policy",
+                )
+            )
         return out
 
     # ── Church ──
@@ -219,8 +337,16 @@ class DataUnderstandingEngine:
         out = []
         m = s.str.match(_TITHE_RE).sum()
         if m / n > 0.5:
-            out.append(ValueSignal(col, "tithe_reference", "church", min(m / n, 1.0),
-                f"{m}/{n} values match tithe/offering reference pattern", "tithe"))
+            out.append(
+                ValueSignal(
+                    col,
+                    "tithe_reference",
+                    "church",
+                    min(m / n, 1.0),
+                    f"{m}/{n} values match tithe/offering reference pattern",
+                    "tithe",
+                )
+            )
         return out
 
     # ── Government ──
@@ -229,8 +355,16 @@ class DataUnderstandingEngine:
         out = []
         m = s.str.match(_SSN_RE).sum()
         if m / n > 0.5:
-            out.append(ValueSignal(col, "ssn", "government", min(m / n, 1.0),
-                f"{m}/{n} values match SSN pattern (XXX-XX-XXXX)", "citizen"))
+            out.append(
+                ValueSignal(
+                    col,
+                    "ssn",
+                    "government",
+                    min(m / n, 1.0),
+                    f"{m}/{n} values match SSN pattern (XXX-XX-XXXX)",
+                    "citizen",
+                )
+            )
         return out
 
     # ── Telecom ──
@@ -239,12 +373,28 @@ class DataUnderstandingEngine:
         out = []
         m = s.str.match(_IMEI_RE).sum()
         if m / n > 0.7:
-            out.append(ValueSignal(col, "imei", "telecom", min(m / n, 1.0),
-                f"{m}/{n} values match IMEI pattern (15 digits)", "device"))
+            out.append(
+                ValueSignal(
+                    col,
+                    "imei",
+                    "telecom",
+                    min(m / n, 1.0),
+                    f"{m}/{n} values match IMEI pattern (15 digits)",
+                    "device",
+                )
+            )
         m = s.str.match(_PHONE_RE).sum()
         if m / n > 0.6 and any(kw in cl for kw in ("phone", "mobile", "cell", "tel", "msisdn")):
-            out.append(ValueSignal(col, "phone_number", "telecom", min(m / n * 0.5, 1.0),
-                f"{m}/{n} values match phone number pattern", "subscriber"))
+            out.append(
+                ValueSignal(
+                    col,
+                    "phone_number",
+                    "telecom",
+                    min(m / n * 0.5, 1.0),
+                    f"{m}/{n} values match phone number pattern",
+                    "subscriber",
+                )
+            )
         return out
 
     # ── Retail ──
@@ -253,12 +403,28 @@ class DataUnderstandingEngine:
         out = []
         m = s.str.match(_SKU_RE).sum()
         if m / n > 0.5:
-            out.append(ValueSignal(col, "sku_code", "retail", min(m / n, 1.0),
-                f"{m}/{n} values match SKU pattern (XXX-XXXX)", "product"))
+            out.append(
+                ValueSignal(
+                    col,
+                    "sku_code",
+                    "retail",
+                    min(m / n, 1.0),
+                    f"{m}/{n} values match SKU pattern (XXX-XXXX)",
+                    "product",
+                )
+            )
         m = s.str.match(_BARCODE_RE).sum()
         if m / n > 0.6 and any(kw in cl for kw in ("upc", "ean", "barcode", "sku", "product")):
-            out.append(ValueSignal(col, "barcode", "retail", min(m / n, 1.0),
-                f"{m}/{n} values match UPC/EAN barcode (12–13 digits)", "product"))
+            out.append(
+                ValueSignal(
+                    col,
+                    "barcode",
+                    "retail",
+                    min(m / n, 1.0),
+                    f"{m}/{n} values match UPC/EAN barcode (12–13 digits)",
+                    "product",
+                )
+            )
         return out
 
     # ── Manufacturing ──
@@ -267,8 +433,16 @@ class DataUnderstandingEngine:
         out = []
         m = s.str.match(_PART_RE).sum()
         if m / n > 0.5:
-            out.append(ValueSignal(col, "part_number", "manufacturing", min(m / n, 1.0),
-                f"{m}/{n} values match part number pattern (PN-prefix)", "machine"))
+            out.append(
+                ValueSignal(
+                    col,
+                    "part_number",
+                    "manufacturing",
+                    min(m / n, 1.0),
+                    f"{m}/{n} values match part number pattern (PN-prefix)",
+                    "machine",
+                )
+            )
         return out
 
     # ── Agriculture ──
@@ -277,8 +451,16 @@ class DataUnderstandingEngine:
         out = []
         m = s.str.match(_FIELD_RE).sum()
         if m / n > 0.5:
-            out.append(ValueSignal(col, "field_code", "agriculture", min(m / n, 1.0),
-                f"{m}/{n} values match field/plot code pattern", "crop"))
+            out.append(
+                ValueSignal(
+                    col,
+                    "field_code",
+                    "agriculture",
+                    min(m / n, 1.0),
+                    f"{m}/{n} values match field/plot code pattern",
+                    "crop",
+                )
+            )
         return out
 
     # ── NGO ──
@@ -287,8 +469,16 @@ class DataUnderstandingEngine:
         out = []
         m = s.str.match(_DONATION_RE).sum()
         if m / n > 0.5:
-            out.append(ValueSignal(col, "donation_reference", "ngo", min(m / n, 1.0),
-                f"{m}/{n} values match donation/grant reference pattern", "donation"))
+            out.append(
+                ValueSignal(
+                    col,
+                    "donation_reference",
+                    "ngo",
+                    min(m / n, 1.0),
+                    f"{m}/{n} values match donation/grant reference pattern",
+                    "donation",
+                )
+            )
         return out
 
     # ── Hospitality ──
@@ -297,8 +487,16 @@ class DataUnderstandingEngine:
         out = []
         m = s.str.match(_RESERVATION_RE).sum()
         if m / n > 0.5:
-            out.append(ValueSignal(col, "reservation_code", "hospitality", min(m / n, 1.0),
-                f"{m}/{n} values match reservation code pattern", "reservation"))
+            out.append(
+                ValueSignal(
+                    col,
+                    "reservation_code",
+                    "hospitality",
+                    min(m / n, 1.0),
+                    f"{m}/{n} values match reservation code pattern",
+                    "reservation",
+                )
+            )
         return out
 
     # ── Universal (currency, monetary) ──
@@ -309,8 +507,16 @@ class DataUnderstandingEngine:
         upper_vals = s.str.upper()
         curr_matches = upper_vals.isin(_CURRENCY_CODES).sum()
         if curr_matches / n > 0.5:
-            out.append(ValueSignal(col, "currency_in_values", "universal", min(curr_matches / n, 1.0),
-                f"{curr_matches}/{n} values are ISO currency codes", "currency"))
+            out.append(
+                ValueSignal(
+                    col,
+                    "currency_in_values",
+                    "universal",
+                    min(curr_matches / n, 1.0),
+                    f"{curr_matches}/{n} values are ISO currency codes",
+                    "currency",
+                )
+            )
         return out
 
     # ── Statistical patterns ──
@@ -337,9 +543,13 @@ class DataUnderstandingEngine:
                 result["likely_monetary"] = True
 
             # Detect percentage: 0–100 or 0–1 range
-            if result["min"] >= 0 and result["max"] <= 1.0:
-                result["likely_percentage"] = True
-            elif result["min"] >= 0 and result["max"] <= 100 and result["mean"] < 50:
+            if (
+                result["min"] >= 0
+                and result["max"] <= 1.0
+                or result["min"] >= 0
+                and result["max"] <= 100
+                and result["mean"] < 50
+            ):
                 result["likely_percentage"] = True
 
             # Detect ID column: sequential integers, high uniqueness

@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session as DbSession
 from admin.service import AdminService
 from audit.service import log_audit_event
 from shared.database import get_db
-from shared.dependencies import get_current_user, require_permissions
+from shared.dependencies import require_permissions
 from shared.response import success_response
 
 router = APIRouter(prefix="/admin", tags=["Admin Panel"])

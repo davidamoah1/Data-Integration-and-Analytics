@@ -14,11 +14,10 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
 
-from shared.context import correlation_id, request_id
-from monitoring.prometheus import metrics_registry
 from monitoring.otel import record_request as otel_record_request
-from monitoring.sentry_integration import capture_exception, add_breadcrumb
-
+from monitoring.prometheus import metrics_registry
+from monitoring.sentry_integration import add_breadcrumb, capture_exception
+from shared.context import correlation_id, request_id
 
 # Paths that should be excluded from detailed metrics
 _SKIP_PATHS = {"/health", "/ready", "/metrics", "/", "/favicon.ico"}

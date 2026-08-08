@@ -8,7 +8,6 @@ from __future__ import annotations
 
 from typing import Any
 
-import numpy as np
 import pandas as pd
 from statsmodels.tsa.arima.model import ARIMA
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
@@ -51,7 +50,9 @@ def forecast_ets(series: pd.Series, horizon: int, seasonal: str = "add") -> dict
     try:
         seasonal_periods = 7 if len(series) >= 14 else None
         if seasonal_periods:
-            model = ExponentialSmoothing(series, trend="add", seasonal=seasonal, seasonal_periods=seasonal_periods)
+            model = ExponentialSmoothing(
+                series, trend="add", seasonal=seasonal, seasonal_periods=seasonal_periods
+            )
         else:
             model = ExponentialSmoothing(series, trend="add")
         fitted = model.fit(optimized=True)
@@ -65,7 +66,9 @@ def forecast_ets(series: pd.Series, horizon: int, seasonal: str = "add") -> dict
         return {"algorithm": "ExponentialSmoothing", "error": str(exc)}
 
 
-def forecast_prophet(df: pd.DataFrame, date_col: str, target_col: str, horizon: int, freq: str = "D") -> dict[str, Any]:
+def forecast_prophet(
+    df: pd.DataFrame, date_col: str, target_col: str, horizon: int, freq: str = "D"
+) -> dict[str, Any]:
     """Run Prophet forecast if available."""
     try:
         from prophet import Prophet  # type: ignore
@@ -121,7 +124,10 @@ class ForecastingEngine:
                 seasonal_periods = 7 if len(self.last_values) >= 14 else None
                 if seasonal_periods:
                     model = ExponentialSmoothing(
-                        self.last_values, trend="add", seasonal="add", seasonal_periods=seasonal_periods
+                        self.last_values,
+                        trend="add",
+                        seasonal="add",
+                        seasonal_periods=seasonal_periods,
                     )
                 else:
                     model = ExponentialSmoothing(self.last_values, trend="add")

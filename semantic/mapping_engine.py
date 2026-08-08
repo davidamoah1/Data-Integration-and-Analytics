@@ -9,9 +9,24 @@ Allows administrators to confirm or override mappings.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 import pandas as pd
 
+if TYPE_CHECKING:
+    from ai_copilot import DataAnalystCopilot
+
+import industry_intelligence.agriculture  # noqa: F401
+import industry_intelligence.banking  # noqa: F401
+import industry_intelligence.education  # noqa: F401
+import industry_intelligence.government  # noqa: F401
+
+# Import industry intelligence modules to register them
+import industry_intelligence.healthcare  # noqa: F401
+import industry_intelligence.manufacturing  # noqa: F401
+import industry_intelligence.ngo  # noqa: F401
+import industry_intelligence.retail  # noqa: F401
+from industry_intelligence.base import AnalyticsResult, IndustryAnalyticsRegistry
 from semantic.data_profiler import DataProfiler, DatasetProfile
 from semantic.industry_knowledge import get_industry_knowledge
 from semantic.metadata_extractor import MetadataExtractor, TableMetadata
@@ -19,17 +34,6 @@ from semantic.metric_engine import MetricEngine, MetricResultSet
 from semantic.relationship_engine import RelationshipEngine, RelationshipResult
 from semantic.semantic_engine import SemanticEngine, SemanticResult
 from semantic.semantic_model import SemanticModel, SemanticModelBuilder
-
-# Import industry intelligence modules to register them
-import industry_intelligence.healthcare  # noqa: F401
-import industry_intelligence.education  # noqa: F401
-import industry_intelligence.banking  # noqa: F401
-import industry_intelligence.agriculture  # noqa: F401
-import industry_intelligence.government  # noqa: F401
-import industry_intelligence.retail  # noqa: F401
-import industry_intelligence.manufacturing  # noqa: F401
-import industry_intelligence.ngo  # noqa: F401
-from industry_intelligence.base import AnalyticsResult, IndustryAnalyticsRegistry
 
 
 @dataclass
@@ -85,13 +89,21 @@ class SemanticMappingResult:
             "statistical_patterns": self.semantic_result.statistical_patterns,
             "semantic_model": self.semantic_model.to_dict() if self.semantic_model else None,
             "metric_results": self.metric_results.to_dict() if self.metric_results else None,
-            "industry_intelligence": self.industry_intelligence.to_dict() if self.industry_intelligence else None,
-            "quality_intelligence": self.quality_intelligence.to_dict() if self.quality_intelligence else None,
-            "predictive_intelligence": self.predictive_intelligence.to_dict() if self.predictive_intelligence else None,
-            "africa_intelligence": self.africa_intelligence.to_dict() if self.africa_intelligence else None,
+            "industry_intelligence": (
+                self.industry_intelligence.to_dict() if self.industry_intelligence else None
+            ),
+            "quality_intelligence": (
+                self.quality_intelligence.to_dict() if self.quality_intelligence else None
+            ),
+            "predictive_intelligence": (
+                self.predictive_intelligence.to_dict() if self.predictive_intelligence else None
+            ),
+            "africa_intelligence": (
+                self.africa_intelligence.to_dict() if self.africa_intelligence else None
+            ),
         }
 
-    def get_copilot(self, df: pd.DataFrame | None = None) -> "DataAnalystCopilot":
+    def get_copilot(self, df: pd.DataFrame | None = None) -> DataAnalystCopilot:
         """Get a DataAnalystCopilot for this mapping result.
 
         Args:
@@ -187,15 +199,20 @@ class SemanticMappingEngine:
 
         # Step 10: Data quality intelligence
         from data_quality import QualityEngine
+
         quality_engine = QualityEngine()
         result.quality_intelligence = quality_engine.run(df, col_mapping)
 
         # Step 11: Predictive analytics
         from predictive_analytics import PredictiveAnalyticsRegistry
-        result.predictive_intelligence = PredictiveAnalyticsRegistry.analyze(industry, df, col_mapping)
+
+        result.predictive_intelligence = PredictiveAnalyticsRegistry.analyze(
+            industry, df, col_mapping
+        )
 
         # Step 12: Africa intelligence
         from africa_intelligence import AfricaIntelligenceRegistry
+
         result.africa_intelligence = AfricaIntelligenceRegistry.analyze(df, col_mapping)
 
         return result

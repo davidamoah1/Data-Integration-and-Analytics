@@ -15,70 +15,110 @@ import pandas as pd
 import pytest
 
 from data_quality import (
-    QualityEngine,
-    QualityCheckEngine,
-    QualityFinding,
-    Severity,
     DriftDetector,
     DriftResult,
-    ColumnDrift,
+    QualityCheckEngine,
+    QualityEngine,
+    QualityFinding,
     SchemaMonitor,
-    SchemaChangeResult,
-    SchemaChange,
+    Severity,
 )
-from data_quality.quality_engine import QualityScore, QualityIntelligenceResult
-
+from data_quality.quality_engine import QualityIntelligenceResult, QualityScore
 
 # ── Fixtures ──────────────────────────────────────────────
 
+
 @pytest.fixture
 def clean_df():
-    return pd.DataFrame({
-        "id": range(1, 101),
-        "name": [f"Person_{i}" for i in range(1, 101)],
-        "age": [25 + i % 40 for i in range(100)],
-        "email": [f"person{i}@example.com" for i in range(1, 101)],
-        "revenue": [1000 + i * 10 for i in range(100)],
-        "category": ["A", "B", "C", "D"] * 25,
-        "date": pd.date_range("2024-01-01", periods=100, freq="D"),
-    })
+    return pd.DataFrame(
+        {
+            "id": range(1, 101),
+            "name": [f"Person_{i}" for i in range(1, 101)],
+            "age": [25 + i % 40 for i in range(100)],
+            "email": [f"person{i}@example.com" for i in range(1, 101)],
+            "revenue": [1000 + i * 10 for i in range(100)],
+            "category": ["A", "B", "C", "D"] * 25,
+            "date": pd.date_range("2024-01-01", periods=100, freq="D"),
+        }
+    )
 
 
 @pytest.fixture
 def dirty_df():
     """DataFrame with various quality issues."""
-    return pd.DataFrame({
-        "id": [1, 2, 3, 3, 5, 6, 7, 8, 9, 10],  # duplicate id=3
-        "name": ["Alice", "Bob", "", "Diana", "Eve", None, "Grace", "Heidi", "Ivan", "Judy"],
-        "age": [25, 30, 999, 45, -1, 35, 40, 150, 28, 50],  # 999 and -1 are sentinels, 150 out of range
-        "email": ["alice@test.com", "bob@test.com", "invalid", "diana@test.com", "eve@test.com",
-                  "frank@test.com", "grace@test.com", "heidi@test.com", "ivan@test.com", "judy@test.com"],
-        "revenue": [1000, 2000, 3000, 3000, 5000, 6000, 7000, 8000, 9000, 10000],  # duplicate revenue=3000
-        "category": ["A", "B", "A", "B", "a", "A", "B", "A", "B", "A"],  # mixed case
-        "empty_col": [None] * 10,
-        "constant_col": ["X"] * 10,
-    })
+    return pd.DataFrame(
+        {
+            "id": [1, 2, 3, 3, 5, 6, 7, 8, 9, 10],  # duplicate id=3
+            "name": ["Alice", "Bob", "", "Diana", "Eve", None, "Grace", "Heidi", "Ivan", "Judy"],
+            "age": [
+                25,
+                30,
+                999,
+                45,
+                -1,
+                35,
+                40,
+                150,
+                28,
+                50,
+            ],  # 999 and -1 are sentinels, 150 out of range
+            "email": [
+                "alice@test.com",
+                "bob@test.com",
+                "invalid",
+                "diana@test.com",
+                "eve@test.com",
+                "frank@test.com",
+                "grace@test.com",
+                "heidi@test.com",
+                "ivan@test.com",
+                "judy@test.com",
+            ],
+            "revenue": [
+                1000,
+                2000,
+                3000,
+                3000,
+                5000,
+                6000,
+                7000,
+                8000,
+                9000,
+                10000,
+            ],  # duplicate revenue=3000
+            "category": ["A", "B", "A", "B", "a", "A", "B", "A", "B", "A"],  # mixed case
+            "empty_col": [None] * 10,
+            "constant_col": ["X"] * 10,
+        }
+    )
 
 
 @pytest.fixture
 def drift_old_df():
     np.random.seed(42)
-    return pd.DataFrame({
-        "numeric_col": np.random.normal(100, 15, 200),
-        "category_col": np.random.choice(["A", "B", "C"], 200, p=[0.5, 0.3, 0.2]),
-    })
+    return pd.DataFrame(
+        {
+            "numeric_col": np.random.normal(100, 15, 200),
+            "category_col": np.random.choice(["A", "B", "C"], 200, p=[0.5, 0.3, 0.2]),
+        }
+    )
 
 
 @pytest.fixture
 def drift_new_df():
     np.random.seed(99)
-    return pd.DataFrame({
-        "numeric_col": np.random.normal(130, 20, 200),  # shifted mean
-        "category_col": np.random.choice(["A", "B", "C", "D"], 200, p=[0.3, 0.3, 0.2, 0.2]),  # new category D
-    })
+    return pd.DataFrame(
+        {
+            "numeric_col": np.random.normal(130, 20, 200),  # shifted mean
+            "category_col": np.random.choice(
+                ["A", "B", "C", "D"], 200, p=[0.3, 0.3, 0.2, 0.2]
+            ),  # new category D
+        }
+    )
 
 
 # ── Quality Check Engine Tests ────────────────────────────
+
 
 class TestQualityCheckEngine:
     def test_run_returns_findings(self, dirty_df):
@@ -179,6 +219,7 @@ class TestQualityCheckEngine:
 
 # ── Drift Detector Tests ──────────────────────────────────
 
+
 class TestDriftDetector:
     def test_detect_numeric_drift(self, drift_old_df, drift_new_df):
         result = DriftDetector.detect(drift_old_df, drift_new_df)
@@ -203,10 +244,12 @@ class TestDriftDetector:
         assert not result.drift_detected
 
     def test_time_drift_detection(self):
-        df = pd.DataFrame({
-            "date": pd.date_range("2024-01-01", periods=100, freq="D"),
-            "value": [50 + i for i in range(50)] + [200 + i * 2 for i in range(50)],
-        })
+        df = pd.DataFrame(
+            {
+                "date": pd.date_range("2024-01-01", periods=100, freq="D"),
+                "value": [50 + i for i in range(50)] + [200 + i * 2 for i in range(50)],
+            }
+        )
         result = DriftDetector.detect_time_drift(df, "date")
         assert isinstance(result, DriftResult)
 
@@ -232,6 +275,7 @@ class TestDriftDetector:
 
 
 # ── Schema Monitor Tests ──────────────────────────────────
+
 
 class TestSchemaMonitor:
     def test_detect_added_column(self):
@@ -301,6 +345,7 @@ class TestSchemaMonitor:
 
 
 # ── Quality Engine Tests ──────────────────────────────────
+
 
 class TestQualityEngine:
     def test_run_returns_result(self, dirty_df):
@@ -383,10 +428,12 @@ class TestQualityEngine:
         assert result.schema_result.changes_detected
 
     def test_time_drift_in_engine(self):
-        df = pd.DataFrame({
-            "date": pd.date_range("2024-01-01", periods=100, freq="D"),
-            "value": list(range(50, 150)),
-        })
+        df = pd.DataFrame(
+            {
+                "date": pd.date_range("2024-01-01", periods=100, freq="D"),
+                "value": list(range(50, 150)),
+            }
+        )
         engine = QualityEngine()
         result = engine.run(df)
         assert result.drift_result is not None
@@ -394,14 +441,17 @@ class TestQualityEngine:
 
 # ── Pipeline Integration Tests ────────────────────────────
 
+
 class TestPipelineIntegration:
     def test_quality_in_mapping_result(self, dirty_df):
         from semantic.mapping_engine import SemanticMappingEngine
+
         result = SemanticMappingEngine.analyze(dirty_df, "dirty.csv")
         assert result.quality_intelligence is not None
 
     def test_quality_in_to_dict(self, dirty_df):
         from semantic.mapping_engine import SemanticMappingEngine
+
         result = SemanticMappingEngine.analyze(dirty_df, "dirty.csv")
         d = result.to_dict()
         assert "quality_intelligence" in d
@@ -409,6 +459,7 @@ class TestPipelineIntegration:
 
     def test_quality_score_in_pipeline(self, dirty_df):
         from semantic.mapping_engine import SemanticMappingEngine
+
         result = SemanticMappingEngine.analyze(dirty_df, "dirty.csv")
         qi = result.quality_intelligence
         assert qi.score is not None
@@ -416,12 +467,14 @@ class TestPipelineIntegration:
 
     def test_quality_findings_in_pipeline(self, dirty_df):
         from semantic.mapping_engine import SemanticMappingEngine
+
         result = SemanticMappingEngine.analyze(dirty_df, "dirty.csv")
         qi = result.quality_intelligence
         assert len(qi.findings) > 0
 
     def test_clean_data_pipeline_quality(self, clean_df):
         from semantic.mapping_engine import SemanticMappingEngine
+
         result = SemanticMappingEngine.analyze(clean_df, "clean.csv")
         qi = result.quality_intelligence
         assert qi.score.overall >= 80

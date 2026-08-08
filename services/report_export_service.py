@@ -21,16 +21,15 @@ def _sanitize_pdf_text(text: str) -> str:
     if not text:
         return text
     replacements = {
-        "\u2014": "-",   # em dash
-        "\u2013": "-",   # en dash
-        "\u2018": "'",   # left single quote
-        "\u2019": "'",   # right single quote
-        "\u201c": '"',   # left double quote
-        "\u201d": '"',   # right double quote
-        "\u2026": "...", # ellipsis
-        "\u00a0": " ",   # non-breaking space
-        "\u2022": "*",   # bullet
-        "\u2013": "-",   # en dash
+        "\u2014": "-",  # em dash
+        "\u2013": "-",  # en dash
+        "\u2018": "'",  # left single quote
+        "\u2019": "'",  # right single quote
+        "\u201c": '"',  # left double quote
+        "\u201d": '"',  # right double quote
+        "\u2026": "...",  # ellipsis
+        "\u00a0": " ",  # non-breaking space
+        "\u2022": "*",  # en dash
     }
     for old, new in replacements.items():
         text = text.replace(old, new)
@@ -68,11 +67,21 @@ class ReportExportService:
         if fmt == "csv":
             return self._to_csv(title, report_type, content, summary, created_at, data_sources)
         if fmt == "excel":
-            return self._to_excel(title, report_type, content, summary, sections, created_at, data_sources)
-        return self._to_pdf(title, report_type, content, summary, sections, created_at, data_sources)
+            return self._to_excel(
+                title, report_type, content, summary, sections, created_at, data_sources
+            )
+        return self._to_pdf(
+            title, report_type, content, summary, sections, created_at, data_sources
+        )
 
     def _to_csv(
-        self, title: str, report_type: str, content: str, summary: str, created_at: str, data_sources: dict
+        self,
+        title: str,
+        report_type: str,
+        content: str,
+        summary: str,
+        created_at: str,
+        data_sources: dict,
     ) -> tuple[bytes, str, str]:
         sources = _list_sources(data_sources)
         if sources:
@@ -118,7 +127,11 @@ class ReportExportService:
             for name, records in _list_sources(data_sources):
                 pd.DataFrame(records).to_excel(writer, sheet_name=name[:31], index=False)
         buffer.seek(0)
-        return buffer.read(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "xlsx"
+        return (
+            buffer.read(),
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "xlsx",
+        )
 
     def _to_pdf(
         self,
@@ -143,7 +156,9 @@ class ReportExportService:
         pdf.set_font("Helvetica", "B", 16)
         pdf.cell(0, 10, title, new_x="LMARGIN", new_y="NEXT")
         pdf.set_font("Helvetica", "", 10)
-        pdf.cell(0, 6, f"Type: {report_type}  |  Created: {created_at}", new_x="LMARGIN", new_y="NEXT")
+        pdf.cell(
+            0, 6, f"Type: {report_type}  |  Created: {created_at}", new_x="LMARGIN", new_y="NEXT"
+        )
         pdf.ln(4)
 
         page_width = pdf.w - pdf.l_margin - pdf.r_margin
@@ -168,7 +183,13 @@ class ReportExportService:
                 continue
             pdf.add_page()
             pdf.set_font("Helvetica", "B", 12)
-            pdf.cell(0, 8, _sanitize_pdf_text(name.replace("_", " ").title()), new_x="LMARGIN", new_y="NEXT")
+            pdf.cell(
+                0,
+                8,
+                _sanitize_pdf_text(name.replace("_", " ").title()),
+                new_x="LMARGIN",
+                new_y="NEXT",
+            )
             pdf.set_font("Helvetica", "", 9)
             cols = list(records[0].keys())
             width = 180 / max(len(cols), 1)

@@ -16,9 +16,7 @@ import asyncio
 import json
 import logging
 import threading
-import time
-from datetime import datetime, timezone
-from typing import Any, Callable
+from collections.abc import Callable
 
 from sqlalchemy.orm import Session as DbSession
 
@@ -26,7 +24,7 @@ import shared.database
 from jobs.models import Job
 from jobs.repositories import JobRepository
 from notifications.service import NotificationService
-from performance.queue import Task, TaskPriority, TaskQueue, TaskStatus
+from performance.queue import Task, TaskPriority, TaskQueue
 
 logger = logging.getLogger(__name__)
 
@@ -66,6 +64,7 @@ def get_task_queue() -> TaskQueue:
         with _queue_lock:
             if _queue is None:
                 import config
+
                 redis_url = getattr(config, "REDIS_URL", "") or None
                 _queue = TaskQueue(redis_url=redis_url if redis_url else None)
                 logger.info(
@@ -167,8 +166,11 @@ class JobService:
     ) -> list[Job]:
         return self.repo.list_by_org(
             organization_id,
-            status=status, job_type=job_type, user_id=user_id,
-            limit=limit, offset=offset,
+            status=status,
+            job_type=job_type,
+            user_id=user_id,
+            limit=limit,
+            offset=offset,
         )
 
     def list_active(self, organization_id: int) -> list[Job]:

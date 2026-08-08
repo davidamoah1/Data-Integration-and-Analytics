@@ -1,8 +1,10 @@
 """Debug script to trace healthcare dataset through the full pipeline."""
+
 import pandas as pd
-from semantic.mapping_engine import SemanticMappingEngine
+
 from semantic.dashboard_generator import DashboardGenerator
 from semantic.dashboard_registry import DashboardRegistry
+from semantic.mapping_engine import SemanticMappingEngine
 
 df = pd.read_csv("dataset/industries/healthcare.csv")
 print(f"Columns: {list(df.columns)}")
@@ -17,7 +19,9 @@ print()
 
 print("Column mappings:")
 for mp in m.semantic_result.mappings:
-    print(f"  {mp.column_name:25s} -> {mp.entity_key:20s} ({mp.industry:15s}) conf={mp.confidence:.2f}")
+    print(
+        f"  {mp.column_name:25s} -> {mp.entity_key:20s} ({mp.industry:15s}) conf={mp.confidence:.2f}"
+    )
 print()
 
 # Check what template is returned

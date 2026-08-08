@@ -13,29 +13,29 @@ Modules:
 
 from __future__ import annotations
 
-from performance.queue import (
-    TaskQueue,
-    Task,
-    TaskStatus,
-    TaskPriority,
-    QueueStats,
-)
-from performance.workers import (
-    WorkerPool,
-    Worker,
-    WorkerStats,
-)
 from performance.cache import (
     CacheManager,
-    cached,
-    cache_key,
     CacheStats,
+    cache_key,
+    cached,
 )
 from performance.db_optimization import (
-    IndexManager,
-    QueryOptimizer,
     ChunkedQuery,
     DBStats,
+    IndexManager,
+    QueryOptimizer,
+)
+from performance.queue import (
+    QueueStats,
+    Task,
+    TaskPriority,
+    TaskQueue,
+    TaskStatus,
+)
+from performance.workers import (
+    Worker,
+    WorkerPool,
+    WorkerStats,
 )
 
 __all__ = [

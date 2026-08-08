@@ -19,11 +19,10 @@ Usage in routes:
 
 from __future__ import annotations
 
+from collections.abc import Generator
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import Any, Generator
-
-from sqlalchemy import select
+from typing import Any
 
 
 @dataclass
@@ -36,7 +35,7 @@ class TenantContext:
     is_super_admin: bool
 
     @classmethod
-    def from_user(cls, user: dict) -> "TenantContext":
+    def from_user(cls, user: dict) -> TenantContext:
         """Create a TenantContext from the current_user dict."""
         return cls(
             organization_id=user.get("organization_id"),

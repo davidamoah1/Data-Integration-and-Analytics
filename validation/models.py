@@ -8,7 +8,6 @@ from datetime import datetime, timezone
 from sqlalchemy import (
     Column,
     DateTime,
-    Enum,
     Float,
     ForeignKey,
     Integer,
@@ -69,8 +68,12 @@ class ValidationSession(Base):
     approval_comments = Column(Text, nullable=True)
     organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=True)
 
-    findings = relationship("ValidationFinding", back_populates="session", cascade="all, delete-orphan")
-    approvals = relationship("ValidationApproval", back_populates="session", cascade="all, delete-orphan")
+    findings = relationship(
+        "ValidationFinding", back_populates="session", cascade="all, delete-orphan"
+    )
+    approvals = relationship(
+        "ValidationApproval", back_populates="session", cascade="all, delete-orphan"
+    )
 
     def to_dict(self) -> dict:
         return {
@@ -153,7 +156,11 @@ class ValidationRule(Base):
     department = Column(String(255), nullable=True)
     dataset_pattern = Column(String(255), nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    updated_at = Column(
+        DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+    )
 
     def to_dict(self) -> dict:
         return {

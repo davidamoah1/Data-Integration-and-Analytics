@@ -17,20 +17,14 @@ Covers:
 
 from __future__ import annotations
 
-import json
-from datetime import datetime, timedelta
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import numpy as np
 import pandas as pd
 import pytest
 
 from ai.context_engine import (
-    DatasetContext,
-    EnterpriseAIContext,
     EnterpriseContextEngine,
-    IndustryContext,
-    UserContext,
 )
 from ai.data_gatherer import DataGatherer
 from ai.engines.enterprise_anomaly import EnterpriseAnomalyEngine
@@ -41,13 +35,12 @@ from ai.engines.nl_analytics import NLAnalyticsEngine
 from ai.engines.recommendation_engine import RecommendationEngine
 from ai.engines.root_cause import RootCauseAnalysisEngine
 from ai.performance import (
+    LazyContextLoader,
     PerformanceMonitor,
     TokenBudgetManager,
-    LazyContextLoader,
 )
 from ai.prompt_orchestrator import PromptOrchestrator, PromptTaskType
 from ai.security import AISecurityLayer
-
 
 # ── Fixtures ───────────────────────────────────────────
 
@@ -57,14 +50,16 @@ def sample_df():
     """Create a sample retail dataset."""
     np.random.seed(42)
     dates = pd.date_range("2024-01-01", periods=100, freq="D")
-    return pd.DataFrame({
-        "order_date": dates,
-        "region": np.random.choice(["North", "South", "East", "West"], 100),
-        "category": np.random.choice(["Electronics", "Clothing", "Food"], 100),
-        "sales": np.random.uniform(100, 1000, 100).round(2),
-        "profit": np.random.uniform(10, 200, 100).round(2),
-        "quantity": np.random.randint(1, 10, 100),
-    })
+    return pd.DataFrame(
+        {
+            "order_date": dates,
+            "region": np.random.choice(["North", "South", "East", "West"], 100),
+            "category": np.random.choice(["Electronics", "Clothing", "Food"], 100),
+            "sales": np.random.uniform(100, 1000, 100).round(2),
+            "profit": np.random.uniform(10, 200, 100).round(2),
+            "quantity": np.random.randint(1, 10, 100),
+        }
+    )
 
 
 @pytest.fixture
@@ -72,14 +67,16 @@ def healthcare_df():
     """Create a sample healthcare dataset."""
     np.random.seed(123)
     dates = pd.date_range("2024-01-01", periods=80, freq="D")
-    return pd.DataFrame({
-        "admission_date": dates,
-        "department": np.random.choice(["ER", "ICU", "General", "Pediatrics"], 80),
-        "patient_id": [f"P{i:04d}" for i in range(80)],
-        "billing_amount": np.random.uniform(500, 5000, 80).round(2),
-        "length_of_stay": np.random.randint(1, 14, 80),
-        "readmitted": np.random.choice([0, 1], 80, p=[0.85, 0.15]),
-    })
+    return pd.DataFrame(
+        {
+            "admission_date": dates,
+            "department": np.random.choice(["ER", "ICU", "General", "Pediatrics"], 80),
+            "patient_id": [f"P{i:04d}" for i in range(80)],
+            "billing_amount": np.random.uniform(500, 5000, 80).round(2),
+            "length_of_stay": np.random.randint(1, 14, 80),
+            "readmitted": np.random.choice([0, 1], 80, p=[0.85, 0.15]),
+        }
+    )
 
 
 @pytest.fixture
@@ -199,12 +196,18 @@ class TestPromptOrchestrator:
 
     def test_detect_task_type(self):
         orch = PromptOrchestrator()
-        assert orch.detect_task_type("What happened this month?") == PromptTaskType.EXECUTIVE_SUMMARY
-        assert orch.detect_task_type("Why did revenue decrease?") == PromptTaskType.ROOT_CAUSE_ANALYSIS
+        assert (
+            orch.detect_task_type("What happened this month?") == PromptTaskType.EXECUTIVE_SUMMARY
+        )
+        assert (
+            orch.detect_task_type("Why did revenue decrease?") == PromptTaskType.ROOT_CAUSE_ANALYSIS
+        )
         assert orch.detect_task_type("Forecast sales for next month") == PromptTaskType.FORECASTING
         assert orch.detect_task_type("What are the risks?") == PromptTaskType.RISK_ANALYSIS
         assert orch.detect_task_type("Show top performing regions") == PromptTaskType.NL_ANALYTICS
-        assert orch.detect_task_type("Generate a monthly report") == PromptTaskType.REPORT_GENERATION
+        assert (
+            orch.detect_task_type("Generate a monthly report") == PromptTaskType.REPORT_GENERATION
+        )
         assert orch.detect_task_type("Hello there") == PromptTaskType.GENERAL_CHAT
 
     def test_list_task_types(self):
@@ -219,7 +222,9 @@ class TestPromptOrchestrator:
 
 class TestDataGatherer:
     def test_gather_for_summary(self, sample_df, context_engine, semantic_mappings):
-        ctx = context_engine.build(df=sample_df, semantic_mappings=semantic_mappings, industry="retail")
+        ctx = context_engine.build(
+            df=sample_df, semantic_mappings=semantic_mappings, industry="retail"
+        )
         gatherer = DataGatherer(sample_df, ctx)
         data = gatherer.gather_for_summary()
         assert "overall" in data
@@ -228,7 +233,9 @@ class TestDataGatherer:
         assert "time_trends" in data
 
     def test_gather_for_root_cause(self, sample_df, context_engine, semantic_mappings):
-        ctx = context_engine.build(df=sample_df, semantic_mappings=semantic_mappings, industry="retail")
+        ctx = context_engine.build(
+            df=sample_df, semantic_mappings=semantic_mappings, industry="retail"
+        )
         gatherer = DataGatherer(sample_df, ctx)
         data = gatherer.gather_for_root_cause("revenue", "decrease")
         assert data["metric"] == "revenue"
@@ -236,25 +243,33 @@ class TestDataGatherer:
         assert "period_comparison" in data
 
     def test_gather_for_trend(self, sample_df, context_engine, semantic_mappings):
-        ctx = context_engine.build(df=sample_df, semantic_mappings=semantic_mappings, industry="retail")
+        ctx = context_engine.build(
+            df=sample_df, semantic_mappings=semantic_mappings, industry="retail"
+        )
         gatherer = DataGatherer(sample_df, ctx)
         data = gatherer.gather_for_trend("revenue")
         assert "monthly_trend" in data or "note" in data
 
     def test_gather_for_forecast(self, sample_df, context_engine, semantic_mappings):
-        ctx = context_engine.build(df=sample_df, semantic_mappings=semantic_mappings, industry="retail")
+        ctx = context_engine.build(
+            df=sample_df, semantic_mappings=semantic_mappings, industry="retail"
+        )
         gatherer = DataGatherer(sample_df, ctx)
         data = gatherer.gather_for_forecast("revenue", horizon=7)
         assert "values" in data or "note" in data
 
     def test_find_metric_column(self, sample_df, context_engine, semantic_mappings):
-        ctx = context_engine.build(df=sample_df, semantic_mappings=semantic_mappings, industry="retail")
+        ctx = context_engine.build(
+            df=sample_df, semantic_mappings=semantic_mappings, industry="retail"
+        )
         gatherer = DataGatherer(sample_df, ctx)
         assert gatherer._find_metric_column("revenue") == "sales"
         assert gatherer._find_metric_column("profit") == "profit"
 
     def test_find_date_column(self, sample_df, context_engine, semantic_mappings):
-        ctx = context_engine.build(df=sample_df, semantic_mappings=semantic_mappings, industry="retail")
+        ctx = context_engine.build(
+            df=sample_df, semantic_mappings=semantic_mappings, industry="retail"
+        )
         gatherer = DataGatherer(sample_df, ctx)
         date_col = gatherer._find_date_column()
         assert date_col == "order_date"
@@ -283,7 +298,9 @@ class TestExecutiveSummaryEngine:
 
     def test_generate_from_data_only(self, sample_df, context_engine, semantic_mappings):
         engine = ExecutiveSummaryEngine(db=None)
-        ctx = context_engine.build(df=sample_df, semantic_mappings=semantic_mappings, industry="retail")
+        ctx = context_engine.build(
+            df=sample_df, semantic_mappings=semantic_mappings, industry="retail"
+        )
         gatherer = DataGatherer(sample_df, ctx)
         data = gatherer.gather_for_summary()
         result = engine.generate(
@@ -315,14 +332,18 @@ class TestRootCauseAnalysisEngine:
 
     def test_detect_metric_and_direction(self, sample_df, context_engine, semantic_mappings):
         engine = RootCauseAnalysisEngine(db=None)
-        ctx = context_engine.build(df=sample_df, semantic_mappings=semantic_mappings, industry="retail")
+        ctx = context_engine.build(
+            df=sample_df, semantic_mappings=semantic_mappings, industry="retail"
+        )
         metric, direction = engine._detect_metric_and_direction("Why did revenue decrease?", ctx)
         assert metric == "revenue"
         assert direction == "decrease"
 
     def test_detect_increase_direction(self, sample_df, context_engine, semantic_mappings):
         engine = RootCauseAnalysisEngine(db=None)
-        ctx = context_engine.build(df=sample_df, semantic_mappings=semantic_mappings, industry="retail")
+        ctx = context_engine.build(
+            df=sample_df, semantic_mappings=semantic_mappings, industry="retail"
+        )
         metric, direction = engine._detect_metric_and_direction("Why did profit increase?", ctx)
         assert direction == "increase"
 
@@ -371,10 +392,12 @@ class TestEnterpriseForecastEngine:
 
     def test_forecast_insufficient_data(self, semantic_mappings):
         engine = EnterpriseForecastEngine(db=None)
-        small_df = pd.DataFrame({
-            "date": pd.date_range("2024-01-01", periods=3, freq="D"),
-            "sales": [100, 200, 150],
-        })
+        small_df = pd.DataFrame(
+            {
+                "date": pd.date_range("2024-01-01", periods=3, freq="D"),
+                "sales": [100, 200, 150],
+            }
+        )
         result = engine.forecast(
             metric="revenue",
             df=small_df,
@@ -503,7 +526,11 @@ class TestRecommendationEngine:
         engine = RecommendationEngine(db=None)
         result = engine.generate(
             df=healthcare_df,
-            semantic_mappings={"admission_date": "date", "billing_amount": "billing_amount", "readmitted": "readmission"},
+            semantic_mappings={
+                "admission_date": "date",
+                "billing_amount": "billing_amount",
+                "readmitted": "readmission",
+            },
             industry="healthcare",
         )
         assert result["industry"] == "healthcare"
@@ -520,7 +547,9 @@ class TestRecommendationEngine:
 
     def test_trigger_detection(self, sample_df, context_engine, semantic_mappings):
         engine = RecommendationEngine(db=None)
-        ctx = context_engine.build(df=sample_df, semantic_mappings=semantic_mappings, industry="retail")
+        ctx = context_engine.build(
+            df=sample_df, semantic_mappings=semantic_mappings, industry="retail"
+        )
         gatherer = DataGatherer(sample_df, ctx)
         data = gatherer.gather_for_summary()
         triggers = engine._detect_triggers(data, ctx)
@@ -633,7 +662,9 @@ class TestEnterpriseReportEngine:
             semantic_mappings=semantic_mappings,
             industry="retail",
         )
-        assert "Detailed Statistics" in result["appendix"] or "Overall Summary" in result["appendix"]
+        assert (
+            "Detailed Statistics" in result["appendix"] or "Overall Summary" in result["appendix"]
+        )
 
 
 # ── Security Tests ─────────────────────────────────────
@@ -773,19 +804,37 @@ class TestTokenBudgetManager:
 class TestLazyContextLoader:
     def test_should_load_section_full_context(self, context_engine):
         loader = LazyContextLoader(context_engine)
-        assert loader.should_load_section(PromptTaskType.EXECUTIVE_SUMMARY, "dataset", "test") is True
-        assert loader.should_load_section(PromptTaskType.EXECUTIVE_SUMMARY, "industry", "test") is True
+        assert (
+            loader.should_load_section(PromptTaskType.EXECUTIVE_SUMMARY, "dataset", "test") is True
+        )
+        assert (
+            loader.should_load_section(PromptTaskType.EXECUTIVE_SUMMARY, "industry", "test") is True
+        )
 
     def test_should_load_section_light_context(self, context_engine):
         loader = LazyContextLoader(context_engine)
         assert loader.should_load_section(PromptTaskType.GENERAL_CHAT, "dataset", "hello") is False
-        assert loader.should_load_section(PromptTaskType.GENERAL_CHAT, "dataset", "show me the data") is True
+        assert (
+            loader.should_load_section(PromptTaskType.GENERAL_CHAT, "dataset", "show me the data")
+            is True
+        )
 
     def test_should_load_section_forecast(self, context_engine):
         loader = LazyContextLoader(context_engine)
-        assert loader.should_load_section(PromptTaskType.FORECASTING, "dataset", "forecast revenue") is True
-        assert loader.should_load_section(PromptTaskType.FORECASTING, "dashboard", "forecast revenue") is False
+        assert (
+            loader.should_load_section(PromptTaskType.FORECASTING, "dataset", "forecast revenue")
+            is True
+        )
+        assert (
+            loader.should_load_section(PromptTaskType.FORECASTING, "dashboard", "forecast revenue")
+            is False
+        )
 
     def test_should_load_section_anomaly(self, context_engine):
         loader = LazyContextLoader(context_engine)
-        assert loader.should_load_section(PromptTaskType.ANOMALY_DETECTION, "dataset", "detect anomalies") is True
+        assert (
+            loader.should_load_section(
+                PromptTaskType.ANOMALY_DETECTION, "dataset", "detect anomalies"
+            )
+            is True
+        )

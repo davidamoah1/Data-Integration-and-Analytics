@@ -18,7 +18,6 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session as DbSession
 
-from jobs.handlers import register_builtin_handlers
 from jobs.service import JobService, get_registered_types
 from shared.database import get_db
 from shared.dependencies import get_current_user
@@ -31,7 +30,9 @@ router = APIRouter(prefix="/api/jobs", tags=["background-jobs"])
 
 
 class CreateJobRequest(BaseModel):
-    job_type: str = Field(..., description="Type: etl_run, ocr_batch, report_gen, data_import, export")
+    job_type: str = Field(
+        ..., description="Type: etl_run, ocr_batch, report_gen, data_import, export"
+    )
     name: str = Field(..., description="Human-readable job name")
     description: str | None = None
     payload: dict = Field(default_factory=dict, description="Job-specific parameters")
@@ -86,9 +87,12 @@ async def list_jobs(
     org_id = get_current_organization_id(current_user, db)
     svc = JobService(db)
     jobs = svc.list_jobs(
-        org_id, status=status, job_type=job_type,
+        org_id,
+        status=status,
+        job_type=job_type,
         user_id=current_user["id"],
-        limit=limit, offset=offset,
+        limit=limit,
+        offset=offset,
     )
     return {"jobs": [j.to_dict() for j in jobs], "count": len(jobs)}
 

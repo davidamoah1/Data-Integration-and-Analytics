@@ -5,9 +5,15 @@ All endpoints use standard response format and proper permission checks.
 
 # ruff: noqa: B008  # FastAPI Depends() calls in default arguments are intentional
 
+from datetime import datetime, timedelta, timezone
+
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session as DbSession
 
+from audit.models import AuditLog
+from audit.service import log_audit_event
+from authentication.mfa_service import MFAService
+from authentication.models import ActivityLog
 from authentication.schemas import (
     AccountStatusUpdate,
     ChangePasswordRequest,
@@ -15,7 +21,6 @@ from authentication.schemas import (
     LoginRequest,
     MFADisableRequest,
     MFALoginRequest,
-    MFASetupResponse,
     MFAVerifyRequest,
     OnboardingRequest,
     PermissionCheckRequest,
@@ -26,27 +31,21 @@ from authentication.schemas import (
     RoleCreate,
     RoleUpdate,
     ScopedRoleAssign,
+    SignupRequest,
     SSOCallbackRequest,
     SSOConnectionCreate,
     SSOInitiateRequest,
-    SignupRequest,
     UserCreate,
     UserUpdate,
     VerifyEmailRequest,
 )
 from authentication.services import AuthService, RoleService, UserService
-from authentication.mfa_service import MFAService
 from authentication.sso_service import SSOService
-from authentication.models import ActivityLog
-from audit.models import AuditLog
-from audit.service import log_audit_event
 from shared.database import get_db
 from shared.dependencies import get_current_user, require_permissions
+from shared.response import success_response
 from shared.security import create_access_token, create_refresh_token, verify_password
 from shared.tenant import get_current_organization_id, is_super_admin
-from datetime import datetime, timedelta, timezone
-
-from shared.response import success_response
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 
@@ -77,10 +76,15 @@ async def signup(request: SignupRequest, db: DbSession = Depends(get_db)):
     Returns JWT tokens so the user is auto-logged in and can proceed to onboarding.
     """
     from authentication.models import User
-    from authentication.repositories import UserRepository, RoleRepository, UserRoleRepository
-    from authentication.services import AuthService, validate_password
+    from authentication.repositories import RoleRepository, UserRepository, UserRoleRepository
+    from authentication.services import validate_password
     from organizations.models import Organization
-    from shared.security import hash_password, create_access_token, create_refresh_token, generate_token
+    from shared.security import (
+        create_access_token,
+        create_refresh_token,
+        generate_token,
+        hash_password,
+    )
 
     user_repo = UserRepository(db)
     existing = user_repo.get_by_email(request.email)
@@ -110,6 +114,7 @@ async def signup(request: SignupRequest, db: DbSession = Depends(get_db)):
         org_id = org.id
 
         from organizations.workspace_models import Workspace
+
         workspace = Workspace(
             organization_id=org.id,
             name=f"{request.organization_name} Workspace",
@@ -148,32 +153,40 @@ async def signup(request: SignupRequest, db: DbSession = Depends(get_db)):
         UserRoleRepository(db).set_user_roles(user.id, [assigned_role.id])
 
     # Audit log
-    from audit.models import AuditLog
     if org_id:
-        db.add(AuditLog(
+        db.add(
+            AuditLog(
+                user_id=user.id,
+                organization_id=org_id,
+                action="organization.created",
+                resource_type="organization",
+                resource_id=org_id,
+                new_values={"name": request.organization_name},
+            )
+        )
+        db.add(
+            AuditLog(
+                user_id=user.id,
+                organization_id=org_id,
+                action="role.assigned",
+                resource_type="user",
+                resource_id=user.id,
+                new_values={"role": assigned_role.name if assigned_role else "viewer"},
+            )
+        )
+    db.add(
+        AuditLog(
             user_id=user.id,
             organization_id=org_id,
-            action="organization.created",
-            resource_type="organization",
-            resource_id=org_id,
-            new_values={"name": request.organization_name},
-        ))
-        db.add(AuditLog(
-            user_id=user.id,
-            organization_id=org_id,
-            action="role.assigned",
+            action="user.registered",
             resource_type="user",
             resource_id=user.id,
-            new_values={"role": assigned_role.name if assigned_role else "viewer"},
-        ))
-    db.add(AuditLog(
-        user_id=user.id,
-        organization_id=org_id,
-        action="user.registered",
-        resource_type="user",
-        resource_id=user.id,
-        new_values={"email": user.email, "mode": "create_organization" if org_id else "personal"},
-    ))
+            new_values={
+                "email": user.email,
+                "mode": "create_organization" if org_id else "personal",
+            },
+        )
+    )
 
     # Generate a verification token (stored in onboarding_data for now)
     verify_token = generate_token()
@@ -295,6 +308,7 @@ async def verify_email(
     user_repo = UserRepository(db)
     # Search for user with matching verify token in onboarding_data
     from sqlalchemy import select
+
     from authentication.models import User
 
     users = db.execute(select(User).where(User.is_deleted == 0)).scalars().all()
@@ -331,7 +345,9 @@ async def resend_verification(
     """Resend email verification token."""
     service = AuthService(db)
     service.resend_email_verification(request.email)
-    return success_response(None, "If the email exists and is not verified, a verification link has been sent")
+    return success_response(
+        None, "If the email exists and is not verified, a verification link has been sent"
+    )
 
 
 @router.post("/activate/{user_id}")
@@ -437,11 +453,14 @@ async def mfa_login_challenge(
     # Check if MFA is enabled
     if mfa_service.is_mfa_enabled(user.id):
         challenge_token = mfa_service.create_challenge(user.id)
-        return success_response({
-            "mfa_required": True,
-            "challenge_token": challenge_token,
-            "method": "totp",
-        }, "MFA verification required")
+        return success_response(
+            {
+                "mfa_required": True,
+                "challenge_token": challenge_token,
+                "method": "totp",
+            },
+            "MFA verification required",
+        )
 
     # MFA not enabled — proceed with standard login
     result = auth_service.login(request, ip=None, user_agent=None)
@@ -488,6 +507,7 @@ async def mfa_login_verify(
 
     # Store session
     from authentication.models import Session as UserSession
+
     session = UserSession(
         user_id=user_id,
         refresh_token=refresh_token,
@@ -510,19 +530,22 @@ async def mfa_login_verify(
 
     db.commit()
 
-    return success_response({
-        "access_token": access_token,
-        "refresh_token": refresh_token,
-        "token_type": "bearer",
-        "expires_in": 30 * 60,
-        "user": {
-            "id": user.id,
-            "email": user.email,
-            "full_name": user.full_name,
-            "roles": role_names,
-            "permissions": permission_names,
+    return success_response(
+        {
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "token_type": "bearer",
+            "expires_in": 30 * 60,
+            "user": {
+                "id": user.id,
+                "email": user.email,
+                "full_name": user.full_name,
+                "roles": role_names,
+                "permissions": permission_names,
+            },
         },
-    }, "Login successful")
+        "Login successful",
+    )
 
 
 # --- SSO endpoints ----------------------------------------------------------
@@ -624,10 +647,12 @@ async def get_onboarding_status(
     user = UserRepository(db).get_by_id(current_user["id"])
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    return success_response({
-        "onboarding_completed": bool(user.onboarding_completed),
-        "onboarding_data": user.onboarding_data or {},
-    })
+    return success_response(
+        {
+            "onboarding_completed": bool(user.onboarding_completed),
+            "onboarding_data": user.onboarding_data or {},
+        }
+    )
 
 
 @router.post("/onboarding")
@@ -728,22 +753,62 @@ async def get_navigation(
                     "label": "Platform",
                     "order": 0,
                     "items": [
-                        {"label": "Dashboard", "href": "/dashboard", "icon": "LayoutDashboard", "order": 0},
-                        {"label": "Organizations", "href": "/admin-portal/organizations", "icon": "Building2", "order": 1},
-                        {"label": "Platform Analytics", "href": "/admin-portal/analytics", "icon": "TrendingUp", "order": 2},
-                        {"label": "Monitoring", "href": "/admin-portal/monitoring", "icon": "Activity", "order": 3},
-                        {"label": "Security", "href": "/admin-portal/security", "icon": "Shield", "order": 4},
+                        {
+                            "label": "Dashboard",
+                            "href": "/dashboard",
+                            "icon": "LayoutDashboard",
+                            "order": 0,
+                        },
+                        {
+                            "label": "Organizations",
+                            "href": "/admin-portal/organizations",
+                            "icon": "Building2",
+                            "order": 1,
+                        },
+                        {
+                            "label": "Platform Analytics",
+                            "href": "/admin-portal/analytics",
+                            "icon": "TrendingUp",
+                            "order": 2,
+                        },
+                        {
+                            "label": "Monitoring",
+                            "href": "/admin-portal/monitoring",
+                            "icon": "Activity",
+                            "order": 3,
+                        },
+                        {
+                            "label": "Security",
+                            "href": "/admin-portal/security",
+                            "icon": "Shield",
+                            "order": 4,
+                        },
                     ],
                 },
                 {
                     "label": "Administration",
                     "order": 1,
                     "items": [
-                        {"label": "Admin Portal", "href": "/admin-portal", "icon": "Crown", "order": 0},
+                        {
+                            "label": "Admin Portal",
+                            "href": "/admin-portal",
+                            "icon": "Crown",
+                            "order": 0,
+                        },
                         {"label": "Members", "href": "/admin", "icon": "Users", "order": 1},
                         {"label": "Audit Logs", "href": "/audit", "icon": "ScrollText", "order": 2},
-                        {"label": "Feature Flags", "href": "/admin-portal/feature-flags", "icon": "Zap", "order": 3},
-                        {"label": "Platform Settings", "href": "/admin-portal/settings", "icon": "Server", "order": 4},
+                        {
+                            "label": "Feature Flags",
+                            "href": "/admin-portal/feature-flags",
+                            "icon": "Zap",
+                            "order": 3,
+                        },
+                        {
+                            "label": "Platform Settings",
+                            "href": "/admin-portal/settings",
+                            "icon": "Server",
+                            "order": 4,
+                        },
                     ],
                 },
                 {
@@ -751,12 +816,27 @@ async def get_navigation(
                     "order": 2,
                     "items": [
                         {"label": "Studios", "href": "/studios", "icon": "Sparkles", "order": 0},
-                        {"label": "Templates", "href": "/templates", "icon": "LayoutTemplate", "order": 1},
+                        {
+                            "label": "Templates",
+                            "href": "/templates",
+                            "icon": "LayoutTemplate",
+                            "order": 1,
+                        },
                         {"label": "Connectors", "href": "/connectors", "icon": "Zap", "order": 2},
-                        {"label": "Marketplace", "href": "/marketplace", "icon": "Package", "order": 3},
+                        {
+                            "label": "Marketplace",
+                            "href": "/marketplace",
+                            "icon": "Package",
+                            "order": 3,
+                        },
                         {"label": "API Keys", "href": "/api-keys", "icon": "Key", "order": 4},
                         {"label": "Webhooks", "href": "/webhooks", "icon": "Webhook", "order": 5},
-                        {"label": "Subscriptions", "href": "/admin-portal/subscriptions", "icon": "CreditCard", "order": 6},
+                        {
+                            "label": "Subscriptions",
+                            "href": "/admin-portal/subscriptions",
+                            "icon": "CreditCard",
+                            "order": 6,
+                        },
                         {"label": "Billing", "href": "/billing", "icon": "CreditCard", "order": 7},
                     ],
                 },
@@ -764,7 +844,12 @@ async def get_navigation(
                     "label": "System",
                     "order": 3,
                     "items": [
-                        {"label": "Notifications", "href": "/notifications", "icon": "Bell", "order": 0},
+                        {
+                            "label": "Notifications",
+                            "href": "/notifications",
+                            "icon": "Bell",
+                            "order": 0,
+                        },
                         {"label": "Settings", "href": "/settings", "icon": "Settings", "order": 1},
                     ],
                 },
@@ -777,39 +862,118 @@ async def get_navigation(
                     "label": "Overview",
                     "order": 0,
                     "items": [
-                        {"label": "Dashboard", "href": "/dashboard", "icon": "LayoutDashboard", "order": 0},
-                        {"label": "Dashboards", "href": "/dashboard", "icon": "LayoutDashboard", "permission": "dashboard.view", "order": 1},
+                        {
+                            "label": "Dashboard",
+                            "href": "/dashboard",
+                            "icon": "LayoutDashboard",
+                            "order": 0,
+                        },
+                        {
+                            "label": "Dashboards",
+                            "href": "/dashboard",
+                            "icon": "LayoutDashboard",
+                            "permission": "dashboard.view",
+                            "order": 1,
+                        },
                         {"label": "Studios", "href": "/studios", "icon": "Sparkles", "order": 2},
-                        {"label": "Templates", "href": "/templates", "icon": "LayoutTemplate", "order": 3},
+                        {
+                            "label": "Templates",
+                            "href": "/templates",
+                            "icon": "LayoutTemplate",
+                            "order": 3,
+                        },
                     ],
                 },
                 {
                     "label": "Data",
                     "order": 1,
                     "items": [
-                        {"label": "Smart Data Capture", "href": "/capture", "icon": "ScanLine", "order": 0},
-                        {"label": "Datasets", "href": "/datasets", "icon": "Database", "permission": "datasets.view", "order": 1},
-                        {"label": "Analytics", "href": "/analytics", "icon": "BarChart3", "permission": "analytics.view", "order": 2},
-                        {"label": "Reports", "href": "/reports", "icon": "FileText", "permission": "reports.view", "order": 3},
+                        {
+                            "label": "Smart Data Capture",
+                            "href": "/capture",
+                            "icon": "ScanLine",
+                            "order": 0,
+                        },
+                        {
+                            "label": "Datasets",
+                            "href": "/datasets",
+                            "icon": "Database",
+                            "permission": "datasets.view",
+                            "order": 1,
+                        },
+                        {
+                            "label": "Analytics",
+                            "href": "/analytics",
+                            "icon": "BarChart3",
+                            "permission": "analytics.view",
+                            "order": 2,
+                        },
+                        {
+                            "label": "Reports",
+                            "href": "/reports",
+                            "icon": "FileText",
+                            "permission": "reports.view",
+                            "order": 3,
+                        },
                     ],
                 },
                 {
                     "label": "Intelligence",
                     "order": 2,
                     "items": [
-                        {"label": "Analytics Assistant", "href": "/ai", "icon": "Bot", "permission": "ai.use", "order": 0},
-                        {"label": "Scheduler", "href": "/scheduler", "icon": "CalendarClock", "order": 1},
+                        {
+                            "label": "Analytics Assistant",
+                            "href": "/ai",
+                            "icon": "Bot",
+                            "permission": "ai.use",
+                            "order": 0,
+                        },
+                        {
+                            "label": "Scheduler",
+                            "href": "/scheduler",
+                            "icon": "CalendarClock",
+                            "order": 1,
+                        },
                     ],
                 },
                 {
                     "label": "Administration",
                     "order": 3,
                     "items": [
-                        {"label": "Notifications", "href": "/notifications", "icon": "Bell", "order": 0},
-                        {"label": "Members", "href": "/admin", "icon": "Users", "permission": "users.read", "order": 1},
-                        {"label": "Departments", "href": "/admin/departments", "icon": "Building2", "permission": "departments.manage", "order": 2},
-                        {"label": "Audit Logs", "href": "/audit", "icon": "ScrollText", "permission": "audit.view", "order": 3},
-                        {"label": "Organization Settings", "href": "/settings", "icon": "Settings", "permission": "settings.manage", "order": 4},
+                        {
+                            "label": "Notifications",
+                            "href": "/notifications",
+                            "icon": "Bell",
+                            "order": 0,
+                        },
+                        {
+                            "label": "Members",
+                            "href": "/admin",
+                            "icon": "Users",
+                            "permission": "users.read",
+                            "order": 1,
+                        },
+                        {
+                            "label": "Departments",
+                            "href": "/admin/departments",
+                            "icon": "Building2",
+                            "permission": "departments.manage",
+                            "order": 2,
+                        },
+                        {
+                            "label": "Audit Logs",
+                            "href": "/audit",
+                            "icon": "ScrollText",
+                            "permission": "audit.view",
+                            "order": 3,
+                        },
+                        {
+                            "label": "Organization Settings",
+                            "href": "/settings",
+                            "icon": "Settings",
+                            "permission": "settings.manage",
+                            "order": 4,
+                        },
                     ],
                 },
                 {
@@ -828,39 +992,118 @@ async def get_navigation(
                     "label": "Overview",
                     "order": 0,
                     "items": [
-                        {"label": "Dashboard", "href": "/dashboard", "icon": "LayoutDashboard", "order": 0},
-                        {"label": "Dashboards", "href": "/dashboard", "icon": "LayoutDashboard", "permission": "dashboard.view", "order": 1},
+                        {
+                            "label": "Dashboard",
+                            "href": "/dashboard",
+                            "icon": "LayoutDashboard",
+                            "order": 0,
+                        },
+                        {
+                            "label": "Dashboards",
+                            "href": "/dashboard",
+                            "icon": "LayoutDashboard",
+                            "permission": "dashboard.view",
+                            "order": 1,
+                        },
                         {"label": "Studios", "href": "/studios", "icon": "Sparkles", "order": 2},
-                        {"label": "Templates", "href": "/templates", "icon": "LayoutTemplate", "order": 3},
+                        {
+                            "label": "Templates",
+                            "href": "/templates",
+                            "icon": "LayoutTemplate",
+                            "order": 3,
+                        },
                     ],
                 },
                 {
                     "label": "Data",
                     "order": 1,
                     "items": [
-                        {"label": "Smart Data Capture", "href": "/capture", "icon": "ScanLine", "order": 0},
-                        {"label": "Datasets", "href": "/datasets", "icon": "Database", "permission": "datasets.view", "order": 1},
-                        {"label": "Analytics", "href": "/analytics", "icon": "BarChart3", "permission": "analytics.view", "order": 2},
-                        {"label": "Reports", "href": "/reports", "icon": "FileText", "permission": "reports.view", "order": 3},
+                        {
+                            "label": "Smart Data Capture",
+                            "href": "/capture",
+                            "icon": "ScanLine",
+                            "order": 0,
+                        },
+                        {
+                            "label": "Datasets",
+                            "href": "/datasets",
+                            "icon": "Database",
+                            "permission": "datasets.view",
+                            "order": 1,
+                        },
+                        {
+                            "label": "Analytics",
+                            "href": "/analytics",
+                            "icon": "BarChart3",
+                            "permission": "analytics.view",
+                            "order": 2,
+                        },
+                        {
+                            "label": "Reports",
+                            "href": "/reports",
+                            "icon": "FileText",
+                            "permission": "reports.view",
+                            "order": 3,
+                        },
                     ],
                 },
                 {
                     "label": "Intelligence",
                     "order": 2,
                     "items": [
-                        {"label": "Analytics Assistant", "href": "/ai", "icon": "Bot", "permission": "ai.use", "order": 0},
-                        {"label": "Scheduler", "href": "/scheduler", "icon": "CalendarClock", "order": 1},
+                        {
+                            "label": "Analytics Assistant",
+                            "href": "/ai",
+                            "icon": "Bot",
+                            "permission": "ai.use",
+                            "order": 0,
+                        },
+                        {
+                            "label": "Scheduler",
+                            "href": "/scheduler",
+                            "icon": "CalendarClock",
+                            "order": 1,
+                        },
                     ],
                 },
                 {
                     "label": "Administration",
                     "order": 3,
                     "items": [
-                        {"label": "Notifications", "href": "/notifications", "icon": "Bell", "order": 0},
-                        {"label": "Members", "href": "/admin", "icon": "Users", "permission": "users.read", "order": 1},
-                        {"label": "Departments", "href": "/admin/departments", "icon": "Building2", "permission": "departments.manage", "order": 2},
-                        {"label": "Audit Logs", "href": "/audit", "icon": "ScrollText", "permission": "audit.view", "order": 3},
-                        {"label": "Organization Settings", "href": "/settings", "icon": "Settings", "permission": "settings.manage", "order": 4},
+                        {
+                            "label": "Notifications",
+                            "href": "/notifications",
+                            "icon": "Bell",
+                            "order": 0,
+                        },
+                        {
+                            "label": "Members",
+                            "href": "/admin",
+                            "icon": "Users",
+                            "permission": "users.read",
+                            "order": 1,
+                        },
+                        {
+                            "label": "Departments",
+                            "href": "/admin/departments",
+                            "icon": "Building2",
+                            "permission": "departments.manage",
+                            "order": 2,
+                        },
+                        {
+                            "label": "Audit Logs",
+                            "href": "/audit",
+                            "icon": "ScrollText",
+                            "permission": "audit.view",
+                            "order": 3,
+                        },
+                        {
+                            "label": "Organization Settings",
+                            "href": "/settings",
+                            "icon": "Settings",
+                            "permission": "settings.manage",
+                            "order": 4,
+                        },
                     ],
                 },
                 {
@@ -879,33 +1122,83 @@ async def get_navigation(
                     "label": "Overview",
                     "order": 0,
                     "items": [
-                        {"label": "Dashboard", "href": "/dashboard", "icon": "LayoutDashboard", "order": 0},
-                        {"label": "Dashboards", "href": "/dashboard", "icon": "LayoutDashboard", "permission": "dashboard.view", "order": 1},
-                        {"label": "Templates", "href": "/templates", "icon": "LayoutTemplate", "order": 2},
+                        {
+                            "label": "Dashboard",
+                            "href": "/dashboard",
+                            "icon": "LayoutDashboard",
+                            "order": 0,
+                        },
+                        {
+                            "label": "Dashboards",
+                            "href": "/dashboard",
+                            "icon": "LayoutDashboard",
+                            "permission": "dashboard.view",
+                            "order": 1,
+                        },
+                        {
+                            "label": "Templates",
+                            "href": "/templates",
+                            "icon": "LayoutTemplate",
+                            "order": 2,
+                        },
                     ],
                 },
                 {
                     "label": "Analytics Studio",
                     "order": 1,
                     "items": [
-                        {"label": "Datasets", "href": "/datasets", "icon": "Database", "permission": "datasets.view", "order": 0},
-                        {"label": "Analytics", "href": "/analytics", "icon": "BarChart3", "permission": "analytics.view", "order": 1},
-                        {"label": "Reports", "href": "/reports", "icon": "FileText", "permission": "reports.view", "order": 2},
+                        {
+                            "label": "Datasets",
+                            "href": "/datasets",
+                            "icon": "Database",
+                            "permission": "datasets.view",
+                            "order": 0,
+                        },
+                        {
+                            "label": "Analytics",
+                            "href": "/analytics",
+                            "icon": "BarChart3",
+                            "permission": "analytics.view",
+                            "order": 1,
+                        },
+                        {
+                            "label": "Reports",
+                            "href": "/reports",
+                            "icon": "FileText",
+                            "permission": "reports.view",
+                            "order": 2,
+                        },
                     ],
                 },
                 {
                     "label": "Intelligence",
                     "order": 2,
                     "items": [
-                        {"label": "Analytics Assistant", "href": "/ai", "icon": "Bot", "permission": "ai.use", "order": 0},
-                        {"label": "Scheduler", "href": "/scheduler", "icon": "CalendarClock", "order": 1},
+                        {
+                            "label": "Analytics Assistant",
+                            "href": "/ai",
+                            "icon": "Bot",
+                            "permission": "ai.use",
+                            "order": 0,
+                        },
+                        {
+                            "label": "Scheduler",
+                            "href": "/scheduler",
+                            "icon": "CalendarClock",
+                            "order": 1,
+                        },
                     ],
                 },
                 {
                     "label": "Personal",
                     "order": 3,
                     "items": [
-                        {"label": "Notifications", "href": "/notifications", "icon": "Bell", "order": 0},
+                        {
+                            "label": "Notifications",
+                            "href": "/notifications",
+                            "icon": "Bell",
+                            "order": 0,
+                        },
                         {"label": "Profile", "href": "/settings", "icon": "Settings", "order": 99},
                     ],
                 },
@@ -918,34 +1211,87 @@ async def get_navigation(
                     "label": "Overview",
                     "order": 0,
                     "items": [
-                        {"label": "Dashboard", "href": "/dashboard", "icon": "LayoutDashboard", "order": 0},
-                        {"label": "Templates", "href": "/templates", "icon": "LayoutTemplate", "order": 1},
+                        {
+                            "label": "Dashboard",
+                            "href": "/dashboard",
+                            "icon": "LayoutDashboard",
+                            "order": 0,
+                        },
+                        {
+                            "label": "Templates",
+                            "href": "/templates",
+                            "icon": "LayoutTemplate",
+                            "order": 1,
+                        },
                     ],
                 },
                 {
                     "label": "Research",
                     "order": 1,
                     "items": [
-                        {"label": "Research Studio", "href": "/studios/research", "icon": "FlaskConical", "order": 0},
-                        {"label": "Statistics", "href": "/studios/statistics", "icon": "BarChart3", "order": 1},
-                        {"label": "Publications", "href": "/studios/publications", "icon": "Newspaper", "order": 2},
-                        {"label": "Reports", "href": "/reports", "icon": "FileText", "permission": "reports.view", "order": 3},
-                        {"label": "Datasets", "href": "/datasets", "icon": "Database", "permission": "datasets.view", "order": 4},
+                        {
+                            "label": "Research Studio",
+                            "href": "/studios/research",
+                            "icon": "FlaskConical",
+                            "order": 0,
+                        },
+                        {
+                            "label": "Statistics",
+                            "href": "/studios/statistics",
+                            "icon": "BarChart3",
+                            "order": 1,
+                        },
+                        {
+                            "label": "Publications",
+                            "href": "/studios/publications",
+                            "icon": "Newspaper",
+                            "order": 2,
+                        },
+                        {
+                            "label": "Reports",
+                            "href": "/reports",
+                            "icon": "FileText",
+                            "permission": "reports.view",
+                            "order": 3,
+                        },
+                        {
+                            "label": "Datasets",
+                            "href": "/datasets",
+                            "icon": "Database",
+                            "permission": "datasets.view",
+                            "order": 4,
+                        },
                     ],
                 },
                 {
                     "label": "Intelligence",
                     "order": 2,
                     "items": [
-                        {"label": "Analytics Assistant", "href": "/ai", "icon": "Bot", "permission": "ai.use", "order": 0},
-                        {"label": "Scheduler", "href": "/scheduler", "icon": "CalendarClock", "order": 1},
+                        {
+                            "label": "Analytics Assistant",
+                            "href": "/ai",
+                            "icon": "Bot",
+                            "permission": "ai.use",
+                            "order": 0,
+                        },
+                        {
+                            "label": "Scheduler",
+                            "href": "/scheduler",
+                            "icon": "CalendarClock",
+                            "order": 1,
+                        },
                     ],
                 },
                 {
                     "label": "Personal",
                     "order": 3,
                     "items": [
-                        {"label": "Notifications", "href": "/notifications", "icon": "Bell", "order": 0},
+                        {
+                            "label": "Notifications",
+                            "href": "/notifications",
+                            "icon": "Bell",
+                            "order": 0,
+                        },
                         {"label": "Profile", "href": "/settings", "icon": "Settings", "order": 99},
                     ],
                 },
@@ -958,17 +1304,42 @@ async def get_navigation(
                     "label": "Capture",
                     "order": 0,
                     "items": [
-                        {"label": "Smart Data Capture", "href": "/capture", "icon": "ScanLine", "order": 0},
-                        {"label": "Capture Queue", "href": "/capture/queue", "icon": "ClipboardList", "order": 1},
-                        {"label": "Assigned Tasks", "href": "/capture/tasks", "icon": "CheckSquare", "order": 2},
-                        {"label": "Validation", "href": "/capture/review", "icon": "CheckSquare", "order": 3},
+                        {
+                            "label": "Smart Data Capture",
+                            "href": "/capture",
+                            "icon": "ScanLine",
+                            "order": 0,
+                        },
+                        {
+                            "label": "Capture Queue",
+                            "href": "/capture/queue",
+                            "icon": "ClipboardList",
+                            "order": 1,
+                        },
+                        {
+                            "label": "Assigned Tasks",
+                            "href": "/capture/tasks",
+                            "icon": "CheckSquare",
+                            "order": 2,
+                        },
+                        {
+                            "label": "Validation",
+                            "href": "/capture/review",
+                            "icon": "CheckSquare",
+                            "order": 3,
+                        },
                     ],
                 },
                 {
                     "label": "Personal",
                     "order": 1,
                     "items": [
-                        {"label": "Notifications", "href": "/notifications", "icon": "Bell", "order": 0},
+                        {
+                            "label": "Notifications",
+                            "href": "/notifications",
+                            "icon": "Bell",
+                            "order": 0,
+                        },
                         {"label": "Profile", "href": "/settings", "icon": "Settings", "order": 99},
                     ],
                 },
@@ -981,15 +1352,32 @@ async def get_navigation(
                     "label": "View",
                     "order": 0,
                     "items": [
-                        {"label": "Dashboards", "href": "/dashboard", "icon": "LayoutDashboard", "permission": "dashboard.view", "order": 0},
-                        {"label": "Reports", "href": "/reports", "icon": "FileText", "permission": "reports.view", "order": 1},
+                        {
+                            "label": "Dashboards",
+                            "href": "/dashboard",
+                            "icon": "LayoutDashboard",
+                            "permission": "dashboard.view",
+                            "order": 0,
+                        },
+                        {
+                            "label": "Reports",
+                            "href": "/reports",
+                            "icon": "FileText",
+                            "permission": "reports.view",
+                            "order": 1,
+                        },
                     ],
                 },
                 {
                     "label": "Personal",
                     "order": 1,
                     "items": [
-                        {"label": "Notifications", "href": "/notifications", "icon": "Bell", "order": 0},
+                        {
+                            "label": "Notifications",
+                            "href": "/notifications",
+                            "icon": "Bell",
+                            "order": 0,
+                        },
                         {"label": "Profile", "href": "/settings", "icon": "Settings", "order": 99},
                     ],
                 },
@@ -1004,14 +1392,24 @@ async def get_navigation(
                 "label": "Overview",
                 "order": 0,
                 "items": [
-                    {"label": "Dashboard", "href": "/dashboard", "icon": "LayoutDashboard", "order": 0},
+                    {
+                        "label": "Dashboard",
+                        "href": "/dashboard",
+                        "icon": "LayoutDashboard",
+                        "order": 0,
+                    },
                 ],
             },
             {
                 "label": "Personal",
                 "order": 1,
                 "items": [
-                    {"label": "Notifications", "href": "/notifications", "icon": "Bell", "order": 0},
+                    {
+                        "label": "Notifications",
+                        "href": "/notifications",
+                        "icon": "Bell",
+                        "order": 0,
+                    },
                     {"label": "Profile", "href": "/settings", "icon": "Settings", "order": 99},
                 ],
             },
@@ -1019,10 +1417,19 @@ async def get_navigation(
     }
 
     ROLE_PRIORITY = [
-        "super_admin", "org_owner", "org_admin", "dept_manager",
-        "auditor", "data_engineer", "data_analyst", "researcher",
-        "business_analyst", "executive", "dept_officer",
-        "data_entry_officer", "viewer",
+        "super_admin",
+        "org_owner",
+        "org_admin",
+        "dept_manager",
+        "auditor",
+        "data_engineer",
+        "data_analyst",
+        "researcher",
+        "business_analyst",
+        "executive",
+        "dept_officer",
+        "data_entry_officer",
+        "viewer",
     ]
 
     primary_role = next((r for r in ROLE_PRIORITY if r in roles), roles[0] if roles else "viewer")
@@ -1037,22 +1444,31 @@ async def get_navigation(
 
     filtered_groups = []
     for grp in nav_config["groups"]:
-        filtered_items = [
-            item for item in grp["items"]
-            if _has_perm(item.get("permission"))
-        ]
+        filtered_items = [item for item in grp["items"] if _has_perm(item.get("permission"))]
         filtered_items.sort(key=lambda x: x.get("order", 99))
         if filtered_items:
-            filtered_groups.append({
-                "label": grp["label"],
-                "order": grp.get("order", 0),
-                "items": filtered_items,
-            })
+            filtered_groups.append(
+                {
+                    "label": grp["label"],
+                    "order": grp.get("order", 0),
+                    "items": filtered_items,
+                }
+            )
 
     if industry in ("healthcare", "education"):
         industry_item = {
-            "healthcare": {"label": "Healthcare Studio", "href": "/studios/healthcare", "icon": "Stethoscope", "order": 10},
-            "education": {"label": "Education Studio", "href": "/studios/education", "icon": "GraduationCap", "order": 10},
+            "healthcare": {
+                "label": "Healthcare Studio",
+                "href": "/studios/healthcare",
+                "icon": "Stethoscope",
+                "order": 10,
+            },
+            "education": {
+                "label": "Education Studio",
+                "href": "/studios/education",
+                "icon": "GraduationCap",
+                "order": 10,
+            },
         }[industry]
         for grp in filtered_groups:
             if grp["label"] in ("Overview", "Platform Tools"):
@@ -1068,19 +1484,21 @@ async def get_navigation(
         ]
         filtered_groups = [g for g in filtered_groups if g["items"]]
 
-    return success_response({
-        "purpose": nav_config["purpose"],
-        "primary_role": primary_role,
-        "groups": filtered_groups,
-        "context": {
-            "roles": roles,
-            "permissions": permissions,
-            "organization_type": org_type,
-            "industry": industry,
-            "workspace_type": workspace_type,
-            "department_id": dept_id,
-        },
-    })
+    return success_response(
+        {
+            "purpose": nav_config["purpose"],
+            "primary_role": primary_role,
+            "groups": filtered_groups,
+            "context": {
+                "roles": roles,
+                "permissions": permissions,
+                "organization_type": org_type,
+                "industry": industry,
+                "workspace_type": workspace_type,
+                "department_id": dept_id,
+            },
+        }
+    )
 
 
 @router.get("/sessions")
@@ -1160,7 +1578,9 @@ async def create_user(
     if not is_super_admin(current_user):
         org_id = get_current_organization_id(current_user, db)
         if request.organization_id and request.organization_id != org_id:
-            raise HTTPException(status_code=403, detail="Cannot create users outside your organization")
+            raise HTTPException(
+                status_code=403, detail="Cannot create users outside your organization"
+            )
     service = UserService(db)
     user = service.create_user(request, created_by=current_user["id"])
     return success_response(user, "User created")

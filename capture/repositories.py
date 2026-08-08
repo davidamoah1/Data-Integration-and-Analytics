@@ -11,10 +11,9 @@ Architecture:
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
 from sqlalchemy import func, select
-from sqlalchemy.orm import Session as DbSession
 
 from capture.models import (
     CaptureAuditLog,
@@ -50,9 +49,7 @@ class CaptureDocumentRepository(BaseRepository[CaptureDocument]):
         limit: int = 50,
         offset: int = 0,
     ) -> list[CaptureDocument]:
-        stmt = select(CaptureDocument).where(
-            CaptureDocument.organization_id == organization_id
-        )
+        stmt = select(CaptureDocument).where(CaptureDocument.organization_id == organization_id)
         if status:
             stmt = stmt.where(CaptureDocument.status == status)
         if document_type:
@@ -115,9 +112,7 @@ class CaptureDocumentRepository(BaseRepository[CaptureDocument]):
     def list_all_by_org(self, organization_id: int) -> list[CaptureDocument]:
         return list(
             self.db.execute(
-                select(CaptureDocument).where(
-                    CaptureDocument.organization_id == organization_id
-                )
+                select(CaptureDocument).where(CaptureDocument.organization_id == organization_id)
             )
             .scalars()
             .all()
@@ -149,9 +144,7 @@ class CaptureFieldRepository(BaseRepository[CaptureField]):
         ).scalar_one_or_none()
 
     def delete_by_document(self, document_id: int) -> None:
-        self.db.execute(
-            select(CaptureField).where(CaptureField.document_id == document_id)
-        )
+        self.db.execute(select(CaptureField).where(CaptureField.document_id == document_id))
         for field in self.list_by_document(document_id):
             self.db.delete(field)
         self.db.flush()
@@ -170,7 +163,9 @@ class CaptureBatchRepository(BaseRepository[CaptureBatch]):
             )
         ).scalar_one_or_none()
 
-    def list_by_org(self, organization_id: int, limit: int = 50, offset: int = 0) -> list[CaptureBatch]:
+    def list_by_org(
+        self, organization_id: int, limit: int = 50, offset: int = 0
+    ) -> list[CaptureBatch]:
         return list(
             self.db.execute(
                 select(CaptureBatch)
@@ -247,7 +242,9 @@ class CaptureTemplateRepository(BaseRepository[CaptureTemplate]):
 
     model = CaptureTemplate
 
-    def get_by_org_and_type(self, organization_id: int, document_type: str) -> CaptureTemplate | None:
+    def get_by_org_and_type(
+        self, organization_id: int, document_type: str
+    ) -> CaptureTemplate | None:
         return self.db.execute(
             select(CaptureTemplate).where(
                 CaptureTemplate.organization_id == organization_id,

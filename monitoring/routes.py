@@ -12,9 +12,9 @@ from datetime import datetime, timezone
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse, PlainTextResponse
 
+from monitoring.otel import is_initialised as otel_ready
 from monitoring.prometheus import metrics_registry
 from monitoring.sentry_integration import is_initialised as sentry_ready
-from monitoring.otel import is_initialised as otel_ready
 
 router = APIRouter(prefix="/monitoring", tags=["Monitoring"])
 
@@ -70,6 +70,7 @@ async def readiness():
     # Database check
     try:
         from sqlalchemy import text
+
         from shared.database import get_engine
 
         engine = get_engine()
@@ -85,6 +86,7 @@ async def readiness():
     if redis_url:
         try:
             import redis as redis_lib
+
             r = redis_lib.from_url(redis_url, socket_timeout=2)
             r.ping()
             checks["redis"] = {"status": "ready"}

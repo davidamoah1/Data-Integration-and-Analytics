@@ -11,56 +11,89 @@ import pytest
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from validation.engine import ValidationEngine, ValidationStatus, ValidationResult
-from validation.schema_validator import SchemaValidator
-from validation.quality_rules import QualityRulesEngine
-from validation.business_rules import BusinessRuleEngine, BusinessRule
+from validation.ai_copilot import ValidationAICopilot
+from validation.approval import ApprovalDecisionType, ApprovalWorkflow
+from validation.audit import ValidationAuditLogger
+from validation.business_rules import BusinessRuleEngine
 from validation.clinical_checks import ClinicalValidationEngine
+from validation.engine import ValidationEngine, ValidationStatus
 from validation.outlier_detector import OutlierDetector
 from validation.profiler import ValidationProfiler
-from validation.scoring import QualityScoreEngine
+from validation.quality_rules import QualityRulesEngine
 from validation.report_generator import ValidationReportGenerator
-from validation.approval import ApprovalWorkflow, ApprovalDecisionType
-from validation.audit import ValidationAuditLogger
-from validation.ai_copilot import ValidationAICopilot
-
+from validation.schema_validator import SchemaValidator
 
 # ── Fixtures ──
+
 
 @pytest.fixture
 def clean_healthcare_df():
     """A clean healthcare dataset that should pass all validations."""
-    return pd.DataFrame({
-        "patient_id": ["P001", "P002", "P003", "P004", "P005"],
-        "patient_name": ["John Doe", "Jane Smith", "Bob Johnson", "Alice Brown", "Charlie Wilson"],
-        "age": [45, 32, 67, 12, 80],
-        "gender": ["Male", "Female", "Male", "Female", "Male"],
-        "diagnosis": ["Hypertension", "Diabetes", "Heart Disease", "Asthma", "Arthritis"],
-        "admission_date": ["2024-01-15", "2024-02-20", "2024-03-10", "2024-04-05", "2024-05-12"],
-        "discharge_date": ["2024-01-18", "2024-02-22", "2024-03-15", "2024-04-06", "2024-05-14"],
-        "ward": ["A", "B", "C", "Pediatric", "A"],
-        "doctor": ["Dr. Smith", "Dr. Jones", "Dr. Brown", "Dr. Davis", "Dr. Smith"],
-        "amount": [5000, 3200, 12000, 800, 4500],
-        "insurance_type": ["Private", "Public", "Private", "Public", "Private"],
-    })
+    return pd.DataFrame(
+        {
+            "patient_id": ["P001", "P002", "P003", "P004", "P005"],
+            "patient_name": [
+                "John Doe",
+                "Jane Smith",
+                "Bob Johnson",
+                "Alice Brown",
+                "Charlie Wilson",
+            ],
+            "age": [45, 32, 67, 12, 80],
+            "gender": ["Male", "Female", "Male", "Female", "Male"],
+            "diagnosis": ["Hypertension", "Diabetes", "Heart Disease", "Asthma", "Arthritis"],
+            "admission_date": [
+                "2024-01-15",
+                "2024-02-20",
+                "2024-03-10",
+                "2024-04-05",
+                "2024-05-12",
+            ],
+            "discharge_date": [
+                "2024-01-18",
+                "2024-02-22",
+                "2024-03-15",
+                "2024-04-06",
+                "2024-05-14",
+            ],
+            "ward": ["A", "B", "C", "Pediatric", "A"],
+            "doctor": ["Dr. Smith", "Dr. Jones", "Dr. Brown", "Dr. Davis", "Dr. Smith"],
+            "amount": [5000, 3200, 12000, 800, 4500],
+            "insurance_type": ["Private", "Public", "Private", "Public", "Private"],
+        }
+    )
 
 
 @pytest.fixture
 def dirty_healthcare_df():
     """A healthcare dataset with various data quality issues."""
-    return pd.DataFrame({
-        "patient_id": ["P001", "P002", "P001", "", "P005"],
-        "patient_name": ["John Doe", "", "John Doe", "Alice Brown", "Charlie Wilson"],
-        "age": [45, -5, 200, 12, 80],
-        "gender": ["Male", "Female", "Male", "Unknown", "Male"],
-        "diagnosis": ["Hypertension", "Diabetes", "Heart Disease", "Asthma", "Arthritis"],
-        "admission_date": ["2024-01-15", "2024-02-20", "2024-03-10", "2024-04-05", "2024-05-12"],
-        "discharge_date": ["2024-01-10", "2024-02-22", "2024-03-15", "2024-04-06", "2024-05-14"],
-        "ward": ["A", "B", "C", "Adult", "A"],
-        "doctor": ["Dr. Smith", "", "Dr. Brown", "Dr. Davis", "Dr. Smith"],
-        "amount": [5000, -100, 12000, 800, 450000],
-        "insurance_type": ["Private", "Public", "Private", "Public", "Private"],
-    })
+    return pd.DataFrame(
+        {
+            "patient_id": ["P001", "P002", "P001", "", "P005"],
+            "patient_name": ["John Doe", "", "John Doe", "Alice Brown", "Charlie Wilson"],
+            "age": [45, -5, 200, 12, 80],
+            "gender": ["Male", "Female", "Male", "Unknown", "Male"],
+            "diagnosis": ["Hypertension", "Diabetes", "Heart Disease", "Asthma", "Arthritis"],
+            "admission_date": [
+                "2024-01-15",
+                "2024-02-20",
+                "2024-03-10",
+                "2024-04-05",
+                "2024-05-12",
+            ],
+            "discharge_date": [
+                "2024-01-10",
+                "2024-02-22",
+                "2024-03-15",
+                "2024-04-06",
+                "2024-05-14",
+            ],
+            "ward": ["A", "B", "C", "Adult", "A"],
+            "doctor": ["Dr. Smith", "", "Dr. Brown", "Dr. Davis", "Dr. Smith"],
+            "amount": [5000, -100, 12000, 800, 450000],
+            "insurance_type": ["Private", "Public", "Private", "Public", "Private"],
+        }
+    )
 
 
 @pytest.fixture
@@ -74,6 +107,7 @@ def validation_engine():
 
 
 # ── Schema Validator Tests ──
+
 
 class TestSchemaValidator:
     def test_clean_dataset_passes(self, clean_healthcare_df):
@@ -111,6 +145,7 @@ class TestSchemaValidator:
 
 
 # ── Quality Rules Tests ──
+
 
 class TestQualityRules:
     def test_missing_values_detected(self):
@@ -170,6 +205,7 @@ class TestQualityRules:
 
 # ── Business Rules Tests ──
 
+
 class TestBusinessRules:
     def test_unique_patient_id_passes(self, clean_healthcare_df):
         engine = BusinessRuleEngine()
@@ -206,7 +242,7 @@ class TestBusinessRules:
 
     def test_rule_enable_disable(self):
         engine = BusinessRuleEngine()
-        initial_count = len(engine.list_rules())
+        len(engine.list_rules())
         engine.disable_rule("unique_patient_id")
         rules = {r["name"]: r for r in engine.list_rules()}
         assert rules["unique_patient_id"]["enabled"] is False
@@ -222,11 +258,13 @@ class TestBusinessRules:
         assert len(pediatric) == 0
 
     def test_child_not_pediatric_flagged(self):
-        df = pd.DataFrame({
-            "patient_id": ["P1", "P2"],
-            "age": [10, 30],
-            "department": ["Adult Ward", "Adult Ward"],
-        })
+        df = pd.DataFrame(
+            {
+                "patient_id": ["P1", "P2"],
+                "age": [10, 30],
+                "department": ["Adult Ward", "Adult Ward"],
+            }
+        )
         engine = BusinessRuleEngine()
         findings = engine.run(df)
         pediatric = [f for f in findings if f.rule_name == "child_age_pediatric"]
@@ -236,12 +274,15 @@ class TestBusinessRules:
 
 # ── Clinical Checks Tests ──
 
+
 class TestClinicalChecks:
     def test_bp_range_check(self):
-        df = pd.DataFrame({
-            "systolic_bp": [120, 80, 350],
-            "diastolic_bp": [80, 50, 100],
-        })
+        df = pd.DataFrame(
+            {
+                "systolic_bp": [120, 80, 350],
+                "diastolic_bp": [80, 50, 100],
+            }
+        )
         findings = ClinicalValidationEngine.run(df)
         bp_findings = [f for f in findings if "bp" in f.rule_name]
         assert len(bp_findings) >= 1
@@ -271,6 +312,7 @@ class TestClinicalChecks:
 
 # ── Outlier Detection Tests ──
 
+
 class TestOutlierDetector:
     def test_iqr_outliers_detected(self):
         df = pd.DataFrame({"value": [1, 2, 3, 4, 5, 100, 6, 7, 8, 9, 10, 200]})
@@ -286,16 +328,19 @@ class TestOutlierDetector:
         assert future[0].affected_rows == 1
 
     def test_duplicate_admissions_detected(self):
-        df = pd.DataFrame({
-            "patient_id": ["P1", "P2", "P1"],
-            "admission_date": ["2024-01-15", "2024-02-20", "2024-01-15"],
-        })
+        df = pd.DataFrame(
+            {
+                "patient_id": ["P1", "P2", "P1"],
+                "admission_date": ["2024-01-15", "2024-02-20", "2024-01-15"],
+            }
+        )
         findings = OutlierDetector.run(df)
         dup_adm = [f for f in findings if f.rule_name == "duplicate_admissions"]
         assert len(dup_adm) == 1
 
 
 # ── Profiler Tests ──
+
 
 class TestProfiler:
     def test_profile_generates_stats(self, clean_healthcare_df):
@@ -322,6 +367,7 @@ class TestProfiler:
 
 
 # ── Scoring Tests ──
+
 
 class TestScoring:
     def test_clean_dataset_high_score(self, clean_healthcare_df, validation_engine):
@@ -351,6 +397,7 @@ class TestScoring:
 
 
 # ── Engine Integration Tests ──
+
 
 class TestValidationEngine:
     def test_clean_dataset_passes(self, clean_healthcare_df, validation_engine):
@@ -392,19 +439,24 @@ class TestValidationEngine:
 
 # ── Approval Workflow Tests ──
 
+
 class TestApprovalWorkflow:
     def test_approve_failed_validation(self, dirty_healthcare_df, validation_engine):
         result = validation_engine.validate(dirty_healthcare_df, "dirty.csv")
         assert result.status == ValidationStatus.FAILED
 
-        result, decision = ApprovalWorkflow.approve(result, "admin", "administrator", "Approved with exceptions")
+        result, decision = ApprovalWorkflow.approve(
+            result, "admin", "administrator", "Approved with exceptions"
+        )
         assert result.status == ValidationStatus.APPROVED
         assert result.can_proceed_to_etl is True
         assert decision.decision == ApprovalDecisionType.APPROVED
 
     def test_reject_validation(self, clean_healthcare_df, validation_engine):
         result = validation_engine.validate(clean_healthcare_df, "clean.csv")
-        result, decision = ApprovalWorkflow.reject(result, "reviewer", "reviewer", "Data quality concerns")
+        result, decision = ApprovalWorkflow.reject(
+            result, "reviewer", "reviewer", "Data quality concerns"
+        )
         assert result.status == ValidationStatus.REJECTED
         assert result.can_proceed_to_etl is False
         assert decision.decision == ApprovalDecisionType.REJECTED
@@ -424,6 +476,7 @@ class TestApprovalWorkflow:
 
 
 # ── Report Generator Tests ──
+
 
 class TestReportGenerator:
     def test_generate_summary(self, clean_healthcare_df, validation_engine):
@@ -472,6 +525,7 @@ class TestReportGenerator:
 
 # ── Audit Logger Tests ──
 
+
 class TestAuditLogger:
     def setup_method(self):
         ValidationAuditLogger.clear()
@@ -505,6 +559,7 @@ class TestAuditLogger:
 
 
 # ── AI Copilot Tests ──
+
 
 class TestValidationAICopilot:
     def test_build_context(self, clean_healthcare_df, validation_engine):
@@ -542,17 +597,21 @@ class TestValidationAICopilot:
 
 # ── Performance Tests ──
 
+
 class TestPerformance:
     def test_large_dataset_performance(self):
         """Validate a large dataset within reasonable time."""
         import time
+
         n = 10000
-        df = pd.DataFrame({
-            "patient_id": [f"P{i:05d}" for i in range(n)],
-            "age": [30 + i % 50 for i in range(n)],
-            "gender": ["Male" if i % 2 == 0 else "Female" for i in range(n)],
-            "amount": [1000 + i * 10 for i in range(n)],
-        })
+        df = pd.DataFrame(
+            {
+                "patient_id": [f"P{i:05d}" for i in range(n)],
+                "age": [30 + i % 50 for i in range(n)],
+                "gender": ["Male" if i % 2 == 0 else "Female" for i in range(n)],
+                "amount": [1000 + i * 10 for i in range(n)],
+            }
+        )
         engine = ValidationEngine()
         start = time.time()
         result = engine.validate(df, "large.csv")
@@ -562,6 +621,7 @@ class TestPerformance:
 
 
 # ── API Route Tests ──
+
 
 class TestValidationAPI:
     def test_run_validation_endpoint(self, client, auth_headers):

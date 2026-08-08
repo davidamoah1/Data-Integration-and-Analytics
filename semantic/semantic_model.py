@@ -283,15 +283,17 @@ class SemanticModelBuilder:
 
             definition = BusinessDefinitions.get_entity_definition(key, industry)
 
-            entities.append(EntityDefinition(
-                key=key,
-                display_name=display,
-                industry=industry,
-                columns=entity_cols[key],
-                role=entity_roles.get(key, "attribute"),
-                definition=definition,
-                synonyms=synonyms,
-            ))
+            entities.append(
+                EntityDefinition(
+                    key=key,
+                    display_name=display,
+                    industry=industry,
+                    columns=entity_cols[key],
+                    role=entity_roles.get(key, "attribute"),
+                    definition=definition,
+                    synonyms=synonyms,
+                )
+            )
 
         return entities
 
@@ -310,7 +312,9 @@ class SemanticModelBuilder:
                     continue
 
                 series = df[col].dropna()
-                unique_pct = (series.nunique() / max(len(series), 1) * 100) if len(series) > 0 else 0
+                unique_pct = (
+                    (series.nunique() / max(len(series), 1) * 100) if len(series) > 0 else 0
+                )
 
                 if unique_pct < 5:
                     cardinality = "low"
@@ -323,26 +327,27 @@ class SemanticModelBuilder:
 
                 definition = BusinessDefinitions.get_dimension_definition(mapping.entity_key)
 
-                dimensions.append(DimensionDefinition(
-                    key=mapping.entity_key,
-                    display_name=mapping.entity_display,
-                    column=col,
-                    cardinality=cardinality,
-                    sample_values=sample,
-                    definition=definition,
-                ))
+                dimensions.append(
+                    DimensionDefinition(
+                        key=mapping.entity_key,
+                        display_name=mapping.entity_display,
+                        column=col,
+                        cardinality=cardinality,
+                        sample_values=sample,
+                        definition=definition,
+                    )
+                )
 
         return dimensions
 
     @staticmethod
-    def _build_metrics(
-        df: pd.DataFrame, mapping_result, industry: str
-    ) -> list[MetricDefinition]:
+    def _build_metrics(df: pd.DataFrame, mapping_result, industry: str) -> list[MetricDefinition]:
         """Build metric definitions by computing KPIs."""
         from semantic.kpi_generator import KPIGenerator
+
         kpi_result = KPIGenerator.generate(df, mapping_result)
         knowledge = get_industry_knowledge(industry) or {}
-        kpi_defs = knowledge.get("kpis", {})
+        knowledge.get("kpis", {})
 
         metrics = []
         col_mapping = mapping_result.semantic_result.get_column_mapping()
@@ -352,6 +357,7 @@ class SemanticModelBuilder:
 
             # Find threshold from KPI registry
             from semantic.kpi_registry import KPIRegistry
+
             threshold = None
             for reg_def in KPIRegistry.definitions(industry):
                 if reg_def.key == kpi.key:
@@ -365,18 +371,20 @@ class SemanticModelBuilder:
                     metric_column = col
                     break
 
-            metrics.append(MetricDefinition(
-                key=kpi.key,
-                label=kpi.label,
-                entity=kpi.entity,
-                category=kpi.category,
-                aggregation="sum" if kpi.value != int(kpi.value) else "count",
-                column=metric_column,
-                value=kpi.value,
-                formatted=kpi.formatted,
-                definition=definition,
-                threshold=threshold,
-            ))
+            metrics.append(
+                MetricDefinition(
+                    key=kpi.key,
+                    label=kpi.label,
+                    entity=kpi.entity,
+                    category=kpi.category,
+                    aggregation="sum" if kpi.value != int(kpi.value) else "count",
+                    column=metric_column,
+                    value=kpi.value,
+                    formatted=kpi.formatted,
+                    definition=definition,
+                    threshold=threshold,
+                )
+            )
 
         return metrics
 
@@ -385,15 +393,17 @@ class SemanticModelBuilder:
         """Build relationship definitions from relationship result."""
         relationships = []
         for rel in rel_result.relationships:
-            relationships.append(RelationshipDefinition(
-                source=rel.source_entity,
-                target=rel.target_entity,
-                type=rel.relationship_type,
-                label=rel.label,
-                source_column=rel.source_column,
-                target_column=rel.target_column,
-                confidence=rel.confidence,
-            ))
+            relationships.append(
+                RelationshipDefinition(
+                    source=rel.source_entity,
+                    target=rel.target_entity,
+                    type=rel.relationship_type,
+                    label=rel.label,
+                    source_column=rel.source_column,
+                    target_column=rel.target_column,
+                    confidence=rel.confidence,
+                )
+            )
         return relationships
 
 

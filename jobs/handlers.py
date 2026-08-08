@@ -8,7 +8,6 @@ to them.
 from __future__ import annotations
 
 import logging
-from typing import Any
 
 from sqlalchemy.orm import Session as DbSession
 
@@ -31,10 +30,7 @@ def _handle_etl_run(job_id: int, payload: dict, db: DbSession) -> dict:
     svc = ETLService()
     update_job_progress(job_id, 0.2, "Running pipeline")
 
-    if pipeline_id:
-        metrics = svc.run_pipeline(pipeline_id=int(pipeline_id))
-    else:
-        metrics = svc.run_pipeline()
+    metrics = svc.run_pipeline(pipeline_id=int(pipeline_id)) if pipeline_id else svc.run_pipeline()
 
     update_job_progress(job_id, 0.9, "Pipeline completed, collecting metrics")
     return {"metrics": metrics}
@@ -63,7 +59,11 @@ def _handle_ocr_batch(job_id: int, payload: dict, db: DbSession) -> dict:
 
     # Refresh to get final counts
     db.refresh(batch)
-    update_job_progress(job_id, 1.0, f"Batch complete: {batch.processed_documents} processed, {batch.failed_documents} failed")
+    update_job_progress(
+        job_id,
+        1.0,
+        f"Batch complete: {batch.processed_documents} processed, {batch.failed_documents} failed",
+    )
 
     return {
         "batch_id": batch_id,
@@ -118,8 +118,9 @@ def _handle_data_import(job_id: int, payload: dict, db: DbSession) -> dict:
 
     update_job_progress(job_id, 0.1, f"Loading file: {file_path}")
 
-    import pandas as pd
     import os
+
+    import pandas as pd
 
     ext = os.path.splitext(file_path)[1].lower()
     if ext == ".csv":
@@ -178,6 +179,7 @@ def _handle_export(job_id: int, payload: dict, db: DbSession) -> dict:
 
     if payload.get("capture_bulk_export"):
         from capture.service import CaptureService
+
         svc = CaptureService(db)
         update_job_progress(job_id, 0.3, "Exporting approved capture documents")
         result = svc.bulk_export_approved(

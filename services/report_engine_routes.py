@@ -7,7 +7,7 @@ from typing import Any
 
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import Response
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from services.report_engine import (
     ChartDefinition,
@@ -17,7 +17,6 @@ from services.report_engine import (
     KPIMetric,
     PresentationGenerator,
     Recommendation,
-    ReportComposition,
     ReportCompositionService,
     ReportSection,
     ReportSectionType,
@@ -94,7 +93,7 @@ async def create_report(req: CreateReportRequest):
     try:
         template = ReportTemplate(req.template)
     except ValueError:
-        raise HTTPException(status_code=400, detail=f"Invalid template: {req.template}")
+        raise HTTPException(status_code=400, detail=f"Invalid template: {req.template}") from None
 
     report = ReportCompositionService.create_report(
         title=req.title,
@@ -145,7 +144,9 @@ async def add_section(report_id: str, req: dict[str, Any]):
     try:
         section_type = ReportSectionType(req.get("section_type", "custom"))
     except ValueError:
-        raise HTTPException(status_code=400, detail=f"Invalid section type: {req.get('section_type')}")
+        raise HTTPException(
+            status_code=400, detail=f"Invalid section type: {req.get('section_type')}"
+        ) from None
 
     section = ReportSection(
         section_type=section_type,
@@ -198,7 +199,9 @@ async def add_chart(report_id: str, section_order: int, req: AddChartRequest):
     try:
         chart_type = ChartType(req.chart_type)
     except ValueError:
-        raise HTTPException(status_code=400, detail=f"Invalid chart type: {req.chart_type}")
+        raise HTTPException(
+            status_code=400, detail=f"Invalid chart type: {req.chart_type}"
+        ) from None
 
     chart = ChartDefinition(
         title=req.title,
@@ -290,7 +293,7 @@ async def export_report(
     try:
         fmt = ExportFormat(format)
     except ValueError:
-        raise HTTPException(status_code=400, detail=f"Unsupported format: {format}")
+        raise HTTPException(status_code=400, detail=f"Unsupported format: {format}") from None
 
     try:
         data, media_type, ext = ReportCompositionService.export_report(report_id, fmt)
@@ -300,9 +303,7 @@ async def export_report(
     return Response(
         content=data,
         media_type=media_type,
-        headers={
-            "Content-Disposition": f"attachment; filename=report_{report_id}.{ext}"
-        },
+        headers={"Content-Disposition": f"attachment; filename=report_{report_id}.{ext}"},
     )
 
 
@@ -337,9 +338,7 @@ async def export_presentation(
     return Response(
         content=data,
         media_type=media_type,
-        headers={
-            "Content-Disposition": f"attachment; filename=presentation_{report_id}.{ext}"
-        },
+        headers={"Content-Disposition": f"attachment; filename=presentation_{report_id}.{ext}"},
     )
 
 
@@ -372,8 +371,7 @@ async def list_section_types():
     """List available section types."""
     return {
         "section_types": [
-            {"key": s.value, "name": s.value.replace("_", " ").title()}
-            for s in ReportSectionType
+            {"key": s.value, "name": s.value.replace("_", " ").title()} for s in ReportSectionType
         ]
     }
 
@@ -381,9 +379,4 @@ async def list_section_types():
 @router.get("/chart-types/list")
 async def list_chart_types():
     """List available chart types."""
-    return {
-        "chart_types": [
-            {"key": c.value, "name": c.value.title()}
-            for c in ChartType
-        ]
-    }
+    return {"chart_types": [{"key": c.value, "name": c.value.title()} for c in ChartType]}

@@ -11,35 +11,31 @@ Tests cover:
 from __future__ import annotations
 
 import asyncio
-import pytest
-import time
 
+from performance.cache import (
+    CacheManager,
+    CacheStats,
+    cache_key,
+    cached,
+)
+from performance.db_optimization import (
+    ChunkedQuery,
+    DBStats,
+    IndexManager,
+    QueryOptimizer,
+    get_db_stats,
+)
 from performance.queue import (
-    TaskQueue,
-    Task,
-    TaskStatus,
-    TaskPriority,
     QueueStats,
+    Task,
+    TaskPriority,
+    TaskQueue,
+    TaskStatus,
 )
 from performance.workers import (
     WorkerPool,
-    Worker,
     WorkerStats,
 )
-from performance.cache import (
-    CacheManager,
-    cached,
-    cache_key,
-    CacheStats,
-)
-from performance.db_optimization import (
-    IndexManager,
-    QueryOptimizer,
-    ChunkedQuery,
-    DBStats,
-    get_db_stats,
-)
-
 
 # ── Task Queue Tests ──────────────────────────────────────
 
@@ -526,7 +522,7 @@ class TestIndexManager:
 class TestQueryOptimizer:
     def test_analyze_query_no_where(self):
         optimizer = QueryOptimizer()
-        from sqlalchemy import select, text
+        from sqlalchemy import text
 
         class FakeModel:
             __name__ = "FakeModel"
@@ -552,6 +548,7 @@ class TestQueryOptimizer:
 class TestChunkedQuery:
     def test_iter_chunks(self, db_session):
         from sqlalchemy import select
+
         from authentication.models import User
 
         # Count existing users (seeded super admin)
@@ -560,12 +557,14 @@ class TestChunkedQuery:
         to_create = total_needed - existing
         if to_create > 0:
             for i in range(to_create):
-                db_session.add(User(
-                    email=f"chunk{i}@test.com",
-                    password_hash="hash",
-                    full_name=f"Chunk {i}",
-                    is_active=1,
-                ))
+                db_session.add(
+                    User(
+                        email=f"chunk{i}@test.com",
+                        password_hash="hash",
+                        full_name=f"Chunk {i}",
+                        is_active=1,
+                    )
+                )
             db_session.commit()
 
         chunks = list(ChunkedQuery.iter_chunks(db_session, select(User), chunk_size=5))
@@ -575,23 +574,29 @@ class TestChunkedQuery:
 
     def test_iter_chunks_empty(self, db_session):
         from sqlalchemy import select
+
         from authentication.models import User
 
-        chunks = list(ChunkedQuery.iter_chunks(db_session, select(User).where(User.id < 0), chunk_size=10))
+        chunks = list(
+            ChunkedQuery.iter_chunks(db_session, select(User).where(User.id < 0), chunk_size=10)
+        )
         assert len(chunks) == 0
 
     def test_process_in_chunks(self, db_session):
         from sqlalchemy import select
+
         from authentication.models import User
 
         processed = []
         for i in range(10):
-            db_session.add(User(
-                email=f"proc{i}@test.com",
-                password_hash="hash",
-                full_name=f"Proc {i}",
-                is_active=1,
-            ))
+            db_session.add(
+                User(
+                    email=f"proc{i}@test.com",
+                    password_hash="hash",
+                    full_name=f"Proc {i}",
+                    is_active=1,
+                )
+            )
         db_session.commit()
 
         count = ChunkedQuery.process_in_chunks(

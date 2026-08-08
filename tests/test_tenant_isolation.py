@@ -8,7 +8,7 @@ import pytest
 from sqlalchemy.orm import Session as DbSession
 
 from ai.models import AIConversation, AIInsight, AIWorkflow
-from etl.models import ETLPipeline, ETLJob, ETLImportTemplate, ETLTransformation
+from etl.models import ETLImportTemplate, ETLJob, ETLPipeline, ETLTransformation
 from shared.exceptions import NotFoundError
 from shared.tenant import (
     TenantQueryManager,
@@ -38,11 +38,13 @@ class TestTenantQueryManagerList:
     def test_list_only_returns_own_org_records(self, db_session, two_orgs):
         org_a, org_b = two_orgs
         # Create pipelines for both orgs
-        db_session.add_all([
-            ETLPipeline(organization_id=org_a, name="Pipeline A1", status="active"),
-            ETLPipeline(organization_id=org_a, name="Pipeline A2", status="active"),
-            ETLPipeline(organization_id=org_b, name="Pipeline B1", status="active"),
-        ])
+        db_session.add_all(
+            [
+                ETLPipeline(organization_id=org_a, name="Pipeline A1", status="active"),
+                ETLPipeline(organization_id=org_a, name="Pipeline A2", status="active"),
+                ETLPipeline(organization_id=org_b, name="Pipeline B1", status="active"),
+            ]
+        )
         db_session.flush()
 
         mgr_a = TenantQueryManager(db_session, org_a)
@@ -58,11 +60,13 @@ class TestTenantQueryManagerList:
 
     def test_list_with_filters_still_scoped(self, db_session, two_orgs):
         org_a, org_b = two_orgs
-        db_session.add_all([
-            ETLPipeline(organization_id=org_a, name="A-active", status="active"),
-            ETLPipeline(organization_id=org_a, name="A-inactive", status="inactive"),
-            ETLPipeline(organization_id=org_b, name="B-active", status="active"),
-        ])
+        db_session.add_all(
+            [
+                ETLPipeline(organization_id=org_a, name="A-active", status="active"),
+                ETLPipeline(organization_id=org_a, name="A-inactive", status="inactive"),
+                ETLPipeline(organization_id=org_b, name="B-active", status="active"),
+            ]
+        )
         db_session.flush()
 
         mgr_a = TenantQueryManager(db_session, org_a)
@@ -152,8 +156,10 @@ class TestTenantQueryManagerDelete:
     def test_delete_raises_for_other_org(self, db_session, two_orgs):
         org_a, org_b = two_orgs
         template_b = ETLImportTemplate(
-            organization_id=org_b, name="B Template",
-            source_type="csv", source_config={},
+            organization_id=org_b,
+            name="B Template",
+            source_type="csv",
+            source_config={},
         )
         db_session.add(template_b)
         db_session.flush()
@@ -171,13 +177,15 @@ class TestTenantQueryManagerCount:
 
     def test_count_is_org_scoped(self, db_session, two_orgs):
         org_a, org_b = two_orgs
-        db_session.add_all([
-            ETLJob(organization_id=org_a, job_type="import", status="completed"),
-            ETLJob(organization_id=org_a, job_type="import", status="failed"),
-            ETLJob(organization_id=org_b, job_type="import", status="completed"),
-            ETLJob(organization_id=org_b, job_type="import", status="completed"),
-            ETLJob(organization_id=org_b, job_type="import", status="failed"),
-        ])
+        db_session.add_all(
+            [
+                ETLJob(organization_id=org_a, job_type="import", status="completed"),
+                ETLJob(organization_id=org_a, job_type="import", status="failed"),
+                ETLJob(organization_id=org_b, job_type="import", status="completed"),
+                ETLJob(organization_id=org_b, job_type="import", status="completed"),
+                ETLJob(organization_id=org_b, job_type="import", status="failed"),
+            ]
+        )
         db_session.flush()
 
         mgr_a = TenantQueryManager(db_session, org_a)
@@ -247,11 +255,13 @@ class TestAIModelIsolation:
 
     def test_ai_conversations_isolated(self, db_session, two_orgs):
         org_a, org_b = two_orgs
-        db_session.add_all([
-            AIConversation(organization_id=org_a, user_id=1, assistant_type="data_copilot"),
-            AIConversation(organization_id=org_a, user_id=1, assistant_type="etl_copilot"),
-            AIConversation(organization_id=org_b, user_id=2, assistant_type="data_copilot"),
-        ])
+        db_session.add_all(
+            [
+                AIConversation(organization_id=org_a, user_id=1, assistant_type="data_copilot"),
+                AIConversation(organization_id=org_a, user_id=1, assistant_type="etl_copilot"),
+                AIConversation(organization_id=org_b, user_id=2, assistant_type="data_copilot"),
+            ]
+        )
         db_session.flush()
 
         mgr_a = TenantQueryManager(db_session, org_a)
@@ -263,8 +273,11 @@ class TestAIModelIsolation:
     def test_ai_workflow_cross_org_blocked(self, db_session, two_orgs):
         org_a, org_b = two_orgs
         wf_b = AIWorkflow(
-            organization_id=org_b, name="B Workflow",
-            trigger_type="manual", is_active=True, steps=[],
+            organization_id=org_b,
+            name="B Workflow",
+            trigger_type="manual",
+            is_active=True,
+            steps=[],
         )
         db_session.add(wf_b)
         db_session.flush()
@@ -274,12 +287,26 @@ class TestAIModelIsolation:
 
     def test_ai_insight_isolated(self, db_session, two_orgs):
         org_a, org_b = two_orgs
-        db_session.add_all([
-            AIInsight(organization_id=org_a, title="A insight", insight_type="decision",
-                      summary="desc", confidence_score=0.9, is_archived=False),
-            AIInsight(organization_id=org_b, title="B insight", insight_type="decision",
-                      summary="desc", confidence_score=0.8, is_archived=False),
-        ])
+        db_session.add_all(
+            [
+                AIInsight(
+                    organization_id=org_a,
+                    title="A insight",
+                    insight_type="decision",
+                    summary="desc",
+                    confidence_score=0.9,
+                    is_archived=False,
+                ),
+                AIInsight(
+                    organization_id=org_b,
+                    title="B insight",
+                    insight_type="decision",
+                    summary="desc",
+                    confidence_score=0.8,
+                    is_archived=False,
+                ),
+            ]
+        )
         db_session.flush()
 
         mgr_a = TenantQueryManager(db_session, org_a)
@@ -296,16 +323,22 @@ class TestETLModelIsolation:
 
     def test_etl_transformation_isolated(self, db_session, two_orgs):
         org_a, org_b = two_orgs
-        db_session.add_all([
-            ETLTransformation(
-                organization_id=org_a, name="A transform",
-                transformation_type="rename", config={},
-            ),
-            ETLTransformation(
-                organization_id=org_b, name="B transform",
-                transformation_type="rename", config={},
-            ),
-        ])
+        db_session.add_all(
+            [
+                ETLTransformation(
+                    organization_id=org_a,
+                    name="A transform",
+                    transformation_type="rename",
+                    config={},
+                ),
+                ETLTransformation(
+                    organization_id=org_b,
+                    name="B transform",
+                    transformation_type="rename",
+                    config={},
+                ),
+            ]
+        )
         db_session.flush()
 
         mgr_a = TenantQueryManager(db_session, org_a)

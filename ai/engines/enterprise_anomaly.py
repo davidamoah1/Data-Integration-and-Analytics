@@ -11,10 +11,7 @@ Enhances the existing AnomalyDetectionEngine with:
 
 from __future__ import annotations
 
-import json
 import logging
-from datetime import datetime, timezone
-from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -25,17 +22,17 @@ from ai.context_engine import EnterpriseAIContext, EnterpriseContextEngine
 from ai.data_gatherer import DataGatherer
 from ai.gateway import AIGateway
 from ai.models import AIAnomalyAlert
-from ai.prompt_orchestrator import PromptOrchestrator, PromptTaskType
+from ai.prompt_orchestrator import PromptOrchestrator
 
 logger = logging.getLogger(__name__)
 
 # Industry-specific sensitivity overrides
 INDUSTRY_SENSITIVITY = {
-    "healthcare": 1.5,   # More sensitive for patient safety
-    "finance": 2.0,      # Standard for financial data
-    "retail": 2.5,       # Less sensitive — sales fluctuate
-    "education": 2.0,    # Standard
-    "government": 1.8,   # More sensitive for public funds
+    "healthcare": 1.5,  # More sensitive for patient safety
+    "finance": 2.0,  # Standard for financial data
+    "retail": 2.5,  # Less sensitive — sales fluctuate
+    "education": 2.0,  # Standard
+    "government": 1.8,  # More sensitive for public funds
     "manufacturing": 2.0,
     "logistics": 2.5,
 }
@@ -176,37 +173,39 @@ class EnterpriseAnomalyEngine:
             return alerts
 
         z_scores = np.abs((values - mean) / std)
-        for i, (date, value, z) in enumerate(zip(dates, values, z_scores, strict=False)):
+        for _i, (date, value, z) in enumerate(zip(dates, values, z_scores, strict=False)):
             if z > sensitivity:
                 deviation = ((value - mean) / mean) * 100 if mean != 0 else 0
                 alert_type = "spike" if value > mean else "drop"
                 severity = "critical" if z > sensitivity * 2 else "warning"
-                alerts.append({
-                    "alert_type": alert_type,
-                    "severity": severity,
-                    "title": f"{alert_type.title()} detected in {metric}",
-                    "description": (
-                        f"Value {value:.2f} on {date} deviates {z:.1f} standard deviations "
-                        f"from the mean ({mean:.2f}). This is a {alert_type} of "
-                        f"{abs(deviation):.1f}% from the expected value."
-                    ),
-                    "metric_name": metric,
-                    "expected_value": round(float(mean), 2),
-                    "actual_value": round(float(value), 2),
-                    "deviation_percentage": round(float(deviation), 2),
-                    "context_data": {
-                        "date": date,
-                        "z_score": round(float(z), 2),
-                        "mean": round(float(mean), 2),
-                        "std": round(float(std), 2),
-                    },
-                    "explanation": (
-                        f"The value on {date} ({value:.2f}) is {z:.1f} standard deviations "
-                        f"away from the historical average of {mean:.2f}. "
-                        f"This {'spike' if value > mean else 'drop'} may indicate "
-                        f"an unusual event, data quality issue, or significant business change."
-                    ),
-                })
+                alerts.append(
+                    {
+                        "alert_type": alert_type,
+                        "severity": severity,
+                        "title": f"{alert_type.title()} detected in {metric}",
+                        "description": (
+                            f"Value {value:.2f} on {date} deviates {z:.1f} standard deviations "
+                            f"from the mean ({mean:.2f}). This is a {alert_type} of "
+                            f"{abs(deviation):.1f}% from the expected value."
+                        ),
+                        "metric_name": metric,
+                        "expected_value": round(float(mean), 2),
+                        "actual_value": round(float(value), 2),
+                        "deviation_percentage": round(float(deviation), 2),
+                        "context_data": {
+                            "date": date,
+                            "z_score": round(float(z), 2),
+                            "mean": round(float(mean), 2),
+                            "std": round(float(std), 2),
+                        },
+                        "explanation": (
+                            f"The value on {date} ({value:.2f}) is {z:.1f} standard deviations "
+                            f"away from the historical average of {mean:.2f}. "
+                            f"This {'spike' if value > mean else 'drop'} may indicate "
+                            f"an unusual event, data quality issue, or significant business change."
+                        ),
+                    }
+                )
         return alerts
 
     def _detect_trend_breaks(
@@ -230,28 +229,30 @@ class EnterpriseAnomalyEngine:
             deviation = abs((actual - expected) / expected)
             if deviation > sensitivity / 10:
                 severity = "warning" if deviation < 0.5 else "critical"
-                alerts.append({
-                    "alert_type": "trend",
-                    "severity": severity,
-                    "title": f"Trend anomaly in {metric}",
-                    "description": (
-                        f"Value {actual:.2f} on {dates[i + 1]} breaks the expected trend ({expected:.2f}). "
-                        f"Deviation: {deviation * 100:.1f}%."
-                    ),
-                    "metric_name": metric,
-                    "expected_value": round(float(expected), 2),
-                    "actual_value": round(float(actual), 2),
-                    "deviation_percentage": round(float(deviation * 100), 2),
-                    "context_data": {
-                        "date": dates[i + 1],
-                        "rolling_mean": round(float(expected), 2),
-                    },
-                    "explanation": (
-                        f"The value on {dates[i + 1]} ({actual:.2f}) significantly deviates "
-                        f"from the 7-period rolling average of {expected:.2f}. "
-                        f"This trend break may indicate a structural change or external event."
-                    ),
-                })
+                alerts.append(
+                    {
+                        "alert_type": "trend",
+                        "severity": severity,
+                        "title": f"Trend anomaly in {metric}",
+                        "description": (
+                            f"Value {actual:.2f} on {dates[i + 1]} breaks the expected trend ({expected:.2f}). "
+                            f"Deviation: {deviation * 100:.1f}%."
+                        ),
+                        "metric_name": metric,
+                        "expected_value": round(float(expected), 2),
+                        "actual_value": round(float(actual), 2),
+                        "deviation_percentage": round(float(deviation * 100), 2),
+                        "context_data": {
+                            "date": dates[i + 1],
+                            "rolling_mean": round(float(expected), 2),
+                        },
+                        "explanation": (
+                            f"The value on {dates[i + 1]} ({actual:.2f}) significantly deviates "
+                            f"from the 7-period rolling average of {expected:.2f}. "
+                            f"This trend break may indicate a structural change or external event."
+                        ),
+                    }
+                )
         return alerts[:5]
 
     def _detect_missing_records(self, dates: list[str], metric: str) -> list[dict]:
@@ -270,26 +271,28 @@ class EnterpriseAnomalyEngine:
             large_gaps = diffs[diffs > expected_freq * 3]
             for gap_date, gap_size in large_gaps.items():
                 prev_date = gap_date - gap_size
-                alerts.append({
-                    "alert_type": "missing",
-                    "severity": "info",
-                    "title": f"Missing records in {metric}",
-                    "description": f"Gap of {gap_size.days} days detected between {prev_date.date()} and {gap_date.date()}.",
-                    "metric_name": metric,
-                    "expected_value": None,
-                    "actual_value": None,
-                    "deviation_percentage": None,
-                    "context_data": {
-                        "gap_days": gap_size.days,
-                        "from_date": str(prev_date.date()),
-                        "to_date": str(gap_date.date()),
-                    },
-                    "explanation": (
-                        f"A data gap of {gap_size.days} days was detected between "
-                        f"{prev_date.date()} and {gap_date.date()}. This may indicate "
-                        f"missing records, system downtime, or a data collection issue."
-                    ),
-                })
+                alerts.append(
+                    {
+                        "alert_type": "missing",
+                        "severity": "info",
+                        "title": f"Missing records in {metric}",
+                        "description": f"Gap of {gap_size.days} days detected between {prev_date.date()} and {gap_date.date()}.",
+                        "metric_name": metric,
+                        "expected_value": None,
+                        "actual_value": None,
+                        "deviation_percentage": None,
+                        "context_data": {
+                            "gap_days": gap_size.days,
+                            "from_date": str(prev_date.date()),
+                            "to_date": str(gap_date.date()),
+                        },
+                        "explanation": (
+                            f"A data gap of {gap_size.days} days was detected between "
+                            f"{prev_date.date()} and {gap_date.date()}. This may indicate "
+                            f"missing records, system downtime, or a data collection issue."
+                        ),
+                    }
+                )
         except Exception:
             pass
         return alerts[:3]
@@ -309,28 +312,30 @@ class EnterpriseAnomalyEngine:
                 deviation = ((value - mean) / mean) * 100 if mean != 0 else 0
                 alert_type = "high_outlier" if value > mean else "low_outlier"
                 severity = "critical" if z > sensitivity * 2 else "warning"
-                alerts.append({
-                    "alert_type": alert_type,
-                    "severity": severity,
-                    "title": f"{alert_type.replace('_', ' ').title()} in {metric}",
-                    "description": (
-                        f"Value {value:.2f} (index {i}) deviates {z:.1f} standard deviations "
-                        f"from the mean ({mean:.2f})."
-                    ),
-                    "metric_name": metric,
-                    "expected_value": round(float(mean), 2),
-                    "actual_value": round(float(value), 2),
-                    "deviation_percentage": round(float(deviation), 2),
-                    "context_data": {
-                        "index": i,
-                        "z_score": round(float(z), 2),
-                    },
-                    "explanation": (
-                        f"This value ({value:.2f}) is an outlier — {z:.1f} standard deviations "
-                        f"from the average of {mean:.2f}. It may represent a data entry error, "
-                        f"an exceptional case, or a genuine anomaly worth investigating."
-                    ),
-                })
+                alerts.append(
+                    {
+                        "alert_type": alert_type,
+                        "severity": severity,
+                        "title": f"{alert_type.replace('_', ' ').title()} in {metric}",
+                        "description": (
+                            f"Value {value:.2f} (index {i}) deviates {z:.1f} standard deviations "
+                            f"from the mean ({mean:.2f})."
+                        ),
+                        "metric_name": metric,
+                        "expected_value": round(float(mean), 2),
+                        "actual_value": round(float(value), 2),
+                        "deviation_percentage": round(float(deviation), 2),
+                        "context_data": {
+                            "index": i,
+                            "z_score": round(float(z), 2),
+                        },
+                        "explanation": (
+                            f"This value ({value:.2f}) is an outlier — {z:.1f} standard deviations "
+                            f"from the average of {mean:.2f}. It may represent a data entry error, "
+                            f"an exceptional case, or a genuine anomaly worth investigating."
+                        ),
+                    }
+                )
         return alerts
 
     def _explain_anomalies(
@@ -357,12 +362,14 @@ class EnterpriseAnomalyEngine:
                     impact = "low"
                 explanation += f" Estimated impact: {impact}."
 
-            explanations.append({
-                "alert_type": alert["alert_type"],
-                "title": alert["title"],
-                "explanation": explanation,
-                "impact": impact if alert.get("deviation_percentage") else "unknown",
-            })
+            explanations.append(
+                {
+                    "alert_type": alert["alert_type"],
+                    "title": alert["title"],
+                    "explanation": explanation,
+                    "impact": impact if alert.get("deviation_percentage") else "unknown",
+                }
+            )
 
         return explanations
 

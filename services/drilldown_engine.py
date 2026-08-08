@@ -9,7 +9,6 @@ Supports breadcrumb navigation and drill-through.
 from __future__ import annotations
 
 import logging
-import uuid
 from dataclasses import dataclass, field
 
 import pandas as pd
@@ -59,48 +58,57 @@ class DrilldownEngine:
             List of DrilldownLevel objects.
         """
         levels: list[DrilldownLevel] = []
-        col_mapping = semantic_mappings or {}
 
         # Level 0: KPI summary
-        levels.append(DrilldownLevel(
-            level=0,
-            label="Summary",
-            chart_id=None,
-            table_columns=[],
-        ))
+        levels.append(
+            DrilldownLevel(
+                level=0,
+                label="Summary",
+                chart_id=None,
+                table_columns=[],
+            )
+        )
 
         # Level 1: Primary chart (e.g., revenue over time)
         primary_charts = [c for c in charts if c.section == "primary_charts"]
         if primary_charts:
             chart = primary_charts[0]
-            levels.append(DrilldownLevel(
-                level=1,
-                label=chart.title,
-                chart_id=chart.id,
-                table_columns=chart.source_columns,
-                parent_column=None,
-            ))
+            levels.append(
+                DrilldownLevel(
+                    level=1,
+                    label=chart.title,
+                    chart_id=chart.id,
+                    table_columns=chart.source_columns,
+                    parent_column=None,
+                )
+            )
 
-        # Level 2: Grouped detail (e.g., revenue by category)
+            # Level 2: Grouped detail (e.g., revenue by category)
             if chart.group_by or chart.x_axis:
                 group_col = chart.group_by or chart.x_axis
-                levels.append(DrilldownLevel(
-                    level=2,
-                    label=f"Detail by {group_col.replace('_', ' ').title()}",
-                    chart_id=None,
-                    table_columns=[group_col, chart.y_axis] if chart.y_axis else [group_col],
-                    parent_column=chart.x_axis,
-                    target_column=group_col,
-                ))
+                levels.append(
+                    DrilldownLevel(
+                        level=2,
+                        label=f"Detail by {group_col.replace('_', ' ').title()}",
+                        chart_id=None,
+                        table_columns=[group_col, chart.y_axis] if chart.y_axis else [group_col],
+                        parent_column=chart.x_axis,
+                        target_column=group_col,
+                    )
+                )
 
         # Level 3: Record-level detail
-        detail_cols = [c for c in df.columns if not c.lower().endswith("_id") or c.lower().endswith("_id")][:10]
-        levels.append(DrilldownLevel(
-            level=3,
-            label="Record Details",
-            chart_id=None,
-            table_columns=detail_cols,
-        ))
+        detail_cols = [
+            c for c in df.columns if not c.lower().endswith("_id") or c.lower().endswith("_id")
+        ][:10]
+        levels.append(
+            DrilldownLevel(
+                level=3,
+                label="Record Details",
+                chart_id=None,
+                table_columns=detail_cols,
+            )
+        )
 
         return levels
 
@@ -132,10 +140,12 @@ class DrilldownEngine:
         for i in range(target_level + 1):
             if i < len(path.levels):
                 level = path.levels[i]
-                path.breadcrumbs.append({
-                    "level": i,
-                    "label": level.label,
-                })
+                path.breadcrumbs.append(
+                    {
+                        "level": i,
+                        "label": level.label,
+                    }
+                )
 
         return path
 
@@ -156,11 +166,14 @@ class DrilldownEngine:
             to_level = 0
 
         path.current_level = to_level
-        path.breadcrumbs = path.breadcrumbs[:to_level + 1]
+        path.breadcrumbs = path.breadcrumbs[: to_level + 1]
 
         # Remove filter context for levels below
-        levels_to_remove = [k for k, v in path.filter_context.items()
-                           if isinstance(v, dict) and v.get("level", 0) > to_level]
+        levels_to_remove = [
+            k
+            for k, v in path.filter_context.items()
+            if isinstance(v, dict) and v.get("level", 0) > to_level
+        ]
         for key in levels_to_remove:
             path.filter_context.pop(key, None)
 
@@ -193,7 +206,7 @@ class DrilldownEngine:
         filtered = df.copy()
 
         # Apply drilldown filter context
-        for key, value in path.filter_context.items():
+        for _key, value in path.filter_context.items():
             if isinstance(value, dict):
                 col = value.get("column")
                 val = value.get("value")

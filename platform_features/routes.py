@@ -9,14 +9,14 @@ Endpoints for:
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session as DbSession
 
-from platform_features.audit_tracker import AuditTracker, AuditCategory
-from platform_features.rbac import RoleHierarchy, PermissionMatrix
+from platform_features.audit_tracker import AuditCategory, AuditTracker
+from platform_features.rbac import PermissionMatrix, RoleHierarchy
 from platform_features.seed import seed_enterprise_data
 from shared.database import get_db
-from shared.dependencies import get_current_user, require_permissions, require_any_role
+from shared.dependencies import get_current_user, require_any_role, require_permissions
 from shared.response import success_response
 
 platform_router = APIRouter(prefix="/platform", tags=["Platform"])
@@ -100,14 +100,16 @@ async def tenant_context(
     from platform_features.tenant import TenantContext
 
     ctx = TenantContext.from_user(current_user)
-    return success_response({
-        "organization_id": ctx.organization_id,
-        "user_id": ctx.user_id,
-        "roles": ctx.roles,
-        "is_super_admin": ctx.is_super_admin,
-        "is_tenant_scoped": ctx.is_tenant_scoped,
-        "highest_role": RoleHierarchy.get_highest_role(ctx.roles),
-    })
+    return success_response(
+        {
+            "organization_id": ctx.organization_id,
+            "user_id": ctx.user_id,
+            "roles": ctx.roles,
+            "is_super_admin": ctx.is_super_admin,
+            "is_tenant_scoped": ctx.is_tenant_scoped,
+            "highest_role": RoleHierarchy.get_highest_role(ctx.roles),
+        }
+    )
 
 
 # --- Seed Data ------------------------------------------------------------

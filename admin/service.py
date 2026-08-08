@@ -120,8 +120,7 @@ class AdminService:
 
     def assign_user_roles(self, user_id: int, role_names: list[str]) -> dict:
         """Assign roles to a user."""
-        from authentication.repositories import RoleRepository
-        from authentication.repositories import UserRoleRepository
+        from authentication.repositories import RoleRepository, UserRoleRepository
 
         user = self._get_user(user_id)
         self._ensure_user_org_access(user.organization_id)
@@ -170,7 +169,9 @@ class AdminService:
         return org
 
     def _get_user(self, user_id: int) -> User:
-        user = self.db.execute(select(User).where(User.id == user_id, User.is_deleted == 0)).scalar_one_or_none()
+        user = self.db.execute(
+            select(User).where(User.id == user_id, User.is_deleted == 0)
+        ).scalar_one_or_none()
         if not user:
             raise NotFoundError("User not found")
         return user

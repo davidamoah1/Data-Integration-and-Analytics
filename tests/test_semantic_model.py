@@ -18,57 +18,84 @@ from semantic.mapping_engine import SemanticMappingEngine
 from semantic.metric_engine import MetricEngine, MetricResultSet
 from semantic.semantic_model import (
     BusinessDefinitions,
-    SemanticModel,
-    SemanticModelBuilder,
 )
 
 
 @pytest.fixture
 def healthcare_df():
     """Healthcare dataset with patients, doctors, diagnoses, billing."""
-    return pd.DataFrame({
-        "patient_id": range(1, 21),
-        "doctor_name": [f"Dr. {i}" for i in range(20)],
-        "department": ["Cardiology"] * 10 + ["Neurology"] * 10,
-        "diagnosis_code": ["A00.1", "B01.0", "C50.2", "D45.0", "E11.9",
-                           "F32.1", "G40.0", "H10.0", "I10.0", "J00.0",
-                           "K00.0", "L00.0", "M00.0", "N00.0", "O00.0",
-                           "P00.0", "Q00.0", "R00.0", "S00.0", "T00.0"],
-        "billing_amount": [1000 + i * 50 for i in range(20)],
-        "visit_date": pd.date_range("2024-01-01", periods=20, freq="3D"),
-        "gender": ["M", "F"] * 10,
-    })
+    return pd.DataFrame(
+        {
+            "patient_id": range(1, 21),
+            "doctor_name": [f"Dr. {i}" for i in range(20)],
+            "department": ["Cardiology"] * 10 + ["Neurology"] * 10,
+            "diagnosis_code": [
+                "A00.1",
+                "B01.0",
+                "C50.2",
+                "D45.0",
+                "E11.9",
+                "F32.1",
+                "G40.0",
+                "H10.0",
+                "I10.0",
+                "J00.0",
+                "K00.0",
+                "L00.0",
+                "M00.0",
+                "N00.0",
+                "O00.0",
+                "P00.0",
+                "Q00.0",
+                "R00.0",
+                "S00.0",
+                "T00.0",
+            ],
+            "billing_amount": [1000 + i * 50 for i in range(20)],
+            "visit_date": pd.date_range("2024-01-01", periods=20, freq="3D"),
+            "gender": ["M", "F"] * 10,
+        }
+    )
 
 
 @pytest.fixture
 def retail_df():
     """Retail dataset with customers, orders, products, revenue."""
-    return pd.DataFrame({
-        "order_id": range(1, 31),
-        "customer_id": [i % 10 + 1 for i in range(30)],
-        "product_name": [f"Product_{chr(65 + i % 5)}" for i in range(30)],
-        "sales_amount": [100.0 + i * 10 for i in range(30)],
-        "order_date": pd.date_range("2024-01-01", periods=30, freq="D"),
-        "region": ["North", "South", "East", "West"] * 7 + ["North", "South"],
-    })
+    return pd.DataFrame(
+        {
+            "order_id": range(1, 31),
+            "customer_id": [i % 10 + 1 for i in range(30)],
+            "product_name": [f"Product_{chr(65 + i % 5)}" for i in range(30)],
+            "sales_amount": [100.0 + i * 10 for i in range(30)],
+            "order_date": pd.date_range("2024-01-01", periods=30, freq="D"),
+            "region": ["North", "South", "East", "West"] * 7 + ["North", "South"],
+        }
+    )
 
 
 @pytest.fixture
 def banking_df():
     """Banking dataset with accounts, transactions, loans."""
-    return pd.DataFrame({
-        "account_number": [
-            "GB82WEST12345698765432", "DE89370400440532013000",
-            "FR1420041010050500013M02606", "IT60X0542811101000000123456",
-            "ES9121000418450200051332", "GB29NWBK60161331926819",
-            "DE75512108001235119613", "FR7630006000011234567890189",
-            "IT05Q0542811101000000123456", "ES792100081361012345678901",
-        ],
-        "transaction_id": range(1, 11),
-        "loan_id": range(100, 110),
-        "amount": [5000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000],
-        "transaction_date": pd.date_range("2024-01-01", periods=10, freq="D"),
-    })
+    return pd.DataFrame(
+        {
+            "account_number": [
+                "GB82WEST12345698765432",
+                "DE89370400440532013000",
+                "FR1420041010050500013M02606",
+                "IT60X0542811101000000123456",
+                "ES9121000418450200051332",
+                "GB29NWBK60161331926819",
+                "DE75512108001235119613",
+                "FR7630006000011234567890189",
+                "IT05Q0542811101000000123456",
+                "ES792100081361012345678901",
+            ],
+            "transaction_id": range(1, 11),
+            "loan_id": range(100, 110),
+            "amount": [5000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000],
+            "transaction_date": pd.date_range("2024-01-01", periods=10, freq="D"),
+        }
+    )
 
 
 class TestSemanticModel:
@@ -140,8 +167,10 @@ class TestSemanticModel:
         result = SemanticMappingEngine.analyze(healthcare_df)
         model = result.semantic_model
         assert len(model.business_rules) > 0
-        assert any("occupancy" in rule.lower() or "readmission" in rule.lower()
-                    for rule in model.business_rules)
+        assert any(
+            "occupancy" in rule.lower() or "readmission" in rule.lower()
+            for rule in model.business_rules
+        )
 
     def test_model_has_recommended_charts(self, healthcare_df):
         result = SemanticMappingEngine.analyze(healthcare_df)
@@ -168,6 +197,7 @@ class TestSemanticModel:
         result = SemanticMappingEngine.analyze(healthcare_df)
         model = result.semantic_model
         import json
+
         data = json.loads(model.to_json())
         assert data["domain"] == "healthcare"
 

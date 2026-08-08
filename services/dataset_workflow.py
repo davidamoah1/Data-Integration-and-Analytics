@@ -18,10 +18,10 @@ from __future__ import annotations
 import logging
 import time
 import uuid
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Callable
 
 import pandas as pd
 
@@ -214,7 +214,9 @@ class DatasetWorkflowOrchestrator:
         self._run_stage(state, WorkflowStage.QUALITY_CHECKED, self._stage_quality_checked)
 
         # Stage 5: Semantically Analyzed
-        self._run_stage(state, WorkflowStage.SEMANTICALLY_ANALYZED, self._stage_semantically_analyzed)
+        self._run_stage(
+            state, WorkflowStage.SEMANTICALLY_ANALYZED, self._stage_semantically_analyzed
+        )
 
         # Stage 6: Industry Identified
         self._run_stage(state, WorkflowStage.INDUSTRY_IDENTIFIED, self._stage_industry_identified)
@@ -357,7 +359,9 @@ class DatasetWorkflowOrchestrator:
         # Check for duplicate column names
         dup_cols = df.columns[df.columns.duplicated()].tolist()
         if dup_cols:
-            issues.append({"severity": "error", "issue": "Duplicate column names", "columns": dup_cols})
+            issues.append(
+                {"severity": "error", "issue": "Duplicate column names", "columns": dup_cols}
+            )
 
         state.context["validation_issues"] = issues
         return {
@@ -426,7 +430,8 @@ class DatasetWorkflowOrchestrator:
             "confidence": round(confidence, 2),
             "detected_entities": entities,
             "alternative_candidates": alternatives,
-            "needs_confirmation": confidence < 70.0 and not state.context.get("admin_confirmed", False),
+            "needs_confirmation": confidence < 70.0
+            and not state.context.get("admin_confirmed", False),
         }
         state.context["industry_result"] = result
         return result
@@ -514,7 +519,11 @@ class DatasetWorkflowOrchestrator:
             "dataset_name": state.dataset_name,
             "row_count": profile.get("row_count", 0),
             "column_count": profile.get("column_count", 0),
-            "quality_score": quality.get("score", {}).get("overall", 0) if isinstance(quality.get("score"), dict) else 0,
+            "quality_score": (
+                quality.get("score", {}).get("overall", 0)
+                if isinstance(quality.get("score"), dict)
+                else 0
+            ),
             "industry": industry.get("industry", "unknown"),
             "industry_confidence": industry.get("confidence", 0),
             "total_insights": insights.get("total_insights", 0),
@@ -575,6 +584,7 @@ class DatasetWorkflowOrchestrator:
         if cached:
             # Return a copy with a new workflow ID
             import copy
+
             state = copy.deepcopy(cached)
             state.workflow_id = str(uuid.uuid4())
             state.context.pop("df", None)  # Don't return the DataFrame
@@ -586,6 +596,7 @@ class DatasetWorkflowOrchestrator:
         cache_key = f"workflow:{dataset_hash}"
         # Store without the DataFrame to save memory
         import copy
+
         to_cache = copy.deepcopy(state)
         to_cache.context.pop("df", None)
         self._cache[cache_key] = to_cache

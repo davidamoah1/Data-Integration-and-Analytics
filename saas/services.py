@@ -5,7 +5,8 @@ from __future__ import annotations
 import logging
 from datetime import datetime, timedelta, timezone
 
-from sqlalchemy import select, update, func as sa_func
+from sqlalchemy import func as sa_func
+from sqlalchemy import select
 from sqlalchemy.orm import Session as DbSession
 
 from saas.models import (
@@ -59,7 +60,15 @@ PLAN_DEFINITIONS = [
         "max_scheduled_jobs": 20,
         "max_model_trainings": 10,
         "max_connectors": 10,
-        "features": ["dashboards", "etl", "reports", "basic_analytics", "ai_copilot", "workflows", "connectors"],
+        "features": [
+            "dashboards",
+            "etl",
+            "reports",
+            "basic_analytics",
+            "ai_copilot",
+            "workflows",
+            "connectors",
+        ],
         "is_trial_available": True,
         "trial_days": 14,
         "sort_order": 2,
@@ -78,7 +87,19 @@ PLAN_DEFINITIONS = [
         "max_scheduled_jobs": 100,
         "max_model_trainings": 50,
         "max_connectors": 25,
-        "features": ["dashboards", "etl", "reports", "basic_analytics", "ai_copilot", "workflows", "connectors", "marketplace", "forecasting", "api_access", "webhooks"],
+        "features": [
+            "dashboards",
+            "etl",
+            "reports",
+            "basic_analytics",
+            "ai_copilot",
+            "workflows",
+            "connectors",
+            "marketplace",
+            "forecasting",
+            "api_access",
+            "webhooks",
+        ],
         "is_trial_available": True,
         "trial_days": 14,
         "sort_order": 3,
@@ -97,7 +118,22 @@ PLAN_DEFINITIONS = [
         "max_scheduled_jobs": 500,
         "max_model_trainings": 200,
         "max_connectors": 100,
-        "features": ["dashboards", "etl", "reports", "basic_analytics", "ai_copilot", "workflows", "connectors", "marketplace", "forecasting", "api_access", "webhooks", "automl", "decision_intelligence", "white_label"],
+        "features": [
+            "dashboards",
+            "etl",
+            "reports",
+            "basic_analytics",
+            "ai_copilot",
+            "workflows",
+            "connectors",
+            "marketplace",
+            "forecasting",
+            "api_access",
+            "webhooks",
+            "automl",
+            "decision_intelligence",
+            "white_label",
+        ],
         "is_trial_available": True,
         "trial_days": 30,
         "sort_order": 4,
@@ -116,7 +152,26 @@ PLAN_DEFINITIONS = [
         "max_scheduled_jobs": None,
         "max_model_trainings": None,
         "max_connectors": None,
-        "features": ["dashboards", "etl", "reports", "basic_analytics", "ai_copilot", "workflows", "connectors", "marketplace", "forecasting", "api_access", "webhooks", "automl", "decision_intelligence", "white_label", "sso", "audit_export", "priority_support", "custom_connectors"],
+        "features": [
+            "dashboards",
+            "etl",
+            "reports",
+            "basic_analytics",
+            "ai_copilot",
+            "workflows",
+            "connectors",
+            "marketplace",
+            "forecasting",
+            "api_access",
+            "webhooks",
+            "automl",
+            "decision_intelligence",
+            "white_label",
+            "sso",
+            "audit_export",
+            "priority_support",
+            "custom_connectors",
+        ],
         "is_trial_available": True,
         "trial_days": 30,
         "sort_order": 5,
@@ -125,24 +180,150 @@ PLAN_DEFINITIONS = [
 
 
 FEATURE_FLAG_DEFINITIONS = [
-    {"flag_key": "dashboards", "name": "Dashboards", "description": "View and create dashboards", "category": "core", "default_enabled": True, "min_plan": "free"},
-    {"flag_key": "etl", "name": "ETL Engine", "description": "Data extraction, transformation, loading", "category": "core", "default_enabled": True, "min_plan": "free"},
-    {"flag_key": "reports", "name": "Reports", "description": "Generate and export reports", "category": "core", "default_enabled": True, "min_plan": "free"},
-    {"flag_key": "basic_analytics", "name": "Basic Analytics", "description": "KPIs and basic analytics", "category": "core", "default_enabled": True, "min_plan": "free"},
-    {"flag_key": "ai_copilot", "name": "AI Copilot", "description": "AI-powered data assistant", "category": "premium", "default_enabled": False, "min_plan": "starter"},
-    {"flag_key": "workflows", "name": "Workflow Engine", "description": "Automated workflow execution", "category": "premium", "default_enabled": False, "min_plan": "starter"},
-    {"flag_key": "connectors", "name": "Connectors", "description": "External data source connectors", "category": "premium", "default_enabled": False, "min_plan": "starter"},
-    {"flag_key": "marketplace", "name": "Marketplace", "description": "Plugin marketplace access", "category": "premium", "default_enabled": False, "min_plan": "professional"},
-    {"flag_key": "forecasting", "name": "Forecasting", "description": "ML-powered forecasting", "category": "premium", "default_enabled": False, "min_plan": "professional"},
-    {"flag_key": "api_access", "name": "Public API Access", "description": "External API key access", "category": "premium", "default_enabled": False, "min_plan": "professional"},
-    {"flag_key": "webhooks", "name": "Webhooks", "description": "Webhook event subscriptions", "category": "premium", "default_enabled": False, "min_plan": "professional"},
-    {"flag_key": "automl", "name": "AutoML", "description": "Automated model selection and tuning", "category": "enterprise", "default_enabled": False, "min_plan": "business"},
-    {"flag_key": "decision_intelligence", "name": "Decision Intelligence", "description": "AI-powered decision recommendations", "category": "enterprise", "default_enabled": False, "min_plan": "business"},
-    {"flag_key": "white_label", "name": "White Labeling", "description": "Custom branding", "category": "enterprise", "default_enabled": False, "min_plan": "business"},
-    {"flag_key": "sso", "name": "Single Sign-On", "description": "SAML/OIDC SSO integration", "category": "enterprise", "default_enabled": False, "min_plan": "enterprise"},
-    {"flag_key": "audit_export", "name": "Audit Export", "description": "Export audit logs", "category": "enterprise", "default_enabled": False, "min_plan": "enterprise"},
-    {"flag_key": "priority_support", "name": "Priority Support", "description": "Dedicated support channel", "category": "enterprise", "default_enabled": False, "min_plan": "enterprise"},
-    {"flag_key": "custom_connectors", "name": "Custom Connectors", "description": "Build custom connectors", "category": "enterprise", "default_enabled": False, "min_plan": "enterprise"},
+    {
+        "flag_key": "dashboards",
+        "name": "Dashboards",
+        "description": "View and create dashboards",
+        "category": "core",
+        "default_enabled": True,
+        "min_plan": "free",
+    },
+    {
+        "flag_key": "etl",
+        "name": "ETL Engine",
+        "description": "Data extraction, transformation, loading",
+        "category": "core",
+        "default_enabled": True,
+        "min_plan": "free",
+    },
+    {
+        "flag_key": "reports",
+        "name": "Reports",
+        "description": "Generate and export reports",
+        "category": "core",
+        "default_enabled": True,
+        "min_plan": "free",
+    },
+    {
+        "flag_key": "basic_analytics",
+        "name": "Basic Analytics",
+        "description": "KPIs and basic analytics",
+        "category": "core",
+        "default_enabled": True,
+        "min_plan": "free",
+    },
+    {
+        "flag_key": "ai_copilot",
+        "name": "AI Copilot",
+        "description": "AI-powered data assistant",
+        "category": "premium",
+        "default_enabled": False,
+        "min_plan": "starter",
+    },
+    {
+        "flag_key": "workflows",
+        "name": "Workflow Engine",
+        "description": "Automated workflow execution",
+        "category": "premium",
+        "default_enabled": False,
+        "min_plan": "starter",
+    },
+    {
+        "flag_key": "connectors",
+        "name": "Connectors",
+        "description": "External data source connectors",
+        "category": "premium",
+        "default_enabled": False,
+        "min_plan": "starter",
+    },
+    {
+        "flag_key": "marketplace",
+        "name": "Marketplace",
+        "description": "Plugin marketplace access",
+        "category": "premium",
+        "default_enabled": False,
+        "min_plan": "professional",
+    },
+    {
+        "flag_key": "forecasting",
+        "name": "Forecasting",
+        "description": "ML-powered forecasting",
+        "category": "premium",
+        "default_enabled": False,
+        "min_plan": "professional",
+    },
+    {
+        "flag_key": "api_access",
+        "name": "Public API Access",
+        "description": "External API key access",
+        "category": "premium",
+        "default_enabled": False,
+        "min_plan": "professional",
+    },
+    {
+        "flag_key": "webhooks",
+        "name": "Webhooks",
+        "description": "Webhook event subscriptions",
+        "category": "premium",
+        "default_enabled": False,
+        "min_plan": "professional",
+    },
+    {
+        "flag_key": "automl",
+        "name": "AutoML",
+        "description": "Automated model selection and tuning",
+        "category": "enterprise",
+        "default_enabled": False,
+        "min_plan": "business",
+    },
+    {
+        "flag_key": "decision_intelligence",
+        "name": "Decision Intelligence",
+        "description": "AI-powered decision recommendations",
+        "category": "enterprise",
+        "default_enabled": False,
+        "min_plan": "business",
+    },
+    {
+        "flag_key": "white_label",
+        "name": "White Labeling",
+        "description": "Custom branding",
+        "category": "enterprise",
+        "default_enabled": False,
+        "min_plan": "business",
+    },
+    {
+        "flag_key": "sso",
+        "name": "Single Sign-On",
+        "description": "SAML/OIDC SSO integration",
+        "category": "enterprise",
+        "default_enabled": False,
+        "min_plan": "enterprise",
+    },
+    {
+        "flag_key": "audit_export",
+        "name": "Audit Export",
+        "description": "Export audit logs",
+        "category": "enterprise",
+        "default_enabled": False,
+        "min_plan": "enterprise",
+    },
+    {
+        "flag_key": "priority_support",
+        "name": "Priority Support",
+        "description": "Dedicated support channel",
+        "category": "enterprise",
+        "default_enabled": False,
+        "min_plan": "enterprise",
+    },
+    {
+        "flag_key": "custom_connectors",
+        "name": "Custom Connectors",
+        "description": "Build custom connectors",
+        "category": "enterprise",
+        "default_enabled": False,
+        "min_plan": "enterprise",
+    },
 ]
 
 
@@ -164,11 +345,18 @@ class SubscriptionService:
         return self.db.execute(query.order_by(SubscriptionPlan.sort_order)).scalars().all()
 
     def get_org_subscription(self, org_id: int) -> Subscription | None:
-        return self.db.execute(
-            select(Subscription)
-            .where(Subscription.organization_id == org_id, Subscription.status.in_(["active", "trial", "past_due"]))
-            .order_by(Subscription.created_at.desc())
-        ).scalars().first()
+        return (
+            self.db.execute(
+                select(Subscription)
+                .where(
+                    Subscription.organization_id == org_id,
+                    Subscription.status.in_(["active", "trial", "past_due"]),
+                )
+                .order_by(Subscription.created_at.desc())
+            )
+            .scalars()
+            .first()
+        )
 
     def create_subscription(
         self,
@@ -304,16 +492,20 @@ class SubscriptionService:
             "scheduled_jobs": record.scheduled_jobs,
             "model_trainings": record.model_trainings,
             "connector_usage": record.connector_usage,
-            "limits": {
-                "max_users": plan.max_users if plan else 5,
-                "max_storage_mb": plan.max_storage_mb if plan else 500,
-                "max_ai_requests_monthly": plan.max_ai_requests_monthly if plan else 50,
-                "max_api_calls_monthly": plan.max_api_calls_monthly if plan else 1000,
-                "max_workflow_executions": plan.max_workflow_executions if plan else 100,
-                "max_scheduled_jobs": plan.max_scheduled_jobs if plan else 5,
-                "max_model_trainings": plan.max_model_trainings if plan else 2,
-                "max_connectors": plan.max_connectors if plan else 3,
-            } if plan else {},
+            "limits": (
+                {
+                    "max_users": plan.max_users if plan else 5,
+                    "max_storage_mb": plan.max_storage_mb if plan else 500,
+                    "max_ai_requests_monthly": plan.max_ai_requests_monthly if plan else 50,
+                    "max_api_calls_monthly": plan.max_api_calls_monthly if plan else 1000,
+                    "max_workflow_executions": plan.max_workflow_executions if plan else 100,
+                    "max_scheduled_jobs": plan.max_scheduled_jobs if plan else 5,
+                    "max_model_trainings": plan.max_model_trainings if plan else 2,
+                    "max_connectors": plan.max_connectors if plan else 3,
+                }
+                if plan
+                else {}
+            ),
         }
 
     def increment_usage(self, org_id: int, field: str, amount: int = 1) -> None:
@@ -340,12 +532,16 @@ class SubscriptionService:
         self.db.commit()
 
     def list_invoices(self, org_id: int, limit: int = 20) -> list[Invoice]:
-        return self.db.execute(
-            select(Invoice)
-            .where(Invoice.organization_id == org_id)
-            .order_by(Invoice.created_at.desc())
-            .limit(limit)
-        ).scalars().all()
+        return (
+            self.db.execute(
+                select(Invoice)
+                .where(Invoice.organization_id == org_id)
+                .order_by(Invoice.created_at.desc())
+                .limit(limit)
+            )
+            .scalars()
+            .all()
+        )
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -403,7 +599,9 @@ class FeatureFlagService:
         flags = self.db.execute(select(FeatureFlag)).scalars().all()
         return [f.flag_key for f in flags if self.is_feature_enabled(org_id, f.flag_key)]
 
-    def set_override(self, org_id: int, flag_key: str, is_enabled: bool, reason: str | None = None) -> OrganizationFeatureOverride:
+    def set_override(
+        self, org_id: int, flag_key: str, is_enabled: bool, reason: str | None = None
+    ) -> OrganizationFeatureOverride:
         existing = self.db.execute(
             select(OrganizationFeatureOverride).where(
                 OrganizationFeatureOverride.organization_id == org_id,
@@ -427,7 +625,11 @@ class FeatureFlagService:
         return existing
 
     def list_flags(self) -> list[FeatureFlag]:
-        return self.db.execute(select(FeatureFlag).order_by(FeatureFlag.category, FeatureFlag.name)).scalars().all()
+        return (
+            self.db.execute(select(FeatureFlag).order_by(FeatureFlag.category, FeatureFlag.name))
+            .scalars()
+            .all()
+        )
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -518,36 +720,45 @@ class CustomerSuccessService:
         self.db = db
 
     def compute_health_score(self, org_id: int) -> dict:
-        from authentication.models import User
         from audit.models import AuditLog
+        from authentication.models import User
 
         now = datetime.now(timezone.utc)
         thirty_days_ago = now - timedelta(days=30)
 
         # Active users
-        active_users = self.db.execute(
-            select(sa_func.count(User.id)).where(
-                User.organization_id == org_id,
-                User.is_active == 1,
-                User.is_deleted == 0,
-                User.last_login_at >= thirty_days_ago,
-            )
-        ).scalar() or 0
+        active_users = (
+            self.db.execute(
+                select(sa_func.count(User.id)).where(
+                    User.organization_id == org_id,
+                    User.is_active == 1,
+                    User.is_deleted == 0,
+                    User.last_login_at >= thirty_days_ago,
+                )
+            ).scalar()
+            or 0
+        )
 
-        total_users = self.db.execute(
-            select(sa_func.count(User.id)).where(
-                User.organization_id == org_id,
-                User.is_deleted == 0,
-            )
-        ).scalar() or 1
+        total_users = (
+            self.db.execute(
+                select(sa_func.count(User.id)).where(
+                    User.organization_id == org_id,
+                    User.is_deleted == 0,
+                )
+            ).scalar()
+            or 1
+        )
 
         # Activity
-        recent_activity = self.db.execute(
-            select(sa_func.count(AuditLog.id)).where(
-                AuditLog.organization_id == org_id,
-                AuditLog.created_at >= thirty_days_ago,
-            )
-        ).scalar() or 0
+        recent_activity = (
+            self.db.execute(
+                select(sa_func.count(AuditLog.id)).where(
+                    AuditLog.organization_id == org_id,
+                    AuditLog.created_at >= thirty_days_ago,
+                )
+            ).scalar()
+            or 0
+        )
 
         # Feature adoption
         flag_service = FeatureFlagService(self.db)
@@ -561,17 +772,29 @@ class CustomerSuccessService:
 
         # User engagement (30%)
         user_engagement = min(active_users / max(total_users, 1), 1.0) * 100
-        factors["user_engagement"] = {"score": int(user_engagement), "weight": 30, "detail": f"{active_users}/{total_users} users active"}
+        factors["user_engagement"] = {
+            "score": int(user_engagement),
+            "weight": 30,
+            "detail": f"{active_users}/{total_users} users active",
+        }
         score += int(user_engagement * 0.3)
 
         # Activity (25%)
         activity_score = min(recent_activity / 100, 1.0) * 100
-        factors["activity"] = {"score": int(activity_score), "weight": 25, "detail": f"{recent_activity} actions in 30 days"}
+        factors["activity"] = {
+            "score": int(activity_score),
+            "weight": 25,
+            "detail": f"{recent_activity} actions in 30 days",
+        }
         score += int(activity_score * 0.25)
 
         # Feature adoption (25%)
         adoption_score = adoption_rate * 100
-        factors["feature_adoption"] = {"score": int(adoption_score), "weight": 25, "detail": f"{len(enabled_features)}/{len(all_flags)} features used"}
+        factors["feature_adoption"] = {
+            "score": int(adoption_score),
+            "weight": 25,
+            "detail": f"{len(enabled_features)}/{len(all_flags)} features used",
+        }
         score += int(adoption_score * 0.25)
 
         # Subscription status (20%)
@@ -600,7 +823,6 @@ class CustomerSuccessService:
 
 
 from saas.models import CustomerHealthScore  # noqa: E402
-
 
 # ═══════════════════════════════════════════════════════════════
 # Seed Function

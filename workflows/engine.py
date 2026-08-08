@@ -10,7 +10,7 @@ import concurrent.futures
 import logging
 import time
 import uuid
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 from sqlalchemy.orm import Session as DbSession
@@ -30,7 +30,7 @@ class RetryPolicy:
     timeout_seconds: float | None = None
 
     @classmethod
-    def from_config(cls, config: dict | None) -> "RetryPolicy":
+    def from_config(cls, config: dict | None) -> RetryPolicy:
         if config is None:
             return cls()
         return cls(
@@ -93,8 +93,11 @@ class WorkflowEngine:
             else:
                 execution.status = "completed"
             if execution.node_results:
-                final_node = max(execution.node_results, key=lambda k: execution.node_results[k].get("completed_at", ""))
-                final_result = execution.node_results[final_node]
+                final_node = max(
+                    execution.node_results,
+                    key=lambda k: execution.node_results[k].get("completed_at", ""),
+                )
+                execution.node_results[final_node]
                 execution.ai_summary = self._generate_ai_summary(execution)
         except Exception as e:
             logger.exception("Workflow execution failed")
@@ -102,9 +105,11 @@ class WorkflowEngine:
             execution.errors.append(str(e))
 
         execution.completed_at = datetime.now(timezone.utc)
-        execution.duration_seconds = int(
-            (execution.completed_at - execution.started_at).total_seconds()
-        ) if execution.started_at else None
+        execution.duration_seconds = (
+            int((execution.completed_at - execution.started_at).total_seconds())
+            if execution.started_at
+            else None
+        )
         job.status = execution.status
         job.completed_at = execution.completed_at
         self.db.commit()
@@ -137,7 +142,8 @@ class WorkflowEngine:
         remaining = set(nodes.keys())
         while remaining:
             ready = {
-                nid for nid in remaining
+                nid
+                for nid in remaining
                 if all(p in completed for p in parents[nid])
                 and not any(p in failed for p in parents[nid])
             }
@@ -145,7 +151,14 @@ class WorkflowEngine:
                 # Cyclic dependency or all remaining blocked by failures
                 for nid in remaining:
                     if nid not in execution.node_results:
-                        self._record_node_result(execution, nid, {"status": "failed", "errors": ["Dependency not satisfied or cycle detected"]})
+                        self._record_node_result(
+                            execution,
+                            nid,
+                            {
+                                "status": "failed",
+                                "errors": ["Dependency not satisfied or cycle detected"],
+                            },
+                        )
                 execution.status = "failed"
                 break
 
@@ -157,7 +170,9 @@ class WorkflowEngine:
             if len(batch) == 1:
                 results = {batch[0]: self._execute_node(nodes[batch[0]], ctx, lineage)}
             else:
-                with concurrent.futures.ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+                with concurrent.futures.ThreadPoolExecutor(
+                    max_workers=self.max_workers
+                ) as executor:
                     futures = {
                         executor.submit(self._execute_node, nodes[nid], ctx, lineage): nid
                         for nid in batch
@@ -212,18 +227,21 @@ class WorkflowEngine:
                 else:
                     result = node.run(ctx)
                 if result.status == "failed" and retry.max_retries and attempt < retry.max_retries:
-                    wait = retry.backoff_seconds * (retry.backoff_multiplier ** attempt)
-                    logger.warning(f"Node {node_id} failed, retrying in {wait}s (attempt {attempt + 1})")
+                    wait = retry.backoff_seconds * (retry.backoff_multiplier**attempt)
+                    logger.warning(
+                        f"Node {node_id} failed, retrying in {wait}s (attempt {attempt + 1})"
+                    )
                     time.sleep(wait)
                     continue
                 return result
             except Exception as e:
                 last_exception = e
                 if attempt < retry.max_retries:
-                    wait = retry.backoff_seconds * (retry.backoff_multiplier ** attempt)
+                    wait = retry.backoff_seconds * (retry.backoff_multiplier**attempt)
                     time.sleep(wait)
                 else:
                     from workflows.nodes import NodeResult
+
                     return NodeResult(status="failed", errors=[str(last_exception)])
 
     def _run_with_timeout(self, node, ctx: WorkflowContext, timeout: float):
@@ -232,7 +250,9 @@ class WorkflowEngine:
             try:
                 return future.result(timeout=timeout)
             except concurrent.futures.TimeoutError:
-                return node.run(ctx).__class__(status="failed", errors=[f"Timeout after {timeout}s"])
+                return node.run(ctx).__class__(
+                    status="failed", errors=[f"Timeout after {timeout}s"]
+                )
 
     def _record_node_result(self, execution: WorkflowExecution, node_id: str, result: Any) -> None:
         execution.node_results[node_id] = {

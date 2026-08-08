@@ -13,11 +13,10 @@ Endpoints:
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session as DbSession
 
-from ai.context_engine import EnterpriseContextEngine
 from ai.engines.enterprise_anomaly import EnterpriseAnomalyEngine
 from ai.engines.enterprise_forecast import EnterpriseForecastEngine
 from ai.engines.enterprise_report import EnterpriseReportEngine

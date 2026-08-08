@@ -18,13 +18,14 @@ import asyncio
 import json
 import time
 import uuid
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Callable
+from typing import Any
 
 try:
     import redis as redis_lib
+
     HAS_REDIS = True
 except ImportError:
     HAS_REDIS = False
@@ -253,7 +254,7 @@ class TaskQueue:
             task.status = TaskStatus.RETRYING
             self._stats.total_retried += 1
             # Exponential backoff
-            delay = 2 ** task.retries
+            delay = 2**task.retries
             await asyncio.sleep(delay)
             task.status = TaskStatus.PENDING
             task.error = None
@@ -299,7 +300,5 @@ class TaskQueue:
     def pending_count(self) -> int:
         """Count of pending tasks across all queues."""
         if self._redis:
-            return sum(
-                self._redis.llen(f"queue:{p.value}") for p in TaskPriority
-            )
+            return sum(self._redis.llen(f"queue:{p.value}") for p in TaskPriority)
         return sum(q.qsize() for q in self._queues.values())

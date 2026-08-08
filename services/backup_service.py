@@ -6,6 +6,7 @@ critical configuration. Supports SQLite (file copy) and MySQL (mysqldump).
 
 from __future__ import annotations
 
+import contextlib
 import os
 import shutil
 import sqlite3
@@ -39,10 +40,8 @@ class BackupService:
     def __init__(self, backup_root: str | Path | None = None) -> None:
         self.backup_root = Path(backup_root) if backup_root else _backup_dir()
         # Do not fail construction on read-only filesystems; create lazily on demand.
-        try:
+        with contextlib.suppress(OSError):
             self.backup_root.mkdir(parents=True, exist_ok=True)
-        except OSError:
-            pass
 
     def create_backup(self, name: str | None = None) -> dict[str, Any]:
         """Create a timestamped database and configuration backup.
@@ -71,9 +70,7 @@ class BackupService:
         db_result = self._backup_database(config, backup_path)
         config_result = self._backup_config(backup_path)
 
-        total_size = sum(
-            f.stat().st_size for f in backup_path.rglob("*") if f.is_file()
-        )
+        total_size = sum(f.stat().st_size for f in backup_path.rglob("*") if f.is_file())
         verified = db_result["verified"] and config_result["verified"]
 
         result = {
@@ -96,9 +93,18 @@ class BackupService:
             db_url = getattr(config_module, "DB_URL", "")
             db_file_source = db_url.replace("sqlite:///", "").lstrip("/")
             if not db_file_source or not Path(db_file_source).exists():
-                return {"status": "skipped", "path": None, "verified": False, "error": "SQLite source not found"}
+                return {
+                    "status": "skipped",
+                    "path": None,
+                    "verified": False,
+                    "error": "SQLite source not found",
+                }
             shutil.copy2(db_file_source, db_file)
-            return {"status": "completed", "path": str(db_file), "verified": self._verify_sqlite(db_file)}
+            return {
+                "status": "completed",
+                "path": str(db_file),
+                "verified": self._verify_sqlite(db_file),
+            }
 
         if db_type == "mysql":
             host = os.getenv("MYSQL_HOST", "localhost")
@@ -113,10 +119,14 @@ class BackupService:
                 cmd = [
                     "mysqldump",
                     "--single-transaction",
-                    "--host", host,
-                    "--port", str(port),
-                    "--user", user,
-                    "--databases", database,
+                    "--host",
+                    host,
+                    "--port",
+                    str(port),
+                    "--user",
+                    user,
+                    "--databases",
+                    database,
                 ]
                 with open(db_file, "w", encoding="utf-8") as f:
                     subprocess.run(cmd, env=env, stdout=f, check=True, text=True, timeout=300)
@@ -138,7 +148,11 @@ class BackupService:
         try:
             if env_source.exists():
                 shutil.copy2(env_source, config_backup)
-                return {"status": "completed", "path": str(config_backup), "verified": config_backup.exists()}
+                return {
+                    "status": "completed",
+                    "path": str(config_backup),
+                    "verified": config_backup.exists(),
+                }
             return {"status": "skipped", "path": None, "verified": True, "reason": ".env not found"}
         except OSError as e:
             return {"status": "failed", "path": None, "verified": False, "error": str(e)}
@@ -166,7 +180,9 @@ class BackupService:
                     "id": path.name,
                     "path": str(path),
                     "size_bytes": size,
-                    "created_at": datetime.fromtimestamp(path.stat().st_ctime, tz=timezone.utc).isoformat(),
+                    "created_at": datetime.fromtimestamp(
+                        path.stat().st_ctime, tz=timezone.utc
+                    ).isoformat(),
                 }
             )
         return backups

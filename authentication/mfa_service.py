@@ -46,6 +46,7 @@ class MFAService:
 
         # Hash backup codes for storage
         from shared.security import hash_password
+
         backup_codes_hashed = [hash_password(code) for code in backup_codes]
 
         if existing:
@@ -67,8 +68,9 @@ class MFAService:
         self.db.commit()
 
         # Build QR URI for authenticator apps
-        from config import MFA_TOTP_ISSUER
         from authentication.repositories import UserRepository
+        from config import MFA_TOTP_ISSUER
+
         user = UserRepository(self.db).get_by_id(user_id)
         issuer = MFA_TOTP_ISSUER
         account = user.email if user else str(user_id)
@@ -181,6 +183,7 @@ class MFAService:
         # Check backup codes
         if config.backup_codes_hashed:
             from shared.security import verify_password
+
             for i, hashed_code in enumerate(config.backup_codes_hashed):
                 if verify_password(code, hashed_code):
                     # Remove used backup code
@@ -206,5 +209,7 @@ class MFAService:
             "setup_pending": not config.is_enabled,
             "enabled_at": config.enabled_at,
             "last_used_at": config.last_used_at,
-            "backup_codes_remaining": len(config.backup_codes_hashed) if config.backup_codes_hashed else 0,
+            "backup_codes_remaining": (
+                len(config.backup_codes_hashed) if config.backup_codes_hashed else 0
+            ),
         }

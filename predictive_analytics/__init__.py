@@ -23,23 +23,23 @@ Usage:
 
 from __future__ import annotations
 
-from predictive_analytics.base import (
-    ForecastResult,
-    PredictionResult,
-    RiskAssessment,
-    PredictiveAnalyticsRegistry,
-    PredictiveAnalyticsBase,
-    PredictiveIntelligenceResult,
-)
-from predictive_analytics.forecasting import TimeSeriesForecaster
-from predictive_analytics.regression import RegressionPredictor
-from predictive_analytics.classification import RiskClassifier
+import predictive_analytics.agriculture  # noqa: F401
 
 # Import industry modules to register them
 import predictive_analytics.business  # noqa: F401
-import predictive_analytics.healthcare  # noqa: F401
 import predictive_analytics.education  # noqa: F401
-import predictive_analytics.agriculture  # noqa: F401
+import predictive_analytics.healthcare  # noqa: F401
+from predictive_analytics.base import (
+    ForecastResult,
+    PredictionResult,
+    PredictiveAnalyticsBase,
+    PredictiveAnalyticsRegistry,
+    PredictiveIntelligenceResult,
+    RiskAssessment,
+)
+from predictive_analytics.classification import RiskClassifier
+from predictive_analytics.forecasting import TimeSeriesForecaster
+from predictive_analytics.regression import RegressionPredictor
 
 __all__ = [
     "ForecastResult",

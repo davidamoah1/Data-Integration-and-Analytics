@@ -14,10 +14,8 @@ Usage:
 from __future__ import annotations
 
 import sys
-from datetime import datetime, timezone
 
 from shared.database import (
-    Base,
     ensure_default_data,
     ensure_tables,
     get_engine,
@@ -45,6 +43,7 @@ def cmd_migrate():
     """Run Alembic migrations to head."""
     print("Running Alembic migrations to head...")
     from alembic.config import Config
+
     from alembic import command
 
     alembic_cfg = Config("alembic.ini")
@@ -104,8 +103,12 @@ def cmd_status():
     print(f"│ Indexes:      {total_indexes}")
     print(f"│ Pool Size:    {getattr(__import__('config'), 'POOL_SIZE', 'N/A')}")
     print(f"│ Max Overflow: {getattr(__import__('config'), 'MAX_OVERFLOW', 'N/A')}")
-    print(f"│ Slow Query:   {getattr(__import__('config'), 'SLOW_QUERY_THRESHOLD_MS', 'N/A')}ms threshold")
-    print(f"│ Backup:       {'enabled' if getattr(__import__('config'), 'BACKUP_ENABLED', False) else 'disabled'}")
+    print(
+        f"│ Slow Query:   {getattr(__import__('config'), 'SLOW_QUERY_THRESHOLD_MS', 'N/A')}ms threshold"
+    )
+    print(
+        f"│ Backup:       {'enabled' if getattr(__import__('config'), 'BACKUP_ENABLED', False) else 'disabled'}"
+    )
 
     # Table details
     if tables:
@@ -118,7 +121,9 @@ def cmd_status():
                     idx_count = len(inspector.get_indexes(table))
                     print(f"│   {table:40s} {count:>10} rows  {idx_count:>3} indexes")
                 except Exception:
-                    print(f"│   {table:40s} {'?':>10} rows  {len(inspector.get_indexes(table)):>3} indexes")
+                    print(
+                        f"│   {table:40s} {'?':>10} rows  {len(inspector.get_indexes(table)):>3} indexes"
+                    )
     print("└─────────────────────────────────────────────────")
 
 
@@ -133,7 +138,7 @@ def cmd_indexes():
     try:
         mgr = IndexManager(db)
         result = mgr.ensure_critical_indexes()
-        print(f"✓ Index check complete:")
+        print("✓ Index check complete:")
         print(f"  Created: {len(result['created'])} — {result['created']}")
         print(f"  Skipped: {len(result['skipped'])} (already exist)")
         print(f"  Failed:  {len(result['failed'])}")
@@ -143,8 +148,8 @@ def cmd_indexes():
 
 def cmd_cleanup():
     """Remove old backups beyond retention period."""
-    from database.backup import BackupManager
     import config
+    from database.backup import BackupManager
 
     print(f"Cleaning up backups older than {config.BACKUP_RETENTION_DAYS} days...")
     mgr = BackupManager()
@@ -168,7 +173,9 @@ def cmd_list_backups():
     print(f"{'Filename':50s} {'Size (MB)':>10s} {'Created':25s} {'Compressed':>10s}")
     print("─" * 100)
     for b in backups:
-        print(f"{b.filename:50s} {b.size_mb:>10.2f} {b.created_at.strftime('%Y-%m-%d %H:%M:%S UTC'):25s} {'yes' if b.compressed else 'no':>10s}")
+        print(
+            f"{b.filename:50s} {b.size_mb:>10.2f} {b.created_at.strftime('%Y-%m-%d %H:%M:%S UTC'):25s} {'yes' if b.compressed else 'no':>10s}"
+        )
 
 
 def main():

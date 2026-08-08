@@ -1,6 +1,7 @@
 """SQLAlchemy models for the Enterprise Connector Framework."""
 
 from sqlalchemy import JSON, TIMESTAMP, Boolean, Column, Integer, String, Text, func
+
 from shared.database import Base, BigInt
 
 
@@ -17,7 +18,9 @@ class Connector(Base):
     description = Column(Text, nullable=True)
     configuration = Column(JSON, nullable=True)  # connection params (credentials stored encrypted)
     auth_config = Column(JSON, nullable=True)  # auth method + credentials
-    status = Column(String(20), nullable=False, default="inactive")  # active, inactive, error, testing
+    status = Column(
+        String(20), nullable=False, default="inactive"
+    )  # active, inactive, error, testing
     last_tested_at = Column(TIMESTAMP, nullable=True)
     last_test_result = Column(JSON, nullable=True)
     is_public = Column(Boolean, default=False, nullable=False)

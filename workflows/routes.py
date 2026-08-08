@@ -2,23 +2,20 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session as DbSession
 
 from audit.service import log_audit_event
 from shared.database import get_db
 from shared.dependencies import get_current_user, require_permissions
-from shared.exceptions import AuthorizationError, NotFoundError
 from shared.response import success_response
-from shared.tenant import is_super_admin
 from workflows.schemas import (
     WorkflowDefinitionCreate,
     WorkflowDefinitionResponse,
     WorkflowDefinitionUpdate,
     WorkflowExecutionCreate,
     WorkflowExecutionResponse,
-    WorkflowHistoryQuery,
     WorkflowLineageResponse,
     WorkflowTemplateCreate,
     WorkflowTemplateResponse,
@@ -47,6 +44,7 @@ class ImportWorkflowRequest(BaseModel):
 async def list_node_types(current_user: dict = Depends(get_current_user)):
     """Return all registered workflow node types."""
     from workflows.nodes import list_node_types
+
     return success_response(list_node_types())
 
 
@@ -247,7 +245,13 @@ async def list_executions(
     current_user: dict = Depends(get_current_user),
 ):
     service = WorkflowService(db, current_user)
-    filters = {"workflow_id": workflow_id, "status": status, "trigger_type": trigger_type, "limit": limit, "offset": offset}
+    filters = {
+        "workflow_id": workflow_id,
+        "status": status,
+        "trigger_type": trigger_type,
+        "limit": limit,
+        "offset": offset,
+    }
     return service.list_executions(filters)
 
 
@@ -298,7 +302,9 @@ async def get_template(
     return service.get_template(template_id)
 
 
-@router.post("/templates/{template_id}/import", response_model=WorkflowDefinitionResponse, status_code=201)
+@router.post(
+    "/templates/{template_id}/import", response_model=WorkflowDefinitionResponse, status_code=201
+)
 async def import_template(
     template_id: int,
     request: ImportWorkflowRequest,
@@ -308,7 +314,12 @@ async def import_template(
     """Import a public or owned template as a new workflow."""
     service = WorkflowService(db, current_user)
     template = service.get_template(template_id)
-    from workflows.schemas import WorkflowDefinitionCreate, WorkflowNodeDefinition, WorkflowEdgeDefinition
+    from workflows.schemas import (
+        WorkflowDefinitionCreate,
+        WorkflowEdgeDefinition,
+        WorkflowNodeDefinition,
+    )
+
     wf_request = WorkflowDefinitionCreate(
         name=request.name,
         description=request.description,
@@ -345,14 +356,16 @@ async def export_workflow(
     service = WorkflowService(db, current_user)
     wf = service.get_definition(workflow_id)
     latest = wf.versions[0] if wf.versions else None
-    return success_response({
-        "name": wf.name,
-        "description": wf.description,
-        "category": wf.category,
-        "nodes": latest.nodes if latest else [],
-        "edges": latest.edges if latest else [],
-        "config": latest.config if latest else {},
-    })
+    return success_response(
+        {
+            "name": wf.name,
+            "description": wf.description,
+            "category": wf.category,
+            "nodes": latest.nodes if latest else [],
+            "edges": latest.edges if latest else [],
+            "config": latest.config if latest else {},
+        }
+    )
 
 
 # --- Job queue ---------------------------------------------------------------
@@ -365,7 +378,12 @@ async def list_jobs(
     current_user: dict = Depends(require_permissions("workflows.read")),
 ):
     service = WorkflowService(db, current_user)
-    return success_response([{"id": j.id, "execution_id": j.execution_id, "status": j.status} for j in service.list_jobs(status)])
+    return success_response(
+        [
+            {"id": j.id, "execution_id": j.execution_id, "status": j.status}
+            for j in service.list_jobs(status)
+        ]
+    )
 
 
 # Router-level error handlers are not supported by APIRouter; global

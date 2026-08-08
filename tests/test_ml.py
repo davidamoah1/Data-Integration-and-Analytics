@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 
 import numpy as np
 import pandas as pd
@@ -15,7 +15,7 @@ from ml.decision import generate_recommendation, generate_what_if_scenarios
 from ml.drift import detect_data_drift
 from ml.features import FeatureEngineer, auto_clean
 from ml.forecast import ForecastingEngine
-from ml.models import MLModel, MLTrainingRun, ModelType
+from ml.models import ModelType
 from ml.readiness import assess_ml_readiness
 from ml.service import MLService
 
@@ -34,11 +34,13 @@ class TestMLReadiness:
         assert report["quality_score"] == 0.0
 
     def test_classification_suggestions(self):
-        df = pd.DataFrame({
-            "age": [20, 25, 30, 35, 40],
-            "income": [30000, 40000, 50000, 60000, 70000],
-            "churn": ["yes", "no", "no", "yes", "no"],
-        })
+        df = pd.DataFrame(
+            {
+                "age": [20, 25, 30, 35, 40],
+                "income": [30000, 40000, 50000, 60000, 70000],
+                "churn": ["yes", "no", "no", "yes", "no"],
+            }
+        )
         report = assess_ml_readiness(df, target_column="churn")
         assert report["ready"] is True
         assert any(s["family"] == "classification" for s in report["suggested_algorithms"])
@@ -46,11 +48,13 @@ class TestMLReadiness:
 
 class TestFeatureEngineering:
     def test_auto_clean_and_transform(self):
-        df = pd.DataFrame({
-            "num1": [1.0, 2.0, np.nan, 4.0],
-            "cat1": ["a", "b", np.nan, "a"],
-            "target": [0, 1, 0, 1],
-        })
+        df = pd.DataFrame(
+            {
+                "num1": [1.0, 2.0, np.nan, 4.0],
+                "cat1": ["a", "b", np.nan, "a"],
+                "target": [0, 1, 0, 1],
+            }
+        )
         cleaned, log = auto_clean(df)
         assert cleaned.isna().sum().sum() == 0
         engineer = FeatureEngineer({"scaling": "standard"})
@@ -61,11 +65,13 @@ class TestFeatureEngineering:
 
 class TestAutoML:
     def test_classification_training(self):
-        df = pd.DataFrame({
-            "x1": np.random.rand(50),
-            "x2": np.random.rand(50),
-            "y": np.random.choice(["A", "B"], size=50),
-        })
+        df = pd.DataFrame(
+            {
+                "x1": np.random.rand(50),
+                "x2": np.random.rand(50),
+                "y": np.random.choice(["A", "B"], size=50),
+            }
+        )
         X = df[["x1", "x2"]]
         y = df["y"]
         engine = AutoMLEngine("classification", algorithm="LogisticRegression")
@@ -75,11 +81,13 @@ class TestAutoML:
         assert "accuracy" in result["best"]["metrics"]
 
     def test_regression_training(self):
-        df = pd.DataFrame({
-            "x1": np.random.rand(50),
-            "x2": np.random.rand(50),
-            "y": np.random.rand(50),
-        })
+        df = pd.DataFrame(
+            {
+                "x1": np.random.rand(50),
+                "x2": np.random.rand(50),
+                "y": np.random.rand(50),
+            }
+        )
         X = df[["x1", "x2"]]
         y = df["y"]
         engine = AutoMLEngine("regression", algorithm="LinearRegression")
@@ -101,9 +109,11 @@ class TestForecasting:
 
 class TestAnomalyDetection:
     def test_isolation_forest(self):
-        df = pd.DataFrame({
-            "amount": np.concatenate([np.random.rand(45), np.random.rand(5) * 100]),
-        })
+        df = pd.DataFrame(
+            {
+                "amount": np.concatenate([np.random.rand(45), np.random.rand(5) * 100]),
+            }
+        )
         engine = AnomalyDetectionEngine(algorithm="isolation_forest")
         result = engine.detect(df)
         assert result["status"] == "completed"
@@ -118,10 +128,12 @@ class TestAnomalyDetection:
 
 class TestDecisionIntelligence:
     def test_recommendation(self):
-        df = pd.DataFrame({
-            "sales": [100, 110, 120, 90],
-            "region": ["North", "North", "South", "South"],
-        })
+        df = pd.DataFrame(
+            {
+                "sales": [100, 110, 120, 90],
+                "region": ["North", "North", "South", "South"],
+            }
+        )
         rec = generate_recommendation(df, "sales", segment_column="region")
         assert rec["recommendation"]
         assert rec["confidence"] > 0
@@ -147,9 +159,10 @@ class TestMLService:
         user = {"id": 1, "organization_id": 1, "roles": ["analyst"]}
         service = MLService(db_session, user)
         df = pd.DataFrame({"x": [1, 2, 3], "y": [0, 1, 0]})
-        path = str(db_session.bind.url).replace("sqlite:///", "")
+        str(db_session.bind.url).replace("sqlite:///", "")
         # Use a temp CSV independent of session path
         import tempfile
+
         with tempfile.NamedTemporaryFile(suffix=".csv", delete=False, mode="w") as f:
             df.to_csv(f.name, index=False)
             csv_path = f.name
@@ -160,13 +173,15 @@ class TestMLService:
     def test_create_model(self, db_session):
         user = {"id": 1, "organization_id": 1, "roles": ["analyst"]}
         service = MLService(db_session, user)
-        model = service.create_model({
-            "name": "Test Model",
-            "description": "",
-            "model_type": "classification",
-            "dataset_source": "/tmp/dummy.csv",
-            "target_column": "y",
-        })
+        model = service.create_model(
+            {
+                "name": "Test Model",
+                "description": "",
+                "model_type": "classification",
+                "dataset_source": "/tmp/dummy.csv",
+                "target_column": "y",
+            }
+        )
         assert model.name == "Test Model"
         assert model.model_type == ModelType.CLASSIFICATION
 

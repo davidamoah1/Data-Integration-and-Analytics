@@ -30,7 +30,7 @@ import logging
 import os
 import shutil
 import subprocess
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -165,7 +165,9 @@ class BackupManager:
                 duration_seconds=duration,
             )
         except FileNotFoundError:
-            return BackupResult(success=False, error="mysqldump not found. Install MySQL client tools.")
+            return BackupResult(
+                success=False, error="mysqldump not found. Install MySQL client tools."
+            )
         except Exception as e:
             filepath.unlink(missing_ok=True)
             return BackupResult(success=False, error=str(e))
@@ -211,13 +213,15 @@ class BackupManager:
             if not (entry.name.startswith("backup_") and (entry.suffix in (".sql", ".gz", ".db"))):
                 continue
             stat = entry.stat()
-            backups.append(BackupInfo(
-                filename=entry.name,
-                path=str(entry),
-                size_mb=stat.st_size / (1024 * 1024),
-                created_at=datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc),
-                compressed=entry.name.endswith(".gz"),
-            ))
+            backups.append(
+                BackupInfo(
+                    filename=entry.name,
+                    path=str(entry),
+                    size_mb=stat.st_size / (1024 * 1024),
+                    created_at=datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc),
+                    compressed=entry.name.endswith(".gz"),
+                )
+            )
         backups.sort(key=lambda b: b.created_at, reverse=True)
         return backups
 
@@ -276,7 +280,9 @@ class BackupManager:
             logger.info("MySQL backup restored: %s", filepath.name)
             return BackupResult(success=True, path=str(filepath), duration_seconds=duration)
         except FileNotFoundError:
-            return BackupResult(success=False, error="mysql client not found. Install MySQL client tools.")
+            return BackupResult(
+                success=False, error="mysql client not found. Install MySQL client tools."
+            )
         except Exception as e:
             return BackupResult(success=False, error=str(e))
 
@@ -287,7 +293,10 @@ class BackupManager:
         try:
             # Create a pre-restore safety backup
             if os.path.exists(db_path):
-                safety = self.backup_dir / f"pre_restore_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.db"
+                safety = (
+                    self.backup_dir
+                    / f"pre_restore_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.db"
+                )
                 shutil.copy2(db_path, safety)
 
             if filepath.name.endswith(".gz"):

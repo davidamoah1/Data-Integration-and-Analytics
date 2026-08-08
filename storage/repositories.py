@@ -5,7 +5,6 @@ from __future__ import annotations
 from datetime import datetime, timezone
 
 from sqlalchemy import func, select, update
-from sqlalchemy.orm import Session as DbSession
 
 from shared.repositories import BaseRepository
 from storage.models import FileRecord

@@ -8,7 +8,7 @@ import streamlit as st
 
 from dashboard.styles import CHART_LAYOUT
 from dashboard.utils import fmt_currency, fmt_number
-from semantic.dashboard_registry import DashboardRegistry, WidgetDefinition
+from semantic.dashboard_registry import DashboardTemplate, WidgetDefinition
 from semantic.mapping_engine import SemanticMappingResult
 
 
@@ -73,7 +73,7 @@ def render_semantic_dashboard(
         with st.expander("Data Understanding Signals", expanded=False):
             for sig in value_signals:
                 st.caption(
-                    f"• **{sig.column_name}** → {sig.signal_type.replace("_", " ").title()} "
+                    f"• **{sig.column_name}** → {sig.signal_type.replace('_', ' ').title()} "
                     f"({sig.industry}): {sig.evidence}"
                 )
 
@@ -133,7 +133,9 @@ def _render_generic_dashboard(df: pd.DataFrame, template: DashboardTemplate) -> 
     missing = df.isnull().sum()
     missing_pct = (missing / len(df) * 100).round(2)
     missing_df = pd.DataFrame({"Missing Count": missing, "Missing %": missing_pct})
-    missing_df = missing_df[missing_df["Missing Count"] > 0].sort_values("Missing Count", ascending=False)
+    missing_df = missing_df[missing_df["Missing Count"] > 0].sort_values(
+        "Missing Count", ascending=False
+    )
     if missing_df.empty:
         st.success("No missing values detected in the dataset.")
     else:
@@ -157,11 +159,19 @@ def _render_generic_dashboard(df: pd.DataFrame, template: DashboardTemplate) -> 
             if not trend_df.empty:
                 first_numeric = numeric_cols[0]
                 trend_data = (
-                    trend_df.groupby(trend_df[date_col].dt.to_period("M").astype(str))[first_numeric]
+                    trend_df.groupby(trend_df[date_col].dt.to_period("M").astype(str))[
+                        first_numeric
+                    ]
                     .sum()
                     .reset_index()
                 )
-                fig = px.line(trend_data, x=date_col, y=first_numeric, title=f"{first_numeric} Trend", template="none")
+                fig = px.line(
+                    trend_data,
+                    x=date_col,
+                    y=first_numeric,
+                    title=f"{first_numeric} Trend",
+                    template="none",
+                )
                 fig.update_layout(**CHART_LAYOUT, height=300)
                 st.plotly_chart(fig, use_container_width=True)
         except (KeyError, TypeError, ValueError):
@@ -175,7 +185,9 @@ def _render_generic_dashboard(df: pd.DataFrame, template: DashboardTemplate) -> 
         )
         try:
             corr = df[numeric_cols].corr().round(2)
-            fig = px.imshow(corr, title="Numeric Correlations", template="none", color_continuous_scale="RdBu_r")
+            fig = px.imshow(
+                corr, title="Numeric Correlations", template="none", color_continuous_scale="RdBu_r"
+            )
             fig.update_layout(**CHART_LAYOUT, height=400)
             st.plotly_chart(fig, use_container_width=True)
         except (KeyError, TypeError, ValueError):

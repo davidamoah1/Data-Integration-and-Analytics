@@ -61,10 +61,7 @@ class TimeSeriesForecaster:
         # Determine trend
         first_val = float(ts.iloc[0])
         last_val = float(ts.iloc[-1])
-        if first_val != 0:
-            trend_pct = ((last_val - first_val) / abs(first_val)) * 100
-        else:
-            trend_pct = 0.0
+        trend_pct = (last_val - first_val) / abs(first_val) * 100 if first_val != 0 else 0.0
         if trend_pct > 5:
             trend = "increasing"
         elif trend_pct < -5:
@@ -162,7 +159,9 @@ class TimeSeriesForecaster:
             return TimeSeriesForecaster._linear_forecast(ts, horizon, confidence_level)
 
     @staticmethod
-    def _linear_forecast(ts: pd.Series, horizon: int, confidence_level: float) -> tuple[list[ForecastPoint], float]:
+    def _linear_forecast(
+        ts: pd.Series, horizon: int, confidence_level: float
+    ) -> tuple[list[ForecastPoint], float]:
         x = np.arange(len(ts))
         y = ts.values
 
@@ -178,6 +177,7 @@ class TimeSeriesForecaster:
         z = 1.96
         try:
             from scipy import stats
+
             z = float(stats.norm.ppf((1 + confidence_level) / 2))
         except Exception:
             pass
@@ -200,7 +200,9 @@ class TimeSeriesForecaster:
         return predictions, r_squared
 
     @staticmethod
-    def _exponential_forecast(ts: pd.Series, horizon: int, confidence_level: float) -> tuple[list[ForecastPoint], float]:
+    def _exponential_forecast(
+        ts: pd.Series, horizon: int, confidence_level: float
+    ) -> tuple[list[ForecastPoint], float]:
         alpha = 0.3
         smoothed = [float(ts.iloc[0])]
         for i in range(1, len(ts)):
@@ -215,6 +217,7 @@ class TimeSeriesForecaster:
         z = 1.96
         try:
             from scipy import stats
+
             z = float(stats.norm.ppf((1 + confidence_level) / 2))
         except Exception:
             pass
@@ -236,7 +239,9 @@ class TimeSeriesForecaster:
         return predictions, accuracy
 
     @staticmethod
-    def _moving_average_forecast(ts: pd.Series, horizon: int, confidence_level: float) -> tuple[list[ForecastPoint], float]:
+    def _moving_average_forecast(
+        ts: pd.Series, horizon: int, confidence_level: float
+    ) -> tuple[list[ForecastPoint], float]:
         window = min(7, len(ts))
         ma_value = float(ts.iloc[-window:].mean())
         predicted = [ma_value] * horizon
@@ -249,6 +254,7 @@ class TimeSeriesForecaster:
         z = 1.96
         try:
             from scipy import stats
+
             z = float(stats.norm.ppf((1 + confidence_level) / 2))
         except Exception:
             pass
@@ -267,7 +273,9 @@ class TimeSeriesForecaster:
         return predictions, 0.5
 
     @staticmethod
-    def _seasonal_forecast(ts: pd.Series, horizon: int, confidence_level: float) -> tuple[list[ForecastPoint], float]:
+    def _seasonal_forecast(
+        ts: pd.Series, horizon: int, confidence_level: float
+    ) -> tuple[list[ForecastPoint], float]:
         period = min(12, len(ts) // 2)
         seasonal_avg = ts.iloc[-period:].values
         overall_avg = float(ts.mean())
@@ -288,6 +296,7 @@ class TimeSeriesForecaster:
         z = 1.96
         try:
             from scipy import stats
+
             z = float(stats.norm.ppf((1 + confidence_level) / 2))
         except Exception:
             pass
@@ -311,8 +320,13 @@ class TimeSeriesForecaster:
 
     @staticmethod
     def _generate_summary(
-        name: str, method: str, accuracy: float, accuracy_label: str,
-        trend: str, trend_pct: float, predictions: list[ForecastPoint],
+        name: str,
+        method: str,
+        accuracy: float,
+        accuracy_label: str,
+        trend: str,
+        trend_pct: float,
+        predictions: list[ForecastPoint],
     ) -> str:
         parts = [f"{name} ({method} method):"]
         parts.append(f"Accuracy: {accuracy:.1%} ({accuracy_label})")

@@ -18,7 +18,7 @@ from shared.dependencies import get_current_user, require_permissions
 from shared.tenant import get_current_organization_id, is_super_admin
 from validation.approval import ApprovalWorkflow
 from validation.audit import ValidationAuditLogger
-from validation.engine import ValidationEngine, ValidationStatus
+from validation.engine import ValidationEngine
 from validation.report_generator import ValidationReportGenerator
 
 logger = logging.getLogger(__name__)
@@ -92,14 +92,20 @@ async def run_validation(
     elif filename.endswith(".json"):
         df = pd.read_json(io.BytesIO(content))
     else:
-        raise HTTPException(status_code=400, detail="Unsupported file format. Use CSV, Excel, or JSON.")
+        raise HTTPException(
+            status_code=400, detail="Unsupported file format. Use CSV, Excel, or JSON."
+        )
 
     schema_type = _detect_schema_type(filename)
     engine = ValidationEngine()
     result = engine.validate(df, dataset_name=filename, schema_type=schema_type)
 
     session_id = _get_next_id()
-    org_id = current_user.get("organization_id") if is_super_admin(current_user) else get_current_organization_id(current_user, db)
+    org_id = (
+        current_user.get("organization_id")
+        if is_super_admin(current_user)
+        else get_current_organization_id(current_user, db)
+    )
     session = {
         "id": session_id,
         "result": result,
@@ -111,7 +117,11 @@ async def run_validation(
     _sessions[session_id] = session
 
     ValidationAuditLogger.log_upload(filename)
-    ValidationAuditLogger.log_validation(session_id, result.status.value, result.quality_score.overall if result.quality_score else None)
+    ValidationAuditLogger.log_validation(
+        session_id,
+        result.status.value,
+        result.quality_score.overall if result.quality_score else None,
+    )
 
     log_audit_event(
         db=db,
@@ -192,10 +202,13 @@ async def export_validation_report(
     if format == "csv":
         content = ValidationReportGenerator.export_csv(result)
         from fastapi.responses import Response
+
         return Response(
             content=content,
             media_type="text/csv",
-            headers={"Content-Disposition": f"attachment; filename=validation_report_{session_id}.csv"},
+            headers={
+                "Content-Disposition": f"attachment; filename=validation_report_{session_id}.csv"
+            },
         )
     elif format == "excel":
         with tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False) as tmp:
@@ -204,10 +217,13 @@ async def export_validation_report(
                 content = f.read()
             os.unlink(tmp.name)
         from fastapi.responses import Response
+
         return Response(
             content=content,
             media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            headers={"Content-Disposition": f"attachment; filename=validation_report_{session_id}.xlsx"},
+            headers={
+                "Content-Disposition": f"attachment; filename=validation_report_{session_id}.xlsx"
+            },
         )
     elif format == "pdf":
         with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
@@ -216,10 +232,13 @@ async def export_validation_report(
                 content = f.read()
             os.unlink(tmp.name)
         from fastapi.responses import Response
+
         return Response(
             content=content,
             media_type="application/pdf",
-            headers={"Content-Disposition": f"attachment; filename=validation_report_{session_id}.pdf"},
+            headers={
+                "Content-Disposition": f"attachment; filename=validation_report_{session_id}.pdf"
+            },
         )
     else:
         raise HTTPException(status_code=400, detail="Format must be csv, excel, or pdf.")
@@ -239,7 +258,9 @@ async def approve_validation(
         raise HTTPException(status_code=403, detail="Access denied.")
     result = session["result"]
     if not ApprovalWorkflow.can_approve(result):
-        raise HTTPException(status_code=400, detail=f"Cannot approve session with status '{result.status.value}'.")
+        raise HTTPException(
+            status_code=400, detail=f"Cannot approve session with status '{result.status.value}'."
+        )
     result, decision = ApprovalWorkflow.approve(result, req.approver, req.role, req.comments)
     ValidationAuditLogger.log_approval(session_id, req.approver, "approved", req.comments)
     return {
@@ -308,15 +329,17 @@ async def validation_history(
         if not is_super and session.get("organization_id") != user_org:
             continue
         result = session["result"]
-        history.append({
-            "session_id": sid,
-            "dataset_name": result.dataset_name,
-            "status": result.status.value,
-            "quality_score": result.quality_score.overall if result.quality_score else None,
-            "total_errors": result.total_errors,
-            "total_warnings": result.total_warnings,
-            "validated_at": result.validated_at,
-        })
+        history.append(
+            {
+                "session_id": sid,
+                "dataset_name": result.dataset_name,
+                "status": result.status.value,
+                "quality_score": result.quality_score.overall if result.quality_score else None,
+                "total_errors": result.total_errors,
+                "total_warnings": result.total_warnings,
+                "validated_at": result.validated_at,
+            }
+        )
     return {"history": history, "total": len(history)}
 
 

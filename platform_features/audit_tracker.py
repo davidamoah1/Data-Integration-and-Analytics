@@ -21,13 +21,14 @@ Usage:
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from enum import Enum
 from functools import wraps
-from typing import Any, Callable
+from typing import Any
 
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session as DbSession
 
 
@@ -100,7 +101,9 @@ class AuditSummary:
             "total_events": self.total_events,
             "by_category": self.by_category,
             "by_user": self.by_user,
-            "by_action": dict(sorted(self.by_action.items(), key=lambda x: x[1], reverse=True)[:20]),
+            "by_action": dict(
+                sorted(self.by_action.items(), key=lambda x: x[1], reverse=True)[:20]
+            ),
             "period_start": self.period_start,
             "period_end": self.period_end,
         }
@@ -261,15 +264,17 @@ class AuditTracker:
             cat = data.get("audit_category", AuditCategory.USER_ACTION.value)
             if category and cat != category.value:
                 continue
-            results.append({
-                "id": log.id,
-                "action": log.action,
-                "category": cat,
-                "resource_type": log.resource_type,
-                "resource_id": log.resource_id,
-                "ip_address": log.ip_address,
-                "created_at": str(log.created_at) if log.created_at else None,
-            })
+            results.append(
+                {
+                    "id": log.id,
+                    "action": log.action,
+                    "category": cat,
+                    "resource_type": log.resource_type,
+                    "resource_id": log.resource_id,
+                    "ip_address": log.ip_address,
+                    "created_at": str(log.created_at) if log.created_at else None,
+                }
+            )
 
         return results
 

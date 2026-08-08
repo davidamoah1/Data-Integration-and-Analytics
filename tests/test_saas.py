@@ -9,8 +9,8 @@ Verifies that:
 
 from __future__ import annotations
 
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -143,17 +143,25 @@ class TestSubscriptionLifecycle:
     """Test subscription creation, upgrade, and cancellation."""
 
     def test_subscribe_to_starter(self, client, admin_headers):
-        resp = client.post("/saas/subscribe", json={
-            "plan_code": "starter",
-            "billing_cycle": "monthly",
-        }, headers=admin_headers)
+        resp = client.post(
+            "/saas/subscribe",
+            json={
+                "plan_code": "starter",
+                "billing_cycle": "monthly",
+            },
+            headers=admin_headers,
+        )
         assert resp.status_code == 200
         assert resp.json()["data"]["status"] in ("active", "trial")
 
     def test_upgrade_to_professional(self, client, admin_headers):
-        resp = client.post("/saas/upgrade", json={
-            "plan_code": "professional",
-        }, headers=admin_headers)
+        resp = client.post(
+            "/saas/upgrade",
+            json={
+                "plan_code": "professional",
+            },
+            headers=admin_headers,
+        )
         assert resp.status_code == 200
 
     def test_cancel_subscription(self, client, admin_headers):
@@ -163,10 +171,14 @@ class TestSubscriptionLifecycle:
 
     def test_trial_subscription(self, client, admin_headers):
         # Re-subscribe with trial
-        resp = client.post("/saas/subscribe", json={
-            "plan_code": "business",
-            "is_trial": True,
-        }, headers=admin_headers)
+        resp = client.post(
+            "/saas/subscribe",
+            json={
+                "plan_code": "business",
+                "is_trial": True,
+            },
+            headers=admin_headers,
+        )
         assert resp.status_code == 200
 
 
@@ -199,10 +211,14 @@ class TestOnboarding:
         assert "all_steps" in data
 
     def test_complete_onboarding_step(self, client, admin_headers):
-        resp = client.post("/saas/onboarding/complete-step", json={
-            "step_key": "industry_selection",
-            "industry": "healthcare",
-        }, headers=admin_headers)
+        resp = client.post(
+            "/saas/onboarding/complete-step",
+            json={
+                "step_key": "industry_selection",
+                "industry": "healthcare",
+            },
+            headers=admin_headers,
+        )
         assert resp.status_code == 200
         data = resp.json()["data"]
         assert data["completion_percentage"] > 0

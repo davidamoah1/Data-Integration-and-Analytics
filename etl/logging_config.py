@@ -4,7 +4,7 @@ import os
 import sys
 from logging.handlers import RotatingFileHandler
 
-from config import LOG_LEVEL, LOG_PATH
+from config import LOG_LEVEL
 from shared.context import correlation_id, request_id
 
 _LOGGING_CONFIGURED = False

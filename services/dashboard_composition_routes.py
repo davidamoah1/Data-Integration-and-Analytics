@@ -16,21 +16,20 @@ Endpoints:
 from __future__ import annotations
 
 import logging
-from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session as DbSession
 
-from shared.database import get_db
-from shared.dependencies import get_current_user
-from shared.response import success_response
 from services.dashboard_composition import (
     DashboardCompositionService,
     WidgetRegistry,
     WidgetType,
 )
 from services.dashboard_widget_catalog import INDUSTRY_DASHBOARD_TEMPLATES
+from shared.database import get_db
+from shared.dependencies import get_current_user
+from shared.response import success_response
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/dashboards", tags=["Dashboard Composition"])
@@ -65,14 +64,20 @@ async def list_widgets(
     widgets = WidgetRegistry.all()
 
     if industry:
-        widgets = [w for w in widgets if not w.industries or industry in w.industries or "generic" in w.industries]
+        widgets = [
+            w
+            for w in widgets
+            if not w.industries or industry in w.industries or "generic" in w.industries
+        ]
 
     if widget_type:
         try:
             wt = WidgetType(widget_type)
             widgets = [w for w in widgets if w.widget_type == wt]
         except ValueError:
-            raise HTTPException(status_code=400, detail=f"Invalid widget type: {widget_type}")
+            raise HTTPException(
+                status_code=400, detail=f"Invalid widget type: {widget_type}"
+            ) from None
 
     return success_response(
         [w.to_dict() for w in sorted(widgets, key=lambda x: (x.group, x.order))],
@@ -86,7 +91,11 @@ async def list_widget_types(
 ):
     """List all supported widget types."""
     types = [
-        {"value": "kpi_card", "label": "KPI Card", "description": "Single metric with icon and trend"},
+        {
+            "value": "kpi_card",
+            "label": "KPI Card",
+            "description": "Single metric with icon and trend",
+        },
         {"value": "chart", "label": "Chart", "description": "Visual chart (line, bar, pie, etc.)"},
         {"value": "table", "label": "Table", "description": "Tabular data display"},
         {"value": "map", "label": "Map", "description": "Geographic data visualization"},
@@ -128,13 +137,15 @@ async def list_templates(
     templates = []
     for industry, config in INDUSTRY_DASHBOARD_TEMPLATES.items():
         widget_count = len(config["widget_keys"])
-        templates.append({
-            "industry": industry,
-            "name": config["name"],
-            "description": config["description"],
-            "widget_count": widget_count,
-            "widget_keys": config["widget_keys"],
-        })
+        templates.append(
+            {
+                "industry": industry,
+                "name": config["name"],
+                "description": config["description"],
+                "widget_count": widget_count,
+                "widget_keys": config["widget_keys"],
+            }
+        )
     return success_response(templates)
 
 

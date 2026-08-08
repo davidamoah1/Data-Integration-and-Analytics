@@ -337,11 +337,14 @@ class DashboardMetadata:
 
     def content_hash(self) -> str:
         """Hash of KPI/chart/filter content for change detection."""
-        content = json.dumps({
-            "kpis": [k.to_dict() for k in self.kpis],
-            "charts": [c.to_dict() for c in self.charts],
-            "filters": [f.to_dict() for f in self.filters],
-        }, sort_keys=True)
+        content = json.dumps(
+            {
+                "kpis": [k.to_dict() for k in self.kpis],
+                "charts": [c.to_dict() for c in self.charts],
+                "filters": [f.to_dict() for f in self.filters],
+            },
+            sort_keys=True,
+        )
         return hashlib.sha256(content.encode()).hexdigest()[:16]
 
 
@@ -368,7 +371,9 @@ class DashboardEngine:
         dashboard.updated_at = now
         self._store[dashboard.dashboard_id] = dashboard
         self._index(dashboard)
-        logger.info(f"Created dashboard {dashboard.dashboard_id} for dataset {dashboard.dataset_id}")
+        logger.info(
+            f"Created dashboard {dashboard.dashboard_id} for dataset {dashboard.dataset_id}"
+        )
         return dashboard
 
     def get(self, dashboard_id: str) -> DashboardMetadata | None:
@@ -380,21 +385,37 @@ class DashboardEngine:
             return None
 
         for key, value in updates.items():
-            if key in ("title", "subtitle", "industry", "version", "ai_insights",
-                       "recommendations", "template_key", "is_custom"):
+            if key in (
+                "title",
+                "subtitle",
+                "industry",
+                "version",
+                "ai_insights",
+                "recommendations",
+                "template_key",
+                "is_custom",
+            ):
                 setattr(dashboard, key, value)
             elif key == "kpis":
                 dashboard.kpis = [KPIDefinition(**k) if isinstance(k, dict) else k for k in value]
             elif key == "charts":
-                dashboard.charts = [ChartDefinition(**c) if isinstance(c, dict) else c for c in value]
+                dashboard.charts = [
+                    ChartDefinition(**c) if isinstance(c, dict) else c for c in value
+                ]
             elif key == "filters":
-                dashboard.filters = [FilterDefinition(**f) if isinstance(f, dict) else f for f in value]
+                dashboard.filters = [
+                    FilterDefinition(**f) if isinstance(f, dict) else f for f in value
+                ]
             elif key == "layout":
                 dashboard.layout = DashboardLayout(**value) if isinstance(value, dict) else value
             elif key == "drilldowns":
-                dashboard.drilldowns = [DrilldownLevel(**d) if isinstance(d, dict) else d for d in value]
+                dashboard.drilldowns = [
+                    DrilldownLevel(**d) if isinstance(d, dict) else d for d in value
+                ]
             elif key == "permissions":
-                dashboard.permissions = DashboardPermissions(**value) if isinstance(value, dict) else value
+                dashboard.permissions = (
+                    DashboardPermissions(**value) if isinstance(value, dict) else value
+                )
 
         dashboard.updated_at = self._now()
         dashboard.version += 1
@@ -445,7 +466,7 @@ class DashboardEngine:
         if chart_updates:
             for update in chart_updates:
                 chart_id = update.get("id")
-                for i, chart in enumerate(custom.charts):
+                for _i, chart in enumerate(custom.charts):
                     if chart.id == chart_id:
                         for k, v in update.items():
                             if k != "id" and hasattr(chart, k):
@@ -460,7 +481,7 @@ class DashboardEngine:
         if kpi_updates:
             for update in kpi_updates:
                 kpi_key = update.get("key")
-                for i, kpi in enumerate(custom.kpis):
+                for _i, kpi in enumerate(custom.kpis):
                     if kpi.key == kpi_key:
                         for k, v in update.items():
                             if k != "key" and hasattr(kpi, k):
@@ -508,7 +529,9 @@ class DashboardEngine:
         dashboard.version += 1
         return dashboard
 
-    def reorder_widgets(self, dashboard_id: str, section: str, widget_order: list[str]) -> DashboardMetadata | None:
+    def reorder_widgets(
+        self, dashboard_id: str, section: str, widget_order: list[str]
+    ) -> DashboardMetadata | None:
         """Reorder widgets within a section."""
         dashboard = self._store.get(dashboard_id)
         if not dashboard:
@@ -524,7 +547,9 @@ class DashboardEngine:
         dashboard.version += 1
         return dashboard
 
-    def resize_widget(self, dashboard_id: str, widget_id: str, width: int, height: int) -> DashboardMetadata | None:
+    def resize_widget(
+        self, dashboard_id: str, widget_id: str, width: int, height: int
+    ) -> DashboardMetadata | None:
         """Resize a widget."""
         dashboard = self._store.get(dashboard_id)
         if not dashboard:

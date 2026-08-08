@@ -18,8 +18,6 @@ from __future__ import annotations
 
 import json
 import logging
-import re
-from typing import Any
 
 import pandas as pd
 from sqlalchemy.orm import Session as DbSession
@@ -27,7 +25,7 @@ from sqlalchemy.orm import Session as DbSession
 from ai.context_engine import EnterpriseAIContext, EnterpriseContextEngine
 from ai.data_gatherer import DataGatherer
 from ai.gateway import AIGateway
-from ai.prompt_orchestrator import PromptOrchestrator, PromptTaskType
+from ai.prompt_orchestrator import PromptOrchestrator
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +79,9 @@ class NLAnalyticsEngine:
         analysis_result = self._perform_analysis(intent, question, df, context)
 
         # Generate explanation
-        explanation = self._generate_explanation(intent, question, analysis_result, context, user_id)
+        explanation = self._generate_explanation(
+            intent, question, analysis_result, context, user_id
+        )
 
         # Recommend visualizations
         visualizations = self._recommend_visualizations(intent, analysis_result, context)
@@ -101,9 +101,14 @@ class NLAnalyticsEngine:
 
         if any(kw in q for kw in ["compare", "versus", "vs", "difference between", "contrast"]):
             return "compare"
-        if any(kw in q for kw in ["top", "best", "highest", "leading", "rank", "bottom", "worst", "lowest"]):
+        if any(
+            kw in q
+            for kw in ["top", "best", "highest", "leading", "rank", "bottom", "worst", "lowest"]
+        ):
             return "rank"
-        if any(kw in q for kw in ["trend", "over time", "growth", "decline", "change", "progression"]):
+        if any(
+            kw in q for kw in ["trend", "over time", "growth", "decline", "change", "progression"]
+        ):
             return "trend"
         if any(kw in q for kw in ["explain", "why", "cause", "reason", "driver"]):
             return "explain"
@@ -111,7 +116,9 @@ class NLAnalyticsEngine:
             return "summarize"
         if any(kw in q for kw in ["filter", "show only", "where", "specific", "particular"]):
             return "filter"
-        if any(kw in q for kw in ["highlight", "unusual", "anomaly", "outlier", "abnormal", "strange"]):
+        if any(
+            kw in q for kw in ["highlight", "unusual", "anomaly", "outlier", "abnormal", "strange"]
+        ):
             return "highlight"
         if any(kw in q for kw in ["breakdown", "by ", "group", "segment", "category"]):
             return "breakdown"
@@ -154,13 +161,19 @@ class NLAnalyticsEngine:
         """Compare periods or segments."""
         data = gatherer.gather_for_summary()
         period = data.get("period_comparison", {})
-        by_dim = data.get("by_dimension", {})
+        data.get("by_dimension", {})
 
         results = []
         if period:
-            results.append(f"Current period ({period.get('current_period', '')}): {period.get('current_value', 0):.2f}")
-            results.append(f"Previous period ({period.get('previous_period', '')}): {period.get('previous_value', 0):.2f}")
-            results.append(f"Change: {period.get('absolute_change', 0):+.2f} ({period.get('percentage_change', 0):+.1f}%)")
+            results.append(
+                f"Current period ({period.get('current_period', '')}): {period.get('current_value', 0):.2f}"
+            )
+            results.append(
+                f"Previous period ({period.get('previous_period', '')}): {period.get('previous_value', 0):.2f}"
+            )
+            results.append(
+                f"Change: {period.get('absolute_change', 0):+.2f} ({period.get('percentage_change', 0):+.1f}%)"
+            )
 
         return {
             "method": "period_comparison",
@@ -175,12 +188,14 @@ class NLAnalyticsEngine:
         contributors = data.get("top_contributors", {})
 
         results = []
-        for key, items in contributors.items():
+        for _key, items in contributors.items():
             top_n = items[:5]
             for i, item in enumerate(top_n, 1):
                 dim_name = list(item.keys())[0]
                 val_name = list(item.keys())[1]
-                results.append(f"#{i}: {item[dim_name]} ({item[val_name]:.2f}, {item.get('share', 0):.1f}%)")
+                results.append(
+                    f"#{i}: {item[dim_name]} ({item[val_name]:.2f}, {item.get('share', 0):.1f}%)"
+                )
 
         return {
             "method": "ranking",
@@ -202,7 +217,9 @@ class NLAnalyticsEngine:
                 change = last - first
                 pct = (change / first * 100) if first != 0 else 0
                 direction = "increasing" if change > 0 else "decreasing" if change < 0 else "stable"
-                results.append(f"{metric}: {direction} ({pct:+.1f}%) from {first:.2f} to {last:.2f}")
+                results.append(
+                    f"{metric}: {direction} ({pct:+.1f}%) from {first:.2f} to {last:.2f}"
+                )
 
         return {
             "method": "trend_analysis",
@@ -222,12 +239,14 @@ class NLAnalyticsEngine:
             direction = "increased" if period.get("percentage_change", 0) > 0 else "decreased"
             results.append(f"Metric {direction} by {abs(period.get('percentage_change', 0)):.1f}%")
 
-        for key, items in contributors.items():
+        for _key, items in contributors.items():
             if items:
                 top = items[0]
                 dim_name = list(top.keys())[0]
                 val_name = list(top.keys())[1]
-                results.append(f"Top contributor: {top[dim_name]} with {top[val_name]:.2f} ({top.get('share', 0):.1f}%)")
+                results.append(
+                    f"Top contributor: {top[dim_name]} with {top[val_name]:.2f} ({top.get('share', 0):.1f}%)"
+                )
 
         return {
             "method": "explanation",
@@ -353,14 +372,25 @@ class NLAnalyticsEngine:
     ) -> list[dict]:
         """Recommend appropriate visualizations for the analysis."""
         viz_map = {
-            "compare": [{"type": "grouped_bar", "rationale": "Side-by-side comparison of periods or segments"}],
-            "rank": [{"type": "horizontal_bar", "rationale": "Ranked display of top/bottom performers"}],
+            "compare": [
+                {
+                    "type": "grouped_bar",
+                    "rationale": "Side-by-side comparison of periods or segments",
+                }
+            ],
+            "rank": [
+                {"type": "horizontal_bar", "rationale": "Ranked display of top/bottom performers"}
+            ],
             "trend": [{"type": "line", "rationale": "Time series trend visualization"}],
-            "explain": [{"type": "waterfall", "rationale": "Shows contribution of each factor to the total"}],
+            "explain": [
+                {"type": "waterfall", "rationale": "Shows contribution of each factor to the total"}
+            ],
             "summarize": [{"type": "kpi_cards", "rationale": "Key metrics at a glance"}],
             "filter": [{"type": "table", "rationale": "Filtered data in tabular form"}],
             "highlight": [{"type": "scatter", "rationale": "Identify outliers visually"}],
-            "breakdown": [{"type": "stacked_bar", "rationale": "Show composition across dimensions"}],
+            "breakdown": [
+                {"type": "stacked_bar", "rationale": "Show composition across dimensions"}
+            ],
         }
         return viz_map.get(intent, [{"type": "table", "rationale": "Default tabular display"}])
 

@@ -14,7 +14,6 @@ from __future__ import annotations
 import json
 import logging
 import uuid
-from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session as DbSession
 
@@ -77,7 +76,10 @@ class FileService:
         result: StorageUploadResult = self.backend.upload(key, data, content_type)
         logger.info(
             "File uploaded to %s: %s (%d bytes, %s)",
-            self.backend.name, key, result.size, content_type,
+            self.backend.name,
+            key,
+            result.size,
+            content_type,
         )
 
         # Persist metadata

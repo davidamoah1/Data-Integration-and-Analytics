@@ -16,8 +16,8 @@ from predictive_analytics.base import (
     PredictiveAnalyticsRegistry,
     PredictiveIntelligenceResult,
 )
-from predictive_analytics.forecasting import TimeSeriesForecaster
 from predictive_analytics.classification import RiskClassifier
+from predictive_analytics.forecasting import TimeSeriesForecaster
 
 
 class EducationPredictiveAnalytics(PredictiveAnalyticsBase):
@@ -31,11 +31,16 @@ class EducationPredictiveAnalytics(PredictiveAnalyticsBase):
         student_col = self._find_col(df, col_mapping, ["student", "student_id", "enrollment"])
 
         # 1. Enrollment/Attendance Forecast
-        attendance_col = self._find_numeric_col(df, col_mapping, ["attendance", "attendance_rate", "enrollment"])
+        attendance_col = self._find_numeric_col(
+            df, col_mapping, ["attendance", "attendance_rate", "enrollment"]
+        )
         if attendance_col and date_col:
             forecast = TimeSeriesForecaster.forecast(
-                df, attendance_col, date_col,
-                horizon=30, frequency="D",
+                df,
+                attendance_col,
+                date_col,
+                horizon=30,
+                frequency="D",
                 name="Attendance Trend Forecast",
             )
             if forecast:
@@ -45,52 +50,68 @@ class EducationPredictiveAnalytics(PredictiveAnalyticsBase):
         risk_factors = []
 
         # Low grade/score
-        grade_col = self._find_numeric_col(df, col_mapping, ["grade", "score", "gpa", "mark", "result"])
+        grade_col = self._find_numeric_col(
+            df, col_mapping, ["grade", "score", "gpa", "mark", "result"]
+        )
         if grade_col:
             median_grade = df[grade_col].median()
-            risk_factors.append({
-                "column": grade_col,
-                "condition": "below",
-                "threshold": median_grade,
-                "weight": 0.35,
-                "label": f"Below-median grade (<{median_grade:.1f})",
-            })
+            risk_factors.append(
+                {
+                    "column": grade_col,
+                    "condition": "below",
+                    "threshold": median_grade,
+                    "weight": 0.35,
+                    "label": f"Below-median grade (<{median_grade:.1f})",
+                }
+            )
 
         # Low attendance rate
         if attendance_col:
-            risk_factors.append({
-                "column": attendance_col,
-                "condition": "below",
-                "threshold": 80,
-                "weight": 0.30,
-                "label": "Low attendance (<80%)",
-            })
+            risk_factors.append(
+                {
+                    "column": attendance_col,
+                    "condition": "below",
+                    "threshold": 80,
+                    "weight": 0.30,
+                    "label": "Low attendance (<80%)",
+                }
+            )
 
         # High absenteeism (if absences column exists)
-        absence_col = self._find_numeric_col(df, col_mapping, ["absence", "absent", "absenteeism", "days_absent"])
+        absence_col = self._find_numeric_col(
+            df, col_mapping, ["absence", "absent", "absenteeism", "days_absent"]
+        )
         if absence_col:
-            risk_factors.append({
-                "column": absence_col,
-                "condition": "above",
-                "threshold": 10,
-                "weight": 0.20,
-                "label": "High absenteeism (>10 days)",
-            })
+            risk_factors.append(
+                {
+                    "column": absence_col,
+                    "condition": "above",
+                    "threshold": 10,
+                    "weight": 0.20,
+                    "label": "High absenteeism (>10 days)",
+                }
+            )
 
         # Low participation or engagement
-        participation_col = self._find_numeric_col(df, col_mapping, ["participation", "engagement", "activity"])
+        participation_col = self._find_numeric_col(
+            df, col_mapping, ["participation", "engagement", "activity"]
+        )
         if participation_col:
-            risk_factors.append({
-                "column": participation_col,
-                "condition": "below",
-                "threshold": 50,
-                "weight": 0.15,
-                "label": "Low participation (<50%)",
-            })
+            risk_factors.append(
+                {
+                    "column": participation_col,
+                    "condition": "below",
+                    "threshold": 50,
+                    "weight": 0.15,
+                    "label": "Low participation (<50%)",
+                }
+            )
 
         if risk_factors and student_col:
             risk = RiskClassifier.classify(
-                df, student_col, risk_factors,
+                df,
+                student_col,
+                risk_factors,
                 name="Student Risk Prediction",
                 target="student_risk",
                 high_threshold=0.5,
@@ -106,7 +127,9 @@ class EducationPredictiveAnalytics(PredictiveAnalyticsBase):
             summary_parts.append(
                 f"{ra.high_risk_count} high-risk, {ra.medium_risk_count} medium-risk students identified"
             )
-        summary = " | ".join(summary_parts) if summary_parts else "No predictions could be generated."
+        summary = (
+            " | ".join(summary_parts) if summary_parts else "No predictions could be generated."
+        )
 
         return PredictiveIntelligenceResult(
             industry="education",

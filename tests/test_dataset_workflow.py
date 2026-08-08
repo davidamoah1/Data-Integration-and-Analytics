@@ -10,44 +10,58 @@ Tests cover:
 
 from __future__ import annotations
 
-import pytest
 import pandas as pd
+import pytest
 
 from services.dataset_workflow import (
     DatasetWorkflowOrchestrator,
-    WorkflowStage,
     StageStatus,
+    WorkflowStage,
 )
 
 
 @pytest.fixture
 def sample_df():
     """Create a sample healthcare-like dataset."""
-    return pd.DataFrame({
-        "patient_id": [1, 2, 3, 4, 5],
-        "patient_name": ["John Doe", "Jane Smith", "Bob Wilson", "Alice Brown", "Charlie Davis"],
-        "age": [45, 32, 67, 28, 55],
-        "diagnosis": ["E11.9", "J45.909", "I10", "E11.9", "M54.5"],
-        "doctor": ["Dr. Smith", "Dr. Jones", "Dr. Smith", "Dr. Lee", "Dr. Jones"],
-        "ward": ["A", "B", "A", "C", "B"],
-        "admission_date": pd.to_datetime(["2024-01-15", "2024-02-20", "2024-03-10", "2024-04-05", "2024-05-12"]),
-        "billing_amount": [1500.00, 3200.50, 8900.00, 750.00, 4200.00],
-    })
+    return pd.DataFrame(
+        {
+            "patient_id": [1, 2, 3, 4, 5],
+            "patient_name": [
+                "John Doe",
+                "Jane Smith",
+                "Bob Wilson",
+                "Alice Brown",
+                "Charlie Davis",
+            ],
+            "age": [45, 32, 67, 28, 55],
+            "diagnosis": ["E11.9", "J45.909", "I10", "E11.9", "M54.5"],
+            "doctor": ["Dr. Smith", "Dr. Jones", "Dr. Smith", "Dr. Lee", "Dr. Jones"],
+            "ward": ["A", "B", "A", "C", "B"],
+            "admission_date": pd.to_datetime(
+                ["2024-01-15", "2024-02-20", "2024-03-10", "2024-04-05", "2024-05-12"]
+            ),
+            "billing_amount": [1500.00, 3200.50, 8900.00, 750.00, 4200.00],
+        }
+    )
 
 
 @pytest.fixture
 def retail_df():
     """Create a sample retail dataset."""
-    return pd.DataFrame({
-        "product_id": [101, 102, 103, 104, 105],
-        "product_name": ["Widget A", "Widget B", "Gadget C", "Gadget D", "Tool E"],
-        "category": ["Electronics", "Electronics", "Tools", "Tools", "Tools"],
-        "price": [29.99, 49.99, 15.50, 25.00, 39.99],
-        "quantity": [100, 50, 200, 75, 30],
-        "sales": [2999.00, 2499.50, 3100.00, 1875.00, 1199.70],
-        "region": ["North", "South", "North", "East", "West"],
-        "order_date": pd.to_datetime(["2024-01-01", "2024-01-15", "2024-02-01", "2024-02-15", "2024-03-01"]),
-    })
+    return pd.DataFrame(
+        {
+            "product_id": [101, 102, 103, 104, 105],
+            "product_name": ["Widget A", "Widget B", "Gadget C", "Gadget D", "Tool E"],
+            "category": ["Electronics", "Electronics", "Tools", "Tools", "Tools"],
+            "price": [29.99, 49.99, 15.50, 25.00, 39.99],
+            "quantity": [100, 50, 200, 75, 30],
+            "sales": [2999.00, 2499.50, 3100.00, 1875.00, 1199.70],
+            "region": ["North", "South", "North", "East", "West"],
+            "order_date": pd.to_datetime(
+                ["2024-01-01", "2024-01-15", "2024-02-01", "2024-02-15", "2024-03-01"]
+            ),
+        }
+    )
 
 
 @pytest.fixture
@@ -223,11 +237,13 @@ class TestEnterpriseProfiler:
     def test_profile_detects_sensitive_columns(self):
         from services.enterprise_profiler import EnterpriseDataProfiler
 
-        df = pd.DataFrame({
-            "name": ["John", "Jane", "Bob"],
-            "email": ["john@test.com", "jane@test.com", "bob@test.com"],
-            "age": [25, 30, 35],
-        })
+        df = pd.DataFrame(
+            {
+                "name": ["John", "Jane", "Bob"],
+                "email": ["john@test.com", "jane@test.com", "bob@test.com"],
+                "age": [25, 30, 35],
+            }
+        )
         profiler = EnterpriseDataProfiler()
         result = profiler.profile(df)
 
@@ -245,11 +261,13 @@ class TestEnterpriseProfiler:
     def test_profile_correlations(self):
         from services.enterprise_profiler import EnterpriseDataProfiler
 
-        df = pd.DataFrame({
-            "x": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-            "y": [2, 4, 6, 8, 10, 12, 14, 16, 18, 20],  # Perfect positive correlation
-            "z": [10, 9, 8, 7, 6, 5, 4, 3, 2, 1],  # Perfect negative correlation
-        })
+        df = pd.DataFrame(
+            {
+                "x": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                "y": [2, 4, 6, 8, 10, 12, 14, 16, 18, 20],  # Perfect positive correlation
+                "z": [10, 9, 8, 7, 6, 5, 4, 3, 2, 1],  # Perfect negative correlation
+            }
+        )
         profiler = EnterpriseDataProfiler()
         result = profiler.profile(df)
 
@@ -274,10 +292,12 @@ class TestQualityChecks:
     def test_invalid_dates_detected(self):
         from data_quality.checks import QualityCheckEngine
 
-        df = pd.DataFrame({
-            "order_date": ["2024-01-01", "2024-02-15", "not_a_date", "2024-03-30", "invalid"],
-            "amount": [100, 200, 300, 400, 500],
-        })
+        df = pd.DataFrame(
+            {
+                "order_date": ["2024-01-01", "2024-02-15", "not_a_date", "2024-03-30", "invalid"],
+                "amount": [100, 200, 300, 400, 500],
+            }
+        )
         findings = QualityCheckEngine.run(df)
 
         date_findings = [f for f in findings if f.check_name == "invalid_dates"]
@@ -287,10 +307,12 @@ class TestQualityChecks:
     def test_invalid_numeric_detected(self):
         from data_quality.checks import QualityCheckEngine
 
-        df = pd.DataFrame({
-            "sales_amount": ["100.50", "200.00", "N/A", "$300.00", "400"],
-            "category": ["A", "B", "C", "D", "E"],
-        })
+        df = pd.DataFrame(
+            {
+                "sales_amount": ["100.50", "200.00", "N/A", "$300.00", "400"],
+                "category": ["A", "B", "C", "D", "E"],
+            }
+        )
         findings = QualityCheckEngine.run(df)
 
         numeric_findings = [f for f in findings if f.check_name == "invalid_numeric"]

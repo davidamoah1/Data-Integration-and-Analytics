@@ -1090,7 +1090,9 @@ def render_manufacturing_dashboard(df: pd.DataFrame, kpis: dict):
     with c1:
         _chart_container("Production Output Over Time")
         if date_col and production_col:
-            pdata = df.groupby(df[date_col].astype(str).str[:10])[production_col].sum().reset_index()
+            pdata = (
+                df.groupby(df[date_col].astype(str).str[:10])[production_col].sum().reset_index()
+            )
             pdata.columns = ["Date", "Production"]
             fig = px.line(
                 pdata,
@@ -1107,7 +1109,12 @@ def render_manufacturing_dashboard(df: pd.DataFrame, kpis: dict):
     with c2:
         _chart_container("Production by Machine")
         if machine_col and production_col:
-            mdata = df.groupby(machine_col)[production_col].sum().sort_values(ascending=False).reset_index()
+            mdata = (
+                df.groupby(machine_col)[production_col]
+                .sum()
+                .sort_values(ascending=False)
+                .reset_index()
+            )
             mdata.columns = ["Machine", "Production"]
             fig = px.bar(
                 mdata,
@@ -1129,7 +1136,9 @@ def render_manufacturing_dashboard(df: pd.DataFrame, kpis: dict):
         up_states = {"running", "up", "operational", "active", "online", "1"}
         util = (
             df.groupby(machine_col)
-            .apply(lambda g: g[status_col].astype(str).str.lower().isin(up_states).sum() / len(g) * 100)
+            .apply(
+                lambda g: g[status_col].astype(str).str.lower().isin(up_states).sum() / len(g) * 100
+            )
             .reset_index(name="Utilization")
         )
         _chart_container("Utilization by Machine")
@@ -1213,7 +1222,11 @@ def render_agriculture_dashboard(df: pd.DataFrame, kpis: dict):
     hectares_col = _safe_col(df, "hectares", "size_hectares", "area_hectares", "farm_size")
     date_col = _safe_col(df, "date", "harvest_date", "planting_date", "recorded_date")
 
-    total_harvest = float(df[harvest_col].sum()) if harvest_col and pd.api.types.is_numeric_dtype(df[harvest_col]) else 0.0
+    total_harvest = (
+        float(df[harvest_col].sum())
+        if harvest_col and pd.api.types.is_numeric_dtype(df[harvest_col])
+        else 0.0
+    )
     farm_count = int(df[farm_col].nunique()) if farm_col else 0
     yield_per_ha = 0.0
     if harvest_col and hectares_col:
@@ -1222,7 +1235,11 @@ def render_agriculture_dashboard(df: pd.DataFrame, kpis: dict):
     elif harvest_col and farm_count:
         yield_per_ha = total_harvest / farm_count
 
-    avg_rainfall = float(df[weather_col].mean()) if weather_col and pd.api.types.is_numeric_dtype(df[weather_col]) else 0.0
+    avg_rainfall = (
+        float(df[weather_col].mean())
+        if weather_col and pd.api.types.is_numeric_dtype(df[weather_col])
+        else 0.0
+    )
 
     _section_header("Agriculture Overview")
     render_kpi_cards(
@@ -1240,7 +1257,9 @@ def render_agriculture_dashboard(df: pd.DataFrame, kpis: dict):
     with c1:
         _chart_container("Yield by Farm")
         if farm_col and harvest_col:
-            ydata = df.groupby(farm_col)[harvest_col].sum().sort_values(ascending=False).reset_index()
+            ydata = (
+                df.groupby(farm_col)[harvest_col].sum().sort_values(ascending=False).reset_index()
+            )
             ydata.columns = ["Farm", "Harvest"]
             fig = px.bar(
                 ydata,
@@ -1259,7 +1278,9 @@ def render_agriculture_dashboard(df: pd.DataFrame, kpis: dict):
     with c2:
         _chart_container("Harvest by Crop")
         if crop_col and harvest_col:
-            cdata = df.groupby(crop_col)[harvest_col].sum().sort_values(ascending=False).reset_index()
+            cdata = (
+                df.groupby(crop_col)[harvest_col].sum().sort_values(ascending=False).reset_index()
+            )
             cdata.columns = ["Crop", "Harvest"]
             fig = px.pie(
                 cdata,
@@ -1269,7 +1290,9 @@ def render_agriculture_dashboard(df: pd.DataFrame, kpis: dict):
                 hole=0.45,
                 template="none",
             )
-            fig.update_layout(**{k: v for k, v in CHART_LAYOUT.items() if k not in ("xaxis", "yaxis")}, height=300)
+            fig.update_layout(
+                **{k: v for k, v in CHART_LAYOUT.items() if k not in ("xaxis", "yaxis")}, height=300
+            )
             st.plotly_chart(fig, use_container_width=True)
         else:
             st.info("No crop data found.")
@@ -1374,12 +1397,12 @@ def render_generic_sector_dashboard(df: pd.DataFrame, kpis: dict):
     _section_header("Data Visualizations")
 
     # Try to find a date column for time series
-    date_col = _safe_col(df, "date", "order_date", "sale_date", "transaction_date", "timestamp")
+    _safe_col(df, "date", "order_date", "sale_date", "transaction_date", "timestamp")
     numeric_col = None
     if numeric_cols:
         # Pick the first numeric column that isn't an ID
         for col in numeric_cols:
-            if not col.lower().endswith("_id") and not col.lower() == "id":
+            if not col.lower().endswith("_id") and col.lower() != "id":
                 numeric_col = col
                 break
         if not numeric_col:

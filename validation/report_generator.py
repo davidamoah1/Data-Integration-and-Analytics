@@ -4,10 +4,8 @@ from __future__ import annotations
 
 import csv
 import io
-import os
-from datetime import datetime, timezone
 
-from validation.engine import ValidationResult, ValidationStatus
+from validation.engine import ValidationResult
 
 
 class ValidationReportGenerator:
@@ -30,12 +28,14 @@ class ValidationReportGenerator:
         for f in result.all_findings:
             fix = f.get("suggested_fix")
             if fix:
-                recommendations.append({
-                    "rule": f.get("rule_name"),
-                    "severity": f.get("severity"),
-                    "fix": fix,
-                    "affected_rows": f.get("affected_rows", 0),
-                })
+                recommendations.append(
+                    {
+                        "rule": f.get("rule_name"),
+                        "severity": f.get("severity"),
+                        "fix": fix,
+                        "affected_rows": f.get("affected_rows", 0),
+                    }
+                )
 
         return {
             "dataset_name": result.dataset_name,
@@ -66,21 +66,31 @@ class ValidationReportGenerator:
         """Export findings as CSV. Returns file path or CSV string."""
         output = io.StringIO()
         writer = csv.writer(output)
-        writer.writerow([
-            "Rule Name", "Category", "Severity", "Column",
-            "Affected Rows", "Message", "Suggested Fix", "Business Impact",
-        ])
+        writer.writerow(
+            [
+                "Rule Name",
+                "Category",
+                "Severity",
+                "Column",
+                "Affected Rows",
+                "Message",
+                "Suggested Fix",
+                "Business Impact",
+            ]
+        )
         for f in result.all_findings:
-            writer.writerow([
-                f.get("rule_name", ""),
-                f.get("category", ""),
-                f.get("severity", ""),
-                f.get("column", ""),
-                f.get("affected_rows", 0),
-                f.get("message", ""),
-                f.get("suggested_fix", ""),
-                f.get("business_impact", ""),
-            ])
+            writer.writerow(
+                [
+                    f.get("rule_name", ""),
+                    f.get("category", ""),
+                    f.get("severity", ""),
+                    f.get("column", ""),
+                    f.get("affected_rows", 0),
+                    f.get("message", ""),
+                    f.get("suggested_fix", ""),
+                    f.get("business_impact", ""),
+                ]
+            )
 
         content = output.getvalue()
         if file_path:
@@ -93,7 +103,7 @@ class ValidationReportGenerator:
     def export_excel(result: ValidationResult, file_path: str) -> str:
         """Export report as Excel file with multiple sheets."""
         import openpyxl
-        from openpyxl.styles import Font, PatternFill, Alignment
+        from openpyxl.styles import Font, PatternFill
 
         wb = openpyxl.Workbook()
 
@@ -133,12 +143,25 @@ class ValidationReportGenerator:
             "approved": "00FF00",
             "rejected": "FF0000",
         }
-        fill = PatternFill(start_color=status_colors.get(summary["status"], "FFFFFF"), end_color=status_colors.get(summary["status"], "FFFFFF"), fill_type="solid")
+        fill = PatternFill(
+            start_color=status_colors.get(summary["status"], "FFFFFF"),
+            end_color=status_colors.get(summary["status"], "FFFFFF"),
+            fill_type="solid",
+        )
         ws_summary["B5"].fill = fill
 
         # Findings sheet
         ws_findings = wb.create_sheet("Findings")
-        headers = ["Rule Name", "Category", "Severity", "Column", "Affected Rows", "Message", "Suggested Fix", "Business Impact"]
+        headers = [
+            "Rule Name",
+            "Category",
+            "Severity",
+            "Column",
+            "Affected Rows",
+            "Message",
+            "Suggested Fix",
+            "Business Impact",
+        ]
         for col_idx, header in enumerate(headers, 1):
             cell = ws_findings.cell(row=1, column=col_idx, value=header)
             cell.font = Font(bold=True)
@@ -221,7 +244,13 @@ class ValidationReportGenerator:
         pdf.cell(0, 6, summary["status"], new_x="LMARGIN", new_y="NEXT")
         if summary["quality_score"]:
             pdf.cell(60, 6, "Quality Score:")
-            pdf.cell(0, 6, f"{summary['quality_score']['overall']:.1f} ({summary['quality_score']['traffic_light']})", new_x="LMARGIN", new_y="NEXT")
+            pdf.cell(
+                0,
+                6,
+                f"{summary['quality_score']['overall']:.1f} ({summary['quality_score']['traffic_light']})",
+                new_x="LMARGIN",
+                new_y="NEXT",
+            )
         pdf.cell(60, 6, "Rows:")
         pdf.cell(0, 6, str(summary["summary"]["row_count"]), new_x="LMARGIN", new_y="NEXT")
         pdf.cell(60, 6, "Columns:")
@@ -266,7 +295,13 @@ class ValidationReportGenerator:
 
         if len(result.all_findings) > 50:
             pdf.ln(3)
-            pdf.cell(0, 6, f"... and {len(result.all_findings) - 50} more findings (see Excel/CSV for full report).", new_x="LMARGIN", new_y="NEXT")
+            pdf.cell(
+                0,
+                6,
+                f"... and {len(result.all_findings) - 50} more findings (see Excel/CSV for full report).",
+                new_x="LMARGIN",
+                new_y="NEXT",
+            )
 
         pdf.output(file_path)
         return file_path

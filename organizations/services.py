@@ -21,10 +21,8 @@ from shared.exceptions import AuthorizationError, ConflictError, NotFoundError
 from shared.response import success_response
 from shared.tenant import (
     get_current_organization_id,
-    get_tenant_context,
     is_super_admin,
     require_organization_access,
-    require_super_admin,
 )
 
 
@@ -215,14 +213,17 @@ async def update_organization(
     service = OrganizationService(db)
     org = service.update_org(org_id, request)
     from audit.models import AuditLog
-    db.add(AuditLog(
-        user_id=current_user["id"],
-        organization_id=org_id,
-        action="organization.updated",
-        resource_type="organization",
-        resource_id=org_id,
-        new_values=request.model_dump(exclude_none=True),
-    ))
+
+    db.add(
+        AuditLog(
+            user_id=current_user["id"],
+            organization_id=org_id,
+            action="organization.updated",
+            resource_type="organization",
+            resource_id=org_id,
+            new_values=request.model_dump(exclude_none=True),
+        )
+    )
     db.commit()
     return success_response(org, "Organization updated")
 
@@ -237,13 +238,16 @@ async def delete_organization(
     service = OrganizationService(db)
     service.delete_org(org_id)
     from audit.models import AuditLog
-    db.add(AuditLog(
-        user_id=current_user["id"],
-        organization_id=org_id,
-        action="organization.deleted",
-        resource_type="organization",
-        resource_id=org_id,
-    ))
+
+    db.add(
+        AuditLog(
+            user_id=current_user["id"],
+            organization_id=org_id,
+            action="organization.deleted",
+            resource_type="organization",
+            resource_id=org_id,
+        )
+    )
     db.commit()
     return success_response(None, "Organization deleted")
 

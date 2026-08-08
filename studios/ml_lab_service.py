@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import math
-from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -68,12 +67,19 @@ class MLLabService:
     # ─── Training ────────────────────────────────────────────
 
     @staticmethod
-    def train_classification(df: pd.DataFrame, features: list[str], target: str,
-                             algorithm: str = "random_forest") -> dict:
+    def train_classification(
+        df: pd.DataFrame, features: list[str], target: str, algorithm: str = "random_forest"
+    ) -> dict:
         """Train a classification model."""
-        from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+        from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
         from sklearn.linear_model import LogisticRegression
-        from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report
+        from sklearn.metrics import (
+            accuracy_score,
+            classification_report,
+            f1_score,
+            precision_score,
+            recall_score,
+        )
         from sklearn.model_selection import cross_val_score, train_test_split
         from sklearn.preprocessing import LabelEncoder
 
@@ -109,7 +115,9 @@ class MLLabService:
         # Metrics
         metrics = {
             "accuracy": float(accuracy_score(y_test, y_pred)),
-            "precision": float(precision_score(y_test, y_pred, average="weighted", zero_division=0)),
+            "precision": float(
+                precision_score(y_test, y_pred, average="weighted", zero_division=0)
+            ),
             "recall": float(recall_score(y_test, y_pred, average="weighted", zero_division=0)),
             "f1": float(f1_score(y_test, y_pred, average="weighted", zero_division=0)),
         }
@@ -122,14 +130,18 @@ class MLLabService:
         # Feature importance
         feature_importance = {}
         if hasattr(model, "feature_importances_"):
-            for f, imp in sorted(zip(features, model.feature_importances_), key=lambda x: -x[1]):
+            for f, imp in sorted(
+                zip(features, model.feature_importances_, strict=False), key=lambda x: -x[1]
+            ):
                 feature_importance[f] = float(imp)
         elif hasattr(model, "coef_"):
-            for f, coef in zip(features, model.coef_[0] if len(model.coef_) > 1 else model.coef_):
+            for f, coef in zip(
+                features, model.coef_[0] if len(model.coef_) > 1 else model.coef_, strict=False
+            ):
                 feature_importance[f] = float(abs(coef))
 
         # Classification report
-        class_names = target_encoder.classes_ if target_encoder else sorted(y.unique())
+        target_encoder.classes_ if target_encoder else sorted(y.unique())
         report = classification_report(y_test, y_pred, output_dict=True, zero_division=0)
 
         return {
@@ -154,12 +166,13 @@ class MLLabService:
         }
 
     @staticmethod
-    def train_regression(df: pd.DataFrame, features: list[str], target: str,
-                         algorithm: str = "random_forest") -> dict:
+    def train_regression(
+        df: pd.DataFrame, features: list[str], target: str, algorithm: str = "random_forest"
+    ) -> dict:
         """Train a regression model."""
-        from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
+        from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
         from sklearn.linear_model import LinearRegression
-        from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+        from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
         from sklearn.model_selection import cross_val_score, train_test_split
         from sklearn.preprocessing import LabelEncoder
 
@@ -194,7 +207,9 @@ class MLLabService:
         # Feature importance
         feature_importance = {}
         if hasattr(model, "feature_importances_"):
-            for f, imp in sorted(zip(features, model.feature_importances_), key=lambda x: -x[1]):
+            for f, imp in sorted(
+                zip(features, model.feature_importances_, strict=False), key=lambda x: -x[1]
+            ):
                 feature_importance[f] = float(imp)
 
         return {
@@ -222,10 +237,11 @@ class MLLabService:
         }
 
     @staticmethod
-    def train_clustering(df: pd.DataFrame, features: list[str], n_clusters: int = 3,
-                         algorithm: str = "kmeans") -> dict:
+    def train_clustering(
+        df: pd.DataFrame, features: list[str], n_clusters: int = 3, algorithm: str = "kmeans"
+    ) -> dict:
         """Train a clustering model."""
-        from sklearn.cluster import KMeans, AgglomerativeClustering
+        from sklearn.cluster import AgglomerativeClustering, KMeans
         from sklearn.metrics import silhouette_score
         from sklearn.preprocessing import LabelEncoder, StandardScaler
 
@@ -287,18 +303,33 @@ class MLLabService:
         """AI-recommended algorithm and configuration for the task."""
         recommendations = {
             "classification": [
-                {"algorithm": "random_forest", "reason": "Robust, handles non-linear relationships, provides feature importance"},
-                {"algorithm": "gradient_boosting", "reason": "High accuracy, handles complex patterns"},
-                {"algorithm": "logistic_regression", "reason": "Interpretable, fast, good baseline"},
+                {
+                    "algorithm": "random_forest",
+                    "reason": "Robust, handles non-linear relationships, provides feature importance",
+                },
+                {
+                    "algorithm": "gradient_boosting",
+                    "reason": "High accuracy, handles complex patterns",
+                },
+                {
+                    "algorithm": "logistic_regression",
+                    "reason": "Interpretable, fast, good baseline",
+                },
             ],
             "regression": [
                 {"algorithm": "random_forest", "reason": "Robust, non-linear, feature importance"},
-                {"algorithm": "gradient_boosting", "reason": "High accuracy for complex relationships"},
+                {
+                    "algorithm": "gradient_boosting",
+                    "reason": "High accuracy for complex relationships",
+                },
                 {"algorithm": "linear_regression", "reason": "Interpretable, fast, good baseline"},
             ],
             "clustering": [
                 {"algorithm": "kmeans", "reason": "Fast, scalable, easy to interpret"},
-                {"algorithm": "agglomerative", "reason": "Hierarchical structure, no need to specify k in advance"},
+                {
+                    "algorithm": "agglomerative",
+                    "reason": "Hierarchical structure, no need to specify k in advance",
+                },
             ],
         }
 
@@ -344,8 +375,12 @@ class MLLabService:
         return comp
 
     def list_comparisons(self, org_id: int) -> list[ModelComparison]:
-        return self.db.execute(
-            select(ModelComparison)
-            .where(ModelComparison.organization_id == org_id)
-            .order_by(ModelComparison.created_at.desc())
-        ).scalars().all()
+        return (
+            self.db.execute(
+                select(ModelComparison)
+                .where(ModelComparison.organization_id == org_id)
+                .order_by(ModelComparison.created_at.desc())
+            )
+            .scalars()
+            .all()
+        )

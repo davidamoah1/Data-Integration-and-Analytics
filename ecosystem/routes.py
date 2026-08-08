@@ -4,9 +4,10 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
-from sqlalchemy import func as sa_func, select, update
+from sqlalchemy import func as sa_func
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session as DbSession
 
 from ecosystem.models import APIKey, APIKeyService, APIUsageLog
@@ -98,20 +99,22 @@ async def list_api_keys(
         .scalars()
         .all()
     )
-    return success_response([
-        {
-            "id": k.id,
-            "name": k.name,
-            "key_prefix": k.key_prefix,
-            "scopes": k.scopes,
-            "rate_limit_per_hour": k.rate_limit_per_hour,
-            "is_active": k.is_active,
-            "expires_at": str(k.expires_at) if k.expires_at else None,
-            "last_used_at": str(k.last_used_at) if k.last_used_at else None,
-            "created_at": str(k.created_at) if k.created_at else None,
-        }
-        for k in keys
-    ])
+    return success_response(
+        [
+            {
+                "id": k.id,
+                "name": k.name,
+                "key_prefix": k.key_prefix,
+                "scopes": k.scopes,
+                "rate_limit_per_hour": k.rate_limit_per_hour,
+                "is_active": k.is_active,
+                "expires_at": str(k.expires_at) if k.expires_at else None,
+                "last_used_at": str(k.last_used_at) if k.last_used_at else None,
+                "created_at": str(k.created_at) if k.created_at else None,
+            }
+            for k in keys
+        ]
+    )
 
 
 @router.delete("/api-keys/{key_id}")
@@ -152,9 +155,7 @@ async def rotate_api_key(
 
     raw_key, key_prefix, key_hash = APIKeyService.generate_key()
     db.execute(
-        update(APIKey)
-        .where(APIKey.id == key_id)
-        .values(key_prefix=key_prefix, key_hash=key_hash)
+        update(APIKey).where(APIKey.id == key_id).values(key_prefix=key_prefix, key_hash=key_hash)
     )
     db.commit()
     return success_response(
@@ -176,45 +177,54 @@ async def get_usage_stats(
     org_id = get_current_organization_id(current_user, db)
     since = datetime.now(timezone.utc) - timedelta(days=days)
 
-    total = db.execute(
-        select(sa_func.count(APIUsageLog.id)).where(
-            APIUsageLog.organization_id == org_id,
-            APIUsageLog.created_at >= since,
-        )
-    ).scalar() or 0
-
-    by_endpoint = (
+    total = (
         db.execute(
-            select(
-                APIUsageLog.endpoint,
-                sa_func.count(APIUsageLog.id).label("calls"),
-                sa_func.avg(APIUsageLog.response_time_ms).label("avg_ms"),
+            select(sa_func.count(APIUsageLog.id)).where(
+                APIUsageLog.organization_id == org_id,
+                APIUsageLog.created_at >= since,
             )
-            .where(APIUsageLog.organization_id == org_id, APIUsageLog.created_at >= since)
-            .group_by(APIUsageLog.endpoint)
-            .order_by(sa_func.count(APIUsageLog.id).desc())
-            .limit(20)
-        )
-        .all()
+        ).scalar()
+        or 0
     )
 
-    errors = db.execute(
-        select(sa_func.count(APIUsageLog.id)).where(
-            APIUsageLog.organization_id == org_id,
-            APIUsageLog.created_at >= since,
-            APIUsageLog.status_code >= 400,
+    by_endpoint = db.execute(
+        select(
+            APIUsageLog.endpoint,
+            sa_func.count(APIUsageLog.id).label("calls"),
+            sa_func.avg(APIUsageLog.response_time_ms).label("avg_ms"),
         )
-    ).scalar() or 0
+        .where(APIUsageLog.organization_id == org_id, APIUsageLog.created_at >= since)
+        .group_by(APIUsageLog.endpoint)
+        .order_by(sa_func.count(APIUsageLog.id).desc())
+        .limit(20)
+    ).all()
 
-    return success_response({
-        "total_calls": total,
-        "error_count": errors,
-        "error_rate": round(errors / total * 100, 2) if total else 0,
-        "top_endpoints": [
-            {"endpoint": r.endpoint, "calls": r.calls, "avg_response_ms": int(r.avg_ms) if r.avg_ms else 0}
-            for r in by_endpoint
-        ],
-    })
+    errors = (
+        db.execute(
+            select(sa_func.count(APIUsageLog.id)).where(
+                APIUsageLog.organization_id == org_id,
+                APIUsageLog.created_at >= since,
+                APIUsageLog.status_code >= 400,
+            )
+        ).scalar()
+        or 0
+    )
+
+    return success_response(
+        {
+            "total_calls": total,
+            "error_count": errors,
+            "error_rate": round(errors / total * 100, 2) if total else 0,
+            "top_endpoints": [
+                {
+                    "endpoint": r.endpoint,
+                    "calls": r.calls,
+                    "avg_response_ms": int(r.avg_ms) if r.avg_ms else 0,
+                }
+                for r in by_endpoint
+            ],
+        }
+    )
 
 
 @router.get("/usage/by-key")
@@ -227,27 +237,26 @@ async def get_usage_by_key(
     org_id = get_current_organization_id(current_user, db)
     since = datetime.now(timezone.utc) - timedelta(days=days)
 
-    results = (
-        db.execute(
-            select(
-                APIUsageLog.api_key_id,
-                APIKey.name.label("key_name"),
-                sa_func.count(APIUsageLog.id).label("calls"),
-                sa_func.avg(APIUsageLog.response_time_ms).label("avg_ms"),
-            )
-            .outerjoin(APIKey, APIKey.id == APIUsageLog.api_key_id)
-            .where(APIUsageLog.organization_id == org_id, APIUsageLog.created_at >= since)
-            .group_by(APIUsageLog.api_key_id, APIKey.name)
-            .order_by(sa_func.count(APIUsageLog.id).desc())
+    results = db.execute(
+        select(
+            APIUsageLog.api_key_id,
+            APIKey.name.label("key_name"),
+            sa_func.count(APIUsageLog.id).label("calls"),
+            sa_func.avg(APIUsageLog.response_time_ms).label("avg_ms"),
         )
-        .all()
+        .outerjoin(APIKey, APIKey.id == APIUsageLog.api_key_id)
+        .where(APIUsageLog.organization_id == org_id, APIUsageLog.created_at >= since)
+        .group_by(APIUsageLog.api_key_id, APIKey.name)
+        .order_by(sa_func.count(APIUsageLog.id).desc())
+    ).all()
+    return success_response(
+        [
+            {
+                "api_key_id": r.api_key_id,
+                "key_name": r.key_name or "Internal",
+                "calls": r.calls,
+                "avg_response_ms": int(r.avg_ms) if r.avg_ms else 0,
+            }
+            for r in results
+        ]
     )
-    return success_response([
-        {
-            "api_key_id": r.api_key_id,
-            "key_name": r.key_name or "Internal",
-            "calls": r.calls,
-            "avg_response_ms": int(r.avg_ms) if r.avg_ms else 0,
-        }
-        for r in results
-    ])

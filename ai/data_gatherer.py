@@ -10,10 +10,9 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-import numpy as np
 import pandas as pd
 
-from ai.context_engine import DatasetContext, EnterpriseAIContext
+from ai.context_engine import EnterpriseAIContext
 
 logger = logging.getLogger(__name__)
 
@@ -73,8 +72,16 @@ class DataGatherer:
 
         # Overall metric stats
         data["metric_stats"] = {
-            "total": float(self.df[metric_col].sum()) if pd.api.types.is_numeric_dtype(self.df[metric_col]) else None,
-            "mean": float(self.df[metric_col].mean()) if pd.api.types.is_numeric_dtype(self.df[metric_col]) else None,
+            "total": (
+                float(self.df[metric_col].sum())
+                if pd.api.types.is_numeric_dtype(self.df[metric_col])
+                else None
+            ),
+            "mean": (
+                float(self.df[metric_col].mean())
+                if pd.api.types.is_numeric_dtype(self.df[metric_col])
+                else None
+            ),
             "count": int(self.df[metric_col].count()),
         }
 
@@ -112,8 +119,7 @@ class DataGatherer:
                 df["period"] = df[date_col].dt.to_period("M")
                 monthly = df.groupby("period")[metric_col].sum().sort_index()
                 data["monthly_trend"] = [
-                    {"period": str(p), "value": float(v)}
-                    for p, v in monthly.items()
+                    {"period": str(p), "value": float(v)} for p, v in monthly.items()
                 ]
 
                 # Last vs previous period
@@ -136,8 +142,7 @@ class DataGatherer:
                     df["week"] = df[date_col].dt.to_period("W")
                     weekly = df.groupby("week")[metric_col].sum().sort_index()
                     data["weekly_trend"] = [
-                        {"period": str(p), "value": float(v)}
-                        for p, v in weekly.items()
+                        {"period": str(p), "value": float(v)} for p, v in weekly.items()
                     ]
 
         # Overall trend direction
@@ -211,8 +216,7 @@ class DataGatherer:
             ts = df.groupby(date_col)[metric_col].sum().sort_index()
 
             data["time_series"] = [
-                {"date": str(d.date()), "value": float(v)}
-                for d, v in ts.items()
+                {"date": str(d.date()), "value": float(v)} for d, v in ts.items()
             ]
             data["stats"] = {
                 "mean": float(ts.mean()),
@@ -298,9 +302,8 @@ class DataGatherer:
         # Check semantic mappings
         if self.context and self.context.dataset.semantic_mappings:
             for col, role in self.context.dataset.semantic_mappings.items():
-                if role == "date" or "date" in role:
-                    if col in self.df.columns:
-                        return col
+                if (role == "date" or "date" in role) and col in self.df.columns:
+                    return col
 
         # Check known date columns
         if self.context and self.context.dataset.date_columns:
@@ -351,7 +354,8 @@ class DataGatherer:
         result = {}
         numeric_cols = [c for c in self.df.columns if pd.api.types.is_numeric_dtype(self.df[c])]
         categorical_cols = [
-            c for c in self.df.columns
+            c
+            for c in self.df.columns
             if not pd.api.types.is_numeric_dtype(self.df[c])
             and self.df[c].nunique() <= 20
             and c not in self._find_date_column_safe()
@@ -361,8 +365,7 @@ class DataGatherer:
             for num_col in numeric_cols[:3]:
                 grouped = self.df.groupby(cat_col)[num_col].sum().sort_values(ascending=False)
                 result[f"{num_col}_by_{cat_col}"] = [
-                    {cat_col: str(k), num_col: float(v)}
-                    for k, v in grouped.head(10).items()
+                    {cat_col: str(k), num_col: float(v)} for k, v in grouped.head(10).items()
                 ]
 
         return result
@@ -390,8 +393,7 @@ class DataGatherer:
             df["period"] = df[date_col].dt.to_period("M")
             monthly = df.groupby("period")[num_col].sum().sort_index()
             trends[num_col] = [
-                {"period": str(p), "value": float(v)}
-                for p, v in monthly.tail(12).items()
+                {"period": str(p), "value": float(v)} for p, v in monthly.tail(12).items()
             ]
 
         return trends
@@ -404,7 +406,8 @@ class DataGatherer:
         result = {}
         numeric_cols = [c for c in self.df.columns if pd.api.types.is_numeric_dtype(self.df[c])]
         categorical_cols = [
-            c for c in self.df.columns
+            c
+            for c in self.df.columns
             if not pd.api.types.is_numeric_dtype(self.df[c])
             and self.df[c].nunique() <= 50
             and c not in self._find_date_column_safe()
@@ -450,7 +453,8 @@ class DataGatherer:
 
         contributions = []
         categorical_cols = [
-            c for c in self.df.columns
+            c
+            for c in self.df.columns
             if not pd.api.types.is_numeric_dtype(self.df[c])
             and self.df[c].nunique() <= 50
             and c not in self._find_date_column_safe()
@@ -460,12 +464,14 @@ class DataGatherer:
             grouped = self.df.groupby(cat_col)[metric_col].sum().sort_values(ascending=False)
             total = grouped.sum()
             for k, v in grouped.head(5).items():
-                contributions.append({
-                    "dimension": cat_col,
-                    "value": str(k),
-                    "metric_value": float(v),
-                    "contribution_pct": round(float(v / total * 100), 2) if total != 0 else 0,
-                })
+                contributions.append(
+                    {
+                        "dimension": cat_col,
+                        "value": str(k),
+                        "metric_value": float(v),
+                        "contribution_pct": round(float(v / total * 100), 2) if total != 0 else 0,
+                    }
+                )
 
         return contributions
 
@@ -508,7 +514,11 @@ class DataGatherer:
             return {}
 
         correlations = {}
-        numeric_cols = [c for c in self.df.columns if pd.api.types.is_numeric_dtype(self.df[c]) and c != metric_col]
+        numeric_cols = [
+            c
+            for c in self.df.columns
+            if pd.api.types.is_numeric_dtype(self.df[c]) and c != metric_col
+        ]
 
         for col in numeric_cols[:5]:
             try:

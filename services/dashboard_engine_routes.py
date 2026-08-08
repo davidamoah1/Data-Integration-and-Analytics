@@ -30,16 +30,16 @@ import pandas as pd
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
+from services.chart_recommender import ChartRecommendationEngine
+from services.dashboard_assistant import AIDashboardAssistant
 from services.dashboard_engine import (
     DashboardEngine,
     DashboardMetadata,
     PermissionLevel,
 )
-from services.dashboard_assistant import AIDashboardAssistant
 from services.dashboard_export import DashboardExportService
 from services.dashboard_layout import DashboardLayoutEngine
 from services.dashboard_performance import DashboardPerformanceLayer
-from services.chart_recommender import ChartRecommendationEngine
 from services.drilldown_engine import DrilldownEngine
 from services.filter_engine import GlobalFilterEngine
 from services.kpi_intelligence import KPIIntelligenceEngine
@@ -330,7 +330,7 @@ async def save_custom_layout(dashboard_id: str, req: SaveCustomRequest):
         )
         return {"success": True, "data": dashboard.to_dict()}
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=404, detail=str(e)) from None
 
 
 @router.post("/{dashboard_id}/reset")
@@ -390,7 +390,9 @@ async def apply_filters(dashboard_id: str, req: ApplyFiltersRequest):
     # Get affected charts
     affected = {}
     for filter_id in req.filter_values:
-        chart_ids = _filter_engine.get_affected_charts(filter_id, dashboard.filters, dashboard.charts)
+        chart_ids = _filter_engine.get_affected_charts(
+            filter_id, dashboard.filters, dashboard.charts
+        )
         affected[filter_id] = chart_ids
 
     return {
@@ -490,9 +492,10 @@ async def export_dashboard(dashboard_id: str, req: ExportRequest):
             kpi_values=kpi_values,
         )
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from None
 
     from fastapi.responses import Response
+
     return Response(
         content=content,
         media_type=content_type,

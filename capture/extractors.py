@@ -19,7 +19,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
-from capture.document_types import FieldSpec, GENERIC_FIELDS, DocumentTypeSpec
+from capture.document_types import GENERIC_FIELDS, DocumentTypeSpec, FieldSpec
 from capture.ocr_engine import OcrResult, OcrWord
 
 DATE_PATTERNS = [
@@ -69,9 +69,7 @@ def _extract_label_anchored(text: str, spec: FieldSpec, words: list[OcrWord]) ->
     best_value = None
     for kw in spec.keywords:
         # Match "<label> : value" or "<label> - value" or "<label> value" up to line end.
-        pattern = re.compile(
-            rf"{re.escape(kw)}\s*[:\-]?\s*([^\n]{{1,80}})", re.IGNORECASE
-        )
+        pattern = re.compile(rf"{re.escape(kw)}\s*[:\-]?\s*([^\n]{{1,80}})", re.IGNORECASE)
         m = pattern.search(text)
         if m:
             candidate = m.group(1).strip()
@@ -104,7 +102,9 @@ def _extract_pattern(text: str, spec: FieldSpec, words: list[OcrWord]) -> Extrac
         if m:
             value = m.group(1)
             confidence = _find_word_confidence(value, words)
-            return ExtractedField(spec.name, spec.label, spec.data_type, value, round(confidence, 3))
+            return ExtractedField(
+                spec.name, spec.label, spec.data_type, value, round(confidence, 3)
+            )
     return None
 
 

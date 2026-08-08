@@ -23,7 +23,7 @@ import pandas as pd
 from ai_copilot.insight_generator import AutoInsight, InsightGenerator
 from ai_copilot.query_engine import ParsedQuery, QueryEngine, QueryIntent
 from ai_copilot.report_generator import Report, ReportGenerator
-from ai_copilot.root_cause import RootCauseAnalyzer, RootCauseResult
+from ai_copilot.root_cause import RootCauseAnalyzer
 
 
 @dataclass
@@ -129,12 +129,15 @@ class DataAnalystCopilot:
                 question=parsed.raw_text,
                 intent=parsed.intent.value,
                 answer="I need a numeric metric column and a date column to analyze changes. "
-                       "Please ensure your data has both.",
+                "Please ensure your data has both.",
                 follow_ups=["What metrics are available?", "Give me a summary"],
             )
 
         result = RootCauseAnalyzer.analyze(
-            self.df, metric_col, date_col, dimension_cols,
+            self.df,
+            metric_col,
+            date_col,
+            dimension_cols,
             metric_label=parsed.metric.replace("_", " ").title() if parsed.metric else metric_col,
             direction=parsed.direction,
         )
@@ -186,9 +189,16 @@ class DataAnalystCopilot:
                 follow_ups=["Give me a summary"],
             )
 
-        grouped = self.df.groupby(dimension_col)[metric_col].sum().sort_values(ascending=False).head(parsed.top_n)
+        grouped = (
+            self.df.groupby(dimension_col)[metric_col]
+            .sum()
+            .sort_values(ascending=False)
+            .head(parsed.top_n)
+        )
 
-        lines = [f"**Top {parsed.top_n} {dimension_col.replace('_', ' ').title()} by {metric_col.replace('_', ' ').title()}:**\n"]
+        lines = [
+            f"**Top {parsed.top_n} {dimension_col.replace('_', ' ').title()} by {metric_col.replace('_', ' ').title()}:**\n"
+        ]
         for i, (name, value) in enumerate(grouped.items(), 1):
             lines.append(f"{i}. **{name}**: {value:,.2f}")
 
@@ -213,26 +223,32 @@ class DataAnalystCopilot:
     def _answer_summary(self, parsed: ParsedQuery) -> CopilotResponse:
         """Answer 'Give me a summary' questions."""
         df = self.df
-        industry = getattr(self.mapping_result, "industry", "unknown") if self.mapping_result else "unknown"
+        industry = (
+            getattr(self.mapping_result, "industry", "unknown")
+            if self.mapping_result
+            else "unknown"
+        )
 
-        lines = [f"**Dataset Summary**\n"]
+        lines = ["**Dataset Summary**\n"]
         lines.append(f"- **Records**: {len(df):,}")
         lines.append(f"- **Columns**: {len(df.columns)}")
         lines.append(f"- **Industry**: {industry.title()}")
 
         numeric_cols = [c for c in df.columns if pd.api.types.is_numeric_dtype(df[c])]
         if numeric_cols:
-            lines.append(f"\n**Key Statistics:**")
+            lines.append("\n**Key Statistics:**")
             for col in numeric_cols[:5]:
                 total = float(df[col].sum())
                 avg = float(df[col].mean())
-                lines.append(f"- **{col.replace('_', ' ').title()}**: Total={total:,.2f}, Avg={avg:,.2f}")
+                lines.append(
+                    f"- **{col.replace('_', ' ').title()}**: Total={total:,.2f}, Avg={avg:,.2f}"
+                )
 
         # Add industry intelligence insights if available
         if self.industry_intelligence:
             insights = getattr(self.industry_intelligence, "insights", [])
             if insights:
-                lines.append(f"\n**Industry Insights:**")
+                lines.append("\n**Industry Insights:**")
                 for insight in insights[:5]:
                     lines.append(f"- **{insight.title}**: {insight.formatted}")
 
@@ -307,7 +323,9 @@ class DataAnalystCopilot:
             if first != 0:
                 change = ((last - first) / abs(first)) * 100
                 direction = "increase" if change > 0 else "decrease"
-                lines.append(f"\nOverall: {direction} of {abs(change):.1f}% from {first:,.0f} to {last:,.0f}")
+                lines.append(
+                    f"\nOverall: {direction} of {abs(change):.1f}% from {first:,.0f} to {last:,.0f}"
+                )
 
         answer = "\n".join(lines)
 
@@ -355,11 +373,15 @@ class DataAnalystCopilot:
         grouped = self.df.groupby(dimension_col)[metric_col].agg(["sum", "mean", "count"])
         grouped = grouped.sort_values("sum", ascending=False)
 
-        lines = [f"**Comparison: {metric_col.replace('_', ' ').title()} by {dimension_col.replace('_', ' ').title()}**\n"]
+        lines = [
+            f"**Comparison: {metric_col.replace('_', ' ').title()} by {dimension_col.replace('_', ' ').title()}**\n"
+        ]
         lines.append(f"| {dimension_col.title()} | Total | Average | Count |")
-        lines.append(f"| --- | --- | --- | --- |")
+        lines.append("| --- | --- | --- | --- |")
         for name, row in grouped.iterrows():
-            lines.append(f"| {name} | {row['sum']:,.2f} | {row['mean']:,.2f} | {int(row['count'])} |")
+            lines.append(
+                f"| {name} | {row['sum']:,.2f} | {row['mean']:,.2f} | {int(row['count'])} |"
+            )
 
         answer = "\n".join(lines)
 
@@ -370,8 +392,14 @@ class DataAnalystCopilot:
             data={
                 "dimension": dimension_col,
                 "metric": metric_col,
-                "comparison": {str(k): {"sum": float(v["sum"]), "mean": float(v["mean"]), "count": int(v["count"])}
-                              for k, v in grouped.to_dict("index").items()},
+                "comparison": {
+                    str(k): {
+                        "sum": float(v["sum"]),
+                        "mean": float(v["mean"]),
+                        "count": int(v["count"]),
+                    }
+                    for k, v in grouped.to_dict("index").items()
+                },
             },
             follow_ups=[
                 f"Why did {metric_col} change?",
@@ -387,7 +415,9 @@ class DataAnalystCopilot:
     def _answer_anomaly(self, parsed: ParsedQuery) -> CopilotResponse:
         """Answer anomaly detection questions."""
         insights = InsightGenerator.generate(self.df, self._col_mapping, max_insights=10)
-        anomaly_insights = [i for i in insights if i.type.value == "anomaly" or i.type.value == "quality"]
+        anomaly_insights = [
+            i for i in insights if i.type.value == "anomaly" or i.type.value == "quality"
+        ]
 
         if not anomaly_insights:
             return CopilotResponse(
@@ -462,7 +492,11 @@ class DataAnalystCopilot:
             question=parsed.raw_text,
             intent=parsed.intent.value,
             answer=answer,
-            data={"correlations": [{"col1": c1, "col2": c2, "correlation": val} for c1, c2, val in pairs[:10]]},
+            data={
+                "correlations": [
+                    {"col1": c1, "col2": c2, "correlation": val} for c1, c2, val in pairs[:10]
+                ]
+            },
             follow_ups=["Give me a summary", "Any anomalies?"],
         )
 
@@ -518,7 +552,14 @@ class DataAnalystCopilot:
                 return c
         # Check by name
         lower_map = {c.lower(): c for c in self.df.columns}
-        for name in ("date", "order_date", "visit_date", "transaction_date", "created_at", "record_date"):
+        for name in (
+            "date",
+            "order_date",
+            "visit_date",
+            "transaction_date",
+            "created_at",
+            "record_date",
+        ):
             if name in lower_map:
                 return lower_map[name]
         return None
@@ -527,7 +568,16 @@ class DataAnalystCopilot:
         """Find all dimension columns (categorical, non-date, non-metric)."""
         dims = []
         for col, entity in self._col_mapping.items():
-            if entity not in ("date", "revenue", "sales", "billing", "amount", "profit", "donation", "production"):
+            if entity not in (
+                "date",
+                "revenue",
+                "sales",
+                "billing",
+                "amount",
+                "profit",
+                "donation",
+                "production",
+            ):
                 if col in self.df.columns and self.df[col].dtype == "object":
                     dims.append(col)
         # Fallback: add all categorical columns
@@ -546,7 +596,11 @@ class DataAnalystCopilot:
     def _find_col_by_entity(self, entity_key: str) -> str | None:
         """Find a DataFrame column by entity key, preferring numeric columns for metrics."""
         # Check col_mapping
-        candidates = [col for col, entity in self._col_mapping.items() if entity == entity_key and col in self.df.columns]
+        candidates = [
+            col
+            for col, entity in self._col_mapping.items()
+            if entity == entity_key and col in self.df.columns
+        ]
         if candidates:
             # Prefer numeric columns
             for col in candidates:

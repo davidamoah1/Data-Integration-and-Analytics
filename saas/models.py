@@ -2,13 +2,20 @@
 
 from __future__ import annotations
 
-import hashlib
-import secrets
-from datetime import datetime, timedelta, timezone
+from sqlalchemy import (
+    JSON,
+    TIMESTAMP,
+    Boolean,
+    Column,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    func,
+)
 
-from sqlalchemy import JSON, TIMESTAMP, Boolean, Column, Float, ForeignKey, Integer, String, Text, func
 from shared.database import Base, BigInt
-
 
 # ═══════════════════════════════════════════════════════════════
 # Subscription Plans
@@ -21,7 +28,9 @@ class SubscriptionPlan(Base):
     __tablename__ = "saas_subscription_plans"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
-    plan_code = Column(String(50), unique=True, nullable=False)  # free, starter, professional, business, enterprise
+    plan_code = Column(
+        String(50), unique=True, nullable=False
+    )  # free, starter, professional, business, enterprise
     name = Column(String(100), nullable=False)
     description = Column(Text, nullable=True)
     price_monthly = Column(Float, nullable=False, default=0.0)
@@ -58,7 +67,9 @@ class Subscription(Base):
     id = Column(BigInt, primary_key=True, autoincrement=True)
     organization_id = Column(BigInt, nullable=False, index=True)
     plan_id = Column(BigInt, ForeignKey("saas_subscription_plans.id"), nullable=False)
-    status = Column(String(20), nullable=False, default="active")  # active, trial, past_due, cancelled, expired
+    status = Column(
+        String(20), nullable=False, default="active"
+    )  # active, trial, past_due, cancelled, expired
     billing_cycle = Column(String(10), nullable=False, default="monthly")  # monthly, yearly
     started_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
     current_period_start = Column(TIMESTAMP, nullable=False)
@@ -84,7 +95,9 @@ class Invoice(Base):
     invoice_number = Column(String(100), unique=True, nullable=False)
     amount = Column(Float, nullable=False)
     currency = Column(String(10), nullable=False, default="USD")
-    status = Column(String(20), nullable=False, default="pending")  # pending, paid, failed, refunded
+    status = Column(
+        String(20), nullable=False, default="pending"
+    )  # pending, paid, failed, refunded
     billing_period_start = Column(TIMESTAMP, nullable=False)
     billing_period_end = Column(TIMESTAMP, nullable=False)
     due_date = Column(TIMESTAMP, nullable=True)
@@ -127,7 +140,9 @@ class FeatureFlag(Base):
     __tablename__ = "saas_feature_flags"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
-    flag_key = Column(String(100), unique=True, nullable=False)  # e.g. "ai_copilot", "marketplace", "automl"
+    flag_key = Column(
+        String(100), unique=True, nullable=False
+    )  # e.g. "ai_copilot", "marketplace", "automl"
     name = Column(String(200), nullable=False)
     description = Column(Text, nullable=True)
     category = Column(String(50), nullable=False)  # core, premium, enterprise, beta
@@ -206,7 +221,9 @@ class SupportTicket(Base):
     subject = Column(String(500), nullable=False)
     description = Column(Text, nullable=True)
     priority = Column(String(20), default="normal", nullable=False)  # low, normal, high, urgent
-    status = Column(String(20), default="open", nullable=False)  # open, in_progress, resolved, closed
+    status = Column(
+        String(20), default="open", nullable=False
+    )  # open, in_progress, resolved, closed
     category = Column(String(100), nullable=True)
     assigned_to = Column(BigInt, nullable=True)
     resolved_at = Column(TIMESTAMP, nullable=True)
@@ -228,7 +245,9 @@ class SystemAnnouncement(Base):
     title = Column(String(300), nullable=False)
     message = Column(Text, nullable=False)
     severity = Column(String(20), default="info", nullable=False)  # info, warning, critical
-    target_audience = Column(String(50), default="all", nullable=False)  # all, free, paid, enterprise
+    target_audience = Column(
+        String(50), default="all", nullable=False
+    )  # all, free, paid, enterprise
     is_active = Column(Boolean, default=True, nullable=False)
     starts_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
     ends_at = Column(TIMESTAMP, nullable=True)

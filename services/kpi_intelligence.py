@@ -15,12 +15,11 @@ The engine combines:
 from __future__ import annotations
 
 import logging
-from typing import Any
 
 import pandas as pd
 
-from semantic.kpi_registry import KPIRegistry
 from semantic.industry_knowledge import get_industry_knowledge
+from semantic.kpi_registry import KPIRegistry
 from services.dashboard_engine import KPIDefinition
 
 logger = logging.getLogger(__name__)
@@ -58,71 +57,481 @@ class KPIIntelligenceEngine:
     # Industry-specific KPI templates with formulas
     INDUSTRY_KPI_TEMPLATES: dict[str, list[dict]] = {
         "healthcare": [
-            {"key": "total_admissions", "label": "Total Admissions", "entity": "admission", "metric": "count", "category": "operational", "formula": "COUNT(DISTINCT admission_id)", "icon": "🏥", "description": "Total number of patient admissions"},
-            {"key": "total_patients", "label": "Unique Patients", "entity": "patient", "metric": "count", "category": "operational", "formula": "COUNT(DISTINCT patient_id)", "icon": "👥", "description": "Number of unique patients"},
-            {"key": "total_billing", "label": "Total Billing", "entity": "billing", "metric": "sum", "category": "financial", "formula": "SUM(billing_amount)", "icon": "💰", "description": "Total billing amount", "unit": "currency"},
-            {"key": "avg_billing", "label": "Avg Billing per Patient", "entity": "billing", "metric": "avg", "category": "financial", "formula": "SUM(billing_amount) / COUNT(DISTINCT patient_id)", "icon": "💵", "description": "Average billing amount per patient", "unit": "currency"},
-            {"key": "bed_occupancy", "label": "Bed Occupancy Rate", "entity": "ward", "metric": "custom", "category": "operational", "formula": "occupied_beds / total_beds * 100", "icon": "🛏️", "description": "Percentage of beds occupied", "unit": "%", "threshold_warning": 85, "threshold_critical": 95},
-            {"key": "readmission_rate", "label": "Readmission Rate", "entity": "admission", "metric": "custom", "category": "clinical", "formula": "readmissions / total_admissions * 100", "icon": "🔄", "description": "Percentage of patients readmitted", "unit": "%", "threshold_warning": 10, "threshold_critical": 15},
+            {
+                "key": "total_admissions",
+                "label": "Total Admissions",
+                "entity": "admission",
+                "metric": "count",
+                "category": "operational",
+                "formula": "COUNT(DISTINCT admission_id)",
+                "icon": "🏥",
+                "description": "Total number of patient admissions",
+            },
+            {
+                "key": "total_patients",
+                "label": "Unique Patients",
+                "entity": "patient",
+                "metric": "count",
+                "category": "operational",
+                "formula": "COUNT(DISTINCT patient_id)",
+                "icon": "👥",
+                "description": "Number of unique patients",
+            },
+            {
+                "key": "total_billing",
+                "label": "Total Billing",
+                "entity": "billing",
+                "metric": "sum",
+                "category": "financial",
+                "formula": "SUM(billing_amount)",
+                "icon": "💰",
+                "description": "Total billing amount",
+                "unit": "currency",
+            },
+            {
+                "key": "avg_billing",
+                "label": "Avg Billing per Patient",
+                "entity": "billing",
+                "metric": "avg",
+                "category": "financial",
+                "formula": "SUM(billing_amount) / COUNT(DISTINCT patient_id)",
+                "icon": "💵",
+                "description": "Average billing amount per patient",
+                "unit": "currency",
+            },
+            {
+                "key": "bed_occupancy",
+                "label": "Bed Occupancy Rate",
+                "entity": "ward",
+                "metric": "custom",
+                "category": "operational",
+                "formula": "occupied_beds / total_beds * 100",
+                "icon": "🛏️",
+                "description": "Percentage of beds occupied",
+                "unit": "%",
+                "threshold_warning": 85,
+                "threshold_critical": 95,
+            },
+            {
+                "key": "readmission_rate",
+                "label": "Readmission Rate",
+                "entity": "admission",
+                "metric": "custom",
+                "category": "clinical",
+                "formula": "readmissions / total_admissions * 100",
+                "icon": "🔄",
+                "description": "Percentage of patients readmitted",
+                "unit": "%",
+                "threshold_warning": 10,
+                "threshold_critical": 15,
+            },
         ],
         "education": [
-            {"key": "total_enrollment", "label": "Total Enrollment", "entity": "student", "metric": "count", "category": "operational", "formula": "COUNT(DISTINCT student_id)", "icon": "🎓", "description": "Total number of enrolled students"},
-            {"key": "attendance_rate", "label": "Attendance Rate", "entity": "attendance", "metric": "custom", "category": "academic", "formula": "present_days / total_days * 100", "icon": "📅", "description": "Average attendance rate", "unit": "%", "threshold_warning": 75},
-            {"key": "total_tuition", "label": "Total Tuition", "entity": "revenue", "metric": "sum", "category": "financial", "formula": "SUM(tuition_amount)", "icon": "💰", "description": "Total tuition collected", "unit": "currency"},
-            {"key": "pass_rate", "label": "Pass Rate", "entity": "grade", "metric": "custom", "category": "academic", "formula": "passed_exams / total_exams * 100", "icon": "✅", "description": "Percentage of exams passed", "unit": "%"},
+            {
+                "key": "total_enrollment",
+                "label": "Total Enrollment",
+                "entity": "student",
+                "metric": "count",
+                "category": "operational",
+                "formula": "COUNT(DISTINCT student_id)",
+                "icon": "🎓",
+                "description": "Total number of enrolled students",
+            },
+            {
+                "key": "attendance_rate",
+                "label": "Attendance Rate",
+                "entity": "attendance",
+                "metric": "custom",
+                "category": "academic",
+                "formula": "present_days / total_days * 100",
+                "icon": "📅",
+                "description": "Average attendance rate",
+                "unit": "%",
+                "threshold_warning": 75,
+            },
+            {
+                "key": "total_tuition",
+                "label": "Total Tuition",
+                "entity": "revenue",
+                "metric": "sum",
+                "category": "financial",
+                "formula": "SUM(tuition_amount)",
+                "icon": "💰",
+                "description": "Total tuition collected",
+                "unit": "currency",
+            },
+            {
+                "key": "pass_rate",
+                "label": "Pass Rate",
+                "entity": "grade",
+                "metric": "custom",
+                "category": "academic",
+                "formula": "passed_exams / total_exams * 100",
+                "icon": "✅",
+                "description": "Percentage of exams passed",
+                "unit": "%",
+            },
         ],
         "retail": [
-            {"key": "total_revenue", "label": "Total Revenue", "entity": "revenue", "metric": "sum", "category": "financial", "formula": "SUM(sales)", "icon": "💰", "description": "Total sales revenue", "unit": "currency"},
-            {"key": "total_orders", "label": "Total Orders", "entity": "order", "metric": "count", "category": "operational", "formula": "COUNT(DISTINCT order_id)", "icon": "🛒", "description": "Total number of orders"},
-            {"key": "total_customers", "label": "Unique Customers", "entity": "customer", "metric": "count", "category": "operational", "formula": "COUNT(DISTINCT customer_id)", "icon": "👥", "description": "Number of unique customers"},
-            {"key": "avg_order_value", "label": "Avg Order Value", "entity": "revenue", "metric": "avg", "category": "financial", "formula": "SUM(sales) / COUNT(DISTINCT order_id)", "icon": "📦", "description": "Average value per order", "unit": "currency"},
-            {"key": "profit_margin", "label": "Profit Margin", "entity": "revenue", "metric": "custom", "category": "financial", "formula": "SUM(profit) / SUM(sales) * 100", "icon": "📈", "description": "Profit margin percentage", "unit": "%"},
+            {
+                "key": "total_revenue",
+                "label": "Total Revenue",
+                "entity": "revenue",
+                "metric": "sum",
+                "category": "financial",
+                "formula": "SUM(sales)",
+                "icon": "💰",
+                "description": "Total sales revenue",
+                "unit": "currency",
+            },
+            {
+                "key": "total_orders",
+                "label": "Total Orders",
+                "entity": "order",
+                "metric": "count",
+                "category": "operational",
+                "formula": "COUNT(DISTINCT order_id)",
+                "icon": "🛒",
+                "description": "Total number of orders",
+            },
+            {
+                "key": "total_customers",
+                "label": "Unique Customers",
+                "entity": "customer",
+                "metric": "count",
+                "category": "operational",
+                "formula": "COUNT(DISTINCT customer_id)",
+                "icon": "👥",
+                "description": "Number of unique customers",
+            },
+            {
+                "key": "avg_order_value",
+                "label": "Avg Order Value",
+                "entity": "revenue",
+                "metric": "avg",
+                "category": "financial",
+                "formula": "SUM(sales) / COUNT(DISTINCT order_id)",
+                "icon": "📦",
+                "description": "Average value per order",
+                "unit": "currency",
+            },
+            {
+                "key": "profit_margin",
+                "label": "Profit Margin",
+                "entity": "revenue",
+                "metric": "custom",
+                "category": "financial",
+                "formula": "SUM(profit) / SUM(sales) * 100",
+                "icon": "📈",
+                "description": "Profit margin percentage",
+                "unit": "%",
+            },
         ],
         "banking": [
-            {"key": "total_balance", "label": "Total Balance", "entity": "account", "metric": "sum", "category": "financial", "formula": "SUM(balance)", "icon": "💰", "description": "Total account balance", "unit": "currency"},
-            {"key": "total_accounts", "label": "Total Accounts", "entity": "account", "metric": "count", "category": "operational", "formula": "COUNT(DISTINCT account_id)", "icon": "🏦", "description": "Number of accounts"},
-            {"key": "total_transactions", "label": "Total Transactions", "entity": "transaction", "metric": "count", "category": "operational", "formula": "COUNT(*)", "icon": "🔄", "description": "Total transactions"},
-            {"key": "total_loans", "label": "Total Loans", "entity": "loan", "metric": "count", "category": "financial", "formula": "COUNT(DISTINCT loan_id)", "icon": "📋", "description": "Number of loans"},
+            {
+                "key": "total_balance",
+                "label": "Total Balance",
+                "entity": "account",
+                "metric": "sum",
+                "category": "financial",
+                "formula": "SUM(balance)",
+                "icon": "💰",
+                "description": "Total account balance",
+                "unit": "currency",
+            },
+            {
+                "key": "total_accounts",
+                "label": "Total Accounts",
+                "entity": "account",
+                "metric": "count",
+                "category": "operational",
+                "formula": "COUNT(DISTINCT account_id)",
+                "icon": "🏦",
+                "description": "Number of accounts",
+            },
+            {
+                "key": "total_transactions",
+                "label": "Total Transactions",
+                "entity": "transaction",
+                "metric": "count",
+                "category": "operational",
+                "formula": "COUNT(*)",
+                "icon": "🔄",
+                "description": "Total transactions",
+            },
+            {
+                "key": "total_loans",
+                "label": "Total Loans",
+                "entity": "loan",
+                "metric": "count",
+                "category": "financial",
+                "formula": "COUNT(DISTINCT loan_id)",
+                "icon": "📋",
+                "description": "Number of loans",
+            },
         ],
         "government": [
-            {"key": "total_budget", "label": "Total Budget", "entity": "budget_gov", "metric": "sum", "category": "financial", "formula": "SUM(budget_amount)", "icon": "💰", "description": "Total budget allocation", "unit": "currency"},
-            {"key": "total_projects", "label": "Total Projects", "entity": "project_gov", "metric": "count", "category": "operational", "formula": "COUNT(DISTINCT project_id)", "icon": "🏗️", "description": "Number of projects"},
-            {"key": "budget_utilization", "label": "Budget Utilization", "entity": "budget_gov", "metric": "custom", "category": "financial", "formula": "spent / budget * 100", "icon": "📊", "description": "Budget utilization percentage", "unit": "%"},
+            {
+                "key": "total_budget",
+                "label": "Total Budget",
+                "entity": "budget_gov",
+                "metric": "sum",
+                "category": "financial",
+                "formula": "SUM(budget_amount)",
+                "icon": "💰",
+                "description": "Total budget allocation",
+                "unit": "currency",
+            },
+            {
+                "key": "total_projects",
+                "label": "Total Projects",
+                "entity": "project_gov",
+                "metric": "count",
+                "category": "operational",
+                "formula": "COUNT(DISTINCT project_id)",
+                "icon": "🏗️",
+                "description": "Number of projects",
+            },
+            {
+                "key": "budget_utilization",
+                "label": "Budget Utilization",
+                "entity": "budget_gov",
+                "metric": "custom",
+                "category": "financial",
+                "formula": "spent / budget * 100",
+                "icon": "📊",
+                "description": "Budget utilization percentage",
+                "unit": "%",
+            },
         ],
         "manufacturing": [
-            {"key": "total_production", "label": "Total Production", "entity": "production", "metric": "sum", "category": "operational", "formula": "SUM(production_volume)", "icon": "🏭", "description": "Total production volume"},
-            {"key": "active_machines", "label": "Active Machines", "entity": "machine", "metric": "count", "category": "operational", "formula": "COUNT(DISTINCT machine_id)", "icon": "⚙️", "description": "Number of active machines"},
-            {"key": "downtime_hours", "label": "Downtime Hours", "entity": "downtime", "metric": "sum", "category": "operational", "formula": "SUM(downtime_hours)", "icon": "⏰", "description": "Total downtime hours"},
+            {
+                "key": "total_production",
+                "label": "Total Production",
+                "entity": "production",
+                "metric": "sum",
+                "category": "operational",
+                "formula": "SUM(production_volume)",
+                "icon": "🏭",
+                "description": "Total production volume",
+            },
+            {
+                "key": "active_machines",
+                "label": "Active Machines",
+                "entity": "machine",
+                "metric": "count",
+                "category": "operational",
+                "formula": "COUNT(DISTINCT machine_id)",
+                "icon": "⚙️",
+                "description": "Number of active machines",
+            },
+            {
+                "key": "downtime_hours",
+                "label": "Downtime Hours",
+                "entity": "downtime",
+                "metric": "sum",
+                "category": "operational",
+                "formula": "SUM(downtime_hours)",
+                "icon": "⏰",
+                "description": "Total downtime hours",
+            },
         ],
         "agriculture": [
-            {"key": "total_harvest", "label": "Total Harvest", "entity": "crop", "metric": "sum", "category": "operational", "formula": "SUM(harvest_amount)", "icon": "🌾", "description": "Total harvest amount"},
-            {"key": "total_farms", "label": "Total Farms", "entity": "farm", "metric": "count", "category": "operational", "formula": "COUNT(DISTINCT farm_id)", "icon": "🚜", "description": "Number of farms"},
-            {"key": "avg_yield", "label": "Avg Yield per Hectare", "entity": "crop", "metric": "avg", "category": "operational", "formula": "SUM(yield) / SUM(hectares)", "icon": "📈", "description": "Average yield per hectare"},
+            {
+                "key": "total_harvest",
+                "label": "Total Harvest",
+                "entity": "crop",
+                "metric": "sum",
+                "category": "operational",
+                "formula": "SUM(harvest_amount)",
+                "icon": "🌾",
+                "description": "Total harvest amount",
+            },
+            {
+                "key": "total_farms",
+                "label": "Total Farms",
+                "entity": "farm",
+                "metric": "count",
+                "category": "operational",
+                "formula": "COUNT(DISTINCT farm_id)",
+                "icon": "🚜",
+                "description": "Number of farms",
+            },
+            {
+                "key": "avg_yield",
+                "label": "Avg Yield per Hectare",
+                "entity": "crop",
+                "metric": "avg",
+                "category": "operational",
+                "formula": "SUM(yield) / SUM(hectares)",
+                "icon": "📈",
+                "description": "Average yield per hectare",
+            },
         ],
         "church": [
-            {"key": "total_members", "label": "Total Members", "entity": "member", "metric": "count", "category": "operational", "formula": "COUNT(DISTINCT member_id)", "icon": "👥", "description": "Number of members"},
-            {"key": "total_tithe", "label": "Total Tithe", "entity": "tithe", "metric": "sum", "category": "financial", "formula": "SUM(tithe_amount)", "icon": "💰", "description": "Total tithe collected", "unit": "currency"},
-            {"key": "total_offering", "label": "Total Offering", "entity": "offering", "metric": "sum", "category": "financial", "formula": "SUM(offering_amount)", "icon": "🎁", "description": "Total offerings", "unit": "currency"},
+            {
+                "key": "total_members",
+                "label": "Total Members",
+                "entity": "member",
+                "metric": "count",
+                "category": "operational",
+                "formula": "COUNT(DISTINCT member_id)",
+                "icon": "👥",
+                "description": "Number of members",
+            },
+            {
+                "key": "total_tithe",
+                "label": "Total Tithe",
+                "entity": "tithe",
+                "metric": "sum",
+                "category": "financial",
+                "formula": "SUM(tithe_amount)",
+                "icon": "💰",
+                "description": "Total tithe collected",
+                "unit": "currency",
+            },
+            {
+                "key": "total_offering",
+                "label": "Total Offering",
+                "entity": "offering",
+                "metric": "sum",
+                "category": "financial",
+                "formula": "SUM(offering_amount)",
+                "icon": "🎁",
+                "description": "Total offerings",
+                "unit": "currency",
+            },
         ],
         "ngo": [
-            {"key": "total_donations", "label": "Total Donations", "entity": "donation", "metric": "sum", "category": "financial", "formula": "SUM(donation_amount)", "icon": "💰", "description": "Total donations received", "unit": "currency"},
-            {"key": "total_beneficiaries", "label": "Beneficiaries", "entity": "beneficiary", "metric": "count", "category": "impact", "formula": "COUNT(DISTINCT beneficiary_id)", "icon": "🤝", "description": "Number of beneficiaries"},
-            {"key": "total_donors", "label": "Total Donors", "entity": "donor", "metric": "count", "category": "financial", "formula": "COUNT(DISTINCT donor_id)", "icon": "❤️", "description": "Number of unique donors"},
+            {
+                "key": "total_donations",
+                "label": "Total Donations",
+                "entity": "donation",
+                "metric": "sum",
+                "category": "financial",
+                "formula": "SUM(donation_amount)",
+                "icon": "💰",
+                "description": "Total donations received",
+                "unit": "currency",
+            },
+            {
+                "key": "total_beneficiaries",
+                "label": "Beneficiaries",
+                "entity": "beneficiary",
+                "metric": "count",
+                "category": "impact",
+                "formula": "COUNT(DISTINCT beneficiary_id)",
+                "icon": "🤝",
+                "description": "Number of beneficiaries",
+            },
+            {
+                "key": "total_donors",
+                "label": "Total Donors",
+                "entity": "donor",
+                "metric": "count",
+                "category": "financial",
+                "formula": "COUNT(DISTINCT donor_id)",
+                "icon": "❤️",
+                "description": "Number of unique donors",
+            },
         ],
         "insurance": [
-            {"key": "total_premium", "label": "Total Premium", "entity": "policy", "metric": "sum", "category": "financial", "formula": "SUM(premium_amount)", "icon": "💰", "description": "Total premium income", "unit": "currency"},
-            {"key": "total_policies", "label": "Total Policies", "entity": "policy", "metric": "count", "category": "operational", "formula": "COUNT(DISTINCT policy_id)", "icon": "📄", "description": "Number of active policies"},
-            {"key": "total_claims", "label": "Total Claims", "entity": "claim", "metric": "count", "category": "operational", "formula": "COUNT(DISTINCT claim_id)", "icon": "📋", "description": "Number of claims"},
+            {
+                "key": "total_premium",
+                "label": "Total Premium",
+                "entity": "policy",
+                "metric": "sum",
+                "category": "financial",
+                "formula": "SUM(premium_amount)",
+                "icon": "💰",
+                "description": "Total premium income",
+                "unit": "currency",
+            },
+            {
+                "key": "total_policies",
+                "label": "Total Policies",
+                "entity": "policy",
+                "metric": "count",
+                "category": "operational",
+                "formula": "COUNT(DISTINCT policy_id)",
+                "icon": "📄",
+                "description": "Number of active policies",
+            },
+            {
+                "key": "total_claims",
+                "label": "Total Claims",
+                "entity": "claim",
+                "metric": "count",
+                "category": "operational",
+                "formula": "COUNT(DISTINCT claim_id)",
+                "icon": "📋",
+                "description": "Number of claims",
+            },
         ],
         "hospitality": [
-            {"key": "total_reservations", "label": "Reservations", "entity": "reservation", "metric": "count", "category": "operational", "formula": "COUNT(DISTINCT reservation_id)", "icon": "🏨", "description": "Number of reservations"},
-            {"key": "total_guests", "label": "Total Guests", "entity": "guest", "metric": "count", "category": "operational", "formula": "COUNT(DISTINCT guest_id)", "icon": "👥", "description": "Number of unique guests"},
-            {"key": "total_revenue", "label": "Total Revenue", "entity": "reservation", "metric": "sum", "category": "financial", "formula": "SUM(revenue)", "icon": "💰", "description": "Total revenue", "unit": "currency"},
+            {
+                "key": "total_reservations",
+                "label": "Reservations",
+                "entity": "reservation",
+                "metric": "count",
+                "category": "operational",
+                "formula": "COUNT(DISTINCT reservation_id)",
+                "icon": "🏨",
+                "description": "Number of reservations",
+            },
+            {
+                "key": "total_guests",
+                "label": "Total Guests",
+                "entity": "guest",
+                "metric": "count",
+                "category": "operational",
+                "formula": "COUNT(DISTINCT guest_id)",
+                "icon": "👥",
+                "description": "Number of unique guests",
+            },
+            {
+                "key": "total_revenue",
+                "label": "Total Revenue",
+                "entity": "reservation",
+                "metric": "sum",
+                "category": "financial",
+                "formula": "SUM(revenue)",
+                "icon": "💰",
+                "description": "Total revenue",
+                "unit": "currency",
+            },
         ],
         "telecommunications": [
-            {"key": "total_subscribers", "label": "Subscribers", "entity": "subscriber", "metric": "count", "category": "operational", "formula": "COUNT(DISTINCT subscriber_id)", "icon": "📱", "description": "Number of subscribers"},
-            {"key": "total_calls", "label": "Total Calls", "entity": "call", "metric": "count", "category": "operational", "formula": "COUNT(*)", "icon": "📞", "description": "Total number of calls"},
-            {"key": "total_data_usage", "label": "Data Usage", "entity": "data_usage", "metric": "sum", "category": "operational", "formula": "SUM(data_bytes)", "icon": "📶", "description": "Total data usage"},
+            {
+                "key": "total_subscribers",
+                "label": "Subscribers",
+                "entity": "subscriber",
+                "metric": "count",
+                "category": "operational",
+                "formula": "COUNT(DISTINCT subscriber_id)",
+                "icon": "📱",
+                "description": "Number of subscribers",
+            },
+            {
+                "key": "total_calls",
+                "label": "Total Calls",
+                "entity": "call",
+                "metric": "count",
+                "category": "operational",
+                "formula": "COUNT(*)",
+                "icon": "📞",
+                "description": "Total number of calls",
+            },
+            {
+                "key": "total_data_usage",
+                "label": "Data Usage",
+                "entity": "data_usage",
+                "metric": "sum",
+                "category": "operational",
+                "formula": "SUM(data_bytes)",
+                "icon": "📶",
+                "description": "Total data usage",
+            },
         ],
     }
 
@@ -175,34 +584,38 @@ class KPIIntelligenceEngine:
         kpis = []
         for template in self.UNIVERSAL_KPI_TEMPLATES:
             if template["key"] == "total_records":
-                kpis.append(KPIDefinition(
-                    key="total_records",
-                    label="Total Records",
-                    entity="",
-                    metric="count",
-                    category="operational",
-                    formula="COUNT(*)",
-                    source_columns=[],
-                    aggregation="count",
-                    confidence=1.0,
-                    icon="📋",
-                    description="Total number of records",
-                ))
+                kpis.append(
+                    KPIDefinition(
+                        key="total_records",
+                        label="Total Records",
+                        entity="",
+                        metric="count",
+                        category="operational",
+                        formula="COUNT(*)",
+                        source_columns=[],
+                        aggregation="count",
+                        confidence=1.0,
+                        icon="📋",
+                        description="Total number of records",
+                    )
+                )
             elif template["key"] == "data_quality":
-                kpis.append(KPIDefinition(
-                    key="data_quality",
-                    label="Data Quality Score",
-                    entity="",
-                    metric="quality",
-                    category="quality",
-                    formula="Composite quality score (0-100)",
-                    source_columns=[],
-                    aggregation="avg",
-                    confidence=1.0,
-                    icon="✅",
-                    unit="%",
-                    description="Overall data quality score",
-                ))
+                kpis.append(
+                    KPIDefinition(
+                        key="data_quality",
+                        label="Data Quality Score",
+                        entity="",
+                        metric="quality",
+                        category="quality",
+                        formula="Composite quality score (0-100)",
+                        source_columns=[],
+                        aggregation="avg",
+                        confidence=1.0,
+                        icon="✅",
+                        unit="%",
+                        description="Overall data quality score",
+                    )
+                )
         return kpis
 
     def _industry_kpis(
@@ -266,42 +679,48 @@ class KPIIntelligenceEngine:
             # Sum KPI for numeric columns
             kpi_key = f"sum_{col.lower().replace(' ', '_')}"
             if kpi_key not in existing_keys:
-                kpis.append(KPIDefinition(
-                    key=kpi_key,
-                    label=f"Total {col.replace('_', ' ').title()}",
-                    entity=col_mapping.get(col, ""),
-                    metric="sum",
-                    category="financial" if self._looks_monetary(col) else "operational",
-                    formula=f"SUM({col})",
-                    source_columns=[col],
-                    aggregation="sum",
-                    confidence=0.6,
-                    icon="💰" if self._looks_monetary(col) else "📊",
-                    unit="currency" if self._looks_monetary(col) else "",
-                    description=f"Sum of {col}",
-                ))
+                kpis.append(
+                    KPIDefinition(
+                        key=kpi_key,
+                        label=f"Total {col.replace('_', ' ').title()}",
+                        entity=col_mapping.get(col, ""),
+                        metric="sum",
+                        category="financial" if self._looks_monetary(col) else "operational",
+                        formula=f"SUM({col})",
+                        source_columns=[col],
+                        aggregation="sum",
+                        confidence=0.6,
+                        icon="💰" if self._looks_monetary(col) else "📊",
+                        unit="currency" if self._looks_monetary(col) else "",
+                        description=f"Sum of {col}",
+                    )
+                )
 
             # Average KPI for numeric columns
             avg_key = f"avg_{col.lower().replace(' ', '_')}"
             if avg_key not in existing_keys and len(df) > 0:
-                kpis.append(KPIDefinition(
-                    key=avg_key,
-                    label=f"Avg {col.replace('_', ' ').title()}",
-                    entity=col_mapping.get(col, ""),
-                    metric="avg",
-                    category="operational",
-                    formula=f"AVG({col})",
-                    source_columns=[col],
-                    aggregation="avg",
-                    confidence=0.5,
-                    icon="📊",
-                    description=f"Average of {col}",
-                ))
+                kpis.append(
+                    KPIDefinition(
+                        key=avg_key,
+                        label=f"Avg {col.replace('_', ' ').title()}",
+                        entity=col_mapping.get(col, ""),
+                        metric="avg",
+                        category="operational",
+                        formula=f"AVG({col})",
+                        source_columns=[col],
+                        aggregation="avg",
+                        confidence=0.5,
+                        icon="📊",
+                        description=f"Average of {col}",
+                    )
+                )
 
         # Limit data-driven KPIs to avoid overload
         return kpis[:8]
 
-    def _registry_kpis(self, df: pd.DataFrame, industry: str, col_mapping: dict) -> list[KPIDefinition]:
+    def _registry_kpis(
+        self, df: pd.DataFrame, industry: str, col_mapping: dict
+    ) -> list[KPIDefinition]:
         """Generate KPIs from KPIRegistry definitions."""
         kpis = []
         for definition in KPIRegistry.definitions(industry):
@@ -318,21 +737,29 @@ class KPIIntelligenceEngine:
                             kpi_info = {"formula": kpi_name}
                             break
 
-            kpis.append(KPIDefinition(
-                key=definition.key,
-                label=definition.label,
-                entity=definition.entity,
-                metric=definition.metric,
-                category=definition.category,
-                formula=kpi_info.get("formula", f"{definition.metric.upper()}({definition.entity})"),
-                source_columns=source_cols,
-                aggregation=definition.metric,
-                confidence=0.8 if source_cols else 0.3,
-                icon="📊",
-                threshold_warning=definition.threshold.get("warning") if definition.threshold else None,
-                threshold_critical=definition.threshold.get("critical") if definition.threshold else None,
-                description=f"{definition.label} from {definition.entity}",
-            ))
+            kpis.append(
+                KPIDefinition(
+                    key=definition.key,
+                    label=definition.label,
+                    entity=definition.entity,
+                    metric=definition.metric,
+                    category=definition.category,
+                    formula=kpi_info.get(
+                        "formula", f"{definition.metric.upper()}({definition.entity})"
+                    ),
+                    source_columns=source_cols,
+                    aggregation=definition.metric,
+                    confidence=0.8 if source_cols else 0.3,
+                    icon="📊",
+                    threshold_warning=(
+                        definition.threshold.get("warning") if definition.threshold else None
+                    ),
+                    threshold_critical=(
+                        definition.threshold.get("critical") if definition.threshold else None
+                    ),
+                    description=f"{definition.label} from {definition.entity}",
+                )
+            )
         return kpis
 
     # ── Helpers ─────────────────────────────────────────
@@ -357,9 +784,24 @@ class KPIIntelligenceEngine:
     @staticmethod
     def _looks_monetary(col_name: str) -> bool:
         monetary_keywords = (
-            "amount", "price", "cost", "revenue", "sales", "total",
-            "balance", "fee", "charge", "payment", "billing", "salary",
-            "budget", "spending", "donation", "tithe", "offering", "premium",
+            "amount",
+            "price",
+            "cost",
+            "revenue",
+            "sales",
+            "total",
+            "balance",
+            "fee",
+            "charge",
+            "payment",
+            "billing",
+            "salary",
+            "budget",
+            "spending",
+            "donation",
+            "tithe",
+            "offering",
+            "premium",
         )
         col_lower = col_name.lower()
         return any(kw in col_lower for kw in monetary_keywords)

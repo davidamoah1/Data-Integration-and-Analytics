@@ -86,7 +86,7 @@ async def download_file(
     try:
         data, record = svc.download(file_id, org_id)
     except FileNotFoundError:
-        raise HTTPException(status_code=404, detail="File not found")
+        raise HTTPException(status_code=404, detail="File not found") from None
 
     return Response(
         content=data,
@@ -110,7 +110,7 @@ async def get_file_url(
     try:
         url = svc.get_url(file_id, org_id, expires=expires)
     except FileNotFoundError:
-        raise HTTPException(status_code=404, detail="File not found")
+        raise HTTPException(status_code=404, detail="File not found") from None
     return {"url": url, "expires_in": expires}
 
 

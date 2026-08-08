@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import hashlib
 import secrets
-from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import JSON, TIMESTAMP, Boolean, Column, Integer, String, Text, func
+
 from shared.database import Base, BigInt
 
 
@@ -21,7 +21,9 @@ class APIKey(Base):
     name = Column(String(200), nullable=False)
     key_prefix = Column(String(20), nullable=False)  # first 8 chars for identification
     key_hash = Column(String(255), unique=True, nullable=False)  # SHA-256 hash of full key
-    scopes = Column(JSON, nullable=True)  # list of allowed scopes: datasets, analytics, ai, workflows
+    scopes = Column(
+        JSON, nullable=True
+    )  # list of allowed scopes: datasets, analytics, ai, workflows
     rate_limit_per_hour = Column(Integer, nullable=False, default=1000)
     is_active = Column(Boolean, default=True, nullable=False)
     expires_at = Column(TIMESTAMP, nullable=True)

@@ -14,20 +14,18 @@ Run: python -m pytest tests/test_ecosystem.py -v
 
 from __future__ import annotations
 
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from shared.database import Base, BigInt
 from api.main import app
-from shared.database import get_db
-
+from shared.database import Base
 
 # ─── Fixtures ──────────────────────────────────────────────
 
@@ -53,10 +51,13 @@ def client():
 @pytest.fixture(scope="module")
 def auth_token(client):
     """Get an auth token for testing."""
-    resp = client.post("/api/auth/login", json={
-        "email": "admin@dataflow.io",
-        "password": "Admin@12345",
-    })
+    resp = client.post(
+        "/api/auth/login",
+        json={
+            "email": "admin@dataflow.io",
+            "password": "Admin@12345",
+        },
+    )
     if resp.status_code == 200 and "data" in resp.json():
         return resp.json()["data"]["access_token"]
     # If login fails, return a dummy token — tests may skip
@@ -83,7 +84,9 @@ class TestConnectorFramework:
         assert resp.status_code == 200
         types = resp.json()["data"]
         assert all(t["is_africa_first"] for t in types)
-        assert len(types) >= 5  # mobile_money, bank_api, gov_open_data, hospital_system, student_info_system
+        assert (
+            len(types) >= 5
+        )  # mobile_money, bank_api, gov_open_data, hospital_system, student_info_system
 
     def test_connector_types_have_required_fields(self, client, auth_headers):
         resp = client.get("/connectors/types", headers=auth_headers)
@@ -142,13 +145,17 @@ class TestIndustryPackages:
         assert len(packages) >= 5
 
     def test_filter_by_industry(self, client, auth_headers):
-        resp = client.get("/marketplace/industry-packages?industry=healthcare", headers=auth_headers)
+        resp = client.get(
+            "/marketplace/industry-packages?industry=healthcare", headers=auth_headers
+        )
         assert resp.status_code == 200
         packages = resp.json()["data"]
         assert all(p["industry"] == "healthcare" for p in packages)
 
     def test_get_package_detail(self, client, auth_headers):
-        resp = client.get("/marketplace/industry-packages/healthcare-analytics", headers=auth_headers)
+        resp = client.get(
+            "/marketplace/industry-packages/healthcare-analytics", headers=auth_headers
+        )
         assert resp.status_code == 200
         pkg = resp.json()["data"]
         assert pkg["package_id"] == "healthcare-analytics"
@@ -172,10 +179,14 @@ class TestWebhooks:
 
     def test_create_and_delete_webhook(self, client, auth_headers):
         # Create
-        resp = client.post("/webhooks", json={
-            "url": "https://example.com/webhook",
-            "events": ["dataset.uploaded", "pipeline.completed"],
-        }, headers=auth_headers)
+        resp = client.post(
+            "/webhooks",
+            json={
+                "url": "https://example.com/webhook",
+                "events": ["dataset.uploaded", "pipeline.completed"],
+            },
+            headers=auth_headers,
+        )
         assert resp.status_code == 200
         data = resp.json()["data"]
         assert "id" in data
@@ -192,10 +203,14 @@ class TestWebhooks:
         assert resp.status_code == 200
 
     def test_invalid_event_rejected(self, client, auth_headers):
-        resp = client.post("/webhooks", json={
-            "url": "https://example.com/webhook",
-            "events": ["invalid.event"],
-        }, headers=auth_headers)
+        resp = client.post(
+            "/webhooks",
+            json={
+                "url": "https://example.com/webhook",
+                "events": ["invalid.event"],
+            },
+            headers=auth_headers,
+        )
         assert resp.status_code == 400
 
 
@@ -205,11 +220,15 @@ class TestWebhooks:
 class TestAPIKeys:
     def test_create_and_list_api_key(self, client, auth_headers):
         # Create
-        resp = client.post("/platform/api-keys", json={
-            "name": "Test Key",
-            "scopes": ["datasets", "analytics"],
-            "rate_limit_per_hour": 500,
-        }, headers=auth_headers)
+        resp = client.post(
+            "/platform/api-keys",
+            json={
+                "name": "Test Key",
+                "scopes": ["datasets", "analytics"],
+                "rate_limit_per_hour": 500,
+            },
+            headers=auth_headers,
+        )
         assert resp.status_code == 200
         data = resp.json()["data"]
         assert "api_key" in data
@@ -225,10 +244,14 @@ class TestAPIKeys:
 
     def test_revoke_api_key(self, client, auth_headers):
         # Create
-        resp = client.post("/platform/api-keys", json={
-            "name": "Revoke Test",
-            "scopes": ["datasets"],
-        }, headers=auth_headers)
+        resp = client.post(
+            "/platform/api-keys",
+            json={
+                "name": "Revoke Test",
+                "scopes": ["datasets"],
+            },
+            headers=auth_headers,
+        )
         key_id = resp.json()["data"]["id"]
 
         # Revoke
@@ -246,10 +269,14 @@ class TestPublicAPI:
 
     def test_public_api_with_valid_key(self, client, auth_headers):
         # Create API key
-        resp = client.post("/platform/api-keys", json={
-            "name": "Public API Test",
-            "scopes": ["datasets", "analytics", "ai", "workflows"],
-        }, headers=auth_headers)
+        resp = client.post(
+            "/platform/api-keys",
+            json={
+                "name": "Public API Test",
+                "scopes": ["datasets", "analytics", "ai", "workflows"],
+            },
+            headers=auth_headers,
+        )
         api_key = resp.json()["data"]["api_key"]
 
         # Use public API
@@ -258,10 +285,14 @@ class TestPublicAPI:
 
     def test_public_api_scope_enforcement(self, client, auth_headers):
         # Create API key with limited scope
-        resp = client.post("/platform/api-keys", json={
-            "name": "Limited Scope",
-            "scopes": ["datasets"],
-        }, headers=auth_headers)
+        resp = client.post(
+            "/platform/api-keys",
+            json={
+                "name": "Limited Scope",
+                "scopes": ["datasets"],
+            },
+            headers=auth_headers,
+        )
         api_key = resp.json()["data"]["api_key"]
 
         # Try to access analytics (should fail)

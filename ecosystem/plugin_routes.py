@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel, Field
-from sqlalchemy import select, update, func as sa_func
+from pydantic import BaseModel
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session as DbSession
 
 from ecosystem.plugin_models import IndustryPackage, Plugin, PluginInstallation
@@ -58,24 +58,26 @@ async def list_plugins(
     if search:
         query = query.where(Plugin.name.ilike(f"%{search}%"))
     plugins = db.execute(query.order_by(Plugin.install_count.desc()).limit(limit)).scalars().all()
-    return success_response([
-        {
-            "id": p.id,
-            "plugin_id": p.plugin_id,
-            "name": p.name,
-            "version": p.version,
-            "author": p.author,
-            "description": p.description,
-            "category": p.category,
-            "icon": p.icon,
-            "is_verified": p.is_verified,
-            "is_featured": p.is_featured,
-            "install_count": p.install_count,
-            "rating": p.rating,
-            "tags": p.tags,
-        }
-        for p in plugins
-    ])
+    return success_response(
+        [
+            {
+                "id": p.id,
+                "plugin_id": p.plugin_id,
+                "name": p.name,
+                "version": p.version,
+                "author": p.author,
+                "description": p.description,
+                "category": p.category,
+                "icon": p.icon,
+                "is_verified": p.is_verified,
+                "is_featured": p.is_featured,
+                "install_count": p.install_count,
+                "rating": p.rating,
+                "tags": p.tags,
+            }
+            for p in plugins
+        ]
+    )
 
 
 @plugin_router.get("/plugins/{plugin_id}")
@@ -88,25 +90,27 @@ async def get_plugin(
     plugin = db.execute(select(Plugin).where(Plugin.plugin_id == plugin_id)).scalar_one_or_none()
     if not plugin:
         raise HTTPException(status_code=404, detail="Plugin not found")
-    return success_response({
-        "id": plugin.id,
-        "plugin_id": plugin.plugin_id,
-        "name": plugin.name,
-        "version": plugin.version,
-        "author": plugin.author,
-        "description": plugin.description,
-        "category": plugin.category,
-        "icon": plugin.icon,
-        "permissions": plugin.permissions,
-        "dependencies": plugin.dependencies,
-        "config_schema": plugin.config_schema,
-        "is_verified": plugin.is_verified,
-        "is_featured": plugin.is_featured,
-        "install_count": plugin.install_count,
-        "rating": plugin.rating,
-        "tags": plugin.tags,
-        "screenshots": plugin.screenshots,
-    })
+    return success_response(
+        {
+            "id": plugin.id,
+            "plugin_id": plugin.plugin_id,
+            "name": plugin.name,
+            "version": plugin.version,
+            "author": plugin.author,
+            "description": plugin.description,
+            "category": plugin.category,
+            "icon": plugin.icon,
+            "permissions": plugin.permissions,
+            "dependencies": plugin.dependencies,
+            "config_schema": plugin.config_schema,
+            "is_verified": plugin.is_verified,
+            "is_featured": plugin.is_featured,
+            "install_count": plugin.install_count,
+            "rating": plugin.rating,
+            "tags": plugin.tags,
+            "screenshots": plugin.screenshots,
+        }
+    )
 
 
 @plugin_router.post("/plugins")
@@ -119,7 +123,9 @@ async def publish_plugin(
     if "super_admin" not in current_user["roles"]:
         raise HTTPException(status_code=403, detail="Only admins can publish plugins")
 
-    existing = db.execute(select(Plugin).where(Plugin.plugin_id == body.plugin_id)).scalar_one_or_none()
+    existing = db.execute(
+        select(Plugin).where(Plugin.plugin_id == body.plugin_id)
+    ).scalar_one_or_none()
     if existing:
         raise HTTPException(status_code=409, detail="Plugin with this ID already exists")
 
@@ -155,7 +161,9 @@ async def install_plugin(
 ):
     """Install a plugin for the current organization."""
     org_id = get_current_organization_id(current_user, db)
-    plugin = db.execute(select(Plugin).where(Plugin.plugin_id == plugin_id_str)).scalar_one_or_none()
+    plugin = db.execute(
+        select(Plugin).where(Plugin.plugin_id == plugin_id_str)
+    ).scalar_one_or_none()
     if not plugin:
         raise HTTPException(status_code=404, detail="Plugin not found")
 
@@ -177,9 +185,15 @@ async def install_plugin(
         installed_by=current_user["id"],
     )
     db.add(installation)
-    db.execute(update(Plugin).where(Plugin.plugin_id == plugin_id_str).values(install_count=Plugin.install_count + 1))
+    db.execute(
+        update(Plugin)
+        .where(Plugin.plugin_id == plugin_id_str)
+        .values(install_count=Plugin.install_count + 1)
+    )
     db.commit()
-    return success_response({"id": installation.id, "status": installation.status}, "Plugin installed")
+    return success_response(
+        {"id": installation.id, "status": installation.status}, "Plugin installed"
+    )
 
 
 @plugin_router.get("/installations")
@@ -198,17 +212,19 @@ async def list_installations(
         .scalars()
         .all()
     )
-    return success_response([
-        {
-            "id": i.id,
-            "plugin_id": i.plugin_id,
-            "version": i.version,
-            "status": i.status,
-            "configuration": i.configuration,
-            "installed_at": str(i.installed_at) if i.installed_at else None,
-        }
-        for i in installations
-    ])
+    return success_response(
+        [
+            {
+                "id": i.id,
+                "plugin_id": i.plugin_id,
+                "version": i.version,
+                "status": i.status,
+                "configuration": i.configuration,
+                "installed_at": str(i.installed_at) if i.installed_at else None,
+            }
+            for i in installations
+        ]
+    )
 
 
 @plugin_router.post("/installations/{installation_id}/enable")
@@ -227,7 +243,11 @@ async def enable_plugin(
     ).scalar_one_or_none()
     if not inst:
         raise HTTPException(status_code=404, detail="Installation not found")
-    db.execute(update(PluginInstallation).where(PluginInstallation.id == installation_id).values(status="enabled"))
+    db.execute(
+        update(PluginInstallation)
+        .where(PluginInstallation.id == installation_id)
+        .values(status="enabled")
+    )
     db.commit()
     return success_response(None, "Plugin enabled")
 
@@ -248,7 +268,11 @@ async def disable_plugin(
     ).scalar_one_or_none()
     if not inst:
         raise HTTPException(status_code=404, detail="Installation not found")
-    db.execute(update(PluginInstallation).where(PluginInstallation.id == installation_id).values(status="disabled"))
+    db.execute(
+        update(PluginInstallation)
+        .where(PluginInstallation.id == installation_id)
+        .values(status="disabled")
+    )
     db.commit()
     return success_response(None, "Plugin disabled")
 
@@ -269,7 +293,11 @@ async def uninstall_plugin(
     ).scalar_one_or_none()
     if not inst:
         raise HTTPException(status_code=404, detail="Installation not found")
-    db.execute(update(Plugin).where(Plugin.plugin_id == inst.plugin_id).values(install_count=Plugin.install_count - 1))
+    db.execute(
+        update(Plugin)
+        .where(Plugin.plugin_id == inst.plugin_id)
+        .values(install_count=Plugin.install_count - 1)
+    )
     db.delete(inst)
     db.commit()
     return success_response(None, "Plugin uninstalled")
@@ -289,18 +317,20 @@ async def list_industry_packages(
     if industry:
         query = query.where(IndustryPackage.industry == industry)
     packages = db.execute(query.order_by(IndustryPackage.industry)).scalars().all()
-    return success_response([
-        {
-            "id": p.id,
-            "package_id": p.package_id,
-            "industry": p.industry,
-            "name": p.name,
-            "description": p.description,
-            "version": p.version,
-            "is_africa_optimized": p.is_africa_optimized,
-        }
-        for p in packages
-    ])
+    return success_response(
+        [
+            {
+                "id": p.id,
+                "package_id": p.package_id,
+                "industry": p.industry,
+                "name": p.name,
+                "description": p.description,
+                "version": p.version,
+                "is_africa_optimized": p.is_africa_optimized,
+            }
+            for p in packages
+        ]
+    )
 
 
 @plugin_router.get("/industry-packages/{package_id_str}")
@@ -310,23 +340,27 @@ async def get_industry_package(
     db: DbSession = Depends(get_db),
 ):
     """Get details of an industry package."""
-    pkg = db.execute(select(IndustryPackage).where(IndustryPackage.package_id == package_id_str)).scalar_one_or_none()
+    pkg = db.execute(
+        select(IndustryPackage).where(IndustryPackage.package_id == package_id_str)
+    ).scalar_one_or_none()
     if not pkg:
         raise HTTPException(status_code=404, detail="Package not found")
-    return success_response({
-        "id": pkg.id,
-        "package_id": pkg.package_id,
-        "industry": pkg.industry,
-        "name": pkg.name,
-        "description": pkg.description,
-        "version": pkg.version,
-        "dataset_templates": pkg.dataset_templates,
-        "dashboard_templates": pkg.dashboard_templates,
-        "kpi_templates": pkg.kpi_templates,
-        "ai_insight_templates": pkg.ai_insight_templates,
-        "ml_model_templates": pkg.ml_model_templates,
-        "is_africa_optimized": pkg.is_africa_optimized,
-    })
+    return success_response(
+        {
+            "id": pkg.id,
+            "package_id": pkg.package_id,
+            "industry": pkg.industry,
+            "name": pkg.name,
+            "description": pkg.description,
+            "version": pkg.version,
+            "dataset_templates": pkg.dataset_templates,
+            "dashboard_templates": pkg.dashboard_templates,
+            "kpi_templates": pkg.kpi_templates,
+            "ai_insight_templates": pkg.ai_insight_templates,
+            "ml_model_templates": pkg.ml_model_templates,
+            "is_africa_optimized": pkg.is_africa_optimized,
+        }
+    )
 
 
 @plugin_router.post("/industry-packages/{package_id_str}/install")
@@ -337,7 +371,9 @@ async def install_industry_package(
 ):
     """Install an industry package — creates dashboards, KPIs, and templates for the organization."""
     org_id = get_current_organization_id(current_user, db)
-    pkg = db.execute(select(IndustryPackage).where(IndustryPackage.package_id == package_id_str)).scalar_one_or_none()
+    pkg = db.execute(
+        select(IndustryPackage).where(IndustryPackage.package_id == package_id_str)
+    ).scalar_one_or_none()
     if not pkg:
         raise HTTPException(status_code=404, detail="Package not found")
 
@@ -346,6 +382,7 @@ async def install_industry_package(
     # Create dashboards from templates
     if pkg.dashboard_templates:
         from analytics.models import Dashboard
+
         for tmpl in pkg.dashboard_templates:
             dash = Dashboard(
                 organization_id=org_id,
@@ -363,6 +400,7 @@ async def install_industry_package(
     # Create KPIs from templates
     if pkg.kpi_templates:
         from analytics.models import KPI
+
         for tmpl in pkg.kpi_templates:
             kpi = KPI(
                 organization_id=org_id,
@@ -380,4 +418,7 @@ async def install_industry_package(
             created["kpis"] += 1
 
     db.commit()
-    return success_response(created, f"Industry package installed: {created['dashboards']} dashboards, {created['kpis']} KPIs created")
+    return success_response(
+        created,
+        f"Industry package installed: {created['dashboards']} dashboards, {created['kpis']} KPIs created",
+    )

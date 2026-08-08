@@ -13,7 +13,7 @@ New users get a blank workspace — NO demo datasets are auto-loaded.
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any
 
@@ -286,10 +286,19 @@ def get_flow_for_roles(roles: list[str]) -> OnboardingFlowDef:
     > data_entry_officer > viewer > first role > viewer default.
     """
     priority = [
-        "super_admin", "org_owner", "org_admin", "dept_manager",
-        "data_analyst", "business_analyst", "data_engineer",
-        "researcher", "data_entry_officer", "auditor",
-        "executive", "dept_officer", "viewer",
+        "super_admin",
+        "org_owner",
+        "org_admin",
+        "dept_manager",
+        "data_analyst",
+        "business_analyst",
+        "data_engineer",
+        "researcher",
+        "data_entry_officer",
+        "auditor",
+        "executive",
+        "dept_officer",
+        "viewer",
     ]
     for role in priority:
         if role in roles:

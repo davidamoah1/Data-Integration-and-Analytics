@@ -8,6 +8,7 @@ from datetime import datetime, timedelta, timezone
 
 from sqlalchemy.orm import Session as DbSession
 
+from audit.models import AuditLog
 from authentication.models import (
     ActivityLog,
     LoginHistory,
@@ -19,7 +20,6 @@ from authentication.models import (
 from authentication.models import (
     Session as UserSession,
 )
-from audit.models import AuditLog
 from authentication.repositories import (
     ActivityLogRepository,
     LoginHistoryRepository,
@@ -57,8 +57,6 @@ from shared.security import (
     create_access_token,
     create_refresh_token,
     decode_token,
-    encrypt_secret,
-    decrypt_secret,
     generate_token,
     hash_password,
     validate_password,
@@ -171,15 +169,17 @@ class AuthService:
         )
 
         # Audit log
-        self.db.add(AuditLog(
-            user_id=user.id,
-            organization_id=user.organization_id,
-            action="auth.login",
-            resource_type="user",
-            resource_id=user.id,
-            ip_address=ip,
-            new_values={"device": self._parse_device(user_agent)},
-        ))
+        self.db.add(
+            AuditLog(
+                user_id=user.id,
+                organization_id=user.organization_id,
+                action="auth.login",
+                resource_type="user",
+                resource_id=user.id,
+                ip_address=ip,
+                new_values={"device": self._parse_device(user_agent)},
+            )
+        )
 
         # Security notification for new login
         self._create_security_notification(
@@ -323,13 +323,15 @@ class AuthService:
         )
 
         # Audit log
-        self.db.add(AuditLog(
-            user_id=user_id,
-            organization_id=user.organization_id,
-            action="security.password_changed",
-            resource_type="user",
-            resource_id=user_id,
-        ))
+        self.db.add(
+            AuditLog(
+                user_id=user_id,
+                organization_id=user.organization_id,
+                action="security.password_changed",
+                resource_type="user",
+                resource_id=user_id,
+            )
+        )
 
         self.db.commit()
 
@@ -408,13 +410,15 @@ class AuthService:
         )
 
         # Audit log
-        self.db.add(AuditLog(
-            user_id=user.id,
-            organization_id=user.organization_id,
-            action="security.password_reset",
-            resource_type="user",
-            resource_id=user.id,
-        ))
+        self.db.add(
+            AuditLog(
+                user_id=user.id,
+                organization_id=user.organization_id,
+                action="security.password_reset",
+                resource_type="user",
+                resource_id=user.id,
+            )
+        )
 
         self.db.commit()
 
@@ -427,12 +431,14 @@ class AuthService:
                 action="email_verified",
             )
         )
-        self.db.add(AuditLog(
-            user_id=user_id,
-            action="security.email_verified",
-            resource_type="user",
-            resource_id=user_id,
-        ))
+        self.db.add(
+            AuditLog(
+                user_id=user_id,
+                action="security.email_verified",
+                resource_type="user",
+                resource_id=user_id,
+            )
+        )
         self.db.commit()
 
     def resend_email_verification(self, email: str) -> str:
@@ -476,14 +482,16 @@ class AuthService:
                 resource_id=user_id,
             )
         )
-        self.db.add(AuditLog(
-            user_id=activated_by,
-            organization_id=user.organization_id,
-            action="user.activated",
-            resource_type="user",
-            resource_id=user_id,
-            new_values={"reason": reason} if reason else None,
-        ))
+        self.db.add(
+            AuditLog(
+                user_id=activated_by,
+                organization_id=user.organization_id,
+                action="user.activated",
+                resource_type="user",
+                resource_id=user_id,
+                new_values={"reason": reason} if reason else None,
+            )
+        )
         self.db.commit()
 
     def deactivate_account(self, user_id: int, reason: str = None, deactivated_by: int = None):
@@ -505,14 +513,16 @@ class AuthService:
                 resource_id=user_id,
             )
         )
-        self.db.add(AuditLog(
-            user_id=deactivated_by,
-            organization_id=user.organization_id,
-            action="user.deactivated",
-            resource_type="user",
-            resource_id=user_id,
-            new_values={"reason": reason} if reason else None,
-        ))
+        self.db.add(
+            AuditLog(
+                user_id=deactivated_by,
+                organization_id=user.organization_id,
+                action="user.deactivated",
+                resource_type="user",
+                resource_id=user_id,
+                new_values={"reason": reason} if reason else None,
+            )
+        )
 
         # Security notification
         self._create_security_notification(
@@ -537,7 +547,10 @@ class AuthService:
         industry = None
         if user.organization_id:
             from organizations.models import Organization
-            org = self.db.query(Organization).filter(Organization.id == user.organization_id).first()
+
+            org = (
+                self.db.query(Organization).filter(Organization.id == user.organization_id).first()
+            )
             if org:
                 org_name = org.name
                 org_type = org.organization_type
@@ -648,16 +661,19 @@ class AuthService:
     def _create_security_notification(self, user_id: int, subject: str, body: str):
         """Create an in-app security notification for a user."""
         from notifications.models import Notification
-        self.db.add(Notification(
-            user_id=user_id,
-            channel="in_app",
-            subject=subject,
-            body=body,
-            status="sent",
-            read=False,
-            created_at=datetime.now(timezone.utc),
-            sent_at=datetime.now(timezone.utc),
-        ))
+
+        self.db.add(
+            Notification(
+                user_id=user_id,
+                channel="in_app",
+                subject=subject,
+                body=body,
+                status="sent",
+                read=False,
+                created_at=datetime.now(timezone.utc),
+                sent_at=datetime.now(timezone.utc),
+            )
+        )
 
     @staticmethod
     def _parse_device(user_agent: str) -> str:
@@ -732,14 +748,16 @@ class UserService:
             )
         )
 
-        self.db.add(AuditLog(
-            user_id=created_by,
-            organization_id=user.organization_id,
-            action="user.created",
-            resource_type="user",
-            resource_id=user.id,
-            new_values={"email": user.email, "full_name": user.full_name},
-        ))
+        self.db.add(
+            AuditLog(
+                user_id=created_by,
+                organization_id=user.organization_id,
+                action="user.created",
+                resource_type="user",
+                resource_id=user.id,
+                new_values={"email": user.email, "full_name": user.full_name},
+            )
+        )
 
         self.db.commit()
         return self._user_to_dict(user)
@@ -761,14 +779,16 @@ class UserService:
                     resource_id=user_id,
                 )
             )
-            self.db.add(AuditLog(
-                user_id=updated_by,
-                organization_id=user.organization_id,
-                action="user.updated",
-                resource_type="user",
-                resource_id=user_id,
-                new_values=kwargs,
-            ))
+            self.db.add(
+                AuditLog(
+                    user_id=updated_by,
+                    organization_id=user.organization_id,
+                    action="user.updated",
+                    resource_type="user",
+                    resource_id=user_id,
+                    new_values=kwargs,
+                )
+            )
 
         self.db.commit()
         return self._user_to_dict(self.user_repo.get_by_id(user_id))
@@ -790,13 +810,15 @@ class UserService:
                 resource_id=user_id,
             )
         )
-        self.db.add(AuditLog(
-            user_id=deleted_by,
-            organization_id=user.organization_id,
-            action="user.deleted",
-            resource_type="user",
-            resource_id=user_id,
-        ))
+        self.db.add(
+            AuditLog(
+                user_id=deleted_by,
+                organization_id=user.organization_id,
+                action="user.deleted",
+                resource_type="user",
+                resource_id=user_id,
+            )
+        )
         self.db.commit()
 
     def list_users(self, page: int = 1, page_size: int = 20) -> dict:
@@ -841,14 +863,16 @@ class UserService:
                 resource_id=user_id,
             )
         )
-        self.db.add(AuditLog(
-            user_id=assigned_by,
-            organization_id=user.organization_id,
-            action="role.assigned",
-            resource_type="user",
-            resource_id=user_id,
-            new_values={"roles": role_names},
-        ))
+        self.db.add(
+            AuditLog(
+                user_id=assigned_by,
+                organization_id=user.organization_id,
+                action="role.assigned",
+                resource_type="user",
+                resource_id=user_id,
+                new_values={"roles": role_names},
+            )
+        )
         self.db.commit()
 
     def _user_to_dict(self, user: User) -> dict:
@@ -979,6 +1003,7 @@ class RoleService:
     def assign_scoped_role(self, request: ScopedRoleAssign, assigned_by: int) -> dict:
         """Assign a role to a user with optional scope (organization, department, resource)."""
         from authentication.repositories import UserRepository
+
         user_repo = UserRepository(self.db)
         user = user_repo.get_by_id(request.user_id)
         if not user:
@@ -1002,10 +1027,15 @@ class RoleService:
             raise ValidationError("Personal roles can only have personal scope")
 
         # Use user's org as default scope for org-level roles
-        scope_type = request.scope_type or ("organization" if role.level == "organization" else None)
-        scope_id = request.scope_id or (user.organization_id if scope_type == "organization" else None)
+        scope_type = request.scope_type or (
+            "organization" if role.level == "organization" else None
+        )
+        scope_id = request.scope_id or (
+            user.organization_id if scope_type == "organization" else None
+        )
 
         from authentication.repositories import UserRoleRepository
+
         user_role_repo = UserRoleRepository(self.db)
         user_role_repo.assign_role(
             user_id=request.user_id,
@@ -1015,20 +1045,32 @@ class RoleService:
             scope_id=scope_id,
         )
 
-        self.db.add(AuditLog(
-            user_id=assigned_by,
-            organization_id=user.organization_id,
-            action="role.scoped_assign",
-            resource_type="user",
-            resource_id=request.user_id,
-            new_values={"role": request.role_name, "scope_type": scope_type, "scope_id": scope_id},
-        ))
+        self.db.add(
+            AuditLog(
+                user_id=assigned_by,
+                organization_id=user.organization_id,
+                action="role.scoped_assign",
+                resource_type="user",
+                resource_id=request.user_id,
+                new_values={
+                    "role": request.role_name,
+                    "scope_type": scope_type,
+                    "scope_id": scope_id,
+                },
+            )
+        )
         self.db.commit()
-        return {"user_id": request.user_id, "role": request.role_name, "scope_type": scope_type, "scope_id": scope_id}
+        return {
+            "user_id": request.user_id,
+            "role": request.role_name,
+            "scope_type": scope_type,
+            "scope_id": scope_id,
+        }
 
     def get_user_permissions(self, user_id: int) -> dict:
         """Get a user's roles, permissions, and scoped role assignments."""
         from authentication.repositories import UserRepository, UserRoleRepository
+
         user_repo = UserRepository(self.db)
         user_role_repo = UserRoleRepository(self.db)
 
@@ -1047,11 +1089,22 @@ class RoleService:
             "scoped_roles": scoped_roles,
         }
 
-    def check_permission(self, user_id: int, permission: str,
-                          scope_type: str = None, scope_id: int = None,
-                          resource_type: str = None, resource_id: int = None) -> dict:
+    def check_permission(
+        self,
+        user_id: int,
+        permission: str,
+        scope_type: str = None,
+        scope_id: int = None,
+        resource_type: str = None,
+        resource_id: int = None,
+    ) -> dict:
         """Check if a user has a specific permission, optionally within a scope or resource."""
-        from authentication.repositories import UserRoleRepository, UserRepository, ResourceRepository
+        from authentication.repositories import (
+            ResourceRepository,
+            UserRepository,
+            UserRoleRepository,
+        )
+
         user_role_repo = UserRoleRepository(self.db)
         user_repo = UserRepository(self.db)
 
@@ -1104,7 +1157,12 @@ def seed_default_data(db: DbSession):
     # Enterprise RBAC permissions
     permissions_def = [
         ("organization.create", "Create Organization", "organization", "Create new organizations"),
-        ("organization.manage", "Manage Organization", "organization", "Manage organization settings"),
+        (
+            "organization.manage",
+            "Manage Organization",
+            "organization",
+            "Manage organization settings",
+        ),
         ("organization.read", "View Organization", "organization", "View organization details"),
         ("organization.delete", "Delete Organization", "organization", "Delete an organization"),
         ("department.create", "Create Department", "department", "Create departments"),
@@ -1148,22 +1206,47 @@ def seed_default_data(db: DbSession):
         ("etl.import", "Import Data", "etl", "Import data via ETL"),
         ("etl.export", "Export Data", "etl", "Export data from ETL"),
         ("analytics.view", "View Analytics", "analytics", "View analytics"),
-        ("analytics.manage", "Manage Analytics", "analytics", "Create and manage dashboards and KPIs"),
-        ("analytics.export", "Export Analytics", "analytics", "Export dashboards and analytics data"),
+        (
+            "analytics.manage",
+            "Manage Analytics",
+            "analytics",
+            "Create and manage dashboards and KPIs",
+        ),
+        (
+            "analytics.export",
+            "Export Analytics",
+            "analytics",
+            "Export dashboards and analytics data",
+        ),
         ("ai.use", "Use AI Features", "ai", "Access AI predictions and insights"),
         ("settings.manage", "Manage Settings", "settings", "Manage system settings"),
         ("audit.view", "View Audit Logs", "audit", "View audit logs"),
-        ("notifications.manage", "Manage Notifications", "notifications", "Manage notification settings"),
+        (
+            "notifications.manage",
+            "Manage Notifications",
+            "notifications",
+            "Manage notification settings",
+        ),
         ("sessions.manage", "Manage Sessions", "sessions", "Revoke user sessions"),
         ("profile.update", "Update Profile", "profile", "Update own profile"),
         ("ml.read", "View ML Models", "ml", "View machine learning models and dashboards"),
         ("ml.write", "Create ML Models", "ml", "Create and edit machine learning models"),
         ("ml.execute", "Execute ML Training", "ml", "Train, predict, and run ML jobs"),
         ("ml.delete", "Delete ML Models", "ml", "Archive or delete ML models"),
-        ("capture.upload", "Upload Documents", "capture", "Upload documents for smart data capture"),
+        (
+            "capture.upload",
+            "Upload Documents",
+            "capture",
+            "Upload documents for smart data capture",
+        ),
         ("capture.process", "Process Documents", "capture", "Run OCR and document processing"),
         ("capture.read", "View Captured Data", "capture", "View captured document data"),
-        ("workspace.create", "Create Workspace", "workspace", "Create personal or shared workspaces"),
+        (
+            "workspace.create",
+            "Create Workspace",
+            "workspace",
+            "Create personal or shared workspaces",
+        ),
         ("workspace.manage", "Manage Workspace", "workspace", "Manage workspace settings"),
     ]
 
@@ -1182,89 +1265,327 @@ def seed_default_data(db: DbSession):
 
     # Enterprise roles: (name, display, desc, level, is_system, is_assignable, [perms])
     roles_def = [
-        ("super_admin", "Super Administrator", "Full system access — backward compatible", "platform", True, False, ALL_PERMS),
-        ("platform_owner", "Platform Owner", "Owns the platform, full control over all organizations", "platform", True, False, ALL_PERMS),
-        ("platform_admin", "Platform Administrator", "Manages platform operations and all organizations", "platform", True, True, ALL_PERMS),
-        ("org_admin", "Organization Administrator", "Manages users, roles, departments, and resources within an organization", "organization", True, True, [
-            "organization.read", "organization.manage", "department.create", "department.manage", "department.read",
-            "member.invite", "member.remove", "member.read", "member.manage",
-            "role.assign", "role.revoke", "role.read",
-            "users.create", "users.read", "users.edit", "users.delete", "users.manage",
-            "dataset.create", "dataset.read", "dataset.update", "dataset.delete", "dataset.share", "dataset.export",
-            "dashboard.create", "dashboard.read", "dashboard.update", "dashboard.delete", "dashboard.export", "dashboard.share",
-            "report.generate", "report.read", "report.update", "report.delete", "report.export",
-            "pipelines.create", "pipelines.execute", "pipelines.view", "pipelines.delete",
-            "etl.import", "etl.export", "analytics.view", "analytics.manage", "analytics.export",
-            "ai.use", "audit.view", "notifications.manage", "sessions.manage", "profile.update",
-            "ml.read", "ml.write", "ml.execute", "ml.delete",
-            "capture.upload", "capture.process", "capture.read", "workspace.create", "workspace.manage",
-        ]),
-        ("dept_manager", "Department Manager", "Manages department operations, members, and resources", "department", True, True, [
-            "organization.read", "department.read", "department.manage",
-            "member.invite", "member.read", "role.read", "users.read",
-            "dataset.create", "dataset.read", "dataset.update", "dataset.delete", "dataset.share", "dataset.export",
-            "dashboard.create", "dashboard.read", "dashboard.update", "dashboard.export",
-            "report.generate", "report.read", "report.export",
-            "pipelines.create", "pipelines.execute", "pipelines.view",
-            "etl.import", "etl.export", "analytics.view", "analytics.manage", "ai.use", "audit.view",
-            "profile.update", "ml.read", "ml.execute",
-            "capture.upload", "capture.process", "capture.read", "workspace.create", "workspace.manage",
-        ]),
-        ("analyst", "Analyst", "Analyzes data, creates dashboards and reports, runs ML models", "organization", True, True, [
-            "organization.read", "department.read", "member.read", "role.read", "users.read",
-            "dataset.read", "dataset.update", "dataset.export", "dataset.share",
-            "dashboard.create", "dashboard.read", "dashboard.update", "dashboard.export", "dashboard.share",
-            "report.generate", "report.read", "report.update", "report.export",
-            "pipelines.view", "etl.export", "analytics.view", "analytics.manage", "analytics.export", "ai.use",
-            "profile.update", "ml.read", "ml.write", "ml.execute", "capture.read",
-            "workspace.create", "workspace.manage",
-        ]),
-        ("researcher", "Researcher", "Uploads research datasets, performs statistical analysis, generates reports", "organization", True, True, [
-            "organization.read", "department.read", "member.read",
-            "dataset.create", "dataset.read", "dataset.update", "dataset.export",
-            "dashboard.create", "dashboard.read", "dashboard.export",
-            "report.generate", "report.read", "report.export",
-            "pipelines.view", "etl.import", "etl.export", "analytics.view", "analytics.export", "ai.use",
-            "profile.update", "ml.read", "ml.execute",
-            "capture.upload", "capture.read", "workspace.create",
-        ]),
-        ("data_entry_officer", "Data Entry Officer", "Uploads documents, uses Smart Data Capture, enters and updates data", "department", True, True, [
-            "organization.read", "department.read",
-            "dataset.create", "dataset.read", "dataset.update",
-            "dashboard.read", "report.read", "etl.import",
-            "profile.update", "capture.upload", "capture.process", "capture.read",
-        ]),
-        ("viewer", "Viewer", "Read-only access to dashboards, reports, and shared resources", "organization", True, True, [
-            "organization.read", "member.read", "dataset.read",
-            "dashboard.read", "report.read", "analytics.view", "profile.update",
-        ]),
-        ("personal_user", "Personal Workspace User", "Individual user with personal workspace — limited to own resources", "personal", True, True, [
-            "dataset.create", "dataset.read", "dataset.update", "dataset.delete", "dataset.export",
-            "dashboard.create", "dashboard.read", "dashboard.update", "dashboard.export",
-            "report.generate", "report.read", "report.export",
-            "analytics.view", "ai.use", "profile.update",
-            "ml.read", "ml.execute", "capture.upload", "capture.read",
-            "workspace.create", "workspace.manage",
-        ]),
+        (
+            "super_admin",
+            "Super Administrator",
+            "Full system access — backward compatible",
+            "platform",
+            True,
+            False,
+            ALL_PERMS,
+        ),
+        (
+            "platform_owner",
+            "Platform Owner",
+            "Owns the platform, full control over all organizations",
+            "platform",
+            True,
+            False,
+            ALL_PERMS,
+        ),
+        (
+            "platform_admin",
+            "Platform Administrator",
+            "Manages platform operations and all organizations",
+            "platform",
+            True,
+            True,
+            ALL_PERMS,
+        ),
+        (
+            "org_admin",
+            "Organization Administrator",
+            "Manages users, roles, departments, and resources within an organization",
+            "organization",
+            True,
+            True,
+            [
+                "organization.read",
+                "organization.manage",
+                "department.create",
+                "department.manage",
+                "department.read",
+                "member.invite",
+                "member.remove",
+                "member.read",
+                "member.manage",
+                "role.assign",
+                "role.revoke",
+                "role.read",
+                "users.create",
+                "users.read",
+                "users.edit",
+                "users.delete",
+                "users.manage",
+                "dataset.create",
+                "dataset.read",
+                "dataset.update",
+                "dataset.delete",
+                "dataset.share",
+                "dataset.export",
+                "dashboard.create",
+                "dashboard.read",
+                "dashboard.update",
+                "dashboard.delete",
+                "dashboard.export",
+                "dashboard.share",
+                "report.generate",
+                "report.read",
+                "report.update",
+                "report.delete",
+                "report.export",
+                "pipelines.create",
+                "pipelines.execute",
+                "pipelines.view",
+                "pipelines.delete",
+                "etl.import",
+                "etl.export",
+                "analytics.view",
+                "analytics.manage",
+                "analytics.export",
+                "ai.use",
+                "audit.view",
+                "notifications.manage",
+                "sessions.manage",
+                "profile.update",
+                "ml.read",
+                "ml.write",
+                "ml.execute",
+                "ml.delete",
+                "capture.upload",
+                "capture.process",
+                "capture.read",
+                "workspace.create",
+                "workspace.manage",
+            ],
+        ),
+        (
+            "dept_manager",
+            "Department Manager",
+            "Manages department operations, members, and resources",
+            "department",
+            True,
+            True,
+            [
+                "organization.read",
+                "department.read",
+                "department.manage",
+                "member.invite",
+                "member.read",
+                "role.read",
+                "users.read",
+                "dataset.create",
+                "dataset.read",
+                "dataset.update",
+                "dataset.delete",
+                "dataset.share",
+                "dataset.export",
+                "dashboard.create",
+                "dashboard.read",
+                "dashboard.update",
+                "dashboard.export",
+                "report.generate",
+                "report.read",
+                "report.export",
+                "pipelines.create",
+                "pipelines.execute",
+                "pipelines.view",
+                "etl.import",
+                "etl.export",
+                "analytics.view",
+                "analytics.manage",
+                "ai.use",
+                "audit.view",
+                "profile.update",
+                "ml.read",
+                "ml.execute",
+                "capture.upload",
+                "capture.process",
+                "capture.read",
+                "workspace.create",
+                "workspace.manage",
+            ],
+        ),
+        (
+            "analyst",
+            "Analyst",
+            "Analyzes data, creates dashboards and reports, runs ML models",
+            "organization",
+            True,
+            True,
+            [
+                "organization.read",
+                "department.read",
+                "member.read",
+                "role.read",
+                "users.read",
+                "dataset.read",
+                "dataset.update",
+                "dataset.export",
+                "dataset.share",
+                "dashboard.create",
+                "dashboard.read",
+                "dashboard.update",
+                "dashboard.export",
+                "dashboard.share",
+                "report.generate",
+                "report.read",
+                "report.update",
+                "report.export",
+                "pipelines.view",
+                "etl.export",
+                "analytics.view",
+                "analytics.manage",
+                "analytics.export",
+                "ai.use",
+                "profile.update",
+                "ml.read",
+                "ml.write",
+                "ml.execute",
+                "capture.read",
+                "workspace.create",
+                "workspace.manage",
+            ],
+        ),
+        (
+            "researcher",
+            "Researcher",
+            "Uploads research datasets, performs statistical analysis, generates reports",
+            "organization",
+            True,
+            True,
+            [
+                "organization.read",
+                "department.read",
+                "member.read",
+                "dataset.create",
+                "dataset.read",
+                "dataset.update",
+                "dataset.export",
+                "dashboard.create",
+                "dashboard.read",
+                "dashboard.export",
+                "report.generate",
+                "report.read",
+                "report.export",
+                "pipelines.view",
+                "etl.import",
+                "etl.export",
+                "analytics.view",
+                "analytics.export",
+                "ai.use",
+                "profile.update",
+                "ml.read",
+                "ml.execute",
+                "capture.upload",
+                "capture.read",
+                "workspace.create",
+            ],
+        ),
+        (
+            "data_entry_officer",
+            "Data Entry Officer",
+            "Uploads documents, uses Smart Data Capture, enters and updates data",
+            "department",
+            True,
+            True,
+            [
+                "organization.read",
+                "department.read",
+                "dataset.create",
+                "dataset.read",
+                "dataset.update",
+                "dashboard.read",
+                "report.read",
+                "etl.import",
+                "profile.update",
+                "capture.upload",
+                "capture.process",
+                "capture.read",
+            ],
+        ),
+        (
+            "viewer",
+            "Viewer",
+            "Read-only access to dashboards, reports, and shared resources",
+            "organization",
+            True,
+            True,
+            [
+                "organization.read",
+                "member.read",
+                "dataset.read",
+                "dashboard.read",
+                "report.read",
+                "analytics.view",
+                "profile.update",
+            ],
+        ),
+        (
+            "personal_user",
+            "Personal Workspace User",
+            "Individual user with personal workspace — limited to own resources",
+            "personal",
+            True,
+            True,
+            [
+                "dataset.create",
+                "dataset.read",
+                "dataset.update",
+                "dataset.delete",
+                "dataset.export",
+                "dashboard.create",
+                "dashboard.read",
+                "dashboard.update",
+                "dashboard.export",
+                "report.generate",
+                "report.read",
+                "report.export",
+                "analytics.view",
+                "ai.use",
+                "profile.update",
+                "ml.read",
+                "ml.execute",
+                "capture.upload",
+                "capture.read",
+                "workspace.create",
+                "workspace.manage",
+            ],
+        ),
     ]
 
     for name, display, desc, level, is_system, is_assignable, perm_names in roles_def:
         role = role_repo.get_by_name(name)
         if not role:
-            role = Role(name=name, display_name=display, description=desc, level=level, is_system=is_system, is_assignable=is_assignable)
+            role = Role(
+                name=name,
+                display_name=display,
+                description=desc,
+                level=level,
+                is_system=is_system,
+                is_assignable=is_assignable,
+            )
             role_repo.create(role)
         else:
-            role_repo.update(role.id, level=level, is_assignable=is_assignable, display_name=display, description=desc)
+            role_repo.update(
+                role.id,
+                level=level,
+                is_assignable=is_assignable,
+                display_name=display,
+                description=desc,
+            )
         perm_ids = role_perm_repo.get_permission_ids_by_names(perm_names)
         role_perm_repo.set_role_permissions(role.id, perm_ids)
 
     # Create default super admin user (credentials from env vars — no hardcoded passwords)
     import os as _os
+
     admin_email = _os.getenv("SUPER_ADMIN_EMAIL", "admin@dataflow.io")
     admin_password = _os.getenv("SUPER_ADMIN_PASSWORD", "")
 
     # Ensure a default organization exists for the super admin
     from organizations.models import Organization
+
     default_org = db.query(Organization).filter(Organization.slug == "system").first()
     if not default_org:
         default_org = Organization(

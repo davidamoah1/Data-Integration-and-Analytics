@@ -77,17 +77,21 @@ class UserRepository:
         )
         return list(users), total
 
-    def list_users_by_org(self, org_id: int, page: int = 1, page_size: int = 20) -> tuple[list[User], int]:
+    def list_users_by_org(
+        self, org_id: int, page: int = 1, page_size: int = 20
+    ) -> tuple[list[User], int]:
         offset = (page - 1) * page_size
         total = self.db.execute(
-            select(func.count()).select_from(User).where(
-                User.is_deleted == 0, User.organization_id == org_id
-            )
+            select(func.count())
+            .select_from(User)
+            .where(User.is_deleted == 0, User.organization_id == org_id)
         ).scalar()
         users = (
             self.db.execute(
-                select(User).where(User.is_deleted == 0, User.organization_id == org_id)
-                .offset(offset).limit(page_size)
+                select(User)
+                .where(User.is_deleted == 0, User.organization_id == org_id)
+                .offset(offset)
+                .limit(page_size)
             )
             .scalars()
             .all()
@@ -293,8 +297,14 @@ class UserRoleRepository:
         )
         return list(results)
 
-    def assign_role(self, user_id: int, role_id: int, assigned_by: int = None,
-                    scope_type: str = None, scope_id: int = None):
+    def assign_role(
+        self,
+        user_id: int,
+        role_id: int,
+        assigned_by: int = None,
+        scope_type: str = None,
+        scope_id: int = None,
+    ):
         existing = self.db.execute(
             select(UserRole).where(
                 UserRole.user_id == user_id,
@@ -304,13 +314,15 @@ class UserRoleRepository:
             )
         ).scalar_one_or_none()
         if not existing:
-            self.db.add(UserRole(
-                user_id=user_id,
-                role_id=role_id,
-                assigned_by=assigned_by,
-                scope_type=scope_type,
-                scope_id=scope_id,
-            ))
+            self.db.add(
+                UserRole(
+                    user_id=user_id,
+                    role_id=role_id,
+                    assigned_by=assigned_by,
+                    scope_type=scope_type,
+                    scope_id=scope_id,
+                )
+            )
             self.db.flush()
 
     def remove_role(self, user_id: int, role_id: int):
@@ -319,8 +331,14 @@ class UserRoleRepository:
         )
         self.db.flush()
 
-    def set_user_roles(self, user_id: int, role_ids: list[int], assigned_by: int = None,
-                       scope_type: str = None, scope_id: int = None):
+    def set_user_roles(
+        self,
+        user_id: int,
+        role_ids: list[int],
+        assigned_by: int = None,
+        scope_type: str = None,
+        scope_id: int = None,
+    ):
         # Only remove roles matching the same scope
         if scope_type:
             self.db.execute(
@@ -338,13 +356,15 @@ class UserRoleRepository:
                 )
             )
         for rid in role_ids:
-            self.db.add(UserRole(
-                user_id=user_id,
-                role_id=rid,
-                assigned_by=assigned_by,
-                scope_type=scope_type,
-                scope_id=scope_id,
-            ))
+            self.db.add(
+                UserRole(
+                    user_id=user_id,
+                    role_id=rid,
+                    assigned_by=assigned_by,
+                    scope_type=scope_type,
+                    scope_id=scope_id,
+                )
+            )
         self.db.flush()
 
     def get_all_permissions_for_user(self, user_id: int) -> list[str]:
@@ -363,20 +383,17 @@ class UserRoleRepository:
 
     def get_scoped_roles_for_user(self, user_id: int) -> list[dict]:
         """Get all role assignments for a user including scope information."""
-        results = (
-            self.db.execute(
-                select(
-                    Role.name,
-                    Role.display_name,
-                    Role.level,
-                    UserRole.scope_type,
-                    UserRole.scope_id,
-                )
-                .join(UserRole, UserRole.role_id == Role.id)
-                .where(UserRole.user_id == user_id, Role.is_deleted == 0)
+        results = self.db.execute(
+            select(
+                Role.name,
+                Role.display_name,
+                Role.level,
+                UserRole.scope_type,
+                UserRole.scope_id,
             )
-            .all()
-        )
+            .join(UserRole, UserRole.role_id == Role.id)
+            .where(UserRole.user_id == user_id, Role.is_deleted == 0)
+        ).all()
         return [
             {
                 "role_name": r[0],
@@ -388,7 +405,9 @@ class UserRoleRepository:
             for r in results
         ]
 
-    def get_permissions_for_scope(self, user_id: int, scope_type: str, scope_id: int = None) -> list[str]:
+    def get_permissions_for_scope(
+        self, user_id: int, scope_type: str, scope_id: int = None
+    ) -> list[str]:
         """Get permissions for a user within a specific scope (e.g., department)."""
         if scope_id:
             results = (
@@ -644,8 +663,14 @@ class ResourceRepository:
         resource = Resource(resource_type=resource_type, resource_id=resource_id, **kwargs)
         return self.create(resource)
 
-    def can_access(self, user_id: int, resource_type: str, resource_id: int,
-                   user_org_id: int = None, user_dept_id: int = None) -> bool:
+    def can_access(
+        self,
+        user_id: int,
+        resource_type: str,
+        resource_id: int,
+        user_org_id: int = None,
+        user_dept_id: int = None,
+    ) -> bool:
         """Check if a user can access a specific resource."""
         resource = self.get(resource_type, resource_id)
         if not resource:
@@ -660,7 +685,6 @@ class ResourceRepository:
         if resource.access_level == "organization" and resource.organization_id == user_org_id:
             return True
 
-        if resource.access_level == "department" and resource.department_id == user_dept_id:
-            return True
-
-        return False
+        return bool(
+            resource.access_level == "department" and resource.department_id == user_dept_id
+        )

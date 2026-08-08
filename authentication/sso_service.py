@@ -9,14 +9,13 @@ can be added when SSO is enabled in production.
 """
 
 import secrets
-from datetime import datetime, timezone
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session as DbSession
 
 from authentication.sso_models import SSOConnection, SSOIdentity
 from shared.exceptions import NotFoundError, ValidationError
-from shared.security import decrypt_secret, encrypt_secret
+from shared.security import encrypt_secret
 
 
 class SSOService:
@@ -27,9 +26,16 @@ class SSOService:
 
     # --- Organization SSO Configuration ---
 
-    def create_connection(self, org_id: int, provider: str, client_id: str = None,
-                          client_secret: str = None, metadata_url: str = None,
-                          scopes: list[str] = None, field_mapping: dict = None) -> dict:
+    def create_connection(
+        self,
+        org_id: int,
+        provider: str,
+        client_id: str = None,
+        client_secret: str = None,
+        metadata_url: str = None,
+        scopes: list[str] = None,
+        field_mapping: dict = None,
+    ) -> dict:
         """Configure an SSO provider for an organization."""
         existing = self.db.execute(
             select(SSOConnection).where(
@@ -39,7 +45,9 @@ class SSOService:
         ).scalar_one_or_none()
 
         if existing:
-            raise ValidationError(f"SSO provider '{provider}' is already configured for this organization")
+            raise ValidationError(
+                f"SSO provider '{provider}' is already configured for this organization"
+            )
 
         conn = SSOConnection(
             organization_id=org_id,
@@ -57,12 +65,16 @@ class SSOService:
 
     def list_connections(self, org_id: int) -> list[dict]:
         """List SSO connections for an organization."""
-        conns = self.db.execute(
-            select(SSOConnection).where(
-                SSOConnection.organization_id == org_id,
-                SSOConnection.is_active == True,  # noqa: E712
+        conns = (
+            self.db.execute(
+                select(SSOConnection).where(
+                    SSOConnection.organization_id == org_id,
+                    SSOConnection.is_active == True,  # noqa: E712
+                )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
         return [self._connection_to_dict(c) for c in conns]
 
     def delete_connection(self, org_id: int, provider: str):
@@ -100,8 +112,9 @@ class SSOService:
             "redirect_url": redirect_url,
         }
 
-    def handle_callback(self, provider: str, code: str = None, state: str = None,
-                         saml_response: str = None) -> dict:
+    def handle_callback(
+        self, provider: str, code: str = None, state: str = None, saml_response: str = None
+    ) -> dict:
         """Handle SSO provider callback.
 
         Exchanges authorization code for tokens, fetches user info,
@@ -125,9 +138,11 @@ class SSOService:
 
     def get_user_sso_identities(self, user_id: int) -> list[dict]:
         """Get SSO identities linked to a user."""
-        identities = self.db.execute(
-            select(SSOIdentity).where(SSOIdentity.user_id == user_id)
-        ).scalars().all()
+        identities = (
+            self.db.execute(select(SSOIdentity).where(SSOIdentity.user_id == user_id))
+            .scalars()
+            .all()
+        )
         return [
             {
                 "id": i.id,

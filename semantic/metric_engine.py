@@ -18,7 +18,10 @@ from dataclasses import dataclass, field
 import numpy as np
 import pandas as pd
 
-from semantic.semantic_model import DimensionDefinition, EntityDefinition, MetricDefinition, SemanticModel
+from semantic.semantic_model import (
+    MetricDefinition,
+    SemanticModel,
+)
 
 
 @dataclass
@@ -220,9 +223,7 @@ class MetricEngine:
                 if len(grouped) > 0:
                     # Sort descending, take top 10
                     grouped = grouped.sort_values(ascending=False).head(10)
-                    breakdowns[dim.key] = {
-                        str(k): float(v) for k, v in grouped.items()
-                    }
+                    breakdowns[dim.key] = {str(k): float(v) for k, v in grouped.items()}
             except Exception:
                 continue
 
@@ -293,10 +294,7 @@ class MetricEngine:
             if len(grouped) < 2:
                 return None
 
-            return [
-                {"period": str(idx), "value": float(val)}
-                for idx, val in grouped.items()
-            ]
+            return [{"period": str(idx), "value": float(val)} for idx, val in grouped.items()]
         except Exception:
             return None
 
@@ -312,59 +310,67 @@ class MetricEngine:
         derived: list[MetricResult] = []
 
         # Row count
-        derived.append(MetricResult(
-            key="record_count",
-            label="Total Records",
-            value=float(len(df)),
-            formatted=_fmt_number(len(df)),
-            category="operational",
-            entity="universal",
-            aggregation="count",
-            definition="Total number of data records (rows) in the dataset.",
-        ))
+        derived.append(
+            MetricResult(
+                key="record_count",
+                label="Total Records",
+                value=float(len(df)),
+                formatted=_fmt_number(len(df)),
+                category="operational",
+                entity="universal",
+                aggregation="count",
+                definition="Total number of data records (rows) in the dataset.",
+            )
+        )
 
         # Column count
-        derived.append(MetricResult(
-            key="column_count",
-            label="Total Columns",
-            value=float(len(df.columns)),
-            formatted=str(len(df.columns)),
-            category="operational",
-            entity="universal",
-            aggregation="count",
-            definition="Total number of columns (attributes) in the dataset.",
-        ))
+        derived.append(
+            MetricResult(
+                key="column_count",
+                label="Total Columns",
+                value=float(len(df.columns)),
+                formatted=str(len(df.columns)),
+                category="operational",
+                entity="universal",
+                aggregation="count",
+                definition="Total number of columns (attributes) in the dataset.",
+            )
+        )
 
         # Completeness
         total_cells = len(df) * len(df.columns) if len(df.columns) > 0 else 0
         if total_cells > 0:
             null_cells = int(df.isnull().sum().sum())
             completeness = ((total_cells - null_cells) / total_cells) * 100
-            derived.append(MetricResult(
-                key="data_completeness",
-                label="Data Completeness",
-                value=completeness,
-                formatted=_fmt_pct(completeness),
-                category="quality",
-                entity="universal",
-                aggregation="avg",
-                definition="Percentage of non-null cells across all columns.",
-            ))
+            derived.append(
+                MetricResult(
+                    key="data_completeness",
+                    label="Data Completeness",
+                    value=completeness,
+                    formatted=_fmt_pct(completeness),
+                    category="quality",
+                    entity="universal",
+                    aggregation="avg",
+                    definition="Percentage of non-null cells across all columns.",
+                )
+            )
 
         # Duplicate rate
         dup_count = int(df.duplicated().sum())
         if len(df) > 0:
             dup_rate = (dup_count / len(df)) * 100
-            derived.append(MetricResult(
-                key="duplicate_rate",
-                label="Duplicate Rate",
-                value=dup_rate,
-                formatted=_fmt_pct(dup_rate),
-                category="quality",
-                entity="universal",
-                aggregation="avg",
-                definition="Percentage of duplicate rows in the dataset.",
-            ))
+            derived.append(
+                MetricResult(
+                    key="duplicate_rate",
+                    label="Duplicate Rate",
+                    value=dup_rate,
+                    formatted=_fmt_pct(dup_rate),
+                    category="quality",
+                    entity="universal",
+                    aggregation="avg",
+                    definition="Percentage of duplicate rows in the dataset.",
+                )
+            )
 
         # Numeric column averages (if any numeric columns exist)
         numeric_cols = df.select_dtypes(include=[np.number]).columns
@@ -380,24 +386,42 @@ class MetricEngine:
             avg_val = float(non_null.mean())
             # Determine if monetary
             col_lower = col.lower()
-            is_monetary = any(kw in col_lower for kw in (
-                "amount", "revenue", "sales", "price", "cost", "fee",
-                "billing", "balance", "profit", "income", "salary",
-                "tuition", "offering", "tithe", "donation", "premium",
-            ))
+            is_monetary = any(
+                kw in col_lower
+                for kw in (
+                    "amount",
+                    "revenue",
+                    "sales",
+                    "price",
+                    "cost",
+                    "fee",
+                    "billing",
+                    "balance",
+                    "profit",
+                    "income",
+                    "salary",
+                    "tuition",
+                    "offering",
+                    "tithe",
+                    "donation",
+                    "premium",
+                )
+            )
 
             fmt = _fmt_currency(avg_val) if is_monetary else _fmt_number(avg_val)
 
-            derived.append(MetricResult(
-                key=f"avg_{col}",
-                label=f"Avg {col.replace('_', ' ').title()}",
-                value=avg_val,
-                formatted=fmt,
-                category="statistical",
-                entity="universal",
-                aggregation="avg",
-                definition=f"Average value of the {col} column across all records.",
-            ))
+            derived.append(
+                MetricResult(
+                    key=f"avg_{col}",
+                    label=f"Avg {col.replace('_', ' ').title()}",
+                    value=avg_val,
+                    formatted=fmt,
+                    category="statistical",
+                    entity="universal",
+                    aggregation="avg",
+                    definition=f"Average value of the {col} column across all records.",
+                )
+            )
 
         return derived
 
@@ -411,14 +435,11 @@ class MetricEngine:
         warning = threshold.get("warning")
         critical = threshold.get("critical")
 
-        if critical is not None:
-            if isinstance(critical, (int, float)):
-                if value >= critical:
-                    return "critical"
+        if critical is not None and isinstance(critical, (int, float)):
+            if value >= critical:
+                return "critical"
 
-        if warning is not None:
-            if isinstance(warning, (int, float)):
-                if value >= warning:
-                    return "warning"
+        if warning is not None and isinstance(warning, (int, float)) and value >= warning:
+            return "warning"
 
         return "ok"

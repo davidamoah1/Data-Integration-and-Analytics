@@ -8,7 +8,6 @@ from __future__ import annotations
 from datetime import datetime, timezone
 
 from sqlalchemy import func, select, update
-from sqlalchemy.orm import Session as DbSession
 
 from jobs.models import Job
 from shared.repositories import BaseRepository
@@ -58,10 +57,7 @@ class JobRepository(BaseRepository[Job]):
     def list_pending(self, limit: int = 100) -> list[Job]:
         return list(
             self.db.execute(
-                select(Job)
-                .where(Job.status == "pending")
-                .order_by(Job.id.asc())
-                .limit(limit)
+                select(Job).where(Job.status == "pending").order_by(Job.id.asc()).limit(limit)
             )
             .scalars()
             .all()
@@ -70,7 +66,8 @@ class JobRepository(BaseRepository[Job]):
     def list_active(self, organization_id: int) -> list[Job]:
         return list(
             self.db.execute(
-                select(Job).where(
+                select(Job)
+                .where(
                     Job.organization_id == organization_id,
                     Job.status.in_(["pending", "running"]),
                 )

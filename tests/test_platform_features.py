@@ -10,25 +10,19 @@ Tests cover:
 
 from __future__ import annotations
 
-import pytest
-
 from platform_features import (
-    TenantContext,
-    TenantFilter,
-    RoleHierarchy,
-    PermissionMatrix,
-    ROLE_HIERARCHY,
-    PERMISSION_MATRIX,
-    RoleLevel,
-    AuditTracker,
     AuditCategory,
     AuditSummary,
-    has_role_or_higher,
+    AuditTracker,
+    PermissionMatrix,
+    RoleHierarchy,
+    RoleLevel,
+    TenantContext,
     get_role_level,
+    has_role_or_higher,
     seed_enterprise_data,
 )
 from platform_features.audit_tracker import ACTION_CATEGORY_MAP
-
 
 # ── Tenant Context Tests ──────────────────────────────────
 
@@ -74,13 +68,17 @@ class TestTenantContext:
         assert ctx.can_access_org(99) is False
 
     def test_super_admin_can_access_any_org(self):
-        ctx = TenantContext(organization_id=None, user_id=1, roles=["super_admin"], is_super_admin=True)
+        ctx = TenantContext(
+            organization_id=None, user_id=1, roles=["super_admin"], is_super_admin=True
+        )
         assert ctx.can_access_org(99) is True
 
 
 class TestTenantFilter:
     def test_super_admin_sees_all(self):
-        ctx = TenantContext(organization_id=None, user_id=1, roles=["super_admin"], is_super_admin=True)
+        ctx = TenantContext(
+            organization_id=None, user_id=1, roles=["super_admin"], is_super_admin=True
+        )
         # Simulate a query — just verify no filtering happens
         # In practice, the query is returned unchanged
         assert ctx.is_super_admin is True
@@ -181,7 +179,9 @@ class TestPermissionMatrix:
         assert PermissionMatrix.user_has_permission(["viewer"], "users.create") is False
 
     def test_user_has_permission_multiple_roles(self):
-        assert PermissionMatrix.user_has_permission(["viewer", "analyst"], "report.generate") is True
+        assert (
+            PermissionMatrix.user_has_permission(["viewer", "analyst"], "report.generate") is True
+        )
 
     def test_get_role_permissions_summary(self):
         summary = PermissionMatrix.get_role_permissions_summary()
@@ -227,7 +227,7 @@ class TestAuditCategory:
         assert ACTION_CATEGORY_MAP["ai_forecast"] == AuditCategory.AI_USAGE
 
     def test_unknown_action_defaults_to_user_action(self):
-        tracker = AuditTracker.__new__(AuditTracker)
+        AuditTracker.__new__(AuditTracker)
         category = ACTION_CATEGORY_MAP.get("unknown_action", AuditCategory.USER_ACTION)
         assert category == AuditCategory.USER_ACTION
 
@@ -271,7 +271,7 @@ class TestSeedData:
 
     def test_seed_idempotent(self, db_session):
         # Run twice — second run should not create duplicates
-        result1 = seed_enterprise_data(db_session)
+        seed_enterprise_data(db_session)
         result2 = seed_enterprise_data(db_session)
         # Second run should create 0 new items
         assert len(result2["organizations_created"]) == 0

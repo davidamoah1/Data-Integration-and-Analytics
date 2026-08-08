@@ -9,6 +9,7 @@ Revises: 0015_audit_enhancements
 Create Date: 2026-08-01
 """
 
+import contextlib
 from collections.abc import Sequence
 
 import sqlalchemy as sa
@@ -82,7 +83,9 @@ def upgrade() -> None:
     _safe_create_index("idx_sales_order_date_region", "sales", ["order_date", "region"])
     _safe_create_index("idx_pipeline_runs_date", "pipeline_runs", ["started_at"])
     _safe_create_index("idx_pipeline_runs_status", "pipeline_runs", ["status"])
-    _safe_create_index("idx_capture_docs_org_status", "capture_documents", ["organization_id", "status"])
+    _safe_create_index(
+        "idx_capture_docs_org_status", "capture_documents", ["organization_id", "status"]
+    )
     _safe_create_index("idx_capture_docs_batch", "capture_documents", ["batch_id"])
     _safe_create_index("idx_capture_batches_org", "capture_batches", ["organization_id"])
     _safe_create_index("idx_capture_batches_status", "capture_batches", ["status"])
@@ -165,7 +168,5 @@ def downgrade() -> None:
     ]
     for name, table in indexes:
         if _table_exists(table):
-            try:
+            with contextlib.suppress(Exception):
                 op.drop_index(name, table_name=table)
-            except Exception:
-                pass

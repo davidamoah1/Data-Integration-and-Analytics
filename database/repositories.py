@@ -10,7 +10,6 @@ import pandas as pd
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from config import DB_TYPE
 from etl.logging_config import logger
 from shared.database import get_engine
 

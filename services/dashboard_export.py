@@ -16,7 +16,6 @@ import csv
 import io
 import logging
 from datetime import datetime, timezone
-from typing import Any
 
 import pandas as pd
 
@@ -33,7 +32,11 @@ class DashboardExportService:
     @staticmethod
     def _strip_emoji(text: str) -> str:
         """Remove emoji and non-latin-1 characters for PDF compatibility."""
-        return "".join(c for c in text if ord(c) <= 0xFFFF and c.isprintable() and ord(c) < 256 or c in " -_:.()[]/")
+        return "".join(
+            c
+            for c in text
+            if ord(c) <= 0xFFFF and c.isprintable() and ord(c) < 256 or c in " -_:.()[]/"
+        )
 
     def __init__(self, brand_name: str = "ETL Platform", brand_color: str = "#667eea"):
         self.brand_name = brand_name
@@ -105,7 +108,13 @@ class DashboardExportService:
         # Metadata
         pdf.set_font("Helvetica", "", 8)
         pdf.set_text_color(120, 120, 120)
-        pdf.cell(0, 5, f"Industry: {dashboard.industry.title()}  |  Version: {dashboard.version}  |  Generated: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}", new_x="LMARGIN", new_y="NEXT")
+        pdf.cell(
+            0,
+            5,
+            f"Industry: {dashboard.industry.title()}  |  Version: {dashboard.version}  |  Generated: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}",
+            new_x="LMARGIN",
+            new_y="NEXT",
+        )
         pdf.ln(5)
 
         # KPIs section
@@ -145,7 +154,13 @@ class DashboardExportService:
             for chart in dashboard.charts:
                 pdf.set_font("Helvetica", "B", 10)
                 pdf.set_text_color(50, 50, 50)
-                pdf.cell(0, 6, f"  - {chart.title} ({chart.chart_type.replace('_', ' ').title()})", new_x="LMARGIN", new_y="NEXT")
+                pdf.cell(
+                    0,
+                    6,
+                    f"  - {chart.title} ({chart.chart_type.replace('_', ' ').title()})",
+                    new_x="LMARGIN",
+                    new_y="NEXT",
+                )
                 pdf.set_font("Helvetica", "I", 8)
                 pdf.set_text_color(120, 120, 120)
                 pdf.cell(0, 5, f"    {chart.reasoning}", new_x="LMARGIN", new_y="NEXT")
@@ -157,7 +172,13 @@ class DashboardExportService:
                         axes.append(f"Y: {chart.y_axis}")
                     pdf.set_font("Helvetica", "", 8)
                     pdf.set_text_color(100, 100, 100)
-                    pdf.cell(0, 5, f"    Axes: {', '.join(axes)}  |  Aggregation: {chart.aggregation}", new_x="LMARGIN", new_y="NEXT")
+                    pdf.cell(
+                        0,
+                        5,
+                        f"    Axes: {', '.join(axes)}  |  Aggregation: {chart.aggregation}",
+                        new_x="LMARGIN",
+                        new_y="NEXT",
+                    )
                 pdf.ln(2)
 
             pdf.ln(5)
@@ -171,7 +192,13 @@ class DashboardExportService:
             for f in dashboard.filters:
                 pdf.set_font("Helvetica", "", 10)
                 pdf.set_text_color(60, 60, 60)
-                pdf.cell(0, 6, f"  - {f.label} ({f.filter_type.replace('_', ' ').title()}) - Column: {f.column}", new_x="LMARGIN", new_y="NEXT")
+                pdf.cell(
+                    0,
+                    6,
+                    f"  - {f.label} ({f.filter_type.replace('_', ' ').title()}) - Column: {f.column}",
+                    new_x="LMARGIN",
+                    new_y="NEXT",
+                )
             pdf.ln(5)
 
         # AI Insights
@@ -233,48 +260,56 @@ class DashboardExportService:
             # Sheet 1: KPIs
             kpi_data = []
             for kpi in dashboard.kpis:
-                kpi_data.append({
-                    "KPI": kpi.label,
-                    "Value": kpi_values.get(kpi.key, "N/A") if kpi_values else "N/A",
-                    "Category": kpi.category,
-                    "Formula": kpi.formula,
-                    "Confidence": kpi.confidence,
-                    "Description": kpi.description,
-                })
+                kpi_data.append(
+                    {
+                        "KPI": kpi.label,
+                        "Value": kpi_values.get(kpi.key, "N/A") if kpi_values else "N/A",
+                        "Category": kpi.category,
+                        "Formula": kpi.formula,
+                        "Confidence": kpi.confidence,
+                        "Description": kpi.description,
+                    }
+                )
             if kpi_data:
                 pd.DataFrame(kpi_data).to_excel(writer, sheet_name="KPIs", index=False)
 
             # Sheet 2: Charts
             chart_data = []
             for chart in dashboard.charts:
-                chart_data.append({
-                    "Title": chart.title,
-                    "Type": chart.chart_type,
-                    "X Axis": chart.x_axis or "",
-                    "Y Axis": chart.y_axis or "",
-                    "Group By": chart.group_by or "",
-                    "Aggregation": chart.aggregation,
-                    "Confidence": chart.confidence,
-                    "Reasoning": chart.reasoning,
-                })
+                chart_data.append(
+                    {
+                        "Title": chart.title,
+                        "Type": chart.chart_type,
+                        "X Axis": chart.x_axis or "",
+                        "Y Axis": chart.y_axis or "",
+                        "Group By": chart.group_by or "",
+                        "Aggregation": chart.aggregation,
+                        "Confidence": chart.confidence,
+                        "Reasoning": chart.reasoning,
+                    }
+                )
             if chart_data:
                 pd.DataFrame(chart_data).to_excel(writer, sheet_name="Charts", index=False)
 
             # Sheet 3: Filters
             filter_data = []
             for f in dashboard.filters:
-                filter_data.append({
-                    "Label": f.label,
-                    "Type": f.filter_type,
-                    "Column": f.column,
-                    "Entity": f.entity or "",
-                })
+                filter_data.append(
+                    {
+                        "Label": f.label,
+                        "Type": f.filter_type,
+                        "Column": f.column,
+                        "Entity": f.entity or "",
+                    }
+                )
             if filter_data:
                 pd.DataFrame(filter_data).to_excel(writer, sheet_name="Filters", index=False)
 
             # Sheet 4: AI Insights
             if dashboard.ai_insights:
-                pd.DataFrame({"Insights": dashboard.ai_insights}).to_excel(writer, sheet_name="AI Insights", index=False)
+                pd.DataFrame({"Insights": dashboard.ai_insights}).to_excel(
+                    writer, sheet_name="AI Insights", index=False
+                )
 
             # Sheet 5: Data
             if df is not None and not df.empty:
@@ -282,7 +317,15 @@ class DashboardExportService:
 
             # Sheet 6: Metadata
             meta_data = {
-                "Field": ["Dashboard ID", "Title", "Industry", "Version", "Created", "Updated", "Template"],
+                "Field": [
+                    "Dashboard ID",
+                    "Title",
+                    "Industry",
+                    "Version",
+                    "Created",
+                    "Updated",
+                    "Template",
+                ],
                 "Value": [
                     dashboard.dashboard_id,
                     dashboard.title,
@@ -297,7 +340,11 @@ class DashboardExportService:
 
         content = output.getvalue()
         filename = f"dashboard_{dashboard.dashboard_id[:8]}.xlsx"
-        return content, filename, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        return (
+            content,
+            filename,
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
 
     def _export_csv(
         self,
@@ -326,7 +373,16 @@ class DashboardExportService:
         writer.writerow(["=== Charts ==="])
         writer.writerow(["Title", "Type", "X Axis", "Y Axis", "Aggregation", "Confidence"])
         for chart in dashboard.charts:
-            writer.writerow([chart.title, chart.chart_type, chart.x_axis, chart.y_axis, chart.aggregation, chart.confidence])
+            writer.writerow(
+                [
+                    chart.title,
+                    chart.chart_type,
+                    chart.x_axis,
+                    chart.y_axis,
+                    chart.aggregation,
+                    chart.confidence,
+                ]
+            )
         writer.writerow([])
 
         # Data
@@ -347,6 +403,7 @@ class DashboardExportService:
         This returns a metadata stub that the frontend can use.
         """
         import json
+
         metadata = {
             "format": "png",
             "dashboard_id": dashboard.dashboard_id,
@@ -401,7 +458,9 @@ class DashboardExportService:
 
         # KPIs
         if dashboard.kpis:
-            html_parts.append('<div class="section"><h2>Key Performance Indicators</h2><div class="kpi-grid">')
+            html_parts.append(
+                '<div class="section"><h2>Key Performance Indicators</h2><div class="kpi-grid">'
+            )
             for kpi in dashboard.kpis:
                 value = ""
                 if kpi_values and kpi.key in kpi_values:
@@ -410,7 +469,7 @@ class DashboardExportService:
                     f'<div class="kpi-card">'
                     f'<div class="label">{kpi.icon} {kpi.label}</div>'
                     f'<div class="value">{value or "N/A"}</div>'
-                    f'</div>'
+                    f"</div>"
                 )
             html_parts.append("</div></div>")
 
@@ -423,9 +482,9 @@ class DashboardExportService:
                     f'<div class="title">{chart.title}</div>'
                     f'<div class="meta">Type: {chart.chart_type.replace("_", " ").title()} | '
                     f'X: {chart.x_axis or "N/A"} | Y: {chart.y_axis or "N/A"} | '
-                    f'Aggregation: {chart.aggregation}</div>'
+                    f"Aggregation: {chart.aggregation}</div>"
                     f'<div class="meta">{chart.reasoning}</div>'
-                    f'</div>'
+                    f"</div>"
                 )
             html_parts.append("</div>")
 
@@ -433,7 +492,9 @@ class DashboardExportService:
         if dashboard.filters:
             html_parts.append('<div class="section"><h2>Filters</h2>')
             for f in dashboard.filters:
-                html_parts.append(f'<div class="filter-item">• {f.label} ({f.filter_type.replace("_", " ").title()}) — Column: {f.column}</div>')
+                html_parts.append(
+                    f'<div class="filter-item">• {f.label} ({f.filter_type.replace("_", " ").title()}) — Column: {f.column}</div>'
+                )
             html_parts.append("</div>")
 
         # AI Insights
@@ -444,7 +505,9 @@ class DashboardExportService:
             html_parts.append("</div>")
 
         # Footer
-        html_parts.append(f'<div class="footer">{self.brand_name} — Dashboard Export | {dashboard.dashboard_id}</div>')
+        html_parts.append(
+            f'<div class="footer">{self.brand_name} — Dashboard Export | {dashboard.dashboard_id}</div>'
+        )
         html_parts.append("</body></html>")
 
         content = "\n".join(html_parts).encode("utf-8")

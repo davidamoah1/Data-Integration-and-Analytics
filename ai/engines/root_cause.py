@@ -17,7 +17,6 @@ from __future__ import annotations
 import json
 import logging
 import re
-from typing import Any
 
 import pandas as pd
 from sqlalchemy.orm import Session as DbSession
@@ -84,7 +83,7 @@ class RootCauseAnalysisEngine:
         analysis_data["question"] = question
 
         # Build prompt messages
-        messages = self.orchestrator.build_messages(
+        self.orchestrator.build_messages(
             task_type=PromptTaskType.ROOT_CAUSE_ANALYSIS,
             user_message=question,
             context=context,
@@ -118,7 +117,10 @@ class RootCauseAnalysisEngine:
                     summary=parsed.get("conclusion", ""),
                     details=parsed,
                     key_findings=parsed.get("root_causes", []),
-                    recommendations=[r if isinstance(r, str) else r.get("action", str(r)) for r in parsed.get("recommended_actions", [])],
+                    recommendations=[
+                        r if isinstance(r, str) else r.get("action", str(r))
+                        for r in parsed.get("recommended_actions", [])
+                    ],
                     risks=[],
                     opportunities=[],
                     confidence_score=parsed.get("overall_confidence"),
@@ -134,14 +136,22 @@ class RootCauseAnalysisEngine:
 
         return parsed
 
-    def _detect_metric_and_direction(self, question: str, context: EnterpriseAIContext) -> tuple[str, str]:
+    def _detect_metric_and_direction(
+        self, question: str, context: EnterpriseAIContext
+    ) -> tuple[str, str]:
         """Detect the metric and direction from the user's question."""
         question_lower = question.lower()
 
         # Detect direction
-        if any(kw in question_lower for kw in ["decrease", "decline", "drop", "fall", "reduce", "lower", "went down"]):
+        if any(
+            kw in question_lower
+            for kw in ["decrease", "decline", "drop", "fall", "reduce", "lower", "went down"]
+        ):
             direction = "decrease"
-        elif any(kw in question_lower for kw in ["increase", "grow", "rise", "improve", "higher", "went up", "surge"]):
+        elif any(
+            kw in question_lower
+            for kw in ["increase", "grow", "rise", "improve", "higher", "went up", "surge"]
+        ):
             direction = "increase"
         else:
             direction = "change"
@@ -242,12 +252,16 @@ class RootCauseAnalysisEngine:
 
         conclusion = " ".join(parts) if parts else "Insufficient data for root cause analysis."
 
-        return json.dumps({
-            "observation": f"{metric} {direction}d",
-            "magnitude": f"{abs(period.get('percentage_change', 0)):.1f}%" if period else "Unknown",
-            "root_causes": [],
-            "ruled_out": [],
-            "conclusion": conclusion,
-            "recommended_actions": [],
-            "overall_confidence": 0.6,
-        })
+        return json.dumps(
+            {
+                "observation": f"{metric} {direction}d",
+                "magnitude": (
+                    f"{abs(period.get('percentage_change', 0)):.1f}%" if period else "Unknown"
+                ),
+                "root_causes": [],
+                "ruled_out": [],
+                "conclusion": conclusion,
+                "recommended_actions": [],
+                "overall_confidence": 0.6,
+            }
+        )

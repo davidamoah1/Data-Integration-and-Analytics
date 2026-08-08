@@ -67,7 +67,7 @@ def classify_dataset(
 
     # Determine overall classification from the most sensitive flagged category.
     column_classifications: list[DataClassification] = []
-    for column, categories in flagged.items():
+    for _column, categories in flagged.items():
         category_set = {SensitivityCategory(c) for c in categories}
         if category_set & {
             SensitivityCategory.GOVERNMENT_ID,

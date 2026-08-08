@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import math
-from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -78,8 +77,14 @@ class StatisticsService:
     # ═══════════════════════════════════════════════════════════
 
     @staticmethod
-    def ttest(df: pd.DataFrame, col1: str, col2: str | None = None, group_col: str | None = None,
-              test_type: str = "independent", alpha: float = 0.05) -> dict:
+    def ttest(
+        df: pd.DataFrame,
+        col1: str,
+        col2: str | None = None,
+        group_col: str | None = None,
+        test_type: str = "independent",
+        alpha: float = 0.05,
+    ) -> dict:
         """Perform t-test (independent, paired, or one-sample)."""
         if test_type == "independent" and group_col:
             groups = df[group_col].unique()
@@ -90,8 +95,16 @@ class StatisticsService:
             t_stat, p_value = sp_stats.ttest_ind(g1, g2)
             test_name = f"Independent t-test: {col1} by {group_col}"
             group_stats = {
-                str(groups[0]): {"mean": float(g1.mean()), "std": float(g1.std()), "n": int(len(g1))},
-                str(groups[1]): {"mean": float(g2.mean()), "std": float(g2.std()), "n": int(len(g2))},
+                str(groups[0]): {
+                    "mean": float(g1.mean()),
+                    "std": float(g1.std()),
+                    "n": int(len(g1)),
+                },
+                str(groups[1]): {
+                    "mean": float(g2.mean()),
+                    "std": float(g2.std()),
+                    "n": int(len(g2)),
+                },
             }
         elif test_type == "paired" and col2:
             t_stat, p_value = sp_stats.ttest_rel(df[col1].dropna(), df[col2].dropna())
@@ -105,11 +118,18 @@ class StatisticsService:
             data = df[col1].dropna()
             t_stat, p_value = sp_stats.ttest_1samp(data, 0)
             test_name = f"One-sample t-test: {col1}"
-            group_stats = {"mean": float(data.mean()), "std": float(data.std()), "n": int(len(data))}
+            group_stats = {
+                "mean": float(data.mean()),
+                "std": float(data.std()),
+                "n": int(len(data)),
+            }
 
         # Effect size (Cohen's d)
         if test_type == "independent" and group_col:
-            pooled_std = math.sqrt(((len(g1) - 1) * g1.std()**2 + (len(g2) - 1) * g2.std()**2) / (len(g1) + len(g2) - 2))
+            pooled_std = math.sqrt(
+                ((len(g1) - 1) * g1.std() ** 2 + (len(g2) - 1) * g2.std() ** 2)
+                / (len(g1) + len(g2) - 2)
+            )
             cohens_d = (g1.mean() - g2.mean()) / pooled_std if pooled_std > 0 else 0
         else:
             cohens_d = None
@@ -206,7 +226,9 @@ class StatisticsService:
         }
 
     @staticmethod
-    def correlation(df: pd.DataFrame, columns: list[str] | None = None, method: str = "pearson") -> dict:
+    def correlation(
+        df: pd.DataFrame, columns: list[str] | None = None, method: str = "pearson"
+    ) -> dict:
         """Compute correlation matrix."""
         if columns is None:
             columns = df.select_dtypes(include=[np.number]).columns.tolist()
@@ -219,14 +241,18 @@ class StatisticsService:
             for j in range(i + 1, len(columns)):
                 r = corr_matrix.iloc[i, j]
                 if not np.isnan(r):
-                    strength = "strong" if abs(r) >= 0.7 else "moderate" if abs(r) >= 0.4 else "weak"
-                    pairs.append({
-                        "var1": columns[i],
-                        "var2": columns[j],
-                        "correlation": float(r),
-                        "strength": strength,
-                        "direction": "positive" if r > 0 else "negative",
-                    })
+                    strength = (
+                        "strong" if abs(r) >= 0.7 else "moderate" if abs(r) >= 0.4 else "weak"
+                    )
+                    pairs.append(
+                        {
+                            "var1": columns[i],
+                            "var2": columns[j],
+                            "correlation": float(r),
+                            "strength": strength,
+                            "direction": "positive" if r > 0 else "negative",
+                        }
+                    )
         pairs.sort(key=lambda x: abs(x["correlation"]), reverse=True)
 
         return {
@@ -238,7 +264,9 @@ class StatisticsService:
             "interpretation": (
                 f"Correlation analysis using {method} method. "
                 f"Found {len([p for p in pairs if p['strength'] == 'strong'])} strong correlations. "
-                f"Strongest: {pairs[0]['var1']} and {pairs[0]['var2']} (r={pairs[0]['correlation']:.4f})" if pairs else "No valid correlations found."
+                f"Strongest: {pairs[0]['var1']} and {pairs[0]['var2']} (r={pairs[0]['correlation']:.4f})"
+                if pairs
+                else "No valid correlations found."
             ),
             "assumptions": [
                 "Linearity (for Pearson)",
@@ -252,7 +280,7 @@ class StatisticsService:
     def regression(df: pd.DataFrame, target: str, features: list[str]) -> dict:
         """Perform linear regression analysis."""
         from sklearn.linear_model import LinearRegression
-        from sklearn.metrics import r2_score, mean_squared_error
+        from sklearn.metrics import mean_squared_error, r2_score
 
         X = df[features].dropna()
         y = df.loc[X.index, target].dropna()
@@ -272,7 +300,7 @@ class StatisticsService:
             "adjusted_r_squared": float(1 - (1 - r2) * (len(y) - 1) / (len(y) - len(features) - 1)),
             "rmse": float(rmse),
             "mse": float(mse),
-            "coefficients": {f: float(c) for f, c in zip(features, model.coef_)},
+            "coefficients": {f: float(c) for f, c in zip(features, model.coef_, strict=False)},
             "intercept": float(model.intercept_),
             "n_observations": int(len(y)),
             "interpretation": (
@@ -337,7 +365,11 @@ class StatisticsService:
                 f"Mann-Whitney U test (U={statistic:.4f}, p={p_value:.4f}). "
                 f"{'Significant' if p_value < alpha else 'No significant'} difference between groups."
             ),
-            "assumptions": ["Independent observations", "Ordinal or continuous data", "Similar distributions"],
+            "assumptions": [
+                "Independent observations",
+                "Ordinal or continuous data",
+                "Similar distributions",
+            ],
             "limitations": "Non-parametric test — use when t-test assumptions are violated.",
         }
 
@@ -359,7 +391,11 @@ class StatisticsService:
                 f"Kruskal-Wallis test (H={statistic:.4f}, p={p_value:.4f}). "
                 f"{'Significant' if p_value < alpha else 'No significant'} difference between groups."
             ),
-            "assumptions": ["Independent observations", "Ordinal or continuous data", "Similar distribution shapes"],
+            "assumptions": [
+                "Independent observations",
+                "Ordinal or continuous data",
+                "Similar distribution shapes",
+            ],
             "limitations": "Non-parametric alternative to ANOVA. Use when normality assumption is violated.",
         }
 
@@ -397,11 +433,15 @@ class StatisticsService:
         self.db.commit()
         return analysis
 
-    def list_analyses(self, org_id: int, dataset_id: int | None = None) -> list[StatisticalAnalysis]:
+    def list_analyses(
+        self, org_id: int, dataset_id: int | None = None
+    ) -> list[StatisticalAnalysis]:
         query = select(StatisticalAnalysis).where(StatisticalAnalysis.organization_id == org_id)
         if dataset_id:
             query = query.where(StatisticalAnalysis.dataset_id == dataset_id)
-        return self.db.execute(query.order_by(StatisticalAnalysis.created_at.desc())).scalars().all()
+        return (
+            self.db.execute(query.order_by(StatisticalAnalysis.created_at.desc())).scalars().all()
+        )
 
     def get_analysis(self, analysis_id: int, org_id: int) -> StatisticalAnalysis | None:
         return self.db.execute(

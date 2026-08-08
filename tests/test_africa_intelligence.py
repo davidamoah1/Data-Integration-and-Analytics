@@ -13,24 +13,19 @@ Tests cover:
 
 from __future__ import annotations
 
-import numpy as np
 import pandas as pd
 import pytest
 
 from africa_intelligence import (
     GHANA_PROFILE,
-    NIGERIA_PROFILE,
     KENYA_PROFILE,
+    NIGERIA_PROFILE,
     SOUTH_AFRICA_PROFILE,
-    AfricaIntelligenceRegistry,
     AfricaColumnRecognizer,
     AfricaCurrencyConverter,
     AfricaIndustryMapper,
-    CountryProfile,
-    RegionInfo,
-    CurrencyInfo,
+    AfricaIntelligenceRegistry,
 )
-
 
 # ── Ghana Profile Tests ──────────────────────────────────
 
@@ -272,34 +267,42 @@ class TestAfricaIntelligenceRegistry:
         assert len(countries) == 4
 
     def test_detect_ghana_data(self):
-        df = pd.DataFrame({
-            "region": ["Greater Accra", "Ashanti", "Western"],
-            "amount_ghs": ["₵1000", "₵2000", "₵3000"],
-        })
+        df = pd.DataFrame(
+            {
+                "region": ["Greater Accra", "Ashanti", "Western"],
+                "amount_ghs": ["₵1000", "₵2000", "₵3000"],
+            }
+        )
         code = AfricaIntelligenceRegistry.detect_country(df)
         assert code == "GH"
 
     def test_detect_nigeria_data(self):
-        df = pd.DataFrame({
-            "state": ["Lagos", "Kano", "Rivers"],
-            "amount_ngn": ["₦50000", "₦100000", "₦75000"],
-        })
+        df = pd.DataFrame(
+            {
+                "state": ["Lagos", "Kano", "Rivers"],
+                "amount_ngn": ["₦50000", "₦100000", "₦75000"],
+            }
+        )
         code = AfricaIntelligenceRegistry.detect_country(df)
         assert code == "NG"
 
     def test_detect_kenya_data(self):
-        df = pd.DataFrame({
-            "county": ["Nairobi", "Mombasa", "Kisumu"],
-            "amount_kes": ["KSh 5000", "KSh 3000", "KSh 2000"],
-        })
+        df = pd.DataFrame(
+            {
+                "county": ["Nairobi", "Mombasa", "Kisumu"],
+                "amount_kes": ["KSh 5000", "KSh 3000", "KSh 2000"],
+            }
+        )
         code = AfricaIntelligenceRegistry.detect_country(df)
         assert code == "KE"
 
     def test_detect_south_africa_data(self):
-        df = pd.DataFrame({
-            "province": ["Gauteng", "Western Cape", "KwaZulu-Natal"],
-            "amount zar": ["R1500", "R2000", "R1000"],
-        })
+        df = pd.DataFrame(
+            {
+                "province": ["Gauteng", "Western Cape", "KwaZulu-Natal"],
+                "amount zar": ["R1500", "R2000", "R1000"],
+            }
+        )
         code = AfricaIntelligenceRegistry.detect_country(df)
         assert code == "ZA"
 
@@ -309,11 +312,13 @@ class TestAfricaIntelligenceRegistry:
         assert code is None
 
     def test_analyze_ghana(self):
-        df = pd.DataFrame({
-            "region": ["Greater Accra", "Ashanti", "Western", "Central"],
-            "revenue_ghs": ["₵1000", "₵2000", "₵3000", "₵1500"],
-            "crop": ["cocoa", "maize", "cocoa", "cassava"],
-        })
+        df = pd.DataFrame(
+            {
+                "region": ["Greater Accra", "Ashanti", "Western", "Central"],
+                "revenue_ghs": ["₵1000", "₵2000", "₵3000", "₵1500"],
+                "crop": ["cocoa", "maize", "cocoa", "cassava"],
+            }
+        )
         result = AfricaIntelligenceRegistry.analyze(df)
         assert result.detected_country == "GH"
         assert "Greater Accra" in result.detected_regions
@@ -328,10 +333,12 @@ class TestAfricaIntelligenceRegistry:
         assert "No African country" in result.summary
 
     def test_analyze_to_dict(self):
-        df = pd.DataFrame({
-            "region": ["Greater Accra", "Ashanti"],
-            "amount": ["₵1000", "₵2000"],
-        })
+        df = pd.DataFrame(
+            {
+                "region": ["Greater Accra", "Ashanti"],
+                "amount": ["₵1000", "₵2000"],
+            }
+        )
         result = AfricaIntelligenceRegistry.analyze(df)
         d = result.to_dict()
         assert "detected_country" in d
@@ -344,62 +351,76 @@ class TestAfricaIntelligenceRegistry:
 
 class TestAfricaColumnRecognizer:
     def test_recognize_regions(self):
-        df = pd.DataFrame({
-            "region": ["Greater Accra", "Ashanti", "Western"],
-        })
+        df = pd.DataFrame(
+            {
+                "region": ["Greater Accra", "Ashanti", "Western"],
+            }
+        )
         recognizer = AfricaColumnRecognizer(GHANA_PROFILE)
         result = recognizer.recognize(df)
         assert "region" in result["localized_columns"]
         assert "Greater Accra" in result["detected_regions"]
 
     def test_recognize_currency(self):
-        df = pd.DataFrame({
-            "revenue": ["₵1000", "₵2000", "₵3000"],
-        })
+        df = pd.DataFrame(
+            {
+                "revenue": ["₵1000", "₵2000", "₵3000"],
+            }
+        )
         recognizer = AfricaColumnRecognizer(GHANA_PROFILE)
         result = recognizer.recognize(df)
         assert result["detected_currency"] == "GHS"
 
     def test_recognize_phone(self):
-        df = pd.DataFrame({
-            "phone": ["+233244567890", "+233205556666", "+233277778888"],
-        })
+        df = pd.DataFrame(
+            {
+                "phone": ["+233244567890", "+233205556666", "+233277778888"],
+            }
+        )
         recognizer = AfricaColumnRecognizer(GHANA_PROFILE)
         result = recognizer.recognize(df)
         assert "phone" in result["localized_columns"]
 
     def test_recognize_education(self):
-        df = pd.DataFrame({
-            "grade": ["A1", "B2", "C4", "F9"],
-        })
+        df = pd.DataFrame(
+            {
+                "grade": ["A1", "B2", "C4", "F9"],
+            }
+        )
         recognizer = AfricaColumnRecognizer(GHANA_PROFILE)
         result = recognizer.recognize(df)
         assert "grade" in result["localized_columns"]
         assert len(result["education_mappings"]) > 0
 
     def test_recognize_healthcare(self):
-        df = pd.DataFrame({
-            "diagnosis": ["Malaria", "HIV/AIDS", "Tuberculosis"],
-        })
+        df = pd.DataFrame(
+            {
+                "diagnosis": ["Malaria", "HIV/AIDS", "Tuberculosis"],
+            }
+        )
         recognizer = AfricaColumnRecognizer(GHANA_PROFILE)
         result = recognizer.recognize(df)
         assert "diagnosis" in result["localized_columns"]
 
     def test_recognize_agriculture(self):
-        df = pd.DataFrame({
-            "crop": ["cocoa", "maize", "cassava"],
-        })
+        df = pd.DataFrame(
+            {
+                "crop": ["cocoa", "maize", "cassava"],
+            }
+        )
         recognizer = AfricaColumnRecognizer(GHANA_PROFILE)
         result = recognizer.recognize(df)
         assert "crop" in result["localized_columns"]
         assert len(result["agriculture_mappings"]) > 0
 
     def test_insights_generated(self):
-        df = pd.DataFrame({
-            "region": ["Greater Accra", "Ashanti"],
-            "revenue": ["₵1000", "₵2000"],
-            "crop": ["cocoa", "maize"],
-        })
+        df = pd.DataFrame(
+            {
+                "region": ["Greater Accra", "Ashanti"],
+                "revenue": ["₵1000", "₵2000"],
+                "crop": ["cocoa", "maize"],
+            }
+        )
         recognizer = AfricaColumnRecognizer(GHANA_PROFILE)
         result = recognizer.recognize(df)
         assert len(result["insights"]) > 0
@@ -516,7 +537,9 @@ class TestAfricaIndustryMapper:
         assert "cocoa" in terms
 
     def test_detect_industries_in_text(self):
-        detected = AfricaIndustryMapper.detect_industries_in_text("We produce cocoa and gold in Ghana")
+        detected = AfricaIndustryMapper.detect_industries_in_text(
+            "We produce cocoa and gold in Ghana"
+        )
         assert "Agriculture - Cocoa" in detected
         assert "Mining - Gold" in detected
 
@@ -528,21 +551,25 @@ class TestPipelineIntegration:
     def test_africa_intelligence_in_mapping_result(self):
         from semantic.mapping_engine import SemanticMappingEngine
 
-        df = pd.DataFrame({
-            "region": ["Greater Accra", "Ashanti", "Western"],
-            "revenue": [1000, 2000, 3000],
-            "crop": ["cocoa", "maize", "cassava"],
-        })
+        df = pd.DataFrame(
+            {
+                "region": ["Greater Accra", "Ashanti", "Western"],
+                "revenue": [1000, 2000, 3000],
+                "crop": ["cocoa", "maize", "cassava"],
+            }
+        )
         result = SemanticMappingEngine.analyze(df, "ghana_data.csv")
         assert result.africa_intelligence is not None
 
     def test_africa_intelligence_in_to_dict(self):
         from semantic.mapping_engine import SemanticMappingEngine
 
-        df = pd.DataFrame({
-            "region": ["Greater Accra", "Ashanti"],
-            "amount": [1000, 2000],
-        })
+        df = pd.DataFrame(
+            {
+                "region": ["Greater Accra", "Ashanti"],
+                "amount": [1000, 2000],
+            }
+        )
         result = SemanticMappingEngine.analyze(df, "ghana.csv")
         d = result.to_dict()
         assert "africa_intelligence" in d
@@ -551,10 +578,12 @@ class TestPipelineIntegration:
     def test_nigeria_pipeline(self):
         from semantic.mapping_engine import SemanticMappingEngine
 
-        df = pd.DataFrame({
-            "state": ["Lagos", "Kano", "Rivers"],
-            "amount": [50000, 100000, 75000],
-        })
+        df = pd.DataFrame(
+            {
+                "state": ["Lagos", "Kano", "Rivers"],
+                "amount": [50000, 100000, 75000],
+            }
+        )
         result = SemanticMappingEngine.analyze(df, "nigeria.csv")
         assert result.africa_intelligence is not None
         assert result.africa_intelligence.detected_country == "NG"

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import io
 from unittest.mock import MagicMock
 
 import pandas as pd
@@ -62,28 +61,34 @@ class TestPrivacyDetection:
     """PII and sensitive data detection."""
 
     def test_detect_email_column(self):
-        df = pd.DataFrame({
-            "email": ["alice@example.com", "bob@example.com"],
-            "value": [1, 2],
-        })
+        df = pd.DataFrame(
+            {
+                "email": ["alice@example.com", "bob@example.com"],
+                "value": [1, 2],
+            }
+        )
         flagged = detect_sensitive_columns(df)
         assert "email" in flagged
         assert "email" in flagged["email"]
 
     def test_detect_name_column(self):
-        df = pd.DataFrame({
-            "full_name": ["Alice Smith", "Bob Jones"],
-            "phone": ["+1-555-123-4567", "+1-555-765-4321"],
-        })
+        df = pd.DataFrame(
+            {
+                "full_name": ["Alice Smith", "Bob Jones"],
+                "phone": ["+1-555-123-4567", "+1-555-765-4321"],
+            }
+        )
         flagged = detect_sensitive_columns(df)
         assert "full_name" in flagged
         assert "phone" in flagged
 
     def test_no_false_positives_on_generic_columns(self):
-        df = pd.DataFrame({
-            "product_id": [101, 102],
-            "quantity": [5, 10],
-        })
+        df = pd.DataFrame(
+            {
+                "product_id": [101, 102],
+                "quantity": [5, 10],
+            }
+        )
         flagged = detect_sensitive_columns(df)
         assert "product_id" not in flagged
         assert "quantity" not in flagged
@@ -93,21 +98,25 @@ class TestGovernanceClassification:
     """Dataset classification and lifecycle controls."""
 
     def test_sensitive_dataset_blocks_publishing(self):
-        df = pd.DataFrame({
-            "patient_name": ["Alice", "Bob"],
-            "diagnosis": ["Flu", "Cold"],
-            "ssn": ["123456789", "987654321"],
-        })
+        df = pd.DataFrame(
+            {
+                "patient_name": ["Alice", "Bob"],
+                "diagnosis": ["Flu", "Cold"],
+                "ssn": ["123456789", "987654321"],
+            }
+        )
         result = classify_dataset(df, lifecycle=DatasetLifecycle.PUBLISHED)
         assert result.classification == DataClassification.SENSITIVE
         assert "publishing" in result.blocked_actions
         assert any("Sensitive datasets cannot be published" in w for w in result.warnings)
 
     def test_public_dataset_no_warnings(self):
-        df = pd.DataFrame({
-            "year": [2024, 2025],
-            "revenue": [1000, 2000],
-        })
+        df = pd.DataFrame(
+            {
+                "year": [2024, 2025],
+                "revenue": [1000, 2000],
+            }
+        )
         result = classify_dataset(df)
         assert result.classification == DataClassification.INTERNAL
         assert not result.sensitive_columns

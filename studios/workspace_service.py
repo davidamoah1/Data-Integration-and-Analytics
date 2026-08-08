@@ -4,10 +4,8 @@ from __future__ import annotations
 
 import ast
 import operator
-import re
 from typing import Any
 
-import pandas as pd
 from sqlalchemy import select
 from sqlalchemy.orm import Session as DbSession
 
@@ -70,11 +68,17 @@ class DataWorkspaceService:
         return ws
 
     def list_workspaces(self, org_id: int) -> list[DataWorkspace]:
-        return self.db.execute(
-            select(DataWorkspace)
-            .where(DataWorkspace.organization_id == org_id, DataWorkspace.is_active == True)  # noqa: E712
-            .order_by(DataWorkspace.updated_at.desc())
-        ).scalars().all()
+        return (
+            self.db.execute(
+                select(DataWorkspace)
+                .where(
+                    DataWorkspace.organization_id == org_id, DataWorkspace.is_active == True  # noqa: E712
+                )
+                .order_by(DataWorkspace.updated_at.desc())
+            )
+            .scalars()
+            .all()
+        )
 
     def get_workspace(self, workspace_id: int, org_id: int) -> DataWorkspace | None:
         return self.db.execute(
@@ -112,7 +116,9 @@ class DataWorkspaceService:
         self.db.commit()
         return ws
 
-    def create_version(self, workspace_id: int, user_id: int, change_description: str, changes: dict) -> WorkspaceVersion:
+    def create_version(
+        self, workspace_id: int, user_id: int, change_description: str, changes: dict
+    ) -> WorkspaceVersion:
         latest = self.db.execute(
             select(WorkspaceVersion)
             .where(WorkspaceVersion.workspace_id == workspace_id)
@@ -133,11 +139,15 @@ class DataWorkspaceService:
         return version
 
     def list_versions(self, workspace_id: int) -> list[WorkspaceVersion]:
-        return self.db.execute(
-            select(WorkspaceVersion)
-            .where(WorkspaceVersion.workspace_id == workspace_id)
-            .order_by(WorkspaceVersion.version_number.desc())
-        ).scalars().all()
+        return (
+            self.db.execute(
+                select(WorkspaceVersion)
+                .where(WorkspaceVersion.workspace_id == workspace_id)
+                .order_by(WorkspaceVersion.version_number.desc())
+            )
+            .scalars()
+            .all()
+        )
 
     def add_calculated_column(
         self,
@@ -161,11 +171,15 @@ class DataWorkspaceService:
         return col
 
     def list_calculated_columns(self, workspace_id: int) -> list[CalculatedColumn]:
-        return self.db.execute(
-            select(CalculatedColumn)
-            .where(CalculatedColumn.workspace_id == workspace_id)
-            .order_by(CalculatedColumn.created_at.desc())
-        ).scalars().all()
+        return (
+            self.db.execute(
+                select(CalculatedColumn)
+                .where(CalculatedColumn.workspace_id == workspace_id)
+                .order_by(CalculatedColumn.created_at.desc())
+            )
+            .scalars()
+            .all()
+        )
 
     @staticmethod
     def evaluate_formula(formula: str, row: dict[str, Any]) -> Any:
@@ -181,8 +195,10 @@ class DataWorkspaceService:
             for col_name, value in row.items():
                 if col_name in eval_formula:
                     # Use a safe placeholder
-                    safe_name = col_name.replace(" ", "_").replace("-", "_")
-                    eval_formula = eval_formula.replace(col_name, str(value if value is not None else 0))
+                    col_name.replace(" ", "_").replace("-", "_")
+                    eval_formula = eval_formula.replace(
+                        col_name, str(value if value is not None else 0)
+                    )
 
             # Parse and evaluate safely
             tree = ast.parse(eval_formula, mode="eval")
@@ -228,54 +244,70 @@ class DataWorkspaceService:
         # Profit margin
         if "profit margin" in desc or "margin" in desc:
             profit_cols = [c for c in available_columns if "profit" in c.lower()]
-            revenue_cols = [c for c in available_columns if "revenue" in c.lower() or "sales" in c.lower()]
+            revenue_cols = [
+                c for c in available_columns if "revenue" in c.lower() or "sales" in c.lower()
+            ]
             if profit_cols and revenue_cols:
                 formula = f"{profit_cols[0]} / {revenue_cols[0]} * 100"
-                suggestions.append({
-                    "formula": formula,
-                    "column_name": "profit_margin",
-                    "data_type": "float",
-                    "explanation": f"Calculates profit margin as ({profit_cols[0]} / {revenue_cols[0]}) × 100",
-                })
+                suggestions.append(
+                    {
+                        "formula": formula,
+                        "column_name": "profit_margin",
+                        "data_type": "float",
+                        "explanation": f"Calculates profit margin as ({profit_cols[0]} / {revenue_cols[0]}) × 100",
+                    }
+                )
 
         # Growth rate
         if "growth" in desc or "increase" in desc or "change" in desc:
             if len(available_columns) >= 2:
-                suggestions.append({
-                    "formula": f"({available_columns[1]} - {available_columns[0]}) / {available_columns[0]} * 100",
-                    "column_name": "growth_rate",
-                    "data_type": "float",
-                    "explanation": "Calculates percentage change between two values",
-                })
+                suggestions.append(
+                    {
+                        "formula": f"({available_columns[1]} - {available_columns[0]}) / {available_columns[0]} * 100",
+                        "column_name": "growth_rate",
+                        "data_type": "float",
+                        "explanation": "Calculates percentage change between two values",
+                    }
+                )
 
         # Total / sum
         if "total" in desc or "sum" in desc:
-            num_cols = [c for c in available_columns if not c.isalpha() or c.lower() in ("revenue", "cost", "price", "amount", "quantity")]
+            num_cols = [
+                c
+                for c in available_columns
+                if not c.isalpha()
+                or c.lower() in ("revenue", "cost", "price", "amount", "quantity")
+            ]
             if num_cols:
-                suggestions.append({
-                    "formula": f"sum({', '.join(num_cols[:3])})",
-                    "column_name": "total",
-                    "data_type": "float",
-                    "explanation": f"Sums {', '.join(num_cols[:3])}",
-                })
+                suggestions.append(
+                    {
+                        "formula": f"sum({', '.join(num_cols[:3])})",
+                        "column_name": "total",
+                        "data_type": "float",
+                        "explanation": f"Sums {', '.join(num_cols[:3])}",
+                    }
+                )
 
         # Ratio
-        if "ratio" in desc or "percentage of" in desc:
-            if len(available_columns) >= 2:
-                suggestions.append({
+        if ("ratio" in desc or "percentage of" in desc) and len(available_columns) >= 2:
+            suggestions.append(
+                {
                     "formula": f"{available_columns[0]} / {available_columns[1]}",
                     "column_name": "ratio",
                     "data_type": "float",
                     "explanation": f"Ratio of {available_columns[0]} to {available_columns[1]}",
-                })
+                }
+            )
 
         # Default: if no match, suggest a simple expression
         if not suggestions:
-            suggestions.append({
-                "formula": f"# Could not auto-detect. Available columns: {', '.join(available_columns[:5])}",
-                "column_name": "calculated",
-                "data_type": "float",
-                "explanation": "Please specify the formula manually or rephrase your request.",
-            })
+            suggestions.append(
+                {
+                    "formula": f"# Could not auto-detect. Available columns: {', '.join(available_columns[:5])}",
+                    "column_name": "calculated",
+                    "data_type": "float",
+                    "explanation": "Please specify the formula manually or rephrase your request.",
+                }
+            )
 
         return {"suggestions": suggestions}

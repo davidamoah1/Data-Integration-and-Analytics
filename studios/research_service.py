@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
-
 from sqlalchemy import select
 from sqlalchemy.orm import Session as DbSession
 
@@ -40,11 +38,15 @@ class ResearchStudioService:
         return project
 
     def list_projects(self, org_id: int) -> list[ResearchProject]:
-        return self.db.execute(
-            select(ResearchProject)
-            .where(ResearchProject.organization_id == org_id)
-            .order_by(ResearchProject.updated_at.desc())
-        ).scalars().all()
+        return (
+            self.db.execute(
+                select(ResearchProject)
+                .where(ResearchProject.organization_id == org_id)
+                .order_by(ResearchProject.updated_at.desc())
+            )
+            .scalars()
+            .all()
+        )
 
     def get_project(self, project_id: int, org_id: int) -> ResearchProject | None:
         return self.db.execute(
@@ -88,11 +90,15 @@ class ResearchStudioService:
         return hyp
 
     def list_hypotheses(self, project_id: int) -> list[ResearchHypothesis]:
-        return self.db.execute(
-            select(ResearchHypothesis)
-            .where(ResearchHypothesis.project_id == project_id)
-            .order_by(ResearchHypothesis.created_at.desc())
-        ).scalars().all()
+        return (
+            self.db.execute(
+                select(ResearchHypothesis)
+                .where(ResearchHypothesis.project_id == project_id)
+                .order_by(ResearchHypothesis.created_at.desc())
+            )
+            .scalars()
+            .all()
+        )
 
     def update_hypothesis_status(
         self,
@@ -134,28 +140,46 @@ class ResearchStudioService:
         if any(w in question for w in ["compare", "difference", "versus", "vs", "effect of"]):
             design["suggested_design"] = "comparative"
             design["suggested_methodology"] = "Compare groups using appropriate statistical tests"
-            design["suggested_tests"] = ["t-test (2 groups)", "ANOVA (3+ groups)", "Mann-Whitney U (non-parametric)"]
+            design["suggested_tests"] = [
+                "t-test (2 groups)",
+                "ANOVA (3+ groups)",
+                "Mann-Whitney U (non-parametric)",
+            ]
             design["sample_size_consideration"] = "Ensure adequate power (typically n≥30 per group)"
 
         # Detect relationship questions
         elif any(w in question for w in ["relationship", "correlation", "associate", "predict"]):
             design["suggested_design"] = "correlational"
             design["suggested_methodology"] = "Examine relationships between variables"
-            design["suggested_tests"] = ["Pearson/Spearman correlation", "Linear/Multiple regression", "Chi-square (categorical)"]
+            design["suggested_tests"] = [
+                "Pearson/Spearman correlation",
+                "Linear/Multiple regression",
+                "Chi-square (categorical)",
+            ]
             design["sample_size_consideration"] = "At least 10 observations per predictor variable"
 
         # Detect causal questions
         elif any(w in question for w in ["cause", "impact", "influence", "affect"]):
             design["suggested_design"] = "experimental"
             design["suggested_methodology"] = "Randomized controlled trial or quasi-experiment"
-            design["suggested_tests"] = ["ANOVA", "Regression with controls", "Difference-in-differences"]
-            design["sample_size_consideration"] = "Power analysis recommended before data collection"
+            design["suggested_tests"] = [
+                "ANOVA",
+                "Regression with controls",
+                "Difference-in-differences",
+            ]
+            design["sample_size_consideration"] = (
+                "Power analysis recommended before data collection"
+            )
 
         # Detect descriptive questions
         elif any(w in question for w in ["what", "how many", "describe", "characterize"]):
             design["suggested_design"] = "descriptive"
             design["suggested_methodology"] = "Describe characteristics of the population"
-            design["suggested_tests"] = ["Descriptive statistics", "Frequency analysis", "Cross-tabulation"]
+            design["suggested_tests"] = [
+                "Descriptive statistics",
+                "Frequency analysis",
+                "Cross-tabulation",
+            ]
             design["sample_size_consideration"] = "Representative sample of the population"
 
         # Industry-specific additions
@@ -187,21 +211,25 @@ class ResearchStudioService:
             for i in range(min(len(variables), 3)):
                 for j in range(i + 1, min(len(variables), 4)):
                     v1, v2 = variables[i], variables[j]
-                    hypotheses.append({
-                        "hypothesis": f"There is a significant relationship between {v1} and {v2}",
-                        "null_hypothesis": f"There is no significant relationship between {v1} and {v2}",
-                        "alternative_hypothesis": f"There is a significant relationship between {v1} and {v2}",
-                        "suggested_test": "Correlation analysis" if i != j else "Descriptive",
-                    })
+                    hypotheses.append(
+                        {
+                            "hypothesis": f"There is a significant relationship between {v1} and {v2}",
+                            "null_hypothesis": f"There is no significant relationship between {v1} and {v2}",
+                            "alternative_hypothesis": f"There is a significant relationship between {v1} and {v2}",
+                            "suggested_test": "Correlation analysis" if i != j else "Descriptive",
+                        }
+                    )
 
         # Group comparison
         if len(variables) >= 2:
-            hypotheses.append({
-                "hypothesis": f"There is a significant difference in {variables[0]} across groups of {variables[1]}",
-                "null_hypothesis": f"There is no significant difference in {variables[0]} across groups of {variables[1]}",
-                "alternative_hypothesis": f"There is a significant difference in {variables[0]} across groups of {variables[1]}",
-                "suggested_test": "ANOVA or t-test",
-            })
+            hypotheses.append(
+                {
+                    "hypothesis": f"There is a significant difference in {variables[0]} across groups of {variables[1]}",
+                    "null_hypothesis": f"There is no significant difference in {variables[0]} across groups of {variables[1]}",
+                    "alternative_hypothesis": f"There is a significant difference in {variables[0]} across groups of {variables[1]}",
+                    "suggested_test": "ANOVA or t-test",
+                }
+            )
 
         return hypotheses[:5]  # Limit to top 5
 
@@ -227,11 +255,15 @@ class ResearchStudioService:
         return report
 
     def list_reports(self, project_id: int) -> list[ResearchReport]:
-        return self.db.execute(
-            select(ResearchReport)
-            .where(ResearchReport.project_id == project_id)
-            .order_by(ResearchReport.created_at.desc())
-        ).scalars().all()
+        return (
+            self.db.execute(
+                select(ResearchReport)
+                .where(ResearchReport.project_id == project_id)
+                .order_by(ResearchReport.created_at.desc())
+            )
+            .scalars()
+            .all()
+        )
 
     @staticmethod
     def generate_report_sections(
@@ -248,7 +280,7 @@ class ResearchStudioService:
             {
                 "title": "Introduction",
                 "content": f"Research question: {project.research_question or 'Not specified'}\n\n"
-                           f"This research aims to contribute to understanding in the {project.industry or 'relevant'} domain.",
+                f"This research aims to contribute to understanding in the {project.industry or 'relevant'} domain.",
             },
             {
                 "title": "Methodology",
@@ -256,21 +288,26 @@ class ResearchStudioService:
             },
             {
                 "title": "Hypotheses",
-                "content": "\n".join([
-                    f"H{i+1}: {h.hypothesis}\n"
-                    f"  Null: {h.null_hypothesis}\n"
-                    f"  Test: {h.test_type}\n"
-                    f"  Status: {h.status}"
-                    for i, h in enumerate(hypotheses)
-                ]),
+                "content": "\n".join(
+                    [
+                        f"H{i+1}: {h.hypothesis}\n"
+                        f"  Null: {h.null_hypothesis}\n"
+                        f"  Test: {h.test_type}\n"
+                        f"  Status: {h.status}"
+                        for i, h in enumerate(hypotheses)
+                    ]
+                ),
             },
             {
                 "title": "Results",
-                "content": "\n".join([
-                    f"Analysis: {a.get('test_name', 'Unknown')}\n"
-                    f"Result: {a.get('interpretation', 'N/A')}\n"
-                    for a in analyses
-                ]) or "No analyses performed yet.",
+                "content": "\n".join(
+                    [
+                        f"Analysis: {a.get('test_name', 'Unknown')}\n"
+                        f"Result: {a.get('interpretation', 'N/A')}\n"
+                        for a in analyses
+                    ]
+                )
+                or "No analyses performed yet.",
             },
             {
                 "title": "Discussion",

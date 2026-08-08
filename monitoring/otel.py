@@ -33,18 +33,18 @@ def init_otel() -> bool:
         return False
 
     try:
-        from opentelemetry import trace, metrics
+        from opentelemetry import metrics, trace
+        from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
+        from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+        from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor  # noqa: F401
+        from opentelemetry.instrumentation.logging import LoggingInstrumentor
+        from opentelemetry.instrumentation.redis import RedisInstrumentor  # noqa: F401
+        from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor  # noqa: F401
+        from opentelemetry.sdk.metrics import MeterProvider
+        from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
         from opentelemetry.sdk.resources import Resource
         from opentelemetry.sdk.trace import TracerProvider
         from opentelemetry.sdk.trace.export import BatchSpanProcessor
-        from opentelemetry.sdk.metrics import MeterProvider
-        from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
-        from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-        from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
-        from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
-        from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
-        from opentelemetry.instrumentation.redis import RedisInstrumentor
-        from opentelemetry.instrumentation.logging import LoggingInstrumentor
     except ImportError:
         return False
 
@@ -97,6 +97,7 @@ def instrument_fastapi(app: Any) -> None:
         return
     try:
         from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+
         FastAPIInstrumentor.instrument_app(app)
     except Exception:
         pass
@@ -108,6 +109,7 @@ def instrument_sqlalchemy(engine: Any) -> None:
         return
     try:
         from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
+
         SQLAlchemyInstrumentor.instrument_engine(engine)
     except Exception:
         pass
@@ -119,6 +121,7 @@ def instrument_redis(client: Any) -> None:
         return
     try:
         from opentelemetry.instrumentation.redis import RedisInstrumentor
+
         RedisInstrumentor.instrument_redis(client)
     except Exception:
         pass
@@ -237,5 +240,6 @@ def start_span(name: str, attributes: dict | None = None):
     """Context manager for creating a span. No-op if OTel is not initialised."""
     if _tracer is None:
         from contextlib import nullcontext
+
         return nullcontext()
     return _tracer.start_as_current_span(name, attributes=attributes)

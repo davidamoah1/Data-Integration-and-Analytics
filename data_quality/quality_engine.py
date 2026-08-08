@@ -20,7 +20,7 @@ import pandas as pd
 
 from data_quality.checks import QualityCheckEngine, QualityFinding, Severity
 from data_quality.drift_detector import DriftDetector, DriftResult
-from data_quality.schema_monitor import SchemaMonitor, SchemaChangeResult
+from data_quality.schema_monitor import SchemaChangeResult, SchemaMonitor
 
 
 @dataclass
@@ -183,13 +183,21 @@ class QualityEngine:
         total_cells = total_rows * max(len(df.columns), 1)
 
         # Completeness: based on missing values
-        missing_findings = [f for f in findings if f.check_name in ("missing_values", "blank_fields", "empty_column")]
+        missing_findings = [
+            f
+            for f in findings
+            if f.check_name in ("missing_values", "blank_fields", "empty_column")
+        ]
         missing_cells = sum(f.affected_rows for f in missing_findings)
         completeness = max(0, 100 - (missing_cells / max(total_cells, 1)) * 100)
 
         # Validity: based on invalid/sentinel/out-of-range findings
         validity_findings = [f for f in findings if f.category == "validity"]
-        validity_errors = sum(f.affected_rows for f in validity_findings if f.severity in (Severity.ERROR, Severity.CRITICAL, Severity.WARNING))
+        validity_errors = sum(
+            f.affected_rows
+            for f in validity_findings
+            if f.severity in (Severity.ERROR, Severity.CRITICAL, Severity.WARNING)
+        )
         validity = max(0, 100 - (validity_errors / total_rows) * 50)
 
         # Uniqueness: based on duplicates
@@ -199,7 +207,9 @@ class QualityEngine:
 
         # Consistency: based on consistency findings
         consistency_findings = [f for f in findings if f.category == "consistency"]
-        consistency_penalty = sum(min(f.affected_rows / total_rows, 1) * 15 for f in consistency_findings)
+        consistency_penalty = sum(
+            min(f.affected_rows / total_rows, 1) * 15 for f in consistency_findings
+        )
         consistency = max(0, 100 - consistency_penalty)
 
         # Timeliness: based on drift
@@ -269,7 +279,9 @@ class QualityEngine:
         # From findings
         for f in findings:
             if f.severity in (Severity.CRITICAL, Severity.ERROR):
-                recommendations.append(f"[{f.severity.value.upper()}] {f.message} — {f.suggested_fix}")
+                recommendations.append(
+                    f"[{f.severity.value.upper()}] {f.message} — {f.suggested_fix}"
+                )
 
         # From drift
         if drift_result and drift_result.drift_detected:

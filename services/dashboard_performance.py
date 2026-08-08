@@ -16,7 +16,7 @@ import hashlib
 import json
 import logging
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 import pandas as pd
@@ -255,13 +255,16 @@ class DashboardPerformanceLayer:
     @staticmethod
     def compute_dataset_hash(df: pd.DataFrame) -> str:
         """Compute a hash for a DataFrame for cache keying."""
-        content = json.dumps({
-            "shape": list(df.shape),
-            "columns": list(df.columns),
-            "head_hash": hashlib.sha256(
-                df.head(5).to_csv(index=False).encode()
-            ).hexdigest()[:16],
-        }, sort_keys=True)
+        content = json.dumps(
+            {
+                "shape": list(df.shape),
+                "columns": list(df.columns),
+                "head_hash": hashlib.sha256(df.head(5).to_csv(index=False).encode()).hexdigest()[
+                    :16
+                ],
+            },
+            sort_keys=True,
+        )
         return hashlib.sha256(content.encode()).hexdigest()[:16]
 
     @staticmethod

@@ -12,7 +12,6 @@ Usage:
     return PlainTextResponse(metrics_registry.render(), media_type="text/plain")
 """
 
-import os
 import threading
 import time
 from collections import defaultdict
@@ -35,7 +34,7 @@ class CounterMetric:
         lines = [f"# HELP {self.name} {self.help_text}", f"# TYPE {self.name} counter"]
         for key, value in sorted(self.labels.items()):
             if key:
-                lines.append(f'{self.name}{{{key}}} {value}')
+                lines.append(f"{self.name}{{{key}}} {value}")
             else:
                 lines.append(f"{self.name} {value}")
         return "\n".join(lines)
@@ -84,15 +83,15 @@ class HistogramMetric:
             for i, bound in enumerate(self.buckets):
                 cumulative += self.counts[key][i]
                 bucket_label = f'{key},"le"="{bound}"' if key else f'le="{bound}"'
-                lines.append(f'{self.name}_bucket{{{bucket_label}}} {cumulative}')
+                lines.append(f"{self.name}_bucket{{{bucket_label}}} {cumulative}")
             # +Inf bucket
             total = self.totals.get(key, 0)
             inf_label = f'{key},"le"="+Inf"' if key else 'le="+Inf"'
-            lines.append(f'{self.name}_bucket{{{inf_label}}} {total}')
+            lines.append(f"{self.name}_bucket{{{inf_label}}} {total}")
             sum_label = key if key else ""
             if sum_label:
-                lines.append(f'{self.name}_sum{{{sum_label}}} {self.sums.get(key, 0):.2f}')
-                lines.append(f'{self.name}_count{{{sum_label}}} {total}')
+                lines.append(f"{self.name}_sum{{{sum_label}}} {self.sums.get(key, 0):.2f}")
+                lines.append(f"{self.name}_count{{{sum_label}}} {total}")
             else:
                 lines.append(f"{self.name}_sum {self.sums.get(key, 0):.2f}")
                 lines.append(f"{self.name}_count {total}")
@@ -123,7 +122,7 @@ class GaugeMetric:
         lines = [f"# HELP {self.name} {self.help_text}", f"# TYPE {self.name} gauge"]
         for key, value in sorted(self.labels.items()):
             if key:
-                lines.append(f'{self.name}{{{key}}} {value}')
+                lines.append(f"{self.name}{{{key}}} {value}")
             else:
                 lines.append(f"{self.name} {value}")
         return "\n".join(lines)
@@ -156,15 +155,11 @@ class MetricsRegistry:
         self._counters["pipeline_runs_total"] = CounterMetric(
             "pipeline_runs_total", "Total ETL pipeline runs"
         )
-        self._counters["errors_total"] = CounterMetric(
-            "errors_total", "Total application errors"
-        )
+        self._counters["errors_total"] = CounterMetric("errors_total", "Total application errors")
         self._gauges["active_sessions"] = GaugeMetric(
             "active_sessions", "Number of active user sessions"
         )
-        self._gauges["db_pool_size"] = GaugeMetric(
-            "db_pool_size", "Database connection pool size"
-        )
+        self._gauges["db_pool_size"] = GaugeMetric("db_pool_size", "Database connection pool size")
         self._gauges["db_pool_checked_out"] = GaugeMetric(
             "db_pool_checked_out", "Database connections checked out"
         )

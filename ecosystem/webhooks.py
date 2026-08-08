@@ -10,6 +10,7 @@ from datetime import datetime, timedelta, timezone
 
 import requests
 from sqlalchemy import JSON, TIMESTAMP, Boolean, Column, Integer, String, Text, func
+
 from shared.database import Base, BigInt
 
 logger = logging.getLogger("etl_project.webhooks")
@@ -44,7 +45,9 @@ class WebhookDelivery(Base):
     status_code = Column(Integer, nullable=True)
     response_body = Column(Text, nullable=True)
     attempt = Column(Integer, nullable=False, default=1)
-    status = Column(String(20), nullable=False, default="pending")  # pending, delivered, failed, retry
+    status = Column(
+        String(20), nullable=False, default="pending"
+    )  # pending, delivered, failed, retry
     error_message = Column(Text, nullable=True)
     delivered_at = Column(TIMESTAMP, nullable=True)
     next_retry_at = Column(TIMESTAMP, nullable=True)
@@ -82,6 +85,7 @@ class WebhookDispatcher:
     def get_subscriptions(db, org_id: int, event_type: str) -> list[WebhookSubscription]:
         """Get active subscriptions for an event type."""
         from sqlalchemy import select
+
         subs = (
             db.execute(
                 select(WebhookSubscription).where(
@@ -115,7 +119,13 @@ class WebhookDispatcher:
     @staticmethod
     def _deliver(sub: WebhookSubscription, delivery: WebhookDelivery, payload: dict) -> None:
         """Attempt to deliver a webhook."""
-        body = json.dumps({"event": delivery.event_type, "data": payload, "timestamp": str(datetime.now(timezone.utc))})
+        body = json.dumps(
+            {
+                "event": delivery.event_type,
+                "data": payload,
+                "timestamp": str(datetime.now(timezone.utc)),
+            }
+        )
         signature = WebhookDispatcher.sign_payload(body, sub.secret)
 
         try:
@@ -139,20 +149,25 @@ class WebhookDispatcher:
                 delivery.error_message = f"HTTP {resp.status_code}"
                 if delivery.attempt < WebhookDispatcher.MAX_RETRIES:
                     delivery.status = "retry"
-                    delay = WebhookDispatcher.RETRY_DELAYS[min(delivery.attempt - 1, len(WebhookDispatcher.RETRY_DELAYS) - 1)]
+                    delay = WebhookDispatcher.RETRY_DELAYS[
+                        min(delivery.attempt - 1, len(WebhookDispatcher.RETRY_DELAYS) - 1)
+                    ]
                     delivery.next_retry_at = datetime.now(timezone.utc) + timedelta(seconds=delay)
         except Exception as e:
             delivery.status = "failed"
             delivery.error_message = str(e)
             if delivery.attempt < WebhookDispatcher.MAX_RETRIES:
                 delivery.status = "retry"
-                delay = WebhookDispatcher.RETRY_DELAYS[min(delivery.attempt - 1, len(WebhookDispatcher.RETRY_DELAYS) - 1)]
+                delay = WebhookDispatcher.RETRY_DELAYS[
+                    min(delivery.attempt - 1, len(WebhookDispatcher.RETRY_DELAYS) - 1)
+                ]
                 delivery.next_retry_at = datetime.now(timezone.utc) + timedelta(seconds=delay)
 
     @staticmethod
     def retry_pending(db) -> int:
         """Retry pending webhook deliveries. Returns count of retries."""
         from sqlalchemy import select
+
         now = datetime.now(timezone.utc)
         pending = (
             db.execute(
@@ -167,7 +182,9 @@ class WebhookDispatcher:
         count = 0
         for delivery in pending:
             sub = db.execute(
-                select(WebhookSubscription).where(WebhookSubscription.id == delivery.subscription_id)
+                select(WebhookSubscription).where(
+                    WebhookSubscription.id == delivery.subscription_id
+                )
             ).scalar_one_or_none()
             if not sub or not sub.is_active:
                 delivery.status = "failed"

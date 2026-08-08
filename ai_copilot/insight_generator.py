@@ -11,7 +11,7 @@ Surfaces interesting patterns in the data without being asked:
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 
 import pandas as pd
@@ -125,17 +125,19 @@ class InsightGenerator:
                 entity = col_mapping.get(col, col)
                 severity = Severity.WARNING if outlier_pct > 10 else Severity.INFO
                 max_outlier = float(outliers.max()) if not outliers.empty else 0
-                insights.append(AutoInsight(
-                    type=InsightType.ANOMALY,
-                    severity=severity,
-                    title=f"Outliers detected in {col.replace('_', ' ').title()}",
-                    description=f"{len(outliers)} outliers ({outlier_pct:.1f}%) found in '{col}'. "
-                                f"Values range from {float(outliers.min()):.2f} to {max_outlier:.2f}, "
-                                f"outside the normal range [{lower_bound:.2f}, {upper_bound:.2f}].",
-                    metric=col,
-                    value=outlier_pct,
-                    recommendation=f"Review {entity} outliers for data entry errors or exceptional cases.",
-                ))
+                insights.append(
+                    AutoInsight(
+                        type=InsightType.ANOMALY,
+                        severity=severity,
+                        title=f"Outliers detected in {col.replace('_', ' ').title()}",
+                        description=f"{len(outliers)} outliers ({outlier_pct:.1f}%) found in '{col}'. "
+                        f"Values range from {float(outliers.min()):.2f} to {max_outlier:.2f}, "
+                        f"outside the normal range [{lower_bound:.2f}, {upper_bound:.2f}].",
+                        metric=col,
+                        value=outlier_pct,
+                        recommendation=f"Review {entity} outliers for data entry errors or exceptional cases.",
+                    )
+                )
 
         return insights
 
@@ -157,7 +159,9 @@ class InsightGenerator:
         if date_col is None:
             return insights
 
-        numeric_cols = [c for c in df.columns if pd.api.types.is_numeric_dtype(df[c]) and c != date_col]
+        numeric_cols = [
+            c for c in df.columns if pd.api.types.is_numeric_dtype(df[c]) and c != date_col
+        ]
 
         df_sorted = df.copy()
         if not pd.api.types.is_datetime64_any_dtype(df_sorted[date_col]):
@@ -192,16 +196,18 @@ class InsightGenerator:
             severity = Severity.POSITIVE if change_pct > 0 else Severity.WARNING
             entity = col_mapping.get(col, col)
 
-            insights.append(AutoInsight(
-                type=InsightType.TREND,
-                severity=severity,
-                title=f"{col.replace('_', ' ').title()} is {direction}",
-                description=f"{col.replace('_', ' ').title()} shows a {abs(change_pct):.1f}% "
-                            f"{direction} trend (from avg {first_mean:.2f} to {second_mean:.2f}).",
-                metric=col,
-                value=change_pct,
-                recommendation=f"Monitor {entity} trend and adjust strategy accordingly.",
-            ))
+            insights.append(
+                AutoInsight(
+                    type=InsightType.TREND,
+                    severity=severity,
+                    title=f"{col.replace('_', ' ').title()} is {direction}",
+                    description=f"{col.replace('_', ' ').title()} shows a {abs(change_pct):.1f}% "
+                    f"{direction} trend (from avg {first_mean:.2f} to {second_mean:.2f}).",
+                    metric=col,
+                    value=change_pct,
+                    recommendation=f"Monitor {entity} trend and adjust strategy accordingly.",
+                )
+            )
 
         return insights
 
@@ -237,18 +243,20 @@ class InsightGenerator:
                     direction = "positive" if val > 0 else "negative"
                     strength = "strong" if abs(val) >= 0.8 else "moderate"
                     severity = Severity.INFO
-                    insights.append(AutoInsight(
-                        type=InsightType.CORRELATION,
-                        severity=severity,
-                        title=f"{strength.title()} {direction} correlation: {col1} ↔ {col2}",
-                        description=f"{col1.replace('_', ' ').title()} and {col2.replace('_', ' ').title()} "
-                                    f"have a {strength} {direction} correlation (r={val:.2f}). "
-                                    f"{'They tend to move together.' if val > 0 else 'They tend to move in opposite directions.'}",
-                        metric=f"{col1} vs {col2}",
-                        value=float(val),
-                        recommendation=f"Use this correlation for predictive insights — "
-                                       f"{'when one increases, expect the other to increase too.' if val > 0 else 'when one increases, expect the other to decrease.'}",
-                    ))
+                    insights.append(
+                        AutoInsight(
+                            type=InsightType.CORRELATION,
+                            severity=severity,
+                            title=f"{strength.title()} {direction} correlation: {col1} ↔ {col2}",
+                            description=f"{col1.replace('_', ' ').title()} and {col2.replace('_', ' ').title()} "
+                            f"have a {strength} {direction} correlation (r={val:.2f}). "
+                            f"{'They tend to move together.' if val > 0 else 'They tend to move in opposite directions.'}",
+                            metric=f"{col1} vs {col2}",
+                            value=float(val),
+                            recommendation=f"Use this correlation for predictive insights — "
+                            f"{'when one increases, expect the other to increase too.' if val > 0 else 'when one increases, expect the other to decrease.'}",
+                        )
+                    )
 
         return insights
 
@@ -256,29 +264,33 @@ class InsightGenerator:
     def _detect_dominance(df: pd.DataFrame, col_mapping: dict) -> list[AutoInsight]:
         """Detect category dominance / concentration risk."""
         insights = []
-        categorical_cols = [c for c in df.columns if df[c].dtype == "object" and df[c].nunique() < 50]
+        categorical_cols = [
+            c for c in df.columns if df[c].dtype == "object" and df[c].nunique() < 50
+        ]
 
         for col in categorical_cols:
             value_counts = df[col].value_counts()
             if value_counts.empty:
                 continue
 
-            top_pct = (value_counts.iloc[0] / len(df) * 100)
+            top_pct = value_counts.iloc[0] / len(df) * 100
             top_value = value_counts.index[0]
 
             if top_pct > 60:
                 entity = col_mapping.get(col, col)
                 severity = Severity.WARNING if top_pct > 80 else Severity.INFO
-                insights.append(AutoInsight(
-                    type=InsightType.DOMINANCE,
-                    severity=severity,
-                    title=f"High concentration in {col.replace('_', ' ').title()}",
-                    description=f"'{top_value}' accounts for {top_pct:.1f}% of all records in '{col}'. "
-                                f"This represents concentration risk.",
-                    metric=col,
-                    value=top_pct,
-                    recommendation=f"Diversify {entity} to reduce dependency on '{top_value}'.",
-                ))
+                insights.append(
+                    AutoInsight(
+                        type=InsightType.DOMINANCE,
+                        severity=severity,
+                        title=f"High concentration in {col.replace('_', ' ').title()}",
+                        description=f"'{top_value}' accounts for {top_pct:.1f}% of all records in '{col}'. "
+                        f"This represents concentration risk.",
+                        metric=col,
+                        value=top_pct,
+                        recommendation=f"Diversify {entity} to reduce dependency on '{top_value}'.",
+                    )
+                )
 
         return insights
 
@@ -291,34 +303,38 @@ class InsightGenerator:
         for col in df.columns:
             missing = df[col].isna().sum()
             if missing > 0:
-                missing_pct = (missing / len(df) * 100)
+                missing_pct = missing / len(df) * 100
                 if missing_pct > 20:
                     entity = col_mapping.get(col, col)
                     severity = Severity.CRITICAL if missing_pct > 50 else Severity.WARNING
-                    insights.append(AutoInsight(
-                        type=InsightType.QUALITY,
-                        severity=severity,
-                        title=f"High missing rate in {col.replace('_', ' ').title()}",
-                        description=f"'{col}' has {missing} missing values ({missing_pct:.1f}%). "
-                                    f"This may affect analysis reliability.",
-                        metric=col,
-                        value=missing_pct,
-                        recommendation=f"Address missing {entity} values through imputation or data collection.",
-                    ))
+                    insights.append(
+                        AutoInsight(
+                            type=InsightType.QUALITY,
+                            severity=severity,
+                            title=f"High missing rate in {col.replace('_', ' ').title()}",
+                            description=f"'{col}' has {missing} missing values ({missing_pct:.1f}%). "
+                            f"This may affect analysis reliability.",
+                            metric=col,
+                            value=missing_pct,
+                            recommendation=f"Address missing {entity} values through imputation or data collection.",
+                        )
+                    )
 
         # Duplicates
         dup_count = df.duplicated().sum()
         if dup_count > 0:
-            dup_pct = (dup_count / len(df) * 100)
+            dup_pct = dup_count / len(df) * 100
             if dup_pct > 5:
-                insights.append(AutoInsight(
-                    type=InsightType.QUALITY,
-                    severity=Severity.WARNING,
-                    title=f"{dup_count} duplicate rows detected",
-                    description=f"{dup_pct:.1f}% of rows are exact duplicates, which may skew analysis.",
-                    value=dup_pct,
-                    recommendation="Remove duplicate rows before analysis.",
-                ))
+                insights.append(
+                    AutoInsight(
+                        type=InsightType.QUALITY,
+                        severity=Severity.WARNING,
+                        title=f"{dup_count} duplicate rows detected",
+                        description=f"{dup_pct:.1f}% of rows are exact duplicates, which may skew analysis.",
+                        value=dup_pct,
+                        recommendation="Remove duplicate rows before analysis.",
+                    )
+                )
 
         return insights
 
@@ -345,15 +361,17 @@ class InsightGenerator:
             if abs(skew) > 0.5:
                 direction = "right" if skew > 0 else "left"
                 severity = Severity.INFO
-                insights.append(AutoInsight(
-                    type=InsightType.DISTRIBUTION,
-                    severity=severity,
-                    title=f"{col.replace('_', ' ').title()} is {direction}-skewed",
-                    description=f"'{col}' has a {direction} skew (mean={mean:.2f}, median={median:.2f}). "
-                                f"{'Most values are low with a few high outliers.' if skew > 0 else 'Most values are high with a few low outliers.'}",
-                    metric=col,
-                    value=skew,
-                    recommendation=f"Consider log transformation for {col} if using linear models.",
-                ))
+                insights.append(
+                    AutoInsight(
+                        type=InsightType.DISTRIBUTION,
+                        severity=severity,
+                        title=f"{col.replace('_', ' ').title()} is {direction}-skewed",
+                        description=f"'{col}' has a {direction} skew (mean={mean:.2f}, median={median:.2f}). "
+                        f"{'Most values are low with a few high outliers.' if skew > 0 else 'Most values are high with a few low outliers.'}",
+                        metric=col,
+                        value=skew,
+                        recommendation=f"Consider log transformation for {col} if using linear models.",
+                    )
+                )
 
         return insights

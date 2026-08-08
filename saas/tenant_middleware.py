@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 
-from fastapi import Request, Response
+from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 
 logger = logging.getLogger("etl_project.tenant")
@@ -16,8 +16,15 @@ logger = logging.getLogger("etl_project.tenant")
 
 # Paths that don't require tenant isolation
 PUBLIC_PATHS = {
-    "/", "/health", "/ready", "/docs", "/openapi.json", "/redoc",
-    "/auth/login", "/auth/register", "/auth/refresh",
+    "/",
+    "/health",
+    "/ready",
+    "/docs",
+    "/openapi.json",
+    "/redoc",
+    "/auth/login",
+    "/auth/register",
+    "/auth/refresh",
 }
 
 # Path prefixes that are exempt (super admin only or public)
@@ -67,9 +74,10 @@ class TenantIsolationMiddleware(BaseHTTPMiddleware):
                 if payload and payload.get("type") == "access":
                     request.state.tenant_user_id = int(payload["sub"])
                     # Fetch user's organization_id from DB
-                    from shared.database import get_engine
                     from sqlalchemy.orm import Session as DbSession
+
                     from authentication.repositories import UserRepository
+                    from shared.database import get_engine
 
                     engine = get_engine()
                     db = DbSession(engine)

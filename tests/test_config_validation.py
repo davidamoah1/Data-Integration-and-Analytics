@@ -14,6 +14,7 @@ class TestValidateConfig:
     @pytest.fixture(autouse=True)
     def _reset_env(self, monkeypatch):
         """Ensure environment-dependent config values are stable for each test."""
+        monkeypatch.delenv("DISABLE_CONFIG_VALIDATION", raising=False)
         monkeypatch.setattr(config, "DB_TYPE", "sqlite")
         monkeypatch.setattr(config, "JWT_SECRET_KEY", "dummy-secret-for-tests")
         monkeypatch.setattr(config, "CORS_ORIGINS", "http://localhost:3000")

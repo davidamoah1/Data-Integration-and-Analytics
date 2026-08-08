@@ -34,18 +34,30 @@ def generate_recommendation(
     facts = []
 
     if metric_column not in df.columns:
-        return {"recommendation": "", "facts": [], "reasoning": "Metric column not found", "confidence": 0.0}
+        return {
+            "recommendation": "",
+            "facts": [],
+            "reasoning": "Metric column not found",
+            "confidence": 0.0,
+        }
 
     series = df[metric_column].dropna()
     if len(series) < 2:
-        return {"recommendation": "", "facts": [], "reasoning": "Insufficient data", "confidence": 0.0}
+        return {
+            "recommendation": "",
+            "facts": [],
+            "reasoning": "Insufficient data",
+            "confidence": 0.0,
+        }
 
     recent = series.iloc[-1]
     previous = series.iloc[-2]
     pct_change = ((recent - previous) / previous * 100) if previous != 0 else 0.0
     direction = "increased" if pct_change > 0 else "decreased"
 
-    facts.append(f"{metric_column.replace('_', ' ').title()} {direction} by {abs(pct_change):.1f}%.")
+    facts.append(
+        f"{metric_column.replace('_', ' ').title()} {direction} by {abs(pct_change):.1f}%."
+    )
 
     if segment_column and segment_column in df.columns:
         grouped = df.groupby(segment_column)[metric_column].sum().sort_values(ascending=False)
@@ -61,7 +73,9 @@ def generate_recommendation(
         strongest = corr.abs().idxmax() if not corr.empty else None
         if strongest and abs(corr[strongest]) > 0.5:
             direction_corr = "positively" if corr[strongest] > 0 else "negatively"
-            facts.append(f"{strongest} is {direction_corr} correlated ({corr[strongest]:.2f}) with {metric_column}.")
+            facts.append(
+                f"{strongest} is {direction_corr} correlated ({corr[strongest]:.2f}) with {metric_column}."
+            )
 
     # Outliers
     spike = detect_spikes(df, metric_column, threshold=2.5)
@@ -70,22 +84,32 @@ def generate_recommendation(
 
     # Build recommendation
     if pct_change < -5:
-        recommendations.append(f"Investigate the drivers behind the {abs(pct_change):.1f}% {metric_column} decline.")
+        recommendations.append(
+            f"Investigate the drivers behind the {abs(pct_change):.1f}% {metric_column} decline."
+        )
         if segment_column:
-            recommendations.append(f"Review performance in the weakest segment and reallocate resources if needed.")
+            recommendations.append(
+                "Review performance in the weakest segment and reallocate resources if needed."
+            )
     elif pct_change > 5:
         recommendations.append(f"Capitalize on the {metric_column} growth momentum.")
         if segment_column:
-            recommendations.append(f"Reinforce what's working in the top-performing segment.")
+            recommendations.append("Reinforce what's working in the top-performing segment.")
     else:
-        recommendations.append(f"{metric_column.replace('_', ' ').title()} is stable; monitor for trend shifts.")
+        recommendations.append(
+            f"{metric_column.replace('_', ' ').title()} is stable; monitor for trend shifts."
+        )
 
     if forecast_values and len(forecast_values) > 0:
         avg_forecast = float(np.mean(forecast_values))
         if avg_forecast > recent * 1.05:
-            recommendations.append(f"Forecast indicates continued growth; plan inventory and staffing accordingly.")
+            recommendations.append(
+                "Forecast indicates continued growth; plan inventory and staffing accordingly."
+            )
         elif avg_forecast < recent * 0.95:
-            recommendations.append(f"Forecast indicates a slowdown; consider cost controls or demand-generation initiatives.")
+            recommendations.append(
+                "Forecast indicates a slowdown; consider cost controls or demand-generation initiatives."
+            )
 
     readiness = assess_ml_readiness(df)
     if not readiness["ready"]:
@@ -143,12 +167,14 @@ def generate_what_if_scenarios(
         impact_pct = scenario.get("impact_pct", 0) * multiplier
         projected = latest * (1 + impact_pct / 100)
         delta = projected - baseline
-        results.append({
-            "name": scenario.get("name", "Unnamed scenario"),
-            "baseline": round(baseline, 2),
-            "latest": round(latest, 2),
-            "projected": round(projected, 2),
-            "delta": round(delta, 2),
-            "assumption": f"Assumes a {impact_pct:.1f}% direct impact on {metric_column}.",
-        })
+        results.append(
+            {
+                "name": scenario.get("name", "Unnamed scenario"),
+                "baseline": round(baseline, 2),
+                "latest": round(latest, 2),
+                "projected": round(projected, 2),
+                "delta": round(delta, 2),
+                "assumption": f"Assumes a {impact_pct:.1f}% direct impact on {metric_column}.",
+            }
+        )
     return results

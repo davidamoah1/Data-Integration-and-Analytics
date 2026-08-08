@@ -78,7 +78,7 @@ class DashboardLayoutEngine:
         supporting = supporting[:8]
 
         # Assign widths for supporting charts
-        for i, chart in enumerate(supporting):
+        for _i, chart in enumerate(supporting):
             if chart.chart_type in ("pie_chart", "donut_chart", "gauge"):
                 chart.width = 4  # Third width
             else:

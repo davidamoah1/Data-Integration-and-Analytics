@@ -18,13 +18,13 @@ import json
 from datetime import datetime, timezone
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session as DbSession
 
 from audit.repositories import AuditRepository
 from shared.database import get_db
-from shared.dependencies import get_current_user, require_permissions
+from shared.dependencies import get_current_user
 from shared.tenant import get_current_organization_id, is_super_admin
 
 router = APIRouter(prefix="/api/audit", tags=["audit"])
@@ -115,7 +115,12 @@ async def list_audit_logs(
         end_date=ed,
     )
 
-    return {"logs": [_log_to_dict(l) for l in logs], "total": total, "limit": limit, "offset": offset}
+    return {
+        "logs": [_log_to_dict(l) for l in logs],
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+    }
 
 
 @router.get("/logs/{log_id}")
@@ -183,16 +188,33 @@ async def export_audit_logs(
     # CSV
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow([
-        "id", "user_id", "organization_id", "action", "resource_type",
-        "resource_id", "ip_address", "user_agent", "created_at",
-    ])
+    writer.writerow(
+        [
+            "id",
+            "user_id",
+            "organization_id",
+            "action",
+            "resource_type",
+            "resource_id",
+            "ip_address",
+            "user_agent",
+            "created_at",
+        ]
+    )
     for log in logs:
-        writer.writerow([
-            log.id, log.user_id, log.organization_id, log.action,
-            log.resource_type, log.resource_id, log.ip_address,
-            log.user_agent, log.created_at.isoformat() if log.created_at else "",
-        ])
+        writer.writerow(
+            [
+                log.id,
+                log.user_id,
+                log.organization_id,
+                log.action,
+                log.resource_type,
+                log.resource_id,
+                log.ip_address,
+                log.user_agent,
+                log.created_at.isoformat() if log.created_at else "",
+            ]
+        )
 
     return StreamingResponse(
         io.BytesIO(output.getvalue().encode()),
@@ -279,7 +301,12 @@ async def list_security_logs(
         event_type=event_type,
     )
 
-    return {"logs": [_security_to_dict(l) for l in logs], "total": total, "limit": limit, "offset": offset}
+    return {
+        "logs": [_security_to_dict(l) for l in logs],
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+    }
 
 
 # ── User Activity ─────────────────────────────────────────────────────────

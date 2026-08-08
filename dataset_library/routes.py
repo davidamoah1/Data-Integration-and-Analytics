@@ -2,13 +2,11 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 import pandas as pd
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
-from dataset_library import DataTier, DatasetLibrary, get_dataset_library
+from dataset_library import DataTier, get_dataset_library
 
 router = APIRouter(prefix="/datasets", tags=["Dataset Library"])
 
@@ -43,7 +41,7 @@ async def list_datasets(
         try:
             data_tier = DataTier(tier.lower())
         except ValueError:
-            raise HTTPException(status_code=400, detail=f"Invalid tier: {tier}")
+            raise HTTPException(status_code=400, detail=f"Invalid tier: {tier}") from None
         entries = lib.list_by_tier(data_tier)
     elif industry:
         entries = lib.list_by_industry(industry.lower())
@@ -81,9 +79,9 @@ async def preview_dataset(
             "total_columns": len(df.columns),
         }
     except FileNotFoundError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=404, detail=str(e)) from None
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to load dataset: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to load dataset: {e}") from None
 
 
 @router.get("/{dataset_id}/schema")
@@ -120,14 +118,16 @@ async def register_production_upload(dataset: ProductionDatasetCreate):
             row_count = len(pd.read_csv(dataset.file_path))
             column_count = len(df.columns)
             for col in df.columns:
-                schema.append({
-                    "name": col,
-                    "dtype": str(df[col].dtype),
-                    "description": "",
-                    "nullable": df[col].isna().any(),
-                    "unique": False,
-                    "sample_values": [str(v) for v in df[col].dropna().head(3).tolist()],
-                })
+                schema.append(
+                    {
+                        "name": col,
+                        "dtype": str(df[col].dtype),
+                        "description": "",
+                        "nullable": df[col].isna().any(),
+                        "unique": False,
+                        "sample_values": [str(v) for v in df[col].dropna().head(3).tolist()],
+                    }
+                )
         except Exception:
             pass
 
@@ -201,8 +201,4 @@ async def list_industries():
 @router.get("/tiers/list")
 async def list_tiers():
     """List all data tiers."""
-    return {
-        "tiers": [
-            {"value": t.value, "name": t.value.title()} for t in DataTier
-        ]
-    }
+    return {"tiers": [{"value": t.value, "name": t.value.title()} for t in DataTier]}

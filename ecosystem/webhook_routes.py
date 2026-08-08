@@ -9,7 +9,12 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.orm import Session as DbSession
 
-from ecosystem.webhooks import SUPPORTED_EVENTS, WebhookDelivery, WebhookDispatcher, WebhookSubscription
+from ecosystem.webhooks import (
+    SUPPORTED_EVENTS,
+    WebhookDelivery,
+    WebhookDispatcher,
+    WebhookSubscription,
+)
 from shared.database import get_db
 from shared.dependencies import get_current_user
 from shared.response import success_response
@@ -90,17 +95,19 @@ async def list_webhooks(
         .scalars()
         .all()
     )
-    return success_response([
-        {
-            "id": s.id,
-            "url": s.url,
-            "events": s.events,
-            "is_active": s.is_active,
-            "description": s.description,
-            "created_at": str(s.created_at) if s.created_at else None,
-        }
-        for s in subs
-    ])
+    return success_response(
+        [
+            {
+                "id": s.id,
+                "url": s.url,
+                "events": s.events,
+                "is_active": s.is_active,
+                "description": s.description,
+                "created_at": str(s.created_at) if s.created_at else None,
+            }
+            for s in subs
+        ]
+    )
 
 
 @webhook_router.delete("/{webhook_id}")
@@ -146,19 +153,21 @@ async def list_deliveries(
         .scalars()
         .all()
     )
-    return success_response([
-        {
-            "id": d.id,
-            "event_type": d.event_type,
-            "status": d.status,
-            "status_code": d.status_code,
-            "attempt": d.attempt,
-            "error_message": d.error_message,
-            "delivered_at": str(d.delivered_at) if d.delivered_at else None,
-            "created_at": str(d.created_at) if d.created_at else None,
-        }
-        for d in deliveries
-    ])
+    return success_response(
+        [
+            {
+                "id": d.id,
+                "event_type": d.event_type,
+                "status": d.status,
+                "status_code": d.status_code,
+                "attempt": d.attempt,
+                "error_message": d.error_message,
+                "delivered_at": str(d.delivered_at) if d.delivered_at else None,
+                "created_at": str(d.created_at) if d.created_at else None,
+            }
+            for d in deliveries
+        ]
+    )
 
 
 @webhook_router.post("/{webhook_id}/redeliver/{delivery_id}")

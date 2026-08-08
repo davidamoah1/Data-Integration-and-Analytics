@@ -14,6 +14,7 @@ Detects:
 
 from __future__ import annotations
 
+import contextlib
 import re
 from dataclasses import dataclass, field
 from enum import Enum
@@ -65,11 +66,35 @@ class QualityFinding:
 # Common sentinel/placeholder values that indicate missing data
 SENTINEL_VALUES_NUMERIC = {999, 9999, -1, -999, -9999, 999.99, -999.99, 0}
 SENTINEL_VALUES_TEXT = {
-    "n/a", "na", "n/a ", "n.a.", "n.a", "null", "none", "nil",
-    "unknown", "unk", "unkn", "missing", "not applicable",
-    "tbd", "tba", "pending", "unspecified", "default",
-    "test", "dummy", "placeholder", "temp", "temporary",
-    "-", "--", "---", "?", "??", "???",
+    "n/a",
+    "na",
+    "n/a ",
+    "n.a.",
+    "n.a",
+    "null",
+    "none",
+    "nil",
+    "unknown",
+    "unk",
+    "unkn",
+    "missing",
+    "not applicable",
+    "tbd",
+    "tba",
+    "pending",
+    "unspecified",
+    "default",
+    "test",
+    "dummy",
+    "placeholder",
+    "temp",
+    "temporary",
+    "-",
+    "--",
+    "---",
+    "?",
+    "??",
+    "???",
 }
 
 # Regex patterns for format validation
@@ -133,20 +158,24 @@ class QualityCheckEngine:
             null_count = int(df[col].isnull().sum())
             if null_count > 0:
                 pct = null_count / total_rows * 100
-                severity = Severity.CRITICAL if pct > 50 else (
-                    Severity.ERROR if pct > 20 else Severity.WARNING
+                severity = (
+                    Severity.CRITICAL
+                    if pct > 50
+                    else (Severity.ERROR if pct > 20 else Severity.WARNING)
                 )
-                findings.append(QualityFinding(
-                    check_name="missing_values",
-                    category="completeness",
-                    severity=severity,
-                    column=col,
-                    affected_rows=null_count,
-                    affected_pct=pct,
-                    message=f"Column '{col}' has {null_count} missing values ({pct:.1f}%).",
-                    suggested_fix=f"Fill or remove missing values in '{col}'. Consider imputation for small gaps.",
-                    business_impact="Missing data leads to incomplete analytics and biased results.",
-                ))
+                findings.append(
+                    QualityFinding(
+                        check_name="missing_values",
+                        category="completeness",
+                        severity=severity,
+                        column=col,
+                        affected_rows=null_count,
+                        affected_pct=pct,
+                        message=f"Column '{col}' has {null_count} missing values ({pct:.1f}%).",
+                        suggested_fix=f"Fill or remove missing values in '{col}'. Consider imputation for small gaps.",
+                        business_impact="Missing data leads to incomplete analytics and biased results.",
+                    )
+                )
         return findings
 
     @staticmethod
@@ -158,17 +187,19 @@ class QualityCheckEngine:
                 blank_count = int((df[col].astype(str).str.strip() == "").sum())
                 if blank_count > 0:
                     pct = blank_count / total_rows * 100
-                    findings.append(QualityFinding(
-                        check_name="blank_fields",
-                        category="completeness",
-                        severity=Severity.WARNING,
-                        column=col,
-                        affected_rows=blank_count,
-                        affected_pct=pct,
-                        message=f"Column '{col}' has {blank_count} blank (empty string) values.",
-                        suggested_fix=f"Replace blank strings with null or meaningful values in '{col}'.",
-                        business_impact="Blank strings may be treated differently from nulls, causing inconsistency.",
-                    ))
+                    findings.append(
+                        QualityFinding(
+                            check_name="blank_fields",
+                            category="completeness",
+                            severity=Severity.WARNING,
+                            column=col,
+                            affected_rows=blank_count,
+                            affected_pct=pct,
+                            message=f"Column '{col}' has {blank_count} blank (empty string) values.",
+                            suggested_fix=f"Replace blank strings with null or meaningful values in '{col}'.",
+                            business_impact="Blank strings may be treated differently from nulls, causing inconsistency.",
+                        )
+                    )
         return findings
 
     @staticmethod
@@ -176,17 +207,19 @@ class QualityCheckEngine:
         findings = []
         for col in df.columns:
             if df[col].isnull().all():
-                findings.append(QualityFinding(
-                    check_name="empty_column",
-                    category="completeness",
-                    severity=Severity.ERROR,
-                    column=col,
-                    affected_rows=len(df),
-                    affected_pct=100.0,
-                    message=f"Column '{col}' is entirely empty.",
-                    suggested_fix=f"Populate '{col}' or remove it from the dataset.",
-                    business_impact="Empty columns waste storage and confuse analysis tools.",
-                ))
+                findings.append(
+                    QualityFinding(
+                        check_name="empty_column",
+                        category="completeness",
+                        severity=Severity.ERROR,
+                        column=col,
+                        affected_rows=len(df),
+                        affected_pct=100.0,
+                        message=f"Column '{col}' is entirely empty.",
+                        suggested_fix=f"Populate '{col}' or remove it from the dataset.",
+                        business_impact="Empty columns waste storage and confuse analysis tools.",
+                    )
+                )
         return findings
 
     @staticmethod
@@ -196,17 +229,19 @@ class QualityCheckEngine:
         for col in df.columns:
             null_pct = df[col].isnull().sum() / total_rows
             if 0.5 < null_pct < 1.0:
-                findings.append(QualityFinding(
-                    check_name="high_null_percentage",
-                    category="completeness",
-                    severity=Severity.WARNING,
-                    column=col,
-                    affected_rows=int(df[col].isnull().sum()),
-                    affected_pct=null_pct * 100,
-                    message=f"Column '{col}' has {null_pct*100:.1f}% null values.",
-                    suggested_fix=f"Consider whether '{col}' is needed or improve data capture processes.",
-                    business_impact="Columns with >50% nulls provide limited analytical value.",
-                ))
+                findings.append(
+                    QualityFinding(
+                        check_name="high_null_percentage",
+                        category="completeness",
+                        severity=Severity.WARNING,
+                        column=col,
+                        affected_rows=int(df[col].isnull().sum()),
+                        affected_pct=null_pct * 100,
+                        message=f"Column '{col}' has {null_pct*100:.1f}% null values.",
+                        suggested_fix=f"Consider whether '{col}' is needed or improve data capture processes.",
+                        business_impact="Columns with >50% nulls provide limited analytical value.",
+                    )
+                )
         return findings
 
     # ── Uniqueness Checks ────────────────────────────────
@@ -219,17 +254,19 @@ class QualityCheckEngine:
         if dup_count > 0:
             pct = dup_count / total_rows * 100
             severity = Severity.ERROR if pct > 10 else Severity.WARNING
-            findings.append(QualityFinding(
-                check_name="duplicate_rows",
-                category="uniqueness",
-                severity=severity,
-                column=None,
-                affected_rows=dup_count,
-                affected_pct=pct,
-                message=f"{dup_count} duplicate rows found ({pct:.1f}%).",
-                suggested_fix="Remove duplicate rows or investigate data entry process.",
-                business_impact="Duplicate records inflate counts and skew analytics.",
-            ))
+            findings.append(
+                QualityFinding(
+                    check_name="duplicate_rows",
+                    category="uniqueness",
+                    severity=severity,
+                    column=None,
+                    affected_rows=dup_count,
+                    affected_pct=pct,
+                    message=f"{dup_count} duplicate rows found ({pct:.1f}%).",
+                    suggested_fix="Remove duplicate rows or investigate data entry process.",
+                    business_impact="Duplicate records inflate counts and skew analytics.",
+                )
+            )
         return findings
 
     @staticmethod
@@ -243,17 +280,19 @@ class QualityCheckEngine:
             dup_count = int(df[col].duplicated(keep=False).sum())
             if dup_count > 0:
                 pct = dup_count / total_rows * 100
-                findings.append(QualityFinding(
-                    check_name="duplicate_ids",
-                    category="uniqueness",
-                    severity=Severity.ERROR,
-                    column=col,
-                    affected_rows=dup_count,
-                    affected_pct=pct,
-                    message=f"Column '{col}' has {dup_count} duplicate ID values.",
-                    suggested_fix=f"Ensure '{col}' values are unique. Investigate data entry process.",
-                    business_impact="Duplicate IDs cause record conflicts and incorrect joins.",
-                ))
+                findings.append(
+                    QualityFinding(
+                        check_name="duplicate_ids",
+                        category="uniqueness",
+                        severity=Severity.ERROR,
+                        column=col,
+                        affected_rows=dup_count,
+                        affected_pct=pct,
+                        message=f"Column '{col}' has {dup_count} duplicate ID values.",
+                        suggested_fix=f"Ensure '{col}' values are unique. Investigate data entry process.",
+                        business_impact="Duplicate IDs cause record conflicts and incorrect joins.",
+                    )
+                )
         return findings
 
     # ── Validity Checks ──────────────────────────────────
@@ -271,39 +310,54 @@ class QualityCheckEngine:
                     if sentinel == 0:
                         # Only flag 0 for columns that shouldn't have zero
                         col_lower = col.lower()
-                        if any(kw in col_lower for kw in ("age", "price", "amount", "revenue", "billing", "cost", "salary")):
+                        if any(
+                            kw in col_lower
+                            for kw in (
+                                "age",
+                                "price",
+                                "amount",
+                                "revenue",
+                                "billing",
+                                "cost",
+                                "salary",
+                            )
+                        ):
                             count = int((series == 0).sum())
                             if count > 0:
                                 pct = count / total_rows * 100
-                                findings.append(QualityFinding(
-                                    check_name="sentinel_value",
-                                    category="validity",
-                                    severity=Severity.WARNING,
-                                    column=col,
-                                    affected_rows=count,
-                                    affected_pct=pct,
-                                    message=f"Column '{col}' contains {count} zero values — possible placeholder for missing data.",
-                                    suggested_fix=f"Verify if 0 in '{col}' is a valid value or should be treated as missing.",
-                                    business_impact="Sentinel values like 0 can skew averages and totals.",
-                                    sample_values=[0],
-                                ))
+                                findings.append(
+                                    QualityFinding(
+                                        check_name="sentinel_value",
+                                        category="validity",
+                                        severity=Severity.WARNING,
+                                        column=col,
+                                        affected_rows=count,
+                                        affected_pct=pct,
+                                        message=f"Column '{col}' contains {count} zero values — possible placeholder for missing data.",
+                                        suggested_fix=f"Verify if 0 in '{col}' is a valid value or should be treated as missing.",
+                                        business_impact="Sentinel values like 0 can skew averages and totals.",
+                                        sample_values=[0],
+                                    )
+                                )
                     else:
                         count = int((series == sentinel).sum())
                         if count > 0:
                             pct = count / total_rows * 100
                             severity = Severity.WARNING if pct < 10 else Severity.ERROR
-                            findings.append(QualityFinding(
-                                check_name="sentinel_value",
-                                category="validity",
-                                severity=severity,
-                                column=col,
-                                affected_rows=count,
-                                affected_pct=pct,
-                                message=f"Column '{col}' contains {count} sentinel value(s) of {sentinel} — likely placeholder for missing data.",
-                                suggested_fix=f"Replace {sentinel} in '{col}' with null or the actual missing value representation.",
-                                business_impact=f"Sentinel value {sentinel} can skew statistics and is often mistaken for real data.",
-                                sample_values=[sentinel],
-                            ))
+                            findings.append(
+                                QualityFinding(
+                                    check_name="sentinel_value",
+                                    category="validity",
+                                    severity=severity,
+                                    column=col,
+                                    affected_rows=count,
+                                    affected_pct=pct,
+                                    message=f"Column '{col}' contains {count} sentinel value(s) of {sentinel} — likely placeholder for missing data.",
+                                    suggested_fix=f"Replace {sentinel} in '{col}' with null or the actual missing value representation.",
+                                    business_impact=f"Sentinel value {sentinel} can skew statistics and is often mistaken for real data.",
+                                    sample_values=[sentinel],
+                                )
+                            )
 
             elif df[col].dtype == "object":
                 series = df[col].dropna().astype(str).str.strip().str.lower()
@@ -311,18 +365,20 @@ class QualityCheckEngine:
                     count = int((series == sentinel).sum())
                     if count > 0:
                         pct = count / total_rows * 100
-                        findings.append(QualityFinding(
-                            check_name="sentinel_value",
-                            category="validity",
-                            severity=Severity.WARNING,
-                            column=col,
-                            affected_rows=count,
-                            affected_pct=pct,
-                            message=f"Column '{col}' contains {count} placeholder value(s) '{sentinel}' — likely indicates missing data.",
-                            suggested_fix=f"Replace '{sentinel}' in '{col}' with null or a proper value.",
-                            business_impact="Placeholder text values are often missed by null checks and can skew category counts.",
-                            sample_values=[sentinel],
-                        ))
+                        findings.append(
+                            QualityFinding(
+                                check_name="sentinel_value",
+                                category="validity",
+                                severity=Severity.WARNING,
+                                column=col,
+                                affected_rows=count,
+                                affected_pct=pct,
+                                message=f"Column '{col}' contains {count} placeholder value(s) '{sentinel}' — likely indicates missing data.",
+                                suggested_fix=f"Replace '{sentinel}' in '{col}' with null or a proper value.",
+                                business_impact="Placeholder text values are often missed by null checks and can skew category counts.",
+                                sample_values=[sentinel],
+                            )
+                        )
 
         return findings
 
@@ -358,18 +414,20 @@ class QualityCheckEngine:
                     count = len(out_of_range)
                     if count > 0:
                         pct = count / total_rows * 100
-                        findings.append(QualityFinding(
-                            check_name="out_of_range",
-                            category="validity",
-                            severity=Severity.WARNING,
-                            column=col,
-                            affected_rows=count,
-                            affected_pct=pct,
-                            message=f"Column '{col}' has {count} values outside expected range [{lo}, {hi}].",
-                            suggested_fix=f"Review and correct values in '{col}' that fall outside [{lo}, {hi}].",
-                            business_impact="Out-of-range values indicate data entry errors or sensor malfunctions.",
-                            sample_values=[float(v) for v in out_of_range.head(5).tolist()],
-                        ))
+                        findings.append(
+                            QualityFinding(
+                                check_name="out_of_range",
+                                category="validity",
+                                severity=Severity.WARNING,
+                                column=col,
+                                affected_rows=count,
+                                affected_pct=pct,
+                                message=f"Column '{col}' has {count} values outside expected range [{lo}, {hi}].",
+                                suggested_fix=f"Review and correct values in '{col}' that fall outside [{lo}, {hi}].",
+                                business_impact="Out-of-range values indicate data entry errors or sensor malfunctions.",
+                                sample_values=[float(v) for v in out_of_range.head(5).tolist()],
+                            )
+                        )
                     break
 
         return findings
@@ -389,21 +447,25 @@ class QualityCheckEngine:
             invalid = ~non_null.str.match(EMAIL_PATTERN)
             count = int(invalid.sum())
             if count > 0:
-                findings.append(QualityFinding(
-                    check_name="invalid_emails",
-                    category="validity",
-                    severity=Severity.WARNING,
-                    column=col,
-                    affected_rows=count,
-                    affected_pct=count / total_rows * 100,
-                    message=f"Column '{col}': {count} invalid email addresses.",
-                    suggested_fix="Correct email format to user@domain.com.",
-                    business_impact="Invalid emails cause communication failures.",
-                    sample_values=non_null[invalid].head(5).tolist(),
-                ))
+                findings.append(
+                    QualityFinding(
+                        check_name="invalid_emails",
+                        category="validity",
+                        severity=Severity.WARNING,
+                        column=col,
+                        affected_rows=count,
+                        affected_pct=count / total_rows * 100,
+                        message=f"Column '{col}': {count} invalid email addresses.",
+                        suggested_fix="Correct email format to user@domain.com.",
+                        business_impact="Invalid emails cause communication failures.",
+                        sample_values=non_null[invalid].head(5).tolist(),
+                    )
+                )
 
         # Phones
-        phone_cols = [c for c in df.columns if any(kw in c.lower() for kw in ("phone", "mobile", "tel"))]
+        phone_cols = [
+            c for c in df.columns if any(kw in c.lower() for kw in ("phone", "mobile", "tel"))
+        ]
         for col in phone_cols:
             non_null = df[col].dropna().astype(str)
             if len(non_null) == 0:
@@ -411,17 +473,19 @@ class QualityCheckEngine:
             invalid = ~non_null.str.match(PHONE_PATTERN)
             count = int(invalid.sum())
             if count > 0:
-                findings.append(QualityFinding(
-                    check_name="invalid_phones",
-                    category="validity",
-                    severity=Severity.INFO,
-                    column=col,
-                    affected_rows=count,
-                    affected_pct=count / total_rows * 100,
-                    message=f"Column '{col}': {count} invalid phone numbers.",
-                    suggested_fix="Ensure phone numbers contain only digits, spaces, +, -, and parentheses.",
-                    sample_values=non_null[invalid].head(5).tolist(),
-                ))
+                findings.append(
+                    QualityFinding(
+                        check_name="invalid_phones",
+                        category="validity",
+                        severity=Severity.INFO,
+                        column=col,
+                        affected_rows=count,
+                        affected_pct=count / total_rows * 100,
+                        message=f"Column '{col}': {count} invalid phone numbers.",
+                        suggested_fix="Ensure phone numbers contain only digits, spaces, +, -, and parentheses.",
+                        sample_values=non_null[invalid].head(5).tolist(),
+                    )
+                )
 
         # Diagnosis codes (ICD-10)
         diag_cols = [c for c in df.columns if "diagnosis" in c.lower() and "code" in c.lower()]
@@ -432,17 +496,19 @@ class QualityCheckEngine:
             invalid = ~non_null.str.match(ICD10_PATTERN)
             count = int(invalid.sum())
             if count > 0:
-                findings.append(QualityFinding(
-                    check_name="invalid_diagnosis_codes",
-                    category="validity",
-                    severity=Severity.WARNING,
-                    column=col,
-                    affected_rows=count,
-                    affected_pct=count / total_rows * 100,
-                    message=f"Column '{col}': {count} values don't match ICD-10 format.",
-                    suggested_fix="Use ICD-10 format (e.g., E11.9, J45.909).",
-                    sample_values=non_null[invalid].head(5).tolist(),
-                ))
+                findings.append(
+                    QualityFinding(
+                        check_name="invalid_diagnosis_codes",
+                        category="validity",
+                        severity=Severity.WARNING,
+                        column=col,
+                        affected_rows=count,
+                        affected_pct=count / total_rows * 100,
+                        message=f"Column '{col}': {count} values don't match ICD-10 format.",
+                        suggested_fix="Use ICD-10 format (e.g., E11.9, J45.909).",
+                        sample_values=non_null[invalid].head(5).tolist(),
+                    )
+                )
 
         return findings
 
@@ -450,7 +516,7 @@ class QualityCheckEngine:
     def _check_type_mismatches(df: pd.DataFrame) -> list[QualityFinding]:
         """Detect columns with mixed data types (e.g., numbers stored as text)."""
         findings = []
-        total_rows = max(len(df), 1)
+        max(len(df), 1)
 
         for col in df.columns:
             if df[col].dtype == "object":
@@ -461,17 +527,19 @@ class QualityCheckEngine:
                 # Check if column has mixed types
                 types = non_null.apply(type).nunique()
                 if types > 1:
-                    findings.append(QualityFinding(
-                        check_name="type_mismatch",
-                        category="consistency",
-                        severity=Severity.WARNING,
-                        column=col,
-                        affected_rows=len(non_null),
-                        affected_pct=100.0,
-                        message=f"Column '{col}' contains mixed data types ({types} different types).",
-                        suggested_fix=f"Standardize '{col}' to a single data type.",
-                        business_impact="Mixed types cause parsing errors and incorrect aggregations.",
-                    ))
+                    findings.append(
+                        QualityFinding(
+                            check_name="type_mismatch",
+                            category="consistency",
+                            severity=Severity.WARNING,
+                            column=col,
+                            affected_rows=len(non_null),
+                            affected_pct=100.0,
+                            message=f"Column '{col}' contains mixed data types ({types} different types).",
+                            suggested_fix=f"Standardize '{col}' to a single data type.",
+                            business_impact="Mixed types cause parsing errors and incorrect aggregations.",
+                        )
+                    )
 
                 # Check if numeric values are stored as strings
                 numeric_count = sum(1 for v in non_null if isinstance(v, (int, float)))
@@ -488,17 +556,19 @@ class QualityCheckEngine:
         for col in df.columns:
             if df[col].nunique() == 1 and not df[col].isnull().all():
                 value = df[col].iloc[0]
-                findings.append(QualityFinding(
-                    check_name="constant_column",
-                    category="consistency",
-                    severity=Severity.INFO,
-                    column=col,
-                    affected_rows=0,
-                    affected_pct=0.0,
-                    message=f"Column '{col}' has only one unique value: '{value}'.",
-                    suggested_fix=f"Consider removing '{col}' if it provides no analytical value.",
-                    business_impact="Constant columns add no information and waste storage.",
-                ))
+                findings.append(
+                    QualityFinding(
+                        check_name="constant_column",
+                        category="consistency",
+                        severity=Severity.INFO,
+                        column=col,
+                        affected_rows=0,
+                        affected_pct=0.0,
+                        message=f"Column '{col}' has only one unique value: '{value}'.",
+                        suggested_fix=f"Consider removing '{col}' if it provides no analytical value.",
+                        business_impact="Constant columns add no information and waste storage.",
+                    )
+                )
         return findings
 
     @staticmethod
@@ -517,17 +587,19 @@ class QualityCheckEngine:
             neg_count = int((df[col] < 0).sum())
             if neg_count > 0:
                 pct = neg_count / total_rows * 100
-                findings.append(QualityFinding(
-                    check_name="negative_values",
-                    category="validity",
-                    severity=Severity.WARNING,
-                    column=col,
-                    affected_rows=neg_count,
-                    affected_pct=pct,
-                    message=f"Column '{col}': {neg_count} negative values found.",
-                    suggested_fix=f"Check if negative values in '{col}' are valid. Remove or correct if not.",
-                    business_impact="Unexpected negative values may indicate data entry errors.",
-                ))
+                findings.append(
+                    QualityFinding(
+                        check_name="negative_values",
+                        category="validity",
+                        severity=Severity.WARNING,
+                        column=col,
+                        affected_rows=neg_count,
+                        affected_pct=pct,
+                        message=f"Column '{col}': {neg_count} negative values found.",
+                        suggested_fix=f"Check if negative values in '{col}' are valid. Remove or correct if not.",
+                        business_impact="Unexpected negative values may indicate data entry errors.",
+                    )
+                )
         return findings
 
     @staticmethod
@@ -550,17 +622,19 @@ class QualityCheckEngine:
 
             if unique_original > unique_lower:
                 diff = unique_original - unique_lower
-                findings.append(QualityFinding(
-                    check_name="mixed_case",
-                    category="consistency",
-                    severity=Severity.INFO,
-                    column=col,
-                    affected_rows=diff,
-                    affected_pct=diff / total_rows * 100,
-                    message=f"Column '{col}' has {diff} values that differ only by case (e.g., 'Active' vs 'active').",
-                    suggested_fix=f"Standardize '{col}' to consistent casing (e.g., all title-case or all lower-case).",
-                    business_impact="Case inconsistencies cause duplicate categories in group-by operations.",
-                ))
+                findings.append(
+                    QualityFinding(
+                        check_name="mixed_case",
+                        category="consistency",
+                        severity=Severity.INFO,
+                        column=col,
+                        affected_rows=diff,
+                        affected_pct=diff / total_rows * 100,
+                        message=f"Column '{col}' has {diff} values that differ only by case (e.g., 'Active' vs 'active').",
+                        suggested_fix=f"Standardize '{col}' to consistent casing (e.g., all title-case or all lower-case).",
+                        business_impact="Case inconsistencies cause duplicate categories in group-by operations.",
+                    )
+                )
 
         return findings
 
@@ -574,7 +648,8 @@ class QualityCheckEngine:
 
         date_keywords = ("date", "time", "timestamp", "created", "updated", "expiry", "deadline")
         date_cols = [
-            c for c in df.columns
+            c
+            for c in df.columns
             if any(kw in c.lower() for kw in date_keywords)
             or pd.api.types.is_datetime64_any_dtype(df[c])
         ]
@@ -599,22 +674,22 @@ class QualityCheckEngine:
                 pct = invalid_count / total_rows * 100
                 severity = Severity.ERROR if pct > 20 else Severity.WARNING
                 sample_vals = []
-                try:
+                with contextlib.suppress(Exception):
                     sample_vals = series[parsed.isna()].head(5).astype(str).tolist()
-                except Exception:
-                    pass
-                findings.append(QualityFinding(
-                    check_name="invalid_dates",
-                    category="validity",
-                    severity=severity,
-                    column=col,
-                    affected_rows=invalid_count,
-                    affected_pct=pct,
-                    message=f"Column '{col}': {invalid_count} values cannot be parsed as dates.",
-                    suggested_fix=f"Standardize date format in '{col}' (e.g., YYYY-MM-DD).",
-                    business_impact="Invalid dates prevent time-based analysis and trend detection.",
-                    sample_values=sample_vals,
-                ))
+                findings.append(
+                    QualityFinding(
+                        check_name="invalid_dates",
+                        category="validity",
+                        severity=severity,
+                        column=col,
+                        affected_rows=invalid_count,
+                        affected_pct=pct,
+                        message=f"Column '{col}': {invalid_count} values cannot be parsed as dates.",
+                        suggested_fix=f"Standardize date format in '{col}' (e.g., YYYY-MM-DD).",
+                        business_impact="Invalid dates prevent time-based analysis and trend detection.",
+                        sample_values=sample_vals,
+                    )
+                )
 
         return findings
 
@@ -627,14 +702,28 @@ class QualityCheckEngine:
         total_rows = max(len(df), 1)
 
         numeric_keywords = (
-            "amount", "price", "cost", "revenue", "sales", "total",
-            "quantity", "count", "sum", "avg", "average", "rate",
-            "salary", "balance", "fee", "charge", "payment",
+            "amount",
+            "price",
+            "cost",
+            "revenue",
+            "sales",
+            "total",
+            "quantity",
+            "count",
+            "sum",
+            "avg",
+            "average",
+            "rate",
+            "salary",
+            "balance",
+            "fee",
+            "charge",
+            "payment",
         )
         numeric_cols = [
-            c for c in df.columns
-            if any(kw in c.lower() for kw in numeric_keywords)
-            and df[c].dtype == "object"
+            c
+            for c in df.columns
+            if any(kw in c.lower() for kw in numeric_keywords) and df[c].dtype == "object"
         ]
 
         for col in numeric_cols:
@@ -649,17 +738,19 @@ class QualityCheckEngine:
             if invalid_count > 0:
                 pct = invalid_count / total_rows * 100
                 severity = Severity.WARNING if pct < 10 else Severity.ERROR
-                findings.append(QualityFinding(
-                    check_name="invalid_numeric",
-                    category="validity",
-                    severity=severity,
-                    column=col,
-                    affected_rows=invalid_count,
-                    affected_pct=pct,
-                    message=f"Column '{col}': {invalid_count} non-numeric values in a numeric column.",
-                    suggested_fix=f"Clean '{col}' by removing currency symbols, commas, and non-numeric characters.",
-                    business_impact="Non-numeric values in numeric columns prevent aggregation and statistical analysis.",
-                    sample_values=series[converted.isna()].head(5).astype(str).tolist(),
-                ))
+                findings.append(
+                    QualityFinding(
+                        check_name="invalid_numeric",
+                        category="validity",
+                        severity=severity,
+                        column=col,
+                        affected_rows=invalid_count,
+                        affected_pct=pct,
+                        message=f"Column '{col}': {invalid_count} non-numeric values in a numeric column.",
+                        suggested_fix=f"Clean '{col}' by removing currency symbols, commas, and non-numeric characters.",
+                        business_impact="Non-numeric values in numeric columns prevent aggregation and statistical analysis.",
+                        sample_values=series[converted.isna()].head(5).astype(str).tolist(),
+                    )
+                )
 
         return findings

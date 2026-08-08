@@ -34,20 +34,23 @@ from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
+from audit.middleware import AuditMiddleware
 from config import validate_config
+from monitoring.middleware import MonitoringMiddleware
+from monitoring.otel import init_otel, instrument_fastapi, record_pipeline_run
+from monitoring.prometheus import metrics_registry
+from monitoring.sentry_integration import capture_exception, init_sentry
+from saas.tenant_middleware import TenantIsolationMiddleware
 from shared.context import correlation_id, request_id
 from shared.middleware import (
     RateLimitMiddleware,
     RequestSizeLimitMiddleware,
     SecurityHeadersMiddleware,
 )
-from monitoring.middleware import MonitoringMiddleware
-from monitoring.sentry_integration import init_sentry, capture_exception, set_user_context
-from monitoring.otel import init_otel, instrument_fastapi, record_pipeline_run
-from monitoring.prometheus import metrics_registry
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+from admin.routes import router as admin_router
 from ai.enterprise_routes import router as ai_enterprise_router
 from ai.routes import router as ai_router
 from analytics.routes import router as analytics_router
@@ -60,69 +63,65 @@ from api.schemas import (
     SalesListResponse,
     SalesRecordResponse,
 )
-from admin.routes import router as admin_router
-from audit.services import audit_router
 from audit.routes import router as audit_enterprise_router
-from authentication.routes import roles_router, users_router
-from database.routes import router as database_router
+from audit.services import audit_router
+from authentication.routes import mfa_router, roles_router, sso_router, users_router
 
 # Phase 4 — Enterprise IAM
 from authentication.routes import router as auth_router
-from authentication.routes import mfa_router
-from authentication.routes import sso_router
 from authentication.services import seed_default_data
-from database.repositories import PipelineRunRepository, SalesRepository
-from enterprise.routes import router as enterprise_router
-from platform_features.routes import platform_router as platform_features_router
-from performance.routes import performance_router
-from etl.logging_config import logger
-from etl.routes import router as etl_router
-from notifications.routes import router as notifications_router
-from organizations.invitation_routes import invitation_router, registration_router
-from organizations.services import dept_router, org_router
-from scheduler.report_scheduler import ReportScheduler
-from scheduler.routes import router as scheduler_router
-from semantic.routes import router as semantic_router
-from services.dataset_workflow_routes import router as dataset_workflow_router
-from services.dashboard_engine_routes import router as dashboard_engine_router
-from services.dashboard_composition_routes import router as dashboard_composition_router
-from services.onboarding_routes import router as onboarding_router
-from services.report_engine_routes import router as report_engine_router
-from services.etl_service import ETLService
-from shared.database import Base, get_engine
-from dataset_library.routes import router as dataset_library_router
-from validation.routes import router as validation_router
-from workflows.routes import router as workflow_router
-from ml.routes import router as ml_router
-
-# Phase 12.9 — Enterprise Integration Ecosystem
-from connectors.routes import router as connectors_router
-from ecosystem.routes import router as platform_router
-from ecosystem.webhook_routes import webhook_router
-from ecosystem.plugin_routes import plugin_router
-from ecosystem.public_routes import public_router
-from ecosystem.monitoring_routes import monitoring_router
-
-# Phase 13 — Commercial SaaS Platform
-from saas.routes import saas_router
-from saas.admin_routes import admin_router
-
-# Phase 15 — AI Data Intelligence Operating System (Studios)
-from studios.routes import router as studios_router
 
 # Phase 16 — Smart Data Capture & Intelligent Document Processing
 from capture.routes import router as capture_router
 
+# Phase 12.9 — Enterprise Integration Ecosystem
+from connectors.routes import router as connectors_router
+from database.repositories import PipelineRunRepository, SalesRepository
+from database.routes import router as database_router
+from dataset_library.routes import router as dataset_library_router
+from ecosystem.monitoring_routes import monitoring_router
+from ecosystem.plugin_routes import plugin_router
+from ecosystem.public_routes import public_router
+from ecosystem.routes import router as platform_router
+from ecosystem.webhook_routes import webhook_router
+from enterprise.routes import router as enterprise_router
+from etl.logging_config import logger
+from etl.routes import router as etl_router
+from jobs.handlers import register_builtin_handlers
+
 # Phase 11 — Background Processing & Job Queue
 from jobs.routes import router as jobs_router
-from jobs.handlers import register_builtin_handlers
+from ml.routes import router as ml_router
+
+# Phase 18 — Production Monitoring
+from monitoring.routes import router as phase18_monitoring_router
+from notifications.routes import router as notifications_router
+from organizations.invitation_routes import invitation_router, registration_router
+from organizations.services import dept_router, org_router
+from performance.routes import performance_router
+from platform_features.routes import platform_router as platform_features_router
+from saas.admin_routes import admin_router as saas_admin_router
+
+# Phase 13 — Commercial SaaS Platform
+from saas.routes import saas_router
+from scheduler.report_scheduler import ReportScheduler
+from scheduler.routes import router as scheduler_router
+from semantic.routes import router as semantic_router
+from services.dashboard_composition_routes import router as dashboard_composition_router
+from services.dashboard_engine_routes import router as dashboard_engine_router
+from services.dataset_workflow_routes import router as dataset_workflow_router
+from services.etl_service import ETLService
+from services.onboarding_routes import router as onboarding_router
+from services.report_engine_routes import router as report_engine_router
+from shared.database import Base, get_engine
 
 # Phase 12 — File Storage Architecture
 from storage.routes import router as storage_router
 
-# Phase 18 — Production Monitoring
-from monitoring.routes import router as phase18_monitoring_router
-
+# Phase 15 — AI Data Intelligence Operating System (Studios)
+from studios.routes import router as studios_router
+from validation.routes import router as validation_router
+from workflows.routes import router as workflow_router
 
 # ── Deployment / cold-start helpers ────────────────────
 
@@ -152,7 +151,9 @@ async def lifespan(app: FastAPI):
     if otel_ok:
         logger.info("OpenTelemetry tracing initialised.")
     if not sentry_ok and not otel_ok:
-        logger.info("Monitoring integrations not configured (set SENTRY_DSN / OTEL_EXPORTER_OTLP_ENDPOINT to enable).")
+        logger.info(
+            "Monitoring integrations not configured (set SENTRY_DSN / OTEL_EXPORTER_OTLP_ENDPOINT to enable)."
+        )
 
     if not serverless:
         try:
@@ -172,33 +173,39 @@ async def lifespan(app: FastAPI):
         import ai.models  # noqa: F401
         import analytics.models  # noqa: F401
         import audit.models  # noqa: F401
-        import authentication.models  # noqa: F401
         import authentication.mfa_models  # noqa: F401
+        import authentication.models  # noqa: F401
         import authentication.sso_models  # noqa: F401
-        import database.db_setup  # noqa: F401
-        import enterprise.models  # noqa: F401
-        import enterprise.subscription  # noqa: F401
-        import etl.models  # noqa: F401
-        import notifications.models  # noqa: F401
-        import organizations.models  # noqa: F401
-        import organizations.workspace_models  # noqa: F401
-        import scheduler.models  # noqa: F401
-        import validation.models  # noqa: F401
+
+        # Phase 16 — Smart Data Capture models
+        import capture.models  # noqa: F401
+
         # Phase 12.9 — Ecosystem models
         import connectors.models  # noqa: F401
+        import database.db_setup  # noqa: F401
         import ecosystem.models  # noqa: F401
         import ecosystem.plugin_models  # noqa: F401
         import ecosystem.webhooks  # noqa: F401
-        # Phase 13 — SaaS models
-        import saas.models  # noqa: F401
-        # Phase 15 — Studios models
-        import studios.models  # noqa: F401
-        # Phase 16 — Smart Data Capture models
-        import capture.models  # noqa: F401
+        import enterprise.models  # noqa: F401
+        import enterprise.subscription  # noqa: F401
+        import etl.models  # noqa: F401
+
         # Phase 11 — Background Jobs
         import jobs.models  # noqa: F401
+        import notifications.models  # noqa: F401
+        import organizations.models  # noqa: F401
+        import organizations.workspace_models  # noqa: F401
+
+        # Phase 13 — SaaS models
+        import saas.models  # noqa: F401
+        import scheduler.models  # noqa: F401
+
         # Phase 12 — File Storage
         import storage.models  # noqa: F401
+
+        # Phase 15 — Studios models
+        import studios.models  # noqa: F401
+        import validation.models  # noqa: F401
 
         try:
             Base.metadata.create_all(engine)
@@ -208,7 +215,9 @@ async def lifespan(app: FastAPI):
         # Seed ecosystem marketplace data
         try:
             from sqlalchemy.orm import Session as EcoDbSession
+
             from ecosystem.seed import seed_ecosystem_data
+
             eco_db = EcoDbSession(engine)
             seed_ecosystem_data(eco_db)
             eco_db.close()
@@ -218,6 +227,7 @@ async def lifespan(app: FastAPI):
         # Seed SaaS plans and feature flags
         try:
             from saas.services import seed_saas_data
+
             saas_db = EcoDbSession(engine)
             seed_saas_data(saas_db)
             saas_db.close()
@@ -227,6 +237,7 @@ async def lifespan(app: FastAPI):
         # Seed Studios industry data
         try:
             from studios.seed import seed_studios_data
+
             studios_db = EcoDbSession(engine)
             seed_studios_data(studios_db)
             studios_db.close()
@@ -336,14 +347,14 @@ app = FastAPI(
     root_path="/api" if _is_vercel else "",
 )
 
-app.add_middleware(RequestSizeLimitMiddleware, max_bytes=int(os.getenv("MAX_REQUEST_BODY_BYTES", "52428800")))
+app.add_middleware(
+    RequestSizeLimitMiddleware, max_bytes=int(os.getenv("MAX_REQUEST_BODY_BYTES", "52428800"))
+)
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 app.add_middleware(MonitoringMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
-from saas.tenant_middleware import TenantIsolationMiddleware
 app.add_middleware(TenantIsolationMiddleware)
 # Phase 13 — Enterprise audit middleware (auto-logs mutating requests)
-from audit.middleware import AuditMiddleware
 app.add_middleware(AuditMiddleware)
 _is_test_env = os.getenv("PYTEST_RUNNING", "").lower() in ("1", "true", "yes")
 if not _is_test_env:
@@ -460,7 +471,7 @@ app.include_router(monitoring_router)
 
 # Phase 13 — Commercial SaaS Platform
 app.include_router(saas_router)
-app.include_router(admin_router)
+app.include_router(saas_admin_router)
 
 # Phase 15 — AI Data Intelligence Operating System (Studios)
 app.include_router(studios_router)
@@ -489,7 +500,9 @@ async def landing_page():
     index_path = os.path.join(static_dir, "index.html")
     if os.path.exists(index_path):
         return FileResponse(index_path)
-    return JSONResponse({"message": "DataFlow API — visit /docs for API documentation"}, status_code=200)
+    return JSONResponse(
+        {"message": "DataFlow API — visit /docs for API documentation"}, status_code=200
+    )
 
 
 # ──────────────────────────────────────────────
@@ -587,6 +600,7 @@ async def prometheus_metrics():
     session counts, and process uptime.
     """
     from fastapi.responses import PlainTextResponse
+
     return PlainTextResponse(
         metrics_registry.render(),
         media_type="text/plain; version=0.0.4; charset=utf-8",

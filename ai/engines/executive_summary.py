@@ -18,7 +18,6 @@ from __future__ import annotations
 import json
 import logging
 import re
-from typing import Any
 
 import pandas as pd
 from sqlalchemy.orm import Session as DbSession
@@ -81,7 +80,7 @@ class ExecutiveSummaryEngine:
         analysis_data = additional_data or gatherer.gather_for_summary()
 
         # Build prompt messages
-        messages = self.orchestrator.build_messages(
+        self.orchestrator.build_messages(
             task_type=PromptTaskType.EXECUTIVE_SUMMARY,
             user_message=user_message,
             context=context,
@@ -116,10 +115,20 @@ class ExecutiveSummaryEngine:
                     summary=parsed.get("executive_summary", ""),
                     details=parsed,
                     key_findings=parsed.get("kpi_highlights", []),
-                    recommendations=[r.get("action", str(r)) if isinstance(r, dict) else str(r) for r in parsed.get("recommended_actions", [])],
-                    risks=[r.get("risk", str(r)) if isinstance(r, dict) else str(r) for r in parsed.get("risks", [])],
+                    recommendations=[
+                        r.get("action", str(r)) if isinstance(r, dict) else str(r)
+                        for r in parsed.get("recommended_actions", [])
+                    ],
+                    risks=[
+                        r.get("risk", str(r)) if isinstance(r, dict) else str(r)
+                        for r in parsed.get("risks", [])
+                    ],
                     opportunities=parsed.get("opportunities", []),
-                    confidence_score=parsed.get("confidence", {}).get("score") if isinstance(parsed.get("confidence"), dict) else parsed.get("confidence"),
+                    confidence_score=(
+                        parsed.get("confidence", {}).get("score")
+                        if isinstance(parsed.get("confidence"), dict)
+                        else parsed.get("confidence")
+                    ),
                     data_sources=analysis_data.get("data_sources", []),
                     user_id=user_id,
                 )
@@ -172,7 +181,7 @@ class ExecutiveSummaryEngine:
 
     def _generate_from_data(self, data: dict, context: EnterpriseAIContext) -> str:
         """Generate a basic summary from data alone (no LLM)."""
-        overall = data.get("overall", {})
+        data.get("overall", {})
         period_comparison = data.get("period_comparison", {})
 
         summary_parts = []
@@ -183,12 +192,11 @@ class ExecutiveSummaryEngine:
             pct = period_comparison.get("percentage_change", 0)
             direction = "increased" if pct > 0 else "decreased"
             summary_parts.append(
-                f"Key metric {direction} by {abs(pct):.1f}% "
-                f"({previous:.2f} to {current:.2f})."
+                f"Key metric {direction} by {abs(pct):.1f}% " f"({previous:.2f} to {current:.2f})."
             )
 
         if data.get("top_contributors"):
-            for key, items in list(data["top_contributors"].items())[:1]:
+            for _key, items in list(data["top_contributors"].items())[:1]:
                 if items:
                     top = items[0]
                     for k, v in top.items():
@@ -197,16 +205,20 @@ class ExecutiveSummaryEngine:
                     if "share" in top:
                         summary_parts.append(f"Share: {top['share']}%")
 
-        summary_text = " ".join(summary_parts) if summary_parts else "Summary generated from available data."
+        summary_text = (
+            " ".join(summary_parts) if summary_parts else "Summary generated from available data."
+        )
 
-        return json.dumps({
-            "title": "Executive Summary",
-            "executive_summary": summary_text,
-            "kpi_highlights": [],
-            "main_drivers": [],
-            "risks": [],
-            "opportunities": [],
-            "forecast": {},
-            "recommended_actions": [],
-            "confidence": {"score": 0.6, "methodology": "Data-driven summary without LLM"},
-        })
+        return json.dumps(
+            {
+                "title": "Executive Summary",
+                "executive_summary": summary_text,
+                "kpi_highlights": [],
+                "main_drivers": [],
+                "risks": [],
+                "opportunities": [],
+                "forecast": {},
+                "recommended_actions": [],
+                "confidence": {"score": 0.6, "methodology": "Data-driven summary without LLM"},
+            }
+        )

@@ -22,7 +22,6 @@ from __future__ import annotations
 import hashlib
 import logging
 import os
-import shutil
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any
@@ -199,7 +198,9 @@ class S3CompatibleBackend(StorageBackend):
             if self.endpoint:
                 kwargs["endpoint_url"] = self.endpoint
             self._client = boto3.client(**kwargs)
-            logger.info("S3-compatible backend initialized: %s (bucket=%s)", self._backend_name, self.bucket)
+            logger.info(
+                "S3-compatible backend initialized: %s (bucket=%s)", self._backend_name, self.bucket
+            )
         except ImportError:
             logger.warning("boto3 not installed — S3 backend unavailable")
             raise
@@ -330,7 +331,10 @@ class SupabaseBackend(StorageBackend):
 
     def _init_client(self) -> None:
         try:
-            from supabase import create_client, Client
+            from supabase import (
+                Client,  # noqa: F401
+                create_client,
+            )
 
             self._client = create_client(self.url, self.service_key)
             logger.info("Supabase storage backend initialized (bucket=%s)", self.bucket)
@@ -376,9 +380,7 @@ class SupabaseBackend(StorageBackend):
     def get_url(self, key: str, expires: int = 3600) -> str:
         if expires > 0:
             # Create a signed URL
-            return self._client.storage.from_(self.bucket).create_signed_url(
-                key, expires
-            )
+            return self._client.storage.from_(self.bucket).create_signed_url(key, expires)
         return f"{self.public_base_url}/{self.bucket}/{key}"
 
     def exists(self, key: str) -> bool:

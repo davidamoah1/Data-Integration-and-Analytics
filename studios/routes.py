@@ -10,7 +10,7 @@ from shared.dependencies import get_current_user
 from shared.tenant import get_current_organization_id
 from studios.cleaning_service import DataCleaningService
 from studios.collaboration_service import CollaborationService
-from studios.industry_service import IndustryIntelligenceService, seed_industry_data
+from studios.industry_service import IndustryIntelligenceService
 from studios.mentor_service import AIMentorService
 from studios.ml_lab_service import MLLabService
 from studios.presentation_service import PresentationStudioService
@@ -121,7 +121,7 @@ async def add_calculated_column(
     db: DbSession = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
-    org_id = get_current_organization_id(current_user, db)
+    get_current_organization_id(current_user, db)
     svc = DataWorkspaceService(db)
     col = svc.add_calculated_column(
         workspace_id=workspace_id,
@@ -544,8 +544,9 @@ async def list_industries():
 async def industry_overview(
     industry: str,
     db: DbSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
 ):
-    org_id = get_current_organization_id(current_user, db)
+    get_current_organization_id(current_user, db)
     svc = IndustryIntelligenceService(db)
     return svc.get_industry_overview(industry)
 
@@ -554,8 +555,9 @@ async def industry_overview(
 async def industry_kpis(
     industry: str,
     db: DbSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
 ):
-    org_id = get_current_organization_id(current_user, db)
+    get_current_organization_id(current_user, db)
     svc = IndustryIntelligenceService(db)
     kpis = svc.get_kpis(industry)
     return {
@@ -577,8 +579,9 @@ async def industry_kpis(
 async def industry_templates(
     industry: str,
     db: DbSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
 ):
-    org_id = get_current_organization_id(current_user, db)
+    get_current_organization_id(current_user, db)
     svc = IndustryIntelligenceService(db)
     templates = svc.get_templates(industry)
     return {
@@ -621,10 +624,7 @@ async def recommend_chart(
     columns = payload.get("columns")
     intent = payload.get("intent")
 
-    if data:
-        df = pd.DataFrame(data)
-    else:
-        df = pd.DataFrame()
+    df = pd.DataFrame(data) if data else pd.DataFrame()
 
     return VisualizationEngine.recommend_chart(df, columns, intent)
 
@@ -657,8 +657,12 @@ async def list_mentors():
 
 
 @router.get("/mentors/{mentor_type}")
-async def get_mentor_profile(mentor_type: str):
-    org_id = get_current_organization_id(current_user, db)
+async def get_mentor_profile(
+    mentor_type: str,
+    db: DbSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    get_current_organization_id(current_user, db)
     svc = AIMentorService(None)
     profile = svc.get_mentor_profile(mentor_type)
     if not profile:

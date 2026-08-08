@@ -56,7 +56,6 @@ class AfricaIndustryMapper:
         "coal": "Mining - Coal",
         "iron ore": "Mining - Iron Ore",
         "bauxite": "Mining - Bauxite",
-        "manganese": "Mining - Manganese",
         # Energy
         "crude oil": "Energy - Oil & Gas",
         "oil": "Energy - Oil & Gas",
@@ -111,10 +110,35 @@ class AfricaIndustryMapper:
 
     # Country-specific industry highlights
     COUNTRY_HIGHLIGHTS: dict[str, list[str]] = {
-        "GH": ["Cocoa", "Gold Mining", "Oil and Gas", "Timber", "Textiles and Garments", "Tourism", "Fishing"],
-        "NG": ["Oil and Gas", "Agriculture", "Telecommunications", "Nollywood (Film)", "Banking and Finance"],
-        "KE": ["Agriculture (Tea, Coffee, Horticulture)", "Tourism (Safari)", "Financial Services (M-Pesa)", "Manufacturing"],
-        "ZA": ["Mining (Platinum, Gold, Diamonds)", "Financial Services", "Manufacturing (Automotive)", "Tourism", "Agriculture (Wine, Citrus)"],
+        "GH": [
+            "Cocoa",
+            "Gold Mining",
+            "Oil and Gas",
+            "Timber",
+            "Textiles and Garments",
+            "Tourism",
+            "Fishing",
+        ],
+        "NG": [
+            "Oil and Gas",
+            "Agriculture",
+            "Telecommunications",
+            "Nollywood (Film)",
+            "Banking and Finance",
+        ],
+        "KE": [
+            "Agriculture (Tea, Coffee, Horticulture)",
+            "Tourism (Safari)",
+            "Financial Services (M-Pesa)",
+            "Manufacturing",
+        ],
+        "ZA": [
+            "Mining (Platinum, Gold, Diamonds)",
+            "Financial Services",
+            "Manufacturing (Automotive)",
+            "Tourism",
+            "Agriculture (Wine, Citrus)",
+        ],
     }
 
     @classmethod
@@ -156,10 +180,7 @@ class AfricaIndustryMapper:
     @classmethod
     def get_terms_for_sector(cls, sector: str) -> list[str]:
         """Get all local terms that map to a given sector."""
-        return sorted([
-            term for term, sec in cls.LOCAL_TO_SECTOR.items()
-            if sec == sector
-        ])
+        return sorted([term for term, sec in cls.LOCAL_TO_SECTOR.items() if sec == sector])
 
     @classmethod
     def detect_industries_in_text(cls, text: str) -> list[str]:

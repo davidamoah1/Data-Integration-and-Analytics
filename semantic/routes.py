@@ -174,6 +174,7 @@ async def analyze_with_overrides(
 ):
     """Analyze a dataset with admin overrides applied."""
     import json as _json
+
     parsed_overrides: dict | None = None
     if overrides:
         try:
@@ -185,7 +186,9 @@ async def analyze_with_overrides(
     org_id = get_current_organization_id(current_user, db)
 
     result = SemanticIntelligenceService.analyze_dataset(
-        df, file.filename, parsed_overrides,
+        df,
+        file.filename,
+        parsed_overrides,
         admin_confirmed=admin_confirmed,
         force_industry=force_industry,
     )
@@ -320,6 +323,7 @@ async def semantic_health():
 
 class PersistAnalysisRequest(BaseModel):
     """Request body for persisting semantic analysis results."""
+
     table_name: str = "uploaded_dataset"
     industry: str | None = None
     dashboard_config: dict | None = None
@@ -340,11 +344,12 @@ async def persist_analysis(
     Creates a Dashboard with widgets and KPI records so they appear on the
     Analytics and Dashboard pages.
     """
-    from analytics.models import Dashboard, DashboardWidget, KPI, KPIHistory, AnalyticsAlert
+    from analytics.models import KPI, AnalyticsAlert, Dashboard, DashboardWidget, KPIHistory
 
     org_id = current_user.get("organization_id")
     if org_id is None:
         from shared.tenant import get_current_organization_id
+
         org_id = get_current_organization_id(current_user, db)
 
     created_dashboard_id = None
@@ -433,7 +438,9 @@ async def persist_analysis(
     # Summary
     summary_parts = []
     if created_dashboard_id:
-        summary_parts.append(f"Dashboard created with {len(body.dashboard_config.get('widgets', [])) if body.dashboard_config else 0} widgets.")
+        summary_parts.append(
+            f"Dashboard created with {len(body.dashboard_config.get('widgets', [])) if body.dashboard_config else 0} widgets."
+        )
     if created_kpi_ids:
         summary_parts.append(f"{len(created_kpi_ids)} KPIs tracked.")
     if body.alerts:
@@ -454,27 +461,33 @@ async def persist_analysis(
     if body.dashboard_config:
         report_sections.append("Dashboard Configuration")
         widgets = body.dashboard_config.get("widgets", [])
-        report_content_parts.append(f"\n## Dashboard Configuration\n")
+        report_content_parts.append("\n## Dashboard Configuration\n")
         report_content_parts.append(f"Title: {body.dashboard_config.get('title', 'N/A')}\n")
         report_content_parts.append(f"Widgets: {len(widgets)}\n")
         for w in widgets:
-            report_content_parts.append(f"- {w.get('title', 'Untitled')} ({w.get('type', 'chart')})\n")
+            report_content_parts.append(
+                f"- {w.get('title', 'Untitled')} ({w.get('type', 'chart')})\n"
+            )
 
     # Alerts section
     if body.alerts:
         report_sections.append("Alerts")
-        report_content_parts.append(f"\n## Alerts\n")
+        report_content_parts.append("\n## Alerts\n")
         for alert in body.alerts:
-            report_content_parts.append(f"- **{alert.get('title', 'Alert')}**: {alert.get('description', '')}\n")
+            report_content_parts.append(
+                f"- **{alert.get('title', 'Alert')}**: {alert.get('description', '')}\n"
+            )
 
     # Recommendations section
     if body.recommendations:
         report_sections.append("Recommendations")
-        report_content_parts.append(f"\n## Recommendations\n")
+        report_content_parts.append("\n## Recommendations\n")
         for rec in body.recommendations:
             report_content_parts.append(f"- {rec}\n")
 
-    report_content = "".join(report_content_parts) if report_content_parts else "No detailed content available."
+    report_content = (
+        "".join(report_content_parts) if report_content_parts else "No detailed content available."
+    )
 
     report = AIReportGeneration(
         report_type="semantic_analysis",

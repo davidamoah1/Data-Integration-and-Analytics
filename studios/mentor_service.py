@@ -17,7 +17,6 @@ from sqlalchemy.orm import Session as DbSession
 
 from studios.models import AIMentorSession
 
-
 MENTOR_PROFILES = {
     "data_mentor": {
         "name": "Data Mentor",
@@ -192,15 +191,19 @@ class AIMentorService:
         return session
 
     def list_sessions(self, org_id: int, user_id: int) -> list[AIMentorSession]:
-        return self.db.execute(
-            select(AIMentorSession)
-            .where(
-                AIMentorSession.organization_id == org_id,
-                AIMentorSession.user_id == user_id,
-                AIMentorSession.is_active == True,  # noqa: E712
+        return (
+            self.db.execute(
+                select(AIMentorSession)
+                .where(
+                    AIMentorSession.organization_id == org_id,
+                    AIMentorSession.user_id == user_id,
+                    AIMentorSession.is_active == True,  # noqa: E712
+                )
+                .order_by(AIMentorSession.updated_at.desc())
             )
-            .order_by(AIMentorSession.updated_at.desc())
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
 
     def get_session(self, session_id: int, org_id: int) -> AIMentorSession | None:
         return self.db.execute(
@@ -210,7 +213,9 @@ class AIMentorService:
             )
         ).scalar_one_or_none()
 
-    def add_message(self, session_id: int, role: str, content: str, metadata: dict | None = None) -> dict:
+    def add_message(
+        self, session_id: int, role: str, content: str, metadata: dict | None = None
+    ) -> dict:
         """Add a message to a mentor session and generate a response."""
         session = self.db.execute(
             select(AIMentorSession).where(AIMentorSession.id == session_id)
@@ -219,21 +224,25 @@ class AIMentorService:
             raise ValueError("Session not found")
 
         messages = session.messages or []
-        messages.append({
-            "role": role,
-            "content": content,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "metadata": metadata or {},
-        })
+        messages.append(
+            {
+                "role": role,
+                "content": content,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "metadata": metadata or {},
+            }
+        )
 
         # Generate response based on mentor type
         if role == "user":
             response = self._generate_response(session.mentor_type, content, session.context)
-            messages.append({
-                "role": "assistant",
-                "content": response,
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-            })
+            messages.append(
+                {
+                    "role": "assistant",
+                    "content": response,
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                }
+            )
         else:
             response = content
 
@@ -249,7 +258,7 @@ class AIMentorService:
         with the mentor's system prompt and conversation context.
         """
         msg = user_message.lower()
-        profile = MENTOR_PROFILES.get(mentor_type, {})
+        MENTOR_PROFILES.get(mentor_type, {})
 
         # Data Mentor responses
         if mentor_type == "data_mentor":

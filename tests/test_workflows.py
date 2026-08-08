@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 
 from workflows.engine import WorkflowEngine
-from workflows.models import WorkflowExecution, WorkflowVersion
+from workflows.models import WorkflowVersion
 from workflows.nodes import NODE_REGISTRY, WorkflowContext
 from workflows.service import WorkflowService
 
@@ -141,6 +141,7 @@ class TestWorkflowServiceTenantIsolation:
         service = WorkflowService(db_session, {"id": 1, "organization_id": 1, "roles": ["analyst"]})
         # create a workflow in org 2 directly
         from workflows.models import WorkflowDefinition
+
         wf = WorkflowDefinition(organization_id=2, created_by=2, name="Other Org")
         db_session.add(wf)
         db_session.commit()
@@ -150,27 +151,37 @@ class TestWorkflowServiceTenantIsolation:
 
     def test_super_admin_can_access_any_workflow(self, db_session):
         from workflows.models import WorkflowDefinition
+
         wf = WorkflowDefinition(organization_id=2, created_by=2, name="Other Org")
         db_session.add(wf)
         db_session.commit()
 
-        service = WorkflowService(db_session, {"id": 1, "organization_id": 1, "roles": ["super_admin"]})
+        service = WorkflowService(
+            db_session, {"id": 1, "organization_id": 1, "roles": ["super_admin"]}
+        )
         assert service.get_definition(wf.id).name == "Other Org"
 
 
 class TestWorkflowVersioning:
     def test_publishing_archives_previous_version(self, db_session):
         from workflows.models import WorkflowDefinition
+
         wf = WorkflowDefinition(organization_id=1, created_by=1, name="Versioned")
         db_session.add(wf)
         db_session.commit()
 
-        v1 = WorkflowVersion(workflow_id=wf.id, version_number=1, status="published", nodes=[], edges=[], config={})
-        v2 = WorkflowVersion(workflow_id=wf.id, version_number=2, status="draft", nodes=[], edges=[], config={})
+        v1 = WorkflowVersion(
+            workflow_id=wf.id, version_number=1, status="published", nodes=[], edges=[], config={}
+        )
+        v2 = WorkflowVersion(
+            workflow_id=wf.id, version_number=2, status="draft", nodes=[], edges=[], config={}
+        )
         db_session.add_all([v1, v2])
         db_session.commit()
 
-        service = WorkflowService(db_session, {"id": 1, "organization_id": 1, "roles": ["super_admin"]})
+        service = WorkflowService(
+            db_session, {"id": 1, "organization_id": 1, "roles": ["super_admin"]}
+        )
         service.publish_version(wf.id, v2.id)
         db_session.refresh(v1)
         db_session.refresh(v2)
@@ -243,4 +254,3 @@ class TestWorkflowAPI:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
-

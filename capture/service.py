@@ -16,7 +16,6 @@ from __future__ import annotations
 import io
 import logging
 import os
-import uuid
 import zipfile
 from datetime import datetime, timedelta, timezone
 
@@ -26,12 +25,16 @@ import config
 from capture import classifier, extractors, preprocessing, template_service, validators
 from capture.document_types import get_document_type
 from capture.models import (
-    CaptureAuditLog,
     CaptureBatch,
     CaptureDocument,
     CaptureField,
 )
-from capture.ocr_engine import OcrUnavailableError, is_ocr_available, render_pdf_to_images, run_ocr_on_document
+from capture.ocr_engine import (
+    OcrUnavailableError,
+    is_ocr_available,
+    render_pdf_to_images,
+    run_ocr_on_document,
+)
 from capture.repositories import (
     CaptureAuditLogRepository,
     CaptureBatchRepository,
@@ -62,6 +65,7 @@ class CaptureService:
         self.template_repo = CaptureTemplateRepository(db)
         # File storage service (Phase 12)
         from storage.service import FileService
+
         self.file_service = FileService(db)
 
     # ── storage helpers ──────────────────────────────────────────────────
@@ -82,6 +86,7 @@ class CaptureService:
             return os.path.join(backend.base_dir, storage_key)
         # Cloud backend — download to temp file
         import tempfile
+
         ext = os.path.splitext(storage_key)[1]
         fd, tmp_path = tempfile.mkstemp(suffix=ext)
         os.close(fd)
@@ -90,7 +95,9 @@ class CaptureService:
             f.write(data)
         return tmp_path
 
-    def _upload_derived(self, doc: CaptureDocument, key_suffix: str, data: bytes, content_type: str = "image/png") -> str:
+    def _upload_derived(
+        self, doc: CaptureDocument, key_suffix: str, data: bytes, content_type: str = "image/png"
+    ) -> str:
         """Upload a derived file (enhanced image, thumbnail) to storage and return the key."""
         key_prefix = f"capture/{doc.organization_id}/"
         file_record = self.file_service.upload(
@@ -103,12 +110,22 @@ class CaptureService:
         )
         return file_record.storage_key
 
-    def _log(self, organization_id: int, action: str, document_id: int | None = None,
-              batch_id: int | None = None, actor_id: int | None = None, details: dict | None = None) -> None:
+    def _log(
+        self,
+        organization_id: int,
+        action: str,
+        document_id: int | None = None,
+        batch_id: int | None = None,
+        actor_id: int | None = None,
+        details: dict | None = None,
+    ) -> None:
         self.audit_repo.log(
-            organization_id, action,
-            document_id=document_id, batch_id=batch_id,
-            actor_id=actor_id, details=details,
+            organization_id,
+            action,
+            document_id=document_id,
+            batch_id=batch_id,
+            actor_id=actor_id,
+            details=details,
         )
 
     # ── upload ───────────────────────────────────────────────────────────
@@ -130,9 +147,7 @@ class CaptureService:
 
         size_mb = len(file_content) / (1024 * 1024)
         if size_mb > config.CAPTURE_MAX_FILE_SIZE_MB:
-            raise CaptureError(
-                f"File exceeds maximum size of {config.CAPTURE_MAX_FILE_SIZE_MB}MB."
-            )
+            raise CaptureError(f"File exceeds maximum size of {config.CAPTURE_MAX_FILE_SIZE_MB}MB.")
 
         # Upload to storage layer (Phase 12 — abstract object storage)
         key_prefix = f"capture/{organization_id}/"
@@ -146,7 +161,9 @@ class CaptureService:
         )
         original_path = file_record.storage_key
 
-        retention_expires = datetime.now(timezone.utc) + timedelta(days=config.CAPTURE_RETENTION_DAYS)
+        retention_expires = datetime.now(timezone.utc) + timedelta(
+            days=config.CAPTURE_RETENTION_DAYS
+        )
 
         doc = CaptureDocument(
             organization_id=organization_id,
@@ -164,8 +181,14 @@ class CaptureService:
         self.db.commit()
         self.db.refresh(doc)
 
-        self._log(organization_id, "uploaded", document_id=doc.id, batch_id=batch_id, actor_id=user_id,
-                   details={"filename": filename, "size_bytes": len(file_content)})
+        self._log(
+            organization_id,
+            "uploaded",
+            document_id=doc.id,
+            batch_id=batch_id,
+            actor_id=user_id,
+            details={"filename": filename, "size_bytes": len(file_content)},
+        )
         self.db.commit()
 
         return doc
@@ -192,8 +215,12 @@ class CaptureService:
                 content = zf.read(info.filename)
                 try:
                     doc = self.upload_document(
-                        organization_id, user_id, os.path.basename(info.filename), content,
-                        source="web", batch_id=batch.id,
+                        organization_id,
+                        user_id,
+                        os.path.basename(info.filename),
+                        content,
+                        source="web",
+                        batch_id=batch.id,
                     )
                     documents.append(doc)
                 except CaptureError as e:
@@ -206,8 +233,12 @@ class CaptureService:
 
     # ── batches ──────────────────────────────────────────────────────────
 
-    def create_batch(self, organization_id: int, user_id: int, name: str, industry: str | None = None) -> CaptureBatch:
-        batch = CaptureBatch(organization_id=organization_id, name=name, industry=industry, created_by=user_id)
+    def create_batch(
+        self, organization_id: int, user_id: int, name: str, industry: str | None = None
+    ) -> CaptureBatch:
+        batch = CaptureBatch(
+            organization_id=organization_id, name=name, industry=industry, created_by=user_id
+        )
         self.db.add(batch)
         self.db.commit()
         self.db.refresh(batch)
@@ -216,7 +247,9 @@ class CaptureService:
     def get_batch(self, batch_id: int, organization_id: int) -> CaptureBatch | None:
         return self.batch_repo.get_by_org(batch_id, organization_id)
 
-    def list_batches(self, organization_id: int, limit: int = 50, offset: int = 0) -> list[CaptureBatch]:
+    def list_batches(
+        self, organization_id: int, limit: int = 50, offset: int = 0
+    ) -> list[CaptureBatch]:
         return self.batch_repo.list_by_org(organization_id, limit, offset)
 
     def process_batch(self, batch_id: int) -> None:
@@ -268,8 +301,12 @@ class CaptureService:
                     "OCR engine unavailable: the Tesseract OCR binary is not installed on this "
                     "server. Install it (see https://github.com/tesseract-ocr/tesseract) and retry."
                 )
-                self._log(doc.organization_id, "failed", document_id=doc.id,
-                          details={"reason": "ocr_unavailable"})
+                self._log(
+                    doc.organization_id,
+                    "failed",
+                    document_id=doc.id,
+                    details={"reason": "ocr_unavailable"},
+                )
                 self.db.commit()
                 return doc
 
@@ -302,8 +339,15 @@ class CaptureService:
 
             doc.status = "ready_for_review"
             doc.processed_at = datetime.now(timezone.utc)
-            self._log(doc.organization_id, "extracted", document_id=doc.id,
-                      details={"document_type": doc.document_type, "confidence": doc.classification_confidence})
+            self._log(
+                doc.organization_id,
+                "extracted",
+                document_id=doc.id,
+                details={
+                    "document_type": doc.document_type,
+                    "confidence": doc.classification_confidence,
+                },
+            )
             self.db.commit()
             return doc
 
@@ -341,7 +385,9 @@ class CaptureService:
             # Upload first enhanced page to storage
             if enhanced_paths:
                 with open(enhanced_paths[0], "rb") as f:
-                    doc.enhanced_file_path = self._upload_derived(doc, f"doc_{doc.id}_enhanced", f.read())
+                    doc.enhanced_file_path = self._upload_derived(
+                        doc, f"doc_{doc.id}_enhanced", f.read()
+                    )
             else:
                 doc.enhanced_file_path = None
             doc.page_count = len(enhanced_paths)
@@ -351,7 +397,9 @@ class CaptureService:
             os.makedirs(enhanced_dir, exist_ok=True)
             preprocessing.enhance_image(local_original, out_path)
             with open(out_path, "rb") as f:
-                doc.enhanced_file_path = self._upload_derived(doc, f"doc_{doc.id}_enhanced", f.read())
+                doc.enhanced_file_path = self._upload_derived(
+                    doc, f"doc_{doc.id}_enhanced", f.read()
+                )
             enhanced_paths = [out_path]
             thumb_source = local_original
 
@@ -367,14 +415,22 @@ class CaptureService:
         # Clean up temp files
         try:
             import shutil
+
             shutil.rmtree(work_dir, ignore_errors=True)
-            if self.file_service.backend.name != "local" and local_original != doc.original_file_path:
+            if (
+                self.file_service.backend.name != "local"
+                and local_original != doc.original_file_path
+            ):
                 os.remove(local_original)
         except Exception:
             pass
 
-        self._log(doc.organization_id, "preprocessed", document_id=doc.id,
-                   details={"pages": len(enhanced_paths)})
+        self._log(
+            doc.organization_id,
+            "preprocessed",
+            document_id=doc.id,
+            details={"pages": len(enhanced_paths)},
+        )
         self.db.commit()
         return enhanced_paths
 
@@ -385,7 +441,9 @@ class CaptureService:
         self.db.flush()
 
         doc_type_spec = get_document_type(doc.document_type) if doc.document_type else None
-        template_boost = template_service.get_template_boost(self.db, doc.organization_id, doc.document_type)
+        template_boost = template_service.get_template_boost(
+            self.db, doc.organization_id, doc.document_type
+        )
 
         extracted = extractors.extract_fields(ocr_result, doc_type_spec, template_boost)
 
@@ -398,16 +456,22 @@ class CaptureService:
                 spec = next((f for f in doc_type_spec.fields if f.name == item.field_name), None)
                 enum_values = spec.enum_values if spec else None
 
-            is_valid, message = validators.validate_field(item.field_name, item.value, item.data_type, enum_values)
+            is_valid, message = validators.validate_field(
+                item.field_name, item.value, item.data_type, enum_values
+            )
             is_low_conf = item.confidence < config.CAPTURE_LOW_CONFIDENCE_THRESHOLD
 
             # Suggest standardized spelling for known vocabularies without overwriting.
             if item.field_name == "diagnosis" and item.value:
-                suggestion = validators.suggest_standard_spelling(item.value, validators.DIAGNOSIS_MASTER_LIST)
+                suggestion = validators.suggest_standard_spelling(
+                    item.value, validators.DIAGNOSIS_MASTER_LIST
+                )
                 if suggestion and suggestion.lower() != item.value.lower():
                     message = (message + " " if message else "") + f"Did you mean '{suggestion}'?"
             if item.field_name in ("drug_name",) and item.value:
-                suggestion = validators.suggest_standard_spelling(item.value, validators.DRUG_MASTER_LIST)
+                suggestion = validators.suggest_standard_spelling(
+                    item.value, validators.DRUG_MASTER_LIST
+                )
                 if suggestion and suggestion.lower() != item.value.lower():
                     message = (message + " " if message else "") + f"Did you mean '{suggestion}'?"
 
@@ -430,7 +494,9 @@ class CaptureService:
                 confidences.append(item.confidence)
                 field_values[item.field_name] = item.value
 
-        doc.overall_confidence = round(sum(confidences) / len(confidences), 3) if confidences else 0.0
+        doc.overall_confidence = (
+            round(sum(confidences) / len(confidences), 3) if confidences else 0.0
+        )
 
         duplicate_id = validators.find_duplicate_document(
             self.db, doc.organization_id, doc.document_type, field_values
@@ -455,8 +521,11 @@ class CaptureService:
     ) -> list[CaptureDocument]:
         return self.doc_repo.list_by_org(
             organization_id,
-            status=status, document_type=document_type, batch_id=batch_id,
-            limit=limit, offset=offset,
+            status=status,
+            document_type=document_type,
+            batch_id=batch_id,
+            limit=limit,
+            offset=offset,
         )
 
     def get_fields(self, document_id: int) -> list[CaptureField]:
@@ -484,23 +553,43 @@ class CaptureService:
         if doc_type_spec:
             spec = next((f for f in doc_type_spec.fields if f.name == field.field_name), None)
             enum_values = spec.enum_values if spec else None
-        is_valid, message = validators.validate_field(field.field_name, new_value, field.data_type, enum_values)
+        is_valid, message = validators.validate_field(
+            field.field_name, new_value, field.data_type, enum_values
+        )
         field.is_valid = is_valid
         field.validation_message = message
 
         self.db.commit()
 
         template_service.record_correction(
-            self.db, organization_id, document_id, field_id, field.field_name,
-            doc.document_type, old_value, new_value, user_id,
+            self.db,
+            organization_id,
+            document_id,
+            field_id,
+            field.field_name,
+            doc.document_type,
+            old_value,
+            new_value,
+            user_id,
         )
-        self._log(organization_id, "corrected", document_id=document_id, actor_id=user_id,
-                   details={"field_name": field.field_name, "old_value": old_value, "new_value": new_value})
+        self._log(
+            organization_id,
+            "corrected",
+            document_id=document_id,
+            actor_id=user_id,
+            details={
+                "field_name": field.field_name,
+                "old_value": old_value,
+                "new_value": new_value,
+            },
+        )
         self.db.commit()
 
         return field
 
-    def set_document_type(self, document_id: int, organization_id: int, document_type_key: str, user_id: int) -> CaptureDocument:
+    def set_document_type(
+        self, document_id: int, organization_id: int, document_type_key: str, user_id: int
+    ) -> CaptureDocument:
         doc = self.get_document(document_id, organization_id)
         if not doc:
             raise CaptureError("Document not found.")
@@ -518,18 +607,28 @@ class CaptureService:
 
         if doc.raw_ocr_text:
             from capture.ocr_engine import OcrResult
+
             # Re-extract using the confirmed type. Word-level boxes aren't
             # re-derived here (text-only re-run); re-processing from images
             # via `retry_document` gives full fidelity if needed.
-            ocr_result = OcrResult(full_text=doc.raw_ocr_text, words=[], mean_confidence=doc.overall_confidence or 0.0)
+            ocr_result = OcrResult(
+                full_text=doc.raw_ocr_text, words=[], mean_confidence=doc.overall_confidence or 0.0
+            )
             self._extract_and_validate(doc, ocr_result)
 
-        self._log(organization_id, "type_confirmed", document_id=document_id, actor_id=user_id,
-                   details={"document_type": spec.key})
+        self._log(
+            organization_id,
+            "type_confirmed",
+            document_id=document_id,
+            actor_id=user_id,
+            details={"document_type": spec.key},
+        )
         self.db.commit()
         return doc
 
-    def approve_document(self, document_id: int, organization_id: int, user_id: int) -> CaptureDocument:
+    def approve_document(
+        self, document_id: int, organization_id: int, user_id: int
+    ) -> CaptureDocument:
         doc = self.get_document(document_id, organization_id)
         if not doc:
             raise CaptureError("Document not found.")
@@ -584,6 +683,7 @@ class CaptureService:
 
         # Write to CSV in the dataset storage area
         import csv
+
         dataset_dir = os.path.join(config.CAPTURE_STORAGE_DIR, str(organization_id), "exports")
         os.makedirs(dataset_dir, exist_ok=True)
         safe_name = (dataset_name or f"capture_export_{doc.id}").replace(" ", "_").replace("/", "_")
@@ -599,12 +699,14 @@ class CaptureService:
         # Register in dataset library if available
         try:
             from dataset_library import DatasetEntry, DataTier, get_dataset_library
+
             lib = get_dataset_library()
             ds_id = f"capture_export_{organization_id}_{safe_name}"
             if not lib.get(ds_id):
                 entry = DatasetEntry(
                     id=ds_id,
-                    name=dataset_name or f"Capture Export — {doc.document_type_label or doc.document_type or 'Unknown'}",
+                    name=dataset_name
+                    or f"Capture Export — {doc.document_type_label or doc.document_type or 'Unknown'}",
                     tier=DataTier.PRODUCTION,
                     file_path=csv_path,
                     metadata={
@@ -618,8 +720,13 @@ class CaptureService:
         except Exception as e:
             logger.warning("Could not register capture export in dataset library: %s", e)
 
-        self._log(organization_id, "exported", document_id=document_id, actor_id=user_id,
-                  details={"dataset_name": safe_name, "csv_path": csv_path})
+        self._log(
+            organization_id,
+            "exported",
+            document_id=document_id,
+            actor_id=user_id,
+            details={"dataset_name": safe_name, "csv_path": csv_path},
+        )
         self.db.commit()
 
         return {
@@ -639,14 +746,24 @@ class CaptureService:
         dataset_name: str | None = None,
     ) -> dict:
         """Export all approved documents for an organization to a single dataset CSV."""
-        docs = self.list_documents(organization_id, status="approved", document_type=document_type, limit=10000)
+        docs = self.list_documents(
+            organization_id, status="approved", document_type=document_type, limit=10000
+        )
         if not docs:
             raise CaptureError("No approved documents to export.")
 
         import csv
+
         dataset_dir = os.path.join(config.CAPTURE_STORAGE_DIR, str(organization_id), "exports")
         os.makedirs(dataset_dir, exist_ok=True)
-        safe_name = (dataset_name or f"capture_bulk_export_{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}").replace(" ", "_").replace("/", "_")
+        safe_name = (
+            (
+                dataset_name
+                or f"capture_bulk_export_{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}"
+            )
+            .replace(" ", "_")
+            .replace("/", "_")
+        )
         csv_path = os.path.join(dataset_dir, f"{safe_name}.csv")
 
         all_field_names: set[str] = set()
@@ -668,7 +785,14 @@ class CaptureService:
             rows.append(row)
 
         # Write CSV with union of all field names
-        fieldnames = ["document_id", "filename", "document_type", "document_type_label", "industry", "approved_at"]
+        fieldnames = [
+            "document_id",
+            "filename",
+            "document_type",
+            "document_type_label",
+            "industry",
+            "approved_at",
+        ]
         fieldnames.extend(sorted(all_field_names - set(fieldnames)))
 
         with open(csv_path, "w", newline="", encoding="utf-8") as csvfile:
@@ -680,6 +804,7 @@ class CaptureService:
         # Register in dataset library
         try:
             from dataset_library import DatasetEntry, DataTier, get_dataset_library
+
             lib = get_dataset_library()
             ds_id = f"capture_export_{organization_id}_{safe_name}"
             entry = DatasetEntry(
@@ -698,8 +823,12 @@ class CaptureService:
         except Exception as e:
             logger.warning("Could not register bulk capture export in dataset library: %s", e)
 
-        self._log(organization_id, "bulk_exported", actor_id=user_id,
-                  details={"document_count": len(rows), "csv_path": csv_path})
+        self._log(
+            organization_id,
+            "bulk_exported",
+            actor_id=user_id,
+            details={"document_count": len(rows), "csv_path": csv_path},
+        )
         self.db.commit()
 
         return {
@@ -710,7 +839,9 @@ class CaptureService:
             "fields_exported": fieldnames,
         }
 
-    def reject_document(self, document_id: int, organization_id: int, user_id: int, reason: str | None = None) -> CaptureDocument:
+    def reject_document(
+        self, document_id: int, organization_id: int, user_id: int, reason: str | None = None
+    ) -> CaptureDocument:
         doc = self.get_document(document_id, organization_id)
         if not doc:
             raise CaptureError("Document not found.")
@@ -720,7 +851,13 @@ class CaptureService:
         doc.reviewed_at = datetime.now(timezone.utc)
         if reason:
             doc.error_message = reason
-        self._log(organization_id, "rejected", document_id=document_id, actor_id=user_id, details={"reason": reason})
+        self._log(
+            organization_id,
+            "rejected",
+            document_id=document_id,
+            actor_id=user_id,
+            details={"reason": reason},
+        )
         self.db.commit()
         return doc
 
@@ -756,7 +893,9 @@ class CaptureService:
                 try:
                     backend.delete(key)
                 except Exception as e:
-                    logger.warning("Failed to delete storage key %s for document %s: %s", key, document_id, e)
+                    logger.warning(
+                        "Failed to delete storage key %s for document %s: %s", key, document_id, e
+                    )
 
         for f in self.field_repo.list_by_document(document_id):
             self.db.delete(f)

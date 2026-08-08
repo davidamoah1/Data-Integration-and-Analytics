@@ -28,14 +28,13 @@ from sqlalchemy.orm import Session as DbSession
 from audit.service import log_audit_event
 from etl.file_security import FileValidator
 from governance import classify_dataset
-from shared.database import get_db
-from shared.dependencies import get_current_user
-from shared.tenant import get_current_organization_id
-
 from services.dataset_workflow import (
     DatasetWorkflowOrchestrator,
     WorkflowStage,
 )
+from shared.database import get_db
+from shared.dependencies import get_current_user
+from shared.tenant import get_current_organization_id
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/dataset-workflow", tags=["Dataset Workflow"])
@@ -120,12 +119,12 @@ async def run_workflow(
 
     Returns the complete workflow state with all stage results.
     """
-    content = _validate_uploaded_file(file)
+    _validate_uploaded_file(file)
 
     try:
         df = _read_upload(file)
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Failed to read file: {e}")
+        raise HTTPException(status_code=400, detail=f"Failed to read file: {e}") from None
 
     if df.empty:
         raise HTTPException(status_code=400, detail="Uploaded file is empty")
@@ -320,7 +319,7 @@ async def retry_stage(
     try:
         stage_enum = WorkflowStage(stage)
     except ValueError:
-        raise HTTPException(status_code=400, detail=f"Invalid stage: {stage}")
+        raise HTTPException(status_code=400, detail=f"Invalid stage: {stage}") from None
 
     state = _orchestrator.retry_stage(workflow_id, stage_enum)
     if not state:

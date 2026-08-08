@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session as DbSession
 
@@ -12,7 +12,6 @@ from connectors.base import ConnectorRegistry
 from connectors.models import Connector, ConnectorExecution
 from connectors.schemas import (
     ConnectorCreate,
-    ConnectorTestResult,
     ConnectorUpdate,
 )
 from shared.database import get_db
@@ -63,20 +62,22 @@ async def list_connectors(
         .scalars()
         .all()
     )
-    return success_response([
-        {
-            "id": c.id,
-            "name": c.name,
-            "connector_type": c.connector_type,
-            "category": c.category,
-            "description": c.description,
-            "status": c.status,
-            "last_tested_at": str(c.last_tested_at) if c.last_tested_at else None,
-            "is_public": c.is_public,
-            "created_at": str(c.created_at) if c.created_at else None,
-        }
-        for c in connectors
-    ])
+    return success_response(
+        [
+            {
+                "id": c.id,
+                "name": c.name,
+                "connector_type": c.connector_type,
+                "category": c.category,
+                "description": c.description,
+                "status": c.status,
+                "last_tested_at": str(c.last_tested_at) if c.last_tested_at else None,
+                "is_public": c.is_public,
+                "created_at": str(c.created_at) if c.created_at else None,
+            }
+            for c in connectors
+        ]
+    )
 
 
 @router.post("")
@@ -89,7 +90,9 @@ async def create_connector(
     org_id = get_current_organization_id(current_user, db)
     connector_type = ConnectorRegistry.get(body.connector_type)
     if not connector_type:
-        raise HTTPException(status_code=400, detail=f"Unknown connector type: {body.connector_type}")
+        raise HTTPException(
+            status_code=400, detail=f"Unknown connector type: {body.connector_type}"
+        )
 
     connector = Connector(
         organization_id=org_id,
@@ -106,7 +109,12 @@ async def create_connector(
     db.flush()
     db.commit()
     return success_response(
-        {"id": connector.id, "name": connector.name, "connector_type": connector.connector_type, "status": connector.status},
+        {
+            "id": connector.id,
+            "name": connector.name,
+            "connector_type": connector.connector_type,
+            "status": connector.status,
+        },
         "Connector created",
     )
 
@@ -124,19 +132,21 @@ async def get_connector(
     ).scalar_one_or_none()
     if not connector:
         raise HTTPException(status_code=404, detail="Connector not found")
-    return success_response({
-        "id": connector.id,
-        "name": connector.name,
-        "connector_type": connector.connector_type,
-        "category": connector.category,
-        "description": connector.description,
-        "configuration": connector.configuration,
-        "status": connector.status,
-        "last_tested_at": str(connector.last_tested_at) if connector.last_tested_at else None,
-        "last_test_result": connector.last_test_result,
-        "is_public": connector.is_public,
-        "created_at": str(connector.created_at) if connector.created_at else None,
-    })
+    return success_response(
+        {
+            "id": connector.id,
+            "name": connector.name,
+            "connector_type": connector.connector_type,
+            "category": connector.category,
+            "description": connector.description,
+            "configuration": connector.configuration,
+            "status": connector.status,
+            "last_tested_at": str(connector.last_tested_at) if connector.last_tested_at else None,
+            "last_test_result": connector.last_test_result,
+            "is_public": connector.is_public,
+            "created_at": str(connector.created_at) if connector.created_at else None,
+        }
+    )
 
 
 @router.put("/{connector_id}")
@@ -259,12 +269,14 @@ async def extract_data(
             )
         )
         db.commit()
-        return success_response({
-            "execution_id": execution.id,
-            "rows": len(df),
-            "columns": list(df.columns),
-            "data": df.head(100).to_dict(orient="records"),
-        })
+        return success_response(
+            {
+                "execution_id": execution.id,
+                "rows": len(df),
+                "columns": list(df.columns),
+                "data": df.head(100).to_dict(orient="records"),
+            }
+        )
     except Exception as e:
         db.execute(
             update(ConnectorExecution)
@@ -276,7 +288,7 @@ async def extract_data(
             )
         )
         db.commit()
-        raise HTTPException(status_code=500, detail=f"Extraction failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Extraction failed: {e}") from None
 
 
 @router.get("/{connector_id}/executions")
@@ -301,14 +313,16 @@ async def list_executions(
         .scalars()
         .all()
     )
-    return success_response([
-        {
-            "id": e.id,
-            "status": e.status,
-            "rows_extracted": e.rows_extracted,
-            "error_message": e.error_message,
-            "started_at": str(e.started_at) if e.started_at else None,
-            "completed_at": str(e.completed_at) if e.completed_at else None,
-        }
-        for e in executions
-    ])
+    return success_response(
+        [
+            {
+                "id": e.id,
+                "status": e.status,
+                "rows_extracted": e.rows_extracted,
+                "error_message": e.error_message,
+                "started_at": str(e.started_at) if e.started_at else None,
+                "completed_at": str(e.completed_at) if e.completed_at else None,
+            }
+            for e in executions
+        ]
+    )

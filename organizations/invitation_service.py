@@ -5,9 +5,9 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session as DbSession
 
-from authentication.models import Role, User, UserRole
-from authentication.repositories import RoleRepository, UserRepository, UserRoleRepository
 from audit.models import AuditLog
+from authentication.models import Role, User
+from authentication.repositories import RoleRepository, UserRepository, UserRoleRepository
 from organizations.invitation_schemas import (
     InvitationAccept,
     InvitationCreate,
@@ -23,9 +23,7 @@ class InvitationService:
     def __init__(self, db: DbSession):
         self.db = db
 
-    def create_invitation(
-        self, org_id: int, request: InvitationCreate, created_by: int
-    ) -> dict:
+    def create_invitation(self, org_id: int, request: InvitationCreate, created_by: int) -> dict:
         role_repo = RoleRepository(self.db)
         role = role_repo.get_by_name(request.role_name)
         if not role:
@@ -82,9 +80,7 @@ class InvitationService:
 
         if invitation.expires_at < datetime.now(timezone.utc):
             self.db.execute(
-                update(Invitation)
-                .where(Invitation.id == invitation.id)
-                .values(status="expired")
+                update(Invitation).where(Invitation.id == invitation.id).values(status="expired")
             )
             self.db.commit()
             raise ValidationError("Invitation has expired")
@@ -211,9 +207,7 @@ class InvitationService:
             raise ValidationError("Only pending invitations can be revoked")
 
         self.db.execute(
-            update(Invitation)
-            .where(Invitation.id == invitation_id)
-            .values(status="revoked")
+            update(Invitation).where(Invitation.id == invitation_id).values(status="revoked")
         )
         self.db.commit()
 

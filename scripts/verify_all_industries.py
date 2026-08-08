@@ -1,9 +1,12 @@
 """Verify all 12 industry datasets detect correctly and produce industry-appropriate dashboards."""
+
 import os
+
 import pandas as pd
-from semantic.mapping_engine import SemanticMappingEngine
+
 from semantic.dashboard_generator import DashboardGenerator
 from semantic.dashboard_registry import DashboardRegistry
+from semantic.mapping_engine import SemanticMappingEngine
 
 datasets_dir = "dataset/industries"
 results = []
@@ -21,10 +24,9 @@ for filename in sorted(os.listdir(datasets_dir)):
     try:
         config = DashboardGenerator.generate(df, m, admin_confirmed=True)
         kpi_labels = [k["label"] for k in config.kpi_cards]
-        has_banking_kpi = (
-        m.industry not in ("retail", "banking")
-        and any("Transaction" in label for label in kpi_labels)
-    )
+        has_banking_kpi = m.industry not in ("retail", "banking") and any(
+            "Transaction" in label for label in kpi_labels
+        )
     except ValueError:
         kpi_labels = []
         has_banking_kpi = False

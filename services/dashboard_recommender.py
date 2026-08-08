@@ -48,7 +48,6 @@ class DashboardRecommendationEngine:
 
         industry = mapping_result.industry
         confidence = mapping_result.industry_confidence
-        entities = mapping_result.business_entities
 
         # Identify available measures, dimensions, time, geo
         measures = self._identify_measures(mapping_result)
@@ -111,12 +110,14 @@ class DashboardRecommendationEngine:
 
         for mapping in mapping_result.semantic_result.mappings:
             if mapping.role == "metric":
-                measures.append({
-                    "column": mapping.column_name,
-                    "entity": mapping.entity_key,
-                    "display": mapping.entity_display,
-                    "confidence": round(mapping.confidence, 2),
-                })
+                measures.append(
+                    {
+                        "column": mapping.column_name,
+                        "entity": mapping.entity_key,
+                        "display": mapping.entity_display,
+                        "confidence": round(mapping.confidence, 2),
+                    }
+                )
         return measures
 
     def _identify_dimensions(self, mapping_result: SemanticMappingResult) -> list[dict]:
@@ -127,15 +128,19 @@ class DashboardRecommendationEngine:
 
         for mapping in mapping_result.semantic_result.mappings:
             if mapping.role in ("dimension", "entity"):
-                dimensions.append({
-                    "column": mapping.column_name,
-                    "entity": mapping.entity_key,
-                    "display": mapping.entity_display,
-                    "confidence": round(mapping.confidence, 2),
-                })
+                dimensions.append(
+                    {
+                        "column": mapping.column_name,
+                        "entity": mapping.entity_key,
+                        "display": mapping.entity_display,
+                        "confidence": round(mapping.confidence, 2),
+                    }
+                )
         return dimensions
 
-    def _identify_time_fields(self, df: pd.DataFrame, mapping_result: SemanticMappingResult) -> list[dict]:
+    def _identify_time_fields(
+        self, df: pd.DataFrame, mapping_result: SemanticMappingResult
+    ) -> list[dict]:
         """Identify time/date fields."""
         time_fields = []
         if not hasattr(mapping_result, "semantic_result"):
@@ -143,13 +148,17 @@ class DashboardRecommendationEngine:
 
         for mapping in mapping_result.semantic_result.mappings:
             if mapping.entity_key == "date":
-                time_fields.append({
-                    "column": mapping.column_name,
-                    "display": mapping.entity_display,
-                    "is_datetime": pd.api.types.is_datetime64_any_dtype(df[mapping.column_name])
-                    if mapping.column_name in df.columns
-                    else False,
-                })
+                time_fields.append(
+                    {
+                        "column": mapping.column_name,
+                        "display": mapping.entity_display,
+                        "is_datetime": (
+                            pd.api.types.is_datetime64_any_dtype(df[mapping.column_name])
+                            if mapping.column_name in df.columns
+                            else False
+                        ),
+                    }
+                )
         return time_fields
 
     def _identify_geo_fields(self, mapping_result: SemanticMappingResult) -> list[dict]:
@@ -161,11 +170,13 @@ class DashboardRecommendationEngine:
 
         for mapping in mapping_result.semantic_result.mappings:
             if mapping.entity_key in geo_entities:
-                geo_fields.append({
-                    "column": mapping.column_name,
-                    "entity": mapping.entity_key,
-                    "display": mapping.entity_display,
-                })
+                geo_fields.append(
+                    {
+                        "column": mapping.column_name,
+                        "entity": mapping.entity_key,
+                        "display": mapping.entity_display,
+                    }
+                )
         return geo_fields
 
     def _get_industry_templates(self, industry: str) -> list[dict]:
@@ -174,12 +185,14 @@ class DashboardRecommendationEngine:
         try:
             template = DashboardRegistry.get(industry)
             if template:
-                templates.append({
-                    "industry": industry,
-                    "name": getattr(template, "name", industry.title()),
-                    "kpi_count": len(getattr(template, "kpi_cards", [])),
-                    "chart_count": len(getattr(template, "charts", [])),
-                })
+                templates.append(
+                    {
+                        "industry": industry,
+                        "name": getattr(template, "name", industry.title()),
+                        "kpi_count": len(getattr(template, "kpi_cards", [])),
+                        "chart_count": len(getattr(template, "charts", [])),
+                    }
+                )
         except Exception:
             pass
 
@@ -187,12 +200,14 @@ class DashboardRecommendationEngine:
         try:
             generic = DashboardRegistry.get("unknown")
             if generic and industry != "unknown":
-                templates.append({
-                    "industry": "unknown",
-                    "name": "Generic Analytics",
-                    "kpi_count": len(getattr(generic, "kpi_cards", [])),
-                    "chart_count": len(getattr(generic, "charts", [])),
-                })
+                templates.append(
+                    {
+                        "industry": "unknown",
+                        "name": "Generic Analytics",
+                        "kpi_count": len(getattr(generic, "kpi_cards", [])),
+                        "chart_count": len(getattr(generic, "charts", [])),
+                    }
+                )
         except Exception:
             pass
 
@@ -214,9 +229,13 @@ class DashboardRecommendationEngine:
         if industry == "unknown":
             parts.append("Industry could not be determined with sufficient confidence.")
             parts.append(f"Best guess confidence: {confidence:.0f}%.")
-            parts.append("A generic analytics dashboard is recommended until industry is confirmed.")
+            parts.append(
+                "A generic analytics dashboard is recommended until industry is confirmed."
+            )
         else:
-            parts.append(f"Industry detected as '{industry.title()}' with {confidence:.0f}% confidence.")
+            parts.append(
+                f"Industry detected as '{industry.title()}' with {confidence:.0f}% confidence."
+            )
             if confidence < 70:
                 parts.append("Confidence is below threshold — user confirmation is required.")
             elif confidence < 85:
@@ -226,7 +245,9 @@ class DashboardRecommendationEngine:
         if time_fields:
             parts.append(f"Time fields available: {', '.join(f['column'] for f in time_fields)}.")
         if geo_fields:
-            parts.append(f"Geographic fields available: {', '.join(f['column'] for f in geo_fields)}.")
+            parts.append(
+                f"Geographic fields available: {', '.join(f['column'] for f in geo_fields)}."
+            )
         if templates:
             parts.append(f"Dashboard template available for '{templates[0]['industry']}'.")
 
@@ -246,56 +267,66 @@ class DashboardRecommendationEngine:
         # Time series: if we have measures and time fields
         if measures and time_fields:
             for measure in measures[:3]:
-                charts.append({
-                    "type": "line_chart",
-                    "title": f"{measure['display']} over time",
-                    "x_axis": time_fields[0]["column"],
-                    "y_axis": measure["column"],
-                    "reasoning": f"Track {measure['display']} trends over time",
-                })
+                charts.append(
+                    {
+                        "type": "line_chart",
+                        "title": f"{measure['display']} over time",
+                        "x_axis": time_fields[0]["column"],
+                        "y_axis": measure["column"],
+                        "reasoning": f"Track {measure['display']} trends over time",
+                    }
+                )
 
         # Bar chart: measure by dimension
         if measures and dimensions:
             for measure in measures[:2]:
                 for dim in dimensions[:2]:
-                    charts.append({
-                        "type": "bar_chart",
-                        "title": f"{measure['display']} by {dim['display']}",
-                        "x_axis": dim["column"],
-                        "y_axis": measure["column"],
-                        "reasoning": f"Compare {measure['display']} across {dim['display']}",
-                    })
+                    charts.append(
+                        {
+                            "type": "bar_chart",
+                            "title": f"{measure['display']} by {dim['display']}",
+                            "x_axis": dim["column"],
+                            "y_axis": measure["column"],
+                            "reasoning": f"Compare {measure['display']} across {dim['display']}",
+                        }
+                    )
 
         # Pie chart: dimension distribution
         if dimensions:
             for dim in dimensions[:2]:
-                charts.append({
-                    "type": "pie_chart",
-                    "title": f"{dim['display']} distribution",
-                    "column": dim["column"],
-                    "reasoning": f"Show distribution of {dim['display']}",
-                })
+                charts.append(
+                    {
+                        "type": "pie_chart",
+                        "title": f"{dim['display']} distribution",
+                        "column": dim["column"],
+                        "reasoning": f"Show distribution of {dim['display']}",
+                    }
+                )
 
         # Geo chart: if geo fields and measures
         if geo_fields and measures:
-            charts.append({
-                "type": "geo_chart",
-                "title": f"{measures[0]['display']} by {geo_fields[0]['display']}",
-                "geo_column": geo_fields[0]["column"],
-                "measure": measures[0]["column"],
-                "reasoning": f"Visualize {measures[0]['display']} geographically",
-            })
+            charts.append(
+                {
+                    "type": "geo_chart",
+                    "title": f"{measures[0]['display']} by {geo_fields[0]['display']}",
+                    "geo_column": geo_fields[0]["column"],
+                    "measure": measures[0]["column"],
+                    "reasoning": f"Visualize {measures[0]['display']} geographically",
+                }
+            )
 
         # KPI cards
         if measures:
             for measure in measures[:4]:
-                charts.append({
-                    "type": "kpi_card",
-                    "title": f"Total {measure['display']}",
-                    "measure": measure["column"],
-                    "aggregation": "sum",
-                    "reasoning": f"Key metric: {measure['display']}",
-                })
+                charts.append(
+                    {
+                        "type": "kpi_card",
+                        "title": f"Total {measure['display']}",
+                        "measure": measure["column"],
+                        "aggregation": "sum",
+                        "reasoning": f"Key metric: {measure['display']}",
+                    }
+                )
 
         return charts[:12]  # Limit to 12 recommendations
 

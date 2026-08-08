@@ -115,10 +115,7 @@ class ReportGenerator:
         """
         industry = getattr(mapping_result, "industry", "unknown") if mapping_result else "unknown"
         dataset_name = getattr(mapping_result, "table_metadata", None)
-        if dataset_name:
-            dataset_name = getattr(dataset_name, "table_name", "dataset")
-        else:
-            dataset_name = "dataset"
+        dataset_name = getattr(dataset_name, "table_name", "dataset") if dataset_name else "dataset"
 
         title = title or f"{industry.title()} Data Analysis Report"
         generated_at = datetime.now().strftime("%Y-%m-%d %H:%M")
@@ -192,18 +189,22 @@ class ReportGenerator:
             for m in semantic_model.metrics[:10]:
                 metric_rows.append([m.label, f"{m.value:,.2f}" if m.value else "N/A"])
             if metric_rows:
-                tables.append({
-                    "title": "Computed Metrics",
-                    "headers": ["Metric", "Value"],
-                    "rows": metric_rows,
-                })
+                tables.append(
+                    {
+                        "title": "Computed Metrics",
+                        "headers": ["Metric", "Value"],
+                        "rows": metric_rows,
+                    }
+                )
 
         # Basic stats
         numeric_cols = [c for c in df.columns if pd.api.types.is_numeric_dtype(df[c])]
         for col in numeric_cols[:5]:
             total = float(df[col].sum())
             avg = float(df[col].mean())
-            bullets.append(f"**{col.replace('_', ' ').title()}**: Total={total:,.2f}, Average={avg:,.2f}")
+            bullets.append(
+                f"**{col.replace('_', ' ').title()}**: Total={total:,.2f}, Average={avg:,.2f}"
+            )
 
         return ReportSection(
             title="Key Metrics",
@@ -262,7 +263,11 @@ class ReportGenerator:
                 date_range = f"{df_temp[date_col].min().date()} to {df_temp[date_col].max().date()}"
                 bullets.append(f"Date range: {date_range}")
 
-                numeric_cols = [c for c in df_temp.columns if pd.api.types.is_numeric_dtype(df_temp[c]) and c != date_col]
+                numeric_cols = [
+                    c
+                    for c in df_temp.columns
+                    if pd.api.types.is_numeric_dtype(df_temp[c]) and c != date_col
+                ]
                 for col in numeric_cols[:3]:
                     df_temp["_period"] = df_temp[date_col].dt.to_period("M").astype(str)
                     monthly = df_temp.groupby("_period")[col].sum()
@@ -289,7 +294,15 @@ class ReportGenerator:
     def _insights_section(insights: list) -> ReportSection:
         bullets = []
         for insight in insights[:10]:
-            icon = "⚠️" if insight.severity.value == "warning" else "🔴" if insight.severity.value == "critical" else "✅" if insight.severity.value == "positive" else "ℹ️"
+            icon = (
+                "⚠️"
+                if insight.severity.value == "warning"
+                else (
+                    "🔴"
+                    if insight.severity.value == "critical"
+                    else "✅" if insight.severity.value == "positive" else "ℹ️"
+                )
+            )
             bullets.append(f"{icon} **{insight.title}**: {insight.description}")
 
         return ReportSection(
@@ -299,7 +312,9 @@ class ReportGenerator:
         )
 
     @staticmethod
-    def _recommendations_section(intelligence: object | None, insights: list | None) -> ReportSection:
+    def _recommendations_section(
+        intelligence: object | None, insights: list | None
+    ) -> ReportSection:
         bullets = []
 
         # From industry intelligence
@@ -351,6 +366,8 @@ class ReportGenerator:
             critical = sum(1 for i in insights if i.severity.value == "critical")
             warnings = sum(1 for i in insights if i.severity.value == "warning")
             if critical or warnings:
-                parts.append(f"Automated analysis found {critical} critical and {warnings} warning-level patterns")
+                parts.append(
+                    f"Automated analysis found {critical} critical and {warnings} warning-level patterns"
+                )
 
         return ". ".join(parts) + "."
