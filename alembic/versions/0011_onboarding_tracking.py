@@ -26,7 +26,12 @@ depends_on: str | Sequence[str] | None = None
 def upgrade() -> None:
     op.create_table(
         "onboarding_progress",
-        sa.Column("id", sa.BigInteger().with_variant(sa.Integer(), "sqlite"), primary_key=True, autoincrement=True),
+        sa.Column(
+            "id",
+            sa.BigInteger().with_variant(sa.Integer(), "sqlite"),
+            primary_key=True,
+            autoincrement=True,
+        ),
         sa.Column("user_id", sa.BigInteger, nullable=False, index=True),
         sa.Column("organization_id", sa.BigInteger, nullable=True, index=True),
         sa.Column("role", sa.String(100), nullable=False),
@@ -40,7 +45,13 @@ def upgrade() -> None:
         sa.Column("is_skipped", sa.Boolean, nullable=False, default=False),
         sa.Column("completed_at", sa.TIMESTAMP, nullable=True),
         sa.Column("created_at", sa.TIMESTAMP, server_default=sa.func.now(), nullable=False),
-        sa.Column("updated_at", sa.TIMESTAMP, server_default=sa.func.now(), onupdate=sa.func.now(), nullable=False),
+        sa.Column(
+            "updated_at",
+            sa.TIMESTAMP,
+            server_default=sa.func.now(),
+            onupdate=sa.func.now(),
+            nullable=False,
+        ),
     )
 
     op.create_index(

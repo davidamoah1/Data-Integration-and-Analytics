@@ -33,7 +33,11 @@ class AnomalyDetectionEngine:
         if numeric.empty:
             return {"status": "failed", "error": "No numeric columns available"}
 
-        defaults = {"random_state": 42, "contamination": "auto"} if self.algorithm == "isolation_forest" else {"n_neighbors": 20, "contamination": "auto"}
+        defaults = (
+            {"random_state": 42, "contamination": "auto"}
+            if self.algorithm == "isolation_forest"
+            else {"n_neighbors": 20, "contamination": "auto"}
+        )
         params = {**defaults, **self.kwargs}
         estimator_class = self.ALGORITHMS[self.algorithm]
 
@@ -44,7 +48,11 @@ class AnomalyDetectionEngine:
             self.model.fit(numeric)
             labels = self.model.predict(numeric)
 
-        scores = self.model.score_samples(numeric) if hasattr(self.model, "score_samples") else [None] * len(numeric)
+        scores = (
+            self.model.score_samples(numeric)
+            if hasattr(self.model, "score_samples")
+            else [None] * len(numeric)
+        )
         summary = anomaly_metrics(labels)
         summary["status"] = "completed"
         summary["algorithm"] = self.algorithm

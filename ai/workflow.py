@@ -375,7 +375,11 @@ class WorkflowEngine:
             body=body,
             user_id=user_id,
         )
-        return {"email_sent": result.get("sent"), "to": to, "note": result.get("note") or result.get("error")}
+        return {
+            "email_sent": result.get("sent"),
+            "to": to,
+            "note": result.get("note") or result.get("error"),
+        }
 
     def _step_archive(self, config: dict, context: dict, user_id: int) -> dict:
         """Archive step."""

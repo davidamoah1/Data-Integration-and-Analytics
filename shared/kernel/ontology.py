@@ -71,16 +71,27 @@ class OntologyEngine:
                     node_id=f"entity:{node.id}",
                     node_type="entity",
                     label=node.display_name,
-                    properties={"description": node.description, "vocabulary": list(node.vocabulary)},
+                    properties={
+                        "description": node.description,
+                        "vocabulary": list(node.vocabulary),
+                    },
                 )
             )
         for source, relationships in self._relationships.items():
             for relationship in relationships:
-                target = relationship.get("target") if isinstance(relationship, dict) else relationship
+                target = (
+                    relationship.get("target") if isinstance(relationship, dict) else relationship
+                )
                 if target not in self._nodes:
                     continue
-                edge_type = relationship.get("type", "related_to") if isinstance(relationship, dict) else "related_to"
+                edge_type = (
+                    relationship.get("type", "related_to")
+                    if isinstance(relationship, dict)
+                    else "related_to"
+                )
                 graph.add_edge(
-                    GraphEdge(source=f"entity:{source}", target=f"entity:{target}", edge_type=edge_type)
+                    GraphEdge(
+                        source=f"entity:{source}", target=f"entity:{target}", edge_type=edge_type
+                    )
                 )
         return graph

@@ -15,17 +15,13 @@ def test_backup_endpoints_require_admin(client):
 
 
 def test_create_and_list_backup(client, admin_token, backup_path_env):
-    response = client.post(
-        "/platform/backups", headers={"Authorization": f"Bearer {admin_token}"}
-    )
+    response = client.post("/platform/backups", headers={"Authorization": f"Bearer {admin_token}"})
     assert response.status_code == 200
     data = response.json()
     assert data["success"] is True
     assert "id" in data["data"]
 
-    response = client.get(
-        "/platform/backups", headers={"Authorization": f"Bearer {admin_token}"}
-    )
+    response = client.get("/platform/backups", headers={"Authorization": f"Bearer {admin_token}"})
     assert response.status_code == 200
     data = response.json()
     assert data["success"] is True

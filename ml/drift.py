@@ -12,12 +12,19 @@ import pandas as pd
 from scipy import stats
 
 
-def kolmogorov_smirnov_drift(reference: pd.Series, current: pd.Series, threshold: float = 0.05) -> dict[str, Any]:
+def kolmogorov_smirnov_drift(
+    reference: pd.Series, current: pd.Series, threshold: float = 0.05
+) -> dict[str, Any]:
     """KS test for numeric feature drift."""
     ref = reference.dropna().astype(float)
     cur = current.dropna().astype(float)
     if len(ref) < 2 or len(cur) < 2:
-        return {"drift": False, "p_value": None, "statistic": None, "message": "Insufficient samples"}
+        return {
+            "drift": False,
+            "p_value": None,
+            "statistic": None,
+            "message": "Insufficient samples",
+        }
     statistic, p_value = stats.ks_2samp(ref, cur)
     return {
         "drift": bool(p_value < threshold),
@@ -27,7 +34,9 @@ def kolmogorov_smirnov_drift(reference: pd.Series, current: pd.Series, threshold
     }
 
 
-def chi_squared_drift(reference: pd.Series, current: pd.Series, threshold: float = 0.05) -> dict[str, Any]:
+def chi_squared_drift(
+    reference: pd.Series, current: pd.Series, threshold: float = 0.05
+) -> dict[str, Any]:
     """Chi-squared test for categorical feature drift."""
     ref_counts = reference.dropna().astype(str).value_counts()
     cur_counts = current.dropna().astype(str).value_counts()
@@ -83,7 +92,9 @@ def detect_data_drift(
     }
 
 
-def detect_prediction_drift(reference_preds: np.ndarray, current_preds: np.ndarray, threshold: float = 0.05) -> dict[str, Any]:
+def detect_prediction_drift(
+    reference_preds: np.ndarray, current_preds: np.ndarray, threshold: float = 0.05
+) -> dict[str, Any]:
     """Run KS drift test on prediction distributions."""
     return kolmogorov_smirnov_drift(pd.Series(reference_preds), pd.Series(current_preds), threshold)
 
@@ -94,5 +105,7 @@ def summarize_drift(drift_report: dict[str, Any]) -> dict[str, Any]:
         "status": "drift_detected" if drift_report["drift_detected"] else "stable",
         "drifted_features": drift_report["drifted_features"],
         "total_features": drift_report["total_features"],
-        "drift_ratio": round(drift_report["drifted_features"] / max(drift_report["total_features"], 1), 2),
+        "drift_ratio": round(
+            drift_report["drifted_features"] / max(drift_report["total_features"], 1), 2
+        ),
     }

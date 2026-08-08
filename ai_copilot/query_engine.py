@@ -93,9 +93,46 @@ class QueryEngine:
     }
 
     # Direction keywords
-    INCREASE_KEYWORDS = ["increase", "increased", "rise", "rose", "grew", "growth", "up", "higher", "gain", "gained"]
-    DECREASE_KEYWORDS = ["decrease", "decreased", "drop", "dropped", "decline", "declined", "fall", "fell", "down", "lower", "loss", "lost", "reduce", "reduced", "shrink", "shrank"]
-    CHANGE_KEYWORDS = ["change", "changed", "shift", "shifted", "fluctuate", "fluctuated", "vary", "varied"]
+    INCREASE_KEYWORDS = [
+        "increase",
+        "increased",
+        "rise",
+        "rose",
+        "grew",
+        "growth",
+        "up",
+        "higher",
+        "gain",
+        "gained",
+    ]
+    DECREASE_KEYWORDS = [
+        "decrease",
+        "decreased",
+        "drop",
+        "dropped",
+        "decline",
+        "declined",
+        "fall",
+        "fell",
+        "down",
+        "lower",
+        "loss",
+        "lost",
+        "reduce",
+        "reduced",
+        "shrink",
+        "shrank",
+    ]
+    CHANGE_KEYWORDS = [
+        "change",
+        "changed",
+        "shift",
+        "shifted",
+        "fluctuate",
+        "fluctuated",
+        "vary",
+        "varied",
+    ]
 
     # Intent patterns
     WHY_PATTERNS = [

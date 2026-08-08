@@ -25,11 +25,52 @@ class AfricaColumnRecognizer:
 
     # Patterns that indicate specific column types
     REGION_KEYWORDS = {"region", "province", "state", "district", "metro", "constituency"}
-    CURRENCY_KEYWORDS = {"amount", "price", "cost", "revenue", "salary", "fee", "payment", "balance", "total", "sum"}
+    CURRENCY_KEYWORDS = {
+        "amount",
+        "price",
+        "cost",
+        "revenue",
+        "salary",
+        "fee",
+        "payment",
+        "balance",
+        "total",
+        "sum",
+    }
     PHONE_KEYWORDS = {"phone", "mobile", "tel", "telephone", "contact", "cell", "whatsapp"}
-    EDUCATION_KEYWORDS = {"grade", "score", "mark", "gpa", "cgpa", "class", "result", "exam", "test", "assessment"}
-    HEALTHCARE_KEYWORDS = {"diagnosis", "patient", "admission", "discharge", "ward", "treatment", "medication", "prescription"}
-    AGRICULTURE_KEYWORDS = {"crop", "yield", "harvest", "farm", "acre", "hectare", "production", "planting", "irrigation"}
+    EDUCATION_KEYWORDS = {
+        "grade",
+        "score",
+        "mark",
+        "gpa",
+        "cgpa",
+        "class",
+        "result",
+        "exam",
+        "test",
+        "assessment",
+    }
+    HEALTHCARE_KEYWORDS = {
+        "diagnosis",
+        "patient",
+        "admission",
+        "discharge",
+        "ward",
+        "treatment",
+        "medication",
+        "prescription",
+    }
+    AGRICULTURE_KEYWORDS = {
+        "crop",
+        "yield",
+        "harvest",
+        "farm",
+        "acre",
+        "hectare",
+        "production",
+        "planting",
+        "irrigation",
+    }
 
     def __init__(self, profile: CountryProfile):
         self.profile = profile
@@ -73,31 +114,41 @@ class AfricaColumnRecognizer:
             if currency_match:
                 result["localized_columns"][col] = f"currency_{self.profile.currency.code.lower()}"
                 result["detected_currency"] = self.profile.currency.code
-                result["currency_mappings"].append({"column": col, "type": "currency", **currency_match})
+                result["currency_mappings"].append(
+                    {"column": col, "type": "currency", **currency_match}
+                )
 
             # Check for phone numbers
             phone_match = self._check_phone_column(col_lower, col_values)
             if phone_match:
                 result["localized_columns"][col] = f"phone_{self.profile.code.lower()}"
-                result["insights"].append(f"Column '{col}' contains {self.profile.name} phone numbers (dialing code +{self.profile.dialing_code}).")
+                result["insights"].append(
+                    f"Column '{col}' contains {self.profile.name} phone numbers (dialing code +{self.profile.dialing_code})."
+                )
 
             # Check for education data
             edu_match = self._check_education_column(col_lower, col_values)
             if edu_match:
                 result["localized_columns"][col] = f"education_{self.profile.code.lower()}"
-                result["education_mappings"].append({"column": col, "type": "education", **edu_match})
+                result["education_mappings"].append(
+                    {"column": col, "type": "education", **edu_match}
+                )
 
             # Check for healthcare data
             health_match = self._check_healthcare_column(col_lower, col_values)
             if health_match:
                 result["localized_columns"][col] = f"healthcare_{self.profile.code.lower()}"
-                result["healthcare_mappings"].append({"column": col, "type": "healthcare", **health_match})
+                result["healthcare_mappings"].append(
+                    {"column": col, "type": "healthcare", **health_match}
+                )
 
             # Check for agriculture data
             agri_match = self._check_agriculture_column(col_lower, col_values)
             if agri_match:
                 result["localized_columns"][col] = f"agriculture_{self.profile.code.lower()}"
-                result["agriculture_mappings"].append({"column": col, "type": "agriculture", **agri_match})
+                result["agriculture_mappings"].append(
+                    {"column": col, "type": "agriculture", **agri_match}
+                )
 
         # Detect industries from all text
         all_text_parts: list[str] = []
@@ -193,7 +244,9 @@ class AfricaColumnRecognizer:
         dialing = "+" + self.profile.dialing_code
         has_dialing = any(dialing in str(v) for v in values[:100])
         # Also check without + (e.g., 233...)
-        has_dialing_no_plus = any(str(v).strip().startswith(self.profile.dialing_code) for v in values[:100])
+        has_dialing_no_plus = any(
+            str(v).strip().startswith(self.profile.dialing_code) for v in values[:100]
+        )
 
         if has_dialing or has_dialing_no_plus:
             return {"dialing_code": dialing}
@@ -209,7 +262,9 @@ class AfricaColumnRecognizer:
                 for entry in scale:
                     grading_values.add(entry["grade"].lower())
 
-            matched_grades = [str(v).strip() for v in values if str(v).strip().lower() in grading_values]
+            matched_grades = [
+                str(v).strip() for v in values if str(v).strip().lower() in grading_values
+            ]
             if matched_grades:
                 return {"matched_grades": list(set(matched_grades))[:10]}
             return {"type": "score_column"}
@@ -224,7 +279,11 @@ class AfricaColumnRecognizer:
         for v in values:
             v_lower = str(v).lower()
             if any(term in v_lower for term in edu_terms):
-                return {"matched_terms": [v for v in values if any(t in str(v).lower() for t in edu_terms)][:5]}
+                return {
+                    "matched_terms": [
+                        v for v in values if any(t in str(v).lower() for t in edu_terms)
+                    ][:5]
+                }
 
         return None
 
@@ -233,7 +292,9 @@ class AfricaColumnRecognizer:
         if any(kw in col_lower for kw in self.HEALTHCARE_KEYWORDS):
             # Check for disease names
             diseases = [d.lower() for d in self.profile.healthcare.major_diseases]
-            matched_diseases = [str(v).strip() for v in values if str(v).strip().lower() in diseases]
+            matched_diseases = [
+                str(v).strip() for v in values if str(v).strip().lower() in diseases
+            ]
             if matched_diseases:
                 return {"matched_diseases": list(set(matched_diseases))[:10]}
             return {"type": "healthcare_column"}
@@ -243,7 +304,11 @@ class AfricaColumnRecognizer:
         for v in values:
             v_lower = str(v).lower()
             if any(f in v_lower for f in facilities):
-                return {"matched_facilities": [v for v in values if any(f in str(v).lower() for f in facilities)][:5]}
+                return {
+                    "matched_facilities": [
+                        v for v in values if any(f in str(v).lower() for f in facilities)
+                    ][:5]
+                }
 
         return None
 
@@ -262,6 +327,10 @@ class AfricaColumnRecognizer:
         for v in values:
             v_lower = str(v).lower()
             if any(c in v_lower for c in crops):
-                return {"matched_crops": [v for v in values if any(c in str(v).lower() for c in crops)][:5]}
+                return {
+                    "matched_crops": [v for v in values if any(c in str(v).lower() for c in crops)][
+                        :5
+                    ]
+                }
 
         return None

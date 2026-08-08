@@ -24,7 +24,12 @@ depends_on: str | Sequence[str] | None = None
 def upgrade() -> None:
     op.create_table(
         "file_records",
-        sa.Column("id", sa.BigInteger().with_variant(sa.Integer, "sqlite"), primary_key=True, autoincrement=True),
+        sa.Column(
+            "id",
+            sa.BigInteger().with_variant(sa.Integer, "sqlite"),
+            primary_key=True,
+            autoincrement=True,
+        ),
         sa.Column("file_id", sa.String(64), nullable=False, unique=True, index=True),
         sa.Column("organization_id", sa.BigInteger(), nullable=False, index=True),
         sa.Column("filename", sa.String(500), nullable=False),

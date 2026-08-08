@@ -1,6 +1,5 @@
 """Tests for scheduled report API and scheduler."""
 
-
 import pytest
 
 from scheduler.models import ScheduledReport

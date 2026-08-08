@@ -50,7 +50,8 @@ jobs:
 
       - name: Check for outdated packages
         run: |
-          pip install -r requirements.txt
+          pip install uv
+          uv pip install --system -r requirements.txt
           pip list --outdated --format=json > outdated-python.json || true
           cat outdated-python.json
 

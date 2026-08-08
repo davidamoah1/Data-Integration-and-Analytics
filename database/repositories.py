@@ -314,14 +314,16 @@ class PipelineRunRepository:
         """
         with Session(self.engine) as session:
             session.execute(
-                text("""UPDATE pipeline_runs
+                text(
+                    """UPDATE pipeline_runs
                        SET status = 'completed',
                            completed_at = CURRENT_TIMESTAMP,
                            rows_extracted = :re,
                            rows_transformed = :rt,
                            rows_loaded = :rl,
                            duplicates_removed = :dr
-                       WHERE run_id = :run_id"""),
+                       WHERE run_id = :run_id"""
+                ),
                 {
                     "run_id": run_id,
                     "re": rows_extracted,
@@ -341,11 +343,13 @@ class PipelineRunRepository:
         """
         with Session(self.engine) as session:
             session.execute(
-                text("""UPDATE pipeline_runs
+                text(
+                    """UPDATE pipeline_runs
                        SET status = 'failed',
                            completed_at = CURRENT_TIMESTAMP,
                            error_message = :err
-                       WHERE run_id = :run_id"""),
+                       WHERE run_id = :run_id"""
+                ),
                 {"run_id": run_id, "err": error_message[:1000]},
             )
             session.commit()

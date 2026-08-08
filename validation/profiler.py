@@ -85,7 +85,9 @@ class ValidationProfiler:
             result.column_profiles.append(profile)
             result.cardinality[col] = profile.unique_count
 
-        avg_uniqueness = sum(c.uniqueness for c in result.column_profiles) / max(len(result.column_profiles), 1)
+        avg_uniqueness = sum(c.uniqueness for c in result.column_profiles) / max(
+            len(result.column_profiles), 1
+        )
         result.overall_uniqueness = avg_uniqueness
 
         return result

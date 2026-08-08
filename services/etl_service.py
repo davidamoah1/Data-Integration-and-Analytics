@@ -50,7 +50,9 @@ class ETLService:
             - run_id, status, rows_extracted, rows_transformed,
               rows_loaded, duplicates_removed, duration_seconds
         """
-        run_id = f"run_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
+        run_id = (
+            f"run_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
+        )
         start_time = datetime.now(timezone.utc)
         logger.info("=" * 50)
         logger.info(

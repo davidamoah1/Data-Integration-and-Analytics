@@ -52,9 +52,7 @@ class ValidationAICopilot:
             "row_count": result.profile.row_count,
             "column_count": result.profile.column_count,
             "top_failed_rules": rule_summary[:10],
-            "columns_with_issues": {
-                col: list(set(rules)) for col, rules in column_issues.items()
-            },
+            "columns_with_issues": {col: list(set(rules)) for col, rules in column_issues.items()},
             "error_findings": [
                 {
                     "rule": f.get("rule_name"),
@@ -95,9 +93,8 @@ class ValidationAICopilot:
                 )
             errors = [f for f in findings if f.get("severity") == "error"]
             reasons = [f"{f.get('rule_name')}: {f.get('message')}" for f in errors[:5]]
-            return (
-                f"Validation failed with {len(errors)} errors.\n"
-                f"Top reasons:\n" + "\n".join(f"  - {r}" for r in reasons)
+            return f"Validation failed with {len(errors)} errors.\n" f"Top reasons:\n" + "\n".join(
+                f"  - {r}" for r in reasons
             )
 
         # Which records have errors?
@@ -115,7 +112,12 @@ class ValidationAICopilot:
 
         # Which departments have poor data quality?
         if "department" in q_lower or "facility" in q_lower:
-            dept_findings = [f for f in findings if "department" in f.get("column", "").lower() or "dept" in f.get("column", "").lower()]
+            dept_findings = [
+                f
+                for f in findings
+                if "department" in f.get("column", "").lower()
+                or "dept" in f.get("column", "").lower()
+            ]
             if not dept_findings:
                 return "No department-specific data quality issues were detected."
             lines = [f"  - {f.get('rule_name')}: {f.get('message')}" for f in dept_findings[:10]]
@@ -128,7 +130,9 @@ class ValidationAICopilot:
                 return "No specific corrections are suggested — all checks passed."
             lines = []
             for f in fixable[:10]:
-                lines.append(f"  - [{f.get('severity', '').upper()}] {f.get('rule_name')}: {f.get('suggested_fix')}")
+                lines.append(
+                    f"  - [{f.get('severity', '').upper()}] {f.get('rule_name')}: {f.get('suggested_fix')}"
+                )
             return "Suggested corrections:\n" + "\n".join(lines)
 
         # Which rules failed most?
@@ -162,7 +166,10 @@ class ValidationAICopilot:
             auto_fixes = []
             for f in findings:
                 fix = f.get("suggested_fix", "")
-                if any(kw in fix.lower() for kw in ["remove", "replace", "correct", "fill", "rename", "ensure"]):
+                if any(
+                    kw in fix.lower()
+                    for kw in ["remove", "replace", "correct", "fill", "rename", "ensure"]
+                ):
                     auto_fixes.append(f"  - {f.get('rule_name')}: {fix}")
             if not auto_fixes:
                 return "No safe automatic corrections are available."

@@ -87,7 +87,14 @@ def enhance_image(input_path: str, output_path: str) -> dict:
     return {
         "deskew_angle": skew_angle,
         "final_size": gray.size,
-        "operations": ["exif_autorotate", "grayscale", "deskew", "denoise", "autocontrast", "sharpen"],
+        "operations": [
+            "exif_autorotate",
+            "grayscale",
+            "deskew",
+            "denoise",
+            "autocontrast",
+            "sharpen",
+        ],
     }
 
 

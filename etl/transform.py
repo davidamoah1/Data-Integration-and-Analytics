@@ -89,7 +89,16 @@ def transform_data(df: pd.DataFrame) -> pd.DataFrame:
                     df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0.0)
 
         # Standardize date format for any column that looks like a date
-        for date_col in ("order_date", "ship_date", "sale_date", "transaction_date", "admission_date", "visit_date", "enrollment_date", "date"):
+        for date_col in (
+            "order_date",
+            "ship_date",
+            "sale_date",
+            "transaction_date",
+            "admission_date",
+            "visit_date",
+            "enrollment_date",
+            "date",
+        ):
             if date_col in df.columns:
                 df[date_col] = pd.to_datetime(df[date_col], errors="coerce")
 

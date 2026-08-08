@@ -54,30 +54,58 @@ def _definition(name: str, purpose: str, model: type[PlatformContract]) -> Contr
     return ContractDefinition(
         name=name,
         purpose=purpose,
-        responsibilities=("validate configuration", "enforce versioned lifecycle", "publish contract events"),
+        responsibilities=(
+            "validate configuration",
+            "enforce versioned lifecycle",
+            "publish contract events",
+        ),
         model=model,
     )
 
 
 PLATFORM_CONTRACTS = ContractRegistry(
     (
-        _definition("metadata", "Govern dataset technical and business metadata.", MetadataContract),
-        _definition("semantic", "Standardize business vocabulary, rules, and taxonomy.", SemanticContract),
-        _definition("business_entity", "Describe enterprise business entities and relationships.", BusinessEntityContract),
-        _definition("industry_pack", "Package industry-specific platform extensions.", IndustryPackContract),
+        _definition(
+            "metadata", "Govern dataset technical and business metadata.", MetadataContract
+        ),
+        _definition(
+            "semantic", "Standardize business vocabulary, rules, and taxonomy.", SemanticContract
+        ),
+        _definition(
+            "business_entity",
+            "Describe enterprise business entities and relationships.",
+            BusinessEntityContract,
+        ),
+        _definition(
+            "industry_pack", "Package industry-specific platform extensions.", IndustryPackContract
+        ),
         _definition("kpi", "Define governed measures and decision thresholds.", KPIContract),
         _definition("dashboard", "Describe semantic dashboard composition.", DashboardContract),
-        _definition("widget", "Define reusable accessible dashboard visualizations.", WidgetContract),
-        _definition("report", "Define governed report data, templates, and exports.", ReportContract),
-        _definition("connector", "Describe external data integration capabilities.", ConnectorContract),
+        _definition(
+            "widget", "Define reusable accessible dashboard visualizations.", WidgetContract
+        ),
+        _definition(
+            "report", "Define governed report data, templates, and exports.", ReportContract
+        ),
+        _definition(
+            "connector", "Describe external data integration capabilities.", ConnectorContract
+        ),
         _definition("etl", "Describe data movement and transformation pipelines.", ETLContract),
         _definition("workflow", "Describe automated operational orchestration.", WorkflowContract),
         _definition("ai_agent", "Define safe, permitted AI agent behavior.", AIAgentContract),
         _definition("plugin", "Define installable platform extensions.", PluginContract),
-        _definition("notification", "Define governed delivery of platform notifications.", NotificationContract),
+        _definition(
+            "notification",
+            "Define governed delivery of platform notifications.",
+            NotificationContract,
+        ),
         _definition("search", "Define searchable platform assets and ranking.", SearchContract),
         _definition("audit", "Define immutable audit behavior and retention.", AuditContract),
-        _definition("monitoring", "Define metrics, health checks, and alerting.", MonitoringContract),
-        _definition("security", "Define platform security and data protection controls.", SecurityContract),
+        _definition(
+            "monitoring", "Define metrics, health checks, and alerting.", MonitoringContract
+        ),
+        _definition(
+            "security", "Define platform security and data protection controls.", SecurityContract
+        ),
     )
 )

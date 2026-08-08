@@ -22,11 +22,15 @@ def upgrade() -> None:
     with op.batch_alter_table("security_logs", schema=None) as batch_op:
         batch_op.add_column(sa.Column("organization_id", sa.BigInteger(), nullable=True))
         batch_op.create_index("ix_security_logs_organization_id", ["organization_id"], unique=False)
-        batch_op.create_index("idx_security_org_created", ["organization_id", "created_at"], unique=False)
+        batch_op.create_index(
+            "idx_security_org_created", ["organization_id", "created_at"], unique=False
+        )
 
     with op.batch_alter_table("audit_logs", schema=None) as batch_op:
         batch_op.create_index("ix_audit_logs_organization_id", ["organization_id"], unique=False)
-        batch_op.create_index("idx_audit_org_created", ["organization_id", "created_at"], unique=False)
+        batch_op.create_index(
+            "idx_audit_org_created", ["organization_id", "created_at"], unique=False
+        )
 
     with op.batch_alter_table("system_logs", schema=None) as batch_op:
         batch_op.create_index("idx_system_log_created", ["created_at"], unique=False)

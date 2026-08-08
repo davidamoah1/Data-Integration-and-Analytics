@@ -15,7 +15,15 @@ def _date_range(n: int, start: datetime = datetime(2024, 1, 1)) -> list[datetime
 
 def generate_healthcare(n: int = 200) -> pd.DataFrame:
     rng = np.random.default_rng(42)
-    diagnoses = ["Hypertension", "Diabetes", "Malaria", "Asthma", "COVID-19", "Fracture", "Pneumonia"]
+    diagnoses = [
+        "Hypertension",
+        "Diabetes",
+        "Malaria",
+        "Asthma",
+        "COVID-19",
+        "Fracture",
+        "Pneumonia",
+    ]
     wards = ["A", "B", "C", "ICU", "ER"]
     doctors = ["Dr. Smith", "Dr. Doe", "Dr. Lee", "Dr. Brown", "Dr. Patel"]
     insurance = ["Private", "Public", "None"]
@@ -28,7 +36,9 @@ def generate_healthcare(n: int = 200) -> pd.DataFrame:
             "gender": rng.choice(["M", "F"], n),
             "diagnosis": rng.choice(diagnoses, n),
             "admission_date": [d.strftime("%Y-%m-%d") for d in dates],
-            "discharge_date": [(d + timedelta(days=int(rng.integers(1, 10)))).strftime("%Y-%m-%d") for d in dates],
+            "discharge_date": [
+                (d + timedelta(days=int(rng.integers(1, 10)))).strftime("%Y-%m-%d") for d in dates
+            ],
             "ward": rng.choice(wards, n),
             "doctor": rng.choice(doctors, n),
             "amount": rng.uniform(50, 5000, n).round(2),
@@ -92,7 +102,9 @@ def generate_government(n: int = 200) -> pd.DataFrame:
             "spent": rng.uniform(5000, 900000, n).round(2),
             "status": rng.choice(statuses, n),
             "start_date": [d.strftime("%Y-%m-%d") for d in dates],
-            "end_date": [(d + timedelta(days=int(rng.integers(30, 365)))).strftime("%Y-%m-%d") for d in dates],
+            "end_date": [
+                (d + timedelta(days=int(rng.integers(30, 365)))).strftime("%Y-%m-%d") for d in dates
+            ],
             "contractor": rng.choice(contractors, n),
             "revenue_amount": rng.uniform(1000, 50000, n).round(2),
             "asset_value": rng.uniform(5000, 500000, n).round(2),
@@ -251,7 +263,10 @@ def generate_hospitality(n: int = 200) -> pd.DataFrame:
             "room_id": [f"RM{100 + i % 50}" for i in range(n)],
             "room_type": rng.choice(room_types, n),
             "check_in": [d.strftime("%Y-%m-%d") for d in check_in],
-            "check_out": [(d + timedelta(days=int(n))).strftime("%Y-%m-%d") for d, n in zip(check_in, nights, strict=False)],
+            "check_out": [
+                (d + timedelta(days=int(n))).strftime("%Y-%m-%d")
+                for d, n in zip(check_in, nights, strict=False)
+            ],
             "nights": nights,
             "amount": rng.uniform(50, 1000, n).round(2),
             "service_type": rng.choice(services, n),

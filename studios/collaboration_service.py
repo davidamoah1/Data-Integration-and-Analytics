@@ -47,15 +47,19 @@ class CollaborationService:
         resource_type: str,
         resource_id: int,
     ) -> list[WorkspaceComment]:
-        return self.db.execute(
-            select(WorkspaceComment)
-            .where(
-                WorkspaceComment.organization_id == org_id,
-                WorkspaceComment.resource_type == resource_type,
-                WorkspaceComment.resource_id == resource_id,
+        return (
+            self.db.execute(
+                select(WorkspaceComment)
+                .where(
+                    WorkspaceComment.organization_id == org_id,
+                    WorkspaceComment.resource_type == resource_type,
+                    WorkspaceComment.resource_id == resource_id,
+                )
+                .order_by(WorkspaceComment.created_at.asc())
             )
-            .order_by(WorkspaceComment.created_at.asc())
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
 
     def resolve_comment(self, comment_id: int, org_id: int) -> WorkspaceComment:
         comment = self.db.execute(
@@ -114,13 +118,17 @@ class CollaborationService:
         resource_type: str,
         resource_id: int,
     ) -> list[SharedResource]:
-        return self.db.execute(
-            select(SharedResource).where(
-                SharedResource.organization_id == org_id,
-                SharedResource.resource_type == resource_type,
-                SharedResource.resource_id == resource_id,
+        return (
+            self.db.execute(
+                select(SharedResource).where(
+                    SharedResource.organization_id == org_id,
+                    SharedResource.resource_type == resource_type,
+                    SharedResource.resource_id == resource_id,
+                )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
 
     def revoke_share(self, share_id: int, org_id: int) -> None:
         share = self.db.execute(
@@ -142,13 +150,17 @@ class CollaborationService:
         required_permission: str = "view",
     ) -> bool:
         """Check if a user has permission to access a shared resource."""
-        shares = self.db.execute(
-            select(SharedResource).where(
-                SharedResource.organization_id == org_id,
-                SharedResource.resource_type == resource_type,
-                SharedResource.resource_id == resource_id,
+        shares = (
+            self.db.execute(
+                select(SharedResource).where(
+                    SharedResource.organization_id == org_id,
+                    SharedResource.resource_type == resource_type,
+                    SharedResource.resource_id == resource_id,
+                )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
 
         permission_hierarchy = {"view": 1, "comment": 2, "edit": 3, "admin": 4}
         required_level = permission_hierarchy.get(required_permission, 1)

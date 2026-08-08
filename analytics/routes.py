@@ -44,25 +44,33 @@ async def list_dashboards(
     dashboards = query.order_by(Dashboard.updated_at.desc()).all()
     result = []
     for d in dashboards:
-        widget_count = db.query(DashboardWidget).filter(DashboardWidget.dashboard_id == d.id).count()
-        is_fav = db.query(DashboardFavorite).filter(
-            DashboardFavorite.dashboard_id == d.id,
-            DashboardFavorite.user_id == current_user["id"],
-        ).first()
-        result.append({
-            "id": d.id,
-            "name": d.name,
-            "description": d.description,
-            "theme": d.theme,
-            "is_public": d.is_public,
-            "is_favorite": is_fav is not None,
-            "version": d.version,
-            "owner_id": d.owner_id,
-            "widgets": [],
-            "widget_count": widget_count,
-            "created_at": str(d.created_at) if d.created_at else None,
-            "updated_at": str(d.updated_at) if d.updated_at else None,
-        })
+        widget_count = (
+            db.query(DashboardWidget).filter(DashboardWidget.dashboard_id == d.id).count()
+        )
+        is_fav = (
+            db.query(DashboardFavorite)
+            .filter(
+                DashboardFavorite.dashboard_id == d.id,
+                DashboardFavorite.user_id == current_user["id"],
+            )
+            .first()
+        )
+        result.append(
+            {
+                "id": d.id,
+                "name": d.name,
+                "description": d.description,
+                "theme": d.theme,
+                "is_public": d.is_public,
+                "is_favorite": is_fav is not None,
+                "version": d.version,
+                "owner_id": d.owner_id,
+                "widgets": [],
+                "widget_count": widget_count,
+                "created_at": str(d.created_at) if d.created_at else None,
+                "updated_at": str(d.updated_at) if d.updated_at else None,
+            }
+        )
     return result
 
 
@@ -281,23 +289,25 @@ async def list_kpis(
             .order_by(KPIHistory.recorded_at.desc())
             .first()
         )
-        result.append({
-            "id": k.id,
-            "name": k.name,
-            "description": k.description,
-            "category": k.category,
-            "formula": k.formula,
-            "target_value": k.target_value,
-            "target": k.target_value,
-            "warning_threshold": k.warning_threshold,
-            "critical_threshold": k.critical_threshold,
-            "unit": k.unit,
-            "is_active": k.is_active,
-            "value": latest_history.value if latest_history else 0,
-            "status": latest_history.status if latest_history else "healthy",
-            "trend": "flat",
-            "trend_value": None,
-        })
+        result.append(
+            {
+                "id": k.id,
+                "name": k.name,
+                "description": k.description,
+                "category": k.category,
+                "formula": k.formula,
+                "target_value": k.target_value,
+                "target": k.target_value,
+                "warning_threshold": k.warning_threshold,
+                "critical_threshold": k.critical_threshold,
+                "unit": k.unit,
+                "is_active": k.is_active,
+                "value": latest_history.value if latest_history else 0,
+                "status": latest_history.status if latest_history else "healthy",
+                "trend": "flat",
+                "trend_value": None,
+            }
+        )
     return result
 
 

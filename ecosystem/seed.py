@@ -29,27 +29,94 @@ INDUSTRY_PACKAGES = [
         "version": "1.0.0",
         "is_africa_optimized": True,
         "dataset_templates": [
-            {"name": "Patient Records", "columns": ["patient_id", "name", "age", "gender", "diagnosis", "admission_date", "discharge_date"]},
-            {"name": "Billing Records", "columns": ["bill_id", "patient_id", "amount", "insurance_provider", "status", "date"]},
-            {"name": "Staff Records", "columns": ["staff_id", "name", "role", "department", "shift"]},
+            {
+                "name": "Patient Records",
+                "columns": [
+                    "patient_id",
+                    "name",
+                    "age",
+                    "gender",
+                    "diagnosis",
+                    "admission_date",
+                    "discharge_date",
+                ],
+            },
+            {
+                "name": "Billing Records",
+                "columns": [
+                    "bill_id",
+                    "patient_id",
+                    "amount",
+                    "insurance_provider",
+                    "status",
+                    "date",
+                ],
+            },
+            {
+                "name": "Staff Records",
+                "columns": ["staff_id", "name", "role", "department", "shift"],
+            },
         ],
         "dashboard_templates": [
-            {"name": "Hospital Executive Dashboard", "description": "Overview of hospital KPIs", "layout": {"grid": "2x3"}},
-            {"name": "Patient Flow Dashboard", "description": "Admissions, discharges, and ward occupancy", "layout": {"grid": "2x2"}},
+            {
+                "name": "Hospital Executive Dashboard",
+                "description": "Overview of hospital KPIs",
+                "layout": {"grid": "2x3"},
+            },
+            {
+                "name": "Patient Flow Dashboard",
+                "description": "Admissions, discharges, and ward occupancy",
+                "layout": {"grid": "2x2"},
+            },
         ],
         "kpi_templates": [
-            {"name": "Total Admissions", "category": "operational", "formula": "count(admission_date)", "unit": "patients"},
-            {"name": "Avg Billing per Patient", "category": "financial", "formula": "avg(billing_amount)", "unit": "USD"},
-            {"name": "Bed Occupancy Rate", "category": "operational", "formula": "occupied_beds / total_beds * 100", "unit": "%"},
-            {"name": "Patient Satisfaction", "category": "quality", "formula": "avg(satisfaction_score)", "unit": "/5"},
-            {"name": "Insurance Claim Rate", "category": "financial", "formula": "approved_claims / total_claims * 100", "unit": "%"},
+            {
+                "name": "Total Admissions",
+                "category": "operational",
+                "formula": "count(admission_date)",
+                "unit": "patients",
+            },
+            {
+                "name": "Avg Billing per Patient",
+                "category": "financial",
+                "formula": "avg(billing_amount)",
+                "unit": "USD",
+            },
+            {
+                "name": "Bed Occupancy Rate",
+                "category": "operational",
+                "formula": "occupied_beds / total_beds * 100",
+                "unit": "%",
+            },
+            {
+                "name": "Patient Satisfaction",
+                "category": "quality",
+                "formula": "avg(satisfaction_score)",
+                "unit": "/5",
+            },
+            {
+                "name": "Insurance Claim Rate",
+                "category": "financial",
+                "formula": "approved_claims / total_claims * 100",
+                "unit": "%",
+            },
         ],
         "ai_insight_templates": [
-            {"type": "patient_flow_analysis", "prompt": "Analyze patient admission patterns and predict peak periods"},
-            {"type": "billing_anomaly", "prompt": "Detect unusual billing patterns and potential fraud"},
+            {
+                "type": "patient_flow_analysis",
+                "prompt": "Analyze patient admission patterns and predict peak periods",
+            },
+            {
+                "type": "billing_anomaly",
+                "prompt": "Detect unusual billing patterns and potential fraud",
+            },
         ],
         "ml_model_templates": [
-            {"type": "patient_readmission", "algorithm": "random_forest", "target": "readmission_30d"},
+            {
+                "type": "patient_readmission",
+                "algorithm": "random_forest",
+                "target": "readmission_30d",
+            },
             {"type": "length_of_stay", "algorithm": "linear_regression", "target": "los_days"},
         ],
     },
@@ -61,27 +128,71 @@ INDUSTRY_PACKAGES = [
         "version": "1.0.0",
         "is_africa_optimized": True,
         "dataset_templates": [
-            {"name": "Student Records", "columns": ["student_id", "name", "grade", "class", "enrollment_date", "gpa"]},
+            {
+                "name": "Student Records",
+                "columns": ["student_id", "name", "grade", "class", "enrollment_date", "gpa"],
+            },
             {"name": "Attendance Records", "columns": ["student_id", "date", "status", "class_id"]},
-            {"name": "Fees Records", "columns": ["student_id", "amount_due", "amount_paid", "status", "due_date"]},
+            {
+                "name": "Fees Records",
+                "columns": ["student_id", "amount_due", "amount_paid", "status", "due_date"],
+            },
         ],
         "dashboard_templates": [
-            {"name": "School Executive Dashboard", "description": "Enrollment, performance, and financial overview", "layout": {"grid": "2x3"}},
-            {"name": "Student Performance Dashboard", "description": "Grades, attendance, and at-risk students", "layout": {"grid": "2x2"}},
+            {
+                "name": "School Executive Dashboard",
+                "description": "Enrollment, performance, and financial overview",
+                "layout": {"grid": "2x3"},
+            },
+            {
+                "name": "Student Performance Dashboard",
+                "description": "Grades, attendance, and at-risk students",
+                "layout": {"grid": "2x2"},
+            },
         ],
         "kpi_templates": [
-            {"name": "Total Enrollment", "category": "operational", "formula": "count(student_id)", "unit": "students"},
+            {
+                "name": "Total Enrollment",
+                "category": "operational",
+                "formula": "count(student_id)",
+                "unit": "students",
+            },
             {"name": "Avg GPA", "category": "academic", "formula": "avg(gpa)", "unit": "/4.0"},
-            {"name": "Attendance Rate", "category": "operational", "formula": "present_days / total_days * 100", "unit": "%"},
-            {"name": "Fee Collection Rate", "category": "financial", "formula": "amount_paid / amount_due * 100", "unit": "%"},
-            {"name": "Dropout Rate", "category": "academic", "formula": "dropouts / total_students * 100", "unit": "%"},
+            {
+                "name": "Attendance Rate",
+                "category": "operational",
+                "formula": "present_days / total_days * 100",
+                "unit": "%",
+            },
+            {
+                "name": "Fee Collection Rate",
+                "category": "financial",
+                "formula": "amount_paid / amount_due * 100",
+                "unit": "%",
+            },
+            {
+                "name": "Dropout Rate",
+                "category": "academic",
+                "formula": "dropouts / total_students * 100",
+                "unit": "%",
+            },
         ],
         "ai_insight_templates": [
-            {"type": "at_risk_students", "prompt": "Identify students at risk of dropping out based on attendance and grades"},
-            {"type": "performance_trends", "prompt": "Analyze grade trends across classes and subjects"},
+            {
+                "type": "at_risk_students",
+                "prompt": "Identify students at risk of dropping out based on attendance and grades",
+            },
+            {
+                "type": "performance_trends",
+                "prompt": "Analyze grade trends across classes and subjects",
+            },
         ],
         "ml_model_templates": [
-            {"type": "student_performance", "algorithm": "gradient_boosting", "target": "final_grade"},
+            {
+                "type": "student_performance",
+                "algorithm": "gradient_boosting",
+                "target": "final_grade",
+            },
             {"type": "dropout_prediction", "algorithm": "logistic_regression", "target": "dropout"},
         ],
     },
@@ -93,24 +204,86 @@ INDUSTRY_PACKAGES = [
         "version": "1.0.0",
         "is_africa_optimized": True,
         "dataset_templates": [
-            {"name": "Transaction Records", "columns": ["transaction_id", "account_id", "amount", "type", "timestamp", "channel"]},
-            {"name": "Account Records", "columns": ["account_id", "customer_id", "type", "balance", "opened_date"]},
-            {"name": "Loan Records", "columns": ["loan_id", "customer_id", "amount", "interest_rate", "status", "term_months"]},
+            {
+                "name": "Transaction Records",
+                "columns": [
+                    "transaction_id",
+                    "account_id",
+                    "amount",
+                    "type",
+                    "timestamp",
+                    "channel",
+                ],
+            },
+            {
+                "name": "Account Records",
+                "columns": ["account_id", "customer_id", "type", "balance", "opened_date"],
+            },
+            {
+                "name": "Loan Records",
+                "columns": [
+                    "loan_id",
+                    "customer_id",
+                    "amount",
+                    "interest_rate",
+                    "status",
+                    "term_months",
+                ],
+            },
         ],
         "dashboard_templates": [
-            {"name": "Bank Executive Dashboard", "description": "Total deposits, loans, and transaction volume", "layout": {"grid": "2x3"}},
-            {"name": "Risk & Fraud Dashboard", "description": "Fraud alerts, risk scores, and suspicious transactions", "layout": {"grid": "2x2"}},
+            {
+                "name": "Bank Executive Dashboard",
+                "description": "Total deposits, loans, and transaction volume",
+                "layout": {"grid": "2x3"},
+            },
+            {
+                "name": "Risk & Fraud Dashboard",
+                "description": "Fraud alerts, risk scores, and suspicious transactions",
+                "layout": {"grid": "2x2"},
+            },
         ],
         "kpi_templates": [
-            {"name": "Total Transaction Volume", "category": "operational", "formula": "sum(amount)", "unit": "USD"},
-            {"name": "Avg Transaction Value", "category": "financial", "formula": "avg(amount)", "unit": "USD"},
-            {"name": "Loan Default Rate", "category": "risk", "formula": "defaults / total_loans * 100", "unit": "%"},
-            {"name": "Fraud Detection Rate", "category": "risk", "formula": "fraud_detected / total_transactions * 100", "unit": "%"},
-            {"name": "Customer Acquisition", "category": "growth", "formula": "count(new_customers)", "unit": "customers"},
+            {
+                "name": "Total Transaction Volume",
+                "category": "operational",
+                "formula": "sum(amount)",
+                "unit": "USD",
+            },
+            {
+                "name": "Avg Transaction Value",
+                "category": "financial",
+                "formula": "avg(amount)",
+                "unit": "USD",
+            },
+            {
+                "name": "Loan Default Rate",
+                "category": "risk",
+                "formula": "defaults / total_loans * 100",
+                "unit": "%",
+            },
+            {
+                "name": "Fraud Detection Rate",
+                "category": "risk",
+                "formula": "fraud_detected / total_transactions * 100",
+                "unit": "%",
+            },
+            {
+                "name": "Customer Acquisition",
+                "category": "growth",
+                "formula": "count(new_customers)",
+                "unit": "customers",
+            },
         ],
         "ai_insight_templates": [
-            {"type": "fraud_detection", "prompt": "Detect anomalous transaction patterns indicating potential fraud"},
-            {"type": "credit_scoring", "prompt": "Assess credit risk for loan applicants based on transaction history"},
+            {
+                "type": "fraud_detection",
+                "prompt": "Detect anomalous transaction patterns indicating potential fraud",
+            },
+            {
+                "type": "credit_scoring",
+                "prompt": "Assess credit risk for loan applicants based on transaction history",
+            },
         ],
         "ml_model_templates": [
             {"type": "fraud_detection", "algorithm": "isolation_forest", "target": "is_fraud"},
@@ -125,22 +298,69 @@ INDUSTRY_PACKAGES = [
         "version": "1.0.0",
         "is_africa_optimized": True,
         "dataset_templates": [
-            {"name": "Crop Production", "columns": ["farm_id", "crop_type", "planted_area", "harvest_amount", "season", "year"]},
-            {"name": "Market Prices", "columns": ["crop_type", "market", "price", "date", "region"]},
-            {"name": "Weather Records", "columns": ["station_id", "date", "rainfall_mm", "temperature_c", "humidity"]},
+            {
+                "name": "Crop Production",
+                "columns": [
+                    "farm_id",
+                    "crop_type",
+                    "planted_area",
+                    "harvest_amount",
+                    "season",
+                    "year",
+                ],
+            },
+            {
+                "name": "Market Prices",
+                "columns": ["crop_type", "market", "price", "date", "region"],
+            },
+            {
+                "name": "Weather Records",
+                "columns": ["station_id", "date", "rainfall_mm", "temperature_c", "humidity"],
+            },
         ],
         "dashboard_templates": [
-            {"name": "Farm Executive Dashboard", "description": "Yield, revenue, and weather overview", "layout": {"grid": "2x3"}},
-            {"name": "Market Analysis Dashboard", "description": "Crop prices and market trends", "layout": {"grid": "2x2"}},
+            {
+                "name": "Farm Executive Dashboard",
+                "description": "Yield, revenue, and weather overview",
+                "layout": {"grid": "2x3"},
+            },
+            {
+                "name": "Market Analysis Dashboard",
+                "description": "Crop prices and market trends",
+                "layout": {"grid": "2x2"},
+            },
         ],
         "kpi_templates": [
-            {"name": "Total Yield", "category": "production", "formula": "sum(harvest_amount)", "unit": "tons"},
-            {"name": "Yield per Hectare", "category": "production", "formula": "harvest_amount / planted_area", "unit": "tons/ha"},
-            {"name": "Avg Market Price", "category": "market", "formula": "avg(price)", "unit": "USD/ton"},
-            {"name": "Revenue", "category": "financial", "formula": "harvest_amount * price", "unit": "USD"},
+            {
+                "name": "Total Yield",
+                "category": "production",
+                "formula": "sum(harvest_amount)",
+                "unit": "tons",
+            },
+            {
+                "name": "Yield per Hectare",
+                "category": "production",
+                "formula": "harvest_amount / planted_area",
+                "unit": "tons/ha",
+            },
+            {
+                "name": "Avg Market Price",
+                "category": "market",
+                "formula": "avg(price)",
+                "unit": "USD/ton",
+            },
+            {
+                "name": "Revenue",
+                "category": "financial",
+                "formula": "harvest_amount * price",
+                "unit": "USD",
+            },
         ],
         "ai_insight_templates": [
-            {"type": "yield_forecast", "prompt": "Forecast crop yields based on weather and historical data"},
+            {
+                "type": "yield_forecast",
+                "prompt": "Forecast crop yields based on weather and historical data",
+            },
             {"type": "price_prediction", "prompt": "Predict market prices for key crops"},
         ],
         "ml_model_templates": [
@@ -156,17 +376,52 @@ INDUSTRY_PACKAGES = [
         "version": "1.0.0",
         "is_africa_optimized": False,
         "dataset_templates": [
-            {"name": "Sales Records", "columns": ["transaction_id", "product_id", "quantity", "amount", "date", "store_id"]},
-            {"name": "Product Catalog", "columns": ["product_id", "name", "category", "cost", "price"]},
-            {"name": "Inventory", "columns": ["product_id", "store_id", "stock_level", "reorder_point"]},
+            {
+                "name": "Sales Records",
+                "columns": [
+                    "transaction_id",
+                    "product_id",
+                    "quantity",
+                    "amount",
+                    "date",
+                    "store_id",
+                ],
+            },
+            {
+                "name": "Product Catalog",
+                "columns": ["product_id", "name", "category", "cost", "price"],
+            },
+            {
+                "name": "Inventory",
+                "columns": ["product_id", "store_id", "stock_level", "reorder_point"],
+            },
         ],
         "dashboard_templates": [
-            {"name": "Retail Executive Dashboard", "description": "Sales, inventory, and customer overview", "layout": {"grid": "2x3"}},
+            {
+                "name": "Retail Executive Dashboard",
+                "description": "Sales, inventory, and customer overview",
+                "layout": {"grid": "2x3"},
+            },
         ],
         "kpi_templates": [
-            {"name": "Total Revenue", "category": "financial", "formula": "sum(amount)", "unit": "USD"},
-            {"name": "Avg Order Value", "category": "financial", "formula": "avg(amount)", "unit": "USD"},
-            {"name": "Inventory Turnover", "category": "operational", "formula": "cogs / avg_inventory", "unit": "ratio"},
+            {
+                "name": "Total Revenue",
+                "category": "financial",
+                "formula": "sum(amount)",
+                "unit": "USD",
+            },
+            {
+                "name": "Avg Order Value",
+                "category": "financial",
+                "formula": "avg(amount)",
+                "unit": "USD",
+            },
+            {
+                "name": "Inventory Turnover",
+                "category": "operational",
+                "formula": "cogs / avg_inventory",
+                "unit": "ratio",
+            },
         ],
         "ai_insight_templates": [],
         "ml_model_templates": [],
@@ -179,16 +434,49 @@ INDUSTRY_PACKAGES = [
         "version": "1.0.0",
         "is_africa_optimized": True,
         "dataset_templates": [
-            {"name": "Project Records", "columns": ["project_id", "name", "department", "budget", "spent", "status", "start_date"]},
-            {"name": "Budget Records", "columns": ["department", "category", "allocated", "spent", "fiscal_year"]},
+            {
+                "name": "Project Records",
+                "columns": [
+                    "project_id",
+                    "name",
+                    "department",
+                    "budget",
+                    "spent",
+                    "status",
+                    "start_date",
+                ],
+            },
+            {
+                "name": "Budget Records",
+                "columns": ["department", "category", "allocated", "spent", "fiscal_year"],
+            },
         ],
         "dashboard_templates": [
-            {"name": "Government Executive Dashboard", "description": "Budget, projects, and procurement overview", "layout": {"grid": "2x3"}},
+            {
+                "name": "Government Executive Dashboard",
+                "description": "Budget, projects, and procurement overview",
+                "layout": {"grid": "2x3"},
+            },
         ],
         "kpi_templates": [
-            {"name": "Total Budget", "category": "financial", "formula": "sum(allocated)", "unit": "USD"},
-            {"name": "Budget Utilization", "category": "financial", "formula": "spent / allocated * 100", "unit": "%"},
-            {"name": "Project Completion Rate", "category": "operational", "formula": "completed / total * 100", "unit": "%"},
+            {
+                "name": "Total Budget",
+                "category": "financial",
+                "formula": "sum(allocated)",
+                "unit": "USD",
+            },
+            {
+                "name": "Budget Utilization",
+                "category": "financial",
+                "formula": "spent / allocated * 100",
+                "unit": "%",
+            },
+            {
+                "name": "Project Completion Rate",
+                "category": "operational",
+                "formula": "completed / total * 100",
+                "unit": "%",
+            },
         ],
         "ai_insight_templates": [],
         "ml_model_templates": [],

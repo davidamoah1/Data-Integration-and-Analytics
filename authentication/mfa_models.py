@@ -26,7 +26,12 @@ class UserMFA(Base):
     failed_attempts = Column(Integer, nullable=False, default=0)
     last_used_at = Column(TIMESTAMP, nullable=True)
     created_at = Column(TIMESTAMP, default=datetime.now(timezone.utc), nullable=False)
-    updated_at = Column(TIMESTAMP, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc), nullable=False)
+    updated_at = Column(
+        TIMESTAMP,
+        default=datetime.now(timezone.utc),
+        onupdate=datetime.now(timezone.utc),
+        nullable=False,
+    )
 
 
 class MFASession(Base):

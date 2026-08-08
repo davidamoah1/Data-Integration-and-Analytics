@@ -822,7 +822,13 @@ ENTITY_LIBRARY: dict[str, dict] = {
     "balance": {
         "display_name": "Balance",
         "industry": "universal",
-        "synonyms": ["balance", "current_balance", "available_balance", "closing_balance", "opening_balance"],
+        "synonyms": [
+            "balance",
+            "current_balance",
+            "available_balance",
+            "closing_balance",
+            "opening_balance",
+        ],
         "attributes": ["amount", "date"],
         "kpis": ["total_balance", "avg_balance"],
         "relationships": [],

@@ -44,15 +44,11 @@ class BaseRepository(Generic[T]):
     # ── Read ────────────────────────────────────────────────────────────
 
     def get_by_id(self, id: int) -> T | None:
-        return self.db.execute(
-            select(self.model).where(self.model.id == id)
-        ).scalar_one_or_none()
+        return self.db.execute(select(self.model).where(self.model.id == id)).scalar_one_or_none()
 
     def get_by_field(self, field: str, value: Any) -> T | None:
         column = getattr(self.model, field)
-        return self.db.execute(
-            select(self.model).where(column == value)
-        ).scalar_one_or_none()
+        return self.db.execute(select(self.model).where(column == value)).scalar_one_or_none()
 
     def list(
         self,
@@ -98,8 +94,11 @@ class BaseRepository(Generic[T]):
     ) -> tuple[list[T], int]:
         offset = (page - 1) * page_size
         items = self.list(
-            filters=filters, order_by=order_by, order_desc=order_desc,
-            limit=page_size, offset=offset,
+            filters=filters,
+            order_by=order_by,
+            order_desc=order_desc,
+            limit=page_size,
+            offset=offset,
         )
         total = self.count(filters=filters)
         return items, total
@@ -124,9 +123,7 @@ class BaseRepository(Generic[T]):
 
     def update(self, id: int, **kwargs) -> T | None:
         kwargs["updated_at"] = datetime.now(timezone.utc)
-        self.db.execute(
-            update(self.model).where(self.model.id == id).values(**kwargs)
-        )
+        self.db.execute(update(self.model).where(self.model.id == id).values(**kwargs))
         self.db.flush()
         return self.get_by_id(id)
 
@@ -160,9 +157,7 @@ class BaseRepository(Generic[T]):
     def bulk_update(self, ids: list[int], **kwargs) -> int:
         if not ids:
             return 0
-        result = self.db.execute(
-            update(self.model).where(self.model.id.in_(ids)).values(**kwargs)
-        )
+        result = self.db.execute(update(self.model).where(self.model.id.in_(ids)).values(**kwargs))
         self.db.flush()
         return result.rowcount
 

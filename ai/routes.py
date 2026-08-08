@@ -1248,7 +1248,9 @@ async def ai_dashboard(
     tracker = UsageTracker(db)
     stats = tracker.get_stats(30)
 
-    total_conversations = db.query(AIConversation).filter(AIConversation.organization_id == org_id).count()
+    total_conversations = (
+        db.query(AIConversation).filter(AIConversation.organization_id == org_id).count()
+    )
     total_messages = (
         db.query(AIMessage)
         .join(AIConversation, AIMessage.conversation_id == AIConversation.id)

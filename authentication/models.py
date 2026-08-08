@@ -53,7 +53,9 @@ class Role(Base):
     name = Column(String(50), unique=True, nullable=False)
     display_name = Column(String(100), nullable=False)
     description = Column(Text, nullable=True)
-    level = Column(String(20), nullable=False, default="organization")  # platform, organization, department, personal
+    level = Column(
+        String(20), nullable=False, default="organization"
+    )  # platform, organization, department, personal
     is_system = Column(Integer, nullable=False, default=0)
     is_assignable = Column(Integer, nullable=False, default=1)
     is_deleted = Column(Integer, nullable=False, default=0)
@@ -182,15 +184,20 @@ class Resource(Base):
     Tracks individual resources (datasets, dashboards, reports, pipelines)
     and their ownership for fine-grained permission checks.
     """
+
     __tablename__ = "resources"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
-    resource_type = Column(String(50), nullable=False, index=True)  # dataset, dashboard, report, pipeline
+    resource_type = Column(
+        String(50), nullable=False, index=True
+    )  # dataset, dashboard, report, pipeline
     resource_id = Column(BigInteger, nullable=False, index=True)  # FK to the actual resource
     organization_id = Column(BigInteger, nullable=True, index=True)
     department_id = Column(BigInteger, nullable=True, index=True)
     owner_id = Column(BigInteger, nullable=True, index=True)  # user who owns the resource
     is_public = Column(Integer, nullable=False, default=0)  # 1 = visible to all org members
-    access_level = Column(String(20), nullable=False, default="private")  # private, department, organization, public
+    access_level = Column(
+        String(20), nullable=False, default="private"
+    )  # private, department, organization, public
     created_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
     updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now(), nullable=False)

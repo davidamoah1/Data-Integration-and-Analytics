@@ -349,7 +349,13 @@ DashboardRegistry.register(
             _card("downtime", "Downtime Hours", "downtime", "sum", "operational"),
             _card("yield", "Yield Rate", "production", "sum", "quality"),
             _chart("production_trend", "line_chart", "Production Trend", "production", "date"),
-            _chart("production_by_machine", "bar_chart", "Production by Machine", "production", "machine"),
+            _chart(
+                "production_by_machine",
+                "bar_chart",
+                "Production by Machine",
+                "production",
+                "machine",
+            ),
             _chart("downtime_reasons", "bar_chart", "Downtime Reasons", "downtime", "machine"),
         ),
     ),
@@ -394,7 +400,9 @@ DashboardRegistry.register(
             _card("cards", "Cards", "card", "count", "operational"),
             _chart("transaction_trend", "line_chart", "Transaction Trend", "transaction", "date"),
             _chart("balance_by_branch", "bar_chart", "Balance by Branch", "account", "account"),
-            _chart("transaction_types", "pie_chart", "Transaction Types", "transaction", "transaction"),
+            _chart(
+                "transaction_types", "pie_chart", "Transaction Types", "transaction", "transaction"
+            ),
         ),
     ),
 )
@@ -438,7 +446,9 @@ DashboardRegistry.register(
             _card("services", "Service Revenue", "service", "sum", "financial"),
             _chart("reservation_trend", "line_chart", "Reservation Trend", "reservation", "date"),
             _chart("revenue_by_room_type", "bar_chart", "Revenue by Room Type", "room", "room"),
-            _chart("service_distribution", "pie_chart", "Service Distribution", "service", "service"),
+            _chart(
+                "service_distribution", "pie_chart", "Service Distribution", "service", "service"
+            ),
         ),
     ),
 )

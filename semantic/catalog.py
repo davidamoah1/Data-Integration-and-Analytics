@@ -100,7 +100,9 @@ class MetadataCatalogService:
                 ]
             ).lower()
             if needle in haystack:
-                matches.append({"type": "column", "name": column["name"], "dataset": document.dataset_name})
+                matches.append(
+                    {"type": "column", "name": column["name"], "dataset": document.dataset_name}
+                )
         for term in document.glossary_terms:
             haystack = " ".join(str(value) for value in term.values()).lower()
             if needle in haystack:

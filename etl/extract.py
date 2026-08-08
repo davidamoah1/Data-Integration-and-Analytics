@@ -45,7 +45,9 @@ def extract_data() -> pd.DataFrame:
         if df.empty:
             raise ValueError("The data file is empty or contains no rows.")
 
-        logger.info(f"Extract complete. {len(df)} rows, {len(df.columns)} columns loaded from {file_ext} file.")
+        logger.info(
+            f"Extract complete. {len(df)} rows, {len(df.columns)} columns loaded from {file_ext} file."
+        )
         return df
 
     except Exception as e:

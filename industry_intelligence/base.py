@@ -109,7 +109,9 @@ class IndustryAnalytics:
     industry: str = "unknown"
 
     @classmethod
-    def analyze(cls, df: pd.DataFrame, col_mapping: dict[str, str] | None = None) -> AnalyticsResult:
+    def analyze(
+        cls, df: pd.DataFrame, col_mapping: dict[str, str] | None = None
+    ) -> AnalyticsResult:
         """Run industry-specific analytics on a DataFrame.
 
         Args:
@@ -125,9 +127,7 @@ class IndustryAnalytics:
     # ── Helpers ──────────────────────────────────────────
 
     @staticmethod
-    def _find_col(
-        df: pd.DataFrame, col_mapping: dict | None, entity_keys: list[str]
-    ) -> str | None:
+    def _find_col(df: pd.DataFrame, col_mapping: dict | None, entity_keys: list[str]) -> str | None:
         """Find a column by entity key mapping or by name heuristic."""
         if col_mapping:
             for col, entity in col_mapping.items():
@@ -150,7 +150,11 @@ class IndustryAnalytics:
         """Find a numeric column by entity key or name."""
         if col_mapping:
             for col, entity in col_mapping.items():
-                if entity in entity_keys and col in df.columns and pd.api.types.is_numeric_dtype(df[col]):
+                if (
+                    entity in entity_keys
+                    and col in df.columns
+                    and pd.api.types.is_numeric_dtype(df[col])
+                ):
                     return col
         # Fallback: search by column name for numeric columns
         lower_map = {c.lower(): c for c in df.columns}
@@ -305,7 +309,9 @@ class IndustryAnalyticsRegistry:
         return sorted(cls._engines.keys())
 
     @classmethod
-    def analyze(cls, industry: str, df: pd.DataFrame, col_mapping: dict | None = None) -> AnalyticsResult | None:
+    def analyze(
+        cls, industry: str, df: pd.DataFrame, col_mapping: dict | None = None
+    ) -> AnalyticsResult | None:
         engine = cls.get(industry)
         if engine is None:
             return None

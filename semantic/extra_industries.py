@@ -52,7 +52,16 @@ EXTRA_ENTITIES: dict[str, dict] = {
         "display_name": "Loan",
         "industry": "banking",
         "weight": 3.0,
-        "synonyms": ["loan_id", "loan_number", "mortgage", "personal_loan", "business_loan", "credit_score", "interest_rate", "principal_amount"],
+        "synonyms": [
+            "loan_id",
+            "loan_number",
+            "mortgage",
+            "personal_loan",
+            "business_loan",
+            "credit_score",
+            "interest_rate",
+            "principal_amount",
+        ],
         "attributes": ["loan_id", "customer_id", "principal", "interest_rate", "status"],
         "kpis": ["total_loans", "total_principal", "default_rate", "approval_rate"],
         "relationships": [

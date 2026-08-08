@@ -30,17 +30,20 @@ def test_send_email_skipped_without_smtp(db_session):
 
 def test_send_email_uses_smtp_when_configured(db_session):
     service = NotificationService(db_session)
-    with patch.dict(
-        "os.environ",
-        {
-            "SMTP_HOST": "smtp.example.com",
-            "SMTP_PORT": "587",
-            "SMTP_USER": "user",
-            "SMTP_PASSWORD": "pass",
-            "SMTP_FROM": "from@example.com",
-        },
-        clear=False,
-    ), patch("notifications.service.smtplib.SMTP") as mock_smtp:
+    with (
+        patch.dict(
+            "os.environ",
+            {
+                "SMTP_HOST": "smtp.example.com",
+                "SMTP_PORT": "587",
+                "SMTP_USER": "user",
+                "SMTP_PASSWORD": "pass",
+                "SMTP_FROM": "from@example.com",
+            },
+            clear=False,
+        ),
+        patch("notifications.service.smtplib.SMTP") as mock_smtp,
+    ):
         result = service.send_email(to="to@example.com", subject="Hi", body="there", user_id=1)
         assert result["sent"] is True
         assert result["to"] == "to@example.com"

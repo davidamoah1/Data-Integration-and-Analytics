@@ -158,10 +158,16 @@ class PredictiveAnalyticsBase:
         return None
 
     @staticmethod
-    def _find_numeric_col(df: pd.DataFrame, col_mapping: dict, entity_keys: list[str]) -> str | None:
+    def _find_numeric_col(
+        df: pd.DataFrame, col_mapping: dict, entity_keys: list[str]
+    ) -> str | None:
         """Find a numeric column by entity key or name."""
         for col, entity in col_mapping.items():
-            if entity in entity_keys and col in df.columns and pd.api.types.is_numeric_dtype(df[col]):
+            if (
+                entity in entity_keys
+                and col in df.columns
+                and pd.api.types.is_numeric_dtype(df[col])
+            ):
                 return col
         lower_map = {c.lower(): c for c in df.columns}
         for key in entity_keys:
@@ -182,7 +188,14 @@ class PredictiveAnalyticsBase:
             if pd.api.types.is_datetime64_any_dtype(df[c]):
                 return c
         lower_map = {c.lower(): c for c in df.columns}
-        for name in ("date", "order_date", "visit_date", "admission_date", "created_at", "record_date"):
+        for name in (
+            "date",
+            "order_date",
+            "visit_date",
+            "admission_date",
+            "created_at",
+            "record_date",
+        ):
             if name in lower_map:
                 return lower_map[name]
         return None
@@ -205,11 +218,15 @@ class PredictiveAnalyticsRegistry:
         return None
 
     @classmethod
-    def analyze(cls, industry: str, df: pd.DataFrame, col_mapping: dict) -> PredictiveIntelligenceResult:
+    def analyze(
+        cls, industry: str, df: pd.DataFrame, col_mapping: dict
+    ) -> PredictiveIntelligenceResult:
         module = cls.get(industry)
         if module:
             return module.analyze(df, col_mapping)
-        return PredictiveIntelligenceResult(industry=industry, summary="No predictive module for this industry.")
+        return PredictiveIntelligenceResult(
+            industry=industry, summary="No predictive module for this industry."
+        )
 
     @classmethod
     def registered_industries(cls) -> list[str]:

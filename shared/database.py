@@ -39,7 +39,9 @@ def _attach_slow_query_listener(engine, threshold_ms: int):
             stmt_preview = statement[:200].replace("\n", " ")
             logger.warning(
                 "Slow query %.1fms (threshold %dms): %s",
-                duration_ms, threshold_ms, stmt_preview,
+                duration_ms,
+                threshold_ms,
+                stmt_preview,
             )
 
 

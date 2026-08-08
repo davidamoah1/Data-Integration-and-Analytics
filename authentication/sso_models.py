@@ -30,7 +30,12 @@ class SSOConnection(Base):
     field_mapping = Column(JSON, nullable=True)  # Map IdP fields to platform fields
     is_active = Column(Boolean, nullable=False, default=True)
     created_at = Column(TIMESTAMP, default=datetime.now(timezone.utc), nullable=False)
-    updated_at = Column(TIMESTAMP, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc), nullable=False)
+    updated_at = Column(
+        TIMESTAMP,
+        default=datetime.now(timezone.utc),
+        onupdate=datetime.now(timezone.utc),
+        nullable=False,
+    )
 
 
 class SSOIdentity(Base):

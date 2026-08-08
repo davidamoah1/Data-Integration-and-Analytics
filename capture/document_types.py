@@ -47,11 +47,24 @@ HEALTHCARE_TYPES: list[DocumentTypeSpec] = [
         fields=[
             FieldSpec("patient_name", "Patient Name", "text", True, ["name", "patient name"]),
             FieldSpec("age", "Age", "number", True, ["age"]),
-            FieldSpec("sex", "Sex", "enum", True, ["sex", "gender"], enum_values=["M", "F", "Male", "Female"]),
+            FieldSpec(
+                "sex",
+                "Sex",
+                "enum",
+                True,
+                ["sex", "gender"],
+                enum_values=["M", "F", "Male", "Female"],
+            ),
             FieldSpec("date", "Visit Date", "date", True, ["date"]),
             FieldSpec("diagnosis", "Diagnosis", "text", False, ["diagnosis", "dx", "complaint"]),
             FieldSpec("department", "Department", "text", False, ["department", "unit", "clinic"]),
-            FieldSpec("attending_officer", "Attending Officer", "text", False, ["seen by", "clinician", "attended by"]),
+            FieldSpec(
+                "attending_officer",
+                "Attending Officer",
+                "text",
+                False,
+                ["seen by", "clinician", "attended by"],
+            ),
         ],
     ),
     DocumentTypeSpec(
@@ -62,13 +75,34 @@ HEALTHCARE_TYPES: list[DocumentTypeSpec] = [
         fields=[
             FieldSpec("patient_name", "Patient Name", "text", True, ["name", "patient name"]),
             FieldSpec("age", "Age", "number", True, ["age"]),
-            FieldSpec("sex", "Sex", "enum", True, ["sex", "gender"], enum_values=["M", "F", "Male", "Female"]),
-            FieldSpec("diagnosis", "Diagnosis", "text", False, ["diagnosis", "provisional diagnosis"]),
+            FieldSpec(
+                "sex",
+                "Sex",
+                "enum",
+                True,
+                ["sex", "gender"],
+                enum_values=["M", "F", "Male", "Female"],
+            ),
+            FieldSpec(
+                "diagnosis", "Diagnosis", "text", False, ["diagnosis", "provisional diagnosis"]
+            ),
             FieldSpec("doctor", "Doctor", "text", False, ["doctor", "physician", "consultant"]),
             FieldSpec("ward", "Ward", "text", True, ["ward"]),
             FieldSpec("bed_number", "Bed Number", "text", False, ["bed", "bed no", "bed number"]),
-            FieldSpec("admission_date", "Admission Date", "date", True, ["admission date", "date admitted"]),
-            FieldSpec("discharge_date", "Discharge Date", "date", False, ["discharge date", "date discharged"]),
+            FieldSpec(
+                "admission_date",
+                "Admission Date",
+                "date",
+                True,
+                ["admission date", "date admitted"],
+            ),
+            FieldSpec(
+                "discharge_date",
+                "Discharge Date",
+                "date",
+                False,
+                ["discharge date", "date discharged"],
+            ),
         ],
     ),
     DocumentTypeSpec(
@@ -81,8 +115,16 @@ HEALTHCARE_TYPES: list[DocumentTypeSpec] = [
             FieldSpec("test_name", "Test Name", "text", True, ["test", "investigation"]),
             FieldSpec("result", "Result", "text", True, ["result", "value"]),
             FieldSpec("units", "Units", "text", False, ["units", "unit"]),
-            FieldSpec("reference_range", "Reference Range", "text", False, ["reference range", "normal range"]),
-            FieldSpec("technician", "Technician", "text", False, ["technician", "analyst", "performed by"]),
+            FieldSpec(
+                "reference_range",
+                "Reference Range",
+                "text",
+                False,
+                ["reference range", "normal range"],
+            ),
+            FieldSpec(
+                "technician", "Technician", "text", False, ["technician", "analyst", "performed by"]
+            ),
             FieldSpec("date", "Test Date", "date", False, ["date"]),
         ],
     ),
@@ -94,9 +136,15 @@ HEALTHCARE_TYPES: list[DocumentTypeSpec] = [
         fields=[
             FieldSpec("drug_name", "Drug", "text", True, ["drug", "medicine", "item"]),
             FieldSpec("quantity", "Quantity", "number", True, ["quantity", "qty"]),
-            FieldSpec("batch_number", "Batch Number", "text", False, ["batch", "batch no", "batch number"]),
-            FieldSpec("expiry_date", "Expiry Date", "date", False, ["expiry", "exp date", "expiry date"]),
-            FieldSpec("supplier", "Supplier", "text", False, ["supplier", "manufacturer", "vendor"]),
+            FieldSpec(
+                "batch_number", "Batch Number", "text", False, ["batch", "batch no", "batch number"]
+            ),
+            FieldSpec(
+                "expiry_date", "Expiry Date", "date", False, ["expiry", "exp date", "expiry date"]
+            ),
+            FieldSpec(
+                "supplier", "Supplier", "text", False, ["supplier", "manufacturer", "vendor"]
+            ),
         ],
     ),
     DocumentTypeSpec(
@@ -106,7 +154,9 @@ HEALTHCARE_TYPES: list[DocumentTypeSpec] = [
         keywords=["patient card", "patient id card", "hospital card", "folder number"],
         fields=[
             FieldSpec("patient_name", "Patient Name", "text", True, ["name"]),
-            FieldSpec("patient_id", "Patient ID", "text", True, ["id", "folder number", "card number"]),
+            FieldSpec(
+                "patient_id", "Patient ID", "text", True, ["id", "folder number", "card number"]
+            ),
             FieldSpec("age", "Age", "number", False, ["age"]),
             FieldSpec("sex", "Sex", "enum", False, ["sex", "gender"], enum_values=["M", "F"]),
             FieldSpec("phone", "Phone", "phone", False, ["phone", "tel", "contact"]),
@@ -120,10 +170,18 @@ HEALTHCARE_TYPES: list[DocumentTypeSpec] = [
         keywords=["nhis", "national health insurance", "claim form", "membership number"],
         fields=[
             FieldSpec("patient_name", "Patient Name", "text", True, ["name"]),
-            FieldSpec("membership_number", "Membership Number", "text", True, ["membership number", "nhis number"]),
+            FieldSpec(
+                "membership_number",
+                "Membership Number",
+                "text",
+                True,
+                ["membership number", "nhis number"],
+            ),
             FieldSpec("diagnosis", "Diagnosis", "text", False, ["diagnosis"]),
             FieldSpec("service_date", "Service Date", "date", False, ["date of service", "date"]),
-            FieldSpec("amount_claimed", "Amount Claimed", "currency", False, ["amount", "claim amount"]),
+            FieldSpec(
+                "amount_claimed", "Amount Claimed", "currency", False, ["amount", "claim amount"]
+            ),
         ],
     ),
     DocumentTypeSpec(
@@ -159,9 +217,17 @@ HEALTHCARE_TYPES: list[DocumentTypeSpec] = [
         keywords=["referral form", "referred to", "referring facility"],
         fields=[
             FieldSpec("patient_name", "Patient Name", "text", True, ["name"]),
-            FieldSpec("referring_facility", "Referring Facility", "text", False, ["referring facility", "from"]),
+            FieldSpec(
+                "referring_facility",
+                "Referring Facility",
+                "text",
+                False,
+                ["referring facility", "from"],
+            ),
             FieldSpec("referred_to", "Referred To", "text", True, ["referred to", "to"]),
-            FieldSpec("reason", "Reason for Referral", "text", False, ["reason", "reason for referral"]),
+            FieldSpec(
+                "reason", "Reason for Referral", "text", False, ["reason", "reason for referral"]
+            ),
             FieldSpec("date", "Date", "date", False, ["date"]),
         ],
     ),
@@ -172,10 +238,26 @@ HEALTHCARE_TYPES: list[DocumentTypeSpec] = [
         keywords=["discharge summary", "discharge form", "discharged on"],
         fields=[
             FieldSpec("patient_name", "Patient Name", "text", True, ["name"]),
-            FieldSpec("diagnosis", "Final Diagnosis", "text", False, ["final diagnosis", "diagnosis"]),
-            FieldSpec("discharge_date", "Discharge Date", "date", True, ["discharge date", "date discharged"]),
-            FieldSpec("condition_on_discharge", "Condition on Discharge", "text", False, ["condition on discharge"]),
-            FieldSpec("follow_up", "Follow-up Instructions", "text", False, ["follow up", "follow-up"]),
+            FieldSpec(
+                "diagnosis", "Final Diagnosis", "text", False, ["final diagnosis", "diagnosis"]
+            ),
+            FieldSpec(
+                "discharge_date",
+                "Discharge Date",
+                "date",
+                True,
+                ["discharge date", "date discharged"],
+            ),
+            FieldSpec(
+                "condition_on_discharge",
+                "Condition on Discharge",
+                "text",
+                False,
+                ["condition on discharge"],
+            ),
+            FieldSpec(
+                "follow_up", "Follow-up Instructions", "text", False, ["follow up", "follow-up"]
+            ),
         ],
     ),
 ]
@@ -203,7 +285,14 @@ EDUCATION_TYPES: list[DocumentTypeSpec] = [
         fields=[
             FieldSpec("student_name", "Student Name", "text", True, ["name"]),
             FieldSpec("date", "Date", "date", True, ["date"]),
-            FieldSpec("status", "Status", "enum", False, ["status", "present/absent"], enum_values=["Present", "Absent"]),
+            FieldSpec(
+                "status",
+                "Status",
+                "enum",
+                False,
+                ["status", "present/absent"],
+                enum_values=["Present", "Absent"],
+            ),
         ],
     ),
     DocumentTypeSpec(
@@ -251,8 +340,20 @@ GOVERNMENT_TYPES: list[DocumentTypeSpec] = [
         industry="government",
         keywords=["census", "household survey", "population count"],
         fields=[
-            FieldSpec("household_head", "Household Head", "text", True, ["household head", "head of household"]),
-            FieldSpec("household_size", "Household Size", "number", False, ["household size", "number of members"]),
+            FieldSpec(
+                "household_head",
+                "Household Head",
+                "text",
+                True,
+                ["household head", "head of household"],
+            ),
+            FieldSpec(
+                "household_size",
+                "Household Size",
+                "number",
+                False,
+                ["household size", "number of members"],
+            ),
             FieldSpec("address", "Address", "text", False, ["address", "location"]),
             FieldSpec("date", "Date", "date", False, ["date"]),
         ],
@@ -264,7 +365,9 @@ GOVERNMENT_TYPES: list[DocumentTypeSpec] = [
         keywords=["permit", "license", "authorization"],
         fields=[
             FieldSpec("applicant_name", "Applicant Name", "text", True, ["name", "applicant"]),
-            FieldSpec("permit_number", "Permit Number", "text", False, ["permit number", "license number"]),
+            FieldSpec(
+                "permit_number", "Permit Number", "text", False, ["permit number", "license number"]
+            ),
             FieldSpec("issue_date", "Issue Date", "date", False, ["issue date", "date issued"]),
             FieldSpec("expiry_date", "Expiry Date", "date", False, ["expiry date", "valid until"]),
         ],
@@ -292,11 +395,19 @@ BUSINESS_TYPES: list[DocumentTypeSpec] = [
         industry="business",
         keywords=["invoice", "invoice number", "bill to", "amount due"],
         fields=[
-            FieldSpec("invoice_number", "Invoice Number", "text", True, ["invoice number", "invoice no"]),
+            FieldSpec(
+                "invoice_number", "Invoice Number", "text", True, ["invoice number", "invoice no"]
+            ),
             FieldSpec("vendor_name", "Vendor", "text", False, ["vendor", "from", "seller"]),
             FieldSpec("customer_name", "Customer", "text", False, ["bill to", "customer"]),
             FieldSpec("date", "Invoice Date", "date", False, ["date", "invoice date"]),
-            FieldSpec("total_amount", "Total Amount", "currency", True, ["total", "amount due", "grand total"]),
+            FieldSpec(
+                "total_amount",
+                "Total Amount",
+                "currency",
+                True,
+                ["total", "amount due", "grand total"],
+            ),
         ],
     ),
     DocumentTypeSpec(
@@ -305,10 +416,14 @@ BUSINESS_TYPES: list[DocumentTypeSpec] = [
         industry="business",
         keywords=["receipt", "cash received", "paid", "thank you"],
         fields=[
-            FieldSpec("receipt_number", "Receipt Number", "text", False, ["receipt number", "receipt no"]),
+            FieldSpec(
+                "receipt_number", "Receipt Number", "text", False, ["receipt number", "receipt no"]
+            ),
             FieldSpec("date", "Date", "date", False, ["date"]),
             FieldSpec("total_amount", "Total Amount", "currency", True, ["total", "amount"]),
-            FieldSpec("payment_method", "Payment Method", "text", False, ["payment method", "paid via"]),
+            FieldSpec(
+                "payment_method", "Payment Method", "text", False, ["payment method", "paid via"]
+            ),
         ],
     ),
     DocumentTypeSpec(
@@ -317,7 +432,9 @@ BUSINESS_TYPES: list[DocumentTypeSpec] = [
         industry="business",
         keywords=["purchase order", "po number", "ship to"],
         fields=[
-            FieldSpec("po_number", "PO Number", "text", True, ["po number", "purchase order number"]),
+            FieldSpec(
+                "po_number", "PO Number", "text", True, ["po number", "purchase order number"]
+            ),
             FieldSpec("supplier_name", "Supplier", "text", False, ["supplier", "vendor"]),
             FieldSpec("date", "Date", "date", False, ["date"]),
             FieldSpec("total_amount", "Total Amount", "currency", False, ["total", "amount"]),
@@ -340,7 +457,13 @@ BUSINESS_TYPES: list[DocumentTypeSpec] = [
         industry="business",
         keywords=["delivery note", "goods delivered", "received by"],
         fields=[
-            FieldSpec("delivery_number", "Delivery Number", "text", False, ["delivery number", "delivery no"]),
+            FieldSpec(
+                "delivery_number",
+                "Delivery Number",
+                "text",
+                False,
+                ["delivery number", "delivery no"],
+            ),
             FieldSpec("recipient_name", "Recipient", "text", False, ["received by", "recipient"]),
             FieldSpec("date", "Date", "date", False, ["date"]),
         ],
@@ -392,7 +515,9 @@ FORM_TYPES: list[DocumentTypeSpec] = [
             FieldSpec("email", "Email", "email", False, ["email", "e-mail"]),
             FieldSpec("address", "Address", "text", False, ["address"]),
             FieldSpec("id_number", "ID Number", "text", False, ["id", "id number"]),
-            FieldSpec("application_date", "Application Date", "date", False, ["application date", "date"]),
+            FieldSpec(
+                "application_date", "Application Date", "date", False, ["application date", "date"]
+            ),
         ],
     ),
 ]

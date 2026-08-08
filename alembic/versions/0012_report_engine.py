@@ -23,7 +23,12 @@ depends_on: str | Sequence[str] | None = None
 def upgrade() -> None:
     op.create_table(
         "report_compositions",
-        sa.Column("id", sa.BigInteger().with_variant(sa.Integer(), "sqlite"), primary_key=True, autoincrement=True),
+        sa.Column(
+            "id",
+            sa.BigInteger().with_variant(sa.Integer(), "sqlite"),
+            primary_key=True,
+            autoincrement=True,
+        ),
         sa.Column("report_id", sa.String(100), nullable=False, unique=True, index=True),
         sa.Column("organization_id", sa.BigInteger, nullable=True, index=True),
         sa.Column("title", sa.String(500), nullable=False),
@@ -40,12 +45,23 @@ def upgrade() -> None:
         sa.Column("status", sa.String(20), nullable=False, default="draft"),
         sa.Column("created_by", sa.BigInteger, nullable=True),
         sa.Column("created_at", sa.TIMESTAMP, server_default=sa.func.now(), nullable=False),
-        sa.Column("updated_at", sa.TIMESTAMP, server_default=sa.func.now(), onupdate=sa.func.now(), nullable=False),
+        sa.Column(
+            "updated_at",
+            sa.TIMESTAMP,
+            server_default=sa.func.now(),
+            onupdate=sa.func.now(),
+            nullable=False,
+        ),
     )
 
     op.create_table(
         "report_exports",
-        sa.Column("id", sa.BigInteger().with_variant(sa.Integer(), "sqlite"), primary_key=True, autoincrement=True),
+        sa.Column(
+            "id",
+            sa.BigInteger().with_variant(sa.Integer(), "sqlite"),
+            primary_key=True,
+            autoincrement=True,
+        ),
         sa.Column("report_id", sa.String(100), nullable=False, index=True),
         sa.Column("organization_id", sa.BigInteger, nullable=True, index=True),
         sa.Column("format", sa.String(20), nullable=False),

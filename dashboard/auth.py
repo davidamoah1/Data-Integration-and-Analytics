@@ -108,7 +108,9 @@ def require_auth():
 
         users = _load_users()
         with st.form("login_form", border=False):
-            username = st.text_input("Username", placeholder="Enter your username", autocomplete="username")
+            username = st.text_input(
+                "Username", placeholder="Enter your username", autocomplete="username"
+            )
             password = st.text_input(
                 "Password",
                 type="password",

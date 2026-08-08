@@ -24,13 +24,18 @@ class BusinessPredictiveAnalytics(PredictiveAnalyticsBase):
         predictions = []
 
         # 1. Sales/Revenue Forecast
-        revenue_col = self._find_numeric_col(df, col_mapping, ["revenue", "sales", "billing", "amount"])
+        revenue_col = self._find_numeric_col(
+            df, col_mapping, ["revenue", "sales", "billing", "amount"]
+        )
         date_col = self._find_date_col(df, col_mapping)
 
         if revenue_col and date_col:
             forecast = TimeSeriesForecaster.forecast(
-                df, revenue_col, date_col,
-                horizon=30, frequency="D",
+                df,
+                revenue_col,
+                date_col,
+                horizon=30,
+                frequency="D",
                 name="Sales Forecast",
             )
             if forecast:
@@ -40,8 +45,11 @@ class BusinessPredictiveAnalytics(PredictiveAnalyticsBase):
         profit_col = self._find_numeric_col(df, col_mapping, ["profit", "margin"])
         if profit_col and date_col:
             forecast = TimeSeriesForecaster.forecast(
-                df, profit_col, date_col,
-                horizon=30, frequency="D",
+                df,
+                profit_col,
+                date_col,
+                horizon=30,
+                frequency="D",
                 name="Profit Forecast",
             )
             if forecast:
@@ -51,24 +59,34 @@ class BusinessPredictiveAnalytics(PredictiveAnalyticsBase):
         # Predict revenue/quantity based on other numeric features
         if revenue_col:
             feature_cols = [
-                c for c in df.columns
-                if pd.api.types.is_numeric_dtype(df[c]) and c != revenue_col
-                and c != date_col and "id" not in c.lower()
+                c
+                for c in df.columns
+                if pd.api.types.is_numeric_dtype(df[c])
+                and c != revenue_col
+                and c != date_col
+                and "id" not in c.lower()
             ]
             if len(feature_cols) >= 1:
                 pred = RegressionPredictor.predict(
-                    df, revenue_col, feature_cols=feature_cols,
+                    df,
+                    revenue_col,
+                    feature_cols=feature_cols,
                     name="Demand Prediction",
                 )
                 if pred:
                     predictions.append(pred)
 
         # 4. Quantity/Volume Forecast
-        quantity_col = self._find_numeric_col(df, col_mapping, ["quantity", "volume", "count", "units"])
+        quantity_col = self._find_numeric_col(
+            df, col_mapping, ["quantity", "volume", "count", "units"]
+        )
         if quantity_col and date_col and quantity_col != revenue_col:
             forecast = TimeSeriesForecaster.forecast(
-                df, quantity_col, date_col,
-                horizon=30, frequency="D",
+                df,
+                quantity_col,
+                date_col,
+                horizon=30,
+                frequency="D",
                 name="Demand Volume Forecast",
             )
             if forecast:
@@ -79,7 +97,9 @@ class BusinessPredictiveAnalytics(PredictiveAnalyticsBase):
             summary_parts.append(f"{len(forecasts)} forecast(s) generated")
         if predictions:
             summary_parts.append(f"{len(predictions)} prediction(s) generated")
-        summary = " | ".join(summary_parts) if summary_parts else "No predictions could be generated."
+        summary = (
+            " | ".join(summary_parts) if summary_parts else "No predictions could be generated."
+        )
 
         return PredictiveIntelligenceResult(
             industry="retail",

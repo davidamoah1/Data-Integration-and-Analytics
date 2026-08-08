@@ -55,7 +55,9 @@ class ScopedRegistry:
         return self._values.get((organization_id, key), self._values.get((None, key), default))
 
     def list(self, organization_id: int | None = None) -> dict[str, Any]:
-        return {key: value for (scope, key), value in self._values.items() if scope == organization_id}
+        return {
+            key: value for (scope, key), value in self._values.items() if scope == organization_id
+        }
 
 
 class CapabilityRegistry:
@@ -69,7 +71,11 @@ class CapabilityRegistry:
         return capability in self._capabilities.get(component_id, set())
 
     def find(self, capability: str) -> list[str]:
-        return sorted(component_id for component_id, values in self._capabilities.items() if capability in values)
+        return sorted(
+            component_id
+            for component_id, values in self._capabilities.items()
+            if capability in values
+        )
 
 
 class HealthRegistry:
@@ -111,15 +117,25 @@ class PlatformKernel:
     marketplace: dict[str, MarketplaceItem] = field(default_factory=dict)
 
     def start(self) -> None:
-        self.events.publish(DomainEvent(event_type="kernel.started", resource_type="kernel", resource_id=self.version))
+        self.events.publish(
+            DomainEvent(
+                event_type="kernel.started", resource_type="kernel", resource_id=self.version
+            )
+        )
 
-    def register_extension(self, manifest: PluginManifest, author: str, license_name: str = "proprietary") -> None:
+    def register_extension(
+        self, manifest: PluginManifest, author: str, license_name: str = "proprietary"
+    ) -> None:
         self.plugins.install(manifest)
         self.marketplace[manifest.id] = MarketplaceItem(manifest, author, license_name)
         self.capabilities.register(manifest.id, manifest.capabilities)
         self.versions.set(manifest.id, manifest.version)
         self.permissions.set(manifest.id, manifest.permissions)
-        self.events.publish(DomainEvent(event_type="plugin.installed", resource_type="plugin", resource_id=manifest.id))
+        self.events.publish(
+            DomainEvent(
+                event_type="plugin.installed", resource_type="plugin", resource_id=manifest.id
+            )
+        )
 
     def set_feature(self, feature: str, enabled: bool, organization_id: int | None = None) -> None:
         self.feature_flags.set(feature, enabled, organization_id)

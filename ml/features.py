@@ -45,24 +45,32 @@ def build_feature_pipeline(
         transformers.append(("num", Pipeline(numeric_steps), numeric_columns))
 
     if categorical_columns:
-        transformers.append((
-            "cat",
-            Pipeline([
-                ("imputer", SimpleImputer(strategy="most_frequent")),
-                ("encoder", OneHotEncoder(handle_unknown="ignore", sparse_output=False)),
-            ]),
-            categorical_columns,
-        ))
+        transformers.append(
+            (
+                "cat",
+                Pipeline(
+                    [
+                        ("imputer", SimpleImputer(strategy="most_frequent")),
+                        ("encoder", OneHotEncoder(handle_unknown="ignore", sparse_output=False)),
+                    ]
+                ),
+                categorical_columns,
+            )
+        )
 
     # Datetime transformer: extracts date components separately.
     if datetime_columns:
-        transformers.append((
-            "dt",
-            Pipeline([
-                ("extract", DatetimeFeatureExtractor(datetime_columns)),
-            ]),
-            datetime_columns,
-        ))
+        transformers.append(
+            (
+                "dt",
+                Pipeline(
+                    [
+                        ("extract", DatetimeFeatureExtractor(datetime_columns)),
+                    ]
+                ),
+                datetime_columns,
+            )
+        )
 
     if not transformers:
         raise ValueError("At least one feature column group must be provided")
@@ -71,10 +79,14 @@ def build_feature_pipeline(
     steps: list[Any] = [("preprocess", transformer)]
 
     if polynomial_degree and polynomial_degree > 1:
-        steps.append((
-            "poly",
-            PolynomialFeatures(degree=polynomial_degree, interaction_only=interaction_only, include_bias=False),
-        ))
+        steps.append(
+            (
+                "poly",
+                PolynomialFeatures(
+                    degree=polynomial_degree, interaction_only=interaction_only, include_bias=False
+                ),
+            )
+        )
 
     if k_best and k_best > 0:
         score_func = f_classif if target_type == "classification" else f_regression
@@ -100,13 +112,17 @@ class DatetimeFeatureExtractor:
         for col in self.columns:
             if col in X.columns:
                 s = pd.to_datetime(X[col], errors="coerce")
-                frames.append(pd.DataFrame({
-                    f"{col}_year": s.dt.year,
-                    f"{col}_month": s.dt.month,
-                    f"{col}_day": s.dt.day,
-                    f"{col}_dayofweek": s.dt.dayofweek,
-                    f"{col}_quarter": s.dt.quarter,
-                }))
+                frames.append(
+                    pd.DataFrame(
+                        {
+                            f"{col}_year": s.dt.year,
+                            f"{col}_month": s.dt.month,
+                            f"{col}_day": s.dt.day,
+                            f"{col}_dayofweek": s.dt.dayofweek,
+                            f"{col}_quarter": s.dt.quarter,
+                        }
+                    )
+                )
         return pd.concat(frames, axis=1)
 
 
@@ -120,11 +136,15 @@ def create_rolling_features(
     result = df.copy()
     for window in windows:
         for agg in aggregations:
-            result[f"{column}_roll{window}_{agg}"] = result[column].rolling(window=window, min_periods=1).agg(agg)
+            result[f"{column}_roll{window}_{agg}"] = (
+                result[column].rolling(window=window, min_periods=1).agg(agg)
+            )
     return result
 
 
-def create_lag_features(df: pd.DataFrame, column: str, lags: list[int] = (1, 2, 3, 7)) -> pd.DataFrame:
+def create_lag_features(
+    df: pd.DataFrame, column: str, lags: list[int] = (1, 2, 3, 7)
+) -> pd.DataFrame:
     """Append lagged values for a numeric column."""
     result = df.copy()
     for lag in lags:
@@ -191,12 +211,14 @@ class FeatureEngineer:
         # Build feature names from transformers
         self.feature_names_out = self._derive_feature_names(active_pipeline)
         output = pd.DataFrame(X_transformed, columns=self.feature_names_out)
-        self.log.append({
-            "operation": "fit_transform",
-            "input_columns": df.columns.tolist(),
-            "output_columns": output.columns.tolist(),
-            "transformer": str(active_pipeline),
-        })
+        self.log.append(
+            {
+                "operation": "fit_transform",
+                "input_columns": df.columns.tolist(),
+                "output_columns": output.columns.tolist(),
+                "transformer": str(active_pipeline),
+            }
+        )
         return output
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -211,7 +233,9 @@ class FeatureEngineer:
         try:
             return active_pipeline.get_feature_names_out().tolist()
         except Exception:
-            return [f"feature_{i}" for i in range(active_pipeline.transform(pd.DataFrame()).shape[1])]
+            return [
+                f"feature_{i}" for i in range(active_pipeline.transform(pd.DataFrame()).shape[1])
+            ]
 
 
 def auto_clean(df: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, Any]]:
@@ -220,7 +244,9 @@ def auto_clean(df: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, Any]]:
     # Drop fully empty rows/columns
     before = df.shape
     df = df.dropna(axis=0, how="all").dropna(axis=1, how="all")
-    log.append({"operation": "drop_empty", "shape_before": list(before), "shape_after": list(df.shape)})
+    log.append(
+        {"operation": "drop_empty", "shape_before": list(before), "shape_after": list(df.shape)}
+    )
 
     # Impute numeric with median
     numeric = df.select_dtypes(include=[np.number])
@@ -228,7 +254,13 @@ def auto_clean(df: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, Any]]:
         if numeric[col].isna().any():
             median = numeric[col].median()
             df[col] = df[col].fillna(median)
-            log.append({"operation": "impute_median", "column": col, "value": float(median) if pd.notna(median) else None})
+            log.append(
+                {
+                    "operation": "impute_median",
+                    "column": col,
+                    "value": float(median) if pd.notna(median) else None,
+                }
+            )
 
     # Impute categorical with mode
     categorical = df.select_dtypes(include=["object", "category"])

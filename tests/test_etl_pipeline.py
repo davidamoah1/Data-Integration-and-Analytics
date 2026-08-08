@@ -88,7 +88,9 @@ class TestJobMonitor:
         assert "failure_rate" in stats
 
     def test_create_and_get_job(self, db_session):
-        job = ETLJob(organization_id=1, job_type="import", status="completed", trigger_type="manual")
+        job = ETLJob(
+            organization_id=1, job_type="import", status="completed", trigger_type="manual"
+        )
         db_session.add(job)
         db_session.commit()
         db_session.refresh(job)

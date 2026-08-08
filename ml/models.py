@@ -68,9 +68,7 @@ class MLModel(Base):
     training_runs = relationship(
         "MLTrainingRun", back_populates="model", cascade="all, delete-orphan"
     )
-    predictions = relationship(
-        "MLPrediction", back_populates="model", cascade="all, delete-orphan"
-    )
+    predictions = relationship("MLPrediction", back_populates="model", cascade="all, delete-orphan")
 
 
 class MLTrainingRun(Base):
@@ -79,7 +77,9 @@ class MLTrainingRun(Base):
     __tablename__ = "ml_training_runs"
 
     id = Column(String(64), primary_key=True, default=lambda: f"trn_{uuid.uuid4().hex[:16]}")
-    model_id = Column(String(64), ForeignKey("ml_models.id", ondelete="CASCADE"), nullable=False, index=True)
+    model_id = Column(
+        String(64), ForeignKey("ml_models.id", ondelete="CASCADE"), nullable=False, index=True
+    )
     status = Column(String(50), default="pending", nullable=False)
     algorithm = Column(String(100), nullable=True)
     hyperparameters = Column(JSON, default=dict, nullable=False)
@@ -106,7 +106,9 @@ class MLPrediction(Base):
     __tablename__ = "ml_predictions"
 
     id = Column(String(64), primary_key=True, default=lambda: f"prd_{uuid.uuid4().hex[:16]}")
-    model_id = Column(String(64), ForeignKey("ml_models.id", ondelete="CASCADE"), nullable=False, index=True)
+    model_id = Column(
+        String(64), ForeignKey("ml_models.id", ondelete="CASCADE"), nullable=False, index=True
+    )
     input_features = Column(JSON, default=dict, nullable=False)
     prediction = Column(JSON, default=dict, nullable=False)
     probability = Column(Float, nullable=True)
@@ -122,7 +124,9 @@ class MLForecast(Base):
     __tablename__ = "ml_forecasts"
 
     id = Column(String(64), primary_key=True, default=lambda: f"frc_{uuid.uuid4().hex[:16]}")
-    model_id = Column(String(64), ForeignKey("ml_models.id", ondelete="CASCADE"), nullable=False, index=True)
+    model_id = Column(
+        String(64), ForeignKey("ml_models.id", ondelete="CASCADE"), nullable=False, index=True
+    )
     horizon = Column(Integer, nullable=False)
     frequency = Column(String(20), nullable=False)
     forecast_values = Column(JSON, default=list, nullable=False)
@@ -158,7 +162,9 @@ class MLDriftRecord(Base):
     __tablename__ = "ml_drift_records"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
-    model_id = Column(String(64), ForeignKey("ml_models.id", ondelete="CASCADE"), nullable=False, index=True)
+    model_id = Column(
+        String(64), ForeignKey("ml_models.id", ondelete="CASCADE"), nullable=False, index=True
+    )
     drift_type = Column(String(50), nullable=False)  # data_drift, concept_drift, prediction_drift
     score = Column(Float, nullable=False)
     threshold = Column(Float, default=0.05, nullable=False)

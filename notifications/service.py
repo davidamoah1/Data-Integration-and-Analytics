@@ -26,7 +26,15 @@ class NotificationService:
         """Initialize with an optional DB session for in-app logging."""
         self.db = db
 
-    def _log(self, channel: str, subject: str, body: str, status: str, user_id: int | None = None, org_id: int | None = None) -> Notification | None:
+    def _log(
+        self,
+        channel: str,
+        subject: str,
+        body: str,
+        status: str,
+        user_id: int | None = None,
+        org_id: int | None = None,
+    ) -> Notification | None:
         """Persist an in-app notification record when a DB session is available."""
         if self.db is None:
             return None

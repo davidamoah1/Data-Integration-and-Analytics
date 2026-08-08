@@ -231,7 +231,9 @@ class PipelineExecutor:
 
         # Create job record
         job = ETLJob(
-            organization_id=organization_id if organization_id is not None else pipeline.organization_id,
+            organization_id=(
+                organization_id if organization_id is not None else pipeline.organization_id
+            ),
             pipeline_id=pipeline_id,
             job_type="pipeline",
             status="running",

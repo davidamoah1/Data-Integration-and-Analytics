@@ -128,7 +128,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
+          pip install uv
+          uv pip install --system -r requirements.txt
           pip install pytest pytest-cov pytest-asyncio httpx
 
       - name: Run Python unit tests
@@ -212,7 +213,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
+          pip install uv
+          uv pip install --system -r requirements.txt
           pip install pytest pytest-asyncio httpx
 
       - name: Wait for MySQL
@@ -282,7 +284,8 @@ jobs:
           JWT_SECRET_KEY: build-check-secret-key-for-ci-32chars
           DISABLE_CONFIG_VALIDATION: "1"
         run: |
-          pip install -r requirements.txt
+          pip install uv
+          uv pip install --system -r requirements.txt
           python -c "from api.main import app; print(f'Backend OK: {len(app.routes)} routes')"
 
       - name: Verify Alembic migration heads

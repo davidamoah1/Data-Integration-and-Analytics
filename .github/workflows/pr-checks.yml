@@ -70,7 +70,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
+          pip install uv
+          uv pip install --system -r requirements.txt
           pip install pytest pytest-asyncio httpx
 
       - name: Run tests (fast fail)
@@ -115,7 +116,8 @@ jobs:
           JWT_SECRET_KEY: pr-build-secret-key-for-ci-32chars
           DISABLE_CONFIG_VALIDATION: "1"
         run: |
-          pip install -r requirements.txt
+          pip install uv
+          uv pip install --system -r requirements.txt
           python -c "from api.main import app; print(f'Backend OK: {len(app.routes)} routes')"
 
       - name: Set up Node

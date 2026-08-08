@@ -70,7 +70,9 @@ def seed_enterprise_data(db: DbSession) -> dict:
     ]
     for name, display, module, desc in new_perms:
         if not perm_repo.get_by_name(name):
-            perm_repo.create(Permission(name=name, display_name=display, module=module, description=desc))
+            perm_repo.create(
+                Permission(name=name, display_name=display, module=module, description=desc)
+            )
 
     roles_def = [
         (
@@ -80,9 +82,12 @@ def seed_enterprise_data(db: DbSession) -> dict:
             False,
             [
                 "dashboard.view",
-                "reports.generate", "reports.export", "reports.view",
+                "reports.generate",
+                "reports.export",
+                "reports.view",
                 "datasets.view",
-                "analytics.view", "analytics.export",
+                "analytics.view",
+                "analytics.export",
                 "ai.use",
                 "predictive.view",
                 "quality.view",
@@ -98,11 +103,17 @@ def seed_enterprise_data(db: DbSession) -> dict:
             [
                 "users.read",
                 "pipelines.view",
-                "etl.import", "etl.export",
-                "dashboard.view", "dashboard.manage",
-                "reports.generate", "reports.export", "reports.view",
-                "datasets.upload", "datasets.view",
-                "analytics.view", "analytics.export",
+                "etl.import",
+                "etl.export",
+                "dashboard.view",
+                "dashboard.manage",
+                "reports.generate",
+                "reports.export",
+                "reports.view",
+                "datasets.upload",
+                "datasets.view",
+                "analytics.view",
+                "analytics.export",
                 "ai.use",
                 "predictive.view",
                 "quality.view",
@@ -126,6 +137,7 @@ def seed_enterprise_data(db: DbSession) -> dict:
     user_role_repo = UserRoleRepository(db)
 
     import os as _os
+
     demo_password = _os.getenv("DEMO_USER_PASSWORD", "Demo@12345")
     demo_password_hash = hash_password(demo_password)
 
@@ -172,7 +184,9 @@ def seed_enterprise_data(db: DbSession) -> dict:
         if role:
             user_role_repo.assign_role(user.id, role.id)
 
-        created["users"].append({"email": email, "name": full_name, "role": role_name, "org": org_slug})
+        created["users"].append(
+            {"email": email, "name": full_name, "role": role_name, "org": org_slug}
+        )
 
     db.commit()
 

@@ -52,6 +52,7 @@ class PostgreSQLConnector(BaseConnector):
     def test_connection(self) -> dict[str, Any]:
         try:
             import sqlalchemy as sa
+
             host = self.configuration.get("host", "localhost")
             port = self.configuration.get("port", 5432)
             db = self.configuration.get("database", "")
@@ -67,6 +68,7 @@ class PostgreSQLConnector(BaseConnector):
 
     def extract_data(self, query: dict[str, Any] | None = None) -> pd.DataFrame:
         import sqlalchemy as sa
+
         host = self.configuration.get("host", "localhost")
         port = self.configuration.get("port", 5432)
         db = self.configuration.get("database", "")
@@ -102,6 +104,7 @@ class MySQLConnector(BaseConnector):
     def test_connection(self) -> dict[str, Any]:
         try:
             import sqlalchemy as sa
+
             host = self.configuration.get("host", "localhost")
             port = self.configuration.get("port", 3306)
             db = self.configuration.get("database", "")
@@ -117,6 +120,7 @@ class MySQLConnector(BaseConnector):
 
     def extract_data(self, query: dict[str, Any] | None = None) -> pd.DataFrame:
         import sqlalchemy as sa
+
         host = self.configuration.get("host", "localhost")
         port = self.configuration.get("port", 3306)
         db = self.configuration.get("database", "")
@@ -152,6 +156,7 @@ class SQLServerConnector(BaseConnector):
     def test_connection(self) -> dict[str, Any]:
         try:
             import sqlalchemy as sa
+
             host = self.configuration.get("host", "localhost")
             port = self.configuration.get("port", 1433)
             db = self.configuration.get("database", "")
@@ -167,6 +172,7 @@ class SQLServerConnector(BaseConnector):
 
     def extract_data(self, query: dict[str, Any] | None = None) -> pd.DataFrame:
         import sqlalchemy as sa
+
         host = self.configuration.get("host", "localhost")
         port = self.configuration.get("port", 1433)
         db = self.configuration.get("database", "")
@@ -212,6 +218,7 @@ class MongoDBConnector(BaseConnector):
     def test_connection(self) -> dict[str, Any]:
         try:
             from pymongo import MongoClient
+
             host = self.configuration.get("host", "localhost")
             port = self.configuration.get("port", 27017)
             client = MongoClient(host, port, serverSelectionTimeoutMS=5000)
@@ -222,6 +229,7 @@ class MongoDBConnector(BaseConnector):
 
     def extract_data(self, query: dict[str, Any] | None = None) -> pd.DataFrame:
         from pymongo import MongoClient
+
         host = self.configuration.get("host", "localhost")
         port = self.configuration.get("port", 27017)
         db_name = self.configuration.get("database", "")
@@ -256,6 +264,7 @@ class CSVConnector(BaseConnector):
 
     def test_connection(self) -> dict[str, Any]:
         import os
+
         path = self.configuration.get("file_path", "")
         if os.path.exists(path):
             return {"success": True, "message": "File exists and is readable"}
@@ -284,6 +293,7 @@ class ExcelConnector(BaseConnector):
 
     def test_connection(self) -> dict[str, Any]:
         import os
+
         path = self.configuration.get("file_path", "")
         if os.path.exists(path):
             return {"success": True, "message": "File exists and is readable"}
@@ -305,6 +315,7 @@ class JSONConnector(BaseConnector):
 
     def test_connection(self) -> dict[str, Any]:
         import os
+
         path = self.configuration.get("file_path", "")
         if os.path.exists(path):
             return {"success": True, "message": "File exists"}
@@ -329,6 +340,7 @@ class XMLConnector(BaseConnector):
 
     def test_connection(self) -> dict[str, Any]:
         import os
+
         path = self.configuration.get("file_path", "")
         if os.path.exists(path):
             return {"success": True, "message": "File exists"}
@@ -349,6 +361,7 @@ class ParquetConnector(BaseConnector):
 
     def test_connection(self) -> dict[str, Any]:
         import os
+
         path = self.configuration.get("file_path", "")
         if os.path.exists(path):
             return {"success": True, "message": "File exists"}
@@ -388,6 +401,7 @@ class S3Connector(BaseConnector):
     def test_connection(self) -> dict[str, Any]:
         try:
             import boto3
+
             session = boto3.Session(
                 aws_access_key_id=self.auth_config.get("access_key_id"),
                 aws_secret_access_key=self.auth_config.get("secret_access_key"),
@@ -401,6 +415,7 @@ class S3Connector(BaseConnector):
 
     def extract_data(self, query: dict[str, Any] | None = None) -> pd.DataFrame:
         import boto3
+
         session = boto3.Session(
             aws_access_key_id=self.auth_config.get("access_key_id"),
             aws_secret_access_key=self.auth_config.get("secret_access_key"),
@@ -421,7 +436,10 @@ class GoogleDriveConnector(BaseConnector):
     icon: ClassVar[str] = "cloud"
 
     def test_connection(self) -> dict[str, Any]:
-        return {"success": False, "message": "Google Drive connector requires google-api-python-client package and OAuth setup"}
+        return {
+            "success": False,
+            "message": "Google Drive connector requires google-api-python-client package and OAuth setup",
+        }
 
     def extract_data(self, query: dict[str, Any] | None = None) -> pd.DataFrame:
         return pd.DataFrame()
@@ -436,7 +454,10 @@ class OneDriveConnector(BaseConnector):
     icon: ClassVar[str] = "cloud"
 
     def test_connection(self) -> dict[str, Any]:
-        return {"success": False, "message": "OneDrive connector requires Microsoft Graph API setup"}
+        return {
+            "success": False,
+            "message": "OneDrive connector requires Microsoft Graph API setup",
+        }
 
     def extract_data(self, query: dict[str, Any] | None = None) -> pd.DataFrame:
         return pd.DataFrame()
@@ -451,7 +472,10 @@ class DropboxConnector(BaseConnector):
     icon: ClassVar[str] = "cloud"
 
     def test_connection(self) -> dict[str, Any]:
-        return {"success": False, "message": "Dropbox connector requires dropbox package and access token"}
+        return {
+            "success": False,
+            "message": "Dropbox connector requires dropbox package and access token",
+        }
 
     def extract_data(self, query: dict[str, Any] | None = None) -> pd.DataFrame:
         return pd.DataFrame()
@@ -480,7 +504,12 @@ class RESTAPIConnector(BaseConnector):
     }
     auth_schema: ClassVar[dict] = {
         "fields": [
-            {"name": "type", "type": "select", "options": ["none", "bearer", "api_key", "basic"], "default": "none"},
+            {
+                "name": "type",
+                "type": "select",
+                "options": ["none", "bearer", "api_key", "basic"],
+                "default": "none",
+            },
             {"name": "token", "type": "password", "required": False},
             {"name": "api_key_header", "type": "string", "required": False, "default": "X-API-Key"},
         ]
@@ -489,6 +518,7 @@ class RESTAPIConnector(BaseConnector):
     def test_connection(self) -> dict[str, Any]:
         try:
             import requests
+
             url = self.configuration.get("base_url", "")
             if not url:
                 return {"success": False, "message": "base_url is required"}
@@ -502,6 +532,7 @@ class RESTAPIConnector(BaseConnector):
 
     def extract_data(self, query: dict[str, Any] | None = None) -> pd.DataFrame:
         import requests
+
         base_url = self.configuration.get("base_url", "")
         endpoint = (query or {}).get("endpoint", self.configuration.get("endpoint", ""))
         url = f"{base_url.rstrip('/')}/{endpoint.lstrip('/')}"
@@ -550,6 +581,7 @@ class GraphQLAPIConnector(BaseConnector):
     def test_connection(self) -> dict[str, Any]:
         try:
             import requests
+
             url = self.configuration.get("endpoint_url", "")
             if not url:
                 return {"success": False, "message": "endpoint_url is required"}
@@ -563,6 +595,7 @@ class GraphQLAPIConnector(BaseConnector):
 
     def extract_data(self, query: dict[str, Any] | None = None) -> pd.DataFrame:
         import requests
+
         url = self.configuration.get("endpoint_url", "")
         graphql_query = (query or {}).get("query", "")
         headers = self._build_headers()
@@ -593,7 +626,10 @@ class WebhookConnector(BaseConnector):
     icon: ClassVar[str] = "api"
 
     def test_connection(self) -> dict[str, Any]:
-        return {"success": True, "message": "Webhook connector is passive — data arrives via POST callbacks"}
+        return {
+            "success": True,
+            "message": "Webhook connector is passive — data arrives via POST callbacks",
+        }
 
     def extract_data(self, query: dict[str, Any] | None = None) -> pd.DataFrame:
         payload = (query or {}).get("payload", [])
@@ -618,9 +654,19 @@ class MobileMoneyConnector(BaseConnector):
     region: ClassVar[str] = "africa"
     config_schema: ClassVar[dict] = {
         "fields": [
-            {"name": "provider", "type": "select", "options": ["mtn_momo", "airtel_money", "mpesa", "orange_money", "vodafone_cash"], "required": True},
+            {
+                "name": "provider",
+                "type": "select",
+                "options": ["mtn_momo", "airtel_money", "mpesa", "orange_money", "vodafone_cash"],
+                "required": True,
+            },
             {"name": "base_url", "type": "string", "required": True},
-            {"name": "environment", "type": "select", "options": ["sandbox", "production"], "default": "sandbox"},
+            {
+                "name": "environment",
+                "type": "select",
+                "options": ["sandbox", "production"],
+                "default": "sandbox",
+            },
         ]
     }
     auth_schema: ClassVar[dict] = {
@@ -636,10 +682,14 @@ class MobileMoneyConnector(BaseConnector):
         base_url = self.configuration.get("base_url", "")
         if not base_url:
             return {"success": False, "message": "base_url is required"}
-        return {"success": True, "message": f"Mobile money connector configured for {provider}. Test with a live API call."}
+        return {
+            "success": True,
+            "message": f"Mobile money connector configured for {provider}. Test with a live API call.",
+        }
 
     def extract_data(self, query: dict[str, Any] | None = None) -> pd.DataFrame:
         import requests
+
         base_url = self.configuration.get("base_url", "")
         endpoint = (query or {}).get("endpoint", "transactions")
         headers = {
@@ -678,7 +728,10 @@ class BankAPIConnector(BaseConnector):
 
     def test_connection(self) -> dict[str, Any]:
         bank = self.configuration.get("bank_name", "")
-        return {"success": True, "message": f"Bank API connector configured for {bank}. Test with live credentials."}
+        return {
+            "success": True,
+            "message": f"Bank API connector configured for {bank}. Test with live credentials.",
+        }
 
     def extract_data(self, query: dict[str, Any] | None = None) -> pd.DataFrame:
         return pd.DataFrame()
@@ -707,6 +760,7 @@ class GovernmentOpenDataConnector(BaseConnector):
             return {"success": False, "message": "portal_url is required"}
         try:
             import requests
+
             resp = requests.get(url, timeout=10)
             if resp.status_code < 400:
                 return {"success": True, "message": "Open data portal reachable"}
@@ -716,9 +770,14 @@ class GovernmentOpenDataConnector(BaseConnector):
 
     def extract_data(self, query: dict[str, Any] | None = None) -> pd.DataFrame:
         import requests
+
         portal = self.configuration.get("portal_url", "")
         dataset_id = (query or {}).get("dataset_id", self.configuration.get("dataset_id", ""))
-        resp = requests.get(f"{portal}/api/3/action/datastore_search", params={"resource_id": dataset_id}, timeout=30)
+        resp = requests.get(
+            f"{portal}/api/3/action/datastore_search",
+            params={"resource_id": dataset_id},
+            timeout=30,
+        )
         resp.raise_for_status()
         records = resp.json().get("result", {}).get("records", [])
         return pd.DataFrame(records) if records else pd.DataFrame()

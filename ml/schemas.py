@@ -52,7 +52,9 @@ class FeatureEngineeringResponse(BaseModel):
 class ModelCreateRequest(BaseModel):
     name: str
     description: str = ""
-    model_type: Literal["classification", "regression", "clustering", "anomaly_detection", "forecasting"]
+    model_type: Literal[
+        "classification", "regression", "clustering", "anomaly_detection", "forecasting"
+    ]
     dataset_source: str
     target_column: str | None = None
     feature_columns: list[str] = []

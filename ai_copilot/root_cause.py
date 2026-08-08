@@ -116,7 +116,9 @@ class RootCauseAnalyzer:
             return None
 
         dimension_cols = dimension_cols or []
-        dimension_cols = [c for c in dimension_cols if c in df.columns and c != metric_col and c != date_col]
+        dimension_cols = [
+            c for c in dimension_cols if c in df.columns and c != metric_col and c != date_col
+        ]
 
         # Parse dates
         df = df.copy()
@@ -175,8 +177,13 @@ class RootCauseAnalyzer:
 
         # Generate summary
         summary = RootCauseAnalyzer._generate_summary(
-            metric_label, effective_direction, old_total, new_total,
-            total_change, total_change_pct, all_contributions
+            metric_label,
+            effective_direction,
+            old_total,
+            new_total,
+            total_change,
+            total_change_pct,
+            all_contributions,
         )
 
         return RootCauseResult(
@@ -220,16 +227,18 @@ class RootCauseAnalyzer:
 
             direction = "increase" if change > 0 else "decrease"
 
-            contributions.append(Contribution(
-                dimension=dim_col,
-                value=str(value),
-                old_value=old_val,
-                new_value=new_val,
-                change=change,
-                change_pct=change_pct,
-                contribution_pct=contribution_pct,
-                direction=direction,
-            ))
+            contributions.append(
+                Contribution(
+                    dimension=dim_col,
+                    value=str(value),
+                    old_value=old_val,
+                    new_value=new_val,
+                    change=change,
+                    change_pct=change_pct,
+                    contribution_pct=contribution_pct,
+                    direction=direction,
+                )
+            )
 
         return contributions
 

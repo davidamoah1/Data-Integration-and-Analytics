@@ -35,6 +35,7 @@ def get_mime_type(file_path: str) -> str:
         ".parquet": "application/octet-stream",
     }.get(ext, "application/octet-stream")
 
+
 ALLOWED_MIME_TYPES = {
     "csv": {"text/csv", "text/plain", "application/csv"},
     "xlsx": {"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"},

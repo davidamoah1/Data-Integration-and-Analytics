@@ -106,8 +106,12 @@ class AfricaCurrencyConverter:
     def supported_currencies(cls) -> list[dict]:
         """Get all supported currencies."""
         return [
-            {"code": code, "name": cls.NAMES.get(code, code), "symbol": cls.SYMBOLS.get(code, ""),
-             "rate_to_usd": rate}
+            {
+                "code": code,
+                "name": cls.NAMES.get(code, code),
+                "symbol": cls.SYMBOLS.get(code, ""),
+                "rate_to_usd": rate,
+            }
             for code, rate in cls.RATES_TO_USD.items()
         ]
 

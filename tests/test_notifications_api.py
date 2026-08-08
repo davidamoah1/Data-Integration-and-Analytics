@@ -8,9 +8,7 @@ from notifications.service import NotificationService
 
 @pytest.fixture
 def sample_notification(db_session):
-    return NotificationService(db_session).send_in_app(
-        subject="Test", body="Hello", user_id=1
-    )
+    return NotificationService(db_session).send_in_app(subject="Test", body="Hello", user_id=1)
 
 
 def test_list_notifications_requires_auth(client):
@@ -44,9 +42,7 @@ def test_mark_read_forbidden_for_other_user(client, auth_headers, db_session):
 
 
 def test_delete_notification(client, auth_headers, db_session):
-    result = NotificationService(db_session).send_in_app(
-        subject="Delete me", body="Bye", user_id=1
-    )
+    result = NotificationService(db_session).send_in_app(subject="Delete me", body="Bye", user_id=1)
     notif_id = result["id"]
     response = client.delete(f"/notifications/{notif_id}", headers=auth_headers)
     assert response.status_code == 200

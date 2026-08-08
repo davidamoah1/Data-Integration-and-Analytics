@@ -93,26 +93,30 @@ class SchemaMonitor:
         # Added columns
         added = new_cols - old_cols
         for col in added:
-            changes.append(SchemaChange(
-                change_type="added",
-                column=str(col),
-                new_value=str(new_df[col].dtype),
-                severity="info",
-                message=f"Column '{col}' added with dtype {new_df[col].dtype}.",
-                impact="New column may need to be mapped in downstream pipelines.",
-            ))
+            changes.append(
+                SchemaChange(
+                    change_type="added",
+                    column=str(col),
+                    new_value=str(new_df[col].dtype),
+                    severity="info",
+                    message=f"Column '{col}' added with dtype {new_df[col].dtype}.",
+                    impact="New column may need to be mapped in downstream pipelines.",
+                )
+            )
 
         # Removed columns
         removed = old_cols - new_cols
         for col in removed:
-            changes.append(SchemaChange(
-                change_type="removed",
-                column=str(col),
-                old_value=str(old_df[col].dtype),
-                severity="error",
-                message=f"Column '{col}' removed (was {old_df[col].dtype}).",
-                impact="Removed column may break downstream pipelines that depend on it.",
-            ))
+            changes.append(
+                SchemaChange(
+                    change_type="removed",
+                    column=str(col),
+                    old_value=str(old_df[col].dtype),
+                    severity="error",
+                    message=f"Column '{col}' removed (was {old_df[col].dtype}).",
+                    impact="Removed column may break downstream pipelines that depend on it.",
+                )
+            )
 
         # Type changes
         common = old_cols & new_cols
@@ -123,15 +127,17 @@ class SchemaMonitor:
                 severity = "warning"
                 if "object" in new_dtype and "object" not in old_dtype:
                     severity = "error"
-                changes.append(SchemaChange(
-                    change_type="type_changed",
-                    column=str(col),
-                    old_value=old_dtype,
-                    new_value=new_dtype,
-                    severity=severity,
-                    message=f"Column '{col}' type changed from {old_dtype} to {new_dtype}.",
-                    impact="Type changes may cause data loss or parsing errors in downstream systems.",
-                ))
+                changes.append(
+                    SchemaChange(
+                        change_type="type_changed",
+                        column=str(col),
+                        old_value=old_dtype,
+                        new_value=new_dtype,
+                        severity=severity,
+                        message=f"Column '{col}' type changed from {old_dtype} to {new_dtype}.",
+                        impact="Type changes may cause data loss or parsing errors in downstream systems.",
+                    )
+                )
 
         # Sort by severity
         severity_order = {"error": 0, "warning": 1, "info": 2}
@@ -189,15 +195,17 @@ class SchemaMonitor:
 
             if best_match and best_score >= threshold:
                 matched_new.add(best_match)
-                renames.append(SchemaChange(
-                    change_type="renamed",
-                    column=f"{old_col} → {best_match}",
-                    old_value=str(old_col),
-                    new_value=str(best_match),
-                    severity="info",
-                    message=f"Column '{old_col}' likely renamed to '{best_match}' (similarity: {best_score:.2f}).",
-                    impact="Update downstream references to use the new column name.",
-                ))
+                renames.append(
+                    SchemaChange(
+                        change_type="renamed",
+                        column=f"{old_col} → {best_match}",
+                        old_value=str(old_col),
+                        new_value=str(best_match),
+                        severity="info",
+                        message=f"Column '{old_col}' likely renamed to '{best_match}' (similarity: {best_score:.2f}).",
+                        impact="Update downstream references to use the new column name.",
+                    )
+                )
 
         return renames
 

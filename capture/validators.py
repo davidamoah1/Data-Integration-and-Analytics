@@ -17,24 +17,57 @@ from sqlalchemy.orm import Session as DbSession
 # a maintained formulary / ICD-10 table; kept inline here so validation works
 # out of the box without extra data files.
 DRUG_MASTER_LIST = [
-    "Paracetamol", "Amoxicillin", "Ibuprofen", "Artesunate", "Metformin",
-    "Amlodipine", "Ciprofloxacin", "Diclofenac", "Omeprazole", "Cotrimoxazole",
-    "Chloroquine", "Artemether", "Lumefantrine", "Furosemide", "Hydrochlorothiazide",
-    "Insulin", "Aspirin", "Atorvastatin", "Losartan", "Metronidazole",
+    "Paracetamol",
+    "Amoxicillin",
+    "Ibuprofen",
+    "Artesunate",
+    "Metformin",
+    "Amlodipine",
+    "Ciprofloxacin",
+    "Diclofenac",
+    "Omeprazole",
+    "Cotrimoxazole",
+    "Chloroquine",
+    "Artemether",
+    "Lumefantrine",
+    "Furosemide",
+    "Hydrochlorothiazide",
+    "Insulin",
+    "Aspirin",
+    "Atorvastatin",
+    "Losartan",
+    "Metronidazole",
 ]
 
 DIAGNOSIS_MASTER_LIST = [
-    "Malaria", "Hypertension", "Diabetes Mellitus", "Pneumonia", "Typhoid Fever",
-    "Urinary Tract Infection", "Anemia", "Asthma", "Gastroenteritis", "Tuberculosis",
-    "Upper Respiratory Tract Infection", "Peptic Ulcer Disease", "Sickle Cell Disease",
+    "Malaria",
+    "Hypertension",
+    "Diabetes Mellitus",
+    "Pneumonia",
+    "Typhoid Fever",
+    "Urinary Tract Infection",
+    "Anemia",
+    "Asthma",
+    "Gastroenteritis",
+    "Tuberculosis",
+    "Upper Respiratory Tract Infection",
+    "Peptic Ulcer Disease",
+    "Sickle Cell Disease",
 ]
 
 GENDER_VALUES = {"m": "Male", "male": "Male", "f": "Female", "female": "Female"}
 
 EMAIL_RE = re.compile(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$")
 DATE_FORMATS = [
-    "%d/%m/%Y", "%d-%m-%Y", "%d.%m.%Y", "%Y-%m-%d", "%Y/%m/%d",
-    "%d/%m/%y", "%d-%m-%y", "%d %b %Y", "%d %B %Y",
+    "%d/%m/%Y",
+    "%d-%m-%Y",
+    "%d.%m.%Y",
+    "%Y-%m-%d",
+    "%Y/%m/%d",
+    "%d/%m/%y",
+    "%d-%m-%y",
+    "%d %b %Y",
+    "%d %B %Y",
 ]
 
 
@@ -90,7 +123,9 @@ def validate_currency(value: str) -> tuple[bool, str | None]:
     return True, None
 
 
-def suggest_standard_spelling(value: str, master_list: list[str], cutoff: float = 0.72) -> str | None:
+def suggest_standard_spelling(
+    value: str, master_list: list[str], cutoff: float = 0.72
+) -> str | None:
     """Return the closest master-list match if similarity is high enough,
     else None (never silently overwrite — this is a suggestion only)."""
     if not value:
@@ -108,7 +143,9 @@ VALIDATORS_BY_TYPE = {
 }
 
 
-def validate_field(field_name: str, value: str | None, data_type: str, enum_values: list[str] | None = None) -> tuple[bool, str | None]:
+def validate_field(
+    field_name: str, value: str | None, data_type: str, enum_values: list[str] | None = None
+) -> tuple[bool, str | None]:
     """Validate a single field value based on its declared data type.
 
     Returns (is_valid, message). A None/empty value is treated as valid here
@@ -121,7 +158,9 @@ def validate_field(field_name: str, value: str | None, data_type: str, enum_valu
     if field_name in ("age",):
         return validate_age(value)
 
-    if field_name in ("sex", "gender") or (enum_values and {"m", "f"} <= {v.lower() for v in enum_values}):
+    if field_name in ("sex", "gender") or (
+        enum_values and {"m", "f"} <= {v.lower() for v in enum_values}
+    ):
         return validate_gender(value)
 
     validator = VALIDATORS_BY_TYPE.get(data_type)
@@ -161,7 +200,10 @@ def find_duplicate_document(
             continue
         if "name" in key and name_value is None:
             name_value = value.strip().lower()
-        if key in ("date", "admission_date", "delivery_date", "service_date") and date_value is None:
+        if (
+            key in ("date", "admission_date", "delivery_date", "service_date")
+            and date_value is None
+        ):
             date_value = value.strip().lower()
 
     if not name_value:
@@ -182,7 +224,9 @@ def find_duplicate_document(
     for candidate in candidates:
         candidate_fields = (
             db.query(CaptureField)
-            .filter(CaptureField.document_id == candidate.id, CaptureField.field_name.like("%name%"))
+            .filter(
+                CaptureField.document_id == candidate.id, CaptureField.field_name.like("%name%")
+            )
             .all()
         )
         for cf in candidate_fields:
@@ -198,7 +242,11 @@ def find_duplicate_document(
                         )
                         .first()
                     )
-                    if date_field and date_field.value and date_field.value.strip().lower() == date_value:
+                    if (
+                        date_field
+                        and date_field.value
+                        and date_field.value.strip().lower() == date_value
+                    ):
                         return candidate.id
                 else:
                     return candidate.id

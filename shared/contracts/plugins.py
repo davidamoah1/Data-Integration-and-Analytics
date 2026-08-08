@@ -50,7 +50,9 @@ class PluginLifecycleRegistry:
     def install(self, manifest: PluginManifest) -> None:
         current = self._plugins.get(manifest.id)
         if current and current[0].version == manifest.version:
-            raise ValueError(f"plugin {manifest.id} version {manifest.version} is already installed")
+            raise ValueError(
+                f"plugin {manifest.id} version {manifest.version} is already installed"
+            )
         self._plugins[manifest.id] = (manifest, LifecycleState.ACTIVE)
 
     def upgrade(self, manifest: PluginManifest) -> None:
@@ -117,7 +119,7 @@ class IndustryPackDiscovery:
             import yaml
         except ImportError:
             payload = {
-                key.strip(): value.strip().strip('"\'')
+                key.strip(): value.strip().strip("\"'")
                 for line in content.splitlines()
                 if ":" in line and not line.lstrip().startswith("#")
                 for key, value in [line.split(":", 1)]

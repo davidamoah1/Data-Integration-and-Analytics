@@ -30,6 +30,7 @@ def get_current_organization_id(current_user: dict, db: DbSession | None = None)
     org_id = current_user.get("organization_id")
     if org_id is None and is_super_admin(current_user) and db is not None:
         from organizations.models import Organization
+
         org = db.query(Organization).filter(Organization.slug == "system").first()
         if org:
             return org.id
@@ -77,6 +78,7 @@ def require_organization_access(
             return int(user_org_id)
         if db is not None:
             from organizations.models import Organization
+
             org = db.query(Organization).filter(Organization.slug == "system").first()
             if org:
                 return org.id
@@ -131,6 +133,7 @@ async def get_tenant_context(
     org_id = current_user.get("organization_id")
     if org_id is None and is_super_admin(current_user):
         from organizations.models import Organization
+
         org = db.query(Organization).filter(Organization.slug == "system").first()
         if org:
             org_id = org.id
@@ -296,6 +299,4 @@ def assert_same_organization(
         return
     user_org_id = current_user.get("organization_id")
     if user_org_id is None or int(user_org_id) != int(resource_organization_id):
-        raise AuthorizationError(
-            f"{resource_type} does not belong to your organization."
-        )
+        raise AuthorizationError(f"{resource_type} does not belong to your organization.")

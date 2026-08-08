@@ -17,7 +17,10 @@ class KPIEngine:
         self.gateway = AIGateway(db)
 
     def recommend_kpis(
-        self, domain: str | None = None, data_source: dict | None = None, user_id: int | None = None,
+        self,
+        domain: str | None = None,
+        data_source: dict | None = None,
+        user_id: int | None = None,
         organization_id: int | None = None,
     ) -> dict:
         """Recommend KPIs based on domain and available data.

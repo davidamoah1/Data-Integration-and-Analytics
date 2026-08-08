@@ -1,4 +1,5 @@
 """Check existing tables in the SQLite database."""
+
 import sqlite3
 
 conn = sqlite3.connect("database/etl_database.db")

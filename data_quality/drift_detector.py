@@ -105,7 +105,9 @@ class DriftDetector:
             if len(old_series) == 0 or len(new_series) == 0:
                 continue
 
-            if pd.api.types.is_numeric_dtype(old_df[col]) and pd.api.types.is_numeric_dtype(new_df[col]):
+            if pd.api.types.is_numeric_dtype(old_df[col]) and pd.api.types.is_numeric_dtype(
+                new_df[col]
+            ):
                 drift = DriftDetector._detect_numeric_drift(col, old_series, new_series)
                 if drift.psi is not None:
                     psi_values.append(drift.psi)
@@ -179,7 +181,9 @@ class DriftDetector:
         return DriftDetector.detect(old_df, new_df, numeric_cols)
 
     @staticmethod
-    def _detect_numeric_drift(col: str, old_series: pd.Series, new_series: pd.Series) -> ColumnDrift:
+    def _detect_numeric_drift(
+        col: str, old_series: pd.Series, new_series: pd.Series
+    ) -> ColumnDrift:
         """Detect drift in a numeric column using PSI."""
         psi = DriftDetector._compute_psi(old_series, new_series)
 
@@ -211,7 +215,11 @@ class DriftDetector:
             "max": round(float(new_series.max()), 4),
         }
 
-        mean_shift = ((new_stats["mean"] - old_stats["mean"]) / old_stats["mean"] * 100) if old_stats["mean"] != 0 else 0.0
+        mean_shift = (
+            ((new_stats["mean"] - old_stats["mean"]) / old_stats["mean"] * 100)
+            if old_stats["mean"] != 0
+            else 0.0
+        )
 
         message = (
             f"'{col}' {'significant' if severity == 'significant' else 'moderate'} drift detected "
@@ -232,7 +240,9 @@ class DriftDetector:
         )
 
     @staticmethod
-    def _detect_categorical_drift(col: str, old_series: pd.Series, new_series: pd.Series) -> ColumnDrift:
+    def _detect_categorical_drift(
+        col: str, old_series: pd.Series, new_series: pd.Series
+    ) -> ColumnDrift:
         """Detect drift in a categorical column using frequency comparison."""
         old_counts = old_series.value_counts(normalize=True)
         new_counts = new_series.value_counts(normalize=True)
@@ -286,7 +296,11 @@ class DriftDetector:
         if drift_detected:
             message_parts.append(f"drift score={drift_score:.4f}")
 
-        message = f"'{col}' {severity} drift. " + "; ".join(message_parts) if message_parts else f"'{col}' no significant drift."
+        message = (
+            f"'{col}' {severity} drift. " + "; ".join(message_parts)
+            if message_parts
+            else f"'{col}' no significant drift."
+        )
 
         return ColumnDrift(
             column=col,

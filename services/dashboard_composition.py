@@ -151,7 +151,9 @@ class WidgetDefinition:
             widget_type=WidgetType(data.get("widget_type", "kpi_card")),
             title=data.get("title", ""),
             description=data.get("description", ""),
-            chart_subtype=ChartSubType(data["chart_subtype"]) if data.get("chart_subtype") else None,
+            chart_subtype=(
+                ChartSubType(data["chart_subtype"]) if data.get("chart_subtype") else None
+            ),
             data_source=DataSourceBinding.from_dict(ds_data) if ds_data else None,
             permission=data.get("permission", "dashboard.view"),
             industries=data.get("industries", []),
@@ -227,7 +229,11 @@ class WidgetRegistry:
         """Return widgets available for a given industry, filtered by permissions and roles."""
         result = []
         for widget in cls._widgets.values():
-            if widget.industries and industry not in widget.industries and "generic" not in widget.industries:
+            if (
+                widget.industries
+                and industry not in widget.industries
+                and "generic" not in widget.industries
+            ):
                 continue
             if permissions and widget.permission and widget.permission not in permissions:
                 continue
@@ -279,7 +285,9 @@ class DashboardCompositionService:
             created_by=created_by,
         )
         self._dashboards[dashboard.dashboard_id] = dashboard
-        logger.info(f"Composed dashboard {dashboard.dashboard_id} with {len(widgets)} widgets for industry={industry}")
+        logger.info(
+            f"Composed dashboard {dashboard.dashboard_id} with {len(widgets)} widgets for industry={industry}"
+        )
         return dashboard
 
     def get(self, dashboard_id: str) -> DashboardComposition | None:

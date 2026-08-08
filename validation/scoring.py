@@ -47,21 +47,35 @@ class QualityScoreEngine:
         total_cells = total_rows * max(len(df.columns), 1)
 
         # Completeness: based on missing values
-        total_missing = sum(f.affected_rows for f in findings if f.rule_name in ("missing_values", "blank_fields", "empty_column"))
+        total_missing = sum(
+            f.affected_rows
+            for f in findings
+            if f.rule_name in ("missing_values", "blank_fields", "empty_column")
+        )
         completeness = max(0, 100 - (total_missing / max(total_cells, 1)) * 100)
 
         # Accuracy: based on clinical/business rule errors
-        accuracy_findings = [f for f in findings if f.category in ("clinical", "business") and f.severity == "error"]
+        accuracy_findings = [
+            f for f in findings if f.category in ("clinical", "business") and f.severity == "error"
+        ]
         accuracy_errors = sum(f.affected_rows for f in accuracy_findings)
         accuracy = max(0, 100 - (accuracy_errors / total_rows) * 100)
 
         # Consistency: based on consistency-related findings
-        consistency_findings = [f for f in findings if f.rule_name in ("constant_column", "mixed_data_types", "bmi_consistency")]
-        consistency_penalty = sum(min(f.affected_rows / total_rows, 1) * 10 for f in consistency_findings)
+        consistency_findings = [
+            f
+            for f in findings
+            if f.rule_name in ("constant_column", "mixed_data_types", "bmi_consistency")
+        ]
+        consistency_penalty = sum(
+            min(f.affected_rows / total_rows, 1) * 10 for f in consistency_findings
+        )
         consistency = max(0, 100 - consistency_penalty)
 
         # Validity: based on format/invalid findings
-        validity_findings = [f for f in findings if f.category == "validity" or "invalid" in f.rule_name]
+        validity_findings = [
+            f for f in findings if f.category == "validity" or "invalid" in f.rule_name
+        ]
         validity_errors = sum(f.affected_rows for f in validity_findings)
         validity = max(0, 100 - (validity_errors / total_rows) * 100)
 
@@ -71,11 +85,19 @@ class QualityScoreEngine:
         uniqueness = max(0, 100 - (dup_rows / total_rows) * 100)
 
         # Integrity: based on relationship/referential findings
-        integrity_findings = [f for f in findings if f.rule_name in (
-            "visit_requires_patient", "diagnosis_requires_clinician",
-            "medication_requires_prescription", "lab_result_requires_order",
-            "admission_before_discharge", "bp_systolic_gt_diastolic",
-        )]
+        integrity_findings = [
+            f
+            for f in findings
+            if f.rule_name
+            in (
+                "visit_requires_patient",
+                "diagnosis_requires_clinician",
+                "medication_requires_prescription",
+                "lab_result_requires_order",
+                "admission_before_discharge",
+                "bp_systolic_gt_diastolic",
+            )
+        ]
         integrity_errors = sum(f.affected_rows for f in integrity_findings)
         integrity = max(0, 100 - (integrity_errors / total_rows) * 100)
 

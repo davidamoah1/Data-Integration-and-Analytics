@@ -67,12 +67,16 @@ class VisualizationEngine:
             elif intent in ("relationship", "correlation", "scatter"):
                 return VisualizationEngine._recommend_relationship(df, numeric_cols)
             elif intent in ("composition", "breakdown", "parts", "proportion"):
-                return VisualizationEngine._recommend_composition(df, categorical_cols, numeric_cols)
+                return VisualizationEngine._recommend_composition(
+                    df, categorical_cols, numeric_cols
+                )
             elif intent in ("geographic", "map", "location"):
                 return VisualizationEngine._recommend_geographic(df, columns)
 
         # Auto-detect best chart based on data characteristics
-        return VisualizationEngine._auto_recommend(df, numeric_cols, categorical_cols, datetime_cols)
+        return VisualizationEngine._auto_recommend(
+            df, numeric_cols, categorical_cols, datetime_cols
+        )
 
     @staticmethod
     def _auto_recommend(df, numeric_cols, categorical_cols, datetime_cols) -> dict:
@@ -114,7 +118,7 @@ class VisualizationEngine:
             "chart_category": "business",
             "title": f"Trend of {value_col} over {time_col}",
             "reasoning": f"Line chart is ideal for showing how {value_col} changes over time. "
-                        f"Time column '{time_col}' on X-axis, '{value_col}' on Y-axis.",
+            f"Time column '{time_col}' on X-axis, '{value_col}' on Y-axis.",
             "config": {
                 "x": time_col,
                 "y": value_col,
@@ -125,7 +129,9 @@ class VisualizationEngine:
             "data_summary": {
                 "time_range": f"{df[time_col].min()} to {df[time_col].max()}",
                 "value_range": [float(df[value_col].min()), float(df[value_col].max())],
-                "trend_direction": "increasing" if df[value_col].iloc[-1] > df[value_col].iloc[0] else "decreasing",
+                "trend_direction": (
+                    "increasing" if df[value_col].iloc[-1] > df[value_col].iloc[0] else "decreasing"
+                ),
             },
         }
 
@@ -253,8 +259,17 @@ class VisualizationEngine:
     @staticmethod
     def _recommend_geographic(df, columns) -> dict:
         # Look for location-like columns
-        location_cols = [c for c in columns if any(k in c.lower() for k in ["country", "city", "region", "state", "location", "lat", "lon"])]
-        value_cols = [c for c in df.select_dtypes(include=[np.number]).columns if c not in location_cols]
+        location_cols = [
+            c
+            for c in columns
+            if any(
+                k in c.lower()
+                for k in ["country", "city", "region", "state", "location", "lat", "lon"]
+            )
+        ]
+        value_cols = [
+            c for c in df.select_dtypes(include=[np.number]).columns if c not in location_cols
+        ]
 
         return {
             "chart_type": "choropleth",
@@ -276,27 +291,41 @@ class VisualizationEngine:
         recommendations = []
         numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
         categorical_cols = df.select_dtypes(include=["object"]).columns.tolist()
-        datetime_cols = [c for c in df.columns if pd.to_datetime(df[c], errors="coerce").notna().sum() > len(df) * 0.8]
+        datetime_cols = [
+            c
+            for c in df.columns
+            if pd.to_datetime(df[c], errors="coerce").notna().sum() > len(df) * 0.8
+        ]
 
         # 1. Trend (if time data)
         if datetime_cols and numeric_cols:
-            recommendations.append(VisualizationEngine._recommend_trend(df, datetime_cols, numeric_cols))
+            recommendations.append(
+                VisualizationEngine._recommend_trend(df, datetime_cols, numeric_cols)
+            )
 
         # 2. Comparison
         if categorical_cols and numeric_cols:
-            recommendations.append(VisualizationEngine._recommend_comparison(df, categorical_cols, numeric_cols))
+            recommendations.append(
+                VisualizationEngine._recommend_comparison(df, categorical_cols, numeric_cols)
+            )
 
         # 3. Distribution
         if numeric_cols:
-            recommendations.append(VisualizationEngine._recommend_distribution(df, [numeric_cols[0]]))
+            recommendations.append(
+                VisualizationEngine._recommend_distribution(df, [numeric_cols[0]])
+            )
 
         # 4. Relationship
         if len(numeric_cols) >= 2:
-            recommendations.append(VisualizationEngine._recommend_relationship(df, numeric_cols[:2]))
+            recommendations.append(
+                VisualizationEngine._recommend_relationship(df, numeric_cols[:2])
+            )
 
         # 5. Composition
         if categorical_cols:
-            recommendations.append(VisualizationEngine._recommend_composition(df, categorical_cols, numeric_cols))
+            recommendations.append(
+                VisualizationEngine._recommend_composition(df, categorical_cols, numeric_cols)
+            )
 
         return recommendations[:max_charts]
 
@@ -329,8 +358,12 @@ class VisualizationEngine:
         self.db.commit()
         return rec
 
-    def list_recommendations(self, org_id: int, dataset_id: int | None = None) -> list[ChartRecommendation]:
+    def list_recommendations(
+        self, org_id: int, dataset_id: int | None = None
+    ) -> list[ChartRecommendation]:
         query = select(ChartRecommendation).where(ChartRecommendation.organization_id == org_id)
         if dataset_id:
             query = query.where(ChartRecommendation.dataset_id == dataset_id)
-        return self.db.execute(query.order_by(ChartRecommendation.created_at.desc())).scalars().all()
+        return (
+            self.db.execute(query.order_by(ChartRecommendation.created_at.desc())).scalars().all()
+        )

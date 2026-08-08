@@ -96,9 +96,11 @@ def get_controller(controller_class: type[BaseController]):
         async def list_items(ctrl: MyController = Depends(get_controller(MyController))):
             return ctrl.ok(ctrl.service.list())
     """
+
     def _create(
         db: DbSession = Depends(get_db),
         current_user: dict = Depends(get_current_user),
     ) -> BaseController:
         return controller_class(db, current_user)
+
     return _create

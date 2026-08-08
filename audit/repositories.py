@@ -36,8 +36,15 @@ class AuditRepository:
         """Query audit logs with optional filters."""
         q = select(AuditLog).order_by(AuditLog.created_at.desc())
         q = self._apply_filters(
-            q, organization_id, user_id, action, resource_type,
-            resource_id, ip_address, start_date, end_date,
+            q,
+            organization_id,
+            user_id,
+            action,
+            resource_type,
+            resource_id,
+            ip_address,
+            start_date,
+            end_date,
         )
         return list(self.db.execute(q.offset(offset).limit(limit)).scalars().all())
 
@@ -56,15 +63,20 @@ class AuditRepository:
         """Count audit logs matching filters."""
         q = select(func.count()).select_from(AuditLog)
         q = self._apply_filters(
-            q, organization_id, user_id, action, resource_type,
-            resource_id, ip_address, start_date, end_date,
+            q,
+            organization_id,
+            user_id,
+            action,
+            resource_type,
+            resource_id,
+            ip_address,
+            start_date,
+            end_date,
         )
         return int(self.db.execute(q).scalar() or 0)
 
     def get_log(self, log_id: int) -> AuditLog | None:
-        return self.db.execute(
-            select(AuditLog).where(AuditLog.id == log_id)
-        ).scalar_one_or_none()
+        return self.db.execute(select(AuditLog).where(AuditLog.id == log_id)).scalar_one_or_none()
 
     def list_actions(self, organization_id: int | None = None) -> list[str]:
         """Get distinct action types for filter dropdowns."""

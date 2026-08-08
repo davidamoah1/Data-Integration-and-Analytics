@@ -243,7 +243,9 @@ class AISecurityLayer:
             "tokens_used": tokens_used,
             "success": success,
             "error": error,
-            "timestamp": __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat(),
+            "timestamp": __import__("datetime")
+            .datetime.now(__import__("datetime").timezone.utc)
+            .isoformat(),
         }
 
     def validate_enterprise_request(

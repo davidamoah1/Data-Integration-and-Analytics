@@ -40,27 +40,31 @@ async def database_status(
         col_count = len(inspector.get_columns(table))
         total_rows += count
         total_indexes += idx_count
-        table_details.append({
-            "name": table,
-            "rows": count,
-            "columns": col_count,
-            "indexes": idx_count,
-        })
+        table_details.append(
+            {
+                "name": table,
+                "rows": count,
+                "columns": col_count,
+                "indexes": idx_count,
+            }
+        )
 
     import config
 
-    return success_response({
-        "environment": config.APP_ENV,
-        "db_type": config.DB_TYPE,
-        "pool_size": config.POOL_SIZE,
-        "max_overflow": config.MAX_OVERFLOW,
-        "slow_query_threshold_ms": config.SLOW_QUERY_THRESHOLD_MS,
-        "backup_enabled": config.BACKUP_ENABLED,
-        "total_tables": len(tables),
-        "total_rows": total_rows,
-        "total_indexes": total_indexes,
-        "tables": table_details,
-    })
+    return success_response(
+        {
+            "environment": config.APP_ENV,
+            "db_type": config.DB_TYPE,
+            "pool_size": config.POOL_SIZE,
+            "max_overflow": config.MAX_OVERFLOW,
+            "slow_query_threshold_ms": config.SLOW_QUERY_THRESHOLD_MS,
+            "backup_enabled": config.BACKUP_ENABLED,
+            "total_tables": len(tables),
+            "total_rows": total_rows,
+            "total_indexes": total_indexes,
+            "tables": table_details,
+        }
+    )
 
 
 @router.post("/backup")

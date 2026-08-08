@@ -36,11 +36,15 @@ class PresentationStudioService:
         return pres
 
     def list_presentations(self, org_id: int) -> list[Presentation]:
-        return self.db.execute(
-            select(Presentation)
-            .where(Presentation.organization_id == org_id)
-            .order_by(Presentation.created_at.desc())
-        ).scalars().all()
+        return (
+            self.db.execute(
+                select(Presentation)
+                .where(Presentation.organization_id == org_id)
+                .order_by(Presentation.created_at.desc())
+            )
+            .scalars()
+            .all()
+        )
 
     def get_presentation(self, pres_id: int, org_id: int) -> Presentation | None:
         return self.db.execute(
@@ -101,7 +105,9 @@ class PresentationStudioService:
                     "slide_number": 5,
                     "layout": "bullets",
                     "title": "Recommendations",
-                    "content": source_data.get("recommendations", "Actionable recommendations based on findings."),
+                    "content": source_data.get(
+                        "recommendations", "Actionable recommendations based on findings."
+                    ),
                     "speaker_notes": "Present clear, actionable recommendations with expected impact.",
                 },
                 {
@@ -125,7 +131,9 @@ class PresentationStudioService:
                     "slide_number": 2,
                     "layout": "bullets",
                     "title": "Data Overview",
-                    "content": source_data.get("data_overview", "Dataset description and methodology."),
+                    "content": source_data.get(
+                        "data_overview", "Dataset description and methodology."
+                    ),
                 },
                 {
                     "slide_number": 3,
@@ -145,7 +153,9 @@ class PresentationStudioService:
                     "slide_number": 5,
                     "layout": "bullets",
                     "title": "Statistical Tests",
-                    "content": source_data.get("test_results", "Results of statistical tests performed."),
+                    "content": source_data.get(
+                        "test_results", "Results of statistical tests performed."
+                    ),
                 },
                 {
                     "slide_number": 6,
@@ -179,7 +189,9 @@ class PresentationStudioService:
                     "slide_number": 2,
                     "layout": "bullets",
                     "title": "Research Question",
-                    "content": source_data.get("research_question", "The research question being investigated."),
+                    "content": source_data.get(
+                        "research_question", "The research question being investigated."
+                    ),
                 },
                 {
                     "slide_number": 3,
@@ -204,7 +216,9 @@ class PresentationStudioService:
                     "slide_number": 6,
                     "layout": "table",
                     "title": "Statistical Summary",
-                    "content": source_data.get("statistical_summary", "Summary table of test results."),
+                    "content": source_data.get(
+                        "statistical_summary", "Summary table of test results."
+                    ),
                 },
                 {
                     "slide_number": 7,
@@ -216,7 +230,9 @@ class PresentationStudioService:
                     "slide_number": 8,
                     "layout": "bullets",
                     "title": "Conclusions & Future Work",
-                    "content": source_data.get("conclusions", "Conclusions and directions for future research."),
+                    "content": source_data.get(
+                        "conclusions", "Conclusions and directions for future research."
+                    ),
                 },
             ]
 
@@ -232,7 +248,9 @@ class PresentationStudioService:
                     "slide_number": 2,
                     "layout": "bullets",
                     "title": "The Opportunity",
-                    "content": source_data.get("opportunity", "What the data reveals about the opportunity."),
+                    "content": source_data.get(
+                        "opportunity", "What the data reveals about the opportunity."
+                    ),
                 },
                 {
                     "slide_number": 3,
@@ -251,7 +269,9 @@ class PresentationStudioService:
                     "slide_number": 5,
                     "layout": "bullets",
                     "title": "Expected Impact",
-                    "content": source_data.get("impact", "Projected impact of acting on these insights."),
+                    "content": source_data.get(
+                        "impact", "Projected impact of acting on these insights."
+                    ),
                 },
                 {
                     "slide_number": 6,

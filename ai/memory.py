@@ -124,7 +124,11 @@ class AIMemory:
                 self.db.commit()
 
     def get_conversations(
-        self, user_id: int, assistant_type: str | None = None, organization_id: int | None = None, limit: int = 50
+        self,
+        user_id: int,
+        assistant_type: str | None = None,
+        organization_id: int | None = None,
+        limit: int = 50,
     ) -> list[dict]:
         """List conversations for a user."""
         query = self.db.query(AIConversation).filter(

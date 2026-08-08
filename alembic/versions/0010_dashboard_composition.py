@@ -22,7 +22,12 @@ depends_on: str | Sequence[str] | None = None
 def upgrade() -> None:
     op.create_table(
         "dashboard_compositions",
-        sa.Column("id", sa.BigInteger().with_variant(sa.Integer(), "sqlite"), primary_key=True, autoincrement=True),
+        sa.Column(
+            "id",
+            sa.BigInteger().with_variant(sa.Integer(), "sqlite"),
+            primary_key=True,
+            autoincrement=True,
+        ),
         sa.Column("dashboard_id", sa.String(255), nullable=False, unique=True, index=True),
         sa.Column("organization_id", sa.BigInteger, nullable=True, index=True),
         sa.Column("name", sa.String(255), nullable=False),
@@ -32,12 +37,23 @@ def upgrade() -> None:
         sa.Column("layout", sa.JSON, nullable=False, default=dict),
         sa.Column("created_by", sa.BigInteger, nullable=True, index=True),
         sa.Column("created_at", sa.TIMESTAMP, server_default=sa.func.now(), nullable=False),
-        sa.Column("updated_at", sa.TIMESTAMP, server_default=sa.func.now(), onupdate=sa.func.now(), nullable=False),
+        sa.Column(
+            "updated_at",
+            sa.TIMESTAMP,
+            server_default=sa.func.now(),
+            onupdate=sa.func.now(),
+            nullable=False,
+        ),
     )
 
     op.create_table(
         "dashboard_widget_data_sources",
-        sa.Column("id", sa.BigInteger().with_variant(sa.Integer(), "sqlite"), primary_key=True, autoincrement=True),
+        sa.Column(
+            "id",
+            sa.BigInteger().with_variant(sa.Integer(), "sqlite"),
+            primary_key=True,
+            autoincrement=True,
+        ),
         sa.Column("organization_id", sa.BigInteger, nullable=True, index=True),
         sa.Column("dashboard_id", sa.String(255), nullable=False, index=True),
         sa.Column("widget_key", sa.String(255), nullable=False, index=True),
@@ -51,7 +67,13 @@ def upgrade() -> None:
         sa.Column("limit", sa.Integer, nullable=True),
         sa.Column("config", sa.JSON, nullable=False, default=dict),
         sa.Column("created_at", sa.TIMESTAMP, server_default=sa.func.now(), nullable=False),
-        sa.Column("updated_at", sa.TIMESTAMP, server_default=sa.func.now(), onupdate=sa.func.now(), nullable=False),
+        sa.Column(
+            "updated_at",
+            sa.TIMESTAMP,
+            server_default=sa.func.now(),
+            onupdate=sa.func.now(),
+            nullable=False,
+        ),
     )
 
     op.create_index(
@@ -63,6 +85,9 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.drop_index("ix_dashboard_widget_data_sources_dashboard_widget", table_name="dashboard_widget_data_sources")
+    op.drop_index(
+        "ix_dashboard_widget_data_sources_dashboard_widget",
+        table_name="dashboard_widget_data_sources",
+    )
     op.drop_table("dashboard_widget_data_sources")
     op.drop_table("dashboard_compositions")

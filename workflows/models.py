@@ -29,9 +29,18 @@ class WorkflowDefinition(Base):
     is_deleted = Column(Integer, default=0, nullable=False)
     published_version_id = Column(BigInt, nullable=True, index=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False)
+    updated_at = Column(
+        DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )
 
-    versions = relationship("WorkflowVersion", back_populates="workflow", order_by="WorkflowVersion.version_number.desc()")
+    versions = relationship(
+        "WorkflowVersion",
+        back_populates="workflow",
+        order_by="WorkflowVersion.version_number.desc()",
+    )
     executions = relationship("WorkflowExecution", back_populates="workflow")
 
 
@@ -41,7 +50,12 @@ class WorkflowVersion(Base):
     __tablename__ = "workflow_versions"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
-    workflow_id = Column(BigInt, ForeignKey("workflow_definitions.id", ondelete="CASCADE"), nullable=False, index=True)
+    workflow_id = Column(
+        BigInt,
+        ForeignKey("workflow_definitions.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
     version_number = Column(Integer, nullable=False)
     status = Column(String(20), default="draft", nullable=False)  # draft, published, archived
     nodes = Column(JSON, nullable=False, default=list)
@@ -49,7 +63,12 @@ class WorkflowVersion(Base):
     config = Column(JSON, nullable=False, default=dict)
     created_by = Column(Integer, ForeignKey("users.id"), nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False)
+    updated_at = Column(
+        DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )
 
     workflow = relationship("WorkflowDefinition", back_populates="versions")
     executions = relationship("WorkflowExecution", back_populates="version")
@@ -64,12 +83,23 @@ class WorkflowExecution(Base):
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
     execution_id = Column(String(64), unique=True, nullable=False, index=True)
-    workflow_id = Column(BigInt, ForeignKey("workflow_definitions.id", ondelete="SET NULL"), nullable=True, index=True)
-    version_id = Column(BigInt, ForeignKey("workflow_versions.id", ondelete="SET NULL"), nullable=True, index=True)
+    workflow_id = Column(
+        BigInt,
+        ForeignKey("workflow_definitions.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    version_id = Column(
+        BigInt, ForeignKey("workflow_versions.id", ondelete="SET NULL"), nullable=True, index=True
+    )
     organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=True, index=True)
     triggered_by = Column(Integer, ForeignKey("users.id"), nullable=True)
-    trigger_type = Column(String(50), default="manual", nullable=False)  # manual, scheduled, webhook, api
-    status = Column(String(30), default="pending", nullable=False)  # pending, running, completed, failed, retrying, cancelled, paused
+    trigger_type = Column(
+        String(50), default="manual", nullable=False
+    )  # manual, scheduled, webhook, api
+    status = Column(
+        String(30), default="pending", nullable=False
+    )  # pending, running, completed, failed, retrying, cancelled, paused
     started_at = Column(DateTime, nullable=True)
     completed_at = Column(DateTime, nullable=True)
     duration_seconds = Column(Integer, nullable=True)
@@ -80,7 +110,12 @@ class WorkflowExecution(Base):
     warnings = Column(JSON, nullable=False, default=list)
     ai_summary = Column(Text, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False)
+    updated_at = Column(
+        DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )
 
     workflow = relationship("WorkflowDefinition", back_populates="executions")
     version = relationship("WorkflowVersion", back_populates="executions")
@@ -92,7 +127,12 @@ class WorkflowJob(Base):
     __tablename__ = "workflow_jobs"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
-    execution_id = Column(String(64), ForeignKey("workflow_executions.execution_id", ondelete="CASCADE"), nullable=False, index=True)
+    execution_id = Column(
+        String(64),
+        ForeignKey("workflow_executions.execution_id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
     status = Column(String(30), default="pending", nullable=False)
     priority = Column(Integer, default=0, nullable=False)
     retry_count = Column(Integer, default=0, nullable=False)
@@ -102,7 +142,12 @@ class WorkflowJob(Base):
     completed_at = Column(DateTime, nullable=True)
     worker_id = Column(String(64), nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False)
+    updated_at = Column(
+        DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )
 
 
 class WorkflowLineage(Base):
@@ -111,9 +156,16 @@ class WorkflowLineage(Base):
     __tablename__ = "workflow_lineage"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
-    execution_id = Column(String(64), ForeignKey("workflow_executions.execution_id", ondelete="CASCADE"), nullable=False, index=True)
+    execution_id = Column(
+        String(64),
+        ForeignKey("workflow_executions.execution_id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
     organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=True, index=True)
-    source_type = Column(String(50), nullable=False)  # dataset, transformation, validation, ai, dashboard, report, export
+    source_type = Column(
+        String(50), nullable=False
+    )  # dataset, transformation, validation, ai, dashboard, report, export
     source_id = Column(String(255), nullable=True)
     target_type = Column(String(50), nullable=False)
     target_id = Column(String(255), nullable=True)
@@ -121,7 +173,9 @@ class WorkflowLineage(Base):
     meta = Column(JSON, nullable=False, default=dict)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
 
-    __table_args__ = (UniqueConstraint("execution_id", "source_type", "source_id", "target_type", "target_id"),)
+    __table_args__ = (
+        UniqueConstraint("execution_id", "source_type", "source_id", "target_type", "target_id"),
+    )
 
 
 class WorkflowTemplate(Base):
@@ -140,4 +194,9 @@ class WorkflowTemplate(Base):
     is_public = Column(Integer, default=0, nullable=False)
     is_active = Column(Integer, default=1, nullable=False)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False)
+    updated_at = Column(
+        DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )

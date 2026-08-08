@@ -108,14 +108,35 @@ class KPIGenerator:
             col_mapping, ["revenue", "offering", "tithe", "donation", "billing"]
         )
         entity_id_col = KPIGenerator._find_column(
-            col_mapping, ["order", "admission", "appointment", "donation",
-                          "transaction", "reservation", "claim", "policy",
-                          "call", "subscription"]
+            col_mapping,
+            [
+                "order",
+                "admission",
+                "appointment",
+                "donation",
+                "transaction",
+                "reservation",
+                "claim",
+                "policy",
+                "call",
+                "subscription",
+            ],
         )
         customer_col = KPIGenerator._find_column(
             col_mapping,
-            ["patient", "student", "member", "customer", "donor", "beneficiary", "citizen",
-             "account", "subscriber", "guest", "policy_holder"],
+            [
+                "patient",
+                "student",
+                "member",
+                "customer",
+                "donor",
+                "beneficiary",
+                "citizen",
+                "account",
+                "subscriber",
+                "guest",
+                "policy_holder",
+            ],
         )
 
         # Industry-appropriate labels
@@ -123,7 +144,11 @@ class KPIGenerator:
         revenue_label = KPIGenerator._revenue_label(industry)
 
         # Compute universal KPIs
-        if revenue_col and revenue_col in df.columns and pd.api.types.is_numeric_dtype(df[revenue_col]):
+        if (
+            revenue_col
+            and revenue_col in df.columns
+            and pd.api.types.is_numeric_dtype(df[revenue_col])
+        ):
             total_revenue = float(df[revenue_col].sum())
             kpis.append(
                 KPI(
@@ -194,10 +219,18 @@ class KPIGenerator:
             if col.lower() in ("profit", "net_profit", "earnings", "margin", "net"):
                 profit_col = col
                 break
-        if profit_col and profit_col in df.columns and pd.api.types.is_numeric_dtype(df[profit_col]):
+        if (
+            profit_col
+            and profit_col in df.columns
+            and pd.api.types.is_numeric_dtype(df[profit_col])
+        ):
             total_profit = float(df[profit_col].sum())
             total_rev = (
-                float(df[revenue_col].sum()) if revenue_col and revenue_col in df.columns and pd.api.types.is_numeric_dtype(df[revenue_col]) else 0
+                float(df[revenue_col].sum())
+                if revenue_col
+                and revenue_col in df.columns
+                and pd.api.types.is_numeric_dtype(df[revenue_col])
+                else 0
             )
             margin = (total_profit / total_rev * 100) if total_rev > 0 else 0
             kpis.append(

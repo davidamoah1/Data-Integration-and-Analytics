@@ -51,9 +51,7 @@ class PipelineRun(Base):
     duplicates_removed = Column(Integer, default=0)
     error_message = Column(String(1000), nullable=True)
 
-    __table_args__ = (
-        Index("idx_pipeline_status_started", "status", "started_at"),
-    )
+    __table_args__ = (Index("idx_pipeline_status_started", "status", "started_at"),)
 
 
 def init_db():

@@ -292,6 +292,7 @@ def validate_config() -> None:
     # ENCRYPTION_KEY should be separate from JWT_SECRET_KEY in production
     if DB_TYPE == "mysql" and not ENCRYPTION_KEY:
         import warnings
+
         warnings.warn(
             "ENCRYPTION_KEY is not set. Falling back to JWT_SECRET_KEY derivation. "
             "Set a separate ENCRYPTION_KEY for production.",
@@ -299,9 +300,7 @@ def validate_config() -> None:
         )
 
     if CORS_ORIGINS == "*":
-        raise ValueError(
-            "CORS_ORIGINS cannot be '*'. Set allowed origins explicitly."
-        )
+        raise ValueError("CORS_ORIGINS cannot be '*'. Set allowed origins explicitly.")
 
     # Production-specific hardening
     if IS_PRODUCTION:
@@ -315,6 +314,7 @@ def validate_config() -> None:
             )
         if BACKUP_ENABLED and not os.path.isabs(os.getenv("BACKUP_STORAGE_PATH", "")):
             import warnings
+
             warnings.warn(
                 "BACKUP_STORAGE_PATH should be an absolute path in production.",
                 stacklevel=2,

@@ -34,7 +34,9 @@ class BaseConnector(abc.ABC):
     config_schema: ClassVar[dict[str, Any] | None] = None
     auth_schema: ClassVar[dict[str, Any] | None] = None
 
-    def __init__(self, configuration: dict[str, Any] | None = None, auth_config: dict[str, Any] | None = None):
+    def __init__(
+        self, configuration: dict[str, Any] | None = None, auth_config: dict[str, Any] | None = None
+    ):
         self.configuration = configuration or {}
         self.auth_config = auth_config or {}
 
@@ -87,7 +89,9 @@ class ConnectorRegistry:
         return cls._registry.get(type_code)
 
     @classmethod
-    def create(cls, type_code: str, configuration: dict | None = None, auth_config: dict | None = None) -> BaseConnector | None:
+    def create(
+        cls, type_code: str, configuration: dict | None = None, auth_config: dict | None = None
+    ) -> BaseConnector | None:
         connector_class = cls._registry.get(type_code)
         if not connector_class:
             return None

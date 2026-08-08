@@ -19,7 +19,9 @@ def contract_payload(contract_name: str) -> dict:
     if contract_name == "industry_pack":
         payload["industry"] = "healthcare"
     elif contract_name == "kpi":
-        payload.update({"industry": "healthcare", "business_entity": "patient", "formula": "count(patient)"})
+        payload.update(
+            {"industry": "healthcare", "business_entity": "patient", "formula": "count(patient)"}
+        )
     elif contract_name == "report":
         payload["industry"] = "healthcare"
     elif contract_name == "connector":
@@ -104,5 +106,7 @@ class TestAPIAndEvents:
         received = []
         event_bus = EventBus()
         event_bus.subscribe("dataset.uploaded", received.append)
-        event_bus.publish(DomainEvent(event_type="dataset.uploaded", resource_type="dataset", resource_id=1))
+        event_bus.publish(
+            DomainEvent(event_type="dataset.uploaded", resource_type="dataset", resource_id=1)
+        )
         assert received[0].resource_id == 1

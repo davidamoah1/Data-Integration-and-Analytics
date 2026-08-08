@@ -46,48 +46,56 @@ class AgricultureAnalytics(IndustryAnalytics):
         # ── Farm Analytics ───────────────────────────────
         if farm_col and farm_col in df.columns:
             farm_count = int(df[farm_col].nunique())
-            insights.append(Insight(
-                title="Total Farms",
-                value=farm_count,
-                formatted=cls._fmt_number(farm_count),
-                category="operational",
-                description="Unique farms in the dataset.",
-            ))
+            insights.append(
+                Insight(
+                    title="Total Farms",
+                    value=farm_count,
+                    formatted=cls._fmt_number(farm_count),
+                    category="operational",
+                    description="Unique farms in the dataset.",
+                )
+            )
 
         # ── Production / Harvest ─────────────────────────
         if harvest_col and harvest_col in df.columns:
             total_harvest = float(df[harvest_col].sum())
-            insights.append(Insight(
-                title="Total Production",
-                value=total_harvest,
-                formatted=cls._fmt_number(total_harvest),
-                category="operational",
-                description="Total production/harvest volume.",
-            ))
+            insights.append(
+                Insight(
+                    title="Total Production",
+                    value=total_harvest,
+                    formatted=cls._fmt_number(total_harvest),
+                    category="operational",
+                    description="Total production/harvest volume.",
+                )
+            )
 
             # Yield per farm
             if farm_col and farm_col in df.columns and farm_count > 0:
                 yield_per_farm = total_harvest / farm_count
-                insights.append(Insight(
-                    title="Yield per Farm",
-                    value=yield_per_farm,
-                    formatted=cls._fmt_number(yield_per_farm),
-                    category="operational",
-                    description="Average production per farm.",
-                ))
+                insights.append(
+                    Insight(
+                        title="Yield per Farm",
+                        value=yield_per_farm,
+                        formatted=cls._fmt_number(yield_per_farm),
+                        category="operational",
+                        description="Average production per farm.",
+                    )
+                )
 
             # Yield per hectare
             if hectares_col and hectares_col in df.columns:
                 total_ha = float(df[hectares_col].sum())
                 if total_ha > 0:
                     yield_per_ha = total_harvest / total_ha
-                    insights.append(Insight(
-                        title="Yield per Hectare",
-                        value=yield_per_ha,
-                        formatted=f"{yield_per_ha:.1f}",
-                        category="operational",
-                        description="Production efficiency per hectare.",
-                    ))
+                    insights.append(
+                        Insight(
+                            title="Yield per Hectare",
+                            value=yield_per_ha,
+                            formatted=f"{yield_per_ha:.1f}",
+                            category="operational",
+                            description="Production efficiency per hectare.",
+                        )
+                    )
 
             # Production trend
             if date_col:
@@ -99,13 +107,15 @@ class AgricultureAnalytics(IndustryAnalytics):
         # ── Crop Analysis ────────────────────────────────
         if crop_col and crop_col in df.columns:
             crop_count = int(df[crop_col].nunique())
-            insights.append(Insight(
-                title="Crop Varieties",
-                value=crop_count,
-                formatted=cls._fmt_number(crop_count),
-                category="operational",
-                description="Distinct crop types cultivated.",
-            ))
+            insights.append(
+                Insight(
+                    title="Crop Varieties",
+                    value=crop_count,
+                    formatted=cls._fmt_number(crop_count),
+                    category="operational",
+                    description="Distinct crop types cultivated.",
+                )
+            )
 
             if harvest_col and harvest_col in df.columns:
                 crop_bd = cls._compute_breakdown(df, crop_col, harvest_col, "sum")
@@ -117,13 +127,15 @@ class AgricultureAnalytics(IndustryAnalytics):
         # ── Livestock ────────────────────────────────────
         if livestock_col and livestock_col in df.columns:
             livestock_count = int(df[livestock_col].nunique())
-            insights.append(Insight(
-                title="Livestock Categories",
-                value=livestock_count,
-                formatted=cls._fmt_number(livestock_count),
-                category="operational",
-                description="Distinct livestock types/categories.",
-            ))
+            insights.append(
+                Insight(
+                    title="Livestock Categories",
+                    value=livestock_count,
+                    formatted=cls._fmt_number(livestock_count),
+                    category="operational",
+                    description="Distinct livestock types/categories.",
+                )
+            )
 
             livestock_bd = cls._compute_breakdown(df, livestock_col, livestock_col, "count")
             if livestock_bd:
@@ -134,25 +146,29 @@ class AgricultureAnalytics(IndustryAnalytics):
         # ── Weather Impact ───────────────────────────────
         if weather_col and weather_col in df.columns:
             avg_weather = float(df[weather_col].dropna().mean())
-            insights.append(Insight(
-                title="Average Rainfall",
-                value=avg_weather,
-                formatted=f"{avg_weather:.1f}mm",
-                category="environmental",
-                description="Mean rainfall/precipitation across records.",
-                alert="warning" if avg_weather < 500 else "ok",
-            ))
+            insights.append(
+                Insight(
+                    title="Average Rainfall",
+                    value=avg_weather,
+                    formatted=f"{avg_weather:.1f}mm",
+                    category="environmental",
+                    description="Mean rainfall/precipitation across records.",
+                    alert="warning" if avg_weather < 500 else "ok",
+                )
+            )
 
         # ── Regional Analytics ───────────────────────────
         if region_col and region_col in df.columns:
             region_count = int(df[region_col].nunique())
-            insights.append(Insight(
-                title="Regions Covered",
-                value=region_count,
-                formatted=cls._fmt_number(region_count),
-                category="operational",
-                description="Number of distinct regions.",
-            ))
+            insights.append(
+                Insight(
+                    title="Regions Covered",
+                    value=region_count,
+                    formatted=cls._fmt_number(region_count),
+                    category="operational",
+                    description="Number of distinct regions.",
+                )
+            )
 
             if harvest_col and harvest_col in df.columns:
                 region_bd = cls._compute_breakdown(df, region_col, harvest_col, "sum")
@@ -169,16 +185,20 @@ class AgricultureAnalytics(IndustryAnalytics):
                 farm_bd.metric = "production"
                 breakdowns.append(farm_bd)
 
-        recommendations.extend([
-            "Compare yield per hectare across farms to identify best practices.",
-            "Monitor rainfall patterns to optimize irrigation scheduling.",
-            "Diversify crop production to reduce single-crop risk.",
-            "Track livestock health and mortality by category.",
-        ])
+        recommendations.extend(
+            [
+                "Compare yield per hectare across farms to identify best practices.",
+                "Monitor rainfall patterns to optimize irrigation scheduling.",
+                "Diversify crop production to reduce single-crop risk.",
+                "Track livestock health and mortality by category.",
+            ]
+        )
 
         for insight in insights:
             if insight.alert == "warning":
-                alerts.append(f"{insight.title}: {insight.formatted} — below recommended threshold.")
+                alerts.append(
+                    f"{insight.title}: {insight.formatted} — below recommended threshold."
+                )
 
         return AnalyticsResult(
             industry="agriculture",

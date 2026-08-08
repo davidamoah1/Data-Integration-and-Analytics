@@ -44,11 +44,12 @@ class RegressionPredictor:
 
         if feature_cols is None:
             feature_cols = [
-                c for c in df.columns
-                if c != target_col and pd.api.types.is_numeric_dtype(df[c])
+                c for c in df.columns if c != target_col and pd.api.types.is_numeric_dtype(df[c])
             ]
         else:
-            feature_cols = [c for c in feature_cols if c in df.columns and pd.api.types.is_numeric_dtype(df[c])]
+            feature_cols = [
+                c for c in feature_cols if c in df.columns and pd.api.types.is_numeric_dtype(df[c])
+            ]
 
         if len(feature_cols) == 0:
             return None
@@ -94,12 +95,14 @@ class RegressionPredictor:
         for idx in sample_idx:
             actual = float(y[idx])
             predicted = float(y_pred[idx])
-            sample_predictions.append({
-                "index": int(idx),
-                "actual": round(actual, 2),
-                "predicted": round(predicted, 2),
-                "error": round(actual - predicted, 2),
-            })
+            sample_predictions.append(
+                {
+                    "index": int(idx),
+                    "actual": round(actual, 2),
+                    "predicted": round(predicted, 2),
+                    "error": round(actual - predicted, 2),
+                }
+            )
 
         name = name or f"{target_col.replace('_', ' ').title()} Prediction"
 

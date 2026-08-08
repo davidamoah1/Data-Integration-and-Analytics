@@ -72,7 +72,8 @@ class DataWorkspaceService:
             self.db.execute(
                 select(DataWorkspace)
                 .where(
-                    DataWorkspace.organization_id == org_id, DataWorkspace.is_active == True  # noqa: E712
+                    DataWorkspace.organization_id == org_id,
+                    DataWorkspace.is_active == True,  # noqa: E712
                 )
                 .order_by(DataWorkspace.updated_at.desc())
             )

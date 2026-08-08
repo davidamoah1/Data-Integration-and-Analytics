@@ -23,7 +23,12 @@ depends_on: str | Sequence[str] | None = None
 def upgrade() -> None:
     op.create_table(
         "background_jobs",
-        sa.Column("id", sa.BigInteger().with_variant(sa.Integer, "sqlite"), primary_key=True, autoincrement=True),
+        sa.Column(
+            "id",
+            sa.BigInteger().with_variant(sa.Integer, "sqlite"),
+            primary_key=True,
+            autoincrement=True,
+        ),
         sa.Column("organization_id", sa.BigInteger(), nullable=False, index=True),
         sa.Column("user_id", sa.BigInteger(), nullable=True, index=True),
         sa.Column("job_type", sa.String(64), nullable=False, index=True),

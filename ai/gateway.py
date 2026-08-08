@@ -90,9 +90,13 @@ class AIGateway:
                 self.db.query(AIConversation).filter(AIConversation.id == conversation_id).first()
             )
             if not conversation:
-                conversation = self._create_conversation(user_id, assistant_type, user_message, organization_id)
+                conversation = self._create_conversation(
+                    user_id, assistant_type, user_message, organization_id
+                )
         else:
-            conversation = self._create_conversation(user_id, assistant_type, user_message, organization_id)
+            conversation = self._create_conversation(
+                user_id, assistant_type, user_message, organization_id
+            )
 
         conversation_id = conversation.id
 
@@ -281,7 +285,11 @@ class AIGateway:
         )
 
     def _create_conversation(
-        self, user_id: int, assistant_type: str, first_message: str, organization_id: int | None = None
+        self,
+        user_id: int,
+        assistant_type: str,
+        first_message: str,
+        organization_id: int | None = None,
     ) -> AIConversation:
         """Create a new conversation."""
         title = first_message[:50] + ("..." if len(first_message) > 50 else "")

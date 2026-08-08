@@ -59,6 +59,7 @@ class SemanticIntelligenceService:
             mapping_result.industry_confidence = 100.0
             # Reload industry knowledge for the forced industry
             from semantic.industry_knowledge import get_industry_knowledge
+
             knowledge = get_industry_knowledge(force_industry)
             if knowledge:
                 mapping_result.kpi_definitions = knowledge.get("kpis", {})

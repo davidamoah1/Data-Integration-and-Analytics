@@ -214,7 +214,9 @@ class TestAIMemory:
 
     def test_create_conversation_and_add_messages(self, ai_db):
         memory = AIMemory(ai_db)
-        conv = AIConversation(organization_id=1, user_id=1, assistant_type="data_copilot", title="Test")
+        conv = AIConversation(
+            organization_id=1, user_id=1, assistant_type="data_copilot", title="Test"
+        )
         ai_db.add(conv)
         ai_db.commit()
 
@@ -228,7 +230,9 @@ class TestAIMemory:
 
     def test_get_conversations(self, ai_db):
         memory = AIMemory(ai_db)
-        conv = AIConversation(organization_id=1, user_id=1, assistant_type="data_copilot", title="Test")
+        conv = AIConversation(
+            organization_id=1, user_id=1, assistant_type="data_copilot", title="Test"
+        )
         ai_db.add(conv)
         ai_db.commit()
 
@@ -747,7 +751,9 @@ class TestAIAPI:
 class TestAIModels:
 
     def test_models_create(self, ai_db):
-        conv = AIConversation(organization_id=1, user_id=1, assistant_type="data_copilot", title="Test")
+        conv = AIConversation(
+            organization_id=1, user_id=1, assistant_type="data_copilot", title="Test"
+        )
         ai_db.add(conv)
         ai_db.commit()
         assert conv.id is not None
