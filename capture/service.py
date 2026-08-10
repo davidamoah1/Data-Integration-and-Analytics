@@ -212,9 +212,7 @@ class CaptureService:
         with zipfile.ZipFile(io.BytesIO(zip_content)) as zf:
             infolist = zf.infolist()
             if len(infolist) > ZIP_MAX_ENTRIES:
-                raise CaptureError(
-                    f"ZIP contains too many entries (max {ZIP_MAX_ENTRIES})."
-                )
+                raise CaptureError(f"ZIP contains too many entries (max {ZIP_MAX_ENTRIES}).")
             total_uncompressed = sum(info.file_size for info in infolist)
             max_bytes = ZIP_MAX_TOTAL_UNCOMPRESSED_MB * 1024 * 1024
             if total_uncompressed > max_bytes:

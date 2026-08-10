@@ -202,7 +202,9 @@ class MFAService:
         if config.failed_attempts >= ACCOUNT_LOCKOUT_THRESHOLD:
             config.is_enabled = False
             self.db.commit()
-            raise AuthenticationError("Too many failed MFA attempts. MFA has been disabled, please re-setup.")
+            raise AuthenticationError(
+                "Too many failed MFA attempts. MFA has been disabled, please re-setup."
+            )
         self.db.commit()
         raise AuthenticationError("Invalid MFA code")
 

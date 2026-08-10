@@ -383,11 +383,7 @@ async def get_kpi(
     current_user: dict = Depends(get_current_user),
 ):
     org_id = get_current_organization_id(current_user, db)
-    kpi = (
-        db.query(KPI)
-        .filter(KPI.id == kpi_id, KPI.organization_id == org_id)
-        .first()
-    )
+    kpi = db.query(KPI).filter(KPI.id == kpi_id, KPI.organization_id == org_id).first()
     if not kpi:
         raise HTTPException(status_code=404, detail="KPI not found")
     history = (
@@ -428,11 +424,7 @@ async def record_kpi_value(
     current_user: dict = Depends(get_current_user),
 ):
     org_id = get_current_organization_id(current_user, db)
-    kpi = (
-        db.query(KPI)
-        .filter(KPI.id == kpi_id, KPI.organization_id == org_id)
-        .first()
-    )
+    kpi = db.query(KPI).filter(KPI.id == kpi_id, KPI.organization_id == org_id).first()
     if not kpi:
         raise HTTPException(status_code=404, detail="KPI not found")
     status_label = "healthy"
@@ -454,11 +446,7 @@ async def delete_kpi(
     current_user: dict = Depends(get_current_user),
 ):
     org_id = get_current_organization_id(current_user, db)
-    kpi = (
-        db.query(KPI)
-        .filter(KPI.id == kpi_id, KPI.organization_id == org_id)
-        .first()
-    )
+    kpi = db.query(KPI).filter(KPI.id == kpi_id, KPI.organization_id == org_id).first()
     if not kpi:
         raise HTTPException(status_code=404, detail="KPI not found")
     db.query(KPIHistory).filter(KPIHistory.kpi_id == kpi_id).delete()

@@ -160,7 +160,11 @@ _JWT_DEFAULT_SECRET = "change-this-to-a-strong-random-secret-min-32-chars"
 _jwt_env = os.getenv("JWT_SECRET_KEY", "")
 if _jwt_env:
     JWT_SECRET_KEY = _jwt_env
-elif os.getenv("DB_TYPE", "sqlite") == "mysql" or os.getenv("IS_PRODUCTION", "").lower() in ("1", "true", "yes"):
+elif os.getenv("DB_TYPE", "sqlite") == "mysql" or os.getenv("IS_PRODUCTION", "").lower() in (
+    "1",
+    "true",
+    "yes",
+):
     # Production must set JWT_SECRET_KEY explicitly — do not provide a fallback
     JWT_SECRET_KEY = ""
 else:

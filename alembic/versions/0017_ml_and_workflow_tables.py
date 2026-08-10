@@ -88,9 +88,7 @@ def upgrade() -> None:
         sa.Column("created_at", sa.DateTime, nullable=False),
     )
     op.create_index("ix_ml_training_runs_model_id", "ml_training_runs", ["model_id"])
-    op.create_index(
-        "ix_ml_training_runs_organization_id", "ml_training_runs", ["organization_id"]
-    )
+    op.create_index("ix_ml_training_runs_organization_id", "ml_training_runs", ["organization_id"])
 
     op.create_table(
         "ml_predictions",
@@ -144,9 +142,7 @@ def upgrade() -> None:
         sa.Column("created_at", sa.DateTime, nullable=False),
         sa.Column("updated_at", sa.DateTime, nullable=False),
     )
-    op.create_index(
-        "ix_ml_anomaly_jobs_organization_id", "ml_anomaly_jobs", ["organization_id"]
-    )
+    op.create_index("ix_ml_anomaly_jobs_organization_id", "ml_anomaly_jobs", ["organization_id"])
 
     op.create_table(
         "ml_drift_records",
@@ -169,9 +165,7 @@ def upgrade() -> None:
     op.create_table(
         "workflow_definitions",
         sa.Column("id", sa.BigInteger, primary_key=True, autoincrement=True),
-        sa.Column(
-            "organization_id", sa.Integer, sa.ForeignKey("organizations.id"), nullable=True
-        ),
+        sa.Column("organization_id", sa.Integer, sa.ForeignKey("organizations.id"), nullable=True),
         sa.Column("created_by", sa.Integer, sa.ForeignKey("users.id"), nullable=True),
         sa.Column("name", sa.String(255), nullable=False),
         sa.Column("description", sa.Text, nullable=True),
@@ -228,9 +222,7 @@ def upgrade() -> None:
             sa.ForeignKey("workflow_versions.id", ondelete="SET NULL"),
             nullable=True,
         ),
-        sa.Column(
-            "organization_id", sa.Integer, sa.ForeignKey("organizations.id"), nullable=True
-        ),
+        sa.Column("organization_id", sa.Integer, sa.ForeignKey("organizations.id"), nullable=True),
         sa.Column("triggered_by", sa.Integer, sa.ForeignKey("users.id"), nullable=True),
         sa.Column("trigger_type", sa.String(50), nullable=False, server_default="manual"),
         sa.Column("status", sa.String(30), nullable=False, server_default="pending"),
@@ -246,9 +238,7 @@ def upgrade() -> None:
         sa.Column("created_at", sa.DateTime, nullable=False),
         sa.Column("updated_at", sa.DateTime, nullable=False),
     )
-    op.create_index(
-        "ix_workflow_executions_execution_id", "workflow_executions", ["execution_id"]
-    )
+    op.create_index("ix_workflow_executions_execution_id", "workflow_executions", ["execution_id"])
     op.create_index("ix_workflow_executions_workflow_id", "workflow_executions", ["workflow_id"])
     op.create_index("ix_workflow_executions_version_id", "workflow_executions", ["version_id"])
     op.create_index(
@@ -286,9 +276,7 @@ def upgrade() -> None:
             sa.ForeignKey("workflow_executions.execution_id", ondelete="CASCADE"),
             nullable=False,
         ),
-        sa.Column(
-            "organization_id", sa.Integer, sa.ForeignKey("organizations.id"), nullable=True
-        ),
+        sa.Column("organization_id", sa.Integer, sa.ForeignKey("organizations.id"), nullable=True),
         sa.Column("source_type", sa.String(50), nullable=False),
         sa.Column("source_id", sa.String(255), nullable=True),
         sa.Column("target_type", sa.String(50), nullable=False),
@@ -296,14 +284,10 @@ def upgrade() -> None:
         sa.Column("transformation", sa.String(255), nullable=True),
         sa.Column("meta", sa.JSON, nullable=False),
         sa.Column("created_at", sa.DateTime, nullable=False),
-        sa.UniqueConstraint(
-            "execution_id", "source_type", "source_id", "target_type", "target_id"
-        ),
+        sa.UniqueConstraint("execution_id", "source_type", "source_id", "target_type", "target_id"),
     )
     op.create_index("ix_workflow_lineage_execution_id", "workflow_lineage", ["execution_id"])
-    op.create_index(
-        "ix_workflow_lineage_organization_id", "workflow_lineage", ["organization_id"]
-    )
+    op.create_index("ix_workflow_lineage_organization_id", "workflow_lineage", ["organization_id"])
 
     op.create_table(
         "workflow_templates",
@@ -336,12 +320,8 @@ def downgrade() -> None:
     op.drop_table("workflow_executions")
     op.drop_index("ix_workflow_versions_workflow_id", table_name="workflow_versions")
     op.drop_table("workflow_versions")
-    op.drop_index(
-        "ix_workflow_definitions_published_version_id", table_name="workflow_definitions"
-    )
-    op.drop_index(
-        "ix_workflow_definitions_organization_id", table_name="workflow_definitions"
-    )
+    op.drop_index("ix_workflow_definitions_published_version_id", table_name="workflow_definitions")
+    op.drop_index("ix_workflow_definitions_organization_id", table_name="workflow_definitions")
     op.drop_table("workflow_definitions")
 
     op.drop_index("ix_ml_drift_records_model_id", table_name="ml_drift_records")

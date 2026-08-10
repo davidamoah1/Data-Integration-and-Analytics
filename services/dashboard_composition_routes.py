@@ -280,7 +280,9 @@ def _resolve_widget_data(widget, db: DbSession) -> dict:
             return _resolve_alert_widget(widget, wt, ds, db)
         if ds.source_type == DataSourceType.REPORT:
             return _resolve_report_widget(widget, wt, ds)
-        return _empty_widget_data(widget, wt, reason=f"unsupported_source_type:{ds.source_type.value}")
+        return _empty_widget_data(
+            widget, wt, reason=f"unsupported_source_type:{ds.source_type.value}"
+        )
     except Exception as e:
         logger.warning("Failed to resolve widget data for %s: %s", widget.key, e)
         return _empty_widget_data(widget, wt, reason=f"error:{type(e).__name__}")
@@ -295,47 +297,61 @@ def _empty_widget_data(widget, wt: str, *, reason: str = "no_data_source") -> di
         "data_source": reason,
     }
     if wt == "kpi_card":
-        base.update({
-            "value": 0,
-            "unit": widget.config.get("unit", ""),
-            "icon": widget.config.get("icon", "Activity"),
-            "trend": {"direction": "neutral", "change_pct": 0},
-        })
+        base.update(
+            {
+                "value": 0,
+                "unit": widget.config.get("unit", ""),
+                "icon": widget.config.get("icon", "Activity"),
+                "trend": {"direction": "neutral", "change_pct": 0},
+            }
+        )
     elif wt == "chart":
-        base.update({
-            "chart_subtype": widget.chart_subtype.value if widget.chart_subtype else "bar",
-            "data": {"labels": [], "datasets": []},
-            "config": widget.config,
-        })
+        base.update(
+            {
+                "chart_subtype": widget.chart_subtype.value if widget.chart_subtype else "bar",
+                "data": {"labels": [], "datasets": []},
+                "config": widget.config,
+            }
+        )
     elif wt == "table":
-        base.update({
-            "columns": widget.config.get("columns", []),
-            "rows": [],
-        })
+        base.update(
+            {
+                "columns": widget.config.get("columns", []),
+                "rows": [],
+            }
+        )
     elif wt == "map":
-        base.update({
-            "geo_field": widget.config.get("geo_field", "region"),
-            "regions": [],
-        })
+        base.update(
+            {
+                "geo_field": widget.config.get("geo_field", "region"),
+                "regions": [],
+            }
+        )
     elif wt == "trend":
-        base.update({
-            "current": 0,
-            "previous": 0,
-            "change_pct": 0,
-            "direction": "neutral",
-            "series": [],
-        })
+        base.update(
+            {
+                "current": 0,
+                "previous": 0,
+                "change_pct": 0,
+                "direction": "neutral",
+                "series": [],
+            }
+        )
     elif wt == "alert":
-        base.update({
-            "alerts": [],
-            "severity": widget.config.get("severity", "warning"),
-        })
+        base.update(
+            {
+                "alerts": [],
+                "severity": widget.config.get("severity", "warning"),
+            }
+        )
     elif wt == "report":
-        base.update({
-            "report_type": None,
-            "status": "not_generated",
-            "url": None,
-        })
+        base.update(
+            {
+                "report_type": None,
+                "status": "not_generated",
+                "url": None,
+            }
+        )
     return base
 
 
@@ -381,9 +397,7 @@ def _resolve_dataset_widget(widget, wt: str, ds, db: DbSession) -> dict:
         query += " WHERE " + " AND ".join(conditions)
     if ds.group_by:
         agg = ds.aggregation or "sum"
-        query = (
-            f"SELECT {ds.group_by}, {agg}(*) as value FROM {table_name}"
-        )
+        query = f"SELECT {ds.group_by}, {agg}(*) as value FROM {table_name}"
         if conditions:
             query += " WHERE " + " AND ".join(conditions)
         query += f" GROUP BY {ds.group_by} ORDER BY value DESC"

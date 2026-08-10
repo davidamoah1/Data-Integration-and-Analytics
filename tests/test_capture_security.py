@@ -11,10 +11,10 @@ from __future__ import annotations
 import io
 import zipfile
 
-import capture.models  # noqa: F401 — registers tables with shared Base
 import pytest
-import storage.models  # noqa: F401 — registers tables with shared Base
 
+import capture.models  # noqa: F401 — registers tables with shared Base
+import storage.models  # noqa: F401 — registers tables with shared Base
 from capture.service import (
     ZIP_MAX_ENTRIES,
     ZIP_MAX_TOTAL_UNCOMPRESSED_MB,

@@ -13,6 +13,7 @@ export default function CollaborationPage() {
 
   useEffect(() => {
     loadComments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function loadComments() {

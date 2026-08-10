@@ -91,7 +91,9 @@ class MLService:
                 new_values=details or {},
             )
         except Exception:
-            logger.warning("ML audit logging failed for action '%s' on '%s'", action, resource, exc_info=True)
+            logger.warning(
+                "ML audit logging failed for action '%s' on '%s'", action, resource, exc_info=True
+            )
 
     # -------------------------------------------------------------------------
     # Readiness

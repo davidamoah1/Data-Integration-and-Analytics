@@ -13,8 +13,6 @@ import os
 import tempfile
 
 import ai.models  # noqa: F401 — registers tables with shared Base
-import pytest
-
 from ai.engines.document_chat import DocumentChatEngine
 from ai.models import AIDocument
 
