@@ -16,7 +16,13 @@ from organizations.invitation_schemas import (
 from organizations.models import Organization
 from organizations.workspace_models import Invitation, Workspace
 from shared.exceptions import AuthorizationError, ConflictError, NotFoundError, ValidationError
-from shared.security import create_access_token, create_refresh_token, generate_token, hash_password
+from shared.security import (
+    JWT_ACCESS_EXPIRE_MINUTES,
+    create_access_token,
+    create_refresh_token,
+    generate_token,
+    hash_password,
+)
 
 
 class InvitationService:
@@ -172,7 +178,7 @@ class InvitationService:
             "access_token": access_token,
             "refresh_token": refresh_token,
             "token_type": "bearer",
-            "expires_in": 30 * 60,
+            "expires_in": JWT_ACCESS_EXPIRE_MINUTES * 60,
             "user": {
                 "id": user.id,
                 "email": user.email,
@@ -407,7 +413,7 @@ class RegistrationService:
             "access_token": access_token,
             "refresh_token": refresh_token,
             "token_type": "bearer",
-            "expires_in": 30 * 60,
+            "expires_in": JWT_ACCESS_EXPIRE_MINUTES * 60,
             "user": {
                 "id": user.id,
                 "email": user.email,
@@ -523,7 +529,7 @@ class RegistrationService:
             "access_token": access_token,
             "refresh_token": refresh_token,
             "token_type": "bearer",
-            "expires_in": 30 * 60,
+            "expires_in": JWT_ACCESS_EXPIRE_MINUTES * 60,
             "user": {
                 "id": user.id,
                 "email": user.email,
@@ -611,7 +617,7 @@ class RegistrationService:
             "access_token": access_token,
             "refresh_token": refresh_token,
             "token_type": "bearer",
-            "expires_in": 30 * 60,
+            "expires_in": JWT_ACCESS_EXPIRE_MINUTES * 60,
             "user": {
                 "id": user.id,
                 "email": user.email,

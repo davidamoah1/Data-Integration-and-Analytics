@@ -157,7 +157,18 @@ PIPELINE_RUN_TIME = os.getenv("PIPELINE_RUN_TIME", "08:00")
 
 # --- Security / JWT ---
 _JWT_DEFAULT_SECRET = "change-this-to-a-strong-random-secret-min-32-chars"
-JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", _JWT_DEFAULT_SECRET)
+_jwt_env = os.getenv("JWT_SECRET_KEY", "")
+if _jwt_env:
+    JWT_SECRET_KEY = _jwt_env
+elif os.getenv("DB_TYPE", "sqlite") == "mysql" or os.getenv("IS_PRODUCTION", "").lower() in ("1", "true", "yes"):
+    # Production must set JWT_SECRET_KEY explicitly — do not provide a fallback
+    JWT_SECRET_KEY = ""
+else:
+    # Dev/test only: generate a random ephemeral secret so no known default is used
+    import secrets as _secrets
+
+    JWT_SECRET_KEY = _secrets.token_urlsafe(48)
+    del _secrets
 JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 JWT_ACCESS_EXPIRE_MINUTES = int(os.getenv("JWT_ACCESS_EXPIRE_MINUTES", "30"))
 JWT_REFRESH_EXPIRE_DAYS = int(os.getenv("JWT_REFRESH_EXPIRE_DAYS", "7"))

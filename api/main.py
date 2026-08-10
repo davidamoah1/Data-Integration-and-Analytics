@@ -192,6 +192,9 @@ async def lifespan(app: FastAPI):
 
         # Phase 11 — Background Jobs
         import jobs.models  # noqa: F401
+
+        # Phase 14 — ML platform models
+        import ml.models  # noqa: F401
         import notifications.models  # noqa: F401
         import organizations.models  # noqa: F401
         import organizations.workspace_models  # noqa: F401
@@ -206,6 +209,9 @@ async def lifespan(app: FastAPI):
         # Phase 15 — Studios models
         import studios.models  # noqa: F401
         import validation.models  # noqa: F401
+
+        # Workflow engine models
+        import workflows.models  # noqa: F401
 
         try:
             Base.metadata.create_all(engine)

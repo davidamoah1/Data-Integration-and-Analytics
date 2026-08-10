@@ -49,6 +49,13 @@ IMAGE_EXTENSIONS = {"jpg", "jpeg", "png", "tiff", "tif", "bmp"}
 PDF_EXTENSIONS = {"pdf"}
 SUPPORTED_EXTENSIONS = IMAGE_EXTENSIONS | PDF_EXTENSIONS
 
+# Zip bomb protection: cap total decompressed size and entry count for
+# batch ZIP uploads. A malicious ZIP can have a tiny compressed size but
+# decompress to gigabytes; both compressed and decompressed size are
+# checked before any entry is read into memory.
+ZIP_MAX_ENTRIES = 500
+ZIP_MAX_TOTAL_UNCOMPRESSED_MB = 500
+
 
 class CaptureError(ValueError):
     """User-facing error for invalid capture requests."""
@@ -202,11 +209,25 @@ class CaptureService:
         batch_name: str | None = None,
         industry: str | None = None,
     ) -> tuple[CaptureBatch, list[CaptureDocument]]:
-        batch = self.create_batch(organization_id, user_id, batch_name or zip_filename, industry)
-
-        documents: list[CaptureDocument] = []
         with zipfile.ZipFile(io.BytesIO(zip_content)) as zf:
-            for info in zf.infolist():
+            infolist = zf.infolist()
+            if len(infolist) > ZIP_MAX_ENTRIES:
+                raise CaptureError(
+                    f"ZIP contains too many entries (max {ZIP_MAX_ENTRIES})."
+                )
+            total_uncompressed = sum(info.file_size for info in infolist)
+            max_bytes = ZIP_MAX_TOTAL_UNCOMPRESSED_MB * 1024 * 1024
+            if total_uncompressed > max_bytes:
+                raise CaptureError(
+                    f"ZIP decompresses to {total_uncompressed / (1024 * 1024):.1f}MB, "
+                    f"exceeding the {ZIP_MAX_TOTAL_UNCOMPRESSED_MB}MB limit."
+                )
+
+            batch = self.create_batch(
+                organization_id, user_id, batch_name or zip_filename, industry
+            )
+            documents: list[CaptureDocument] = []
+            for info in infolist:
                 if info.is_dir():
                     continue
                 ext = (os.path.splitext(info.filename)[1] or "").lstrip(".").lower()

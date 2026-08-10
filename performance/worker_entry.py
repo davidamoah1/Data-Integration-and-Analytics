@@ -14,6 +14,7 @@ import logging
 import os
 import signal
 
+from jobs.handlers import register_builtin_handlers
 from performance.queue import TaskQueue
 from performance.workers import WorkerPool
 
@@ -26,6 +27,8 @@ logger = logging.getLogger("performance.worker_entry")
 
 async def run_workers():
     """Start the worker pool and keep it running."""
+    register_builtin_handlers()
+
     redis_url = os.getenv("REDIS_URL", "")
     min_workers = int(os.getenv("WORKER_MIN_WORKERS", "2"))
     max_workers = int(os.getenv("WORKER_MAX_WORKERS", "20"))

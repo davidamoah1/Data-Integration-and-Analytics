@@ -8,6 +8,7 @@ Users can search using natural language queries like:
 """
 
 import json
+import logging
 
 from sqlalchemy import text
 from sqlalchemy.orm import Session as DbSession
@@ -20,6 +21,8 @@ from ai.models import (
     AIReportGeneration,
 )
 from etl.models import ETLJob, ETLPipeline
+
+logger = logging.getLogger(__name__)
 
 
 class AISearchEngine:
@@ -109,8 +112,8 @@ class AISearchEngine:
                             "created_at": str(job.created_at) if job.created_at else None,
                         }
                     )
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning("Failed to search ETL jobs: %s", e)
         return results
 
     def _search_pipelines(self, query: str) -> list[dict]:
@@ -132,8 +135,8 @@ class AISearchEngine:
                             "status": p.status,
                         }
                     )
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning("Failed to search pipelines: %s", e)
         return results
 
     def _search_reports(self, query: str) -> list[dict]:
@@ -158,8 +161,8 @@ class AISearchEngine:
                             "created_at": str(r.created_at) if r.created_at else None,
                         }
                     )
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning("Failed to search reports: %s", e)
         return results
 
     def _search_insights(self, query: str) -> list[dict]:
@@ -186,8 +189,8 @@ class AISearchEngine:
                             "created_at": str(i.created_at) if i.created_at else None,
                         }
                     )
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning("Failed to search insights: %s", e)
         return results
 
     def _search_data(self, query: str) -> list[dict]:
@@ -211,8 +214,8 @@ class AISearchEngine:
                             "description": f"Sales: {float(r[1]):.2f}, Profit: {float(r[2]):.2f}",
                         }
                     )
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning("Failed to search data: %s", e)
         return results
 
     def _search_forecasts(self, query: str) -> list[dict]:
@@ -236,8 +239,8 @@ class AISearchEngine:
                             "created_at": str(f.created_at) if f.created_at else None,
                         }
                     )
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning("Failed to search forecasts: %s", e)
         return results
 
     def _search_alerts(self, query: str) -> list[dict]:
@@ -264,8 +267,8 @@ class AISearchEngine:
                             "created_at": str(a.created_at) if a.created_at else None,
                         }
                     )
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning("Failed to search alerts: %s", e)
         return results
 
     def _generate_summary(self, query: str, results: list[dict], user_id: int | None) -> str:

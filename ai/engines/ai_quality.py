@@ -5,6 +5,7 @@ to generate recommendations, risk assessments, and fix suggestions.
 """
 
 import json
+import logging
 
 from sqlalchemy.orm import Session as DbSession
 
@@ -12,6 +13,8 @@ from ai.gateway import AIGateway
 from etl.connectors.connectors import get_connector
 from etl.profiling import DataProfiler
 from etl.quality import DataQualityEngine
+
+logger = logging.getLogger(__name__)
 
 
 class AIDataQualityEngine:
@@ -138,5 +141,5 @@ class AIDataQualityEngine:
             if json_match:
                 return json.loads(json_match.group())
         except (json.JSONDecodeError, AttributeError):
-            pass
+            logger.debug("Failed to extract AI analysis JSON from response")
         return {}

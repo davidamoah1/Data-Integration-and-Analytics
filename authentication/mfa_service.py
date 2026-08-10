@@ -14,7 +14,12 @@ from sqlalchemy.orm import Session as DbSession
 
 from authentication.mfa_models import MFASession, UserMFA
 from shared.exceptions import AuthenticationError, NotFoundError, ValidationError
-from shared.security import decrypt_secret, encrypt_secret, generate_token
+from shared.security import (
+    ACCOUNT_LOCKOUT_THRESHOLD,
+    decrypt_secret,
+    encrypt_secret,
+    generate_token,
+)
 
 
 class MFAService:
@@ -194,6 +199,10 @@ class MFAService:
                     return {"user_id": challenge.user_id, "verified": True}
 
         config.failed_attempts += 1
+        if config.failed_attempts >= ACCOUNT_LOCKOUT_THRESHOLD:
+            config.is_enabled = False
+            self.db.commit()
+            raise AuthenticationError("Too many failed MFA attempts. MFA has been disabled, please re-setup.")
         self.db.commit()
         raise AuthenticationError("Invalid MFA code")
 

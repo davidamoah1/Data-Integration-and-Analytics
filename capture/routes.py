@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import zipfile
+
 from fastapi import (
     APIRouter,
     BackgroundTasks,
@@ -144,9 +146,14 @@ async def upload_zip_batch(
     svc = CaptureService(db)
     content = await file.read()
 
-    batch, docs = svc.upload_zip_batch(
-        org_id, current_user["id"], file.filename or "batch.zip", content, batch_name, industry
-    )
+    try:
+        batch, docs = svc.upload_zip_batch(
+            org_id, current_user["id"], file.filename or "batch.zip", content, batch_name, industry
+        )
+    except CaptureError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    except zipfile.BadZipFile as e:
+        raise HTTPException(status_code=400, detail="Invalid or corrupted ZIP file.") from e
 
     # Create a background job for OCR processing
     job = None

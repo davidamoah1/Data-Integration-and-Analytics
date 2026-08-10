@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import pandas as pd
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
 from dataset_library import DataTier, get_dataset_library
+from shared.dependencies import get_current_user, require_permissions
 
 router = APIRouter(prefix="/datasets", tags=["Dataset Library"])
 
@@ -32,6 +33,7 @@ async def list_datasets(
     tier: str | None = Query(None, description="Filter by tier: production, demo, test"),
     industry: str | None = Query(None, description="Filter by industry"),
     search: str | None = Query(None, description="Search query"),
+    current_user: dict = Depends(get_current_user),
 ):
     """List all datasets in the library, optionally filtered."""
     lib = get_dataset_library()
@@ -51,7 +53,7 @@ async def list_datasets(
 
 
 @router.get("/{dataset_id}")
-async def get_dataset(dataset_id: str):
+async def get_dataset(dataset_id: str, current_user: dict = Depends(get_current_user)):
     """Get metadata for a specific dataset."""
     lib = get_dataset_library()
     entry = lib.get(dataset_id)
@@ -64,6 +66,7 @@ async def get_dataset(dataset_id: str):
 async def preview_dataset(
     dataset_id: str,
     rows: int = Query(10, ge=1, le=100),
+    current_user: dict = Depends(get_current_user),
 ):
     """Preview the first N rows of a dataset."""
     lib = get_dataset_library()
@@ -85,7 +88,7 @@ async def preview_dataset(
 
 
 @router.get("/{dataset_id}/schema")
-async def get_dataset_schema(dataset_id: str):
+async def get_dataset_schema(dataset_id: str, current_user: dict = Depends(get_current_user)):
     """Get the schema for a specific dataset."""
     lib = get_dataset_library()
     entry = lib.get(dataset_id)
@@ -98,7 +101,10 @@ async def get_dataset_schema(dataset_id: str):
 
 
 @router.post("/production/upload")
-async def register_production_upload(dataset: ProductionDatasetCreate):
+async def register_production_upload(
+    dataset: ProductionDatasetCreate,
+    current_user: dict = Depends(require_permissions("datasets.manage")),
+):
     """Register a user-uploaded production dataset."""
     lib = get_dataset_library()
     import os
@@ -148,7 +154,10 @@ async def register_production_upload(dataset: ProductionDatasetCreate):
 
 
 @router.post("/production/database")
-async def register_database_connection(dataset: DatabaseDatasetCreate):
+async def register_database_connection(
+    dataset: DatabaseDatasetCreate,
+    current_user: dict = Depends(require_permissions("datasets.manage")),
+):
     """Register a connected database as a production dataset."""
     lib = get_dataset_library()
     import uuid
@@ -166,7 +175,10 @@ async def register_database_connection(dataset: DatabaseDatasetCreate):
 
 
 @router.delete("/{dataset_id}")
-async def unregister_dataset(dataset_id: str):
+async def unregister_dataset(
+    dataset_id: str,
+    current_user: dict = Depends(require_permissions("datasets.manage")),
+):
     """Remove a dataset from the library."""
     lib = get_dataset_library()
     entry = lib.get(dataset_id)
@@ -179,7 +191,7 @@ async def unregister_dataset(dataset_id: str):
 
 
 @router.get("/industries/list")
-async def list_industries():
+async def list_industries(current_user: dict = Depends(get_current_user)):
     """List all supported industries."""
     return {
         "industries": [
@@ -199,6 +211,6 @@ async def list_industries():
 
 
 @router.get("/tiers/list")
-async def list_tiers():
+async def list_tiers(current_user: dict = Depends(get_current_user)):
     """List all data tiers."""
     return {"tiers": [{"value": t.value, "name": t.value.title()} for t in DataTier]}

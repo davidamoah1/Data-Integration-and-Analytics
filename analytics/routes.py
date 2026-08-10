@@ -25,6 +25,7 @@ from analytics.schemas import (
 from analytics.usage import UsageAnalyticsService
 from shared.database import get_db
 from shared.dependencies import get_current_user
+from shared.tenant import get_current_organization_id, is_super_admin
 
 router = APIRouter(prefix="/analytics", tags=["Analytics"])
 
@@ -38,9 +39,18 @@ async def list_dashboards(
     db: DbSession = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
-    query = db.query(Dashboard).filter(Dashboard.owner_id == current_user["id"])
+    org_id = get_current_organization_id(current_user, db)
+    query = db.query(Dashboard).filter(
+        Dashboard.owner_id == current_user["id"],
+        Dashboard.organization_id == org_id,
+    )
     if include_public:
-        query = query.union(db.query(Dashboard).filter(Dashboard.is_public.is_(True)))
+        query = query.union(
+            db.query(Dashboard).filter(
+                Dashboard.is_public.is_(True),
+                Dashboard.organization_id == org_id,
+            )
+        )
     dashboards = query.order_by(Dashboard.updated_at.desc()).all()
     result = []
     for d in dashboards:
@@ -101,13 +111,18 @@ async def get_dashboard(
     db: DbSession = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
-    dashboard = db.query(Dashboard).filter(Dashboard.id == dashboard_id).first()
+    org_id = get_current_organization_id(current_user, db)
+    dashboard = (
+        db.query(Dashboard)
+        .filter(Dashboard.id == dashboard_id, Dashboard.organization_id == org_id)
+        .first()
+    )
     if not dashboard:
         raise HTTPException(status_code=404, detail="Dashboard not found")
     if (
         dashboard.owner_id != current_user["id"]
         and not dashboard.is_public
-        and "super_admin" not in current_user["roles"]
+        and not is_super_admin(current_user)
     ):
         raise HTTPException(status_code=403, detail="Access denied")
     widgets = db.query(DashboardWidget).filter(DashboardWidget.dashboard_id == dashboard_id).all()
@@ -140,10 +155,15 @@ async def update_dashboard(
     db: DbSession = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
-    dashboard = db.query(Dashboard).filter(Dashboard.id == dashboard_id).first()
+    org_id = get_current_organization_id(current_user, db)
+    dashboard = (
+        db.query(Dashboard)
+        .filter(Dashboard.id == dashboard_id, Dashboard.organization_id == org_id)
+        .first()
+    )
     if not dashboard:
         raise HTTPException(status_code=404, detail="Dashboard not found")
-    if dashboard.owner_id != current_user["id"] and "super_admin" not in current_user["roles"]:
+    if dashboard.owner_id != current_user["id"] and not is_super_admin(current_user):
         raise HTTPException(status_code=403, detail="Only the owner can update")
     if body.name is not None:
         dashboard.name = body.name
@@ -167,10 +187,15 @@ async def delete_dashboard(
     db: DbSession = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
-    dashboard = db.query(Dashboard).filter(Dashboard.id == dashboard_id).first()
+    org_id = get_current_organization_id(current_user, db)
+    dashboard = (
+        db.query(Dashboard)
+        .filter(Dashboard.id == dashboard_id, Dashboard.organization_id == org_id)
+        .first()
+    )
     if not dashboard:
         raise HTTPException(status_code=404, detail="Dashboard not found")
-    if dashboard.owner_id != current_user["id"] and "super_admin" not in current_user["roles"]:
+    if dashboard.owner_id != current_user["id"] and not is_super_admin(current_user):
         raise HTTPException(status_code=403, detail="Only the owner can delete")
     db.query(DashboardWidget).filter(DashboardWidget.dashboard_id == dashboard_id).delete()
     db.query(DashboardFavorite).filter(DashboardFavorite.dashboard_id == dashboard_id).delete()
@@ -189,10 +214,15 @@ async def add_widget(
     db: DbSession = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
-    dashboard = db.query(Dashboard).filter(Dashboard.id == dashboard_id).first()
+    org_id = get_current_organization_id(current_user, db)
+    dashboard = (
+        db.query(Dashboard)
+        .filter(Dashboard.id == dashboard_id, Dashboard.organization_id == org_id)
+        .first()
+    )
     if not dashboard:
         raise HTTPException(status_code=404, detail="Dashboard not found")
-    if dashboard.owner_id != current_user["id"] and "super_admin" not in current_user["roles"]:
+    if dashboard.owner_id != current_user["id"] and not is_super_admin(current_user):
         raise HTTPException(status_code=403, detail="Only the owner can add widgets")
     widget = DashboardWidget(
         dashboard_id=dashboard_id,
@@ -215,10 +245,15 @@ async def remove_widget(
     db: DbSession = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
-    dashboard = db.query(Dashboard).filter(Dashboard.id == dashboard_id).first()
+    org_id = get_current_organization_id(current_user, db)
+    dashboard = (
+        db.query(Dashboard)
+        .filter(Dashboard.id == dashboard_id, Dashboard.organization_id == org_id)
+        .first()
+    )
     if not dashboard:
         raise HTTPException(status_code=404, detail="Dashboard not found")
-    if dashboard.owner_id != current_user["id"] and "super_admin" not in current_user["roles"]:
+    if dashboard.owner_id != current_user["id"] and not is_super_admin(current_user):
         raise HTTPException(status_code=403, detail="Only the owner can remove widgets")
     widget = (
         db.query(DashboardWidget)
@@ -244,7 +279,12 @@ async def toggle_favorite(
     db: DbSession = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
-    dashboard = db.query(Dashboard).filter(Dashboard.id == dashboard_id).first()
+    org_id = get_current_organization_id(current_user, db)
+    dashboard = (
+        db.query(Dashboard)
+        .filter(Dashboard.id == dashboard_id, Dashboard.organization_id == org_id)
+        .first()
+    )
     if not dashboard:
         raise HTTPException(status_code=404, detail="Dashboard not found")
     existing = (
@@ -275,7 +315,8 @@ async def list_kpis(
     db: DbSession = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
-    query = db.query(KPI)
+    org_id = get_current_organization_id(current_user, db)
+    query = db.query(KPI).filter(KPI.organization_id == org_id)
     if category:
         query = query.filter(KPI.category == category)
     if is_active is not None:
@@ -341,7 +382,12 @@ async def get_kpi(
     db: DbSession = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
-    kpi = db.query(KPI).filter(KPI.id == kpi_id).first()
+    org_id = get_current_organization_id(current_user, db)
+    kpi = (
+        db.query(KPI)
+        .filter(KPI.id == kpi_id, KPI.organization_id == org_id)
+        .first()
+    )
     if not kpi:
         raise HTTPException(status_code=404, detail="KPI not found")
     history = (
@@ -381,7 +427,12 @@ async def record_kpi_value(
     db: DbSession = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
-    kpi = db.query(KPI).filter(KPI.id == kpi_id).first()
+    org_id = get_current_organization_id(current_user, db)
+    kpi = (
+        db.query(KPI)
+        .filter(KPI.id == kpi_id, KPI.organization_id == org_id)
+        .first()
+    )
     if not kpi:
         raise HTTPException(status_code=404, detail="KPI not found")
     status_label = "healthy"
@@ -402,7 +453,12 @@ async def delete_kpi(
     db: DbSession = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
-    kpi = db.query(KPI).filter(KPI.id == kpi_id).first()
+    org_id = get_current_organization_id(current_user, db)
+    kpi = (
+        db.query(KPI)
+        .filter(KPI.id == kpi_id, KPI.organization_id == org_id)
+        .first()
+    )
     if not kpi:
         raise HTTPException(status_code=404, detail="KPI not found")
     db.query(KPIHistory).filter(KPIHistory.kpi_id == kpi_id).delete()
@@ -422,7 +478,8 @@ async def list_alerts(
     db: DbSession = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
-    query = db.query(AnalyticsAlert)
+    org_id = get_current_organization_id(current_user, db)
+    query = db.query(AnalyticsAlert).filter(AnalyticsAlert.organization_id == org_id)
     if is_acknowledged is not None:
         if is_acknowledged:
             query = query.filter(AnalyticsAlert.acknowledged_by.isnot(None))
@@ -486,7 +543,12 @@ async def acknowledge_alert(
     db: DbSession = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
-    alert = db.query(AnalyticsAlert).filter(AnalyticsAlert.id == alert_id).first()
+    org_id = get_current_organization_id(current_user, db)
+    alert = (
+        db.query(AnalyticsAlert)
+        .filter(AnalyticsAlert.id == alert_id, AnalyticsAlert.organization_id == org_id)
+        .first()
+    )
     if not alert:
         raise HTTPException(status_code=404, detail="Alert not found")
     alert.acknowledged_by = current_user["id"]

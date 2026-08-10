@@ -52,6 +52,7 @@ from shared.exceptions import (
 )
 from shared.security import (
     ACCOUNT_LOCKOUT_THRESHOLD,
+    JWT_ACCESS_EXPIRE_MINUTES,
     JWT_REFRESH_EXPIRE_DAYS,
     PASSWORD_HISTORY_COUNT,
     create_access_token,
@@ -194,7 +195,7 @@ class AuthService:
             "access_token": access_token,
             "refresh_token": refresh_token,
             "token_type": "bearer",
-            "expires_in": 30 * 60,
+            "expires_in": JWT_ACCESS_EXPIRE_MINUTES * 60,
             "user": {
                 "id": user.id,
                 "email": user.email,
@@ -239,6 +240,9 @@ class AuthService:
         if not user or not user.is_active:
             raise AuthenticationError("User not found or disabled")
 
+        if self.user_repo.is_locked(user.id):
+            raise AccountLockedError()
+
         role_names = self.user_role_repo.get_roles_for_user(user.id)
         permission_names = self.user_role_repo.get_all_permissions_for_user(user.id)
 
@@ -275,7 +279,7 @@ class AuthService:
             "access_token": new_access,
             "refresh_token": new_refresh,
             "token_type": "bearer",
-            "expires_in": 30 * 60,
+            "expires_in": JWT_ACCESS_EXPIRE_MINUTES * 60,
         }
 
     def change_password(self, user_id: int, request: ChangePasswordRequest):

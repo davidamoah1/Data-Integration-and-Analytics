@@ -966,11 +966,13 @@ async def document_chat(
 ):
     """Chat with an uploaded document."""
     current_user = tenant["user"]
+    org_id = tenant["organization_id"]
     engine = DocumentChatEngine(db)
     result = engine.chat(
         document_id=document_id,
         question=request.question,
         user_id=current_user["id"],
+        organization_id=org_id,
     )
     return DocumentChatResponse(**result)
 

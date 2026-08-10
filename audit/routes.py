@@ -23,8 +23,9 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session as DbSession
 
 from audit.repositories import AuditRepository
+from authentication.models import User
 from shared.database import get_db
-from shared.dependencies import get_current_user
+from shared.dependencies import require_permissions
 from shared.tenant import get_current_organization_id, is_super_admin
 
 router = APIRouter(prefix="/api/audit", tags=["audit"])
@@ -78,7 +79,7 @@ async def list_audit_logs(
     limit: int = Query(50, ge=1, le=500),
     offset: int = Query(0, ge=0),
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(require_permissions("audit.view")),
 ):
     """List audit logs with rich filtering. Organization-scoped for non-super-admins."""
     repo = AuditRepository(db)
@@ -127,7 +128,7 @@ async def list_audit_logs(
 async def get_audit_log(
     log_id: int,
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(require_permissions("audit.view")),
 ):
     """Get a single audit log entry by ID."""
     repo = AuditRepository(db)
@@ -146,14 +147,14 @@ async def get_audit_log(
 
 @router.get("/logs/export")
 async def export_audit_logs(
-    format: str = Query("csv", regex="^(csv|json)$"),
+    format: str = Query("csv", pattern="^(csv|json)$"),
     user_id: int | None = Query(None),
     action: str | None = Query(None),
     resource_type: str | None = Query(None),
     start_date: str | None = Query(None),
     end_date: str | None = Query(None),
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(require_permissions("audit.view")),
 ):
     """Export audit logs as CSV or JSON."""
     repo = AuditRepository(db)
@@ -231,7 +232,7 @@ async def get_audit_stats(
     start_date: str | None = Query(None),
     end_date: str | None = Query(None),
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(require_permissions("audit.view")),
 ):
     """Get audit statistics: action counts, daily counts, top users."""
     repo = AuditRepository(db)
@@ -256,7 +257,7 @@ async def get_audit_stats(
 @router.get("/filters")
 async def get_filter_values(
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(require_permissions("audit.view")),
 ):
     """Get available filter values (actions, resource types) for the UI."""
     repo = AuditRepository(db)
@@ -280,7 +281,7 @@ async def list_security_logs(
     limit: int = Query(50, ge=1, le=500),
     offset: int = Query(0, ge=0),
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(require_permissions("audit.view")),
 ):
     """List security logs with filtering."""
     repo = AuditRepository(db)
@@ -318,9 +319,15 @@ async def get_user_activity(
     limit: int = Query(50, ge=1, le=500),
     offset: int = Query(0, ge=0),
     db: DbSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(require_permissions("audit.view")),
 ):
-    """Get activity history for a specific user."""
+    """Get activity history for a specific user (organization-scoped)."""
+    if not is_super_admin(current_user):
+        org_id = get_current_organization_id(current_user, db)
+        target_user = db.query(User).filter(User.id == user_id).first()
+        if target_user is None or target_user.organization_id != org_id:
+            raise HTTPException(status_code=404, detail="User not found")
+
     repo = AuditRepository(db)
     activities = repo.list_user_activity(user_id, limit=limit, offset=offset)
 

@@ -525,8 +525,8 @@ class DataGatherer:
                 corr = self.df[metric_col].corr(self.df[col])
                 if not pd.isna(corr):
                     correlations[col] = round(float(corr), 3)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug("Correlation calculation failed for %s: %s", col, e)
 
         return correlations
 

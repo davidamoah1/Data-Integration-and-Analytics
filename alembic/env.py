@@ -15,18 +15,29 @@ if str(PROJECT_ROOT) not in sys.path:
 import ai.models  # noqa: F401, E402
 import analytics.models  # noqa: F401, E402
 import audit.models  # noqa: F401, E402
+import authentication.mfa_models  # noqa: F401, E402
 import authentication.models  # noqa: F401, E402
+import authentication.sso_models  # noqa: F401, E402
 import capture.models  # noqa: F401, E402
+import connectors.models  # noqa: F401, E402
 import database.db_setup  # noqa: F401, E402
+import ecosystem.models  # noqa: F401, E402
+import ecosystem.plugin_models  # noqa: F401, E402
+import ecosystem.webhooks  # noqa: F401, E402
 import enterprise.models  # noqa: F401, E402
 import enterprise.subscription  # noqa: F401, E402
 import etl.models  # noqa: F401, E402
 import jobs.models  # noqa: F401, E402
+import ml.models  # noqa: F401, E402
 import notifications.models  # noqa: F401, E402
 import organizations.models  # noqa: F401, E402
 import organizations.workspace_models  # noqa: F401, E402
+import saas.models  # noqa: F401, E402
 import scheduler.models  # noqa: F401, E402
 import storage.models  # noqa: F401, E402
+import studios.models  # noqa: F401, E402
+import validation.models  # noqa: F401, E402
+import workflows.models  # noqa: F401, E402
 from config import DB_TYPE, DB_URL, validate_config  # noqa: E402
 from shared.database import Base  # noqa: E402
 

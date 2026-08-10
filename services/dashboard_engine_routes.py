@@ -27,7 +27,7 @@ import logging
 from typing import Any
 
 import pandas as pd
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
 from services.chart_recommender import ChartRecommendationEngine
@@ -43,6 +43,7 @@ from services.dashboard_performance import DashboardPerformanceLayer
 from services.drilldown_engine import DrilldownEngine
 from services.filter_engine import GlobalFilterEngine
 from services.kpi_intelligence import KPIIntelligenceEngine
+from shared.dependencies import get_current_user, require_permissions
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/dashboard-engine", tags=["Dashboard Intelligence Engine"])
@@ -157,7 +158,10 @@ class ExportRequest(BaseModel):
 
 
 @router.post("/generate")
-async def generate_dashboard(req: GenerateDashboardRequest):
+async def generate_dashboard(
+    req: GenerateDashboardRequest,
+    current_user: dict = Depends(require_permissions("dashboard.create")),
+):
     """Generate a dashboard dynamically from dataset and semantic analysis."""
     df = _datasets.get(req.dataset_id)
     if df is None:
@@ -228,7 +232,7 @@ async def generate_dashboard(req: GenerateDashboardRequest):
 
 
 @router.get("/{dashboard_id}")
-async def get_dashboard(dashboard_id: str):
+async def get_dashboard(dashboard_id: str, current_user: dict = Depends(get_current_user)):
     """Get dashboard metadata."""
     dashboard = _engine.get(dashboard_id)
     if not dashboard:
@@ -240,7 +244,8 @@ async def get_dashboard(dashboard_id: str):
 async def list_dashboards(
     dataset_id: str | None = Query(None),
     org_id: str | None = Query(None),
-    limit: int = Query(100),
+    limit: int = Query(100, ge=1, le=500),
+    current_user: dict = Depends(get_current_user),
 ):
     """List dashboards."""
     if dataset_id:
@@ -253,7 +258,11 @@ async def list_dashboards(
 
 
 @router.put("/{dashboard_id}")
-async def update_dashboard(dashboard_id: str, req: UpdateDashboardRequest):
+async def update_dashboard(
+    dashboard_id: str,
+    req: UpdateDashboardRequest,
+    current_user: dict = Depends(require_permissions("dashboard.edit")),
+):
     """Update dashboard metadata."""
     updates = req.model_dump(exclude_none=True)
     dashboard = _engine.update(dashboard_id, updates)
@@ -263,7 +272,10 @@ async def update_dashboard(dashboard_id: str, req: UpdateDashboardRequest):
 
 
 @router.delete("/{dashboard_id}")
-async def delete_dashboard(dashboard_id: str):
+async def delete_dashboard(
+    dashboard_id: str,
+    current_user: dict = Depends(require_permissions("dashboard.delete")),
+):
     """Delete a dashboard."""
     if not _engine.delete(dashboard_id):
         raise HTTPException(status_code=404, detail="Dashboard not found")
@@ -271,7 +283,11 @@ async def delete_dashboard(dashboard_id: str):
 
 
 @router.post("/{dashboard_id}/widget")
-async def add_widget(dashboard_id: str, req: AddWidgetRequest):
+async def add_widget(
+    dashboard_id: str,
+    req: AddWidgetRequest,
+    current_user: dict = Depends(require_permissions("dashboard.edit")),
+):
     """Add a widget to a dashboard."""
     widget = req.model_dump(exclude_none=True)
     dashboard = _engine.add_widget(dashboard_id, widget)
@@ -281,7 +297,11 @@ async def add_widget(dashboard_id: str, req: AddWidgetRequest):
 
 
 @router.delete("/{dashboard_id}/widget/{widget_id}")
-async def remove_widget(dashboard_id: str, widget_id: str):
+async def remove_widget(
+    dashboard_id: str,
+    widget_id: str,
+    current_user: dict = Depends(require_permissions("dashboard.edit")),
+):
     """Remove a widget from a dashboard."""
     dashboard = _engine.remove_widget(dashboard_id, widget_id)
     if not dashboard:
@@ -290,7 +310,12 @@ async def remove_widget(dashboard_id: str, widget_id: str):
 
 
 @router.put("/{dashboard_id}/widget/{widget_id}/resize")
-async def resize_widget(dashboard_id: str, widget_id: str, req: ResizeWidgetRequest):
+async def resize_widget(
+    dashboard_id: str,
+    widget_id: str,
+    req: ResizeWidgetRequest,
+    current_user: dict = Depends(require_permissions("dashboard.edit")),
+):
     """Resize a widget."""
     dashboard = _engine.resize_widget(dashboard_id, widget_id, req.width, req.height)
     if not dashboard:
@@ -299,7 +324,11 @@ async def resize_widget(dashboard_id: str, widget_id: str, req: ResizeWidgetRequ
 
 
 @router.put("/{dashboard_id}/reorder")
-async def reorder_widgets(dashboard_id: str, req: ReorderRequest):
+async def reorder_widgets(
+    dashboard_id: str,
+    req: ReorderRequest,
+    current_user: dict = Depends(require_permissions("dashboard.edit")),
+):
     """Reorder widgets within a section."""
     dashboard = _engine.reorder_widgets(dashboard_id, req.section, req.widget_order)
     if not dashboard:
@@ -308,7 +337,11 @@ async def reorder_widgets(dashboard_id: str, req: ReorderRequest):
 
 
 @router.post("/{dashboard_id}/share")
-async def share_dashboard(dashboard_id: str, req: ShareRequest):
+async def share_dashboard(
+    dashboard_id: str,
+    req: ShareRequest,
+    current_user: dict = Depends(require_permissions("dashboard.share")),
+):
     """Share a dashboard with users."""
     dashboard = _engine.share(dashboard_id, req.user_ids, req.permission_level)
     if not dashboard:
@@ -317,7 +350,11 @@ async def share_dashboard(dashboard_id: str, req: ShareRequest):
 
 
 @router.post("/{dashboard_id}/save-custom")
-async def save_custom_layout(dashboard_id: str, req: SaveCustomRequest):
+async def save_custom_layout(
+    dashboard_id: str,
+    req: SaveCustomRequest,
+    current_user: dict = Depends(get_current_user),
+):
     """Save a user's customized version of a dashboard."""
     try:
         dashboard = _engine.save_custom_layout(
@@ -334,7 +371,10 @@ async def save_custom_layout(dashboard_id: str, req: SaveCustomRequest):
 
 
 @router.post("/{dashboard_id}/reset")
-async def reset_to_recommended(dashboard_id: str):
+async def reset_to_recommended(
+    dashboard_id: str,
+    current_user: dict = Depends(require_permissions("dashboard.edit")),
+):
     """Reset a custom dashboard to its parent (recommended) layout."""
     dashboard = _engine.reset_to_recommended(dashboard_id)
     if not dashboard:
@@ -343,7 +383,7 @@ async def reset_to_recommended(dashboard_id: str):
 
 
 @router.get("/{dashboard_id}/kpi-values")
-async def get_kpi_values(dashboard_id: str):
+async def get_kpi_values(dashboard_id: str, current_user: dict = Depends(get_current_user)):
     """Get computed KPI values."""
     dashboard = _engine.get(dashboard_id)
     if not dashboard:
@@ -375,7 +415,11 @@ async def get_kpi_values(dashboard_id: str):
 
 
 @router.post("/{dashboard_id}/filters")
-async def apply_filters(dashboard_id: str, req: ApplyFiltersRequest):
+async def apply_filters(
+    dashboard_id: str,
+    req: ApplyFiltersRequest,
+    current_user: dict = Depends(get_current_user),
+):
     """Apply global filters and get filtered data."""
     dashboard = _engine.get(dashboard_id)
     if not dashboard:
@@ -405,7 +449,11 @@ async def apply_filters(dashboard_id: str, req: ApplyFiltersRequest):
 
 
 @router.post("/{dashboard_id}/drilldown")
-async def get_drilldown_data(dashboard_id: str, req: DrilldownRequest):
+async def get_drilldown_data(
+    dashboard_id: str,
+    req: DrilldownRequest,
+    current_user: dict = Depends(get_current_user),
+):
     """Get drilldown detail data."""
     dashboard = _engine.get(dashboard_id)
     if not dashboard:
@@ -434,7 +482,11 @@ async def get_drilldown_data(dashboard_id: str, req: DrilldownRequest):
 
 
 @router.post("/{dashboard_id}/assistant")
-async def assistant_query(dashboard_id: str, req: AssistantRequest):
+async def assistant_query(
+    dashboard_id: str,
+    req: AssistantRequest,
+    current_user: dict = Depends(get_current_user),
+):
     """Parse a natural language query into a dashboard action."""
     dashboard = _engine.get(dashboard_id)
     if not dashboard:
@@ -458,7 +510,11 @@ async def assistant_query(dashboard_id: str, req: AssistantRequest):
 
 
 @router.post("/{dashboard_id}/export")
-async def export_dashboard(dashboard_id: str, req: ExportRequest):
+async def export_dashboard(
+    dashboard_id: str,
+    req: ExportRequest,
+    current_user: dict = Depends(get_current_user),
+):
     """Export a dashboard to the specified format."""
     dashboard = _engine.get(dashboard_id)
     if not dashboard:
@@ -508,6 +564,7 @@ async def check_permissions(
     dashboard_id: str,
     user_id: str = Query(""),
     user_roles: str = Query(""),
+    current_user: dict = Depends(get_current_user),
 ):
     """Check user permissions for a dashboard."""
     dashboard = _engine.get(dashboard_id)

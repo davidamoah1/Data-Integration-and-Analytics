@@ -12,6 +12,8 @@ DATA SOURCE POLICY:
     AI must NEVER generate answers from fake, mock, or demo datasets.
 """
 
+import logging
+
 from sqlalchemy import inspect as sqlalchemy_inspect
 from sqlalchemy import text
 from sqlalchemy.orm import Session as DbSession
@@ -22,6 +24,8 @@ from etl.models import (
     ETLPipeline,
     ETLQualityReport,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class ContextBuilder:
@@ -99,7 +103,8 @@ class ContextBuilder:
                 }
                 for ind, k in INDUSTRY_KNOWLEDGE.items()
             }
-        except Exception:
+        except Exception as e:
+            logger.warning("Failed to build semantic layer context: %s", e)
             ctx["semantic_layer"] = {"available": False}
         return ctx
 
@@ -132,7 +137,8 @@ class ContextBuilder:
                         "regions": row[3],
                         "categories": row[4],
                     }
-        except Exception:
+        except Exception as e:
+            logger.warning("Failed to build data context: %s", e)
             ctx["note"] = "Data not available"
         return ctx
 
@@ -162,8 +168,8 @@ class ContextBuilder:
                 result[table_name] = {
                     "columns": [{"name": c["name"], "type": str(c["type"])} for c in columns]
                 }
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning("Failed to discover tables: %s", e)
         return result
 
     def _etl_context(self) -> dict:
@@ -217,7 +223,8 @@ class ContextBuilder:
                 "standardize",
             ]
             ctx["load_modes"] = ["insert", "update", "upsert", "incremental", "full", "batch"]
-        except Exception:
+        except Exception as e:
+            logger.warning("Failed to build ETL context: %s", e)
             ctx["note"] = "ETL data not available"
         return ctx
 
@@ -257,8 +264,8 @@ class ContextBuilder:
                 "failed": len(failed),
                 "success_rate": round(len(completed) / max(len(jobs), 1) * 100, 2),
             }
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning("Failed to build report context: %s", e)
         ctx["report_types"] = [
             "executive",
             "monthly",
@@ -302,7 +309,8 @@ class ContextBuilder:
                 ctx["sales_by_category"] = [
                     {"category": r[0], "total_sales": float(r[1])} for r in rows
                 ]
-        except Exception:
+        except Exception as e:
+            logger.warning("Failed to build decision context: %s", e)
             ctx["note"] = "Data not available for analysis"
         return ctx
 
@@ -351,7 +359,8 @@ class ContextBuilder:
                 }
                 for p in profiles
             ]
-        except Exception:
+        except Exception as e:
+            logger.warning("Failed to build quality context: %s", e)
             ctx["note"] = "Quality data not available"
         return ctx
 

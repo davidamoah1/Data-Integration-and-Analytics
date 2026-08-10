@@ -44,7 +44,14 @@ from authentication.sso_service import SSOService
 from shared.database import get_db
 from shared.dependencies import get_current_user, require_permissions
 from shared.response import success_response
-from shared.security import create_access_token, create_refresh_token, verify_password
+from shared.security import (
+    ACCOUNT_LOCKOUT_THRESHOLD,
+    JWT_ACCESS_EXPIRE_MINUTES,
+    JWT_REFRESH_EXPIRE_DAYS,
+    create_access_token,
+    create_refresh_token,
+    verify_password,
+)
 from shared.tenant import get_current_organization_id, is_super_admin
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
@@ -213,7 +220,7 @@ async def signup(request: SignupRequest, db: DbSession = Depends(get_db)):
     session = UserSession(
         user_id=user.id,
         refresh_token=refresh_token,
-        expires_at=datetime.now(timezone.utc) + timedelta(days=7),
+        expires_at=datetime.now(timezone.utc) + timedelta(days=JWT_REFRESH_EXPIRE_DAYS),
     )
     db.add(session)
 
@@ -229,7 +236,7 @@ async def signup(request: SignupRequest, db: DbSession = Depends(get_db)):
             "access_token": access_token,
             "refresh_token": refresh_token,
             "token_type": "bearer",
-            "expires_in": 30 * 60,
+            "expires_in": JWT_ACCESS_EXPIRE_MINUTES * 60,
             "user": {
                 "id": user.id,
                 "email": user.email,
@@ -446,7 +453,7 @@ async def mfa_login_challenge(
     if not verify_password(request.password, user.password_hash):
         count = auth_service.user_repo.increment_failed_login(user.id)
         db.commit()
-        if count >= 5:
+        if count >= ACCOUNT_LOCKOUT_THRESHOLD:
             raise HTTPException(status_code=423, detail="Account is locked")
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
@@ -506,6 +513,7 @@ async def mfa_login_verify(
     refresh_token = create_refresh_token(subject=str(user_id))
 
     # Store session
+    from authentication.models import LoginHistory
     from authentication.models import Session as UserSession
 
     session = UserSession(
@@ -514,9 +522,20 @@ async def mfa_login_verify(
         ip_address=ip,
         user_agent=ua,
         device=auth_service._parse_device(ua),
-        expires_at=datetime.now(timezone.utc) + timedelta(days=7),
+        expires_at=datetime.now(timezone.utc) + timedelta(days=JWT_REFRESH_EXPIRE_DAYS),
     )
     auth_service.session_repo.create(session)
+
+    # Record login history
+    auth_service.login_history_repo.create(
+        LoginHistory(
+            user_id=user_id,
+            email=user.email,
+            ip_address=ip,
+            user_agent=ua,
+            success=True,
+        )
+    )
 
     # Log activity
     auth_service.activity_repo.create(
@@ -528,6 +547,18 @@ async def mfa_login_verify(
         )
     )
 
+    db.add(
+        AuditLog(
+            user_id=user_id,
+            organization_id=user.organization_id,
+            action="auth.login_mfa",
+            resource_type="user",
+            resource_id=user_id,
+            ip_address=ip,
+            new_values={"device": auth_service._parse_device(ua)},
+        )
+    )
+
     db.commit()
 
     return success_response(
@@ -535,7 +566,7 @@ async def mfa_login_verify(
             "access_token": access_token,
             "refresh_token": refresh_token,
             "token_type": "bearer",
-            "expires_in": 30 * 60,
+            "expires_in": JWT_ACCESS_EXPIRE_MINUTES * 60,
             "user": {
                 "id": user.id,
                 "email": user.email,

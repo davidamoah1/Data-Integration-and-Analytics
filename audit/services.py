@@ -8,8 +8,9 @@ from sqlalchemy.orm import Session as DbSession
 
 from audit.models import AuditLog, SecurityLog, SystemLog
 from shared.database import get_db
-from shared.dependencies import require_permissions
+from shared.dependencies import require_any_role, require_permissions
 from shared.response import success_response
+from shared.tenant import get_current_organization_id, is_super_admin
 
 
 class AuditService:
@@ -22,9 +23,13 @@ class AuditService:
         page_size: int = 50,
         user_id: int = None,
         action: str = None,
+        organization_id: int = None,
     ) -> dict:
         query = select(AuditLog).order_by(AuditLog.created_at.desc())
         count_query = select(func.count()).select_from(AuditLog)
+        if organization_id is not None:
+            query = query.where(AuditLog.organization_id == organization_id)
+            count_query = count_query.where(AuditLog.organization_id == organization_id)
         if user_id:
             query = query.where(AuditLog.user_id == user_id)
             count_query = count_query.where(AuditLog.user_id == user_id)
@@ -48,9 +53,13 @@ class AuditService:
         page: int = 1,
         page_size: int = 50,
         severity: str = None,
+        organization_id: int = None,
     ) -> dict:
         query = select(SecurityLog).order_by(SecurityLog.created_at.desc())
         count_query = select(func.count()).select_from(SecurityLog)
+        if organization_id is not None:
+            query = query.where(SecurityLog.organization_id == organization_id)
+            count_query = count_query.where(SecurityLog.organization_id == organization_id)
         if severity:
             query = query.where(SecurityLog.severity == severity)
             count_query = count_query.where(SecurityLog.severity == severity)
@@ -160,8 +169,9 @@ async def list_audit_logs(
     current_user: dict = Depends(require_permissions("audit.view")),
     db: DbSession = Depends(get_db),
 ):
+    org_id = None if is_super_admin(current_user) else get_current_organization_id(current_user, db)
     service = AuditService(db)
-    return success_response(service.list_audit_logs(page, page_size, user_id, action))
+    return success_response(service.list_audit_logs(page, page_size, user_id, action, org_id))
 
 
 @audit_router.get("/security")
@@ -172,8 +182,9 @@ async def list_security_logs(
     current_user: dict = Depends(require_permissions("audit.view")),
     db: DbSession = Depends(get_db),
 ):
+    org_id = None if is_super_admin(current_user) else get_current_organization_id(current_user, db)
     service = AuditService(db)
-    return success_response(service.list_security_logs(page, page_size, severity))
+    return success_response(service.list_security_logs(page, page_size, severity, org_id))
 
 
 @audit_router.get("/system")
@@ -181,7 +192,9 @@ async def list_system_logs(
     page: int = 1,
     page_size: int = 50,
     level: str = None,
-    current_user: dict = Depends(require_permissions("audit.view")),
+    # SystemLog entries have no organization concept and can expose internal
+    # platform-wide debugging details, so this is restricted to super admins.
+    current_user: dict = Depends(require_any_role("super_admin")),
     db: DbSession = Depends(get_db),
 ):
     service = AuditService(db)

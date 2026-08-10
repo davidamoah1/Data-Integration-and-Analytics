@@ -21,6 +21,7 @@ Usage:
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
@@ -30,6 +31,8 @@ from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session as DbSession
+
+logger = logging.getLogger(__name__)
 
 
 class AuditCategory(str, Enum):
@@ -336,7 +339,14 @@ def track_action(
                     )
                     db.commit()
                 except Exception:
-                    pass  # Don't fail the request if audit logging fails
+                    # Don't fail the request if audit logging fails, but make
+                    # sure the gap in the audit trail is visible in logs.
+                    logger.warning(
+                        "Audit logging failed for action '%s' (category=%s)",
+                        action,
+                        category,
+                        exc_info=True,
+                    )
 
             return result
 

@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import Response
 from pydantic import BaseModel
 
@@ -23,6 +23,7 @@ from services.report_engine import (
     ReportTemplate,
     TableDefinition,
 )
+from shared.dependencies import get_current_user, require_permissions
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/reports", tags=["Reports & Presentations"])
@@ -88,7 +89,10 @@ class ExportRequest(BaseModel):
 
 
 @router.post("")
-async def create_report(req: CreateReportRequest):
+async def create_report(
+    req: CreateReportRequest,
+    current_user: dict = Depends(require_permissions("reports.create")),
+):
     """Create a new report from a template."""
     try:
         template = ReportTemplate(req.template)
@@ -108,13 +112,13 @@ async def create_report(req: CreateReportRequest):
 
 
 @router.get("")
-async def list_reports():
+async def list_reports(current_user: dict = Depends(get_current_user)):
     """List all reports."""
     return ReportCompositionService.list_reports()
 
 
 @router.get("/{report_id}")
-async def get_report(report_id: str):
+async def get_report(report_id: str, current_user: dict = Depends(get_current_user)):
     """Get a specific report with all sections."""
     report = ReportCompositionService.get_report(report_id)
     if not report:
@@ -123,7 +127,10 @@ async def get_report(report_id: str):
 
 
 @router.delete("/{report_id}")
-async def delete_report(report_id: str):
+async def delete_report(
+    report_id: str,
+    current_user: dict = Depends(require_permissions("reports.delete")),
+):
     """Delete a report."""
     deleted = ReportCompositionService.delete_report(report_id)
     if not deleted:
@@ -135,7 +142,11 @@ async def delete_report(report_id: str):
 
 
 @router.post("/{report_id}/sections")
-async def add_section(report_id: str, req: dict[str, Any]):
+async def add_section(
+    report_id: str,
+    req: dict[str, Any],
+    current_user: dict = Depends(require_permissions("reports.edit")),
+):
     """Add a new section to a report."""
     report = ReportCompositionService.get_report(report_id)
     if not report:
@@ -158,7 +169,12 @@ async def add_section(report_id: str, req: dict[str, Any]):
 
 
 @router.put("/{report_id}/sections/{section_order}")
-async def update_section(report_id: str, section_order: int, req: UpdateSectionRequest):
+async def update_section(
+    report_id: str,
+    section_order: int,
+    req: UpdateSectionRequest,
+    current_user: dict = Depends(require_permissions("reports.edit")),
+):
     """Update a section in a report."""
     updated = ReportCompositionService.update_section(
         report_id, section_order, req.model_dump(exclude_none=True)
@@ -169,7 +185,11 @@ async def update_section(report_id: str, section_order: int, req: UpdateSectionR
 
 
 @router.delete("/{report_id}/sections/{section_order}")
-async def remove_section(report_id: str, section_order: int):
+async def remove_section(
+    report_id: str,
+    section_order: int,
+    current_user: dict = Depends(require_permissions("reports.edit")),
+):
     """Remove a section from a report."""
     updated = ReportCompositionService.remove_section(report_id, section_order)
     if not updated:
@@ -181,7 +201,12 @@ async def remove_section(report_id: str, section_order: int):
 
 
 @router.post("/{report_id}/sections/{section_order}/kpis")
-async def add_kpis(report_id: str, section_order: int, req: AddKPIsRequest):
+async def add_kpis(
+    report_id: str,
+    section_order: int,
+    req: AddKPIsRequest,
+    current_user: dict = Depends(require_permissions("reports.edit")),
+):
     """Add KPIs to a section."""
     kpis = [KPIMetric(**k) for k in req.kpis]
     updated = ReportCompositionService.add_kpis(report_id, section_order, kpis)
@@ -194,7 +219,12 @@ async def add_kpis(report_id: str, section_order: int, req: AddKPIsRequest):
 
 
 @router.post("/{report_id}/sections/{section_order}/charts")
-async def add_chart(report_id: str, section_order: int, req: AddChartRequest):
+async def add_chart(
+    report_id: str,
+    section_order: int,
+    req: AddChartRequest,
+    current_user: dict = Depends(require_permissions("reports.edit")),
+):
     """Add a chart to a section."""
     try:
         chart_type = ChartType(req.chart_type)
@@ -222,7 +252,12 @@ async def add_chart(report_id: str, section_order: int, req: AddChartRequest):
 
 
 @router.post("/{report_id}/sections/{section_order}/tables")
-async def add_table(report_id: str, section_order: int, req: AddTableRequest):
+async def add_table(
+    report_id: str,
+    section_order: int,
+    req: AddTableRequest,
+    current_user: dict = Depends(require_permissions("reports.edit")),
+):
     """Add a data table to a section."""
     table = TableDefinition(
         title=req.title,
@@ -246,7 +281,12 @@ async def add_table(report_id: str, section_order: int, req: AddTableRequest):
 
 
 @router.post("/{report_id}/sections/{section_order}/insights")
-async def add_insights(report_id: str, section_order: int, req: AddInsightsRequest):
+async def add_insights(
+    report_id: str,
+    section_order: int,
+    req: AddInsightsRequest,
+    current_user: dict = Depends(require_permissions("reports.edit")),
+):
     """Add insights to a section."""
     insights = [Insight(**i) for i in req.insights]
     updated = ReportCompositionService.add_insights(report_id, section_order, insights)
@@ -259,7 +299,12 @@ async def add_insights(report_id: str, section_order: int, req: AddInsightsReque
 
 
 @router.post("/{report_id}/sections/{section_order}/recommendations")
-async def add_recommendations(report_id: str, section_order: int, req: AddRecommendationsRequest):
+async def add_recommendations(
+    report_id: str,
+    section_order: int,
+    req: AddRecommendationsRequest,
+    current_user: dict = Depends(require_permissions("reports.edit")),
+):
     """Add recommendations to a section."""
     recs = [Recommendation(**r) for r in req.recommendations]
     updated = ReportCompositionService.add_recommendations(report_id, section_order, recs)
@@ -272,7 +317,7 @@ async def add_recommendations(report_id: str, section_order: int, req: AddRecomm
 
 
 @router.get("/{report_id}/executive-summary")
-async def get_executive_summary(report_id: str):
+async def get_executive_summary(report_id: str, current_user: dict = Depends(get_current_user)):
     """Get the auto-generated executive summary for a report."""
     report = ReportCompositionService.get_report(report_id)
     if not report:
@@ -288,6 +333,7 @@ async def get_executive_summary(report_id: str):
 async def export_report(
     report_id: str,
     format: str = Query("pdf", pattern="^(pdf|pptx|html|json)$"),
+    current_user: dict = Depends(get_current_user),
 ):
     """Export a report to PDF, PPTX, HTML, or JSON."""
     try:
@@ -311,7 +357,7 @@ async def export_report(
 
 
 @router.get("/{report_id}/presentation")
-async def get_presentation_slides(report_id: str):
+async def get_presentation_slides(report_id: str, current_user: dict = Depends(get_current_user)):
     """Generate presentation slides from a report."""
     report = ReportCompositionService.get_report(report_id)
     if not report:
@@ -324,6 +370,7 @@ async def get_presentation_slides(report_id: str):
 async def export_presentation(
     report_id: str,
     format: str = Query("pptx", pattern="^(pptx|pdf)$"),
+    current_user: dict = Depends(get_current_user),
 ):
     """Export a presentation from a report to PPTX or PDF."""
     report = ReportCompositionService.get_report(report_id)
@@ -346,7 +393,7 @@ async def export_presentation(
 
 
 @router.get("/templates/list")
-async def list_templates():
+async def list_templates(current_user: dict = Depends(get_current_user)):
     """List available report templates."""
     return {
         "templates": [
@@ -367,7 +414,7 @@ async def list_templates():
 
 
 @router.get("/section-types/list")
-async def list_section_types():
+async def list_section_types(current_user: dict = Depends(get_current_user)):
     """List available section types."""
     return {
         "section_types": [
@@ -377,6 +424,6 @@ async def list_section_types():
 
 
 @router.get("/chart-types/list")
-async def list_chart_types():
+async def list_chart_types(current_user: dict = Depends(get_current_user)):
     """List available chart types."""
     return {"chart_types": [{"key": c.value, "name": c.value.title()} for c in ChartType]}

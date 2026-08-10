@@ -368,11 +368,12 @@ class AiAnalysisNode(WorkflowNode):
             from ai.services import AIService
 
             service = AIService()
-            summary = (
-                service.analyze_dataset(df, prompt)
-                if hasattr(service, "analyze_dataset")
-                else f"AI analysis placeholder: {prompt}"
-            )
+            if not hasattr(service, "analyze_dataset"):
+                return NodeResult(
+                    status="failed",
+                    errors=["AIService does not implement analyze_dataset"],
+                )
+            summary = service.analyze_dataset(df, prompt)
             return NodeResult(status="completed", data=summary, metadata={"provider": "ai"})
         except Exception as e:
             logger.exception("ai_analysis failed")
@@ -495,7 +496,48 @@ class ExportPdfNode(WorkflowNode):
     NODE_TYPE = "export_pdf"
 
     def run(self, ctx: WorkflowContext) -> NodeResult:
-        return NodeResult(status="completed", data=b"PDF placeholder", metadata={"format": "pdf"})
+        df = ctx.resolve_ref(_get_param(self.config, "dataset"))
+        if not isinstance(df, pd.DataFrame):
+            return NodeResult(status="failed", errors=["export_pdf requires a DataFrame input"])
+        try:
+            from fpdf import FPDF
+
+            pdf = FPDF(format="A4")
+            pdf.set_auto_page_break(auto=True, margin=15)
+            pdf.add_page()
+            pdf.set_font("Helvetica", "B", 14)
+            pdf.cell(0, 10, "Exported Data", new_x="LMARGIN", new_y="NEXT")
+            pdf.ln(4)
+
+            cols = list(df.columns)
+            page_width = pdf.w - pdf.l_margin - pdf.r_margin
+            col_width = page_width / max(len(cols), 1)
+
+            pdf.set_font("Helvetica", "B", 9)
+            for col in cols:
+                pdf.cell(col_width, 7, str(col)[:20], border=1)
+            pdf.ln()
+
+            pdf.set_font("Helvetica", "", 8)
+            for _, row in df.head(200).iterrows():
+                for col in cols:
+                    val = str(row.get(col, ""))
+                    try:
+                        val = val.encode("latin-1", errors="replace").decode("latin-1")
+                    except Exception:
+                        pass
+                    pdf.cell(col_width, 6, val[:25], border=1)
+                pdf.ln()
+
+            return NodeResult(
+                status="completed",
+                data=bytes(pdf.output()),
+                rows_processed=len(df),
+                metadata={"format": "pdf"},
+            )
+        except Exception as e:
+            logger.exception("export_pdf failed")
+            return NodeResult(status="failed", errors=[str(e)])
 
 
 class SaveDatasetNode(WorkflowNode):

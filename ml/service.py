@@ -7,6 +7,7 @@ registry with tenant isolation.
 
 from __future__ import annotations
 
+import logging
 import os
 import uuid
 from typing import Any
@@ -34,6 +35,8 @@ from ml.models import (
 )
 from ml.readiness import assess_ml_readiness
 from shared.dependencies import AuthorizationError
+
+logger = logging.getLogger(__name__)
 
 
 class MLService:
@@ -88,7 +91,7 @@ class MLService:
                 new_values=details or {},
             )
         except Exception:
-            pass
+            logger.warning("ML audit logging failed for action '%s' on '%s'", action, resource, exc_info=True)
 
     # -------------------------------------------------------------------------
     # Readiness

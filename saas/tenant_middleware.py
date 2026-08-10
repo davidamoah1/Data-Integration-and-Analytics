@@ -73,27 +73,36 @@ class TenantIsolationMiddleware(BaseHTTPMiddleware):
                 payload = decode_token(token)
                 if payload and payload.get("type") == "access":
                     request.state.tenant_user_id = int(payload["sub"])
-                    # Fetch user's organization_id from DB
-                    from sqlalchemy.orm import Session as DbSession
 
-                    from authentication.repositories import UserRepository
-                    from shared.database import get_engine
+                    # Read org_id and roles directly from JWT claims (no DB hit)
+                    org_id = payload.get("org_id")
+                    roles = payload.get("roles", [])
 
-                    engine = get_engine()
-                    db = DbSession(engine)
-                    try:
-                        user_repo = UserRepository(db)
-                        user = user_repo.get_by_id(int(payload["sub"]))
-                        if user and user.is_active:
-                            request.state.tenant_org_id = user.organization_id
-                            # Check super_admin role
-                            from authentication.repositories import UserRoleRepository
+                    if org_id is not None:
+                        request.state.tenant_org_id = int(org_id)
+                        request.state.tenant_is_super_admin = "super_admin" in set(roles)
+                    else:
+                        # Fallback: older tokens without org_id claim — fetch from DB
+                        from sqlalchemy.orm import Session as DbSession
 
-                            user_role_repo = UserRoleRepository(db)
-                            roles = user_role_repo.get_roles_for_user(user.id)
-                            request.state.tenant_is_super_admin = "super_admin" in set(roles)
-                    finally:
-                        db.close()
+                        from authentication.repositories import (
+                            UserRepository,
+                            UserRoleRepository,
+                        )
+                        from shared.database import get_engine
+
+                        engine = get_engine()
+                        db = DbSession(engine)
+                        try:
+                            user_repo = UserRepository(db)
+                            user = user_repo.get_by_id(int(payload["sub"]))
+                            if user and user.is_active:
+                                request.state.tenant_org_id = user.organization_id
+                                user_role_repo = UserRoleRepository(db)
+                                db_roles = user_role_repo.get_roles_for_user(user.id)
+                                request.state.tenant_is_super_admin = "super_admin" in set(db_roles)
+                        finally:
+                            db.close()
             except Exception:
                 # Token invalid or expired — let downstream auth handle the 401
                 pass

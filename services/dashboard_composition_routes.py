@@ -17,12 +17,15 @@ from __future__ import annotations
 
 import logging
 
+import pandas as pd
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
+from sqlalchemy import text
 from sqlalchemy.orm import Session as DbSession
 
 from services.dashboard_composition import (
     DashboardCompositionService,
+    DataSourceType,
     WidgetRegistry,
     WidgetType,
 )
@@ -238,8 +241,9 @@ async def get_widget_data(
 ):
     """Get data for a specific widget in a dashboard.
 
-    This endpoint resolves the widget's data source binding and returns
-    the appropriate data. For now, returns placeholder data structure.
+    Resolves the widget's data source binding and returns real data
+    from the configured source. Falls back to an empty structure with
+    a `data_source` indicator if no binding is configured.
     """
     dashboard = _composition_service.get(dashboard_id)
     if not dashboard:
@@ -249,25 +253,200 @@ async def get_widget_data(
     if not widget:
         raise HTTPException(status_code=404, detail="Widget not found in dashboard")
 
-    # Build placeholder data based on widget type
-    data = _build_placeholder_widget_data(widget)
+    data = _resolve_widget_data(widget, db)
     return success_response(data)
 
 
-def _build_placeholder_widget_data(widget) -> dict:
-    """Build placeholder data structure for a widget."""
+def _resolve_widget_data(widget, db: DbSession) -> dict:
+    """Resolve real data for a widget from its data source binding.
+
+    If the widget has no data source binding, returns an empty structure
+    with a `no_data_source` indicator so the frontend can handle it.
+    """
     wt = widget.widget_type.value
+    ds = widget.data_source
+
+    if ds is None:
+        return _empty_widget_data(widget, wt, reason="no_data_source")
+
+    try:
+        if ds.source_type == DataSourceType.KPI:
+            return _resolve_kpi_widget(widget, wt, ds, db)
+        if ds.source_type == DataSourceType.DATASET:
+            return _resolve_dataset_widget(widget, wt, ds, db)
+        if ds.source_type == DataSourceType.AGGREGATE:
+            return _resolve_aggregate_widget(widget, wt, ds, db)
+        if ds.source_type == DataSourceType.ANALYTICS_ALERT:
+            return _resolve_alert_widget(widget, wt, ds, db)
+        if ds.source_type == DataSourceType.REPORT:
+            return _resolve_report_widget(widget, wt, ds)
+        return _empty_widget_data(widget, wt, reason=f"unsupported_source_type:{ds.source_type.value}")
+    except Exception as e:
+        logger.warning("Failed to resolve widget data for %s: %s", widget.key, e)
+        return _empty_widget_data(widget, wt, reason=f"error:{type(e).__name__}")
+
+
+def _empty_widget_data(widget, wt: str, *, reason: str = "no_data_source") -> dict:
+    """Return an empty widget data structure with a reason indicator."""
+    base = {
+        "widget_key": widget.key,
+        "widget_type": wt,
+        "title": widget.title,
+        "data_source": reason,
+    }
+    if wt == "kpi_card":
+        base.update({
+            "value": 0,
+            "unit": widget.config.get("unit", ""),
+            "icon": widget.config.get("icon", "Activity"),
+            "trend": {"direction": "neutral", "change_pct": 0},
+        })
+    elif wt == "chart":
+        base.update({
+            "chart_subtype": widget.chart_subtype.value if widget.chart_subtype else "bar",
+            "data": {"labels": [], "datasets": []},
+            "config": widget.config,
+        })
+    elif wt == "table":
+        base.update({
+            "columns": widget.config.get("columns", []),
+            "rows": [],
+        })
+    elif wt == "map":
+        base.update({
+            "geo_field": widget.config.get("geo_field", "region"),
+            "regions": [],
+        })
+    elif wt == "trend":
+        base.update({
+            "current": 0,
+            "previous": 0,
+            "change_pct": 0,
+            "direction": "neutral",
+            "series": [],
+        })
+    elif wt == "alert":
+        base.update({
+            "alerts": [],
+            "severity": widget.config.get("severity", "warning"),
+        })
+    elif wt == "report":
+        base.update({
+            "report_type": None,
+            "status": "not_generated",
+            "url": None,
+        })
+    return base
+
+
+def _resolve_kpi_widget(widget, wt: str, ds, db: DbSession) -> dict:
+    """Resolve KPI data from the database."""
+    from database.repositories import SalesRepository
+
+    repo = SalesRepository()
+    kpis = repo.get_kpis(
+        region=ds.filters.get("region"),
+        category=ds.filters.get("category"),
+    )
+    metric_key = ds.source_id or "total_sales"
+    value = kpis.get(str(metric_key), 0)
 
     if wt == "kpi_card":
         return {
             "widget_key": widget.key,
             "widget_type": wt,
             "title": widget.title,
-            "value": 0,
+            "value": float(value),
             "unit": widget.config.get("unit", ""),
             "icon": widget.config.get("icon", "Activity"),
             "trend": {"direction": "neutral", "change_pct": 0},
         }
+    return _empty_widget_data(widget, wt, reason="kpi_unmatched_widget_type")
+
+
+def _resolve_dataset_widget(widget, wt: str, ds, db: DbSession) -> dict:
+    """Resolve dataset data by querying the source table."""
+    table_name = str(ds.source_id or "sales")
+    allowed = {"sales"}
+    if table_name not in allowed:
+        return _empty_widget_data(widget, wt, reason=f"restricted_table:{table_name}")
+
+    query = f"SELECT * FROM {table_name}"
+    conditions = []
+    params: dict = {}
+    for key, val in ds.filters.items():
+        conditions.append(f"{key} = :{key}")
+        params[key] = val
+    if conditions:
+        query += " WHERE " + " AND ".join(conditions)
+    if ds.group_by:
+        agg = ds.aggregation or "sum"
+        query = (
+            f"SELECT {ds.group_by}, {agg}(*) as value FROM {table_name}"
+        )
+        if conditions:
+            query += " WHERE " + " AND ".join(conditions)
+        query += f" GROUP BY {ds.group_by} ORDER BY value DESC"
+    if ds.limit:
+        query += f" LIMIT {int(ds.limit)}"
+
+    with db.bind.connect() as conn:
+        df = pd.read_sql(text(query), conn, params=params)
+
+    records = df.to_dict("records")
+
+    if wt == "table":
+        return {
+            "widget_key": widget.key,
+            "widget_type": wt,
+            "title": widget.title,
+            "columns": df.columns.tolist(),
+            "rows": records,
+        }
+    if wt == "chart":
+        labels = [str(r.get(ds.group_by or df.columns[0], "")) for r in records]
+        values = [float(r.get("value", 0)) for r in records] if ds.group_by else []
+        return {
+            "widget_key": widget.key,
+            "widget_type": wt,
+            "title": widget.title,
+            "chart_subtype": widget.chart_subtype.value if widget.chart_subtype else "bar",
+            "data": {"labels": labels, "datasets": [{"label": widget.title, "data": values}]},
+            "config": widget.config,
+        }
+    return _empty_widget_data(widget, wt, reason="dataset_unmatched_widget_type")
+
+
+def _resolve_aggregate_widget(widget, wt: str, ds, db: DbSession) -> dict:
+    """Resolve aggregate data (group-by + aggregation)."""
+    table_name = str(ds.source_id or "sales")
+    allowed = {"sales"}
+    if table_name not in allowed:
+        return _empty_widget_data(widget, wt, reason=f"restricted_table:{table_name}")
+
+    if not ds.group_by:
+        return _empty_widget_data(widget, wt, reason="aggregate_requires_group_by")
+
+    agg = ds.aggregation or "sum"
+    metric = ds.query or "sales"
+    query = f"SELECT {ds.group_by}, {agg}({metric}) as value FROM {table_name}"
+    conditions = []
+    params: dict = {}
+    for key, val in ds.filters.items():
+        conditions.append(f"{key} = :{key}")
+        params[key] = val
+    if conditions:
+        query += " WHERE " + " AND ".join(conditions)
+    query += f" GROUP BY {ds.group_by} ORDER BY value DESC"
+    if ds.limit:
+        query += f" LIMIT {int(ds.limit)}"
+
+    with db.bind.connect() as conn:
+        df = pd.read_sql(text(query), conn, params=params)
+
+    records = df.to_dict("records")
+    labels = [str(r.get(ds.group_by, "")) for r in records]
+    values = [float(r.get("value", 0)) for r in records]
 
     if wt == "chart":
         return {
@@ -275,57 +454,72 @@ def _build_placeholder_widget_data(widget) -> dict:
             "widget_type": wt,
             "title": widget.title,
             "chart_subtype": widget.chart_subtype.value if widget.chart_subtype else "bar",
-            "data": {"labels": [], "datasets": []},
+            "data": {"labels": labels, "datasets": [{"label": widget.title, "data": values}]},
             "config": widget.config,
         }
-
     if wt == "table":
         return {
             "widget_key": widget.key,
             "widget_type": wt,
             "title": widget.title,
-            "columns": widget.config.get("columns", []),
-            "rows": [],
+            "columns": [ds.group_by, "value"],
+            "rows": records,
         }
-
-    if wt == "map":
-        return {
-            "widget_key": widget.key,
-            "widget_type": wt,
-            "title": widget.title,
-            "geo_field": widget.config.get("geo_field", "region"),
-            "regions": [],
-        }
-
     if wt == "trend":
         return {
             "widget_key": widget.key,
             "widget_type": wt,
             "title": widget.title,
-            "current": 0,
-            "previous": 0,
-            "change_pct": 0,
-            "direction": "neutral",
-            "series": [],
+            "current": values[0] if values else 0,
+            "previous": values[1] if len(values) > 1 else 0,
+            "change_pct": (
+                round((values[0] - values[1]) / values[1] * 100, 2)
+                if len(values) > 1 and values[1] != 0
+                else 0
+            ),
+            "direction": "up" if len(values) > 1 and values[0] > values[1] else "neutral",
+            "series": [{"labels": labels, "values": values}],
         }
+    return _empty_widget_data(widget, wt, reason="aggregate_unmatched_widget_type")
 
-    if wt == "alert":
-        return {
-            "widget_key": widget.key,
-            "widget_type": wt,
-            "title": widget.title,
-            "alerts": [],
-            "severity": widget.config.get("severity", "warning"),
+
+def _resolve_alert_widget(widget, wt: str, ds, db: DbSession) -> dict:
+    """Resolve analytics alerts from the database."""
+    from ai.models import AIAnomalyAlert
+
+    alerts = (
+        db.query(AIAnomalyAlert)
+        .filter(AIAnomalyAlert.is_resolved.is_(False))
+        .order_by(AIAnomalyAlert.created_at.desc())
+        .limit(ds.limit or 10)
+        .all()
+    )
+    alert_list = [
+        {
+            "id": a.id,
+            "title": a.title,
+            "description": a.description,
+            "severity": a.severity,
+            "created_at": str(a.created_at) if a.created_at else None,
         }
+        for a in alerts
+    ]
+    return {
+        "widget_key": widget.key,
+        "widget_type": wt,
+        "title": widget.title,
+        "alerts": alert_list,
+        "severity": widget.config.get("severity", "warning"),
+    }
 
-    if wt == "report":
-        return {
-            "widget_key": widget.key,
-            "widget_type": wt,
-            "title": widget.title,
-            "report_type": widget.data_source.source_id if widget.data_source else None,
-            "status": "not_generated",
-            "url": None,
-        }
 
-    return {"widget_key": widget.key, "widget_type": wt, "title": widget.title}
+def _resolve_report_widget(widget, wt: str, ds) -> dict:
+    """Resolve report widget — returns metadata about the referenced report."""
+    return {
+        "widget_key": widget.key,
+        "widget_type": wt,
+        "title": widget.title,
+        "report_type": ds.source_id,
+        "status": "available",
+        "url": None,
+    }

@@ -15,7 +15,9 @@ an in-memory queue for development and testing.
 from __future__ import annotations
 
 import asyncio
+import importlib
 import json
+import logging
 import time
 import uuid
 from collections.abc import Callable
@@ -29,6 +31,8 @@ try:
     HAS_REDIS = True
 except ImportError:
     HAS_REDIS = False
+
+logger = logging.getLogger(__name__)
 
 
 class TaskStatus(str, Enum):
@@ -56,6 +60,10 @@ class Task:
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
     name: str = ""
     func: Callable | None = None
+    func_path: str | None = None
+    """Dotted "module:qualname" path used to re-import `func` in a separate
+    worker process when using the Redis backend (functions themselves are
+    not JSON-serializable)."""
     args: tuple = ()
     kwargs: dict = field(default_factory=dict)
     priority: TaskPriority = TaskPriority.NORMAL
@@ -80,10 +88,14 @@ class Task:
         return {
             "id": self.id,
             "name": self.name,
+            "func_path": self.func_path,
+            "args": list(self.args),
+            "kwargs": self.kwargs,
             "priority": self.priority.value,
             "status": self.status.value,
             "retries": self.retries,
             "max_retries": self.max_retries,
+            "timeout": self.timeout,
             "error": self.error,
             "duration": self.duration,
             "created_at": self.created_at,
@@ -91,6 +103,29 @@ class Task:
             "completed_at": self.completed_at,
             "metadata": self.metadata,
         }
+
+
+def _resolve_func_path(func: Callable) -> str | None:
+    """Return a "module:qualname" path that can later re-import `func`.
+
+    Only works for plain module-level (or nested-class) functions — not
+    lambdas, closures, or bound methods on instances. Returns None if the
+    function cannot be resolved this way.
+    """
+    module = getattr(func, "__module__", None)
+    qualname = getattr(func, "__qualname__", None)
+    if not module or not qualname or "<lambda>" in qualname or "<locals>" in qualname:
+        return None
+    return f"{module}:{qualname}"
+
+
+def _import_from_path(path: str) -> Callable:
+    """Re-import a function previously resolved by `_resolve_func_path`."""
+    module_name, _, qualname = path.partition(":")
+    obj = importlib.import_module(module_name)
+    for part in qualname.split("."):
+        obj = getattr(obj, part)
+    return obj
 
 
 @dataclass
@@ -173,6 +208,14 @@ class TaskQueue:
         )
 
         if self._redis:
+            if task.func_path is None and task.func is not None:
+                task.func_path = _resolve_func_path(task.func)
+                if task.func_path is None:
+                    logger.warning(
+                        "Task '%s' function is not re-importable (lambda/closure); it will "
+                        "only run if dequeued by this same process.",
+                        task.name,
+                    )
             self._redis.lpush(
                 f"queue:{task.priority.value}",
                 json.dumps(task.to_dict()),
@@ -194,6 +237,18 @@ class TaskQueue:
                         task = self._tasks.get(task_dict["id"])
                         if task:
                             return task
+                        # Not in this process's local cache — likely dequeued
+                        # by a separate worker process. Reconstruct the task
+                        # from the serialized payload so it can still run.
+                        task = self._reconstruct_task(task_dict)
+                        if task:
+                            self._tasks[task.id] = task
+                            return task
+                        logger.error(
+                            "Could not reconstruct task %s from queue payload "
+                            "(missing/unresolvable func_path); dropping.",
+                            task_dict.get("id"),
+                        )
                 else:
                     task = await asyncio.wait_for(
                         self._queues[priority].get(),
@@ -203,6 +258,35 @@ class TaskQueue:
             except (asyncio.TimeoutError, Exception):
                 continue
         return None
+
+    def _reconstruct_task(self, task_dict: dict) -> Task | None:
+        """Rebuild a runnable Task from a Redis-serialized payload.
+
+        Used when a task is dequeued by a process other than the one that
+        enqueued it (the normal case for a separate worker container).
+        """
+        func_path = task_dict.get("func_path")
+        if not func_path:
+            return None
+        try:
+            func = _import_from_path(func_path)
+        except Exception as e:
+            logger.error("Failed to import function for task from '%s': %s", func_path, e)
+            return None
+
+        return Task(
+            id=task_dict["id"],
+            name=task_dict.get("name", ""),
+            func=func,
+            func_path=func_path,
+            args=tuple(task_dict.get("args", [])),
+            kwargs=task_dict.get("kwargs", {}) or {},
+            priority=TaskPriority(task_dict["priority"]),
+            retries=task_dict.get("retries", 0),
+            max_retries=task_dict.get("max_retries", 3),
+            timeout=task_dict.get("timeout", 300),
+            metadata=task_dict.get("metadata", {}) or {},
+        )
 
     async def execute(self, task: Task) -> Any:
         """Execute a task with timeout and retry logic."""

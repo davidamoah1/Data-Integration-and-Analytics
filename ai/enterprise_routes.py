@@ -203,7 +203,7 @@ def generate_report(
 
 
 @router.get("/task-types")
-def list_task_types():
+def list_task_types(user=Depends(get_current_user)):
     """List all available AI task types."""
     orchestrator = PromptOrchestrator()
     return {"task_types": orchestrator.list_task_types()}

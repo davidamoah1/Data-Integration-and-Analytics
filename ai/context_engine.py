@@ -419,8 +419,8 @@ class EnterpriseContextEngine:
                 if org:
                     ctx.organization_id = str(org.id)
                     ctx.organization_name = org.name or ""
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning("Failed to build user context: %s", e)
 
         return ctx
 
@@ -465,7 +465,7 @@ class EnterpriseContextEngine:
             for col in df.columns:
                 if col not in ctx.date_columns:
                     try:
-                        pd.to_datetime(df[col], errors="raise")
+                        pd.to_datetime(df[col], errors="raise", format="mixed")
                         ctx.date_columns.append(col)
                     except Exception:
                         pass
@@ -481,8 +481,8 @@ class EnterpriseContextEngine:
                             "end": str(dates.max().date()),
                         }
                         break
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.debug("Date range detection failed for column %s: %s", col, e)
 
             # Profile summary
             ctx.profile_summary = {
@@ -522,8 +522,8 @@ class EnterpriseContextEngine:
                         for c in table_cols.get("columns", [])
                     ][:20]
                     ctx.column_count = len(ctx.columns)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning("Failed to discover DB tables for dataset context: %s", e)
 
         return ctx
 
@@ -552,8 +552,8 @@ class EnterpriseContextEngine:
                     ctx.template = dashboard.template_key
                     ctx.kpi_definitions = [k.to_dict() for k in dashboard.kpis]
                     ctx.chart_configs = [c.to_dict() for c in dashboard.charts]
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning("Failed to build dashboard context: %s", e)
 
         return ctx
 
@@ -572,8 +572,8 @@ class EnterpriseContextEngine:
                 ctx.business_rules = knowledge.get("business_rules", [])
                 ctx.ai_prompts = knowledge.get("ai_prompts", {})
                 ctx.recommended_charts = knowledge.get("recommended_charts", [])
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning("Failed to load industry knowledge for '%s': %s", industry, e)
 
         return ctx
 
@@ -593,8 +593,8 @@ class EnterpriseContextEngine:
                 history = memory.get_history(conversation_id)
                 ctx.message_count = len(history)
                 ctx.recent_messages = history
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning("Failed to build conversation context: %s", e)
 
         return ctx
 
@@ -610,8 +610,8 @@ class EnterpriseContextEngine:
                 result[table_name] = {
                     "columns": [{"name": c["name"], "type": str(c["type"])} for c in columns]
                 }
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning("Failed to discover tables: %s", e)
         return result
 
 

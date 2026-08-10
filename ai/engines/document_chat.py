@@ -6,6 +6,7 @@ The AI answers using only the uploaded document unless explicitly instructed oth
 
 import os
 import tempfile
+import uuid
 
 from sqlalchemy.orm import Session as DbSession
 
@@ -46,10 +47,14 @@ class DocumentChatEngine:
                 f"File type '{file_type}' not allowed. Allowed: {', '.join(AI_DOC_ALLOWED_TYPES)}"
             )
 
-        # Save file
+        # Save file. Use a random filename on disk (not the user-supplied
+        # filename) to prevent path traversal via crafted names such as
+        # "../../etc/passwd"; the original filename is preserved separately
+        # for display and metadata purposes.
+        safe_ext = os.path.splitext(os.path.basename(filename))[1][:10]
         upload_dir = os.path.join(tempfile.gettempdir(), "ai_documents")
         os.makedirs(upload_dir, exist_ok=True)
-        file_path = os.path.join(upload_dir, f"{filename}")
+        file_path = os.path.join(upload_dir, f"{uuid.uuid4().hex}{safe_ext}")
         with open(file_path, "wb") as f:
             f.write(file_content)
 
@@ -80,14 +85,24 @@ class DocumentChatEngine:
             "is_indexed": True,
         }
 
-    def chat(self, document_id: int, question: str, user_id: int | None = None) -> dict:
+    def chat(
+        self,
+        document_id: int,
+        question: str,
+        user_id: int | None = None,
+        organization_id: int | None = None,
+    ) -> dict:
         """Chat with a document.
 
         Returns:
             Dict with answer, citations, confidence_score.
         """
-        # Get document
-        doc = self.db.query(AIDocument).filter(AIDocument.id == document_id).first()
+        # Get document, scoped to the caller's organization to prevent
+        # cross-tenant access to another org's uploaded documents.
+        query = self.db.query(AIDocument).filter(AIDocument.id == document_id)
+        if organization_id is not None:
+            query = query.filter(AIDocument.organization_id == organization_id)
+        doc = query.first()
         if not doc:
             return {"answer": "Document not found.", "citations": None, "confidence_score": None}
 
