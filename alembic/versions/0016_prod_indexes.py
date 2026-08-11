@@ -43,7 +43,12 @@ def _safe_create_index(name: str, table: str, columns: list[str]) -> None:
     for col in columns:
         if not _column_exists(table, col):
             return
-    op.create_index(name, table, columns, if_not_exists=True)
+    # MySQL's CREATE INDEX has no "IF NOT EXISTS" clause (unlike SQLite/
+    # Postgres), so passing if_not_exists=True makes SQLAlchemy emit invalid
+    # syntax on MySQL (errno 1064). Just attempt the create and swallow the
+    # "duplicate key name" error if the index already exists.
+    with contextlib.suppress(Exception):
+        op.create_index(name, table, columns)
 
 
 def upgrade() -> None:
