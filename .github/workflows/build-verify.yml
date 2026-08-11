@@ -183,10 +183,17 @@ jobs:
 
       - name: Verify docker-compose config
         run: |
+          # .env is gitignored and not present in a fresh checkout, but both
+          # compose files declare env_file: .env — create a throwaway copy
+          # from .env.example purely so `docker compose config` can resolve it.
+          cp .env.example .env
+
           docker compose -f docker-compose.yml config -q
           echo "✓ docker-compose.yml is valid"
           docker compose -f docker-compose.prod.yml config -q
           echo "✓ docker-compose.prod.yml is valid"
+
+          rm -f .env
 
   # ── Summary ────────────────────────────────────────────────
   build-summary:
