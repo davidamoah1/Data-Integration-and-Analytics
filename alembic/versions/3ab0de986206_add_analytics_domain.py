@@ -26,7 +26,11 @@ def upgrade() -> None:
         sa.Column("name", sa.String(255), nullable=False),
         sa.Column("description", sa.Text(), nullable=True),
         sa.Column("theme", sa.String(50), nullable=False, server_default="default"),
-        sa.Column("layout", sa.JSON(), nullable=False, server_default="[]"),
+        # MySQL does not allow literal DEFAULT values on JSON/TEXT/BLOB
+        # columns (raises errno 1101). The ORM model (analytics/models.py)
+        # already supplies a Python-side default=list on insert, so no
+        # server_default is needed here.
+        sa.Column("layout", sa.JSON(), nullable=False),
         sa.Column("version", sa.Integer(), nullable=False, server_default="1"),
         sa.Column("is_public", sa.Boolean(), nullable=False, server_default=sa.text("0")),
         sa.Column("created_at", sa.TIMESTAMP(), server_default=sa.func.now(), nullable=False),
@@ -38,8 +42,10 @@ def upgrade() -> None:
         sa.Column("dashboard_id", sa.BigInteger(), nullable=False, index=True),
         sa.Column("widget_type", sa.String(50), nullable=False),
         sa.Column("title", sa.String(255), nullable=False),
-        sa.Column("configuration", sa.JSON(), nullable=False, server_default="{}"),
-        sa.Column("position", sa.JSON(), nullable=False, server_default="{}"),
+        # See note above: MySQL forbids literal defaults on JSON columns.
+        # ORM defaults (default=dict) cover these at insert time.
+        sa.Column("configuration", sa.JSON(), nullable=False),
+        sa.Column("position", sa.JSON(), nullable=False),
         sa.Column("group_name", sa.String(100), nullable=True),
         sa.Column("created_at", sa.TIMESTAMP(), server_default=sa.func.now(), nullable=False),
         sa.Column("updated_at", sa.TIMESTAMP(), server_default=sa.func.now(), nullable=False),
