@@ -165,7 +165,9 @@ def upgrade() -> None:
     op.create_table(
         "workflow_definitions",
         sa.Column("id", sa.BigInteger, primary_key=True, autoincrement=True),
-        sa.Column("organization_id", sa.BigInteger, sa.ForeignKey("organizations.id"), nullable=True),
+        sa.Column(
+            "organization_id", sa.BigInteger, sa.ForeignKey("organizations.id"), nullable=True
+        ),
         sa.Column("created_by", sa.BigInteger, sa.ForeignKey("users.id"), nullable=True),
         sa.Column("name", sa.String(255), nullable=False),
         sa.Column("description", sa.Text, nullable=True),
@@ -222,7 +224,9 @@ def upgrade() -> None:
             sa.ForeignKey("workflow_versions.id", ondelete="SET NULL"),
             nullable=True,
         ),
-        sa.Column("organization_id", sa.BigInteger, sa.ForeignKey("organizations.id"), nullable=True),
+        sa.Column(
+            "organization_id", sa.BigInteger, sa.ForeignKey("organizations.id"), nullable=True
+        ),
         sa.Column("triggered_by", sa.BigInteger, sa.ForeignKey("users.id"), nullable=True),
         sa.Column("trigger_type", sa.String(50), nullable=False, server_default="manual"),
         sa.Column("status", sa.String(30), nullable=False, server_default="pending"),
@@ -276,7 +280,9 @@ def upgrade() -> None:
             sa.ForeignKey("workflow_executions.execution_id", ondelete="CASCADE"),
             nullable=False,
         ),
-        sa.Column("organization_id", sa.BigInteger, sa.ForeignKey("organizations.id"), nullable=True),
+        sa.Column(
+            "organization_id", sa.BigInteger, sa.ForeignKey("organizations.id"), nullable=True
+        ),
         sa.Column("source_type", sa.String(50), nullable=False),
         sa.Column("source_id", sa.String(255), nullable=True),
         sa.Column("target_type", sa.String(50), nullable=False),
