@@ -16,6 +16,8 @@ const nextConfig = {
   output: process.env.NODE_ENV === 'production' ? 'standalone' : undefined,
   experimental: {
     optimizePackageImports: ['lucide-react'],
+    workerThreads: false,
+    cpus: 1,
   },
   async rewrites() {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
