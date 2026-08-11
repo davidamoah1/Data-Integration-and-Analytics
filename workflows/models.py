@@ -20,8 +20,8 @@ class WorkflowDefinition(Base):
     __tablename__ = "workflow_definitions"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
-    organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=True, index=True)
-    created_by = Column(Integer, ForeignKey("users.id"), nullable=True)
+    organization_id = Column(BigInt, ForeignKey("organizations.id"), nullable=True, index=True)
+    created_by = Column(BigInt, ForeignKey("users.id"), nullable=True)
     name = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
     category = Column(String(100), nullable=True)
@@ -61,7 +61,7 @@ class WorkflowVersion(Base):
     nodes = Column(JSON, nullable=False, default=list)
     edges = Column(JSON, nullable=False, default=list)
     config = Column(JSON, nullable=False, default=dict)
-    created_by = Column(Integer, ForeignKey("users.id"), nullable=True)
+    created_by = Column(BigInt, ForeignKey("users.id"), nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     updated_at = Column(
         DateTime,
@@ -92,8 +92,8 @@ class WorkflowExecution(Base):
     version_id = Column(
         BigInt, ForeignKey("workflow_versions.id", ondelete="SET NULL"), nullable=True, index=True
     )
-    organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=True, index=True)
-    triggered_by = Column(Integer, ForeignKey("users.id"), nullable=True)
+    organization_id = Column(BigInt, ForeignKey("organizations.id"), nullable=True, index=True)
+    triggered_by = Column(BigInt, ForeignKey("users.id"), nullable=True)
     trigger_type = Column(
         String(50), default="manual", nullable=False
     )  # manual, scheduled, webhook, api
@@ -162,7 +162,7 @@ class WorkflowLineage(Base):
         nullable=False,
         index=True,
     )
-    organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=True, index=True)
+    organization_id = Column(BigInt, ForeignKey("organizations.id"), nullable=True, index=True)
     source_type = Column(
         String(50), nullable=False
     )  # dataset, transformation, validation, ai, dashboard, report, export
@@ -184,7 +184,7 @@ class WorkflowTemplate(Base):
     __tablename__ = "workflow_templates"
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
-    created_by = Column(Integer, ForeignKey("users.id"), nullable=True)
+    created_by = Column(BigInt, ForeignKey("users.id"), nullable=True)
     name = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
     category = Column(String(100), nullable=True)

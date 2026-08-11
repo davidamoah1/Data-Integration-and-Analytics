@@ -50,8 +50,8 @@ class MLModel(Base):
     metrics = Column(JSON, default=dict, nullable=False)
     artifact_path = Column(String(500), nullable=True)
     dataset_source = Column(String(500), nullable=True)
-    organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=False, index=True)
-    created_by = Column(Integer, ForeignKey("users.id"), nullable=False)
+    organization_id = Column(BigInt, ForeignKey("organizations.id"), nullable=False, index=True)
+    created_by = Column(BigInt, ForeignKey("users.id"), nullable=False)
     parent_model_id = Column(String(64), ForeignKey("ml_models.id"), nullable=True)
     version = Column(Integer, default=1, nullable=False)
     deployment_status = Column(String(50), default="not_deployed", nullable=False)
@@ -93,8 +93,8 @@ class MLTrainingRun(Base):
     error_message = Column(Text, nullable=True)
     started_at = Column(DateTime, nullable=True)
     completed_at = Column(DateTime, nullable=True)
-    created_by = Column(Integer, ForeignKey("users.id"), nullable=False)
-    organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=False, index=True)
+    created_by = Column(BigInt, ForeignKey("users.id"), nullable=False)
+    organization_id = Column(BigInt, ForeignKey("organizations.id"), nullable=False, index=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
 
     model = relationship("MLModel", back_populates="training_runs")
@@ -145,8 +145,8 @@ class MLAnomalyJob(Base):
     algorithm = Column(String(100), default="isolation_forest", nullable=False)
     config = Column(JSON, default=dict, nullable=False)
     latest_result = Column(JSON, default=dict, nullable=False)
-    organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=False, index=True)
-    created_by = Column(Integer, ForeignKey("users.id"), nullable=False)
+    organization_id = Column(BigInt, ForeignKey("organizations.id"), nullable=False, index=True)
+    created_by = Column(BigInt, ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     updated_at = Column(
         DateTime,
