@@ -8,7 +8,18 @@
 # them here previously pushed the function bundle past Vercel's 500 MB limit.
 #
 # Keep this in sync with the root requirements.txt for every package other
-# than streamlit/plotly.
+# than streamlit/plotly. Additionally excluded here (all bundle-size-only
+# cuts, safe because the code paths that use them already handle ImportError
+# gracefully, or the feature is unusable on Vercel regardless):
+#   - PyMuPDF / pytesseract: only used by capture/ocr_engine.py behind a
+#     lazy `try: import fitz / pytesseract` — OCR also requires a system
+#     Tesseract binary that isn't installable on Vercel, so it never works
+#     there anyway.
+#   - PyPDF2: lazy-imported in ai/engines/document_chat.py with an explicit
+#     ImportError fallback message.
+#   - python-pptx: lazy-imported in services/report_engine.py with a
+#     logger.warning + JSON-export fallback.
+#   - python-docx: not imported anywhere in the codebase (unused).
 
 pandas==2.2.3
 SQLAlchemy==2.0.36
@@ -33,9 +44,6 @@ xmltodict==0.14.2
 requests==2.32.3
 python-multipart==0.0.20
 scipy==1.13.0
-PyPDF2==3.0.1
-python-docx==1.1.2
-python-pptx==1.0.2
 fpdf2==2.8.3
 psutil==6.1.1
 apscheduler==3.11.0
@@ -44,8 +52,6 @@ scikit-learn==1.6.1
 statsmodels==0.14.2
 joblib==1.4.2
 Pillow==11.0.0
-pytesseract==0.3.13
-PyMuPDF==1.24.14
 sentry-sdk[fastapi]==2.19.2
 opentelemetry-distro==0.49b0
 opentelemetry-exporter-otlp==1.28.0
