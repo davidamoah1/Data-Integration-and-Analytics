@@ -102,6 +102,32 @@ run, etc.) has **not** been covered yet — see "Not Yet Audited" section.
 - **Not yet fixed** — same dependency as C3 (needs durable job model +
   queue first).
 
+### C2. In-memory-only rate limiter breaks under multiple workers — FIXED
+- **Where:** `@/d/etl_project/shared/middleware.py` `RateLimitMiddleware` kept
+  hit counters in a per-process `dict`. Its own docstring already flagged
+  this as a known gap: "For production with multiple workers, replace with
+  Redis-backed limiter."
+- **Why it matters:** Any deployment with more than one uvicorn worker,
+  multiple containers, or serverless invocations sharing traffic lets each
+  process enforce the limit independently — a client could get up to
+  `N × RATE_LIMIT_RPM` requests through instead of `RATE_LIMIT_RPM` total.
+- **Fix applied:** Added a Redis fixed-window (`INCR` + `EXPIRE`) backend,
+  auto-selected when `REDIS_URL` is set and reachable at startup (same
+  pattern as `performance/cache.py`'s `CacheManager` and
+  `jobs/service.py`'s `TaskQueue`). Falls back to the original in-memory
+  limiter when Redis is unset/unreachable (dev/test/single-worker
+  unaffected). Redis errors mid-request fail open rather than taking the
+  API down on a transient outage. `@/d/etl_project/api/main.py:374-379`
+  passes `REDIS_URL` through explicitly when registering the middleware.
+- **Verification:** 6 new tests in
+  `@/d/etl_project/tests/test_rate_limit_middleware.py` (memory backend
+  under/over limit, health-path bypass, Redis backend selection, Redis
+  backend over-limit blocking, Redis-unreachable-falls-back-to-memory via a
+  fake Redis client). Full suite (83 tests incl. `test_repository.py`,
+  `test_api.py`, `test_performance.py`) passes; black/ruff clean. **Not yet
+  verified** against a live Redis instance or an actual multi-worker
+  deployment (none available in this session).
+
 ### C5. Frontend audit log UI renders hardcoded fake data — FIXED
 - **Where:** `@/d/etl_project/frontend/components/settings/AuditLogSettings.tsx`
   previously had a `mockEntries` array with literal names
