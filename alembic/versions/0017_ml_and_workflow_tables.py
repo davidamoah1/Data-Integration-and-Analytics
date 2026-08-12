@@ -41,11 +41,16 @@ def upgrade() -> None:
         sa.Column("dataset_source", sa.String(500), nullable=True),
         sa.Column(
             "organization_id",
-            sa.BigInteger,
+            sa.BigInteger().with_variant(sa.Integer(), "sqlite"),
             sa.ForeignKey("organizations.id"),
             nullable=False,
         ),
-        sa.Column("created_by", sa.BigInteger, sa.ForeignKey("users.id"), nullable=False),
+        sa.Column(
+            "created_by",
+            sa.BigInteger().with_variant(sa.Integer(), "sqlite"),
+            sa.ForeignKey("users.id"),
+            nullable=False,
+        ),
         sa.Column("parent_model_id", sa.String(64), sa.ForeignKey("ml_models.id"), nullable=True),
         sa.Column("version", sa.Integer, nullable=False, server_default="1"),
         sa.Column(
@@ -78,10 +83,15 @@ def upgrade() -> None:
         sa.Column("error_message", sa.Text, nullable=True),
         sa.Column("started_at", sa.DateTime, nullable=True),
         sa.Column("completed_at", sa.DateTime, nullable=True),
-        sa.Column("created_by", sa.BigInteger, sa.ForeignKey("users.id"), nullable=False),
+        sa.Column(
+            "created_by",
+            sa.BigInteger().with_variant(sa.Integer(), "sqlite"),
+            sa.ForeignKey("users.id"),
+            nullable=False,
+        ),
         sa.Column(
             "organization_id",
-            sa.BigInteger,
+            sa.BigInteger().with_variant(sa.Integer(), "sqlite"),
             sa.ForeignKey("organizations.id"),
             nullable=False,
         ),
@@ -134,11 +144,16 @@ def upgrade() -> None:
         sa.Column("latest_result", sa.JSON, nullable=False),
         sa.Column(
             "organization_id",
-            sa.BigInteger,
+            sa.BigInteger().with_variant(sa.Integer(), "sqlite"),
             sa.ForeignKey("organizations.id"),
             nullable=False,
         ),
-        sa.Column("created_by", sa.BigInteger, sa.ForeignKey("users.id"), nullable=False),
+        sa.Column(
+            "created_by",
+            sa.BigInteger().with_variant(sa.Integer(), "sqlite"),
+            sa.ForeignKey("users.id"),
+            nullable=False,
+        ),
         sa.Column("created_at", sa.DateTime, nullable=False),
         sa.Column("updated_at", sa.DateTime, nullable=False),
     )
@@ -166,9 +181,17 @@ def upgrade() -> None:
         "workflow_definitions",
         sa.Column("id", sa.BigInteger, primary_key=True, autoincrement=True),
         sa.Column(
-            "organization_id", sa.BigInteger, sa.ForeignKey("organizations.id"), nullable=True
+            "organization_id",
+            sa.BigInteger().with_variant(sa.Integer(), "sqlite"),
+            sa.ForeignKey("organizations.id"),
+            nullable=True,
         ),
-        sa.Column("created_by", sa.BigInteger, sa.ForeignKey("users.id"), nullable=True),
+        sa.Column(
+            "created_by",
+            sa.BigInteger().with_variant(sa.Integer(), "sqlite"),
+            sa.ForeignKey("users.id"),
+            nullable=True,
+        ),
         sa.Column("name", sa.String(255), nullable=False),
         sa.Column("description", sa.Text, nullable=True),
         sa.Column("category", sa.String(100), nullable=True),
@@ -201,7 +224,12 @@ def upgrade() -> None:
         sa.Column("nodes", sa.JSON, nullable=False),
         sa.Column("edges", sa.JSON, nullable=False),
         sa.Column("config", sa.JSON, nullable=False),
-        sa.Column("created_by", sa.BigInteger, sa.ForeignKey("users.id"), nullable=True),
+        sa.Column(
+            "created_by",
+            sa.BigInteger().with_variant(sa.Integer(), "sqlite"),
+            sa.ForeignKey("users.id"),
+            nullable=True,
+        ),
         sa.Column("created_at", sa.DateTime, nullable=False),
         sa.Column("updated_at", sa.DateTime, nullable=False),
         sa.UniqueConstraint("workflow_id", "version_number"),
@@ -225,9 +253,17 @@ def upgrade() -> None:
             nullable=True,
         ),
         sa.Column(
-            "organization_id", sa.BigInteger, sa.ForeignKey("organizations.id"), nullable=True
+            "organization_id",
+            sa.BigInteger().with_variant(sa.Integer(), "sqlite"),
+            sa.ForeignKey("organizations.id"),
+            nullable=True,
         ),
-        sa.Column("triggered_by", sa.BigInteger, sa.ForeignKey("users.id"), nullable=True),
+        sa.Column(
+            "triggered_by",
+            sa.BigInteger().with_variant(sa.Integer(), "sqlite"),
+            sa.ForeignKey("users.id"),
+            nullable=True,
+        ),
         sa.Column("trigger_type", sa.String(50), nullable=False, server_default="manual"),
         sa.Column("status", sa.String(30), nullable=False, server_default="pending"),
         sa.Column("started_at", sa.DateTime, nullable=True),
@@ -281,7 +317,10 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.Column(
-            "organization_id", sa.BigInteger, sa.ForeignKey("organizations.id"), nullable=True
+            "organization_id",
+            sa.BigInteger().with_variant(sa.Integer(), "sqlite"),
+            sa.ForeignKey("organizations.id"),
+            nullable=True,
         ),
         sa.Column("source_type", sa.String(50), nullable=False),
         sa.Column("source_id", sa.String(255), nullable=True),
@@ -298,7 +337,12 @@ def upgrade() -> None:
     op.create_table(
         "workflow_templates",
         sa.Column("id", sa.BigInteger, primary_key=True, autoincrement=True),
-        sa.Column("created_by", sa.BigInteger, sa.ForeignKey("users.id"), nullable=True),
+        sa.Column(
+            "created_by",
+            sa.BigInteger().with_variant(sa.Integer(), "sqlite"),
+            sa.ForeignKey("users.id"),
+            nullable=True,
+        ),
         sa.Column("name", sa.String(255), nullable=False),
         sa.Column("description", sa.Text, nullable=True),
         sa.Column("category", sa.String(100), nullable=True),
