@@ -148,6 +148,46 @@ run, etc.) has **not** been covered yet — see "Not Yet Audited" section.
   session) — recommend a smoke test of `/api/auth/login` on the next Vercel
   preview deploy before calling this fully closed.
 
+### H2. CI Docker Buildx cache failure — FIXED
+- **Where:** `@/d/etl_project/.github/workflows/ci.yml` `build` job called
+  `docker/build-push-action@v6` with `cache-from: type=gha` /
+  `cache-to: type=gha,mode=max` but never ran `docker/setup-buildx-action`
+  first. Without it, buildx uses the default `docker` driver, which does not
+  support the `gha` cache exporter/importer (only `docker-container`/
+  `kubernetes` drivers do) — exactly the "Cache export is not supported for
+  the docker driver" failure Buildx reports.
+- **Confirmed by contrast:** `@/d/etl_project/.github/workflows/build-verify.yml`
+  has the identical `type=gha` cache config but already correctly precedes it
+  with `docker/setup-buildx-action@v3`, and never hit this failure.
+- **Fix applied:** added `docker/setup-buildx-action@v3` immediately before
+  the build step in `ci.yml`; added explicit `scope=aedip-build` /
+  `scope=aedip-build-verify` to both workflows to prevent cache collisions;
+  added `permissions: contents: read` to both Docker build jobs.
+- **Verification:** confirmed via live GitHub Actions run (`31570510856`,
+  commit `592f4db`) — `Set up Docker Buildx` and `Build Docker image` steps
+  both completed with `conclusion: success` (~2 min build). Root cause fully
+  resolved.
+
+### H3. CI `Deploy` job fails at `Deploy to Vercel` — NOT YET FIXED (needs repo secrets)
+- **Where:** `@/d/etl_project/.github/workflows/ci.yml:351-358`, the
+  `deploy` job's `Deploy to Vercel` step (`amondnet/vercel-action@v25`) fails
+  in under 1 second with no build attempt, in the same run (`31570510856`)
+  where the Docker build fix was verified.
+- **Why it matters:** Instant failure (no time spent even attempting a
+  deploy) is the signature of missing/invalid `secrets.VERCEL_TOKEN`,
+  `secrets.VERCEL_ORG_ID`, or `secrets.VERCEL_PROJECT_ID` in the repo's
+  Actions secrets, rather than a workflow logic bug.
+- **Not yet fixed:** could not read the raw job log via the GitHub API (403
+  Forbidden without a repo-scoped token from this environment) to confirm
+  the exact error text, and cannot read/set repo secrets remotely either.
+- **Action required (manual, by repo owner):** verify in GitHub →
+  **Settings → Secrets and variables → Actions** that `VERCEL_TOKEN`,
+  `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID` are all set. Obtain
+  `VERCEL_TOKEN` from Vercel → Account Settings → Tokens; obtain
+  `VERCEL_ORG_ID`/`VERCEL_PROJECT_ID` from `.vercel/project.json` after
+  running `vercel link` locally, or from the Vercel project's Settings →
+  General page.
+
 ---
 
 ## MEDIUM
@@ -158,8 +198,9 @@ run, etc.) has **not** been covered yet — see "Not Yet Audited" section.
   (non-test code). A first pass shows no bare silent `except: pass` (searched
   and found zero matches), but a systematic review of whether each of the 97
   logs/re-raises appropriately vs. silently swallowing has **not** been done.
-- Docker/Nginx/CI configuration referenced in `docker-compose.prod.yml`,
-  `.github/workflows/*.yml` — not yet audited in this pass.
+- Docker/Nginx/CI configuration referenced in `docker-compose.prod.yml` — not
+  yet audited in this pass (CI workflow Docker/Buildx config now audited and
+  fixed, see H2/H3 above).
 
 ---
 
