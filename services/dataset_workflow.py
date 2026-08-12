@@ -183,6 +183,14 @@ class DatasetWorkflowOrchestrator:
         cached_state = self._check_cache(dataset_hash)
         if cached_state:
             logger.info(f"Cache hit for dataset hash {dataset_hash[:8]}")
+            # Register the cache-hit workflow under its own (new) workflow_id
+            # and emit progress for it, same as a freshly-run workflow, so
+            # get_state() and any persistence callbacks (see
+            # services/dataset_workflow_routes.py) work for cache hits too -
+            # without this, a cache-hit workflow_id would be returned to the
+            # caller but any later status lookup for it would 404.
+            self._workflows[cached_state.workflow_id] = cached_state
+            self._emit_progress(cached_state)
             return cached_state
 
         workflow_id = str(uuid.uuid4())
