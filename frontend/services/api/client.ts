@@ -1,4 +1,12 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') || 'http://localhost:8001';
+// NEXT_PUBLIC_API_URL is the backend origin ONLY (e.g. http://localhost:8000).
+// Every service call already includes the leading /api/... segment, so this
+// must NOT also be "/api" or requests will double up as /api/api/....
+// An explicitly empty string (same-origin deployments behind a rewrite, e.g.
+// Vercel) is intentional and must not fall back to the localhost default.
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL !== undefined
+    ? process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, '')
+    : 'http://localhost:8001';
 const REQUEST_TIMEOUT = 30000;
 const MAX_RETRIES = 2;
 

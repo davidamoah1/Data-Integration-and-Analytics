@@ -29,7 +29,7 @@
     }
   ],
   "env": {
-    "NEXT_PUBLIC_API_URL": "/api",
+    "NEXT_PUBLIC_API_URL": "",
     "PYTHONUNBUFFERED": "1"
   },
   "functions": {
