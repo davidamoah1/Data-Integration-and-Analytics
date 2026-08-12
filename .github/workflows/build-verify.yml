@@ -130,6 +130,8 @@ jobs:
   docker-build:
     name: Docker Build Check
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
 
@@ -144,8 +146,8 @@ jobs:
           push: false
           tags: aedip-verify:${{ github.sha }}
           load: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=aedip-build-verify
+          cache-to: type=gha,mode=max,scope=aedip-build-verify
 
       - name: Verify Docker image
         run: |
