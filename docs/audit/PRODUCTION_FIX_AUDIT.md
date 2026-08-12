@@ -102,19 +102,26 @@ run, etc.) has **not** been covered yet — see "Not Yet Audited" section.
 - **Not yet fixed** — same dependency as C3 (needs durable job model +
   queue first).
 
-### C5. Frontend audit log UI renders hardcoded fake data
-- **Where:** `@/d/etl_project/frontend/components/settings/AuditLogSettings.tsx:18-24`
-  — `mockEntries` array with literal names `kwame.mensah@org.com`,
-  `ama.boateng@org.com`, fake IPs, and fixed timestamps, rendered directly
-  with no API call at all.
-- **Why it matters:** Exactly Part 18. Every organization using this UI today
-  sees identical fabricated "audit history" that never touches the backend
-  audit log (`@/d/etl_project/audit/` has a real, working audit service and
-  routes — this component just never calls it).
-- **Not yet fixed.** Fix: wire to `@/d/etl_project/frontend/services/audit/auditService.ts`
-  (exists, calls the real `/api/audit` backend), remove `mockEntries`, add
-  empty-state text "No activity has been recorded yet.", keep the existing
-  search UI and add date/user/action/resource filters against the real API.
+### C5. Frontend audit log UI renders hardcoded fake data — FIXED
+- **Where:** `@/d/etl_project/frontend/components/settings/AuditLogSettings.tsx`
+  previously had a `mockEntries` array with literal names
+  `kwame.mensah@org.com`, `ama.boateng@org.com`, fake IPs, and fixed
+  timestamps, rendered directly with no API call at all.
+- **Why it matters:** Exactly Part 18. Every organization using this UI saw
+  identical fabricated "audit history" that never touched the backend audit
+  log (`@/d/etl_project/audit/routes.py` has a real, working, org-scoped
+  audit API — the component just never called it).
+- **Fix applied:** Rewired to the existing
+  `@/d/etl_project/frontend/services/audit/auditService.ts` (`listLogs`,
+  `getFilters`). Removed `mockEntries`. Added: loading spinner, error state,
+  empty state ("No activity has been recorded yet."), action filter (from
+  `getFilters()`), date range filter, client-side search across
+  action/resource/user, user-id → name resolution via `/api/users`, and a
+  "Load more" pager against the real `total`/`offset`/`limit` from the API.
+- **Verification:** `tsc --noEmit` clean, `eslint` clean, `npm run build`
+  succeeded (production build, `/settings` route compiles). **Not yet
+  verified:** manual browser test against a running backend with real audit
+  log rows (no live backend/DB running in this session).
 
 ---
 
