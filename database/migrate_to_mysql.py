@@ -6,7 +6,9 @@ Usage:
 Prerequisites:
     - Set DB_TYPE=sqlite in .env (source database)
     - Set MYSQL_* variables in .env (target database)
-    - MySQL database must be empty or have the schema created via init_db()
+    - The MySQL target schema must already exist, created via
+      `alembic upgrade head` against MYSQL_* — this script only copies data,
+      it does not create or alter schema.
 """
 
 import os
@@ -59,8 +61,12 @@ def migrate():
     source_engine = create_engine(sqlite_url)
     target_engine = get_engine()
 
-    logger.info("Migration: Creating schema on MySQL target...")
-    # Import all model modules to ensure complete metadata
+    logger.info(
+        "Migration: assuming MySQL target schema already exists "
+        "(created via 'alembic upgrade head'); this script only copies data."
+    )
+    # Import all model modules so Base.metadata reflects the full table set
+    # for ordering/copying purposes only — schema itself is NOT created here.
     import ai.models  # noqa: F401
     import analytics.models  # noqa: F401
     import audit.models  # noqa: F401
@@ -72,8 +78,6 @@ def migrate():
     import organizations.models  # noqa: F401
     import scheduler.models  # noqa: F401
     from database.db_setup import Base
-
-    Base.metadata.create_all(target_engine)
 
     # Migrate all tables in dependency order
     all_tables = [t.name for t in Base.metadata.sorted_tables]

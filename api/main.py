@@ -180,6 +180,11 @@ async def lifespan(app: FastAPI):
         # Phase 16 — Smart Data Capture models
         import capture.models  # noqa: F401
 
+        # Production MySQL schema is owned exclusively by Alembic migrations
+        # (`alembic upgrade head`). create_all() only runs for SQLite so it
+        # doesn't drift from migration history in production.
+        import config as _config
+
         # Phase 12.9 — Ecosystem models
         import connectors.models  # noqa: F401
         import database.db_setup  # noqa: F401
@@ -213,10 +218,13 @@ async def lifespan(app: FastAPI):
         # Workflow engine models
         import workflows.models  # noqa: F401
 
-        try:
-            Base.metadata.create_all(engine)
-        except Exception as e:
-            logger.error(f"Database table creation failed: {e}")
+        if _config.DB_TYPE == "mysql":
+            logger.info("DB_TYPE=mysql; skipping create_all(), relying on Alembic migrations.")
+        else:
+            try:
+                Base.metadata.create_all(engine)
+            except Exception as e:
+                logger.error(f"Database table creation failed: {e}")
 
         # Seed ecosystem marketplace data
         try:

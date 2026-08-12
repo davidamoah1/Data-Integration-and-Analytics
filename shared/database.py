@@ -46,10 +46,24 @@ def _attach_slow_query_listener(engine, threshold_ms: int):
 
 
 def ensure_tables(engine):
-    """Create all tables if they do not exist. Idempotent via module flag."""
+    """Create all tables if they do not exist. Idempotent via module flag.
+
+    Only runs for SQLite (local dev, tests, and SQLite-backed serverless
+    cold starts). Production MySQL schema is owned exclusively by Alembic
+    migrations (`alembic upgrade head`) — calling create_all() against MySQL
+    could create tables/columns that drift from migration history, so it is
+    a deliberate no-op there.
+    """
     global _tables_initialized
     if _tables_initialized:
         return
+
+    import config
+
+    if config.DB_TYPE == "mysql":
+        _tables_initialized = True
+        return
+
     Base.metadata.create_all(engine)
     _tables_initialized = True
 

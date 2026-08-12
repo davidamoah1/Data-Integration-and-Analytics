@@ -60,9 +60,22 @@ def init_db():
     Creates both existing tables (sales, pipeline_runs) and Phase 4
     authentication/organization/audit tables, then seeds default data.
 
+    This is a manual dev/test convenience script only. Production MySQL
+    schema must be created exclusively via `alembic upgrade head` — running
+    this against a MySQL DB_TYPE raises instead of calling create_all(),
+    to avoid schema drift from migration history.
+
     Returns:
         SQLAlchemy Engine instance.
     """
+    import config
+
+    if config.DB_TYPE == "mysql":
+        raise RuntimeError(
+            "init_db() uses Base.metadata.create_all() and must not be run against "
+            "MySQL. Use 'alembic upgrade head' to create/update the production schema."
+        )
+
     engine = get_engine()
     Base.metadata.create_all(engine)
 

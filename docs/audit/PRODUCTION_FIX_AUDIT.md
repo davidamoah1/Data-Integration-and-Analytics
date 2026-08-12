@@ -15,24 +15,43 @@ run, etc.) has **not** been covered yet — see "Not Yet Audited" section.
 
 ## CRITICAL
 
-### C1. `Base.metadata.create_all()` used as a production schema-creation path
-- **Where:** `@/d/etl_project/shared/database.py:48-54` (`ensure_tables()`, called from
+### C1. `Base.metadata.create_all()` used as a production schema-creation path — FIXED
+- **Where:** `@/d/etl_project/shared/database.py:48-68` (`ensure_tables()`, called from
   `get_db()` on every request, guarded only by an in-process boolean flag),
-  `@/d/etl_project/api/main.py:214-219`, `@/d/etl_project/database/db_setup.py:67,82`.
+  `@/d/etl_project/api/main.py:216-227`, `@/d/etl_project/database/db_setup.py:57-80`,
+  `@/d/etl_project/database/migrate_to_mysql.py` (called `create_all()` against the
+  MySQL target with an incomplete/stale model import list — dozens of tables
+  missing from its import block, so it would have silently created a partial
+  schema).
 - **Why it matters:** The mandate requires Alembic to be the *only* schema
   authority. `create_all()` builds tables straight from current ORM
   `Base.metadata`, independent of migration history. If it runs before/instead
-  of `alembic upgrade head` (e.g. cold serverless start, or a worker that
-  imports models before migrations run), the live schema can diverge from
-  what Alembic thinks it applied — this is structurally the same class of bug
-  already hit three times in CI this week (FK type mismatches between models
-  and migrations). It also means a fresh production MySQL database could get
-  its schema from `create_all()` on first request instead of from migrations.
-- **Not yet fixed.** Recommended minimal fix: gate `ensure_tables()` /
-  `create_all()` behind `DB_TYPE == "sqlite"` (dev/test convenience only) and
-  make it a hard no-op when `DB_TYPE == "mysql"`, relying exclusively on
-  `alembic upgrade head` for MySQL. Needs a decision on whether any existing
-  deployment depends on the current auto-create behavior before changing it.
+  of `alembic upgrade head`, the live schema can diverge from what Alembic
+  thinks it applied — structurally the same class of bug already hit three
+  times in CI this week (FK type mismatches between models and migrations).
+- **Fix applied:**
+  - `shared/database.py::ensure_tables()` — now a no-op when `config.DB_TYPE
+    == "mysql"` (still runs for SQLite: local dev, tests, SQLite-backed
+    serverless cold starts).
+  - `api/main.py` lifespan — `create_all()` call now skipped with a log line
+    when `DB_TYPE == "mysql"`.
+  - `database/db_setup.py::init_db()` — now raises `RuntimeError` if called
+    with `DB_TYPE == "mysql"`, pointing at `alembic upgrade head` instead.
+  - `database/migrate_to_mysql.py` — removed the `create_all()` call
+    entirely; docstring/log now states the MySQL target schema must already
+    exist via Alembic before running this data-copy script.
+- **Verification:**
+  - `ensure_tables()` confirmed to actually create tables under
+    `DB_TYPE=sqlite` (ran against a fresh temp SQLite file).
+  - `ensure_tables(None)` confirmed to return without touching the engine
+    argument at all under `DB_TYPE=mysql` (passed `None` as the engine and it
+    didn't error, proving `create_all` was never reached).
+  - `pytest tests/test_repository.py tests/test_api.py` — 19/19 passed
+    (SQLite-backed, exercises `db_setup.py`/repository code paths).
+  - `black --check` and `ruff check` clean on all four touched files.
+  - **Not yet verified:** an actual `DB_TYPE=mysql` FastAPI startup against a
+    real MySQL instance (no live MySQL available in this session) — the
+    no-op path is verified in isolation, not the full lifespan end-to-end.
 
 ### C2. In-memory rate limiter (`shared/middleware.py`)
 - **Where:** `@/d/etl_project/shared/middleware.py:86-118` — `RateLimitMiddleware`
