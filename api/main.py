@@ -375,6 +375,7 @@ if not _is_test_env:
     app.add_middleware(
         RateLimitMiddleware,
         requests_per_minute=int(os.getenv("RATE_LIMIT_RPM", "120")),
+        redis_url=os.getenv("REDIS_URL") or None,
     )
 
 # Instrument FastAPI for OpenTelemetry (no-op if OTel not initialised)

@@ -2,7 +2,8 @@
 
 Provides:
 - SecurityHeadersMiddleware: Adds standard security headers to every response.
-- RateLimitMiddleware: Simple in-memory rate limiter per client IP.
+- RateLimitMiddleware: Redis-backed (or in-memory fallback) rate limiter per
+  client IP.
 - RequestLoggingMiddleware: Logs request method, path, status, and duration.
 """
 
@@ -13,6 +14,13 @@ from collections import defaultdict
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
+
+try:
+    import redis as redis_lib
+
+    HAS_REDIS = True
+except ImportError:
+    HAS_REDIS = False
 
 logger = logging.getLogger("etl_project")
 
@@ -84,22 +92,65 @@ class RequestSizeLimitMiddleware(BaseHTTPMiddleware):
 
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
-    """Simple in-memory sliding-window rate limiter.
+    """Rate limiter per client IP, Redis-backed with in-memory fallback.
 
-    Limits requests per client IP within a configurable window.
-    For production with multiple workers, replace with Redis-backed limiter.
+    When ``REDIS_URL`` is set and reachable, uses a Redis fixed-window
+    counter (``INCR`` + ``EXPIRE``) so the limit is enforced consistently
+    across multiple worker processes/instances — required for correctness
+    once the app runs behind more than a single uvicorn worker (e.g. behind
+    gunicorn/uvicorn workers, multiple containers, or serverless
+    invocations sharing the same Redis).
+
+    Falls back to the original in-memory sliding-window limiter (per-process
+    only) when Redis is unavailable, so single-worker/dev/test setups keep
+    working with no external dependency.
     """
 
-    def __init__(self, app, requests_per_minute: int = 60):
+    def __init__(self, app, requests_per_minute: int = 60, redis_url: str | None = None):
         super().__init__(app)
         self.requests_per_minute = requests_per_minute
         self._hits: dict[str, list[float]] = defaultdict(list)
 
-    async def dispatch(self, request: Request, call_next):
-        if request.url.path in ("/health", "/ready", "/"):
-            return await call_next(request)
+        self._redis = None
+        if redis_url is None:
+            import os
 
-        client_ip = request.client.host if request.client else "unknown"
+            redis_url = os.getenv("REDIS_URL") or None
+        if redis_url and HAS_REDIS:
+            try:
+                client = redis_lib.from_url(redis_url, decode_responses=True, socket_timeout=1)
+                client.ping()
+                self._redis = client
+            except Exception:
+                self._redis = None
+
+        logger.info(
+            "RateLimitMiddleware initialized (backend: %s, limit: %d/min)",
+            "redis" if self._redis is not None else "memory",
+            requests_per_minute,
+        )
+
+    @property
+    def is_redis_backend(self) -> bool:
+        return self._redis is not None
+
+    def _check_redis(self, client_ip: str) -> bool:
+        """Return True if request is allowed, False if rate limit exceeded.
+
+        Falls back to allowing the request (fail-open) if Redis errors
+        mid-check, so a transient Redis outage does not take down the API.
+        """
+        key = f"aedip:ratelimit:{client_ip}"
+        try:
+            count = self._redis.incr(key)
+            if count == 1:
+                self._redis.expire(key, 60)
+            return count <= self.requests_per_minute
+        except Exception:
+            logger.warning("Redis rate-limit check failed for %s; failing open", client_ip)
+            return True
+
+    def _check_memory(self, client_ip: str) -> bool:
         now = time.time()
         window_start = now - 60.0
 
@@ -107,7 +158,21 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         hits[:] = [t for t in hits if t > window_start]
         hits.append(now)
 
-        if len(hits) > self.requests_per_minute:
+        return len(hits) <= self.requests_per_minute
+
+    async def dispatch(self, request: Request, call_next):
+        if request.url.path in ("/health", "/ready", "/"):
+            return await call_next(request)
+
+        client_ip = request.client.host if request.client else "unknown"
+
+        allowed = (
+            self._check_redis(client_ip)
+            if self._redis is not None
+            else self._check_memory(client_ip)
+        )
+
+        if not allowed:
             return Response(
                 content='{"success":false,"message":"Rate limit exceeded","data":null}',
                 status_code=429,
