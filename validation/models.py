@@ -66,7 +66,7 @@ class ValidationSession(Base):
     approved_at = Column(DateTime, nullable=True)
     approved_by = Column(String(255), nullable=True)
     approval_comments = Column(Text, nullable=True)
-    organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=True)
+    organization_id = Column(BigInt, ForeignKey("organizations.id"), nullable=True)
 
     findings = relationship(
         "ValidationFinding", back_populates="session", cascade="all, delete-orphan"

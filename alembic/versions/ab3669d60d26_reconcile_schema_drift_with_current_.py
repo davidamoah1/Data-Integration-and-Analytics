@@ -2000,7 +2000,7 @@ def upgrade() -> None:
         sa.Column("approved_at", sa.DateTime(), nullable=True),
         sa.Column("approved_by", sa.String(length=255), nullable=True),
         sa.Column("approval_comments", sa.Text(), nullable=True),
-        sa.Column("organization_id", sa.Integer(), nullable=True),
+        sa.Column("organization_id", sa.BigInteger(), nullable=True),
         sa.ForeignKeyConstraint(
             ["organization_id"],
             ["organizations.id"],
