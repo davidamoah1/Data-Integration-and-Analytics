@@ -53,54 +53,70 @@ run, etc.) has **not** been covered yet — see "Not Yet Audited" section.
     real MySQL instance (no live MySQL available in this session) — the
     no-op path is verified in isolation, not the full lifespan end-to-end.
 
-### C2. In-memory rate limiter (`shared/middleware.py`)
-- **Where:** `@/d/etl_project/shared/middleware.py:86-118` — `RateLimitMiddleware`
-  stores hits in `self._hits: dict[str, list[float]]`, a plain Python dict on
-  the middleware instance. Docstring literally says *"For production with
-  multiple workers, replace with Redis-backed limiter."*
-- **Why it matters:** Any deployment with more than one worker process (or
-  serverless, where each invocation is a fresh process) gives every
-  worker/instance its own independent counter — the limit is effectively
-  `requests_per_minute × worker_count`, and restarts silently reset it.
-  Login/signup/password-reset brute-force protection is not real in a
-  multi-instance deployment.
-- **Not yet fixed.** Needs a Redis-backed sliding-window or token-bucket
-  implementation using `config.REDIS_URL`, applied at minimum to
-  login/signup/password-reset per the mandate.
-
-### C3. Dataset workflow state lives in a module-level Python object
-- **Where:** `@/d/etl_project/services/dataset_workflow_routes.py:42-43`:
-  ```python
-  # Global orchestrator instance (in production, use Redis/DB for state)
-  _orchestrator = DatasetWorkflowOrchestrator()
-  ```
+### C3. Dataset workflow state lives in a module-level Python object — FIXED
+- **Where:** `@/d/etl_project/services/dataset_workflow_routes.py`'s
+  module-level `_orchestrator = DatasetWorkflowOrchestrator()`.
   `@/d/etl_project/services/dataset_workflow.py` implements the orchestrator's
-  state machine in-memory (no DB/Redis persistence layer observed).
-- **Why it matters:** Matches Part 8 exactly. A workflow started on one
-  worker/instance is invisible to any other instance, and is lost entirely on
-  restart or redeploy. This is incompatible with horizontal scaling,
-  serverless, or rolling deploys.
-- **Not yet fixed.** Requires persisting `WorkflowState`/`StageResult` to a
-  MySQL table (job/workflow metadata) with Redis for queue coordination, per
-  the mandate's Part 8/9 architecture. This is a substantial change — needs
-  its own design pass before implementation (data model, backward
-  compatibility with in-flight workflows, API contract for
-  `/dataset-workflow/{id}/status` etc.).
-- **Positive finding:** tenant isolation IS enforced on this router —
-  `_ensure_workflow_access()` (`@/d/etl_project/services/dataset_workflow_routes.py:95-107`)
-  checks `state.organization_id != user_org` and rejects with 403. The
-  isolation logic is correct; only the storage medium is wrong.
+  state machine entirely in-memory (`self._workflows: dict`).
+- **Why it matters:** Matches Part 8. A workflow started on one
+  worker/instance was invisible to any other instance, and lost entirely on
+  restart or redeploy — incompatible with horizontal scaling, serverless, or
+  rolling deploys.
+- **Fix applied:** Added a durable snapshot table
+  (`@/d/etl_project/services/dataset_workflow_models.py`'s
+  `DatasetWorkflowRun`, migration
+  `@/d/etl_project/alembic/versions/0018_dataset_workflow_runs.py`),
+  persisted after every stage transition via the orchestrator's existing
+  `on_progress()` callback hook — no change to
+  `DatasetWorkflowOrchestrator`'s synchronous execution model or its 20
+  existing unit tests. `_ensure_workflow_access` replaced with
+  `_get_workflow_state_dict`, which checks the in-memory orchestrator first
+  then falls back to the DB snapshot, for every read endpoint. `retry_stage`
+  now returns `409` (not a misleading `404`) when the workflow isn't live in
+  this process's memory, since retrying re-runs stage handlers against the
+  original DataFrame, which is intentionally not persisted.
+- **Two real bugs found and fixed during this work:** (1) cache-hit
+  workflows were never registered in `self._workflows`/never emitted
+  progress, so a cache-hit `workflow_id` returned to a caller would 404 on
+  every later status lookup — fixed by registering/emitting for cache hits
+  like a fresh run; (2) stage results can contain numpy scalar types
+  (`bool_`, `int64`, `float64`) from pandas/numpy operations, which are not
+  JSON-serializable by the encoder SQLAlchemy's JSON column uses — fixed by
+  round-tripping through `json.dumps(..., default=str)` before persisting
+  (same fallback already used by `performance/cache.py`'s `CacheManager`).
+- **Verification:** 3 new tests in
+  `@/d/etl_project/tests/test_dataset_workflow_persistence.py` (state
+  persisted after a run, DB fallback works when purged from the in-memory
+  dict, 404 when not found anywhere). Full regression:
+  `test_dataset_workflow.py` (20 tests, unmodified, all still pass),
+  `test_dataset_workflow_persistence.py`, `test_repository.py`,
+  `test_api.py`, `test_auth.py`, `test_rbac.py`, `test_tenant_isolation.py`
+  — 110 tests total pass. black/ruff clean. `alembic heads` resolves to a
+  single head. **Not yet verified** against a live MySQL instance (none
+  available in this session).
+- **Positive finding (still true):** tenant isolation IS enforced on this
+  router — `_get_workflow_state_dict()` checks
+  `state_dict["organization_id"] != user_org` and rejects with 403.
 
 ### C4. ETL runs synchronously inside the HTTP request
-- **Where:** `@/d/etl_project/services/dataset_workflow_routes.py:110-159`
+- **Where:** `@/d/etl_project/services/dataset_workflow_routes.py`
   (`POST /dataset-workflow/run`) calls `_orchestrator.start(df, ...)` directly
   in the request handler, not via a queued background job.
 - **Why it matters:** Matches Part 9. Large file processing will block the
   request/worker for the full pipeline duration, risking timeouts (especially
   on Vercel's 30s `maxDuration` set in `@/d/etl_project/vercel.json:37`) and
   preventing concurrent throughput.
-- **Not yet fixed** — same dependency as C3 (needs durable job model +
-  queue first).
+- **Not yet fixed.** The durable job model this needed (C3's dependency)
+  now exists — `@/d/etl_project/jobs/service.py`'s `JobService`/`TaskQueue`
+  infrastructure is already production-ready and used elsewhere (e.g.
+  ETL/OCR/report jobs). Wiring the dataset workflow route to it is a
+  deliberate, **breaking API-contract change**: today `POST
+  /dataset-workflow/run` returns `200` with the full completed result
+  synchronously; enqueuing would mean returning `202` with a `job_id`
+  immediately and requiring the frontend to poll `GET
+  /dataset-workflow/{id}/status` instead. That frontend coordination was
+  judged out of scope to do silently in this pass — flagging for explicit
+  sign-off before implementing.
 
 ### C2. In-memory-only rate limiter breaks under multiple workers — FIXED
 - **Where:** `@/d/etl_project/shared/middleware.py` `RateLimitMiddleware` kept
