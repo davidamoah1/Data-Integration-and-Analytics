@@ -89,13 +89,17 @@ class ExecutiveSummaryEngine:
 
         # Generate via AI gateway
         if self.gateway:
-            result = self.gateway.chat(
-                user_message=user_message,
-                assistant_type="decision_copilot",
-                user_id=user_id,
-                context=context.to_dict(),
-            )
-            response_text = result["response"]
+            try:
+                result = self.gateway.chat(
+                    user_message=user_message,
+                    assistant_type="decision_copilot",
+                    user_id=user_id,
+                    context=context.to_dict(),
+                )
+                response_text = result["response"]
+            except Exception as exc:
+                logger.warning("AI gateway call failed, using data-driven fallback: %s", exc)
+                response_text = self._generate_from_data(analysis_data, context)
         else:
             # Fallback: generate a structured summary from data alone
             response_text = self._generate_from_data(analysis_data, context)
@@ -109,7 +113,16 @@ class ExecutiveSummaryEngine:
         # Save to database
         if self.db:
             try:
+                # Resolve organization_id from user
+                org_id = None
+                if user_id:
+                    from authentication.models import User as _User
+                    _u = self.db.query(_User).filter(_User.id == user_id).first()
+                    if _u:
+                        org_id = _u.organization_id
+
                 insight = AIInsight(
+                    organization_id=org_id,
                     insight_type="executive_summary",
                     title=parsed.get("title", "Executive Summary"),
                     summary=parsed.get("executive_summary", ""),
@@ -138,6 +151,7 @@ class ExecutiveSummaryEngine:
                 parsed["id"] = insight.id
             except Exception as e:
                 logger.warning(f"Failed to save insight: {e}")
+                self.db.rollback()
 
         return parsed
 

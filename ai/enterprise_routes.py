@@ -27,6 +27,7 @@ from ai.engines.root_cause import RootCauseAnalysisEngine
 from ai.prompt_orchestrator import PromptOrchestrator
 from shared.database import get_db
 from shared.dependencies import get_current_user
+from shared.tenant import get_current_organization_id
 
 router = APIRouter(prefix="/ai/enterprise", tags=["Enterprise AI Decision Support"])
 
@@ -192,12 +193,14 @@ def generate_report(
     user=Depends(get_current_user),
 ):
     """Generate a professional report."""
+    org_id = get_current_organization_id(user, db)
     engine = EnterpriseReportEngine(db)
     return engine.generate(
         report_type=request.report_type,
         title=request.title,
         industry=request.industry,
-        user_id=user.id if user else None,
+        user_id=user["id"] if user else None,
+        organization_id=org_id,
         format=request.format,
     )
 

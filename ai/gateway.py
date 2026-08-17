@@ -292,6 +292,13 @@ class AIGateway:
         organization_id: int | None = None,
     ) -> AIConversation:
         """Create a new conversation."""
+        # Resolve organization_id from user if not provided
+        if organization_id is None and user_id and self.db:
+            from authentication.models import User
+            user_obj = self.db.query(User).filter(User.id == user_id).first()
+            if user_obj:
+                organization_id = user_obj.organization_id
+
         title = first_message[:50] + ("..." if len(first_message) > 50 else "")
         conv = AIConversation(
             user_id=user_id,

@@ -45,6 +45,7 @@ class EnterpriseReportEngine:
         semantic_mappings: dict | None = None,
         industry: str = "unknown",
         user_id: int | None = None,
+        organization_id: int | None = None,
         context: EnterpriseAIContext | None = None,
         format: str = "markdown",
     ) -> dict:
@@ -115,6 +116,7 @@ class EnterpriseReportEngine:
         if self.db:
             try:
                 report = AIReportGeneration(
+                    organization_id=organization_id,
                     report_type=report_type,
                     title=title,
                     content=content,
