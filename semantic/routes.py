@@ -373,6 +373,7 @@ async def persist_analysis(
         # Add widgets
         for i, widget in enumerate(body.dashboard_config.get("widgets", [])):
             w = DashboardWidget(
+                organization_id=org_id,
                 dashboard_id=dash.id,
                 widget_type=widget.get("type", "chart"),
                 title=widget.get("title", ""),
@@ -490,6 +491,7 @@ async def persist_analysis(
     )
 
     report = AIReportGeneration(
+        organization_id=org_id,
         report_type="semantic_analysis",
         title=report_title,
         content=report_content,
