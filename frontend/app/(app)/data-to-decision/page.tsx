@@ -23,6 +23,7 @@ import type {
 } from '@/types/workflow';
 import { workflowService } from '@/services/workflow/workflowService';
 import { datasetService } from '@/services/datasets/datasetService';
+import { apiClient, getAccessToken } from '@/services/api/client';
 import { toast } from '@/components/ui/Toaster';
 import { Loader2 } from 'lucide-react';
 
@@ -243,15 +244,26 @@ export default function DataToDecisionPage() {
     setIsGeneratingPresentation(true);
     try {
       // Call the actual presentation generation API
+      const apiUrl = apiClient.getApiUrl();
+      const token = getAccessToken();
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
       const response = await fetch(
-        `/api/dataset-workflow/${workflowState.workflow_id}/presentation`,
+        `${apiUrl}/dataset-workflow/${workflowState.workflow_id}/presentation`,
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           body: JSON.stringify({ template: 'executive', title: `${file?.name} — Analysis` }),
         },
       );
-      if (!response.ok) throw new Error('Presentation generation failed');
+      if (!response.ok) {
+        const errorBody = await response.text().catch(() => '');
+        if (response.status === 401) throw new Error('Your session has expired. Please sign in again.');
+        if (response.status === 403) throw new Error('You don\'t have permission to generate this presentation.');
+        if (response.status === 404) throw new Error('Workflow not found. Please run the analysis first.');
+        if (response.status === 422) throw new Error('The analysis does not contain enough data for a presentation.');
+        throw new Error(`Presentation generation failed (${response.status})`);
+      }
       // Store the blob for download
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
