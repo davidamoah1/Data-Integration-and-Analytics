@@ -34,6 +34,7 @@ import {
   Globe2,
   ListChecks,
   HardDrive,
+  Rocket,
   type LucideIcon,
 } from 'lucide-react';
 import { ROLES } from './permissions';
@@ -67,6 +68,7 @@ interface RoleProfile {
 
 const ALL_NAV_ITEMS: Record<string, NavItem> = {
   dashboard: { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, order: 0 },
+  dataToDecision: { label: 'Data to Decision', href: '/data-to-decision', icon: Rocket, order: 0.5 },
   studios: { label: 'Studios', href: '/studios', icon: Sparkles, order: 1 },
   templates: { label: 'Templates', href: '/templates', icon: LayoutTemplate, order: 2 },
 
@@ -162,6 +164,7 @@ const ROLE_PROFILES: Record<RoleKey, RoleProfile> = {
     groups: [
       group('Overview', [
         ALL_NAV_ITEMS.dashboard,
+        ALL_NAV_ITEMS.dataToDecision,
         ALL_NAV_ITEMS.dashboards,
         ALL_NAV_ITEMS.dashboardBuilder,
         ALL_NAV_ITEMS.studios,
@@ -198,6 +201,7 @@ const ROLE_PROFILES: Record<RoleKey, RoleProfile> = {
     groups: [
       group('Overview', [
         ALL_NAV_ITEMS.dashboard,
+        ALL_NAV_ITEMS.dataToDecision,
         ALL_NAV_ITEMS.dashboards,
         ALL_NAV_ITEMS.dashboardBuilder,
         ALL_NAV_ITEMS.studios,
@@ -281,6 +285,7 @@ const ROLE_PROFILES: Record<RoleKey, RoleProfile> = {
     groups: [
       group('Overview', [
         ALL_NAV_ITEMS.dashboard,
+        ALL_NAV_ITEMS.dataToDecision,
         ALL_NAV_ITEMS.dashboards,
         ALL_NAV_ITEMS.dashboardBuilder,
         ALL_NAV_ITEMS.templates,
@@ -309,6 +314,7 @@ const ROLE_PROFILES: Record<RoleKey, RoleProfile> = {
     groups: [
       group('Overview', [
         ALL_NAV_ITEMS.dashboard,
+        ALL_NAV_ITEMS.dataToDecision,
       ], 0),
       group('Analytics', [
         ALL_NAV_ITEMS.analytics,
@@ -331,6 +337,7 @@ const ROLE_PROFILES: Record<RoleKey, RoleProfile> = {
     groups: [
       group('Overview', [
         ALL_NAV_ITEMS.dashboard,
+        ALL_NAV_ITEMS.dataToDecision,
       ], 0),
       group('Insights', [
         ALL_NAV_ITEMS.analytics,
@@ -350,6 +357,7 @@ const ROLE_PROFILES: Record<RoleKey, RoleProfile> = {
     groups: [
       group('Overview', [
         ALL_NAV_ITEMS.dashboard,
+        ALL_NAV_ITEMS.dataToDecision,
         ALL_NAV_ITEMS.templates,
       ], 0),
       group('Research', [

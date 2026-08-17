@@ -52,4 +52,37 @@ export const workflowService = {
   async retryStage(workflowId: string, stage: string): Promise<WorkflowState> {
     return await apiClient.post<WorkflowState>(`${BASE}/${workflowId}/retry/${stage}`);
   },
+
+  async applyCleaningTransformation(
+    workflowId: string,
+    payload: {
+      check_name: string;
+      column?: string;
+      action: string;
+      method?: string;
+      value?: string;
+    },
+  ): Promise<{ id: string; description: string; affected_rows: number }> {
+    return await apiClient.post(`${BASE}/${workflowId}/clean/apply`, payload);
+  },
+
+  async getCleaningHistory(
+    workflowId: string,
+  ): Promise<{ transformations: Array<{ id: string; timestamp: string; action: string; description: string; affected_rows: number; undone: boolean }>; total: number; active: number }> {
+    return await apiClient.get(`${BASE}/${workflowId}/clean/history`);
+  },
+
+  async runAnalysis(
+    workflowId: string,
+    payload: {
+      mode: 'easy' | 'pro';
+      analysis_type?: string;
+      columns?: string[];
+      group_column?: string;
+      target_column?: string;
+      question?: string;
+    },
+  ): Promise<unknown> {
+    return await apiClient.post(`${BASE}/${workflowId}/analyze`, payload);
+  },
 };

@@ -193,6 +193,25 @@ class TestWorkflowOrchestrator:
         assert state1.workflow_id != state2.workflow_id
         assert state2.stages[WorkflowStage.UPLOADED].result["row_count"] == 5
 
+    def test_cache_hit_reattributes_ownership_to_current_caller(self, orchestrator, sample_df):
+        """A cache hit must not leak the first caller's org/user attribution."""
+        state1 = orchestrator.start(
+            sample_df, dataset_name="shared.csv", created_by=1, organization_id=100
+        )
+        assert state1.created_by == 1
+        assert state1.organization_id == 100
+
+        # Second caller, different org/user, identical dataset content+name -
+        # must hit the cache but be attributed to itself, not the first caller.
+        state2 = orchestrator.start(
+            sample_df, dataset_name="shared.csv", created_by=2, organization_id=200
+        )
+        assert state2.workflow_id != state1.workflow_id
+        assert state2.created_by == 2
+        assert state2.organization_id == 200
+        # Original workflow's attribution must be unaffected.
+        assert orchestrator.get_state(state1.workflow_id).organization_id == 100
+
     def test_caching_different_dataset(self, orchestrator, sample_df, retail_df):
         """Test that different datasets are not cached."""
         state1 = orchestrator.start(sample_df, dataset_name="healthcare.csv")

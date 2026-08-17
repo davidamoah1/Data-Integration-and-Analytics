@@ -29,11 +29,13 @@ import authentication.models  # noqa: F401
 import enterprise.models  # noqa: F401
 import enterprise.subscription  # noqa: F401
 import etl.models  # noqa: F401
+import jobs.models  # noqa: F401
 import ml.models  # noqa: F401
 import notifications.models  # noqa: F401
 import organizations.models  # noqa: F401
 import scheduler.models  # noqa: F401
 import services.dataset_workflow_models  # noqa: F401
+import storage.models  # noqa: F401
 import workflows.models  # noqa: F401
 from authentication.services import seed_default_data
 from shared import database as db_module

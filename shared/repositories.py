@@ -122,7 +122,11 @@ class BaseRepository(Generic[T]):
     # ── Update ──────────────────────────────────────────────────────────
 
     def update(self, id: int, **kwargs) -> T | None:
-        kwargs["updated_at"] = datetime.now(timezone.utc)
+        # Not every model has an updated_at column (e.g. jobs.models.Job) -
+        # setting it unconditionally makes SQLAlchemy raise
+        # "Unconsumed column names: updated_at" for those models.
+        if hasattr(self.model, "updated_at"):
+            kwargs["updated_at"] = datetime.now(timezone.utc)
         self.db.execute(update(self.model).where(self.model.id == id).values(**kwargs))
         self.db.flush()
         return self.get_by_id(id)

@@ -303,8 +303,11 @@ def _run_job_wrapper(job_id: int, job_type: str) -> dict:
         logger.info("Executing job %d: %s '%s'", job_id, job_type, job.name)
         result = handler(job_id, payload, db)
 
-        # Mark completed
-        result_json = json.dumps(result) if result else None
+        # Mark completed. default=str guards against handlers returning
+        # numpy scalar types (bool_, int64, float64, ...) from pandas/numpy
+        # operations - e.g. dataset_workflow's stage results - which the
+        # stdlib json encoder cannot serialize directly.
+        result_json = json.dumps(result, default=str) if result else None
         repo.mark_completed(job_id, result=result_json)
         db.commit()
 

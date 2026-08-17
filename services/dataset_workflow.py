@@ -183,6 +183,17 @@ class DatasetWorkflowOrchestrator:
         cached_state = self._check_cache(dataset_hash)
         if cached_state:
             logger.info(f"Cache hit for dataset hash {dataset_hash[:8]}")
+            # The cache is keyed only by dataset content + name, not by
+            # caller, so re-attribute ownership to the CURRENT caller rather
+            # than leaving whichever created_by/organization_id the dataset
+            # was originally cached under. Without this, a second
+            # organization uploading content-identical data (e.g. the same
+            # sample file) would get back a workflow attributed to the
+            # first organization - a cross-tenant data attribution bug.
+            cached_state.created_by = created_by
+            cached_state.organization_id = organization_id
+            cached_state.context["admin_confirmed"] = admin_confirmed
+            cached_state.context["overrides"] = overrides or {}
             # Register the cache-hit workflow under its own (new) workflow_id
             # and emit progress for it, same as a freshly-run workflow, so
             # get_state() and any persistence callbacks (see

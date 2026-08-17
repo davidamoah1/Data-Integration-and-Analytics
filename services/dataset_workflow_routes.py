@@ -23,6 +23,7 @@ import tempfile
 
 import pandas as pd
 from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session as DbSession
@@ -125,17 +126,50 @@ class ConfirmIndustryRequest(BaseModel):
     overrides: dict | None = None
 
 
-def _read_upload(file: UploadFile) -> pd.DataFrame:
-    """Read an uploaded file into a DataFrame."""
-    content = file.file.read()
-    file.file.seek(0)
+class ApplyTransformationRequest(BaseModel):
+    """Request to apply a cleaning transformation to a workflow dataset."""
+    check_name: str
+    column: str | None = None
+    action: str  # fill_missing, normalize_countries, normalize_categories, convert_type, parse_dates, flag_outliers, remove_duplicates
+    method: str | None = None  # mean, mode, median, etc.
+    value: str | None = None  # fill value for fill_missing
 
-    if file.filename and file.filename.endswith(".csv"):
+
+class UndoTransformationRequest(BaseModel):
+    """Request to undo a previously applied transformation."""
+    transformation_id: str
+
+
+class AnalyzeRequest(BaseModel):
+    """Request to run analysis on a workflow dataset."""
+    mode: str = "easy"  # easy or pro
+    analysis_type: str | None = None  # descriptive, correlation, ttest, anova, chi_square, regression, normality, mann_whitney, kruskal_wallis
+    columns: list[str] | None = None
+    group_column: str | None = None
+    target_column: str | None = None
+    question: str | None = None  # natural language question for easy mode
+
+
+class GeneratePresentationRequest(BaseModel):
+    """Request to generate a PPTX presentation from workflow results."""
+    template: str = "executive"  # executive, analytical, research, pitch
+    title: str | None = None
+
+
+def _parse_upload_bytes(content: bytes, filename: str) -> pd.DataFrame:
+    """Parse raw upload bytes into a DataFrame based on filename extension.
+
+    Shared by the synchronous request path (`_read_upload`) and the async
+    job handler (`jobs/handlers.py::_handle_dataset_workflow`), which
+    re-downloads the same bytes from storage in a (possibly different)
+    worker process.
+    """
+    if filename and filename.endswith(".csv"):
         try:
             return pd.read_csv(io.BytesIO(content), encoding="utf-8")
         except UnicodeDecodeError:
             return pd.read_csv(io.BytesIO(content), encoding="latin-1")
-    elif file.filename and file.filename.endswith((".xlsx", ".xls")):
+    elif filename and filename.endswith((".xlsx", ".xls")):
         return pd.read_excel(io.BytesIO(content))
     else:
         # Try CSV as default
@@ -143,6 +177,13 @@ def _read_upload(file: UploadFile) -> pd.DataFrame:
             return pd.read_csv(io.BytesIO(content), encoding="utf-8")
         except Exception:
             return pd.read_csv(io.BytesIO(content), encoding="latin-1")
+
+
+def _read_upload(file: UploadFile) -> pd.DataFrame:
+    """Read an uploaded file into a DataFrame."""
+    content = file.file.read()
+    file.file.seek(0)
+    return _parse_upload_bytes(content, file.filename or "")
 
 
 def _validate_uploaded_file(file: UploadFile) -> bytes:
@@ -205,6 +246,28 @@ def _stage_result(state_dict: dict, stage: WorkflowStage) -> dict | None:
     return state_dict["stages"].get(stage.value, {}).get("result")
 
 
+def _async_workflow_execution_available() -> bool:
+    """Whether a background worker exists to process a queued workflow job.
+
+    Mirrors `api.main._is_serverless()` without importing `api.main` (which
+    itself imports this module at startup - importing it back here would be
+    circular). Async execution requires:
+      1. `REDIS_URL` configured, so the job queue is the shared Redis-backed
+         queue rather than an in-process-only in-memory one.
+      2. Not running serverless (Vercel), since no persistent worker process
+         exists there to consume the queue - only `docker-compose.prod.yml`'s
+         dedicated `worker` service (`python -m performance.worker_entry`)
+         does. Enqueuing on Vercel would leave the job stuck "pending"
+         forever with nothing to run it.
+    """
+    import config
+
+    is_serverless = os.getenv("VERCEL", "").lower() in ("1", "true", "yes") or os.getenv(
+        "DISABLE_STARTUP_TASKS", ""
+    ).lower() in ("1", "true", "yes")
+    return bool(getattr(config, "REDIS_URL", "")) and not is_serverless
+
+
 @router.post("/run")
 async def run_workflow(
     request: Request,
@@ -215,26 +278,89 @@ async def run_workflow(
 ):
     """Upload a dataset and run the full intelligence workflow.
 
-    Returns the complete workflow state with all stage results.
+    When a background worker is available (`REDIS_URL` configured and not
+    serverless - see `_async_workflow_execution_available`), this enqueues
+    the pipeline as a background job via `jobs.service.JobService` and
+    returns `202` with a `job_id` to poll (via `GET /api/jobs/{job_id}` or
+    `GET /dataset-workflow/{workflow_id}/status` once the job assigns a
+    workflow_id), instead of blocking the request for the full pipeline
+    duration (C4 - avoids Vercel's 30s `maxDuration` timeout on large
+    files). Otherwise, falls back to the original synchronous behavior and
+    returns the complete result directly in the response.
     """
     _validate_uploaded_file(file)
+    content = file.file.read()
+    file.file.seek(0)
+    filename = file.filename or "uploaded_dataset"
+    org_id = get_current_organization_id(current_user, db)
 
+    if _async_workflow_execution_available():
+        from jobs.service import JobService
+        from storage.service import FileService
+
+        file_service = FileService(db)
+        record = file_service.upload(
+            organization_id=org_id,
+            filename=filename,
+            data=content,
+            uploaded_by=current_user["id"],
+            key_prefix=f"dataset-workflow/org_{org_id}/",
+        )
+
+        try:
+            job = JobService(db).create_job(
+                organization_id=org_id,
+                user_id=current_user["id"],
+                job_type="dataset_workflow",
+                name=f"Dataset workflow: {filename}",
+                payload={
+                    "file_id": record.file_id,
+                    "filename": filename,
+                    "admin_confirmed": admin_confirmed,
+                    "organization_id": org_id,
+                    "created_by": current_user["id"],
+                },
+            )
+        except ValueError as e:
+            # No handler registered for "dataset_workflow" in this process
+            # (e.g. jobs.handlers.register_builtin_handlers() hasn't run
+            # yet). Fail safe to synchronous execution below rather than
+            # erroring out the request.
+            logger.warning(
+                "dataset_workflow job handler unavailable (%s); running synchronously", e
+            )
+        else:
+            return JSONResponse(
+                status_code=202,
+                content={
+                    "success": True,
+                    "data": {
+                        "job_id": job.id,
+                        "status": job.status,
+                        "status_url": f"/api/jobs/{job.id}",
+                    },
+                    "message": (
+                        "Workflow queued for background processing. "
+                        "Poll status_url for progress and results."
+                    ),
+                },
+            )
+
+    # Synchronous fallback (serverless, or no Redis-backed queue available).
     try:
-        df = _read_upload(file)
+        df = _parse_upload_bytes(content, filename)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Failed to read file: {e}") from None
 
     if df.empty:
         raise HTTPException(status_code=400, detail="Uploaded file is empty")
 
-    org_id = get_current_organization_id(current_user, db)
-
     # Run a governance review before processing.
     governance = classify_dataset(df)
 
     state = _orchestrator.start(
         df,
-        dataset_name=file.filename or "uploaded_dataset",
+        dataset_name=filename,
         admin_confirmed=admin_confirmed,
         created_by=current_user["id"],
         organization_id=org_id,
@@ -448,3 +574,424 @@ async def retry_stage(
         "data": state.to_dict(),
         "message": "Stage retried successfully" if not state.has_errors else "Stage retry failed",
     }
+
+
+@router.post("/{workflow_id}/clean/apply")
+async def apply_cleaning_transformation(
+    workflow_id: str,
+    payload: ApplyTransformationRequest,
+    request: Request,
+    current_user: dict = Depends(get_current_user),
+    db: DbSession = Depends(get_db),
+):
+    """Apply a single cleaning transformation to the workflow dataset.
+
+    Tracks the transformation in the workflow state for auditability
+    and supports undo via the transformation_id returned.
+    """
+    state_dict = _get_workflow_state_dict(workflow_id, current_user, db)
+    org_id = get_current_organization_id(current_user, db)
+
+    # The in-memory orchestrator must still hold the DataFrame
+    state = _orchestrator.get_state(workflow_id)
+    if state is None or not hasattr(state, "df") or state.df is None:
+        raise HTTPException(
+            status_code=409,
+            detail="Workflow data is not available for cleaning in this process.",
+        )
+
+    import uuid
+    from datetime import datetime, timezone
+
+    transformation_id = str(uuid.uuid4())
+    df = state.df
+    affected_rows = 0
+    description = ""
+
+    col = payload.column
+
+    if payload.action == "fill_missing" and col:
+        before_missing = int(df[col].isna().sum())
+        if payload.method == "mean" and df[col].dtype in ("int64", "float64"):
+            fill_val = df[col].mean()
+            df[col] = df[col].fillna(fill_val)
+            description = f"Filled {before_missing} missing values in '{col}' with mean ({fill_val:.2f})"
+        elif payload.method == "median" and df[col].dtype in ("int64", "float64"):
+            fill_val = df[col].median()
+            df[col] = df[col].fillna(fill_val)
+            description = f"Filled {before_missing} missing values in '{col}' with median ({fill_val:.2f})"
+        elif payload.method == "mode":
+            mode_val = df[col].mode().iloc[0] if not df[col].mode().empty else "Unknown"
+            df[col] = df[col].fillna(mode_val)
+            description = f"Filled {before_missing} missing values in '{col}' with mode ('{mode_val}')"
+        elif payload.value is not None:
+            df[col] = df[col].fillna(payload.value)
+            description = f"Filled {before_missing} missing values in '{col}' with '{payload.value}'"
+        else:
+            raise HTTPException(status_code=400, detail="fill_missing requires method or value")
+        affected_rows = before_missing
+
+    elif payload.action == "remove_duplicates":
+        before_count = len(df)
+        df = df.drop_duplicates()
+        state.df = df
+        affected_rows = before_count - len(df)
+        description = f"Removed {affected_rows} duplicate rows"
+
+    elif payload.action == "normalize_categories" and col:
+        from studios.cleaning_service import CATEGORY_NORMALIZATION
+        mapping = {k.lower().strip(): v for k, v in CATEGORY_NORMALIZATION.items()}
+        before = df[col].copy()
+        df[col] = df[col].apply(
+            lambda x, m=mapping: m.get(str(x).lower().strip(), x) if pd.notna(x) else x
+        )
+        affected_rows = int((before != df[col]).sum())
+        description = f"Normalized {affected_rows} category values in '{col}'"
+
+    elif payload.action == "normalize_countries" and col:
+        from studios.cleaning_service import COUNTRY_NORMALIZATION
+        mapping = {k.lower().strip(): v for k, v in COUNTRY_NORMALIZATION.items()}
+        before = df[col].copy()
+        df[col] = df[col].apply(
+            lambda x, m=mapping: m.get(str(x).lower().strip(), x) if pd.notna(x) else x
+        )
+        affected_rows = int((before != df[col]).sum())
+        description = f"Normalized {affected_rows} country names in '{col}'"
+
+    elif payload.action == "convert_type" and col:
+        df[col] = pd.to_numeric(df[col], errors="coerce")
+        affected_rows = int(df[col].notna().sum())
+        description = f"Converted '{col}' to numeric type"
+
+    elif payload.action == "parse_dates" and col:
+        df[col] = pd.to_datetime(df[col], errors="coerce")
+        affected_rows = int(df[col].notna().sum())
+        description = f"Parsed '{col}' as datetime"
+
+    elif payload.action == "flag_outliers" and col:
+        q1 = df[col].quantile(0.25)
+        q3 = df[col].quantile(0.75)
+        iqr = q3 - q1
+        lower = q1 - 1.5 * iqr
+        upper = q3 + 1.5 * iqr
+        outlier_col = f"{col}_is_outlier"
+        df[outlier_col] = (df[col] < lower) | (df[col] > upper)
+        affected_rows = int(df[outlier_col].sum())
+        description = f"Flagged {affected_rows} outliers in '{col}'"
+
+    else:
+        raise HTTPException(status_code=400, detail=f"Unsupported action: {payload.action}")
+
+    # Record transformation
+    transformation_record = {
+        "id": transformation_id,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "action": payload.action,
+        "check_name": payload.check_name,
+        "column": col,
+        "description": description,
+        "affected_rows": affected_rows,
+        "undone": False,
+        "applied_by": current_user["id"],
+    }
+
+    # Store in workflow state
+    if not hasattr(state, "transformations"):
+        state.transformations = []
+    state.transformations.append(transformation_record)
+
+    log_audit_event(
+        db=db,
+        action="dataset_workflow.clean.apply",
+        user_id=current_user["id"],
+        organization_id=org_id,
+        resource_type="workflow",
+        resource_id=workflow_id,
+        new_values=transformation_record,
+        request=request,
+    )
+    db.commit()
+
+    return {
+        "success": True,
+        "data": transformation_record,
+        "message": description,
+    }
+
+
+@router.get("/{workflow_id}/clean/history")
+async def get_cleaning_history(
+    workflow_id: str,
+    current_user: dict = Depends(get_current_user),
+    db: DbSession = Depends(get_db),
+):
+    """Get the transformation history for a workflow."""
+    _get_workflow_state_dict(workflow_id, current_user, db)
+
+    state = _orchestrator.get_state(workflow_id)
+    transformations = getattr(state, "transformations", []) if state else []
+
+    return {
+        "success": True,
+        "data": {
+            "transformations": transformations,
+            "total": len(transformations),
+            "active": sum(1 for t in transformations if not t.get("undone")),
+        },
+    }
+
+
+@router.post("/{workflow_id}/analyze")
+async def run_analysis(
+    workflow_id: str,
+    payload: AnalyzeRequest,
+    current_user: dict = Depends(get_current_user),
+    db: DbSession = Depends(get_db),
+):
+    """Run statistical analysis on the workflow dataset.
+
+    Supports two modes:
+      - easy: Auto-detects appropriate analysis, presents insights in plain language.
+      - pro: Runs specific statistical tests (descriptive, correlation, ttest, anova, etc.)
+    """
+    _get_workflow_state_dict(workflow_id, current_user, db)
+
+    state = _orchestrator.get_state(workflow_id)
+    if state is None or not hasattr(state, "df") or state.df is None:
+        raise HTTPException(
+            status_code=409,
+            detail="Workflow data is not available for analysis in this process.",
+        )
+
+    df = state.df
+
+    if payload.mode == "easy":
+        # Easy mode: auto-generate insights using InsightGenerator
+        from ai_copilot.insight_generator import InsightGenerator
+
+        col_mapping = {}
+        # Use semantic mapping from earlier stage if available
+        semantic_result = state.to_dict()["stages"].get("semantically_analyzed", {}).get("result")
+        if semantic_result and isinstance(semantic_result, dict):
+            col_mapping = semantic_result.get("column_mapping", {})
+
+        generator = InsightGenerator()
+        insights = generator.generate(df, col_mapping=col_mapping, max_insights=15)
+
+        # Get industry-specific analytics if industry was detected
+        industry_result = state.to_dict()["stages"].get("industry_identified", {}).get("result")
+        industry_analytics = None
+        if industry_result and isinstance(industry_result, dict):
+            industry_name = industry_result.get("industry", "").lower()
+            try:
+                from industry_intelligence.base import IndustryAnalyticsRegistry
+                industry_analytics = IndustryAnalyticsRegistry.analyze(
+                    industry_name, df, col_mapping
+                )
+            except Exception:
+                pass
+
+        return {
+            "success": True,
+            "data": {
+                "mode": "easy",
+                "insights": [i.to_dict() for i in insights],
+                "total_insights": len(insights),
+                "industry_analytics": industry_analytics.to_dict() if industry_analytics else None,
+                "question": payload.question,
+            },
+        }
+
+    elif payload.mode == "pro":
+        # Pro mode: run specific statistical tests
+        from studios.statistics_service import StatisticsService
+
+        svc = StatisticsService(db)
+        analysis_type = payload.analysis_type or "descriptive"
+        columns = payload.columns
+
+        try:
+            if analysis_type == "descriptive":
+                result = svc.descriptive(df, columns)
+            elif analysis_type == "correlation":
+                result = svc.correlation(df, columns, method="pearson")
+            elif analysis_type == "ttest":
+                if not columns or len(columns) < 1 or not payload.group_column:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="T-test requires at least one numeric column and a group_column",
+                    )
+                result = svc.ttest(df, columns[0], payload.group_column)
+            elif analysis_type == "anova":
+                if not columns or len(columns) < 1 or not payload.group_column:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="ANOVA requires a numeric column and a group_column",
+                    )
+                result = svc.anova(df, columns[0], payload.group_column)
+            elif analysis_type == "chi_square":
+                if not columns or len(columns) < 2:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="Chi-square requires two categorical columns",
+                    )
+                result = svc.chi_square(df, columns[0], columns[1])
+            elif analysis_type == "regression":
+                if not columns or not payload.target_column:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="Regression requires feature columns and a target_column",
+                    )
+                result = svc.regression(df, columns, payload.target_column)
+            elif analysis_type == "normality":
+                if not columns or len(columns) < 1:
+                    raise HTTPException(status_code=400, detail="Normality test requires a column")
+                result = svc.normality_test(df, columns[0])
+            elif analysis_type == "mann_whitney":
+                if not columns or len(columns) < 1 or not payload.group_column:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="Mann-Whitney requires a numeric column and group_column",
+                    )
+                result = svc.mann_whitney(df, columns[0], payload.group_column)
+            elif analysis_type == "kruskal_wallis":
+                if not columns or len(columns) < 1 or not payload.group_column:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="Kruskal-Wallis requires a numeric column and group_column",
+                    )
+                result = svc.kruskal_wallis(df, columns[0], payload.group_column)
+            else:
+                raise HTTPException(status_code=400, detail=f"Unknown analysis type: {analysis_type}")
+
+            return {
+                "success": True,
+                "data": {
+                    "mode": "pro",
+                    "analysis_type": analysis_type,
+                    "result": result,
+                },
+            }
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}") from None
+
+    else:
+        raise HTTPException(status_code=400, detail=f"Invalid mode: {payload.mode}")
+
+
+@router.post("/{workflow_id}/presentation")
+async def generate_presentation(
+    workflow_id: str,
+    payload: GeneratePresentationRequest,
+    request: Request,
+    current_user: dict = Depends(get_current_user),
+    db: DbSession = Depends(get_db),
+):
+    """Generate a PPTX presentation from the workflow results.
+
+    Uses the analysis summary, insights, quality score, and dashboard
+    recommendations to build a professional presentation file.
+    Returns the file as a downloadable response.
+    """
+    from fastapi.responses import StreamingResponse
+    from pptx import Presentation as PptxPresentation
+    from pptx.util import Inches, Pt
+    from studios.presentation_service import PresentationStudioService
+
+    state_dict = _get_workflow_state_dict(workflow_id, current_user, db)
+    org_id = get_current_organization_id(current_user, db)
+
+    # Gather data from workflow stages
+    profile = _stage_result(state_dict, WorkflowStage.PROFILED) or {}
+    quality = _stage_result(state_dict, WorkflowStage.QUALITY_CHECKED) or {}
+    industry = _stage_result(state_dict, WorkflowStage.INDUSTRY_IDENTIFIED) or {}
+    insights_data = _stage_result(state_dict, WorkflowStage.INSIGHTS_GENERATED) or {}
+    dashboard = _stage_result(state_dict, WorkflowStage.DASHBOARD_READY) or {}
+
+    dataset_name = state_dict.get("dataset_name", "Dataset")
+    title = payload.title or f"{dataset_name} — Analysis Presentation"
+
+    # Build source data for slide generation
+    source_data = {
+        "title": title,
+        "subtitle": f"Generated from {dataset_name}",
+        "summary": quality.get("summary", insights_data.get("executive_summary", "")),
+        "findings": "\n".join(
+            f"• {i.get('title', '')}: {i.get('description', '')}"
+            for i in insights_data.get("insights", [])[:5]
+        ),
+        "recommendations": "\n".join(quality.get("recommendations", [])[:5]),
+        "data_overview": (
+            f"Rows: {profile.get('row_count', 'N/A')}, "
+            f"Columns: {profile.get('column_count', 'N/A')}, "
+            f"Quality Score: {quality.get('score', {}).get('overall', 'N/A')}"
+        ),
+        "chart_config": dashboard.get("recommended_charts", [{}])[0] if dashboard.get("recommended_charts") else None,
+        "next_steps": "Review findings and implement recommended actions.",
+        "industry": industry.get("industry", "general"),
+    }
+
+    # Generate slides metadata
+    slides = PresentationStudioService.generate_slides(
+        source_type="workflow",
+        source_data=source_data,
+        template=payload.template,
+    )
+
+    # Create actual PPTX file
+    prs = PptxPresentation()
+    prs.slide_width = Inches(13.333)
+    prs.slide_height = Inches(7.5)
+
+    for slide_data in slides:
+        layout = prs.slide_layouts[1]  # Title and Content layout
+        if slide_data.get("layout") == "title":
+            layout = prs.slide_layouts[0]  # Title Slide layout
+
+        slide = prs.slides.add_slide(layout)
+
+        # Set title
+        if slide.shapes.title:
+            slide.shapes.title.text = slide_data.get("title", "")
+
+        # Set content
+        content = slide_data.get("content", "")
+        if content and len(slide.placeholders) > 1:
+            body = slide.placeholders[1]
+            tf = body.text_frame
+            tf.text = content
+
+        # Add speaker notes
+        notes = slide_data.get("speaker_notes", "")
+        if notes:
+            notes_slide = slide.notes_slide
+            notes_slide.notes_text_frame.text = notes
+
+    # Save to BytesIO and return as download
+    output = io.BytesIO()
+    prs.save(output)
+    output.seek(0)
+
+    # Record in audit
+    log_audit_event(
+        db=db,
+        action="dataset_workflow.presentation.generate",
+        user_id=current_user["id"],
+        organization_id=org_id,
+        resource_type="workflow",
+        resource_id=workflow_id,
+        new_values={"template": payload.template, "title": title, "slides": len(slides)},
+        request=request,
+    )
+    db.commit()
+
+    safe_filename = dataset_name.replace(" ", "_").replace("/", "_")
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        headers={
+            "Content-Disposition": f'attachment; filename="{safe_filename}_presentation.pptx"',
+        },
+    )

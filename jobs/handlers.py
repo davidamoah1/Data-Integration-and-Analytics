@@ -166,6 +166,74 @@ def _handle_data_import(job_id: int, payload: dict, db: DbSession) -> dict:
     }
 
 
+# ── Dataset Workflow Handler ──────────────────────────────────────────────
+
+
+def _handle_dataset_workflow(job_id: int, payload: dict, db: DbSession) -> dict:
+    """Run the full dataset intelligence workflow as a background job (C4).
+
+    Mirrors the synchronous fallback path in
+    services.dataset_workflow_routes.run_workflow: downloads the uploaded
+    file from storage (uploaded there by the route before enqueuing, since
+    a DataFrame itself isn't JSON-serializable for the job payload), parses
+    it, runs governance classification, runs the orchestrator, and writes
+    the same audit log entry the synchronous path would have written.
+    """
+    from audit.service import log_audit_event
+    from governance import classify_dataset
+    from services.dataset_workflow_routes import _orchestrator, _parse_upload_bytes
+    from storage.service import FileService
+
+    file_id = payload.get("file_id")
+    if not file_id:
+        raise ValueError("file_id is required for dataset_workflow jobs")
+    filename = payload.get("filename") or "uploaded_dataset"
+    admin_confirmed = payload.get("admin_confirmed", False)
+    organization_id = payload.get("organization_id")
+    created_by = payload.get("created_by")
+
+    update_job_progress(job_id, 0.05, "Loading uploaded file")
+    content, _record = FileService(db).download(file_id, organization_id)
+
+    df = _parse_upload_bytes(content, filename)
+    if df.empty:
+        raise ValueError("Uploaded file is empty")
+
+    update_job_progress(job_id, 0.1, "Running governance classification")
+    governance = classify_dataset(df)
+
+    update_job_progress(job_id, 0.15, "Running dataset intelligence workflow")
+    state = _orchestrator.start(
+        df,
+        dataset_name=filename,
+        admin_confirmed=admin_confirmed,
+        created_by=created_by,
+        organization_id=organization_id,
+    )
+
+    log_audit_event(
+        db=db,
+        action="dataset_workflow.run",
+        user_id=created_by,
+        organization_id=organization_id,
+        resource_type="workflow",
+        resource_id=state.workflow_id,
+        new_values={
+            "dataset_name": state.dataset_name,
+            "governance": governance.to_dict(),
+            "admin_confirmed": admin_confirmed,
+        },
+        request=None,
+    )
+    db.commit()
+
+    update_job_progress(job_id, 1.0, "Workflow complete")
+    return {
+        **state.to_dict(),
+        "governance": governance.to_dict(),
+    }
+
+
 # ── Export Handler ────────────────────────────────────────────────────────
 
 
@@ -204,4 +272,5 @@ def register_builtin_handlers() -> None:
     register_handler("report_gen", _handle_report_gen, TaskPriority.REPORTS)
     register_handler("data_import", _handle_data_import, TaskPriority.NORMAL)
     register_handler("export", _handle_export, TaskPriority.LOW)
-    logger.info("Registered %d built-in job handlers", 5)
+    register_handler("dataset_workflow", _handle_dataset_workflow, TaskPriority.ETL)
+    logger.info("Registered %d built-in job handlers", 6)
