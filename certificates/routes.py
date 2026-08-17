@@ -157,12 +157,47 @@ async def upload_certificates(
                 org_id, current_user["id"], file.filename or "certificate", content,
                 source="web", batch_id=batch.id,
             )
-            # Process synchronously for small batches
-            doc = svc.process_document(doc.id)
-            if doc.status == "ready_for_review":
-                review_required += 1
+            # Enqueue background job for processing instead of synchronous
+            job_id = None
+            try:
+                from jobs.handlers import register_builtin_handlers
+                from jobs.service import JobService, get_registered_types
+
+                if "ocr_document" not in get_registered_types():
+                    register_builtin_handlers()
+
+                job_svc = JobService(db)
+                job = job_svc.create_job(
+                    organization_id=org_id,
+                    user_id=current_user["id"],
+                    job_type="ocr_document",
+                    name=f"Certificate OCR: {doc.filename}",
+                    description=f"Processing certificate '{doc.filename}'",
+                    payload={"document_id": doc.id, "organization_id": org_id},
+                )
+                job_id = job.id
+                db.commit()
+            except Exception as e:
+                logger.warning("Job system unavailable for certificate, using thread: %s", e)
+                import threading
+
+                def _process_doc(doc_id: int) -> None:
+                    from shared.database import get_engine, get_session_factory
+
+                    engine = get_engine()
+                    factory = get_session_factory(engine)
+                    session = factory()
+                    try:
+                        CaptureService(session).process_document(doc_id)
+                    finally:
+                        session.close()
+
+                threading.Thread(target=_process_doc, args=(doc.id,), daemon=True).start()
+
             succeeded += 1
-            results.append(_serialize_certificate(doc))
+            result = _serialize_certificate(doc)
+            result["job_id"] = job_id
+            results.append(result)
         except CaptureError as e:
             failed += 1
             results.append({

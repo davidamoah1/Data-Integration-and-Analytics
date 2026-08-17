@@ -63,6 +63,9 @@ temp/
 archive/
 uploads/
 
+# Uploaded file storage (test-generated)
+storage/files/
+
 # Runtime artifacts
 *.pid
 *.log

@@ -22,6 +22,7 @@ Authentication:
 
 # ruff: noqa: B008  # FastAPI Depends() calls in default arguments are intentional
 
+import asyncio
 import os
 import sys
 import uuid
@@ -333,7 +334,42 @@ async def lifespan(app: FastAPI):
     elif serverless:
         logger.info("Running in serverless mode; skipped heavy startup tasks.")
 
+    # Start background job worker (skip in serverless/test mode)
+    job_worker_task = None
+    if not serverless and not _is_test_env:
+        from jobs.service import get_task_queue
+
+        queue = get_task_queue()
+
+        async def _job_worker():
+            """Background worker loop — dequeues and executes jobs."""
+            logger.info("Background job worker started.")
+            while True:
+                try:
+                    task = await queue.dequeue(timeout=5.0)
+                    if task is not None:
+                        logger.info("Worker picked up task: %s", task.name)
+                        await queue.execute(task)
+                except asyncio.CancelledError:
+                    logger.info("Background job worker stopping.")
+                    break
+                except Exception as e:
+                    logger.error("Job worker error: %s", e)
+                    await asyncio.sleep(1)
+
+        job_worker_task = asyncio.create_task(_job_worker())
+        logger.info("Background job worker task created.")
+
     yield
+
+    # Stop background job worker
+    if job_worker_task is not None:
+        job_worker_task.cancel()
+        try:
+            await job_worker_task
+        except asyncio.CancelledError:
+            pass
+        logger.info("Background job worker stopped.")
 
 
 class RequestContextMiddleware(BaseHTTPMiddleware):

@@ -303,6 +303,24 @@ class CaptureService:
 
     # ── pipeline ─────────────────────────────────────────────────────────
 
+    def _extract_pdf_text(self, doc: CaptureDocument) -> str | None:
+        """Extract text directly from a PDF using PyMuPDF (no OCR needed)."""
+        try:
+            import fitz  # PyMuPDF
+        except ImportError:
+            return None
+
+        try:
+            local_path = self._resolve_local_path(doc.original_file_path)
+            text_parts: list[str] = []
+            with fitz.open(local_path) as pdf:
+                for page in pdf:
+                    text_parts.append(page.get_text())
+            return "\n".join(text_parts)
+        except Exception as e:
+            logger.warning("PDF text extraction failed for doc %s: %s", doc.id, e)
+            return None
+
     def process_document(self, document_id: int) -> CaptureDocument:
         doc = self.doc_repo.get_by_id(document_id)
         if not doc:
@@ -315,6 +333,64 @@ class CaptureService:
             page_image_paths = self._preprocess(doc)
 
             if not is_ocr_available():
+                # Try direct text extraction for PDFs before failing
+                if doc.file_type == "pdf":
+                    extracted_text = self._extract_pdf_text(doc)
+                    if extracted_text and extracted_text.strip():
+                        doc.status = "extracting"
+                        self.db.commit()
+                        # Create a synthetic OCR result from extracted text
+                        from capture.ocr_engine import OcrResult, OcrWord
+
+                        words = []
+                        for word in extracted_text.split():
+                            words.append(OcrWord(
+                                text=word, confidence=0.8, page=1,
+                                left=0.0, top=0.0, width=0.0, height=0.0,
+                            ))
+                        ocr_result = OcrResult(
+                            full_text=extracted_text,
+                            words=words,
+                            mean_confidence=0.8,
+                            page_count=1,
+                        )
+                        doc.raw_ocr_text = ocr_result.full_text
+                        doc.page_count = ocr_result.page_count or 1
+
+                        doc.status = "classifying"
+                        self.db.commit()
+
+                        classification = classifier.classify_text(ocr_result.full_text)
+                        if classification.document_type:
+                            doc.document_type = classification.document_type.key
+                            doc.document_type_label = classification.document_type.label
+                            doc.industry = classification.document_type.industry
+                        doc.classification_confidence = classification.confidence
+                        doc.needs_type_confirmation = classification.needs_confirmation
+
+                        doc.status = "validating"
+                        self.db.commit()
+
+                        self._extract_and_validate(doc, ocr_result)
+
+                        tables = extractors.detect_tables(ocr_result)
+                        doc.extracted_tables = tables
+
+                        doc.status = "ready_for_review"
+                        doc.processed_at = datetime.now(timezone.utc)
+                        self._log(
+                            doc.organization_id,
+                            "extracted",
+                            document_id=doc.id,
+                            details={
+                                "document_type": doc.document_type,
+                                "confidence": doc.classification_confidence,
+                                "extraction_method": "pdf_text",
+                            },
+                        )
+                        self.db.commit()
+                        return doc
+
                 doc.status = "failed"
                 doc.error_message = (
                     "OCR engine unavailable: the Tesseract OCR binary is not installed on this "
