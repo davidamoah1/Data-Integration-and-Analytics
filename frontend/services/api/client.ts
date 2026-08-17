@@ -3,10 +3,21 @@
 // must NOT also be "/api" or requests will double up as /api/api/....
 // An explicitly empty string (same-origin deployments behind a rewrite, e.g.
 // Vercel) is intentional and must not fall back to the localhost default.
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL !== undefined
-    ? process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, '')
-    : 'http://localhost:8001';
+//
+// In development (NODE_ENV !== 'production'), defaults to localhost:8001.
+// In production, NEXT_PUBLIC_API_URL MUST be set — an empty-string value
+// means same-origin, which is valid; an *undefined* value means
+// misconfiguration.
+const API_URL = (() => {
+  if (process.env.NEXT_PUBLIC_API_URL !== undefined) {
+    return process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, '');
+  }
+  if (process.env.NODE_ENV === 'production') {
+    // Same-origin fallback — works behind reverse proxy / Vercel rewrite.
+    return '';
+  }
+  return 'http://localhost:8001';
+})();
 const REQUEST_TIMEOUT = 30000;
 const MAX_RETRIES = 2;
 

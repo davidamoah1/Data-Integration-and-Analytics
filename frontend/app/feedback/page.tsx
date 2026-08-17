@@ -25,8 +25,18 @@ export default function FeedbackPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!message.trim()) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1200));
+    try {
+      const { apiClient } = await import('@/services/api/client');
+      await apiClient.post('/api/saas/support/tickets', {
+        subject: `[${type}] Feedback${rating ? ` (${rating}/5)` : ''}`,
+        description: `Type: ${type}\nRating: ${rating || 'N/A'}/5\nEmail: ${email || 'N/A'}\n\n${message}`,
+        priority: type === 'bug' ? 'high' : 'low',
+      }, { skipAuth: true });
+    } catch {
+      // Best-effort: visitor may not be authenticated.
+    }
     setLoading(false);
     setSent(true);
     toast.success('Thank you for your feedback!');

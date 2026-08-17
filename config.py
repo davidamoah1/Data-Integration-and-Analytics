@@ -208,7 +208,25 @@ ACCOUNT_LOCKOUT_THRESHOLD = int(os.getenv("ACCOUNT_LOCKOUT_THRESHOLD", "5"))
 ACCOUNT_LOCKOUT_DURATION_MINUTES = int(os.getenv("ACCOUNT_LOCKOUT_DURATION_MINUTES", "30"))
 
 # --- CORS ---
-CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:8501,http://localhost:3000")
+# Development defaults to localhost origins. In production set CORS_ORIGINS
+# explicitly (comma-separated) to your actual frontend domain(s).
+_cors_env = os.getenv("CORS_ORIGINS", "")
+if _cors_env:
+    CORS_ORIGINS = _cors_env
+elif DB_TYPE == "mysql":
+    # Production (MySQL) without explicit CORS_ORIGINS is likely a
+    # misconfiguration — default to empty so no cross-origin requests are
+    # allowed until the deployer configures it deliberately.
+    import warnings as _w
+    _w.warn(
+        "CORS_ORIGINS is not set in a MySQL (production) environment. "
+        "Cross-origin requests will be rejected. Set CORS_ORIGINS to your "
+        "frontend domain(s), e.g. 'https://app.example.com'.",
+        stacklevel=1,
+    )
+    CORS_ORIGINS = ""
+else:
+    CORS_ORIGINS = "http://localhost:8501,http://localhost:3000"
 
 # --- AI Platform (Phase 6) ---
 AI_DEFAULT_PROVIDER = os.getenv("AI_DEFAULT_PROVIDER", "openai")

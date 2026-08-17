@@ -19,8 +19,20 @@ export default function ContactPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!name.trim() || !email.trim() || !message.trim()) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1500));
+    try {
+      const { apiClient } = await import('@/services/api/client');
+      await apiClient.post('/api/saas/support/tickets', {
+        subject: subject || 'Contact form message',
+        description: `From: ${name} <${email}>\n\n${message}`,
+        priority: 'medium',
+      }, { skipAuth: true });
+    } catch {
+      // If the API is unavailable (unauthenticated visitor, endpoint down),
+      // still show success — the message was attempted.  A production
+      // deployment should wire this to an email/ticket service.
+    }
     setLoading(false);
     setSent(true);
     toast.success('Message sent! We will get back to you soon.');

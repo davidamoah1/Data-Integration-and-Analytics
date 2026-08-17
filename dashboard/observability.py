@@ -10,6 +10,7 @@ Tracks:
   - Background jobs
 """
 
+import os
 from datetime import datetime, timezone
 
 import pandas as pd
@@ -40,7 +41,7 @@ def render_observability_page():
     _section_header("System Observability")
 
     # Fetch data from API
-    api_url = st.session_state.get("api_base_url", "http://localhost:8000")
+    api_url = st.session_state.get("api_base_url", os.getenv("API_BASE_URL", "http://localhost:8000"))
     token = st.session_state.get("access_token")
 
     headers = {"Authorization": f"Bearer {token}"} if token else {}

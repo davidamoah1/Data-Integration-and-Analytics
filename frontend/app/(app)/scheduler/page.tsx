@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { CalendarClock, Plus, ArrowRight, FileText } from 'lucide-react';
+import { CalendarClock, ArrowRight, FileText } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 
@@ -15,9 +15,6 @@ export default function SchedulerPage() {
           <h1 className="text-2xl font-bold">Scheduler</h1>
           <p className="text-sm text-muted-foreground">Manage automated report schedules</p>
         </div>
-        <Button onClick={() => router.push('/reports')} className="gap-2">
-          <Plus className="h-4 w-4" /> New Schedule
-        </Button>
       </div>
 
       <Card>

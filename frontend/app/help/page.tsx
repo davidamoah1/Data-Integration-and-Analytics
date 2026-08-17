@@ -76,10 +76,8 @@ export default function HelpCenterPage() {
                 <p className="mt-1 text-sm text-slate-600">{cat.description}</p>
                 <ul className="mt-4 space-y-2">
                   {cat.articles.map((article) => (
-                    <li key={article}>
-                      <Link href="/contact" className="text-sm text-blue-600 hover:underline">
-                        {article}
-                      </Link>
+                    <li key={article} className="text-sm text-slate-600">
+                      {article}
                     </li>
                   ))}
                 </ul>

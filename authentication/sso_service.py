@@ -100,16 +100,20 @@ class SSOService:
         """
         state = secrets.token_urlsafe(32)
 
-        # TODO: When SSO_ENABLED=true and provider SDK is installed:
+        # SSO login flow is not yet available. The data layer (SSOConnection,
+        # SSOIdentity) is ready, but actual OAuth2/SAML exchange requires a
+        # provider SDK (e.g. authlib, python3-saml) which is not yet
+        # integrated. When SSO_ENABLED=true and a provider SDK is installed:
         # - OAuth2: Build authorization URL with client_id, redirect_uri, scope, state
         # - SAML: Build AuthnRequest with entity_id, ACS URL
-        # For now, return the state for the frontend to use
 
         return {
             "provider": provider,
             "state": state,
             "authorization_url": None,  # Populated when SDK is configured
             "redirect_url": redirect_url,
+            "status": "not_available",
+            "message": "SSO login is not yet available. Use email/password authentication.",
         }
 
     def handle_callback(
@@ -122,7 +126,9 @@ class SSOService:
 
         Actual implementation requires provider SDK integration.
         """
-        # TODO: When SSO_ENABLED=true and provider SDK is installed:
+        # SSO callback handling is not yet available.  The full flow
+        # requires a provider SDK (authlib / python3-saml).  Steps when
+        # implemented:
         # 1. Exchange code for access_token (OAuth2) or parse SAML response
         # 2. Fetch user profile from IdP
         # 3. Find or create SSOIdentity
@@ -130,8 +136,8 @@ class SSOService:
         # 5. If user doesn't exist, create account or return registration prompt
 
         raise ValidationError(
-            "SSO callback handling is not yet implemented. "
-            "Install the required provider SDK and configure SSO_ENABLED=true."
+            "SSO callback handling is not yet available. "
+            "Use email/password authentication or contact your administrator."
         )
 
     # --- SSO Identity Management ---

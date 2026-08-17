@@ -30,9 +30,9 @@ import requests
 class DataFlowClient:
     """Main SDK client for the DataFlow platform."""
 
-    def __init__(self, api_key: str | None = None, base_url: str = "http://localhost:8080"):
+    def __init__(self, api_key: str | None = None, base_url: str | None = None):
         self.api_key = api_key or os.getenv("DATAFLOW_API_KEY", "")
-        self.base_url = base_url.rstrip("/")
+        self.base_url = (base_url or os.getenv("DATAFLOW_BASE_URL", "http://localhost:8080")).rstrip("/")
         self.session = requests.Session()
         self.session.headers.update(
             {

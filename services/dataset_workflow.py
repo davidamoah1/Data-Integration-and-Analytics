@@ -136,7 +136,11 @@ class DatasetWorkflowOrchestrator:
     def __init__(self, max_retries: int | None = None):
         self.max_retries = max_retries or self.MAX_RETRIES
         self._progress_callbacks: list[Callable[[WorkflowState], None]] = []
-        # In-memory store for workflow states (replace with DB/Redis in production)
+        # In-process lookup for active workflow states. Every stage
+        # transition is also durably persisted to the dataset_workflow_runs
+        # table via _persist_workflow_state (registered as a progress
+        # callback in dataset_workflow_routes.py), so status/results
+        # survive restarts and are visible to other worker processes.
         self._workflows: dict[str, WorkflowState] = {}
         # Cache for completed workflows by dataset hash
         self._cache: dict[str, WorkflowState] = {}
