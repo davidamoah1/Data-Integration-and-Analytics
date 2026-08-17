@@ -23,6 +23,9 @@ from storage.service import FileService
 router = APIRouter(prefix="/api/files", tags=["file-storage"])
 
 
+_MAX_UPLOAD_BYTES = 50 * 1024 * 1024  # 50 MB
+
+
 @router.post("/upload")
 async def upload_file(
     file: UploadFile = File(...),
@@ -34,6 +37,8 @@ async def upload_file(
     svc = FileService(db)
 
     content = await file.read()
+    if len(content) > _MAX_UPLOAD_BYTES:
+        raise HTTPException(status_code=413, detail="File exceeds maximum upload size (50 MB)")
     record = svc.upload(
         organization_id=org_id,
         filename=file.filename or "unnamed",
@@ -88,11 +93,13 @@ async def download_file(
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="File not found") from None
 
+    # Sanitize filename for Content-Disposition header (prevent CRLF injection)
+    safe_name = "".join(c for c in (record.filename or "download") if c.isalnum() or c in "._- ")
     return Response(
         content=data,
         media_type=record.mime_type or "application/octet-stream",
         headers={
-            "Content-Disposition": f'attachment; filename="{record.filename}"',
+            "Content-Disposition": f'attachment; filename="{safe_name}"',
         },
     )
 

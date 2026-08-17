@@ -85,7 +85,9 @@ class BaseController:
             raise HTTPException(status_code=404, detail=str(e))
         if isinstance(e, ValidationError):
             raise HTTPException(status_code=422, detail=str(e))
-        raise HTTPException(status_code=500, detail=str(e))
+        import logging
+        logging.getLogger(__name__).exception("Unhandled controller error: %s", e)
+        raise HTTPException(status_code=500, detail="An unexpected error occurred.")
 
 
 def get_controller(controller_class: type[BaseController]):

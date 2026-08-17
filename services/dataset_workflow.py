@@ -23,9 +23,31 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
 
+import numpy as np
 import pandas as pd
 
 logger = logging.getLogger(__name__)
+
+
+def _json_safe(obj):
+    """Recursively convert numpy/pandas types to JSON-serializable Python types."""
+    if isinstance(obj, dict):
+        return {k: _json_safe(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_json_safe(v) for v in obj]
+    if isinstance(obj, (np.bool_,)):
+        return bool(obj)
+    if isinstance(obj, (np.integer,)):
+        return int(obj)
+    if isinstance(obj, (np.floating,)):
+        return float(obj) if not np.isnan(obj) else None
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    if isinstance(obj, (pd.Timestamp,)):
+        return obj.isoformat()
+    if hasattr(obj, "item"):  # numpy scalar fallback
+        return obj.item()
+    return obj
 
 
 class WorkflowStage(str, Enum):
@@ -79,7 +101,7 @@ class StageResult:
     retries: int = 0
 
     def to_dict(self) -> dict:
-        return {
+        return _json_safe({
             "stage": self.stage.value,
             "status": self.status.value,
             "started_at": self.started_at,
@@ -88,7 +110,7 @@ class StageResult:
             "result": self.result,
             "error": self.error,
             "retries": self.retries,
-        }
+        })
 
 
 @dataclass

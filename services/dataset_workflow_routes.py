@@ -875,7 +875,8 @@ async def run_analysis(
         except HTTPException:
             raise
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}") from None
+            logger.exception("Analysis failed for workflow %s: %s", workflow_id, e)
+            raise HTTPException(status_code=500, detail="Analysis failed. Please try again.") from None
 
     else:
         raise HTTPException(status_code=400, detail=f"Invalid mode: {payload.mode}")

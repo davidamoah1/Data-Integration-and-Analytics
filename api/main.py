@@ -391,6 +391,25 @@ async def http_exception_handler(request: Request, exc: HTTPException):
     )
 
 
+from fastapi.exceptions import RequestValidationError  # noqa: E402
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Return validation errors without reflecting raw user input."""
+    errors = []
+    for err in exc.errors():
+        # Strip the 'input' field to prevent XSS reflection
+        errors.append({
+            "field": ".".join(str(loc) for loc in err.get("loc", [])),
+            "message": err.get("msg", "Invalid value"),
+        })
+    return JSONResponse(
+        status_code=422,
+        content={"success": False, "message": "Validation error", "data": errors},
+    )
+
+
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     """Catch unhandled exceptions and return a safe response.
@@ -580,7 +599,8 @@ async def readiness_check():
             conn.execute(text("SELECT 1"))
         checks["database"] = {"status": "ready"}
     except Exception as e:
-        checks["database"] = {"status": "not_ready", "error": str(e)}
+        logger.error("Readiness check database probe failed: %s", e)
+        checks["database"] = {"status": "not_ready"}
         overall = False
 
     status_code = 200 if overall else 503

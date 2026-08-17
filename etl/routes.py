@@ -295,8 +295,8 @@ async def execute_import(
         job.error_message = str(e)
         job.completed_at = datetime.now(timezone.utc).replace(tzinfo=None)
         db.commit()
-        logger.error(f"Import failed: {e}")
-        raise HTTPException(status_code=500, detail=str(e)) from e
+        logger.exception(f"Import failed: {e}")
+        raise HTTPException(status_code=500, detail="Import failed. Check file format and try again.") from e
 
 
 # --- Profiling endpoints ----------------------------------------------------
