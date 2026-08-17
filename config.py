@@ -42,6 +42,10 @@ CAPTURE_RETENTION_DAYS = int(os.getenv("CAPTURE_RETENTION_DAYS", "365"))
 # Path to the Tesseract OCR binary. Leave unset to use the system PATH.
 TESSERACT_CMD = os.getenv("TESSERACT_CMD", "")
 
+# Certificate Intelligence — maximum files per normal batch upload.
+# Large batches (500+) should use background processing.
+CERTIFICATE_MAX_BATCH_SIZE = int(os.getenv("CERTIFICATE_MAX_BATCH_SIZE", "50"))
+
 # Database
 DB_TYPE = os.getenv("DB_TYPE", "").lower()
 

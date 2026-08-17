@@ -84,6 +84,40 @@ class CaptureDocument(Base):
     approved_at = Column(TIMESTAMP, nullable=True)
     retention_expires_at = Column(TIMESTAMP, nullable=True)
 
+    # Certificate-specific: verification status distinguishes extraction from
+    # authoritative verification. Never auto-set to "verified" — only an
+    # external verification source can do that.
+    # NOT_VERIFIED -> EXTRACTION_COMPLETE -> VERIFICATION_PENDING -> VERIFIED | VERIFICATION_FAILED
+    verification_status = Column(String(30), default="not_verified", nullable=False, index=True)
+    verification_method = Column(String(100), nullable=True)  # e.g. "institution_api", "qr_scan"
+    verified_at = Column(TIMESTAMP, nullable=True)
+    verified_by = Column(BigInt, nullable=True)
+
+
+class CertificateVerification(Base):
+    """Records of verification attempts for a certificate document.
+
+    Verification means an authoritative source confirmed the certificate,
+    NOT merely that text was extracted. Multiple attempts may be recorded
+    over time (e.g. initial QR scan, later institution API check).
+    """
+
+    __tablename__ = "certificate_verifications"
+
+    id = Column(BigInt, primary_key=True, autoincrement=True)
+    organization_id = Column(BigInt, nullable=False, index=True)
+    document_id = Column(BigInt, nullable=False, index=True)
+
+    method = Column(String(100), nullable=False)  # qr_scan, institution_api, manual_check
+    status = Column(String(30), nullable=False)  # pending, verified, failed, inconclusive
+    verified_by = Column(BigInt, nullable=True)
+    verification_source = Column(String(255), nullable=True)  # e.g. "ABC University Registry API"
+    reference_number = Column(String(255), nullable=True)  # confirmation code from source
+    notes = Column(Text, nullable=True)
+    verified_fields = Column(JSON, nullable=True)  # which fields were confirmed
+
+    created_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
+
 
 class CaptureField(Base):
     """An individual extracted field/value belonging to a captured document."""

@@ -74,6 +74,9 @@ from authentication.services import seed_default_data
 # Phase 16 — Smart Data Capture & Intelligent Document Processing
 from capture.routes import router as capture_router
 
+# Certificate Intelligence module
+from certificates.routes import router as certificates_router
+
 # Phase 12.9 — Enterprise Integration Ecosystem
 from connectors.routes import router as connectors_router
 from database.repositories import PipelineRunRepository, SalesRepository
@@ -512,6 +515,7 @@ app.include_router(studios_router)
 
 # Phase 16 — Smart Data Capture & Intelligent Document Processing
 app.include_router(capture_router)
+app.include_router(certificates_router)
 
 # Phase 11 — Background Processing & Job Queue
 app.include_router(jobs_router)
