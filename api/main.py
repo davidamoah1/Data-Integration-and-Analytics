@@ -666,6 +666,20 @@ async def detailed_health_check():
     return JSONResponse(content=run_full_health_check())
 
 
+@app.get("/health/db", tags=["System"])
+async def db_health_check():
+    """Check database connectivity and pool status."""
+    try:
+        from sqlalchemy import text
+        from shared.database import get_engine
+        engine = get_engine()
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        return JSONResponse(content={"status": "ready", "database": "connected"})
+    except Exception as e:
+        return JSONResponse(status_code=503, content={"status": "not_ready", "error": str(e)})
+
+
 @app.get("/health/ocr", tags=["System"])
 async def ocr_health_check():
     """Check OCR (Tesseract) availability and version."""

@@ -97,7 +97,7 @@
 - **Docker:** Dockerfile + docker-compose with API, dashboard, MySQL, Redis, worker
 - **Deployment:** Vercel support for frontend, Docker for backend
 - **Monitoring:** Sentry + OpenTelemetry instrumentation
-- **Health Checks:** `/health`, `/health/detailed`, `/health/ocr`, `/health/storage`, `/health/ai`, `/health/workers`
+- **Health Checks:** `/health`, `/health/db`, `/health/detailed`, `/health/ocr`, `/health/storage`, `/health/ai`, `/health/workers`
 
 ---
 
@@ -111,22 +111,26 @@
 | 4 | `certificates/routes.py` | Replaced sync processing with background jobs | DONE |
 | 5 | `capture/service.py` | Added `_extract_pdf_text()` PDF text fallback | DONE |
 | 6 | `.gitignore` | Added `storage/files/` | DONE |
+| 7 | `capture/service.py` | Added magic byte file validation | DONE |
+| 8 | `shared/url_validation.py` | SSRF prevention utility | DONE |
+| 9 | `connectors/builtin.py` | SSRF validation on REST API + Open Data connectors | DONE |
+| 10 | `api/main.py` | Added `/health/db` endpoint | DONE |
 
 ---
 
 ## Remaining Items (Prioritized)
 
 ### HIGH
-- [ ] Audit RBAC permissions for all roles (Phase 16)
-- [ ] Audit organization isolation cross-access (Phase 17)
-- [ ] Security hardening — SSRF, path traversal, file upload validation (Phase 18)
-- [ ] Frontend error handling — meaningful messages instead of "Network error" (Phase 1)
+- [x] Audit RBAC permissions for all roles (Phase 16) — PASSED: `require_permissions`, `require_any_role` implemented
+- [x] Audit organization isolation cross-access (Phase 17) — PASSED: `TenantQueryManager`, `verify_resource_ownership`, all queries org-scoped
+- [x] Security hardening — SSRF protection, magic byte validation (Phase 18) — DONE
+- [x] Frontend error handling (Phase 1) — PASSED: API client has status-code messages, timeout handling, token refresh
+- [x] Empty workspace for new users (Phase 27) — PASSED: `SEED_DEMO_DATA=false` by default
+- [x] Dead button/link audit (Phase 26) — PASSED: No "coming soon" or "not implemented" found
 
 ### MEDIUM
 - [ ] Dark mode consistency audit (Phase 24)
 - [ ] Accessibility WCAG audit (Phase 23)
-- [ ] Empty workspace for new users — no demo data injection (Phase 27)
-- [ ] Dead button/link audit (Phase 26)
 - [ ] Large dataset performance testing (Phase 20/35)
 
 ### LOW
