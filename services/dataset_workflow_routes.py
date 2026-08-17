@@ -882,6 +882,109 @@ async def run_analysis(
         raise HTTPException(status_code=400, detail=f"Invalid mode: {payload.mode}")
 
 
+def _add_chart_to_slide(
+    slide,
+    chart_spec: dict,
+    df,
+    left: float = 1.0,
+    top: float = 2.0,
+    width: float = 11.0,
+    height: float = 5.0,
+) -> bool:
+    """Render an actual chart on a PPTX slide using python-pptx.
+
+    Supports bar_chart, line_chart, and pie_chart specs from the dashboard
+    recommender. Returns True if a chart was added, False otherwise.
+    """
+    from pptx.chart.data import CategoryChartData
+    from pptx.enum.chart import XL_CHART_TYPE
+    from pptx.util import Inches
+
+    chart_type = chart_spec.get("type", "")
+    try:
+        if chart_type in ("bar_chart", "line_chart"):
+            x_axis = chart_spec.get("x_axis")
+            y_axis = chart_spec.get("y_axis")
+            if not x_axis or not y_axis or df is None:
+                return False
+            if x_axis not in df.columns or y_axis not in df.columns:
+                return False
+
+            # Aggregate: sum y by x (handle duplicates)
+            grouped = df.groupby(x_axis, dropna=False)[y_axis].sum().sort_index()
+            # Limit to top 15 categories for readability
+            if len(grouped) > 15:
+                grouped = grouped.nlargest(15)
+
+            chart_data = CategoryChartData()
+            chart_data.categories = [str(c) for c in grouped.index.tolist()]
+            chart_data.add_series(chart_spec.get("title", y_axis), grouped.tolist())
+
+            xl_type = XL_CHART_TYPE.COLUMN_CLUSTERED if chart_type == "bar_chart" else XL_CHART_TYPE.LINE
+            slide.shapes.add_chart(
+                xl_type,
+                Inches(left),
+                Inches(top),
+                Inches(width),
+                Inches(height),
+                chart_data,
+            )
+            return True
+
+        elif chart_type == "pie_chart":
+            column = chart_spec.get("column")
+            if not column or df is None or column not in df.columns:
+                return False
+
+            counts = df[column].value_counts().head(10)
+            chart_data = CategoryChartData()
+            chart_data.categories = [str(c) for c in counts.index.tolist()]
+            chart_data.add_series(chart_spec.get("title", column), counts.tolist())
+
+            slide.shapes.add_chart(
+                XL_CHART_TYPE.PIE,
+                Inches(left),
+                Inches(top),
+                Inches(width),
+                Inches(height),
+                chart_data,
+            )
+            return True
+
+        elif chart_type == "scatter":
+            x_axis = chart_spec.get("x_axis")
+            y_axis = chart_spec.get("y_axis")
+            if not x_axis or not y_axis or df is None:
+                return False
+            if x_axis not in df.columns or y_axis not in df.columns:
+                return False
+
+            from pptx.chart.data import XyChartData
+
+            xy_data = XyChartData()
+            series = xy_data.add_series(chart_spec.get("title", y_axis))
+            for _, row in df[[x_axis, y_axis]].dropna().head(50).iterrows():
+                x_val = float(row[x_axis]) if pd.api.types.is_numeric_dtype(df[x_axis]) else 0
+                y_val = float(row[y_axis])
+                series.add_data_point(x_val, y_val)
+
+            slide.shapes.add_chart(
+                XL_CHART_TYPE.XY_SCATTER,
+                Inches(left),
+                Inches(top),
+                Inches(width),
+                Inches(height),
+                xy_data,
+            )
+            return True
+
+    except Exception:
+        logger.warning("Failed to render chart %s", chart_type, exc_info=True)
+        return False
+
+    return False
+
+
 @router.post("/{workflow_id}/presentation")
 async def generate_presentation(
     workflow_id: str,
@@ -904,6 +1007,12 @@ async def generate_presentation(
     state_dict = _get_workflow_state_dict(workflow_id, current_user, db)
     org_id = get_current_organization_id(current_user, db)
 
+    # Try to get the in-memory DataFrame for chart rendering
+    df = None
+    in_memory_state = _orchestrator.get_state(workflow_id)
+    if in_memory_state is not None:
+        df = in_memory_state.context.get("df")
+
     # Gather data from workflow stages
     profile = _stage_result(state_dict, WorkflowStage.PROFILED) or {}
     quality = _stage_result(state_dict, WorkflowStage.QUALITY_CHECKED) or {}
@@ -913,6 +1022,14 @@ async def generate_presentation(
 
     dataset_name = state_dict.get("dataset_name", "Dataset")
     title = payload.title or f"{dataset_name} — Analysis Presentation"
+
+    # Get recommended charts from the dashboard stage
+    recommended_charts = dashboard.get("recommended_charts", [])
+    # Filter to chart types we can render (bar, line, pie, scatter)
+    renderable_charts = [
+        c for c in recommended_charts
+        if c.get("type") in ("bar_chart", "line_chart", "pie_chart", "scatter")
+    ]
 
     # Build source data for slide generation
     source_data = {
@@ -929,7 +1046,10 @@ async def generate_presentation(
             f"Columns: {profile.get('column_count', 'N/A')}, "
             f"Quality Score: {quality.get('score', {}).get('overall', 'N/A')}"
         ),
-        "chart_config": dashboard.get("recommended_charts", [{}])[0] if dashboard.get("recommended_charts") else None,
+        "chart_config": renderable_charts[0] if renderable_charts else (
+            dashboard.get("recommended_charts", [{}])[0]
+            if dashboard.get("recommended_charts") else None
+        ),
         "next_steps": "Review findings and implement recommended actions.",
         "industry": industry.get("industry", "general"),
     }
@@ -946,6 +1066,7 @@ async def generate_presentation(
     prs.slide_width = Inches(13.333)
     prs.slide_height = Inches(7.5)
 
+    charts_rendered = 0
     for slide_data in slides:
         layout = prs.slide_layouts[1]  # Title and Content layout
         if slide_data.get("layout") == "title":
@@ -957,18 +1078,50 @@ async def generate_presentation(
         if slide.shapes.title:
             slide.shapes.title.text = slide_data.get("title", "")
 
-        # Set content
+        # Set content (skip text body for chart slides — chart will fill the space)
+        is_chart_slide = slide_data.get("layout") == "chart"
         content = slide_data.get("content", "")
-        if content and len(slide.placeholders) > 1:
-            body = slide.placeholders[1]
-            tf = body.text_frame
-            tf.text = content
+        if is_chart_slide:
+            # Try to render an actual chart on this slide
+            chart_spec = slide_data.get("chart_config") or source_data.get("chart_config")
+            if chart_spec and df is not None:
+                added = _add_chart_to_slide(slide, chart_spec, df)
+                if added:
+                    charts_rendered += 1
+                else:
+                    # Fallback: show text content if chart rendering failed
+                    if content and len(slide.placeholders) > 1:
+                        body = slide.placeholders[1]
+                        body.text_frame.text = content
+            elif content and len(slide.placeholders) > 1:
+                body = slide.placeholders[1]
+                body.text_frame.text = content
+        else:
+            if content and len(slide.placeholders) > 1:
+                body = slide.placeholders[1]
+                tf = body.text_frame
+                tf.text = content
 
         # Add speaker notes
         notes = slide_data.get("speaker_notes", "")
         if notes:
             notes_slide = slide.notes_slide
             notes_slide.notes_text_frame.text = notes
+
+    # Add additional chart slides for remaining renderable charts
+    # (skip the first one if it was already rendered on the "Key Metrics" slide)
+    if df is not None and len(renderable_charts) > 1:
+        for chart_spec in renderable_charts[1:5]:  # Limit to 4 extra chart slides
+            layout = prs.slide_layouts[1]
+            slide = prs.slides.add_slide(layout)
+            if slide.shapes.title:
+                slide.shapes.title.text = chart_spec.get("title", "Chart")
+            added = _add_chart_to_slide(slide, chart_spec, df, top=1.8, height=5.2)
+            if added:
+                charts_rendered += 1
+                # Add speaker notes
+                notes_slide = slide.notes_slide
+                notes_slide.notes_text_frame.text = chart_spec.get("reasoning", "")
 
     # Save to BytesIO and return as download
     output = io.BytesIO()
@@ -983,7 +1136,12 @@ async def generate_presentation(
         organization_id=org_id,
         resource_type="workflow",
         resource_id=workflow_id,
-        new_values={"template": payload.template, "title": title, "slides": len(slides)},
+        new_values={
+            "template": payload.template,
+            "title": title,
+            "slides": len(prs.slides),
+            "charts_rendered": charts_rendered,
+        },
         request=request,
     )
     db.commit()
