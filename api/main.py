@@ -666,6 +666,98 @@ async def detailed_health_check():
     return JSONResponse(content=run_full_health_check())
 
 
+@app.get("/health/ocr", tags=["System"])
+async def ocr_health_check():
+    """Check OCR (Tesseract) availability and version."""
+    try:
+        from capture.ocr_engine import is_ocr_available
+
+        available = is_ocr_available()
+        version = None
+        if available:
+            try:
+                import pytesseract
+
+                version = str(pytesseract.get_tesseract_version())
+            except Exception:
+                pass
+        return JSONResponse(
+            content={
+                "status": "available" if available else "unavailable",
+                "available": available,
+                "version": version,
+                "engine": "tesseract",
+                "error": None if available else "Tesseract binary not found on PATH",
+            }
+        )
+    except Exception as e:
+        return JSONResponse(
+            status_code=503,
+            content={"status": "unavailable", "available": False, "error": str(e)},
+        )
+
+
+@app.get("/health/storage", tags=["System"])
+async def storage_health_check():
+    """Check file storage availability."""
+    try:
+        from monitoring.health_check import check_storage_health
+
+        result = check_storage_health()
+        return JSONResponse(content=result)
+    except Exception as e:
+        return JSONResponse(
+            status_code=503,
+            content={"status": "not_ready", "error": str(e)},
+        )
+
+
+@app.get("/health/ai", tags=["System"])
+async def ai_health_check():
+    """Check AI provider availability."""
+    try:
+        ai_provider = os.getenv("AI_PROVIDER", "").lower()
+        ai_api_key = os.getenv("AI_API_KEY") or os.getenv("OPENAI_API_KEY")
+        configured = bool(ai_provider and ai_api_key)
+        return JSONResponse(
+            content={
+                "status": "ready" if configured else "not_configured",
+                "provider": ai_provider or None,
+                "configured": configured,
+            }
+        )
+    except Exception as e:
+        return JSONResponse(
+            status_code=503,
+            content={"status": "not_ready", "error": str(e)},
+        )
+
+
+@app.get("/health/workers", tags=["System"])
+async def workers_health_check():
+    """Check background job worker status."""
+    try:
+        from jobs.service import get_task_queue
+
+        queue = get_task_queue()
+        stats = queue.get_stats()
+        return JSONResponse(
+            content={
+                "status": "ready",
+                "pending_tasks": queue.pending_count,
+                "total_enqueued": stats.total_enqueued,
+                "total_completed": stats.total_completed,
+                "total_failed": stats.total_failed,
+                "dead_letter_count": stats.dead_letter_count,
+            }
+        )
+    except Exception as e:
+        return JSONResponse(
+            status_code=503,
+            content={"status": "not_ready", "error": str(e)},
+        )
+
+
 @app.get("/metrics", tags=["System"])
 async def prometheus_metrics():
     """Expose Prometheus-compatible metrics for scraping.
