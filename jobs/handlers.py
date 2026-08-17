@@ -39,6 +39,33 @@ def _handle_etl_run(job_id: int, payload: dict, db: DbSession) -> dict:
 # ── OCR / Capture Batch Handler ───────────────────────────────────────────
 
 
+def _handle_ocr_document(job_id: int, payload: dict, db: DbSession) -> dict:
+    """Process a single capture document (OCR extraction) as a background job."""
+    from capture.service import CaptureService
+
+    document_id = payload.get("document_id")
+    if not document_id:
+        raise ValueError("document_id is required for ocr_document jobs")
+
+    update_job_progress(job_id, 0.1, "Starting document processing")
+
+    svc = CaptureService(db)
+    doc = svc.get_document(document_id, payload.get("organization_id", 0))
+    if not doc:
+        raise ValueError(f"Document {document_id} not found")
+
+    update_job_progress(job_id, 0.3, f"Processing document '{doc.filename}'")
+    doc = svc.process_document(document_id)
+
+    update_job_progress(job_id, 1.0, f"Document processing complete: {doc.status}")
+
+    return {
+        "document_id": document_id,
+        "status": doc.status,
+        "error_message": doc.error_message,
+    }
+
+
 def _handle_ocr_batch(job_id: int, payload: dict, db: DbSession) -> dict:
     """Process a capture batch (OCR extraction) as a background job."""
     from capture.service import CaptureService
@@ -268,9 +295,10 @@ def _handle_export(job_id: int, payload: dict, db: DbSession) -> dict:
 def register_builtin_handlers() -> None:
     """Register all built-in job handlers."""
     register_handler("etl_run", _handle_etl_run, TaskPriority.ETL)
+    register_handler("ocr_document", _handle_ocr_document, TaskPriority.NORMAL)
     register_handler("ocr_batch", _handle_ocr_batch, TaskPriority.NORMAL)
     register_handler("report_gen", _handle_report_gen, TaskPriority.REPORTS)
     register_handler("data_import", _handle_data_import, TaskPriority.NORMAL)
     register_handler("export", _handle_export, TaskPriority.LOW)
     register_handler("dataset_workflow", _handle_dataset_workflow, TaskPriority.ETL)
-    logger.info("Registered %d built-in job handlers", 6)
+    logger.info("Registered %d built-in job handlers", 7)

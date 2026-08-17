@@ -540,16 +540,54 @@ class DatasetWorkflowOrchestrator:
         return result
 
     def _stage_dashboard_ready(self, state: WorkflowState) -> dict:
-        """Stage 10: Generate dashboard recommendations."""
+        """Stage 10: Generate dashboard recommendations.
+
+        Runs both the existing DashboardRecommendationEngine (for backward
+        compatibility) and the new AutoEngineOrchestrator which produces
+        the canonical DashboardSpecification with intelligent chart selection,
+        KPI computation, insight generation, and responsive layout.
+        """
         from services.dashboard_recommender import DashboardRecommendationEngine
+        from services.auto.orchestrator import AutoEngineOrchestrator
 
         df = state.context["df"]
         mapping_result = state.context.get("mapping_result")
         admin_confirmed = state.context.get("admin_confirmed", False)
 
+        # Existing engine (backward compatibility)
         engine = DashboardRecommendationEngine()
         recommendations = engine.recommend(df, mapping_result, admin_confirmed=admin_confirmed)
         state.context["dashboard_recommendations"] = recommendations
+
+        # New auto engine — produces canonical DashboardSpecification
+        try:
+            industry = state.context.get("industry_result", {}).get("industry", "unknown")
+            quality_score = 0.0
+            quality_report = state.context.get("quality_report", {})
+            if isinstance(quality_report.get("score"), dict):
+                quality_score = quality_report["score"].get("overall", 0.0)
+
+            auto_orchestrator = AutoEngineOrchestrator()
+            auto_result = auto_orchestrator.generate(
+                df,
+                dataset_name=state.dataset_name,
+                industry=industry,
+                quality_score=quality_score,
+            )
+
+            state.context["auto_understanding"] = auto_result["understanding"].to_dict()
+            state.context["auto_dashboard"] = auto_result["dashboard"].to_dict()
+            state.context["auto_presentation"] = auto_result["presentation"].to_dict()
+            state.context["auto_dashboard_obj"] = auto_result["dashboard"]
+            state.context["auto_presentation_obj"] = auto_result["presentation"]
+
+            # Merge auto-generated insights into recommendations
+            recommendations["auto_dashboard"] = auto_result["dashboard"].to_dict()
+            recommendations["auto_presentation"] = auto_result["presentation"].to_dict()
+            recommendations["dataset_understanding"] = auto_result["understanding"].to_dict()
+        except Exception as exc:
+            logger.warning("Auto engine failed, falling back to legacy recommendations: %s", exc, exc_info=True)
+
         return recommendations
 
     def _stage_analysis_complete(self, state: WorkflowState) -> dict:

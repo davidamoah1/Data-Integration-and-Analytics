@@ -160,9 +160,10 @@ export function DatasetUpload() {
       setStage('done');
       toast.success('Dataset uploaded and analyzed successfully!');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Upload failed');
+      const msg = err instanceof Error ? err.message : 'Upload failed';
+      setError(msg);
       setStage('error');
-      toast.error('Upload failed. Please try again.');
+      toast.error(msg);
     }
   };
 

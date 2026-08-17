@@ -1,16 +1,22 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Upload, FileText, Image as ImageIcon, Loader2, X, CheckCircle2, AlertCircle } from "lucide-react";
+import { Upload, FileText, Image as ImageIcon, Loader2, X, CheckCircle2, AlertCircle, RotateCw, Clock } from "lucide-react";
 import { captureService, type CaptureDocument } from "@/services/capture/captureService";
 import { Button } from "@/components/ui/Button";
 
+const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
+const ACCEPTED_EXTS = ["jpg", "jpeg", "png", "tiff", "tif", "bmp", "pdf"];
+const POLL_INTERVAL = 3000; // 3 seconds
+
 interface UploadedFile {
   file: File;
-  status: "pending" | "uploading" | "done" | "error";
+  status: "pending" | "uploading" | "processing" | "done" | "error";
   document?: CaptureDocument;
   error?: string;
+  progress?: number;
+  jobId?: number | null;
 }
 
 export default function CaptureUploadPage() {
@@ -20,11 +26,20 @@ export default function CaptureUploadPage() {
   const [isDragging, setIsDragging] = useState(false);
 
   const handleFiles = useCallback((fileList: FileList) => {
-    const accepted = Array.from(fileList).filter((f) => {
+    const newFiles: UploadedFile[] = [];
+    for (const f of Array.from(fileList)) {
       const ext = f.name.split(".").pop()?.toLowerCase();
-      return ["jpg", "jpeg", "png", "tiff", "tif", "bmp", "pdf"].includes(ext || "");
-    });
-    setFiles((prev) => [...prev, ...accepted.map((file) => ({ file, status: "pending" as const }))]);
+      if (!ACCEPTED_EXTS.includes(ext || "")) {
+        newFiles.push({ file: f, status: "error", error: `Unsupported file type: .${ext}. Supported: JPG, JPEG, PNG, TIFF, BMP, PDF` });
+        continue;
+      }
+      if (f.size > MAX_FILE_SIZE) {
+        newFiles.push({ file: f, status: "error", error: `File too large (${(f.size / 1024 / 1024).toFixed(1)} MB). Maximum: 25 MB` });
+        continue;
+      }
+      newFiles.push({ file: f, status: "pending" });
+    }
+    setFiles((prev) => [...prev, ...newFiles]);
   }, []);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
@@ -34,12 +49,23 @@ export default function CaptureUploadPage() {
   }, [handleFiles]);
 
   const uploadOne = async (index: number) => {
-    setFiles((prev) => prev.map((f, i) => (i === index ? { ...f, status: "uploading" } : f)));
+    setFiles((prev) => prev.map((f, i) => (i === index ? { ...f, status: "uploading", progress: 0, error: undefined } : f)));
     try {
-      const doc = await captureService.uploadDocument(files[index].file);
-      setFiles((prev) => prev.map((f, i) => (i === index ? { ...f, status: "done", document: doc } : f)));
-    } catch (err: any) {
-      setFiles((prev) => prev.map((f, i) => (i === index ? { ...f, status: "error", error: err.message } : f)));
+      const doc = await captureService.uploadDocumentWithProgress(files[index].file, (percent) => {
+        setFiles((prev) => prev.map((f, i) => (i === index ? { ...f, progress: percent } : f)));
+      });
+      // Document is uploaded and processing started in background
+      const isProcessing = doc.status === "uploaded" || doc.status === "preprocessing" || doc.status === "extracting" || doc.status === "classifying" || doc.status === "validating";
+      setFiles((prev) => prev.map((f, i) => (i === index ? {
+        ...f,
+        status: isProcessing ? "processing" : "done",
+        document: doc,
+        progress: 100,
+        jobId: (doc as any).job_id ?? null,
+      } : f)));
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Upload failed";
+      setFiles((prev) => prev.map((f, i) => (i === index ? { ...f, status: "error", error: msg } : f)));
     }
   };
 
@@ -55,9 +81,42 @@ export default function CaptureUploadPage() {
     setFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const retryFile = (index: number) => {
+    setFiles((prev) => prev.map((f, i) => (i === index ? { ...f, status: "pending", error: undefined } : f)));
+    uploadOne(index);
+  };
+
   const pendingCount = files.filter((f) => f.status === "pending").length;
   const doneCount = files.filter((f) => f.status === "done").length;
   const errorCount = files.filter((f) => f.status === "error").length;
+  const uploadingCount = files.filter((f) => f.status === "uploading").length;
+  const processingCount = files.filter((f) => f.status === "processing").length;
+
+  // Poll for status updates on processing documents
+  useEffect(() => {
+    const processingFiles = files.filter((f) => f.status === "processing" && f.document);
+    if (processingFiles.length === 0) return;
+
+    const interval = setInterval(async () => {
+      for (const f of processingFiles) {
+        if (!f.document) continue;
+        try {
+          const updated = await captureService.getDocument(f.document.id);
+          const isDone = updated.status === "ready_for_review" || updated.status === "approved" || updated.status === "rejected" || updated.status === "draft";
+          const isFailed = updated.status === "failed";
+          setFiles((prev) => prev.map((pf) =>
+            pf.document?.id === f.document!.id
+              ? { ...pf, status: isFailed ? "error" : isDone ? "done" : "processing", document: updated, error: isFailed ? updated.error_message || "Processing failed" : undefined }
+              : pf
+          ));
+        } catch {
+          // Silently ignore polling errors
+        }
+      }
+    }, POLL_INTERVAL);
+
+    return () => clearInterval(interval);
+  }, [files]);
 
   return (
     <div className="min-h-screen bg-slate-50 py-8">
@@ -89,7 +148,7 @@ export default function CaptureUploadPage() {
             <Upload size={28} className="text-indigo-600" />
           </div>
           <p className="text-lg font-medium text-slate-700">Drop files here or click to browse</p>
-          <p className="mt-1 text-sm text-slate-400">Supports JPG, PNG, TIFF, PDF — up to 25MB each</p>
+          <p className="mt-1 text-sm text-slate-400">Supports JPG, JPEG, PNG, TIFF, BMP, PDF — up to 25MB each</p>
         </div>
 
         {/* File list */}
@@ -103,22 +162,50 @@ export default function CaptureUploadPage() {
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium text-slate-800">{f.file.name}</p>
                   <p className="text-xs text-slate-400">{(f.file.size / 1024).toFixed(0)} KB</p>
+                  {f.status === "uploading" && (
+                    <div className="mt-1.5">
+                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
+                        <div
+                          className="h-full rounded-full bg-indigo-500 transition-all duration-200"
+                          style={{ width: `${f.progress ?? 0}%` }}
+                        />
+                      </div>
+                      <p className="mt-0.5 text-xs text-indigo-500">Uploading... {f.progress ?? 0}%</p>
+                    </div>
+                  )}
+                  {f.status === "processing" && f.document && (
+                    <p className="mt-0.5 text-xs font-medium text-indigo-600">
+                      Processing... {f.document.status || "queued"}
+                    </p>
+                  )}
                   {f.status === "done" && f.document && (
                     <p className="mt-0.5 text-xs font-medium text-green-600">
-                      Extracted: {f.document.document_type_label || "Unknown type"} — {f.document.status === "ready_for_review" ? "Ready for review" : f.document.status}
+                      {f.document.document_type_label || "Unknown type"} — {f.document.status === "ready_for_review" ? "Ready for review" : f.document.status}
                     </p>
                   )}
                   {f.status === "error" && (
                     <p className="mt-0.5 text-xs font-medium text-red-600">{f.error}</p>
                   )}
                 </div>
-                <div className="shrink-0">
+                <div className="shrink-0 flex items-center gap-2">
                   {f.status === "pending" && (
                     <Button size="sm" variant="outline" onClick={() => uploadOne(i)}>Upload</Button>
                   )}
                   {f.status === "uploading" && <Loader2 size={20} className="animate-spin text-indigo-500" />}
+                  {f.status === "processing" && <Clock size={20} className="text-indigo-400 animate-pulse" />}
                   {f.status === "done" && <CheckCircle2 size={20} className="text-green-500" />}
-                  {f.status === "error" && <AlertCircle size={20} className="text-red-500" />}
+                  {f.status === "error" && (
+                    <>
+                      <AlertCircle size={20} className="text-red-500" />
+                      <button
+                        onClick={() => retryFile(i)}
+                        className="text-slate-400 hover:text-indigo-500"
+                        title="Retry upload"
+                      >
+                        <RotateCw size={16} />
+                      </button>
+                    </>
+                  )}
                 </div>
                 <button onClick={() => removeFile(i)} className="shrink-0 text-slate-300 hover:text-slate-500">
                   <X size={18} />
@@ -129,7 +216,7 @@ export default function CaptureUploadPage() {
             {/* Actions */}
             <div className="flex items-center justify-between pt-2">
               <p className="text-sm text-slate-500">
-                {doneCount} done, {pendingCount} pending{errorCount > 0 ? `, ${errorCount} failed` : ""}
+                {doneCount} done, {pendingCount} pending{uploadingCount > 0 ? `, ${uploadingCount} uploading` : ""}{processingCount > 0 ? `, ${processingCount} processing` : ""}{errorCount > 0 ? `, ${errorCount} failed` : ""}
               </p>
               <div className="flex gap-3">
                 {pendingCount > 0 && (

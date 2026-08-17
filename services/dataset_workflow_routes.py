@@ -985,6 +985,170 @@ def _add_chart_to_slide(
     return False
 
 
+def _generate_auto_pptx(
+    auto_presentation: dict,
+    auto_dashboard: dict,
+    df,
+    dataset_name: str,
+    title: str,
+    workflow_id: str,
+    current_user: dict,
+    org_id: int,
+    request: Request,
+    db: DbSession,
+):
+    """Render a PPTX from the canonical PresentationSpecification.
+
+    Uses the SAME chart specifications as the dashboard — no independent
+    chart recreation.  Each chart slide uses the placement computed by
+    the PresentationLayoutEngine (validated: no overlaps, no cropping).
+    """
+    import io
+
+    from fastapi.responses import StreamingResponse
+    from pptx import Presentation as PptxPresentation
+    from pptx.util import Inches, Pt
+
+    # Build a lookup of chart specs by ID from the dashboard
+    charts_by_id = {c["id"]: c for c in auto_dashboard.get("charts", [])}
+    kpis = auto_dashboard.get("kpis", [])
+    insights = auto_dashboard.get("insights", [])
+    recommendations = auto_dashboard.get("recommendations", [])
+
+    prs = PptxPresentation()
+    prs.slide_width = Inches(13.333)
+    prs.slide_height = Inches(7.5)
+
+    charts_rendered = 0
+
+    for slide_data in auto_presentation.get("slides", []):
+        layout_name = slide_data.get("layout", "bullets")
+
+        if layout_name == "title":
+            layout = prs.slide_layouts[0]  # Title Slide
+        else:
+            layout = prs.slide_layouts[1]  # Title and Content
+
+        slide = prs.slides.add_slide(layout)
+
+        # Set title
+        if slide.shapes.title:
+            slide.shapes.title.text = slide_data.get("title", "")
+
+        if layout_name == "kpi":
+            # Render KPI cards as text boxes
+            for card in slide_data.get("kpi_cards", []):
+                placement = card.get("placement", {})
+                x = placement.get("x", 1)
+                y = placement.get("y", 2)
+                w = placement.get("width", 3)
+                h = placement.get("height", 1.5)
+
+                txBox = slide.shapes.add_textbox(
+                    Inches(x), Inches(y), Inches(w), Inches(h)
+                )
+                tf = txBox.text_frame
+                tf.word_wrap = True
+                p = tf.paragraphs[0]
+                p.text = card.get("label", "")
+                p.font.size = Pt(12)
+                p.font.bold = False
+                p2 = tf.add_paragraph()
+                val_str = card.get("value", "")
+                p2.text = str(val_str)
+                p2.font.size = Pt(24)
+                p2.font.bold = True
+
+            # Speaker notes
+            notes = slide_data.get("speaker_notes", "")
+            if notes:
+                slide.notes_slide.notes_text_frame.text = notes
+
+        elif layout_name == "chart":
+            # Render chart using the canonical chart spec
+            chart_id = slide_data.get("chart_id")
+            chart_spec = charts_by_id.get(chart_id, {})
+
+            # Convert canonical spec to legacy format for _add_chart_to_slide
+            legacy_spec = {
+                "type": chart_spec.get("chart_type", ""),
+                "title": chart_spec.get("title", ""),
+                "x_axis": chart_spec.get("x_axis"),
+                "y_axis": chart_spec.get("y_axis"),
+                "column": chart_spec.get("x_axis"),  # for pie charts
+                "reasoning": chart_spec.get("reason", ""),
+            }
+
+            placement = slide_data.get("chart_placement", {})
+            left = placement.get("x", 1)
+            top = placement.get("y", 2)
+            width = placement.get("width", 11)
+            height = placement.get("height", 5)
+
+            if df is not None and chart_spec:
+                added = _add_chart_to_slide(
+                    slide, legacy_spec, df,
+                    left=left, top=top, width=width, height=height,
+                )
+                if added:
+                    charts_rendered += 1
+                else:
+                    # Fallback: show caption text
+                    caption = slide_data.get("caption", "")
+                    if caption and len(slide.placeholders) > 1:
+                        slide.placeholders[1].text_frame.text = caption
+            elif slide_data.get("caption") and len(slide.placeholders) > 1:
+                slide.placeholders[1].text_frame.text = slide_data["caption"]
+
+            # Speaker notes
+            notes = slide_data.get("speaker_notes", "")
+            if notes:
+                slide.notes_slide.notes_text_frame.text = notes
+
+        elif layout_name == "bullets":
+            content = slide_data.get("content", "")
+            if content and len(slide.placeholders) > 1:
+                body = slide.placeholders[1]
+                tf = body.text_frame
+                tf.text = content
+            notes = slide_data.get("speaker_notes", "")
+            if notes:
+                slide.notes_slide.notes_text_frame.text = notes
+
+    # Save to BytesIO and return as download
+    output = io.BytesIO()
+    prs.save(output)
+    output.seek(0)
+
+    # Record in audit
+    log_audit_event(
+        db=db,
+        action="dataset_workflow.presentation.generate",
+        user_id=current_user["id"],
+        organization_id=org_id,
+        resource_type="workflow",
+        resource_id=workflow_id,
+        new_values={
+            "template": auto_presentation.get("template", "executive"),
+            "title": title,
+            "slides": len(prs.slides),
+            "charts_rendered": charts_rendered,
+            "auto_engine": True,
+        },
+        request=request,
+    )
+    db.commit()
+
+    safe_filename = dataset_name.replace(" ", "_").replace("/", "_")
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        headers={
+            "Content-Disposition": f'attachment; filename="{safe_filename}_presentation.pptx"',
+        },
+    )
+
+
 @router.post("/{workflow_id}/presentation")
 async def generate_presentation(
     workflow_id: str,
@@ -995,14 +1159,15 @@ async def generate_presentation(
 ):
     """Generate a PPTX presentation from the workflow results.
 
-    Uses the analysis summary, insights, quality score, and dashboard
-    recommendations to build a professional presentation file.
+    Uses the canonical chart specifications from the AutoEngineOrchestrator
+    (when available) to ensure the PPTX uses the SAME charts as the dashboard.
+    Falls back to legacy chart specs if the auto engine didn't run.
+
     Returns the file as a downloadable response.
     """
     from fastapi.responses import StreamingResponse
     from pptx import Presentation as PptxPresentation
     from pptx.util import Inches, Pt
-    from studios.presentation_service import PresentationStudioService
 
     state_dict = _get_workflow_state_dict(workflow_id, current_user, db)
     org_id = get_current_organization_id(current_user, db)
@@ -1022,6 +1187,28 @@ async def generate_presentation(
 
     dataset_name = state_dict.get("dataset_name", "Dataset")
     title = payload.title or f"{dataset_name} — Analysis Presentation"
+
+    # ── Use canonical auto dashboard/presentation if available ──
+    auto_dashboard = dashboard.get("auto_dashboard") if isinstance(dashboard, dict) else None
+    auto_presentation = dashboard.get("auto_presentation") if isinstance(dashboard, dict) else None
+
+    if auto_presentation and auto_dashboard:
+        # Use the canonical presentation specification
+        return _generate_auto_pptx(
+            auto_presentation=auto_presentation,
+            auto_dashboard=auto_dashboard,
+            df=df,
+            dataset_name=dataset_name,
+            title=title,
+            workflow_id=workflow_id,
+            current_user=current_user,
+            org_id=org_id,
+            request=request,
+            db=db,
+        )
+
+    # ── Fallback: Legacy presentation generation ──
+    from studios.presentation_service import PresentationStudioService
 
     # Get recommended charts from the dashboard stage
     recommended_charts = dashboard.get("recommended_charts", [])
@@ -1154,3 +1341,121 @@ async def generate_presentation(
             "Content-Disposition": f'attachment; filename="{safe_filename}_presentation.pptx"',
         },
     )
+
+
+# ── Auto Engine Endpoints ─────────────────────────────
+
+
+@router.get("/{workflow_id}/understanding")
+async def get_dataset_understanding(
+    workflow_id: str,
+    current_user: dict = Depends(get_current_user),
+    db: DbSession = Depends(get_db),
+):
+    """Get the auto-generated dataset understanding (semantic column roles, correlations, etc.)."""
+    state_dict = _get_workflow_state_dict(workflow_id, current_user, db)
+    dashboard = _stage_result(state_dict, WorkflowStage.DASHBOARD_READY) or {}
+
+    understanding = dashboard.get("dataset_understanding") if isinstance(dashboard, dict) else None
+    if not understanding:
+        in_memory = _orchestrator.get_state(workflow_id)
+        if in_memory and in_memory.context.get("auto_understanding"):
+            understanding = in_memory.context["auto_understanding"]
+
+    if not understanding:
+        raise HTTPException(
+            status_code=404,
+            detail="Dataset understanding not available. Ensure the workflow has completed the dashboard stage.",
+        )
+
+    return understanding
+
+
+@router.get("/{workflow_id}/auto-dashboard")
+async def get_auto_dashboard(
+    workflow_id: str,
+    current_user: dict = Depends(get_current_user),
+    db: DbSession = Depends(get_db),
+):
+    """Get the auto-generated dashboard specification with canonical chart specs, KPIs, insights, and layout."""
+    state_dict = _get_workflow_state_dict(workflow_id, current_user, db)
+    dashboard = _stage_result(state_dict, WorkflowStage.DASHBOARD_READY) or {}
+
+    auto_dashboard = dashboard.get("auto_dashboard") if isinstance(dashboard, dict) else None
+    if not auto_dashboard:
+        in_memory = _orchestrator.get_state(workflow_id)
+        if in_memory and in_memory.context.get("auto_dashboard"):
+            auto_dashboard = in_memory.context["auto_dashboard"]
+
+    if not auto_dashboard:
+        raise HTTPException(
+            status_code=404,
+            detail="Auto dashboard not available. Ensure the workflow has completed the dashboard stage.",
+        )
+
+    return auto_dashboard
+
+
+@router.get("/{workflow_id}/auto-presentation")
+async def get_auto_presentation_spec(
+    workflow_id: str,
+    current_user: dict = Depends(get_current_user),
+    db: DbSession = Depends(get_db),
+):
+    """Get the auto-generated presentation specification (slide plan, chart placements, validation)."""
+    state_dict = _get_workflow_state_dict(workflow_id, current_user, db)
+    dashboard = _stage_result(state_dict, WorkflowStage.DASHBOARD_READY) or {}
+
+    auto_presentation = dashboard.get("auto_presentation") if isinstance(dashboard, dict) else None
+    if not auto_presentation:
+        in_memory = _orchestrator.get_state(workflow_id)
+        if in_memory and in_memory.context.get("auto_presentation"):
+            auto_presentation = in_memory.context["auto_presentation"]
+
+    if not auto_presentation:
+        raise HTTPException(
+            status_code=404,
+            detail="Auto presentation not available. Ensure the workflow has completed the dashboard stage.",
+        )
+
+    return auto_presentation
+
+
+@router.get("/{workflow_id}/charts/{chart_id}/explain")
+async def explain_chart(
+    workflow_id: str,
+    chart_id: str,
+    current_user: dict = Depends(get_current_user),
+    db: DbSession = Depends(get_db),
+):
+    """Get the 'Why this chart?' explanation for a specific chart."""
+    state_dict = _get_workflow_state_dict(workflow_id, current_user, db)
+    dashboard = _stage_result(state_dict, WorkflowStage.DASHBOARD_READY) or {}
+
+    auto_dashboard = dashboard.get("auto_dashboard") if isinstance(dashboard, dict) else None
+    if not auto_dashboard:
+        in_memory = _orchestrator.get_state(workflow_id)
+        if in_memory and in_memory.context.get("auto_dashboard"):
+            auto_dashboard = in_memory.context["auto_dashboard"]
+
+    if not auto_dashboard:
+        raise HTTPException(status_code=404, detail="Auto dashboard not available.")
+
+    chart = None
+    for c in auto_dashboard.get("charts", []):
+        if c.get("id") == chart_id:
+            chart = c
+            break
+
+    if not chart:
+        raise HTTPException(status_code=404, detail=f"Chart '{chart_id}' not found.")
+
+    return {
+        "chart_id": chart_id,
+        "chart_type": chart.get("chart_type"),
+        "title": chart.get("title"),
+        "reason": chart.get("reason"),
+        "importance_score": chart.get("importance_score"),
+        "confidence": chart.get("confidence"),
+        "source_analysis": chart.get("source_analysis"),
+    }

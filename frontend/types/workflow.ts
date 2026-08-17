@@ -189,3 +189,114 @@ export interface AnalysisSummary {
   dashboard_recommended: boolean;
   dashboard_title: string;
 }
+
+// ── Auto Engine Types ──
+
+export interface ChartSpec {
+  id: string;
+  chart_type: string;
+  title: string;
+  description: string;
+  x_axis: string | null;
+  y_axis: string | null;
+  aggregation: string;
+  source_columns: string[];
+  data: Array<Record<string, unknown>>;
+  importance_score: number;
+  confidence: number;
+  reason: string;
+  source_analysis: string;
+  section: string;
+  width: number;
+  height: number;
+  order: number;
+  filters: string[];
+}
+
+export interface KPISpec {
+  id: string;
+  key: string;
+  label: string;
+  value: number | string;
+  unit: string;
+  metric: string;
+  category: string;
+  source_columns: string[];
+  aggregation: string;
+  confidence: number;
+  icon: string;
+  description: string;
+  comparison_value: number | null;
+  comparison_label: string;
+  comparison_direction: string;
+  order: number;
+}
+
+export interface InsightSpec {
+  id: string;
+  title: string;
+  description: string;
+  severity: string;
+  insight_type: string;
+  metric: string;
+  value: number | null;
+  recommendation: string;
+  priority: number;
+  order: number;
+}
+
+export interface FilterSpec {
+  id: string;
+  filter_type: string;
+  label: string;
+  column: string;
+  entity: string | null;
+  default_value: unknown;
+  options: unknown[];
+  order: number;
+}
+
+export interface AutoDashboardSpec {
+  dashboard_id: string;
+  title: string;
+  subtitle: string;
+  industry: string;
+  dataset_name: string;
+  kpis: KPISpec[];
+  charts: ChartSpec[];
+  filters: FilterSpec[];
+  insights: InsightSpec[];
+  recommendations: string[];
+  layout: Record<string, string[]>;
+  grid_columns: number;
+  responsive: boolean;
+  tablet_columns: number;
+  mobile_columns: number;
+  mode: string;
+}
+
+export interface AutoPresentationSpec {
+  presentation_id: string;
+  title: string;
+  subtitle: string;
+  template: string;
+  slides: Array<Record<string, unknown>>;
+  included_chart_ids: string[];
+  excluded_charts: Array<{ chart_id: string; title: string; reason: string }>;
+  validation: {
+    valid: boolean;
+    errors: string[];
+    warnings: string[];
+    slide_count: number;
+  };
+}
+
+export interface ChartExplanation {
+  chart_id: string;
+  chart_type: string;
+  title: string;
+  reason: string;
+  importance_score: number;
+  confidence: number;
+  source_analysis: string;
+}

@@ -4,7 +4,8 @@
 // An explicitly empty string (same-origin deployments behind a rewrite, e.g.
 // Vercel) is intentional and must not fall back to the localhost default.
 //
-// In development (NODE_ENV !== 'production'), defaults to localhost:8001.
+// In development (NODE_ENV !== 'production'), defaults to localhost:8000
+// which is the port the FastAPI backend runs on.
 // In production, NEXT_PUBLIC_API_URL MUST be set — an empty-string value
 // means same-origin, which is valid; an *undefined* value means
 // misconfiguration.
@@ -16,7 +17,7 @@ const API_URL = (() => {
     // Same-origin fallback — works behind reverse proxy / Vercel rewrite.
     return '';
   }
-  return 'http://localhost:8001';
+  return 'http://localhost:8000';
 })();
 const REQUEST_TIMEOUT = 30000;
 const MAX_RETRIES = 2;
@@ -154,12 +155,16 @@ async function request<T = unknown>(
   } catch (err) {
     clearTimeout(timeoutId);
     if (err instanceof Error && err.name === 'AbortError') {
-      throw new ApiError(408, 'Request timeout');
+      throw new ApiError(408, 'Request timed out. The server took too long to respond.');
     }
     if (retries > 0) {
       return request<T>(path, { ...options, retries: retries - 1 });
     }
-    throw new ApiError(0, 'Network error');
+    const msg = err instanceof Error ? err.message : String(err);
+    if (msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('Network request failed')) {
+      throw new ApiError(0, `Unable to connect to the server at ${API_URL}. Make sure the backend is running.`);
+    }
+    throw new ApiError(0, `Network error: ${msg}`);
   }
 
   clearTimeout(timeoutId);
@@ -184,10 +189,23 @@ async function request<T = unknown>(
     } catch {
       // non-JSON error
     }
-    const message =
+    const serverMessage =
       (errorData as { message?: string })?.message ||
-      (errorData as { detail?: string })?.detail ||
-      `Request failed with status ${response.status}`;
+      (errorData as { detail?: string })?.detail;
+    
+    const statusMessages: Record<number, string> = {
+      401: 'Your session has expired. Please sign in again.',
+      403: 'You do not have permission to perform this action.',
+      404: 'The requested resource was not found.',
+      413: 'This file is too large. Maximum allowed size is 50 MB.',
+      415: 'This file type is not supported.',
+      422: 'The file could not be processed because some information is invalid.',
+      500: 'The server encountered an error while processing your request.',
+      502: 'The server received an invalid response from an upstream service.',
+      503: 'The service is temporarily unavailable. Please try again later.',
+      504: 'The server took too long to respond. Please try again.',
+    };
+    const message = serverMessage || statusMessages[response.status] || `Request failed with status ${response.status}`;
     throw new ApiError(response.status, message, errorData);
   }
 
@@ -236,6 +254,66 @@ export const apiClient = {
 
   upload: <T = unknown>(path: string, formData: FormData, options?: Omit<RequestOptions, 'method' | 'body'>) =>
     request<T>(path, { ...options, method: 'POST', body: formData, isFormData: true }),
+
+  uploadWithProgress: <T = unknown>(
+    path: string,
+    formData: FormData,
+    onProgress?: (percent: number) => void,
+    options?: Omit<RequestOptions, 'method' | 'body'>,
+  ): Promise<T> => {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      const url = `${API_URL}${path}`;
+      xhr.open('POST', url);
+
+      // Auth header
+      if (!options?.skipAuth) {
+        const token = getAccessToken();
+        if (token) {
+          xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+        }
+      }
+
+      // Upload progress
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable && onProgress) {
+          onProgress(Math.round((e.loaded / e.total) * 100));
+        }
+      };
+
+      xhr.onload = () => {
+        try {
+          const json = JSON.parse(xhr.responseText);
+          if (json && typeof json === 'object' && 'success' in json) {
+            if (!json.success) {
+              reject(new ApiError(xhr.status, json.message || 'Upload failed', json));
+              return;
+            }
+            resolve(json.data as T);
+            return;
+          }
+          resolve(json as T);
+        } catch {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve(null as T);
+          } else {
+            reject(new ApiError(xhr.status, `Upload failed with status ${xhr.status}`));
+          }
+        }
+      };
+
+      xhr.onerror = () => {
+        reject(new ApiError(0, `Unable to connect to the server at ${API_URL}. Make sure the backend is running.`));
+      };
+
+      xhr.ontimeout = () => {
+        reject(new ApiError(408, 'Upload timed out. The server took too long to respond.'));
+      };
+
+      xhr.timeout = options?.timeout ?? REQUEST_TIMEOUT;
+      xhr.send(formData);
+    });
+  },
 
   getApiUrl: () => API_URL,
 };

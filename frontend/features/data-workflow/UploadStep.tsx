@@ -17,6 +17,11 @@ const ACCEPTED_TYPES = {
   'text/tab-separated-values': ['.tsv'],
   'text/plain': ['.txt'],
   'application/vnd.oasis.opendocument.spreadsheet': ['.ods'],
+  'application/pdf': ['.pdf'],
+  'image/jpeg': ['.jpg', '.jpeg'],
+  'image/png': ['.png'],
+  'image/tiff': ['.tif', '.tiff'],
+  'image/bmp': ['.bmp'],
 };
 
 const MAX_SIZE = 100 * 1024 * 1024; // 100MB
@@ -65,7 +70,7 @@ export function UploadStep({ onFileSelected, onStartProcessing, file, isProcessi
           Upload Your Data
         </CardTitle>
         <CardDescription>
-          Drag and drop a file or click to browse. Supports CSV, Excel (XLSX/XLS), JSON, XML, TSV, and ODS formats.
+          Drag and drop a file or click to browse. Supports CSV, Excel (XLSX/XLS), JSON, XML, TSV, ODS, PDF, JPG, PNG, TIFF, BMP formats.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -93,7 +98,7 @@ export function UploadStep({ onFileSelected, onStartProcessing, file, isProcessi
                 </p>
               </div>
               <div className="flex flex-wrap justify-center gap-1.5 mt-2">
-                {['CSV', 'XLSX', 'XLS', 'JSON', 'XML', 'TSV', 'ODS'].map((ext) => (
+                {['CSV', 'XLSX', 'XLS', 'JSON', 'XML', 'TSV', 'ODS', 'PDF', 'JPG', 'PNG', 'TIFF'].map((ext) => (
                   <Badge key={ext} variant="outline" className="text-xs">
                     {ext}
                   </Badge>

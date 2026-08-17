@@ -7,6 +7,9 @@ import type {
   InsightsResult,
   DashboardRecommendation,
   AnalysisSummary,
+  AutoDashboardSpec,
+  AutoPresentationSpec,
+  ChartExplanation,
 } from "@/types/workflow";
 
 const BASE = "/dataset-workflow";
@@ -84,5 +87,29 @@ export const workflowService = {
     },
   ): Promise<unknown> {
     return await apiClient.post(`${BASE}/${workflowId}/analyze`, payload);
+  },
+
+  async getUnderstanding(workflowId: string): Promise<Record<string, unknown>> {
+    return await apiClient.get<Record<string, unknown>>(`${BASE}/${workflowId}/understanding`);
+  },
+
+  async getAutoDashboard(workflowId: string): Promise<AutoDashboardSpec> {
+    return await apiClient.get<AutoDashboardSpec>(`${BASE}/${workflowId}/auto-dashboard`);
+  },
+
+  async getAutoPresentation(workflowId: string): Promise<AutoPresentationSpec> {
+    return await apiClient.get<AutoPresentationSpec>(`${BASE}/${workflowId}/auto-presentation`);
+  },
+
+  async explainChart(workflowId: string, chartId: string): Promise<ChartExplanation> {
+    return await apiClient.get<ChartExplanation>(`${BASE}/${workflowId}/charts/${chartId}/explain`);
+  },
+
+  async generatePresentation(
+    workflowId: string,
+    template: string = "executive",
+    title?: string,
+  ): Promise<Blob> {
+    return await apiClient.post(`${BASE}/${workflowId}/presentation`, { template, title });
   },
 };

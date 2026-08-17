@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
+import logging
 import zipfile
 
 from fastapi import (
     APIRouter,
-    BackgroundTasks,
     Depends,
     File,
     HTTPException,
@@ -25,6 +25,8 @@ from shared.dependencies import get_current_user
 from shared.tenant import get_current_organization_id
 
 router = APIRouter(prefix="/api/capture", tags=["smart-data-capture"])
+
+logger = logging.getLogger(__name__)
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -129,8 +131,37 @@ async def upload_document(
     except CaptureError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
-    doc = svc.process_document(doc.id)
-    return _serialize_document(doc)
+    # Try to create a background job for processing
+    job_id = None
+    try:
+        from jobs.handlers import register_builtin_handlers
+        from jobs.service import JobService, get_registered_types
+
+        # Ensure handlers are registered (idempotent)
+        if "ocr_document" not in get_registered_types():
+            register_builtin_handlers()
+
+        job_svc = JobService(db)
+        job = job_svc.create_job(
+            organization_id=org_id,
+            user_id=current_user["id"],
+            job_type="ocr_document",
+            name=f"OCR: {doc.filename}",
+            description=f"Processing document '{doc.filename}'",
+            payload={"document_id": doc.id, "organization_id": org_id},
+        )
+        job_id = job.id
+        db.commit()
+    except Exception as e:
+        logger.warning("Job system unavailable, using thread for processing: %s", e)
+        import threading
+        threading.Thread(target=_process_document_task, args=(doc.id,), daemon=True).start()
+
+    # Re-fetch the doc to get fresh state
+    db.refresh(doc)
+    result = _serialize_document(doc)
+    result["job_id"] = job_id
+    return result
 
 
 @router.post("/batches/upload-zip", status_code=status.HTTP_201_CREATED)
@@ -138,7 +169,6 @@ async def upload_zip_batch(
     file: UploadFile = File(...),
     batch_name: str | None = None,
     industry: str | None = None,
-    background_tasks: BackgroundTasks = None,  # noqa: RUF013
     db: DbSession = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
@@ -169,10 +199,10 @@ async def upload_zip_batch(
             description=f"Processing {batch.total_documents} documents from batch '{batch.name}'",
             payload={"batch_id": batch.id, "organization_id": org_id},
         )
-    except Exception:
-        # Fall back to BackgroundTasks if job system isn't available
-        if background_tasks is not None:
-            background_tasks.add_task(_process_batch_task, batch.id)
+    except Exception as e:
+        logger.warning("Job system unavailable for batch, using thread: %s", e)
+        import threading
+        threading.Thread(target=_process_batch_task, args=(batch.id,), daemon=True).start()
 
     return {
         "batch_id": batch.id,
@@ -192,6 +222,18 @@ def _process_batch_task(batch_id: int) -> None:
     db = factory()
     try:
         CaptureService(db).process_batch(batch_id)
+    finally:
+        db.close()
+
+
+def _process_document_task(document_id: int) -> None:
+    from shared.database import get_engine, get_session_factory
+
+    engine = get_engine()
+    factory = get_session_factory(engine)
+    db = factory()
+    try:
+        CaptureService(db).process_document(document_id)
     finally:
         db.close()
 
@@ -383,8 +425,42 @@ async def retry_document(
     doc = svc.get_document(document_id, org_id)
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
-    doc = svc.retry_document(document_id, org_id)
-    return _serialize_document(doc)
+
+    # Reset status for reprocessing — the file is already stored, no re-upload needed
+    doc.status = "uploaded"
+    doc.error_message = None
+    db.commit()
+
+    # Try job system first, fall back to thread
+    job_id = None
+    try:
+        from jobs.handlers import register_builtin_handlers
+        from jobs.service import JobService, get_registered_types
+
+        # Ensure handlers are registered (idempotent)
+        if "ocr_document" not in get_registered_types():
+            register_builtin_handlers()
+
+        job_svc = JobService(db)
+        job = job_svc.create_job(
+            organization_id=org_id,
+            user_id=current_user["id"],
+            job_type="ocr_document",
+            name=f"Retry OCR: {doc.filename}",
+            description=f"Reprocessing document '{doc.filename}'",
+            payload={"document_id": document_id, "organization_id": org_id, "retry": True},
+        )
+        job_id = job.id
+        db.commit()
+    except Exception as e:
+        logger.warning("Job system unavailable, using thread for retry: %s", e)
+        import threading
+        threading.Thread(target=_process_document_task, args=(document_id,), daemon=True).start()
+
+    db.refresh(doc)
+    result = _serialize_document(doc)
+    result["job_id"] = job_id
+    return result
 
 
 @router.delete("/documents/{document_id}")

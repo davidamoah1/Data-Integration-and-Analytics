@@ -100,6 +100,17 @@ export const captureService = {
     return apiClient.upload<CaptureDocument>(`${BASE}/documents/upload`, formData);
   },
 
+  uploadDocumentWithProgress: (file: File, onProgress?: (percent: number) => void) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return apiClient.uploadWithProgress<CaptureDocument>(
+      `${BASE}/documents/upload`,
+      formData,
+      onProgress,
+      { timeout: 120000 },
+    );
+  },
+
   uploadZipBatch: (file: File, batchName?: string, industry?: string) => {
     const formData = new FormData();
     formData.append("file", file);
