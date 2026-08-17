@@ -20,16 +20,12 @@ actively rejected.  Duplicate charts are detected and removed.
 from __future__ import annotations
 
 import logging
-import uuid
-from typing import Any
 
 import numpy as np
 import pandas as pd
 
 from services.auto.analysis_engine import (
-    AutomaticAnalysisEngine,
     DatasetUnderstanding,
-    SemanticRole,
 )
 from services.auto.chart_specification import ChartSpecification
 
@@ -111,7 +107,9 @@ class IntelligentChartSelectionEngine:
         # ── 4. TWO NUMERIC → Scatter plot ──
         if len(good_measures) >= 2:
             for i in range(min(len(good_measures) - 1, 3)):
-                chart = self._make_scatter_plot(df, good_measures[i], good_measures[i + 1], understanding, order)
+                chart = self._make_scatter_plot(
+                    df, good_measures[i], good_measures[i + 1], understanding, order
+                )
                 if chart:
                     candidates.append(chart)
                     order += 1
@@ -172,8 +170,12 @@ class IntelligentChartSelectionEngine:
     # ── Chart factories ──
 
     def _make_line_chart(
-        self, df: pd.DataFrame, time_col: str, metric_col: str,
-        understanding: DatasetUnderstanding, order: int,
+        self,
+        df: pd.DataFrame,
+        time_col: str,
+        metric_col: str,
+        understanding: DatasetUnderstanding,
+        order: int,
     ) -> ChartSpecification | None:
         """Line chart for time series: TIME + NUMERIC."""
         # Validate
@@ -197,7 +199,7 @@ class IntelligentChartSelectionEngine:
         if len(grouped) < 2:
             return None
 
-        data = [{"x": x, "y": float(y)} for x, y in zip(x_labels, grouped.values)]
+        data = [{"x": x, "y": float(y)} for x, y in zip(x_labels, grouped.values, strict=False)]
 
         # Generate meaningful title
         date_range = f"{x_labels[0]} to {x_labels[-1]}" if len(x_labels) >= 2 else ""
@@ -225,8 +227,12 @@ class IntelligentChartSelectionEngine:
         )
 
     def _make_bar_chart(
-        self, df: pd.DataFrame, dim_col: str, metric_col: str,
-        understanding: DatasetUnderstanding, order: int,
+        self,
+        df: pd.DataFrame,
+        dim_col: str,
+        metric_col: str,
+        understanding: DatasetUnderstanding,
+        order: int,
     ) -> ChartSpecification | None:
         """Bar chart for category comparison: CATEGORY + NUMERIC."""
         if not pd.api.types.is_numeric_dtype(df[metric_col]):
@@ -270,8 +276,11 @@ class IntelligentChartSelectionEngine:
         )
 
     def _make_pie_chart(
-        self, df: pd.DataFrame, dim_col: str,
-        understanding: DatasetUnderstanding, order: int,
+        self,
+        df: pd.DataFrame,
+        dim_col: str,
+        understanding: DatasetUnderstanding,
+        order: int,
     ) -> ChartSpecification | None:
         """Pie/donut chart for composition: CATEGORY + PROPORTION."""
         cardinality = df[dim_col].nunique()
@@ -285,7 +294,10 @@ class IntelligentChartSelectionEngine:
         # Compute proportions
         counts = df[dim_col].value_counts()
         total = counts.sum()
-        data = [{"x": str(k), "y": int(v), "pct": round(float(v / total * 100), 1)} for k, v in counts.items()]
+        data = [
+            {"x": str(k), "y": int(v), "pct": round(float(v / total * 100), 1)}
+            for k, v in counts.items()
+        ]
 
         title = f"{self._label(dim_col)} Distribution"
 
@@ -308,11 +320,17 @@ class IntelligentChartSelectionEngine:
         )
 
     def _make_scatter_plot(
-        self, df: pd.DataFrame, x_col: str, y_col: str,
-        understanding: DatasetUnderstanding, order: int,
+        self,
+        df: pd.DataFrame,
+        x_col: str,
+        y_col: str,
+        understanding: DatasetUnderstanding,
+        order: int,
     ) -> ChartSpecification | None:
         """Scatter plot for two numeric variables."""
-        if not pd.api.types.is_numeric_dtype(df[x_col]) or not pd.api.types.is_numeric_dtype(df[y_col]):
+        if not pd.api.types.is_numeric_dtype(df[x_col]) or not pd.api.types.is_numeric_dtype(
+            df[y_col]
+        ):
             return None
 
         # Compute correlation
@@ -348,8 +366,11 @@ class IntelligentChartSelectionEngine:
         )
 
     def _make_histogram(
-        self, df: pd.DataFrame, metric_col: str,
-        understanding: DatasetUnderstanding, order: int,
+        self,
+        df: pd.DataFrame,
+        metric_col: str,
+        understanding: DatasetUnderstanding,
+        order: int,
     ) -> ChartSpecification | None:
         """Histogram for distribution analysis."""
         if not pd.api.types.is_numeric_dtype(df[metric_col]):
@@ -389,8 +410,11 @@ class IntelligentChartSelectionEngine:
         )
 
     def _make_correlation_heatmap(
-        self, df: pd.DataFrame, measures: list[str],
-        understanding: DatasetUnderstanding, order: int,
+        self,
+        df: pd.DataFrame,
+        measures: list[str],
+        understanding: DatasetUnderstanding,
+        order: int,
     ) -> ChartSpecification | None:
         """Correlation heatmap for 3+ numeric variables."""
         numeric_measures = [m for m in measures if pd.api.types.is_numeric_dtype(df[m])]
@@ -399,8 +423,8 @@ class IntelligentChartSelectionEngine:
 
         corr_matrix = df[numeric_measures].corr()
         data = []
-        for i, col1 in enumerate(numeric_measures):
-            for j, col2 in enumerate(numeric_measures):
+        for _i, col1 in enumerate(numeric_measures):
+            for _j, col2 in enumerate(numeric_measures):
                 val = corr_matrix.loc[col1, col2]
                 if not pd.isna(val):
                     data.append({"x": col1, "y": col2, "value": round(float(val), 2)})
@@ -427,8 +451,12 @@ class IntelligentChartSelectionEngine:
         )
 
     def _make_ranking_chart(
-        self, df: pd.DataFrame, dim_col: str, metric_col: str,
-        understanding: DatasetUnderstanding, order: int,
+        self,
+        df: pd.DataFrame,
+        dim_col: str,
+        metric_col: str,
+        understanding: DatasetUnderstanding,
+        order: int,
     ) -> ChartSpecification | None:
         """Sorted bar chart for ranking: top N entities."""
         if not pd.api.types.is_numeric_dtype(df[metric_col]):
@@ -465,8 +493,12 @@ class IntelligentChartSelectionEngine:
         )
 
     def _make_geo_map(
-        self, df: pd.DataFrame, geo_col: str, metric_col: str,
-        understanding: DatasetUnderstanding, order: int,
+        self,
+        df: pd.DataFrame,
+        geo_col: str,
+        metric_col: str,
+        understanding: DatasetUnderstanding,
+        order: int,
     ) -> ChartSpecification | None:
         """Geographic map (only when confidently detected)."""
         if not pd.api.types.is_numeric_dtype(df[metric_col]):
@@ -499,7 +531,9 @@ class IntelligentChartSelectionEngine:
     # ── Scoring ──
 
     def _ensure_diversity(
-        self, charts: list[ChartSpecification], max_charts: int,
+        self,
+        charts: list[ChartSpecification],
+        max_charts: int,
     ) -> list[ChartSpecification]:
         """Ensure chart type diversity by reserving slots for underrepresented types.
 
@@ -545,7 +579,10 @@ class IntelligentChartSelectionEngine:
         return top
 
     def _score_chart(
-        self, chart: ChartSpecification, df: pd.DataFrame, understanding: DatasetUnderstanding,
+        self,
+        chart: ChartSpecification,
+        df: pd.DataFrame,
+        understanding: DatasetUnderstanding,
     ) -> float:
         """Score a chart's importance (0-100).
 
@@ -584,7 +621,19 @@ class IntelligentChartSelectionEngine:
 
         # 4. Business value (max 15) — charts with measures in name
         y_axis_lower = (chart.y_axis or "").lower()
-        if any(kw in y_axis_lower for kw in ("revenue", "sales", "amount", "total", "income", "profit", "billing", "payment")):
+        if any(
+            kw in y_axis_lower
+            for kw in (
+                "revenue",
+                "sales",
+                "amount",
+                "total",
+                "income",
+                "profit",
+                "billing",
+                "payment",
+            )
+        ):
             score += 15
         elif chart.y_axis:
             score += 8
@@ -649,7 +698,7 @@ class IntelligentChartSelectionEngine:
             sig2 = f"axes:{chart.x_axis}:{chart.y_axis}"
 
             # Signature 3: same columns (different chart types on same data)
-            sig3 = f"cols:{','.join(cols)}"
+            # sig3 = f"cols:{','.join(cols)}"
 
             if sig1 in seen_signatures or sig2 in seen_signatures:
                 # Duplicate — skip if the existing one has higher score
@@ -676,7 +725,9 @@ class IntelligentChartSelectionEngine:
 
     @staticmethod
     def _filter_by_quality(
-        df: pd.DataFrame, columns: list[str], understanding: DatasetUnderstanding,
+        df: pd.DataFrame,
+        columns: list[str],
+        understanding: DatasetUnderstanding,
     ) -> list[str]:
         """Filter out columns with >80% missing values."""
         good = []

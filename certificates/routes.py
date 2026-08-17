@@ -11,6 +11,7 @@ certificate-specific endpoints for:
 
 All endpoints enforce organization isolation and authentication.
 """
+
 from __future__ import annotations
 
 import csv
@@ -38,7 +39,6 @@ from capture.models import (
     CaptureField,
     CertificateVerification,
 )
-from capture.repositories import CaptureDocumentRepository
 from capture.service import CaptureError, CaptureService
 from shared.database import get_db
 from shared.dependencies import get_current_user
@@ -143,7 +143,9 @@ async def upload_certificates(
         )
 
     svc = CaptureService(db)
-    batch = svc.create_batch(org_id, current_user["id"], batch_name or "Certificate Batch", "certificates")
+    batch = svc.create_batch(
+        org_id, current_user["id"], batch_name or "Certificate Batch", "certificates"
+    )
 
     results: list[dict] = []
     succeeded = 0
@@ -154,8 +156,12 @@ async def upload_certificates(
         try:
             content = await file.read()
             doc = svc.upload_document(
-                org_id, current_user["id"], file.filename or "certificate", content,
-                source="web", batch_id=batch.id,
+                org_id,
+                current_user["id"],
+                file.filename or "certificate",
+                content,
+                source="web",
+                batch_id=batch.id,
             )
             # Enqueue background job for processing instead of synchronous
             job_id = None
@@ -200,19 +206,23 @@ async def upload_certificates(
             results.append(result)
         except CaptureError as e:
             failed += 1
-            results.append({
-                "filename": file.filename,
-                "status": "failed",
-                "error_message": str(e),
-            })
+            results.append(
+                {
+                    "filename": file.filename,
+                    "status": "failed",
+                    "error_message": str(e),
+                }
+            )
             logger.warning("Certificate upload failed for %s: %s", file.filename, e)
         except Exception as e:
             failed += 1
-            results.append({
-                "filename": file.filename,
-                "status": "failed",
-                "error_message": f"Processing error: {e}",
-            })
+            results.append(
+                {
+                    "filename": file.filename,
+                    "status": "failed",
+                    "error_message": f"Processing error: {e}",
+                }
+            )
             logger.exception("Certificate processing failed for %s", file.filename)
 
     batch.total_documents = len(files)
@@ -258,7 +268,9 @@ async def search_certificates(
     q: str | None = Query(None, description="Search query (name, certificate number, institution)"),
     certificate_type: str | None = Query(None, description="Filter by certificate type"),
     verification_status: str | None = Query(None, description="Filter by verification status"),
-    review_status: str | None = Query(None, description="Filter by review status (approved, ready_for_review, etc.)"),
+    review_status: str | None = Query(
+        None, description="Filter by review status (approved, ready_for_review, etc.)"
+    ),
     institution: str | None = Query(None, description="Filter by institution name"),
     year: int | None = Query(None, description="Filter by award/issue year"),
     limit: int = Query(50, ge=1, le=200),
@@ -323,9 +335,9 @@ async def search_certificates(
     certificates = []
     for doc in docs:
         fields = (
-            db.execute(
-                select(CaptureField).where(CaptureField.document_id == doc.id)
-            ).scalars().all()
+            db.execute(select(CaptureField).where(CaptureField.document_id == doc.id))
+            .scalars()
+            .all()
         )
         field_dict = {f.field_name: f.value for f in fields}
 
@@ -375,7 +387,9 @@ async def certificate_dashboard(
                 CaptureDocument.organization_id == org_id,
                 CaptureDocument.document_type.in_(CERTIFICATE_DOC_TYPES),
             )
-        ).scalars().all()
+        )
+        .scalars()
+        .all()
     )
 
     total = len(docs)
@@ -388,7 +402,9 @@ async def certificate_dashboard(
         by_status[doc.status] = by_status.get(doc.status, 0) + 1
         if doc.document_type:
             by_type[doc.document_type] = by_type.get(doc.document_type, 0) + 1
-        by_verification[doc.verification_status] = by_verification.get(doc.verification_status, 0) + 1
+        by_verification[doc.verification_status] = (
+            by_verification.get(doc.verification_status, 0) + 1
+        )
 
     # Get institution distribution from fields
     for doc in docs:
@@ -398,7 +414,9 @@ async def certificate_dashboard(
                     CaptureField.document_id == doc.id,
                     CaptureField.field_name == "institution",
                 )
-            ).scalars().all()
+            )
+            .scalars()
+            .all()
         )
         for f in fields:
             if f.value:
@@ -414,7 +432,9 @@ async def certificate_dashboard(
                     CaptureField.document_id == doc.id,
                     CaptureField.field_name.in_(["date_awarded", "date_issued", "graduation_date"]),
                 )
-            ).scalars().all()
+            )
+            .scalars()
+            .all()
         )
         for f in fields:
             if f.value and len(f.value) >= 4:
@@ -426,7 +446,10 @@ async def certificate_dashboard(
     return {
         "total": total,
         "processed": by_status.get("ready_for_review", 0) + by_status.get("approved", 0),
-        "processing": by_status.get("preprocessing", 0) + by_status.get("extracting", 0) + by_status.get("classifying", 0) + by_status.get("validating", 0),
+        "processing": by_status.get("preprocessing", 0)
+        + by_status.get("extracting", 0)
+        + by_status.get("classifying", 0)
+        + by_status.get("validating", 0),
         "review_required": by_status.get("ready_for_review", 0),
         "approved": by_status.get("approved", 0),
         "rejected": by_status.get("rejected", 0),
@@ -439,7 +462,9 @@ async def certificate_dashboard(
         "by_type": by_type,
         "by_status": by_status,
         "by_verification": by_verification,
-        "by_institution": dict(sorted(by_institution.items(), key=lambda kv: kv[1], reverse=True)[:20]),
+        "by_institution": dict(
+            sorted(by_institution.items(), key=lambda kv: kv[1], reverse=True)[:20]
+        ),
         "by_year": dict(sorted(by_year.items())),
     }
 
@@ -454,9 +479,9 @@ def _get_certificate_field_dict(db: DbSession, doc_ids: list[int]) -> dict[int, 
     if not doc_ids:
         return {}
     fields = (
-        db.execute(
-            select(CaptureField).where(CaptureField.document_id.in_(doc_ids))
-        ).scalars().all()
+        db.execute(select(CaptureField).where(CaptureField.document_id.in_(doc_ids)))
+        .scalars()
+        .all()
     )
     result: dict[int, dict[str, str]] = {}
     for f in fields:
@@ -465,11 +490,27 @@ def _get_certificate_field_dict(db: DbSession, doc_ids: list[int]) -> dict[int, 
 
 
 EXPORT_COLUMNS = [
-    "full_name", "certificate_type", "qualification", "degree", "programme",
-    "course", "institution", "certificate_number", "license_number",
-    "date_awarded", "date_issued", "graduation_date", "expiry_date",
-    "grade", "gpa", "department", "country", "verification_status",
-    "review_status", "classification_confidence", "overall_confidence",
+    "full_name",
+    "certificate_type",
+    "qualification",
+    "degree",
+    "programme",
+    "course",
+    "institution",
+    "certificate_number",
+    "license_number",
+    "date_awarded",
+    "date_issued",
+    "graduation_date",
+    "expiry_date",
+    "grade",
+    "gpa",
+    "department",
+    "country",
+    "verification_status",
+    "review_status",
+    "classification_confidence",
+    "overall_confidence",
 ]
 
 
@@ -517,7 +558,9 @@ async def export_certificates_csv(
             elif col == "review_status":
                 row.append(doc.status)
             elif col == "classification_confidence":
-                row.append(f"{doc.classification_confidence:.3f}" if doc.classification_confidence else "")
+                row.append(
+                    f"{doc.classification_confidence:.3f}" if doc.classification_confidence else ""
+                )
             elif col == "overall_confidence":
                 row.append(f"{doc.overall_confidence:.3f}" if doc.overall_confidence else "")
             else:
@@ -610,7 +653,9 @@ async def export_certificates_xlsx(
             for cell in row:
                 if cell.value:
                     max_len = max(max_len, len(str(cell.value)))
-        ws.column_dimensions[ws.cell(row=1, column=col_idx).column_letter].width = min(max_len + 2, 50)
+        ws.column_dimensions[ws.cell(row=1, column=col_idx).column_letter].width = min(
+            max_len + 2, 50
+        )
 
     output = io.BytesIO()
     wb.save(output)
@@ -653,14 +698,12 @@ async def verify_certificate(
     """
     org_id = get_current_organization_id(current_user, db)
 
-    doc = (
-        db.execute(
-            select(CaptureDocument).where(
-                CaptureDocument.id == document_id,
-                CaptureDocument.organization_id == org_id,
-            )
-        ).scalar_one_or_none()
-    )
+    doc = db.execute(
+        select(CaptureDocument).where(
+            CaptureDocument.id == document_id,
+            CaptureDocument.organization_id == org_id,
+        )
+    ).scalar_one_or_none()
     if not doc:
         raise HTTPException(status_code=404, detail="Certificate not found")
     if not _is_certificate_type(doc.document_type):
@@ -739,14 +782,12 @@ async def list_verifications(
     """List all verification attempts for a certificate."""
     org_id = get_current_organization_id(current_user, db)
 
-    doc = (
-        db.execute(
-            select(CaptureDocument).where(
-                CaptureDocument.id == document_id,
-                CaptureDocument.organization_id == org_id,
-            )
-        ).scalar_one_or_none()
-    )
+    doc = db.execute(
+        select(CaptureDocument).where(
+            CaptureDocument.id == document_id,
+            CaptureDocument.organization_id == org_id,
+        )
+    ).scalar_one_or_none()
     if not doc:
         raise HTTPException(status_code=404, detail="Certificate not found")
 
@@ -758,7 +799,9 @@ async def list_verifications(
                 CertificateVerification.organization_id == org_id,
             )
             .order_by(CertificateVerification.id.desc())
-        ).scalars().all()
+        )
+        .scalars()
+        .all()
     )
 
     return {
@@ -840,7 +883,9 @@ async def certificates_to_dataset(
                 CaptureDocument.document_type.in_(CERTIFICATE_DOC_TYPES),
                 CaptureDocument.status == "approved",
             )
-        ).scalars().all()
+        )
+        .scalars()
+        .all()
     )
 
     if not docs:
@@ -881,7 +926,6 @@ async def certificates_to_dataset(
 
     # Save as a dataset file for the analytics pipeline
     import os
-    import tempfile
 
     dataset_dir = os.path.join(getattr(config, "UPLOAD_DIR", "uploads"), "certificate_datasets")
     os.makedirs(dataset_dir, exist_ok=True)

@@ -295,6 +295,7 @@ class AIGateway:
         # Resolve organization_id from user if not provided
         if organization_id is None and user_id and self.db:
             from authentication.models import User
+
             user_obj = self.db.query(User).filter(User.id == user_id).first()
             if user_obj:
                 organization_id = user_obj.organization_id

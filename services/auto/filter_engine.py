@@ -57,16 +57,18 @@ class AutomaticFilterEngine:
                     dates = pd.to_datetime(df[time_col], errors="coerce").dropna()
 
                 if len(dates) > 0:
-                    filters.append(FilterSpecification(
-                        filter_type="date_range",
-                        label=f"Date Range ({self._label(time_col)})",
-                        column=time_col,
-                        default_value={
-                            "start": dates.min().strftime("%Y-%m-%d"),
-                            "end": dates.max().strftime("%Y-%m-%d"),
-                        },
-                        order=order,
-                    ))
+                    filters.append(
+                        FilterSpecification(
+                            filter_type="date_range",
+                            label=f"Date Range ({self._label(time_col)})",
+                            column=time_col,
+                            default_value={
+                                "start": dates.min().strftime("%Y-%m-%d"),
+                                "end": dates.max().strftime("%Y-%m-%d"),
+                            },
+                            order=order,
+                        )
+                    )
                     order += 1
 
         # 2. Dimension filters
@@ -74,7 +76,11 @@ class AutomaticFilterEngine:
             if len(filters) >= self.MAX_FILTERS:
                 break
 
-            if col_u.semantic_role not in (SemanticRole.CATEGORY, SemanticRole.GEOGRAPHY, SemanticRole.BOOLEAN):
+            if col_u.semantic_role not in (
+                SemanticRole.CATEGORY,
+                SemanticRole.GEOGRAPHY,
+                SemanticRole.BOOLEAN,
+            ):
                 continue
             if col_u.name not in df.columns:
                 continue
@@ -88,22 +94,28 @@ class AutomaticFilterEngine:
 
             if cardinality <= self.SINGLE_SELECT_MAX:
                 filter_type = "single_select"
-                options = [str(v) for v in df[col_u.name].dropna().unique()[:self.SINGLE_SELECT_MAX]]
+                options = [
+                    str(v) for v in df[col_u.name].dropna().unique()[: self.SINGLE_SELECT_MAX]
+                ]
             elif cardinality <= self.MULTI_SELECT_MAX:
                 filter_type = "multi_select"
-                options = [str(v) for v in df[col_u.name].dropna().unique()[:self.MULTI_SELECT_MAX]]
+                options = [
+                    str(v) for v in df[col_u.name].dropna().unique()[: self.MULTI_SELECT_MAX]
+                ]
             else:
                 # Too many values — skip
                 continue
 
-            filters.append(FilterSpecification(
-                filter_type=filter_type,
-                label=self._label(col_u.name),
-                column=col_u.name,
-                entity=col_u.semantic_role,
-                options=options,
-                order=order,
-            ))
+            filters.append(
+                FilterSpecification(
+                    filter_type=filter_type,
+                    label=self._label(col_u.name),
+                    column=col_u.name,
+                    entity=col_u.semantic_role,
+                    options=options,
+                    order=order,
+                )
+            )
             order += 1
 
         return filters[: self.MAX_FILTERS]

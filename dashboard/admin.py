@@ -29,7 +29,9 @@ def _api_call(method: str, endpoint: str, token: str | None = None, **kwargs):
     """Make an API call with authentication."""
     import requests
 
-    api_url = st.session_state.get("api_base_url", os.getenv("API_BASE_URL", "http://localhost:8000"))
+    api_url = st.session_state.get(
+        "api_base_url", os.getenv("API_BASE_URL", "http://localhost:8000")
+    )
     headers = kwargs.pop("headers", {})
     if token:
         headers["Authorization"] = f"Bearer {token}"

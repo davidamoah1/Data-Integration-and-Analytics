@@ -19,7 +19,6 @@ Tests cover:
 from __future__ import annotations
 
 import io
-from datetime import datetime, timedelta
 
 import numpy as np
 import pandas as pd
@@ -33,9 +32,6 @@ from services.auto.analysis_engine import (
 from services.auto.chart_selection_engine import IntelligentChartSelectionEngine
 from services.auto.chart_specification import (
     ChartSpecification,
-    DashboardSpecification,
-    KPISpecification,
-    PresentationSpecification,
 )
 from services.auto.dashboard_layout_engine import IntelligentDashboardLayoutEngine
 from services.auto.filter_engine import AutomaticFilterEngine
@@ -43,7 +39,6 @@ from services.auto.insight_engine import AutomaticInsightEngine
 from services.auto.kpi_engine import AutomaticKPIEngine
 from services.auto.orchestrator import AutoEngineOrchestrator
 from services.auto.presentation_layout_engine import PresentationLayoutEngine
-
 
 # ── Fixtures ──
 
@@ -56,27 +51,51 @@ def sales_df() -> pd.DataFrame:
     categories = ["Electronics", "Clothing", "Books", "Home", "Sports"]
     regions = ["North", "South", "East", "West"]
 
-    return pd.DataFrame({
-        "transaction_id": range(1, 101),
-        "date": dates,
-        "category": np.random.choice(categories, 100),
-        "region": np.random.choice(regions, 100),
-        "revenue": np.random.uniform(100, 5000, 100).round(2),
-        "quantity": np.random.randint(1, 50, 100),
-        "cost": np.random.uniform(50, 2500, 100).round(2),
-        "is_active": np.random.choice([True, False], 100),
-    })
+    return pd.DataFrame(
+        {
+            "transaction_id": range(1, 101),
+            "date": dates,
+            "category": np.random.choice(categories, 100),
+            "region": np.random.choice(regions, 100),
+            "revenue": np.random.uniform(100, 5000, 100).round(2),
+            "quantity": np.random.randint(1, 50, 100),
+            "cost": np.random.uniform(50, 2500, 100).round(2),
+            "is_active": np.random.choice([True, False], 100),
+        }
+    )
 
 
 @pytest.fixture
 def simple_df() -> pd.DataFrame:
     """Simple dataset for basic tests."""
-    return pd.DataFrame({
-        "id": range(1, 21),
-        "category": ["A", "B", "C", "D"] * 5,
-        "value": [10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
-                  10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
-    })
+    return pd.DataFrame(
+        {
+            "id": range(1, 21),
+            "category": ["A", "B", "C", "D"] * 5,
+            "value": [
+                10,
+                20,
+                30,
+                40,
+                50,
+                60,
+                70,
+                80,
+                90,
+                100,
+                10,
+                20,
+                30,
+                40,
+                50,
+                60,
+                70,
+                80,
+                90,
+                100,
+            ],
+        }
+    )
 
 
 @pytest.fixture
@@ -158,10 +177,12 @@ class TestColumnDetection:
 
     def test_date_string_detection(self):
         """Date-like strings should be detected as DATE_TIME."""
-        df = pd.DataFrame({
-            "created_date": ["2023-01-01", "2023-01-02", "2023-01-03"] * 10,
-            "value": range(30),
-        })
+        df = pd.DataFrame(
+            {
+                "created_date": ["2023-01-01", "2023-01-02", "2023-01-03"] * 10,
+                "value": range(30),
+            }
+        )
         understanding = AutomaticAnalysisEngine.analyze(df)
         col = next(c for c in understanding.columns if c.name == "created_date")
         assert col.semantic_role == SemanticRole.DATE_TIME
@@ -191,7 +212,9 @@ class TestColumnDetection:
 class TestChartSelection:
     """Test intelligent chart selection."""
 
-    def test_line_chart_for_time_series(self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding):
+    def test_line_chart_for_time_series(
+        self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding
+    ):
         """TIME + NUMERIC should produce a line chart."""
         engine = IntelligentChartSelectionEngine()
         charts = engine.select_charts(sales_df, understanding)
@@ -200,7 +223,9 @@ class TestChartSelection:
         assert line_charts[0].x_axis == "date"
         assert line_charts[0].y_axis in ("revenue", "quantity", "cost")
 
-    def test_bar_chart_for_category_comparison(self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding):
+    def test_bar_chart_for_category_comparison(
+        self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding
+    ):
         """CATEGORY + NUMERIC should produce a bar chart."""
         engine = IntelligentChartSelectionEngine()
         charts = engine.select_charts(sales_df, understanding)
@@ -209,10 +234,12 @@ class TestChartSelection:
 
     def test_no_pie_chart_for_many_categories(self):
         """Pie charts should NOT be created for >8 categories."""
-        df = pd.DataFrame({
-            "category": [f"cat_{i}" for i in range(15)] * 10,
-            "value": range(150),
-        })
+        df = pd.DataFrame(
+            {
+                "category": [f"cat_{i}" for i in range(15)] * 10,
+                "value": range(150),
+            }
+        )
         understanding = AutomaticAnalysisEngine.analyze(df)
         engine = IntelligentChartSelectionEngine()
         charts = engine.select_charts(df, understanding)
@@ -227,7 +254,9 @@ class TestChartSelection:
         pie_charts = [c for c in charts if c.chart_type in ("pie_chart", "donut_chart")]
         assert len(pie_charts) > 0
 
-    def test_no_charts_from_identifier_columns(self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding):
+    def test_no_charts_from_identifier_columns(
+        self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding
+    ):
         """No charts should use identifier columns as data."""
         engine = IntelligentChartSelectionEngine()
         charts = engine.select_charts(sales_df, understanding)
@@ -236,18 +265,22 @@ class TestChartSelection:
 
     def test_no_charts_from_high_missing_columns(self):
         """Columns with >80% missing values should not appear in charts."""
-        df = pd.DataFrame({
-            "category": ["A", "B", "C"] * 10,
-            "good_metric": range(30),
-            "bad_metric": [None] * 28 + [1, 2],
-        })
+        df = pd.DataFrame(
+            {
+                "category": ["A", "B", "C"] * 10,
+                "good_metric": range(30),
+                "bad_metric": [None] * 28 + [1, 2],
+            }
+        )
         understanding = AutomaticAnalysisEngine.analyze(df)
         engine = IntelligentChartSelectionEngine()
         charts = engine.select_charts(df, understanding)
         for chart in charts:
             assert "bad_metric" not in chart.source_columns
 
-    def test_scatter_plot_for_two_numeric(self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding):
+    def test_scatter_plot_for_two_numeric(
+        self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding
+    ):
         """Two numeric columns should produce a scatter plot."""
         engine = IntelligentChartSelectionEngine()
         charts = engine.select_charts(sales_df, understanding)
@@ -256,17 +289,21 @@ class TestChartSelection:
 
     def test_no_scatter_with_one_numeric(self):
         """Scatter plots should NOT be created when there's only one numeric variable."""
-        df = pd.DataFrame({
-            "category": ["A", "B", "C"] * 10,
-            "value": range(30),
-        })
+        df = pd.DataFrame(
+            {
+                "category": ["A", "B", "C"] * 10,
+                "value": range(30),
+            }
+        )
         understanding = AutomaticAnalysisEngine.analyze(df)
         engine = IntelligentChartSelectionEngine()
         charts = engine.select_charts(df, understanding)
         scatter_charts = [c for c in charts if c.chart_type == "scatter_plot"]
         assert len(scatter_charts) == 0
 
-    def test_histogram_for_distribution(self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding):
+    def test_histogram_for_distribution(
+        self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding
+    ):
         """Numeric columns should produce histograms."""
         engine = IntelligentChartSelectionEngine()
         charts = engine.select_charts(sales_df, understanding)
@@ -279,7 +316,9 @@ class TestChartSelection:
         charts = engine.select_charts(sales_df, understanding, max_charts=5)
         assert len(charts) <= 5
 
-    def test_every_chart_has_title(self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding):
+    def test_every_chart_has_title(
+        self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding
+    ):
         """Every chart must have a meaningful title."""
         engine = IntelligentChartSelectionEngine()
         charts = engine.select_charts(sales_df, understanding)
@@ -287,7 +326,9 @@ class TestChartSelection:
             assert chart.title
             assert len(chart.title) > 3
 
-    def test_every_chart_has_reason(self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding):
+    def test_every_chart_has_reason(
+        self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding
+    ):
         """Every chart must have a 'Why this chart?' reason."""
         engine = IntelligentChartSelectionEngine()
         charts = engine.select_charts(sales_df, understanding)
@@ -295,7 +336,9 @@ class TestChartSelection:
             assert chart.reason
             assert len(chart.reason) > 10
 
-    def test_every_chart_has_data(self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding):
+    def test_every_chart_has_data(
+        self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding
+    ):
         """Every chart must have pre-computed data."""
         engine = IntelligentChartSelectionEngine()
         charts = engine.select_charts(sales_df, understanding)
@@ -304,10 +347,12 @@ class TestChartSelection:
 
     def test_no_line_chart_for_unrelated_categories(self):
         """Line charts should NOT be used for non-time categorical data."""
-        df = pd.DataFrame({
-            "product_name": [f"Product {chr(65 + i)}" for i in range(10)] * 5,
-            "sales": range(50),
-        })
+        df = pd.DataFrame(
+            {
+                "product_name": [f"Product {chr(65 + i)}" for i in range(10)] * 5,
+                "sales": range(50),
+            }
+        )
         understanding = AutomaticAnalysisEngine.analyze(df)
         engine = IntelligentChartSelectionEngine()
         charts = engine.select_charts(df, understanding)
@@ -330,7 +375,9 @@ class TestChartScoring:
         for chart in charts:
             assert 0 <= chart.importance_score <= 100
 
-    def test_time_series_scores_higher(self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding):
+    def test_time_series_scores_higher(
+        self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding
+    ):
         """Time series charts should generally score higher than supporting charts."""
         engine = IntelligentChartSelectionEngine()
         charts = engine.select_charts(sales_df, understanding)
@@ -342,7 +389,9 @@ class TestChartScoring:
                 avg_other_score = sum(c.importance_score for c in other_charts) / len(other_charts)
                 assert avg_line_score >= avg_other_score * 0.8
 
-    def test_charts_sorted_by_score(self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding):
+    def test_charts_sorted_by_score(
+        self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding
+    ):
         """Charts should be sorted by importance score (descending)."""
         engine = IntelligentChartSelectionEngine()
         charts = engine.select_charts(sales_df, understanding)
@@ -366,7 +415,9 @@ class TestChartDeduplication:
             assert key not in seen, f"Duplicate chart with axes {key}"
             seen.add(key)
 
-    def test_no_duplicate_bar_charts(self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding):
+    def test_no_duplicate_bar_charts(
+        self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding
+    ):
         """No duplicate bar charts for the same dimension + measure."""
         engine = IntelligentChartSelectionEngine()
         charts = engine.select_charts(sales_df, understanding)
@@ -392,7 +443,9 @@ class TestKPIEngine:
         total_kpi = next(k for k in kpis if k.key == "total_records")
         assert total_kpi.value == 100
 
-    def test_revenue_kpi_computed(self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding):
+    def test_revenue_kpi_computed(
+        self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding
+    ):
         """Total revenue KPI should be computed from data."""
         engine = AutomaticKPIEngine()
         kpis = engine.select_kpis(sales_df, understanding)
@@ -403,7 +456,9 @@ class TestKPIEngine:
         total_kpi = next(k for k in revenue_kpis if k.metric == "sum")
         assert abs(total_kpi.value - total_revenue) < 0.01
 
-    def test_no_kpi_from_identifier(self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding):
+    def test_no_kpi_from_identifier(
+        self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding
+    ):
         """No KPI should be computed from identifier columns."""
         engine = AutomaticKPIEngine()
         kpis = engine.select_kpis(sales_df, understanding)
@@ -438,7 +493,9 @@ class TestInsightEngine:
         insights = engine.generate_insights(sales_df, understanding)
         assert len(insights) > 0
 
-    def test_insight_has_required_fields(self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding):
+    def test_insight_has_required_fields(
+        self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding
+    ):
         """Every insight must have title, description, and severity."""
         engine = AutomaticInsightEngine()
         insights = engine.generate_insights(sales_df, understanding)
@@ -447,7 +504,9 @@ class TestInsightEngine:
             assert insight.description
             assert insight.severity in ("info", "warning", "critical", "positive")
 
-    def test_no_fabricated_insights(self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding):
+    def test_no_fabricated_insights(
+        self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding
+    ):
         """Insights should reference real data — check that values are numeric."""
         engine = AutomaticInsightEngine()
         insights = engine.generate_insights(sales_df, understanding)
@@ -467,9 +526,11 @@ class TestInsightEngine:
         # Create data with clear outliers — use non-sequential values to avoid IDENTIFIER classification
         np.random.seed(42)
         normal_values = np.random.uniform(10, 100, 60).round(2)
-        df = pd.DataFrame({
-            "value": list(normal_values) + [500.0, 600.0, 700.0],
-        })
+        df = pd.DataFrame(
+            {
+                "value": list(normal_values) + [500.0, 600.0, 700.0],
+            }
+        )
         understanding = AutomaticAnalysisEngine.analyze(df)
         insights = engine.generate_insights(df, understanding)
         outlier_insights = [i for i in insights if i.insight_type == "anomaly"]
@@ -493,10 +554,14 @@ class TestFilterEngine:
         """Single-select filters should be created for low-cardinality dimensions."""
         engine = AutomaticFilterEngine()
         filters = engine.select_filters(sales_df, understanding)
-        category_filters = [f for f in filters if f.filter_type in ("single_select", "multi_select")]
+        category_filters = [
+            f for f in filters if f.filter_type in ("single_select", "multi_select")
+        ]
         assert len(category_filters) > 0
 
-    def test_no_filter_for_identifier(self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding):
+    def test_no_filter_for_identifier(
+        self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding
+    ):
         """No filter should be created for identifier columns."""
         engine = AutomaticFilterEngine()
         filters = engine.select_filters(sales_df, understanding)
@@ -517,7 +582,9 @@ class TestDashboardLayout:
     """Test intelligent dashboard layout."""
 
     def test_layout_has_sections(
-        self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding,
+        self,
+        sales_df: pd.DataFrame,
+        understanding: DatasetUnderstanding,
     ):
         """Dashboard layout should have standard sections."""
         chart_engine = IntelligentChartSelectionEngine()
@@ -571,7 +638,9 @@ class TestDashboardLayout:
             elif chart.section == "supporting_charts":
                 assert chart.width == 6
 
-    def test_no_overlap_in_kpi_ids(self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding):
+    def test_no_overlap_in_kpi_ids(
+        self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding
+    ):
         """KPI IDs in layout should match KPI specifications."""
         kpi_engine = AutomaticKPIEngine()
         layout_engine = IntelligentDashboardLayoutEngine()
@@ -657,10 +726,14 @@ class TestPresentationLayout:
             if layout == "bullets":
                 assert slide.get("content"), f"Bullet slide {slide.get('slide_number')} is empty"
             elif layout == "chart":
-                assert slide.get("chart_data"), f"Chart slide {slide.get('slide_number')} has no chart data"
+                assert slide.get(
+                    "chart_data"
+                ), f"Chart slide {slide.get('slide_number')} has no chart data"
 
     def test_chart_placement_within_bounds(
-        self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding,
+        self,
+        sales_df: pd.DataFrame,
+        understanding: DatasetUnderstanding,
     ):
         """All chart placements must be within slide bounds (no cropping)."""
         chart_engine = IntelligentChartSelectionEngine()
@@ -695,7 +768,9 @@ class TestPresentationLayout:
                 assert y + h <= pres_engine.SLIDE_HEIGHT + 0.01, "Chart extends beyond slide height"
 
     def test_no_overlapping_kpi_cards(
-        self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding,
+        self,
+        sales_df: pd.DataFrame,
+        understanding: DatasetUnderstanding,
     ):
         """KPI cards on the same slide should not overlap."""
         kpi_engine = AutomaticKPIEngine()
@@ -730,13 +805,14 @@ class TestPresentationLayout:
                         x2, y2 = p2.get("x", 0), p2.get("y", 0)
                         w2, h2 = p2.get("width", 0), p2.get("height", 0)
                         overlap = not (
-                            x1 + w1 <= x2 or x2 + w2 <= x1 or
-                            y1 + h1 <= y2 or y2 + h2 <= y1
+                            x1 + w1 <= x2 or x2 + w2 <= x1 or y1 + h1 <= y2 or y2 + h2 <= y1
                         )
                         assert not overlap, f"KPI cards {i} and {j} overlap"
 
     def test_validation_passes(
-        self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding,
+        self,
+        sales_df: pd.DataFrame,
+        understanding: DatasetUnderstanding,
     ):
         """Presentation validation should pass (no errors)."""
         chart_engine = IntelligentChartSelectionEngine()
@@ -759,7 +835,9 @@ class TestPresentationLayout:
         )
 
         presentation = pres_engine.generate_presentation(dashboard)
-        assert presentation.validation["valid"], f"Validation errors: {presentation.validation['errors']}"
+        assert presentation.validation[
+            "valid"
+        ], f"Validation errors: {presentation.validation['errors']}"
         assert len(presentation.validation["errors"]) == 0
 
 
@@ -770,7 +848,8 @@ class TestEndToEnd:
     """Test that dashboard and presentation use the same chart specifications."""
 
     def test_same_chart_ids_in_dashboard_and_presentation(
-        self, sales_df: pd.DataFrame,
+        self,
+        sales_df: pd.DataFrame,
     ):
         """Charts included in the presentation must exist in the dashboard."""
         orchestrator = AutoEngineOrchestrator()
@@ -800,8 +879,9 @@ class TestEndToEnd:
         for slide in presentation.slides:
             if slide.get("layout") == "chart":
                 chart_id = slide.get("chart_id")
-                assert chart_id in dashboard_charts_by_id, \
-                    f"Chart {chart_id} in presentation but not in dashboard"
+                assert (
+                    chart_id in dashboard_charts_by_id
+                ), f"Chart {chart_id} in presentation but not in dashboard"
 
     def test_full_pipeline_runs_without_error(self, sales_df: pd.DataFrame):
         """The full auto pipeline should run without errors."""
@@ -827,7 +907,7 @@ class TestEndToEnd:
         orchestrator = AutoEngineOrchestrator()
         # Should not crash
         try:
-            result = orchestrator.generate(df, dataset_name="empty", industry="unknown")
+            orchestrator.generate(df, dataset_name="empty", industry="unknown")
             # May produce empty dashboard, that's OK
         except Exception as e:
             # Should fail gracefully, not with a cryptic error
@@ -850,7 +930,7 @@ class TestPPTXChartPresence:
         dashboard_spec = result["dashboard"]
 
         # Build a PPTX from the presentation spec (same logic as the route)
-        from pptx.util import Inches, Pt
+        from pptx.util import Inches
 
         charts_by_id = {c.id: c for c in dashboard_spec.charts}
 
@@ -915,7 +995,9 @@ class TestPPTXChartPresence:
                     chart_count += 1
 
         assert chart_count > 0, "PPTX must contain at least one chart"
-        assert charts_added == chart_count, f"Expected {charts_added} charts but found {chart_count}"
+        assert (
+            charts_added == chart_count
+        ), f"Expected {charts_added} charts but found {chart_count}"
 
     def test_no_silently_omitted_charts(self, sales_df: pd.DataFrame):
         """Every chart included in the presentation spec should be renderable."""
@@ -931,7 +1013,9 @@ class TestPPTXChartPresence:
                 chart_id = slide.get("chart_id")
                 assert chart_id in charts_by_id, f"Chart {chart_id} not found in dashboard specs"
                 chart = charts_by_id[chart_id]
-                assert len(chart.data) > 0, f"Chart {chart_id} has no data — would be silently omitted"
+                assert (
+                    len(chart.data) > 0
+                ), f"Chart {chart_id} has no data — would be silently omitted"
 
 
 # ── 12. Canonical Specification Consistency ──
@@ -976,6 +1060,7 @@ class TestCanonicalSpec:
         d = result["dashboard"].to_dict()
 
         import json
+
         json_str = json.dumps(d, default=str)
         assert isinstance(json_str, str)
         parsed = json.loads(json_str)
@@ -990,6 +1075,7 @@ class TestCanonicalSpec:
         d = result["presentation"].to_dict()
 
         import json
+
         json_str = json.dumps(d, default=str)
         assert isinstance(json_str, str)
         parsed = json.loads(json_str)

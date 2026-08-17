@@ -77,6 +77,7 @@ def _validate_magic_bytes(filename: str, content: bytes) -> None:
         f"the expected file signature. The file may be corrupted or misnamed."
     )
 
+
 # Zip bomb protection: cap total decompressed size and entry count for
 # batch ZIP uploads. A malicious ZIP can have a tiny compressed size but
 # decompress to gigabytes; both compressed and decompressed size are
@@ -374,10 +375,17 @@ class CaptureService:
 
                         words = []
                         for word in extracted_text.split():
-                            words.append(OcrWord(
-                                text=word, confidence=0.8, page=1,
-                                left=0.0, top=0.0, width=0.0, height=0.0,
-                            ))
+                            words.append(
+                                OcrWord(
+                                    text=word,
+                                    confidence=0.8,
+                                    page=1,
+                                    left=0.0,
+                                    top=0.0,
+                                    width=0.0,
+                                    height=0.0,
+                                )
+                            )
                         ocr_result = OcrResult(
                             full_text=extracted_text,
                             words=words,

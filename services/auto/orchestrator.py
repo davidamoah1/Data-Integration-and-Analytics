@@ -37,7 +37,7 @@ from typing import Any
 
 import pandas as pd
 
-from services.auto.analysis_engine import AutomaticAnalysisEngine, DatasetUnderstanding
+from services.auto.analysis_engine import AutomaticAnalysisEngine
 from services.auto.chart_selection_engine import IntelligentChartSelectionEngine
 from services.auto.chart_specification import (
     ChartSpecification,
@@ -106,7 +106,9 @@ class AutoEngineOrchestrator:
 
         # 2. Select charts
         charts = self.chart_engine.select_charts(
-            df, understanding, max_charts=max_charts,
+            df,
+            understanding,
+            max_charts=max_charts,
         )
 
         # 3. Select KPIs
@@ -119,9 +121,7 @@ class AutoEngineOrchestrator:
         filters = self.filter_engine.select_filters(df, understanding)
 
         # 6. Generate recommendations from insights
-        recommendations = [
-            i.recommendation for i in insights if i.recommendation
-        ][:5]
+        recommendations = [i.recommendation for i in insights if i.recommendation][:5]
 
         # 7. Generate dashboard layout
         dashboard = self.dashboard_layout_engine.generate_layout(

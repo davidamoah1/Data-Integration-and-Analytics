@@ -21,7 +21,6 @@ Dashboard hierarchy (top to bottom):
 from __future__ import annotations
 
 import logging
-from typing import Any
 
 from services.auto.chart_specification import (
     ChartSpecification,

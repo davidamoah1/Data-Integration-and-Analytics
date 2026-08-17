@@ -9,9 +9,10 @@ KPIs are selected based on:
 
 Never fabricates KPIs — all values come from actual data.
 """
+
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 import pandas as pd
 
@@ -24,6 +25,7 @@ from .column_analyzer import (
 @dataclass
 class KPICandidate:
     """A selected KPI with computed value."""
+
     key: str
     label: str
     value: float
@@ -60,15 +62,17 @@ class KPISelector:
         kpis: list[KPICandidate] = []
 
         # Total records
-        kpis.append(KPICandidate(
-            key="total_records",
-            label="Total Records",
-            value=float(len(df)),
-            formatted=f"{len(df):,}",
-            unit="records",
-            aggregation="count",
-            importance=70.0,
-        ))
+        kpis.append(
+            KPICandidate(
+                key="total_records",
+                label="Total Records",
+                value=float(len(df)),
+                formatted=f"{len(df):,}",
+                unit="records",
+                aggregation="count",
+                importance=70.0,
+            )
+        )
 
         # Measure-based KPIs
         for measure in u.measures[:5]:  # limit to top 5 measures
@@ -79,43 +83,49 @@ class KPISelector:
             # Sum for currency/measure
             if col_u.role in (ColumnSemanticRole.CURRENCY, ColumnSemanticRole.MEASURE):
                 total = df[measure].sum()
-                kpis.append(KPICandidate(
-                    key=f"total_{measure}",
-                    label=f"Total {measure.replace('_', ' ').title()}",
-                    value=float(total),
-                    formatted=self._format_value(total, col_u.role),
-                    unit="currency" if col_u.role == ColumnSemanticRole.CURRENCY else "",
-                    column=measure,
-                    aggregation="sum",
-                    importance=85.0 if col_u.role == ColumnSemanticRole.CURRENCY else 75.0,
-                ))
+                kpis.append(
+                    KPICandidate(
+                        key=f"total_{measure}",
+                        label=f"Total {measure.replace('_', ' ').title()}",
+                        value=float(total),
+                        formatted=self._format_value(total, col_u.role),
+                        unit="currency" if col_u.role == ColumnSemanticRole.CURRENCY else "",
+                        column=measure,
+                        aggregation="sum",
+                        importance=85.0 if col_u.role == ColumnSemanticRole.CURRENCY else 75.0,
+                    )
+                )
 
                 # Average
                 avg = df[measure].mean()
-                kpis.append(KPICandidate(
-                    key=f"avg_{measure}",
-                    label=f"Average {measure.replace('_', ' ').title()}",
-                    value=float(avg),
-                    formatted=self._format_value(avg, col_u.role),
-                    unit="currency" if col_u.role == ColumnSemanticRole.CURRENCY else "",
-                    column=measure,
-                    aggregation="mean",
-                    importance=70.0,
-                ))
+                kpis.append(
+                    KPICandidate(
+                        key=f"avg_{measure}",
+                        label=f"Average {measure.replace('_', ' ').title()}",
+                        value=float(avg),
+                        formatted=self._format_value(avg, col_u.role),
+                        unit="currency" if col_u.role == ColumnSemanticRole.CURRENCY else "",
+                        column=measure,
+                        aggregation="mean",
+                        importance=70.0,
+                    )
+                )
 
             # Percentage → average
             elif col_u.role == ColumnSemanticRole.PERCENTAGE:
                 avg = df[measure].mean()
-                kpis.append(KPICandidate(
-                    key=f"avg_{measure}",
-                    label=f"Average {measure.replace('_', ' ').title()}",
-                    value=float(avg),
-                    formatted=f"{avg:.1f}%",
-                    unit="%",
-                    column=measure,
-                    aggregation="mean",
-                    importance=72.0,
-                ))
+                kpis.append(
+                    KPICandidate(
+                        key=f"avg_{measure}",
+                        label=f"Average {measure.replace('_', ' ').title()}",
+                        value=float(avg),
+                        formatted=f"{avg:.1f}%",
+                        unit="%",
+                        column=measure,
+                        aggregation="mean",
+                        importance=72.0,
+                    )
+                )
 
         # Time-based growth rate
         if u.date_columns and u.measures:
@@ -124,18 +134,20 @@ class KPISelector:
                 kpis.append(growth)
 
         # Data quality KPI
-        kpis.append(KPICandidate(
-            key="data_quality",
-            label="Data Quality Score",
-            value=u.quality_score,
-            formatted=f"{u.quality_score:.1f}/100",
-            unit="score",
-            importance=65.0,
-        ))
+        kpis.append(
+            KPICandidate(
+                key="data_quality",
+                label="Data Quality Score",
+                value=u.quality_score,
+                formatted=f"{u.quality_score:.1f}/100",
+                unit="score",
+                importance=65.0,
+            )
+        )
 
         # Sort by importance and cap
         kpis.sort(key=lambda k: k.importance, reverse=True)
-        return kpis[:self.MAX_KPIS]
+        return kpis[: self.MAX_KPIS]
 
     def _compute_growth_rate(
         self, df: pd.DataFrame, date_col: str, measure: str

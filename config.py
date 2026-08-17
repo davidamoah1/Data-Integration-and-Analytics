@@ -222,6 +222,7 @@ elif DB_TYPE == "mysql":
     # misconfiguration — default to empty so no cross-origin requests are
     # allowed until the deployer configures it deliberately.
     import warnings as _w
+
     _w.warn(
         "CORS_ORIGINS is not set in a MySQL (production) environment. "
         "Cross-origin requests will be rejected. Set CORS_ORIGINS to your "

@@ -255,7 +255,9 @@ def render_support_page():
         try:
             import requests
 
-            api_url = st.session_state.get("api_base_url", os.getenv("API_BASE_URL", "http://localhost:8000"))
+            api_url = st.session_state.get(
+                "api_base_url", os.getenv("API_BASE_URL", "http://localhost:8000")
+            )
             resp = requests.get(f"{api_url}/health", timeout=5)
             if resp.status_code == 200:
                 data = resp.json()

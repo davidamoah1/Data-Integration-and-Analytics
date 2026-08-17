@@ -117,6 +117,7 @@ class ExecutiveSummaryEngine:
                 org_id = None
                 if user_id:
                     from authentication.models import User as _User
+
                     _u = self.db.query(_User).filter(_User.id == user_id).first()
                     if _u:
                         org_id = _u.organization_id

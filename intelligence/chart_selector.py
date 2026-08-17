@@ -21,6 +21,7 @@ Scoring factors:
   statistical_significance (0-10)
   uniqueness            (0-10)
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -33,7 +34,6 @@ import pandas as pd
 
 from .column_analyzer import (
     ColumnSemanticRole,
-    ColumnUnderstanding,
     DatasetUnderstanding,
 )
 
@@ -70,6 +70,7 @@ class ChartSpecification:
       - Report generator
       - PPTX presentation generator
     """
+
     id: str
     type: ChartType
     title: str
@@ -115,6 +116,7 @@ class ChartSpecification:
 @dataclass
 class ChartSelectionResult:
     """Result of chart selection."""
+
     charts: list[ChartSpecification] = field(default_factory=list)
     total_candidates: int = 0
     rejected: list[dict] = field(default_factory=list)  # rejected candidates with reasons
@@ -154,11 +156,13 @@ class ChartSelector:
         scored = []
         for chart in candidates:
             if chart.importance_score < 20:
-                result.rejected.append({
-                    "type": chart.type.value,
-                    "title": chart.title,
-                    "reason": f"Score too low ({chart.importance_score:.1f})",
-                })
+                result.rejected.append(
+                    {
+                        "type": chart.type.value,
+                        "title": chart.title,
+                        "reason": f"Score too low ({chart.importance_score:.1f})",
+                    }
+                )
             else:
                 scored.append(chart)
 
@@ -214,7 +218,7 @@ class ChartSelector:
         # ─── Two numeric → scatter plot ──────────────────────────────────
         if len(measures) >= 2:
             for i, m1 in enumerate(measures):
-                for m2 in measures[i + 1:]:
+                for m2 in measures[i + 1 :]:
                     if self._column_quality_ok(df, m1) and self._column_quality_ok(df, m2):
                         chart = self._make_scatter_chart(df, m1, m2, understanding)
                         if chart:
@@ -277,10 +281,7 @@ class ChartSelector:
             grouped = temp.groupby("_period")[measure].agg(["sum", "mean", "count"]).reset_index()
             grouped = grouped.sort_values("_period")
 
-            data = [
-                {"x": row["_period"], "y": float(row["sum"])}
-                for _, row in grouped.iterrows()
-            ]
+            data = [{"x": row["_period"], "y": float(row["sum"])} for _, row in grouped.iterrows()]
 
             # Generate meaningful title
             measure_label = measure.replace("_", " ").title()
@@ -328,8 +329,7 @@ class ChartSelector:
                 grouped = grouped.sort_values(measure, ascending=False)
 
             data = [
-                {"x": str(row[cat_col]), "y": float(row[measure])}
-                for _, row in grouped.iterrows()
+                {"x": str(row[cat_col]), "y": float(row[measure])} for _, row in grouped.iterrows()
             ]
 
             measure_label = measure.replace("_", " ").title()
@@ -374,10 +374,7 @@ class ChartSelector:
                 return None  # Too many categories for pie
 
             counts = temp[cat_col].value_counts()
-            data = [
-                {"x": str(k), "y": int(v)}
-                for k, v in counts.items()
-            ]
+            data = [{"x": str(k), "y": int(v)} for k, v in counts.items()]
 
             cat_label = cat_col.replace("_", " ").title()
             title = f"Distribution by {cat_label}"
@@ -394,10 +391,10 @@ class ChartSelector:
                 reason=f"Pie chart shows the share of each {cat_label} category",
                 why_this_chart=(
                     f"We selected a pie chart because your dataset contains a "
-                    f"categorical column ('{cat_col}') with only {cardinalityity} "
+                    f"categorical column ('{cat_col}') with only {cardinality} "
                     f"distinct values. Pie charts are effective for showing "
                     f"part-to-whole relationships when there are few categories."
-                ).replace("cardinalityity", str(cardinality)),
+                ),
                 source_analysis="proportion",
                 data=data,
                 data_hash=self._hash_data(data),
@@ -419,10 +416,7 @@ class ChartSelector:
             if len(temp) > 200:
                 temp = temp.sample(200, random_state=42)
 
-            data = [
-                {"x": float(row[m1]), "y": float(row[m2])}
-                for _, row in temp.iterrows()
-            ]
+            data = [{"x": float(row[m1]), "y": float(row[m2])} for _, row in temp.iterrows()]
 
             m1_label = m1.replace("_", " ").title()
             m2_label = m2.replace("_", " ").title()
@@ -444,13 +438,17 @@ class ChartSelector:
                 importance_score=0,
                 reason=f"Scatter plot reveals the relationship between {m1_label} and {m2_label}",
                 why_this_chart=(
-                    f"We selected a scatter plot because your dataset contains two "
-                    f"numerical columns ('{m1}' and '{m2}'). Scatter plots are the "
-                    f"standard way to examine relationships between two continuous "
-                    f"variables. The correlation coefficient is {corr:.3f}."
-                ) if not pd.isna(corr) else (
-                    f"We selected a scatter plot because your dataset contains two "
-                    f"numerical columns ('{m1}' and '{m2}')."
+                    (
+                        f"We selected a scatter plot because your dataset contains two "
+                        f"numerical columns ('{m1}' and '{m2}'). Scatter plots are the "
+                        f"standard way to examine relationships between two continuous "
+                        f"variables. The correlation coefficient is {corr:.3f}."
+                    )
+                    if not pd.isna(corr)
+                    else (
+                        f"We selected a scatter plot because your dataset contains two "
+                        f"numerical columns ('{m1}' and '{m2}')."
+                    )
                 ),
                 source_analysis="correlation",
                 data=data,
@@ -558,8 +556,7 @@ class ChartSelector:
             grouped = grouped.sort_values(measure, ascending=False)
 
             data = [
-                {"x": str(row[geo_col]), "y": float(row[measure])}
-                for _, row in grouped.iterrows()
+                {"x": str(row[geo_col]), "y": float(row[measure])} for _, row in grouped.iterrows()
             ]
 
             measure_label = measure.replace("_", " ").title()
@@ -603,8 +600,7 @@ class ChartSelector:
             grouped = temp.groupby(cat_col)[measure].sum().nlargest(top_n).reset_index()
 
             data = [
-                {"x": str(row[cat_col]), "y": float(row[measure])}
-                for _, row in grouped.iterrows()
+                {"x": str(row[cat_col]), "y": float(row[measure])} for _, row in grouped.iterrows()
             ]
 
             measure_label = measure.replace("_", " ").title()
@@ -662,8 +658,7 @@ class ChartSelector:
         uniqueness = 10.0
 
         chart.importance_score = (
-            relevance + quality + interpretability
-            + business_value + significance + uniqueness
+            relevance + quality + interpretability + business_value + significance + uniqueness
         )
 
     def _score_relevance(self, chart: ChartSpecification, u: DatasetUnderstanding) -> float:
@@ -834,6 +829,7 @@ class ChartSelector:
     def _hash_data(self, data: list[dict]) -> str:
         """Create a hash of chart data for dedup/versioning."""
         import json
+
         data_str = json.dumps(data, sort_keys=True, default=str)
         return hashlib.md5(data_str.encode()).hexdigest()[:12]
 

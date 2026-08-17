@@ -101,16 +101,18 @@ class StageResult:
     retries: int = 0
 
     def to_dict(self) -> dict:
-        return _json_safe({
-            "stage": self.stage.value,
-            "status": self.status.value,
-            "started_at": self.started_at,
-            "completed_at": self.completed_at,
-            "duration_seconds": round(self.duration_seconds, 3),
-            "result": self.result,
-            "error": self.error,
-            "retries": self.retries,
-        })
+        return _json_safe(
+            {
+                "stage": self.stage.value,
+                "status": self.status.value,
+                "started_at": self.started_at,
+                "completed_at": self.completed_at,
+                "duration_seconds": round(self.duration_seconds, 3),
+                "result": self.result,
+                "error": self.error,
+                "retries": self.retries,
+            }
+        )
 
 
 @dataclass
@@ -547,8 +549,8 @@ class DatasetWorkflowOrchestrator:
         the canonical DashboardSpecification with intelligent chart selection,
         KPI computation, insight generation, and responsive layout.
         """
-        from services.dashboard_recommender import DashboardRecommendationEngine
         from services.auto.orchestrator import AutoEngineOrchestrator
+        from services.dashboard_recommender import DashboardRecommendationEngine
 
         df = state.context["df"]
         mapping_result = state.context.get("mapping_result")
@@ -586,7 +588,9 @@ class DatasetWorkflowOrchestrator:
             recommendations["auto_presentation"] = auto_result["presentation"].to_dict()
             recommendations["dataset_understanding"] = auto_result["understanding"].to_dict()
         except Exception as exc:
-            logger.warning("Auto engine failed, falling back to legacy recommendations: %s", exc, exc_info=True)
+            logger.warning(
+                "Auto engine failed, falling back to legacy recommendations: %s", exc, exc_info=True
+            )
 
         return recommendations
 

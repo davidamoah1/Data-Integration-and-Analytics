@@ -22,13 +22,13 @@ Roles:
   PERCENTAGE    — 0-100 or 0-1 ratio values
   UNKNOWN       — cannot classify
 """
+
 from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
 from enum import Enum
 
-import numpy as np
 import pandas as pd
 
 
@@ -103,24 +103,68 @@ BOOLEAN_PATTERNS = re.compile(
 # Known geographic values for value-based detection
 GEO_VALUES = {
     # Countries
-    "ghana", "nigeria", "kenya", "south africa", "egypt", "morocco", "tunisia",
-    "usa", "united states", "uk", "united kingdom", "canada", "australia",
-    "india", "china", "japan", "germany", "france", "spain", "italy",
-    "brazil", "mexico", "argentina", "russia", "south korea", "saudi arabia",
+    "ghana",
+    "nigeria",
+    "kenya",
+    "south africa",
+    "egypt",
+    "morocco",
+    "tunisia",
+    "usa",
+    "united states",
+    "uk",
+    "united kingdom",
+    "canada",
+    "australia",
+    "india",
+    "china",
+    "japan",
+    "germany",
+    "france",
+    "spain",
+    "italy",
+    "brazil",
+    "mexico",
+    "argentina",
+    "russia",
+    "south korea",
+    "saudi arabia",
     # Ghana regions
-    "greater accra", "ashanti", "western", "eastern", "central", "volta",
-    "northern", "upper east", "upper west", "bono", "ahafo", "oti",
+    "greater accra",
+    "ashanti",
+    "western",
+    "eastern",
+    "central",
+    "volta",
+    "northern",
+    "upper east",
+    "upper west",
+    "bono",
+    "ahafo",
+    "oti",
     # Nigerian states
-    "lagos", "abuja", "kano", "rivers", "oyo", "kaduna",
+    "lagos",
+    "abuja",
+    "kano",
+    "rivers",
+    "oyo",
+    "kaduna",
     # Cities
-    "accra", "kumasi", "takoradi", "tamale", "cape coast", "tema",
-    "lagos", "abuja", "nairobi", "cairo",
+    "accra",
+    "kumasi",
+    "takoradi",
+    "tamale",
+    "cape coast",
+    "tema",
+    "nairobi",
+    "cairo",
 }
 
 
 @dataclass
 class ColumnUnderstanding:
     """Semantic understanding of a single column."""
+
     name: str
     dtype: str
     role: ColumnSemanticRole
@@ -148,7 +192,8 @@ class ColumnUnderstanding:
             "numeric_stats": self.numeric_stats,
             "category_distribution": (
                 {str(k): v for k, v in list(self.category_distribution.items())[:15]}
-                if self.category_distribution else None
+                if self.category_distribution
+                else None
             ),
             "date_range": [str(d) for d in self.date_range] if self.date_range else None,
             "detected_format": self.detected_format,
@@ -159,6 +204,7 @@ class ColumnUnderstanding:
 @dataclass
 class DatasetUnderstanding:
     """Complete semantic understanding of a dataset."""
+
     row_count: int
     column_count: int
     columns: list[ColumnUnderstanding] = field(default_factory=list)
@@ -216,8 +262,11 @@ class ColumnAnalyzer:
 
         # Group columns by role
         for c in columns:
-            if c.role in (ColumnSemanticRole.MEASURE, ColumnSemanticRole.CURRENCY,
-                          ColumnSemanticRole.PERCENTAGE):
+            if c.role in (
+                ColumnSemanticRole.MEASURE,
+                ColumnSemanticRole.CURRENCY,
+                ColumnSemanticRole.PERCENTAGE,
+            ):
                 understanding.measures.append(c.name)
             elif c.role == ColumnSemanticRole.DIMENSION:
                 understanding.dimensions.append(c.name)
@@ -363,84 +412,115 @@ class ColumnAnalyzer:
         if is_datetime:
             return ColumnSemanticRole.DATE_TIME, 0.95, "Column has datetime dtype"
         if detected_date_format:
-            return ColumnSemanticRole.DATE_TIME, 0.85, f"Values match date format: {detected_date_format}"
+            return (
+                ColumnSemanticRole.DATE_TIME,
+                0.85,
+                f"Values match date format: {detected_date_format}",
+            )
 
         # 3. Identifier — very high uniqueness + name matches ID patterns
         if uniqueness_ratio >= self.IDENTIFIER_MIN_UNIQUENESS and row_count > 5:
             if ID_PATTERNS.search(col_name):
-                return ColumnSemanticRole.IDENTIFIER, 0.92, \
-                    f"Column is {uniqueness_ratio:.0%} unique and name matches ID pattern"
+                return (
+                    ColumnSemanticRole.IDENTIFIER,
+                    0.92,
+                    f"Column is {uniqueness_ratio:.0%} unique and name matches ID pattern",
+                )
             # Very high uniqueness without ID name → could be identifier or text
             if is_string and cardinality == row_count:
-                return ColumnSemanticRole.IDENTIFIER, 0.70, \
-                    f"100% unique values — likely an identifier"
+                return (
+                    ColumnSemanticRole.IDENTIFIER,
+                    0.70,
+                    "100% unique values — likely an identifier",
+                )
 
         # 4. Geography — name or value matches geo patterns
         if GEO_PATTERNS.search(col_name):
             if is_string and cardinality <= 200:
-                return ColumnSemanticRole.GEOGRAPHY, 0.88, \
-                    "Column name matches geographic pattern"
+                return ColumnSemanticRole.GEOGRAPHY, 0.88, "Column name matches geographic pattern"
         if is_string and cardinality <= 100 and category_distribution:
-            geo_matches = sum(
-                1 for k in category_distribution
-                if k.lower().strip() in GEO_VALUES
-            )
+            geo_matches = sum(1 for k in category_distribution if k.lower().strip() in GEO_VALUES)
             if geo_matches >= max(2, len(category_distribution) * 0.5):
-                return ColumnSemanticRole.GEOGRAPHY, 0.82, \
-                    f"{geo_matches}/{len(category_distribution)} values match known geographic names"
+                return (
+                    ColumnSemanticRole.GEOGRAPHY,
+                    0.82,
+                    f"{geo_matches}/{len(category_distribution)} values match known geographic names",
+                )
 
         # 5. Currency — numeric + name matches currency patterns
         if is_numeric and CURRENCY_PATTERNS.search(col_name):
-            return ColumnSemanticRole.CURRENCY, 0.85, \
-                "Numeric column with currency-related name"
+            return ColumnSemanticRole.CURRENCY, 0.85, "Numeric column with currency-related name"
 
         # 6. Percentage — numeric + name matches percentage + values in 0-100 or 0-1
         if is_numeric and PERCENTAGE_PATTERNS.search(col_name):
             if numeric_stats and numeric_stats.get("min") is not None:
                 mn, mx = numeric_stats["min"], numeric_stats["max"]
-                if 0 <= mn and mx <= 100:
-                    return ColumnSemanticRole.PERCENTAGE, 0.85, \
-                        "Numeric column with percentage name and values in 0-100 range"
-                if 0 <= mn and mx <= 1:
-                    return ColumnSemanticRole.PERCENTAGE, 0.80, \
-                        "Numeric column with percentage name and values in 0-1 range"
+                if mn >= 0 and mx <= 100:
+                    return (
+                        ColumnSemanticRole.PERCENTAGE,
+                        0.85,
+                        "Numeric column with percentage name and values in 0-100 range",
+                    )
+                if mn >= 0 and mx <= 1:
+                    return (
+                        ColumnSemanticRole.PERCENTAGE,
+                        0.80,
+                        "Numeric column with percentage name and values in 0-1 range",
+                    )
 
         # 7. Measure — numeric + name matches measure patterns
         if is_numeric and MEASURE_PATTERNS.search(col_name):
-            return ColumnSemanticRole.MEASURE, 0.85, \
-                "Numeric column with measure/metric-related name"
+            return (
+                ColumnSemanticRole.MEASURE,
+                0.85,
+                "Numeric column with measure/metric-related name",
+            )
 
         # 8. Measure — numeric without ID pattern, not unique
         if is_numeric and uniqueness_ratio < self.IDENTIFIER_MIN_UNIQUENESS:
             if cardinality > 1:
-                return ColumnSemanticRole.MEASURE, 0.72, \
-                    "Numeric column with multiple distinct values"
+                return (
+                    ColumnSemanticRole.MEASURE,
+                    0.72,
+                    "Numeric column with multiple distinct values",
+                )
 
         # 9. Category — low cardinality string + name matches category patterns
         if is_string and cardinality <= self.CATEGORY_MAX_CARDINALITY:
             if CATEGORY_PATTERNS.search(col_name):
-                return ColumnSemanticRole.CATEGORY, 0.85, \
-                    f"Low-cardinality ({cardinality}) string with category-related name"
+                return (
+                    ColumnSemanticRole.CATEGORY,
+                    0.85,
+                    f"Low-cardinality ({cardinality}) string with category-related name",
+                )
             # Low cardinality without name match
             if cardinality <= 10:
-                return ColumnSemanticRole.CATEGORY, 0.65, \
-                    f"Very low cardinality ({cardinality}) string — likely a category"
+                return (
+                    ColumnSemanticRole.CATEGORY,
+                    0.65,
+                    f"Very low cardinality ({cardinality}) string — likely a category",
+                )
 
         # 10. Dimension — medium cardinality string, not unique
         if is_string and cardinality > self.CATEGORY_MAX_CARDINALITY and uniqueness_ratio < 0.5:
-            return ColumnSemanticRole.DIMENSION, 0.65, \
-                f"Medium-cardinality ({cardinality}) string — likely a dimension"
+            return (
+                ColumnSemanticRole.DIMENSION,
+                0.65,
+                f"Medium-cardinality ({cardinality}) string — likely a dimension",
+            )
 
         # 11. Text — high cardinality string
         if is_string and uniqueness_ratio > 0.5:
             if not ID_PATTERNS.search(col_name):
-                return ColumnSemanticRole.TEXT, 0.60, \
-                    "High-cardinality string — likely free text"
+                return ColumnSemanticRole.TEXT, 0.60, "High-cardinality string — likely free text"
 
         # 12. Dimension — fallback for categorical strings
         if is_string and cardinality <= self.CATEGORY_MAX_CARDINALITY * 3:
-            return ColumnSemanticRole.DIMENSION, 0.55, \
-                f"String column with {cardinality} distinct values"
+            return (
+                ColumnSemanticRole.DIMENSION,
+                0.55,
+                f"String column with {cardinality} distinct values",
+            )
 
         # 13. Fallback
         if is_numeric:
@@ -456,9 +536,17 @@ class ColumnAnalyzer:
             return None
 
         formats_to_try = [
-            "%Y-%m-%d", "%d/%m/%Y", "%m/%d/%Y", "%d-%m-%Y", "%Y/%m/%d",
-            "%d %b %Y", "%d %B %Y", "%b %d, %Y", "%B %d, %Y",
-            "%Y-%m-%d %H:%M:%S", "%d/%m/%Y %H:%M",
+            "%Y-%m-%d",
+            "%d/%m/%Y",
+            "%m/%d/%Y",
+            "%d-%m-%Y",
+            "%Y/%m/%d",
+            "%d %b %Y",
+            "%d %B %Y",
+            "%b %d, %Y",
+            "%B %d, %Y",
+            "%Y-%m-%d %H:%M:%S",
+            "%d/%m/%Y %H:%M",
         ]
 
         for fmt in formats_to_try:
@@ -520,14 +608,72 @@ class ColumnAnalyzer:
 
         domain_signals = {
             "retail": ["sale", "product", "customer", "revenue", "order", "store", "inventory"],
-            "education": ["student", "grade", "course", "school", "gpa", "score", "exam", "teacher"],
-            "healthcare": ["patient", "diagnosis", "doctor", "hospital", "medical", "clinic", "prescription"],
-            "finance": ["loan", "credit", "bank", "account", "transaction", "payment", "balance", "deposit"],
-            "manufacturing": ["production", "factory", "machine", "output", "defect", "quality", "assembly"],
+            "education": [
+                "student",
+                "grade",
+                "course",
+                "school",
+                "gpa",
+                "score",
+                "exam",
+                "teacher",
+            ],
+            "healthcare": [
+                "patient",
+                "diagnosis",
+                "doctor",
+                "hospital",
+                "medical",
+                "clinic",
+                "prescription",
+            ],
+            "finance": [
+                "loan",
+                "credit",
+                "bank",
+                "account",
+                "transaction",
+                "payment",
+                "balance",
+                "deposit",
+            ],
+            "manufacturing": [
+                "production",
+                "factory",
+                "machine",
+                "output",
+                "defect",
+                "quality",
+                "assembly",
+            ],
             "agriculture": ["crop", "farm", "harvest", "livestock", "irrigation", "soil", "yield"],
-            "logistics": ["shipment", "delivery", "route", "vehicle", "freight", "warehouse", "transport"],
-            "government": ["citizen", "census", "district", "public", "office", "department", "ministry"],
-            "hr": ["employee", "salary", "department", "attendance", "leave", "performance", "hire"],
+            "logistics": [
+                "shipment",
+                "delivery",
+                "route",
+                "vehicle",
+                "freight",
+                "warehouse",
+                "transport",
+            ],
+            "government": [
+                "citizen",
+                "census",
+                "district",
+                "public",
+                "office",
+                "department",
+                "ministry",
+            ],
+            "hr": [
+                "employee",
+                "salary",
+                "department",
+                "attendance",
+                "leave",
+                "performance",
+                "hire",
+            ],
         }
 
         best_domain = "unknown"

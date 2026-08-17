@@ -151,7 +151,9 @@ def validate_gpa(value: str) -> tuple[bool, str | None]:
     return True, None
 
 
-def validate_certificate_dates(date_issued: str | None, expiry_date: str | None) -> tuple[bool, str | None]:
+def validate_certificate_dates(
+    date_issued: str | None, expiry_date: str | None
+) -> tuple[bool, str | None]:
     """Validate that expiry date is not before issue date."""
     if not date_issued or not expiry_date:
         return True, None
@@ -245,13 +247,30 @@ def find_duplicate_document(
         if "name" in key and name_value is None:
             name_value = value.strip().lower()
         if (
-            key in ("date", "admission_date", "delivery_date", "service_date",
-                    "date_awarded", "date_issued", "graduation_date")
+            key
+            in (
+                "date",
+                "admission_date",
+                "delivery_date",
+                "service_date",
+                "date_awarded",
+                "date_issued",
+                "graduation_date",
+            )
             and date_value is None
         ):
             date_value = value.strip().lower()
-        if key in ("certificate_number", "license_number", "serial_number",
-                   "registration_number", "credential_id") and cert_number_value is None:
+        if (
+            key
+            in (
+                "certificate_number",
+                "license_number",
+                "serial_number",
+                "registration_number",
+                "credential_id",
+            )
+            and cert_number_value is None
+        ):
             cert_number_value = value.strip().lower()
 
     # For certificates, a matching certificate number is strong evidence of a duplicate
@@ -271,10 +290,15 @@ def find_duplicate_document(
                 db.query(CaptureField)
                 .filter(
                     CaptureField.document_id == candidate.id,
-                    CaptureField.field_name.in_([
-                        "certificate_number", "license_number", "serial_number",
-                        "registration_number", "credential_id",
-                    ]),
+                    CaptureField.field_name.in_(
+                        [
+                            "certificate_number",
+                            "license_number",
+                            "serial_number",
+                            "registration_number",
+                            "credential_id",
+                        ]
+                    ),
                 )
                 .all()
             )

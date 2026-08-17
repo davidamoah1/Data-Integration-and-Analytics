@@ -24,7 +24,6 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-import numpy as np
 import pandas as pd
 
 from services.auto.analysis_engine import DatasetUnderstanding, SemanticRole
@@ -56,37 +55,41 @@ class AutomaticKPIEngine:
         order = 0
 
         # 1. Total Records — always meaningful
-        kpis.append(KPISpecification(
-            key="total_records",
-            label="Total Records",
-            value=int(len(df)),
-            unit="",
-            metric="count",
-            category="operational",
-            source_columns=[],
-            aggregation="count",
-            confidence=1.0,
-            icon="📋",
-            description=f"Total number of records in the dataset",
-            order=order,
-        ))
+        kpis.append(
+            KPISpecification(
+                key="total_records",
+                label="Total Records",
+                value=int(len(df)),
+                unit="",
+                metric="count",
+                category="operational",
+                source_columns=[],
+                aggregation="count",
+                confidence=1.0,
+                icon="📋",
+                description="Total number of records in the dataset",
+                order=order,
+            )
+        )
         order += 1
 
         # 2. Column count
-        kpis.append(KPISpecification(
-            key="column_count",
-            label="Data Columns",
-            value=int(len(df.columns)),
-            unit="",
-            metric="count",
-            category="operational",
-            source_columns=[],
-            aggregation="count",
-            confidence=1.0,
-            icon="📊",
-            description=f"Number of columns in the dataset",
-            order=order,
-        ))
+        kpis.append(
+            KPISpecification(
+                key="column_count",
+                label="Data Columns",
+                value=int(len(df.columns)),
+                unit="",
+                metric="count",
+                category="operational",
+                source_columns=[],
+                aggregation="count",
+                confidence=1.0,
+                icon="📊",
+                description="Number of columns in the dataset",
+                order=order,
+            )
+        )
         order += 1
 
         # 3. Total of primary measure (currency/revenue)
@@ -95,58 +98,72 @@ class AutomaticKPIEngine:
             total = float(df[primary_measure].sum())
             col_u = self._find_col_understanding(primary_measure, understanding)
             unit = "" if (col_u and col_u.semantic_role == SemanticRole.CURRENCY) else ""
-            kpis.append(KPISpecification(
-                key=f"total_{primary_measure}",
-                label=f"Total {self._label(primary_measure)}",
-                value=round(total, 2),
-                unit=unit,
-                metric="sum",
-                category="financial" if col_u and col_u.semantic_role == SemanticRole.CURRENCY else "operational",
-                source_columns=[primary_measure],
-                aggregation="sum",
-                confidence=0.9,
-                icon="💰" if col_u and col_u.semantic_role == SemanticRole.CURRENCY else "📈",
-                description=f"Sum of all {self._label(primary_measure)} values",
-                order=order,
-            ))
+            kpis.append(
+                KPISpecification(
+                    key=f"total_{primary_measure}",
+                    label=f"Total {self._label(primary_measure)}",
+                    value=round(total, 2),
+                    unit=unit,
+                    metric="sum",
+                    category=(
+                        "financial"
+                        if col_u and col_u.semantic_role == SemanticRole.CURRENCY
+                        else "operational"
+                    ),
+                    source_columns=[primary_measure],
+                    aggregation="sum",
+                    confidence=0.9,
+                    icon="💰" if col_u and col_u.semantic_role == SemanticRole.CURRENCY else "📈",
+                    description=f"Sum of all {self._label(primary_measure)} values",
+                    order=order,
+                )
+            )
             order += 1
 
             # 4. Average of primary measure
             avg = float(df[primary_measure].mean())
-            kpis.append(KPISpecification(
-                key=f"avg_{primary_measure}",
-                label=f"Average {self._label(primary_measure)}",
-                value=round(avg, 2),
-                unit=unit,
-                metric="avg",
-                category="financial" if col_u and col_u.semantic_role == SemanticRole.CURRENCY else "operational",
-                source_columns=[primary_measure],
-                aggregation="avg",
-                confidence=0.85,
-                icon="📊",
-                description=f"Average {self._label(primary_measure)} per record",
-                order=order,
-            ))
+            kpis.append(
+                KPISpecification(
+                    key=f"avg_{primary_measure}",
+                    label=f"Average {self._label(primary_measure)}",
+                    value=round(avg, 2),
+                    unit=unit,
+                    metric="avg",
+                    category=(
+                        "financial"
+                        if col_u and col_u.semantic_role == SemanticRole.CURRENCY
+                        else "operational"
+                    ),
+                    source_columns=[primary_measure],
+                    aggregation="avg",
+                    confidence=0.85,
+                    icon="📊",
+                    description=f"Average {self._label(primary_measure)} per record",
+                    order=order,
+                )
+            )
             order += 1
 
         # 5. Unique dimension count
         primary_dim = self._find_primary_dimension(df, understanding)
         if primary_dim:
             unique_count = int(df[primary_dim].nunique())
-            kpis.append(KPISpecification(
-                key=f"unique_{primary_dim}",
-                label=f"Unique {self._label(primary_dim)}",
-                value=unique_count,
-                unit="",
-                metric="count_distinct",
-                category="operational",
-                source_columns=[primary_dim],
-                aggregation="count_distinct",
-                confidence=0.8,
-                icon="🏷️",
-                description=f"Number of distinct {self._label(primary_dim)} values",
-                order=order,
-            ))
+            kpis.append(
+                KPISpecification(
+                    key=f"unique_{primary_dim}",
+                    label=f"Unique {self._label(primary_dim)}",
+                    value=unique_count,
+                    unit="",
+                    metric="count_distinct",
+                    category="operational",
+                    source_columns=[primary_dim],
+                    aggregation="count_distinct",
+                    confidence=0.8,
+                    icon="🏷️",
+                    description=f"Number of distinct {self._label(primary_dim)} values",
+                    order=order,
+                )
+            )
             order += 1
 
         # 6. Date range span
@@ -160,64 +177,72 @@ class AutomaticKPIEngine:
 
                 if len(dates) > 0:
                     span_days = (dates.max() - dates.min()).days
-                    kpis.append(KPISpecification(
-                        key="date_span",
-                        label="Date Range",
-                        value=span_days,
-                        unit="days",
-                        metric="range",
-                        category="operational",
-                        source_columns=[time_col],
-                        aggregation="range",
-                        confidence=0.9,
-                        icon="📅",
-                        description=f"Data spans {span_days} days from {dates.min().strftime('%Y-%m-%d')} to {dates.max().strftime('%Y-%m-%d')}",
-                        time_context=f"{dates.min().strftime('%Y-%m-%d')} to {dates.max().strftime('%Y-%m-%d')}",
-                        order=order,
-                    ))
+                    kpis.append(
+                        KPISpecification(
+                            key="date_span",
+                            label="Date Range",
+                            value=span_days,
+                            unit="days",
+                            metric="range",
+                            category="operational",
+                            source_columns=[time_col],
+                            aggregation="range",
+                            confidence=0.9,
+                            icon="📅",
+                            description=f"Data spans {span_days} days from {dates.min().strftime('%Y-%m-%d')} to {dates.max().strftime('%Y-%m-%d')}",
+                            time_context=f"{dates.min().strftime('%Y-%m-%d')} to {dates.max().strftime('%Y-%m-%d')}",
+                            order=order,
+                        )
+                    )
                     order += 1
 
         # 7. Growth rate (period over period) — if time + measure
         if understanding.time_columns and primary_measure:
             growth = self._compute_growth_rate(df, understanding.time_columns[0], primary_measure)
             if growth is not None:
-                kpis.append(KPISpecification(
-                    key="growth_rate",
-                    label="Growth Rate",
-                    value=round(growth["rate"], 1),
-                    unit="%",
-                    metric="growth",
-                    category="financial",
-                    source_columns=[understanding.time_columns[0], primary_measure],
-                    aggregation="custom",
-                    confidence=0.75,
-                    icon="📈" if growth["rate"] > 0 else "📉",
-                    description=growth["description"],
-                    comparison_value=growth["previous_value"],
-                    comparison_label="vs previous period",
-                    comparison_direction="up" if growth["rate"] > 0 else "down" if growth["rate"] < 0 else "flat",
-                    order=order,
-                ))
+                kpis.append(
+                    KPISpecification(
+                        key="growth_rate",
+                        label="Growth Rate",
+                        value=round(growth["rate"], 1),
+                        unit="%",
+                        metric="growth",
+                        category="financial",
+                        source_columns=[understanding.time_columns[0], primary_measure],
+                        aggregation="custom",
+                        confidence=0.75,
+                        icon="📈" if growth["rate"] > 0 else "📉",
+                        description=growth["description"],
+                        comparison_value=growth["previous_value"],
+                        comparison_label="vs previous period",
+                        comparison_direction=(
+                            "up" if growth["rate"] > 0 else "down" if growth["rate"] < 0 else "flat"
+                        ),
+                        order=order,
+                    )
+                )
                 order += 1
 
         # 8. Top category share
         if primary_dim and primary_measure:
             share = self._compute_top_share(df, primary_dim, primary_measure)
             if share is not None:
-                kpis.append(KPISpecification(
-                    key="top_category_share",
-                    label="Top Category Share",
-                    value=round(share["pct"], 1),
-                    unit="%",
-                    metric="share",
-                    category="operational",
-                    source_columns=[primary_dim, primary_measure],
-                    aggregation="custom",
-                    confidence=0.7,
-                    icon="🏆",
-                    description=share["description"],
-                    order=order,
-                ))
+                kpis.append(
+                    KPISpecification(
+                        key="top_category_share",
+                        label="Top Category Share",
+                        value=round(share["pct"], 1),
+                        unit="%",
+                        metric="share",
+                        category="operational",
+                        source_columns=[primary_dim, primary_measure],
+                        aggregation="custom",
+                        confidence=0.7,
+                        icon="🏆",
+                        description=share["description"],
+                        order=order,
+                    )
+                )
                 order += 1
 
         # Limit and return
@@ -237,7 +262,19 @@ class AutomaticKPIEngine:
             if col not in df.columns:
                 continue
             col_lower = col.lower()
-            if any(kw in col_lower for kw in ("revenue", "sales", "amount", "total", "income", "profit", "billing", "payment")):
+            if any(
+                kw in col_lower
+                for kw in (
+                    "revenue",
+                    "sales",
+                    "amount",
+                    "total",
+                    "income",
+                    "profit",
+                    "billing",
+                    "payment",
+                )
+            ):
                 return col
         # Then first numeric measure
         for col in understanding.measures:
@@ -246,7 +283,9 @@ class AutomaticKPIEngine:
         return None
 
     @staticmethod
-    def _find_primary_dimension(df: pd.DataFrame, understanding: DatasetUnderstanding) -> str | None:
+    def _find_primary_dimension(
+        df: pd.DataFrame, understanding: DatasetUnderstanding
+    ) -> str | None:
         """Find the most important dimension column."""
         # Prefer category columns with low cardinality
         for col in understanding.dimensions:
@@ -276,7 +315,9 @@ class AutomaticKPIEngine:
 
     @staticmethod
     def _compute_growth_rate(
-        df: pd.DataFrame, time_col: str, metric_col: str,
+        df: pd.DataFrame,
+        time_col: str,
+        metric_col: str,
     ) -> dict[str, Any] | None:
         """Compute period-over-period growth rate."""
         try:
@@ -304,18 +345,22 @@ class AutomaticKPIEngine:
                 "rate": rate,
                 "current_value": current,
                 "previous_value": previous,
-                "description": f"{self._label(metric_col)} {'increased' if rate > 0 else 'decreased'} by {abs(rate):.1f}% compared to the previous month",
+                "description": f"{AutomaticKPIEngine._label(metric_col)} {'increased' if rate > 0 else 'decreased'} by {abs(rate):.1f}% compared to the previous month",
             }
         except Exception:
             return None
 
     @staticmethod
     def _compute_top_share(
-        df: pd.DataFrame, dim_col: str, metric_col: str,
+        df: pd.DataFrame,
+        dim_col: str,
+        metric_col: str,
     ) -> dict[str, Any] | None:
         """Compute the share of the top category."""
         try:
-            grouped = df.groupby(dim_col, dropna=False)[metric_col].sum().sort_values(ascending=False)
+            grouped = (
+                df.groupby(dim_col, dropna=False)[metric_col].sum().sort_values(ascending=False)
+            )
             if len(grouped) == 0:
                 return None
             total = grouped.sum()
@@ -328,7 +373,7 @@ class AutomaticKPIEngine:
                 "pct": pct,
                 "top_category": str(top_cat),
                 "top_value": float(top_val),
-                "description": f"{str(top_cat)} accounts for {pct:.1f}% of total {self._label(metric_col)}",
+                "description": f"{str(top_cat)} accounts for {pct:.1f}% of total {AutomaticKPIEngine._label(metric_col)}",
             }
         except Exception:
             return None

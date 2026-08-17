@@ -128,6 +128,7 @@ class ConfirmIndustryRequest(BaseModel):
 
 class ApplyTransformationRequest(BaseModel):
     """Request to apply a cleaning transformation to a workflow dataset."""
+
     check_name: str
     column: str | None = None
     action: str  # fill_missing, normalize_countries, normalize_categories, convert_type, parse_dates, flag_outliers, remove_duplicates
@@ -137,13 +138,17 @@ class ApplyTransformationRequest(BaseModel):
 
 class UndoTransformationRequest(BaseModel):
     """Request to undo a previously applied transformation."""
+
     transformation_id: str
 
 
 class AnalyzeRequest(BaseModel):
     """Request to run analysis on a workflow dataset."""
+
     mode: str = "easy"  # easy or pro
-    analysis_type: str | None = None  # descriptive, correlation, ttest, anova, chi_square, regression, normality, mann_whitney, kruskal_wallis
+    analysis_type: str | None = (
+        None  # descriptive, correlation, ttest, anova, chi_square, regression, normality, mann_whitney, kruskal_wallis
+    )
     columns: list[str] | None = None
     group_column: str | None = None
     target_column: str | None = None
@@ -152,6 +157,7 @@ class AnalyzeRequest(BaseModel):
 
 class GeneratePresentationRequest(BaseModel):
     """Request to generate a PPTX presentation from workflow results."""
+
     template: str = "executive"  # executive, analytical, research, pitch
     title: str | None = None
 
@@ -589,7 +595,7 @@ async def apply_cleaning_transformation(
     Tracks the transformation in the workflow state for auditability
     and supports undo via the transformation_id returned.
     """
-    state_dict = _get_workflow_state_dict(workflow_id, current_user, db)
+    _get_workflow_state_dict(workflow_id, current_user, db)
     org_id = get_current_organization_id(current_user, db)
 
     # The in-memory orchestrator must still hold the DataFrame
@@ -615,18 +621,26 @@ async def apply_cleaning_transformation(
         if payload.method == "mean" and df[col].dtype in ("int64", "float64"):
             fill_val = df[col].mean()
             df[col] = df[col].fillna(fill_val)
-            description = f"Filled {before_missing} missing values in '{col}' with mean ({fill_val:.2f})"
+            description = (
+                f"Filled {before_missing} missing values in '{col}' with mean ({fill_val:.2f})"
+            )
         elif payload.method == "median" and df[col].dtype in ("int64", "float64"):
             fill_val = df[col].median()
             df[col] = df[col].fillna(fill_val)
-            description = f"Filled {before_missing} missing values in '{col}' with median ({fill_val:.2f})"
+            description = (
+                f"Filled {before_missing} missing values in '{col}' with median ({fill_val:.2f})"
+            )
         elif payload.method == "mode":
             mode_val = df[col].mode().iloc[0] if not df[col].mode().empty else "Unknown"
             df[col] = df[col].fillna(mode_val)
-            description = f"Filled {before_missing} missing values in '{col}' with mode ('{mode_val}')"
+            description = (
+                f"Filled {before_missing} missing values in '{col}' with mode ('{mode_val}')"
+            )
         elif payload.value is not None:
             df[col] = df[col].fillna(payload.value)
-            description = f"Filled {before_missing} missing values in '{col}' with '{payload.value}'"
+            description = (
+                f"Filled {before_missing} missing values in '{col}' with '{payload.value}'"
+            )
         else:
             raise HTTPException(status_code=400, detail="fill_missing requires method or value")
         affected_rows = before_missing
@@ -640,6 +654,7 @@ async def apply_cleaning_transformation(
 
     elif payload.action == "normalize_categories" and col:
         from studios.cleaning_service import CATEGORY_NORMALIZATION
+
         mapping = {k.lower().strip(): v for k, v in CATEGORY_NORMALIZATION.items()}
         before = df[col].copy()
         df[col] = df[col].apply(
@@ -650,6 +665,7 @@ async def apply_cleaning_transformation(
 
     elif payload.action == "normalize_countries" and col:
         from studios.cleaning_service import COUNTRY_NORMALIZATION
+
         mapping = {k.lower().strip(): v for k, v in COUNTRY_NORMALIZATION.items()}
         before = df[col].copy()
         df[col] = df[col].apply(
@@ -785,6 +801,7 @@ async def run_analysis(
             industry_name = industry_result.get("industry", "").lower()
             try:
                 from industry_intelligence.base import IndustryAnalyticsRegistry
+
                 industry_analytics = IndustryAnalyticsRegistry.analyze(
                     industry_name, df, col_mapping
                 )
@@ -862,7 +879,9 @@ async def run_analysis(
                     )
                 result = svc.kruskal_wallis(df, columns[0], payload.group_column)
             else:
-                raise HTTPException(status_code=400, detail=f"Unknown analysis type: {analysis_type}")
+                raise HTTPException(
+                    status_code=400, detail=f"Unknown analysis type: {analysis_type}"
+                )
 
             return {
                 "success": True,
@@ -876,7 +895,9 @@ async def run_analysis(
             raise
         except Exception as e:
             logger.exception("Analysis failed for workflow %s: %s", workflow_id, e)
-            raise HTTPException(status_code=500, detail="Analysis failed. Please try again.") from None
+            raise HTTPException(
+                status_code=500, detail="Analysis failed. Please try again."
+            ) from None
 
     else:
         raise HTTPException(status_code=400, detail=f"Invalid mode: {payload.mode}")
@@ -920,7 +941,9 @@ def _add_chart_to_slide(
             chart_data.categories = [str(c) for c in grouped.index.tolist()]
             chart_data.add_series(chart_spec.get("title", y_axis), grouped.tolist())
 
-            xl_type = XL_CHART_TYPE.COLUMN_CLUSTERED if chart_type == "bar_chart" else XL_CHART_TYPE.LINE
+            xl_type = (
+                XL_CHART_TYPE.COLUMN_CLUSTERED if chart_type == "bar_chart" else XL_CHART_TYPE.LINE
+            )
             slide.shapes.add_chart(
                 xl_type,
                 Inches(left),
@@ -1011,9 +1034,6 @@ def _generate_auto_pptx(
 
     # Build a lookup of chart specs by ID from the dashboard
     charts_by_id = {c["id"]: c for c in auto_dashboard.get("charts", [])}
-    kpis = auto_dashboard.get("kpis", [])
-    insights = auto_dashboard.get("insights", [])
-    recommendations = auto_dashboard.get("recommendations", [])
 
     prs = PptxPresentation()
     prs.slide_width = Inches(13.333)
@@ -1024,10 +1044,7 @@ def _generate_auto_pptx(
     for slide_data in auto_presentation.get("slides", []):
         layout_name = slide_data.get("layout", "bullets")
 
-        if layout_name == "title":
-            layout = prs.slide_layouts[0]  # Title Slide
-        else:
-            layout = prs.slide_layouts[1]  # Title and Content
+        layout = prs.slide_layouts[0] if layout_name == "title" else prs.slide_layouts[1]
 
         slide = prs.slides.add_slide(layout)
 
@@ -1044,9 +1061,7 @@ def _generate_auto_pptx(
                 w = placement.get("width", 3)
                 h = placement.get("height", 1.5)
 
-                txBox = slide.shapes.add_textbox(
-                    Inches(x), Inches(y), Inches(w), Inches(h)
-                )
+                txBox = slide.shapes.add_textbox(Inches(x), Inches(y), Inches(w), Inches(h))
                 tf = txBox.text_frame
                 tf.word_wrap = True
                 p = tf.paragraphs[0]
@@ -1087,8 +1102,13 @@ def _generate_auto_pptx(
 
             if df is not None and chart_spec:
                 added = _add_chart_to_slide(
-                    slide, legacy_spec, df,
-                    left=left, top=top, width=width, height=height,
+                    slide,
+                    legacy_spec,
+                    df,
+                    left=left,
+                    top=top,
+                    width=width,
+                    height=height,
                 )
                 if added:
                     charts_rendered += 1
@@ -1167,7 +1187,7 @@ async def generate_presentation(
     """
     from fastapi.responses import StreamingResponse
     from pptx import Presentation as PptxPresentation
-    from pptx.util import Inches, Pt
+    from pptx.util import Inches
 
     state_dict = _get_workflow_state_dict(workflow_id, current_user, db)
     org_id = get_current_organization_id(current_user, db)
@@ -1214,7 +1234,8 @@ async def generate_presentation(
     recommended_charts = dashboard.get("recommended_charts", [])
     # Filter to chart types we can render (bar, line, pie, scatter)
     renderable_charts = [
-        c for c in recommended_charts
+        c
+        for c in recommended_charts
         if c.get("type") in ("bar_chart", "line_chart", "pie_chart", "scatter")
     ]
 
@@ -1233,9 +1254,14 @@ async def generate_presentation(
             f"Columns: {profile.get('column_count', 'N/A')}, "
             f"Quality Score: {quality.get('score', {}).get('overall', 'N/A')}"
         ),
-        "chart_config": renderable_charts[0] if renderable_charts else (
-            dashboard.get("recommended_charts", [{}])[0]
-            if dashboard.get("recommended_charts") else None
+        "chart_config": (
+            renderable_charts[0]
+            if renderable_charts
+            else (
+                dashboard.get("recommended_charts", [{}])[0]
+                if dashboard.get("recommended_charts")
+                else None
+            )
         ),
         "next_steps": "Review findings and implement recommended actions.",
         "industry": industry.get("industry", "general"),

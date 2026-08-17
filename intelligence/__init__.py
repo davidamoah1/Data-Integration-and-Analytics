@@ -13,13 +13,14 @@ Pipeline:
               KPI candidates     deduplication
               insights           "why this chart" explanations
 """
+
 from __future__ import annotations
 
+from .chart_selector import ChartSelectionResult, ChartSelector, ChartSpecification
 from .column_analyzer import ColumnAnalyzer, ColumnSemanticRole, DatasetUnderstanding
-from .chart_selector import ChartSelector, ChartSpecification, ChartSelectionResult
-from .kpi_selector import KPISelector, KPICandidate
-from .insight_generator import InsightGenerator, Insight
-from .dashboard_layout import DashboardLayoutEngine, DashboardLayout
+from .dashboard_layout import DashboardLayout, DashboardLayoutEngine
+from .insight_generator import Insight, InsightGenerator
+from .kpi_selector import KPICandidate, KPISelector
 from .presentation_layout import PresentationLayoutEngine, PresentationPlan
 
 __all__ = [

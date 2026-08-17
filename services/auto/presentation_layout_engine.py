@@ -86,7 +86,9 @@ class PresentationLayoutEngine:
         max_chart_slides = max_chart_slides or self.MAX_CHART_SLIDES
 
         # Select charts for presentation (sorted by importance)
-        presentation_charts = sorted(dashboard.charts, key=lambda c: c.importance_score, reverse=True)
+        presentation_charts = sorted(
+            dashboard.charts, key=lambda c: c.importance_score, reverse=True
+        )
         presentation_charts = presentation_charts[:max_chart_slides]
 
         slides: list[dict[str, Any]] = []
@@ -96,20 +98,24 @@ class PresentationLayoutEngine:
         # Track which charts were excluded and why
         for chart in dashboard.charts:
             if chart.id not in [c.id for c in presentation_charts]:
-                excluded_charts.append({
-                    "chart_id": chart.id,
-                    "title": chart.title,
-                    "reason": "Exceeded maximum chart slides limit",
-                })
+                excluded_charts.append(
+                    {
+                        "chart_id": chart.id,
+                        "title": chart.title,
+                        "reason": "Exceeded maximum chart slides limit",
+                    }
+                )
 
         # ── Slide 1: Title ──
-        slides.append({
-            "slide_number": 1,
-            "layout": "title",
-            "title": dashboard.title,
-            "subtitle": dashboard.subtitle or f"Generated from {dashboard.dataset_name}",
-            "speaker_notes": f"Welcome. Today we'll cover {dashboard.title}. This presentation was automatically generated from your dataset.",
-        })
+        slides.append(
+            {
+                "slide_number": 1,
+                "layout": "title",
+                "title": dashboard.title,
+                "subtitle": dashboard.subtitle or f"Generated from {dashboard.dataset_name}",
+                "speaker_notes": f"Welcome. Today we'll cover {dashboard.title}. This presentation was automatically generated from your dataset.",
+            }
+        )
 
         # ── Slide 2: Executive Summary (KPIs) ──
         if dashboard.kpis:
@@ -117,7 +123,7 @@ class PresentationLayoutEngine:
             slides.append(kpi_slide)
 
         # ── Slides 3-N: Chart slides (1 chart per slide) ──
-        for i, chart in enumerate(presentation_charts):
+        for _i, chart in enumerate(presentation_charts):
             slide = self._make_chart_slide(chart, slide_number=len(slides) + 1)
             slides.append(slide)
             included_chart_ids.append(chart.id)
@@ -135,13 +141,15 @@ class PresentationLayoutEngine:
             slides.append(slide)
 
         # ── Closing slide ──
-        slides.append({
-            "slide_number": len(slides) + 1,
-            "layout": "title",
-            "title": "Thank You",
-            "subtitle": "Questions & Discussion",
-            "speaker_notes": "Open the floor for questions.",
-        })
+        slides.append(
+            {
+                "slide_number": len(slides) + 1,
+                "layout": "title",
+                "title": "Thank You",
+                "subtitle": "Questions & Discussion",
+                "speaker_notes": "Open the floor for questions.",
+            }
+        )
 
         # Validate all placements
         validation = self._validate_presentation(slides)
@@ -176,14 +184,21 @@ class PresentationLayoutEngine:
             x = start_left + col * (self.KPI_CARD_WIDTH + self.KPI_GAP)
             y = self.CONTENT_TOP + row * (self.KPI_CARD_HEIGHT + self.KPI_GAP)
 
-            cards.append({
-                "label": kpi.label,
-                "value": f"{kpi.value}{kpi.unit}" if kpi.unit else str(kpi.value),
-                "icon": kpi.icon,
-                "comparison": kpi.comparison_label if kpi.comparison_value is not None else "",
-                "comparison_direction": kpi.comparison_direction,
-                "placement": {"x": round(x, 2), "y": round(y, 2), "width": self.KPI_CARD_WIDTH, "height": self.KPI_CARD_HEIGHT},
-            })
+            cards.append(
+                {
+                    "label": kpi.label,
+                    "value": f"{kpi.value}{kpi.unit}" if kpi.unit else str(kpi.value),
+                    "icon": kpi.icon,
+                    "comparison": kpi.comparison_label if kpi.comparison_value is not None else "",
+                    "comparison_direction": kpi.comparison_direction,
+                    "placement": {
+                        "x": round(x, 2),
+                        "y": round(y, 2),
+                        "width": self.KPI_CARD_WIDTH,
+                        "height": self.KPI_CARD_HEIGHT,
+                    },
+                }
+            )
 
         return {
             "slide_number": slide_number,
@@ -221,12 +236,18 @@ class PresentationLayoutEngine:
             "speaker_notes": f"Discuss the {chart.chart_type} showing {chart.title}. {chart.reason}",
         }
 
-    def _make_insights_slide(self, insights: list[InsightSpecification], slide_number: int) -> dict[str, Any]:
+    def _make_insights_slide(
+        self, insights: list[InsightSpecification], slide_number: int
+    ) -> dict[str, Any]:
         """Create an insights slide."""
         top_insights = insights[:5]
         content_lines = []
         for insight in top_insights:
-            icon = "⚠️" if insight.severity == "critical" else "✅" if insight.severity == "positive" else "•"
+            icon = (
+                "⚠️"
+                if insight.severity == "critical"
+                else "✅" if insight.severity == "positive" else "•"
+            )
             content_lines.append(f"{icon} {insight.title}: {insight.description}")
 
         return {
@@ -238,7 +259,9 @@ class PresentationLayoutEngine:
             "speaker_notes": "Discuss each insight with supporting evidence from the data.",
         }
 
-    def _make_recommendations_slide(self, recommendations: list[str], slide_number: int) -> dict[str, Any]:
+    def _make_recommendations_slide(
+        self, recommendations: list[str], slide_number: int
+    ) -> dict[str, Any]:
         """Create a recommendations slide."""
         content = "\n".join(f"• {r}" for r in recommendations[:6])
         return {
@@ -271,11 +294,17 @@ class PresentationLayoutEngine:
                 if x < 0 or y < 0:
                     errors.append(f"Slide {slide_num}: Chart placement has negative coordinates")
                 if x + w > self.SLIDE_WIDTH:
-                    errors.append(f"Slide {slide_num}: Chart extends beyond slide width ({x+w:.2f} > {self.SLIDE_WIDTH})")
+                    errors.append(
+                        f"Slide {slide_num}: Chart extends beyond slide width ({x+w:.2f} > {self.SLIDE_WIDTH})"
+                    )
                 if y + h > self.SLIDE_HEIGHT:
-                    errors.append(f"Slide {slide_num}: Chart extends beyond slide height ({y+h:.2f} > {self.SLIDE_HEIGHT})")
+                    errors.append(
+                        f"Slide {slide_num}: Chart extends beyond slide height ({y+h:.2f} > {self.SLIDE_HEIGHT})"
+                    )
                 if w < 2 or h < 2:
-                    warnings.append(f"Slide {slide_num}: Chart is too small ({w:.1f}×{h:.1f} inches)")
+                    warnings.append(
+                        f"Slide {slide_num}: Chart is too small ({w:.1f}×{h:.1f} inches)"
+                    )
 
             # Validate KPI card placements
             if slide.get("layout") == "kpi":
@@ -292,14 +321,22 @@ class PresentationLayoutEngine:
                     if x + w > self.SLIDE_WIDTH:
                         errors.append(f"Slide {slide_num}: KPI card {i} extends beyond slide width")
                     if y + h > self.SLIDE_HEIGHT:
-                        errors.append(f"Slide {slide_num}: KPI card {i} extends beyond slide height")
+                        errors.append(
+                            f"Slide {slide_num}: KPI card {i} extends beyond slide height"
+                        )
 
                     # Check overlap with previous cards
                     for j in range(i):
                         prev = cards[j].get("placement", {})
                         if self._rectangles_overlap(
-                            x, y, w, h,
-                            prev.get("x", 0), prev.get("y", 0), prev.get("width", 0), prev.get("height", 0),
+                            x,
+                            y,
+                            w,
+                            h,
+                            prev.get("x", 0),
+                            prev.get("y", 0),
+                            prev.get("width", 0),
+                            prev.get("height", 0),
                         ):
                             errors.append(f"Slide {slide_num}: KPI cards {i} and {j} overlap")
 
@@ -307,9 +344,13 @@ class PresentationLayoutEngine:
         for slide in slides:
             layout = slide.get("layout", "")
             if layout == "bullets" and not slide.get("content"):
-                warnings.append(f"Slide {slide.get('slide_number', 0)}: Bullet slide has no content")
+                warnings.append(
+                    f"Slide {slide.get('slide_number', 0)}: Bullet slide has no content"
+                )
             if layout == "chart" and not slide.get("chart_data"):
-                warnings.append(f"Slide {slide.get('slide_number', 0)}: Chart slide has no chart data")
+                warnings.append(
+                    f"Slide {slide.get('slide_number', 0)}: Chart slide has no chart data"
+                )
 
         return {
             "valid": len(errors) == 0,
@@ -320,13 +361,14 @@ class PresentationLayoutEngine:
 
     @staticmethod
     def _rectangles_overlap(
-        x1: float, y1: float, w1: float, h1: float,
-        x2: float, y2: float, w2: float, h2: float,
+        x1: float,
+        y1: float,
+        w1: float,
+        h1: float,
+        x2: float,
+        y2: float,
+        w2: float,
+        h2: float,
     ) -> bool:
         """Check if two rectangles overlap."""
-        return not (
-            x1 + w1 <= x2 or
-            x2 + w2 <= x1 or
-            y1 + h1 <= y2 or
-            y2 + h2 <= y1
-        )
+        return not (x1 + w1 <= x2 or x2 + w2 <= x1 or y1 + h1 <= y2 or y2 + h2 <= y1)

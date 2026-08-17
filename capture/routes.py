@@ -155,6 +155,7 @@ async def upload_document(
     except Exception as e:
         logger.warning("Job system unavailable, using thread for processing: %s", e)
         import threading
+
         threading.Thread(target=_process_document_task, args=(doc.id,), daemon=True).start()
 
     # Re-fetch the doc to get fresh state
@@ -202,6 +203,7 @@ async def upload_zip_batch(
     except Exception as e:
         logger.warning("Job system unavailable for batch, using thread: %s", e)
         import threading
+
         threading.Thread(target=_process_batch_task, args=(batch.id,), daemon=True).start()
 
     return {
@@ -455,6 +457,7 @@ async def retry_document(
     except Exception as e:
         logger.warning("Job system unavailable, using thread for retry: %s", e)
         import threading
+
         threading.Thread(target=_process_document_task, args=(document_id,), daemon=True).start()
 
     db.refresh(doc)

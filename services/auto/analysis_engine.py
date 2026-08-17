@@ -19,15 +19,13 @@ downstream engines (chart selection, KPI, insights) consume.
 
 from __future__ import annotations
 
-import re
 from dataclasses import dataclass, field
 from typing import Any
 
-import numpy as np
 import pandas as pd
 
-
 # ── Semantic roles ──
+
 
 class SemanticRole:
     DIMENSION = "dimension"
@@ -46,13 +44,140 @@ class SemanticRole:
 # ── Name-based hints ──
 
 _ID_KEYWORDS = {"id", "_id", "uuid", "guid", "ref", "code", "number", "no", "num", "seq"}
-_DATE_KEYWORDS = {"date", "time", "timestamp", "datetime", "created", "updated", "modified", "period"}
-_GEO_KEYWORDS = {"country", "region", "city", "state", "district", "location", "address", "branch", "zone", "area", "lat", "lon", "latitude", "longitude"}
-_MEASURE_KEYWORDS = {"revenue", "sales", "amount", "total", "sum", "cost", "price", "value", "count", "quantity", "qty", "volume", "income", "expense", "profit", "loss", "billing", "payment", "balance", "score", "rate", "fee", "charge", "budget", "salary", "wage"}
-_CURRENCY_KEYWORDS = {"revenue", "sales", "amount", "cost", "price", "value", "income", "expense", "profit", "billing", "payment", "balance", "fee", "charge", "budget", "salary", "wage", "donation", "offering", "tithe", "fund"}
-_PERCENTAGE_KEYWORDS = {"rate", "pct", "percent", "percentage", "ratio", "share", "growth", "margin", "completion", "attendance"}
-_BOOLEAN_KEYWORDS = {"is_", "has_", "active", "enabled", "approved", "verified", "confirmed", "completed", "paid", "valid", "flag", "status"}
-_CATEGORY_KEYWORDS = {"category", "type", "class", "group", "tier", "level", "grade", "rank", "stage", "phase", "mode", "channel", "method", "status", "label", "tag", "segment", "department", "product", "service", "program", "course", "diagnosis", "plan", "ministry", "project", "event", "gender", "branch"}
+_DATE_KEYWORDS = {
+    "date",
+    "time",
+    "timestamp",
+    "datetime",
+    "created",
+    "updated",
+    "modified",
+    "period",
+}
+_GEO_KEYWORDS = {
+    "country",
+    "region",
+    "city",
+    "state",
+    "district",
+    "location",
+    "address",
+    "branch",
+    "zone",
+    "area",
+    "lat",
+    "lon",
+    "latitude",
+    "longitude",
+}
+_MEASURE_KEYWORDS = {
+    "revenue",
+    "sales",
+    "amount",
+    "total",
+    "sum",
+    "cost",
+    "price",
+    "value",
+    "count",
+    "quantity",
+    "qty",
+    "volume",
+    "income",
+    "expense",
+    "profit",
+    "loss",
+    "billing",
+    "payment",
+    "balance",
+    "score",
+    "rate",
+    "fee",
+    "charge",
+    "budget",
+    "salary",
+    "wage",
+}
+_CURRENCY_KEYWORDS = {
+    "revenue",
+    "sales",
+    "amount",
+    "cost",
+    "price",
+    "value",
+    "income",
+    "expense",
+    "profit",
+    "billing",
+    "payment",
+    "balance",
+    "fee",
+    "charge",
+    "budget",
+    "salary",
+    "wage",
+    "donation",
+    "offering",
+    "tithe",
+    "fund",
+}
+_PERCENTAGE_KEYWORDS = {
+    "rate",
+    "pct",
+    "percent",
+    "percentage",
+    "ratio",
+    "share",
+    "growth",
+    "margin",
+    "completion",
+    "attendance",
+}
+_BOOLEAN_KEYWORDS = {
+    "is_",
+    "has_",
+    "active",
+    "enabled",
+    "approved",
+    "verified",
+    "confirmed",
+    "completed",
+    "paid",
+    "valid",
+    "flag",
+    "status",
+}
+_CATEGORY_KEYWORDS = {
+    "category",
+    "type",
+    "class",
+    "group",
+    "tier",
+    "level",
+    "grade",
+    "rank",
+    "stage",
+    "phase",
+    "mode",
+    "channel",
+    "method",
+    "status",
+    "label",
+    "tag",
+    "segment",
+    "department",
+    "product",
+    "service",
+    "program",
+    "course",
+    "diagnosis",
+    "plan",
+    "ministry",
+    "project",
+    "event",
+    "gender",
+    "branch",
+}
 
 
 @dataclass
@@ -293,7 +418,22 @@ class AutomaticAnalysisEngine:
         # ── Step 2: Check for boolean (before numeric, since bool is numeric dtype) ──
         if n_non_null > 0:
             unique_vals = set(non_null.dropna().unique())
-            bool_vals = {True, False, "true", "false", "True", "False", "yes", "no", "Yes", "No", "Y", "N", 0, 1, "0", "1"}
+            bool_vals = {
+                True,
+                False,
+                "true",
+                "false",
+                "True",
+                "False",
+                "yes",
+                "no",
+                "Yes",
+                "No",
+                "Y",
+                "N",
+                "0",
+                "1",
+            }
             if unique_vals.issubset(bool_vals) and len(unique_vals) <= 3 and len(unique_vals) >= 2:
                 col.semantic_role = SemanticRole.BOOLEAN
                 col.confidence = 0.9
@@ -448,7 +588,10 @@ class AutomaticAnalysisEngine:
         }
         result["iqr"] = result["q3"] - result["q1"]
         result["outlier_count"] = int(
-            ((vals < result["q1"] - 1.5 * result["iqr"]) | (vals > result["q3"] + 1.5 * result["iqr"])).sum()
+            (
+                (vals < result["q1"] - 1.5 * result["iqr"])
+                | (vals > result["q3"] + 1.5 * result["iqr"])
+            ).sum()
         )
         return result
 
@@ -501,13 +644,15 @@ class AutomaticAnalysisEngine:
                 abs_val = abs(val)
                 strength = "weak" if abs_val < 0.3 else "moderate" if abs_val < 0.7 else "strong"
                 direction = "positive" if val > 0 else "negative"
-                correlations.append({
-                    "column_1": col1,
-                    "column_2": col2,
-                    "correlation": round(float(val), 3),
-                    "strength": strength,
-                    "direction": direction,
-                })
+                correlations.append(
+                    {
+                        "column_1": col1,
+                        "column_2": col2,
+                        "correlation": round(float(val), 3),
+                        "strength": strength,
+                        "direction": direction,
+                    }
+                )
 
         correlations.sort(key=lambda c: abs(c["correlation"]), reverse=True)
         return correlations[:15]
@@ -523,7 +668,19 @@ class AutomaticAnalysisEngine:
         # Measures with "revenue", "sales", "amount" in name → likely dependent
         for m in understanding.measures:
             m_lower = m.lower()
-            if any(kw in m_lower for kw in ("revenue", "sales", "amount", "total", "income", "profit", "billing", "payment")):
+            if any(
+                kw in m_lower
+                for kw in (
+                    "revenue",
+                    "sales",
+                    "amount",
+                    "total",
+                    "income",
+                    "profit",
+                    "billing",
+                    "payment",
+                )
+            ):
                 dependent.append(m)
 
         # If no obvious dependent, use the first measure
@@ -587,27 +744,37 @@ class AutomaticAnalysisEngine:
         return list(dict.fromkeys(recommendations))
 
     @staticmethod
-    def _detect_quality_warnings(df: pd.DataFrame, understanding: DatasetUnderstanding) -> list[str]:
+    def _detect_quality_warnings(
+        df: pd.DataFrame, understanding: DatasetUnderstanding
+    ) -> list[str]:
         """Detect data quality warnings that affect chart selection."""
         warnings = []
 
         for col in understanding.columns:
             if col.missing_percentage > 80:
-                warnings.append(f"Column '{col.name}' has {col.missing_percentage:.0f}% missing values — excluded from automatic charts")
+                warnings.append(
+                    f"Column '{col.name}' has {col.missing_percentage:.0f}% missing values — excluded from automatic charts"
+                )
             elif col.missing_percentage > 50:
-                warnings.append(f"Column '{col.name}' has {col.missing_percentage:.0f}% missing values — use with caution")
+                warnings.append(
+                    f"Column '{col.name}' has {col.missing_percentage:.0f}% missing values — use with caution"
+                )
 
             if col.is_numeric and col.stats.get("outlier_count", 0) > 0:
                 outlier_pct = col.stats["outlier_count"] / max(understanding.row_count, 1) * 100
                 if outlier_pct > 10:
-                    warnings.append(f"Column '{col.name}' has {outlier_pct:.0f}% outliers — may affect visualizations")
+                    warnings.append(
+                        f"Column '{col.name}' has {outlier_pct:.0f}% outliers — may affect visualizations"
+                    )
 
         # Check for duplicate rows
         dup_count = int(df.duplicated().sum())
         if dup_count > 0:
             dup_pct = dup_count / max(len(df), 1) * 100
             if dup_pct > 10:
-                warnings.append(f"Dataset has {dup_count} duplicate rows ({dup_pct:.0f}%) — consider deduplication")
+                warnings.append(
+                    f"Dataset has {dup_count} duplicate rows ({dup_pct:.0f}%) — consider deduplication"
+                )
 
         return warnings
 

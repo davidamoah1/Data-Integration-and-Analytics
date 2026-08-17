@@ -519,7 +519,7 @@ class RESTAPIConnector(BaseConnector):
         try:
             import requests
 
-            from shared.url_validation import validate_url, UrlValidationError
+            from shared.url_validation import UrlValidationError, validate_url
 
             url = self.configuration.get("base_url", "")
             if not url:
@@ -539,7 +539,7 @@ class RESTAPIConnector(BaseConnector):
     def extract_data(self, query: dict[str, Any] | None = None) -> pd.DataFrame:
         import requests
 
-        from shared.url_validation import validate_url, UrlValidationError
+        from shared.url_validation import UrlValidationError, validate_url
 
         base_url = self.configuration.get("base_url", "")
         endpoint = (query or {}).get("endpoint", self.configuration.get("endpoint", ""))
@@ -773,7 +773,7 @@ class GovernmentOpenDataConnector(BaseConnector):
         try:
             import requests
 
-            from shared.url_validation import validate_url, UrlValidationError
+            from shared.url_validation import UrlValidationError, validate_url
 
             try:
                 validate_url(url)
@@ -789,7 +789,7 @@ class GovernmentOpenDataConnector(BaseConnector):
     def extract_data(self, query: dict[str, Any] | None = None) -> pd.DataFrame:
         import requests
 
-        from shared.url_validation import validate_url, UrlValidationError
+        from shared.url_validation import UrlValidationError, validate_url
 
         portal = self.configuration.get("portal_url", "")
         dataset_id = (query or {}).get("dataset_id", self.configuration.get("dataset_id", ""))
@@ -797,7 +797,7 @@ class GovernmentOpenDataConnector(BaseConnector):
         try:
             validate_url(full_url)
         except UrlValidationError:
-            raise ValueError(f"URL validation failed for portal URL") from None
+            raise ValueError("URL validation failed for portal URL") from None
         resp = requests.get(
             full_url,
             params={"resource_id": dataset_id},

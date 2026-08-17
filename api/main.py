@@ -439,10 +439,12 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     errors = []
     for err in exc.errors():
         # Strip the 'input' field to prevent XSS reflection
-        errors.append({
-            "field": ".".join(str(loc) for loc in err.get("loc", [])),
-            "message": err.get("msg", "Invalid value"),
-        })
+        errors.append(
+            {
+                "field": ".".join(str(loc) for loc in err.get("loc", [])),
+                "message": err.get("msg", "Invalid value"),
+            }
+        )
     return JSONResponse(
         status_code=422,
         content={"success": False, "message": "Validation error", "data": errors},
@@ -671,7 +673,9 @@ async def db_health_check():
     """Check database connectivity and pool status."""
     try:
         from sqlalchemy import text
+
         from shared.database import get_engine
+
         engine = get_engine()
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))

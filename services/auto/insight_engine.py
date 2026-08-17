@@ -15,9 +15,7 @@ Priorities:
 from __future__ import annotations
 
 import logging
-from typing import Any
 
-import numpy as np
 import pandas as pd
 
 from services.auto.analysis_engine import DatasetUnderstanding, SemanticRole
@@ -71,7 +69,9 @@ class AutomaticInsightEngine:
     # ── Detectors ──
 
     def _detect_trends(
-        self, df: pd.DataFrame, understanding: DatasetUnderstanding,
+        self,
+        df: pd.DataFrame,
+        understanding: DatasetUnderstanding,
     ) -> list[InsightSpecification]:
         """Detect significant trends over time."""
         insights = []
@@ -90,9 +90,17 @@ class AutomaticInsightEngine:
 
             df_temp = df.copy()
             df_temp["_period"] = dates.dt.to_period("M")
-            monthly = df_temp.groupby("_period")[
-                [m for m in understanding.measures if m in df_temp.columns and pd.api.types.is_numeric_dtype(df_temp[m])][:3]
-            ].sum().sort_index()
+            monthly = (
+                df_temp.groupby("_period")[
+                    [
+                        m
+                        for m in understanding.measures
+                        if m in df_temp.columns and pd.api.types.is_numeric_dtype(df_temp[m])
+                    ][:3]
+                ]
+                .sum()
+                .sort_index()
+            )
 
             if len(monthly) < 3:
                 return insights
@@ -114,26 +122,30 @@ class AutomaticInsightEngine:
                 severity = "positive" if change_pct > 0 else "warning"
                 priority = 8 if abs(change_pct) > 50 else 5 if abs(change_pct) > 20 else 3
 
-                insights.append(InsightSpecification(
-                    title=f"{self._label(metric)} {direction} by {abs(change_pct):.1f}%",
-                    description=f"From {series.index[0]} to {series.index[-1]}, {self._label(metric)} {direction} from {first_val:,.0f} to {last_val:,.0f} ({change_pct:+.1f}%).",
-                    severity=severity,
-                    insight_type="trend",
-                    metric=metric,
-                    value=change_pct,
-                    recommendation=(
-                        f"Investigate the factors driving this {'growth' if change_pct > 0 else 'decline'} and {'sustain positive drivers' if change_pct > 0 else 'address root causes'}."
-                    ),
-                    source_data=f"monthly_trend:{metric}",
-                    priority=priority,
-                ))
+                insights.append(
+                    InsightSpecification(
+                        title=f"{self._label(metric)} {direction} by {abs(change_pct):.1f}%",
+                        description=f"From {series.index[0]} to {series.index[-1]}, {self._label(metric)} {direction} from {first_val:,.0f} to {last_val:,.0f} ({change_pct:+.1f}%).",
+                        severity=severity,
+                        insight_type="trend",
+                        metric=metric,
+                        value=change_pct,
+                        recommendation=(
+                            f"Investigate the factors driving this {'growth' if change_pct > 0 else 'decline'} and {'sustain positive drivers' if change_pct > 0 else 'address root causes'}."
+                        ),
+                        source_data=f"monthly_trend:{metric}",
+                        priority=priority,
+                    )
+                )
         except Exception:
             logger.debug("Trend detection failed", exc_info=True)
 
         return insights
 
     def _detect_outliers(
-        self, df: pd.DataFrame, understanding: DatasetUnderstanding,
+        self,
+        df: pd.DataFrame,
+        understanding: DatasetUnderstanding,
     ) -> list[InsightSpecification]:
         """Detect statistical outliers in numeric columns."""
         insights = []
@@ -156,22 +168,26 @@ class AutomaticInsightEngine:
             severity = "warning" if outlier_pct > 10 else "info"
             priority = 6 if outlier_pct > 15 else 3
 
-            insights.append(InsightSpecification(
-                title=f"{outlier_count} outliers detected in {self._label(col_u.name)}",
-                description=f"{outlier_pct:.1f}% of {self._label(col_u.name)} values are statistical outliers (beyond 1.5×IQR). Values range from {stats.get('min', 0):,.2f} to {stats.get('max', 0):,.2f}.",
-                severity=severity,
-                insight_type="anomaly",
-                metric=col_u.name,
-                value=float(outlier_count),
-                recommendation="Review outlier values to determine if they are data errors or genuine extreme values. Consider winsorizing or investigating root causes.",
-                source_data=f"outlier_detection:{col_u.name}",
-                priority=priority,
-            ))
+            insights.append(
+                InsightSpecification(
+                    title=f"{outlier_count} outliers detected in {self._label(col_u.name)}",
+                    description=f"{outlier_pct:.1f}% of {self._label(col_u.name)} values are statistical outliers (beyond 1.5×IQR). Values range from {stats.get('min', 0):,.2f} to {stats.get('max', 0):,.2f}.",
+                    severity=severity,
+                    insight_type="anomaly",
+                    metric=col_u.name,
+                    value=float(outlier_count),
+                    recommendation="Review outlier values to determine if they are data errors or genuine extreme values. Consider winsorizing or investigating root causes.",
+                    source_data=f"outlier_detection:{col_u.name}",
+                    priority=priority,
+                )
+            )
 
         return insights
 
     def _detect_correlations(
-        self, df: pd.DataFrame, understanding: DatasetUnderstanding,
+        self,
+        df: pd.DataFrame,
+        understanding: DatasetUnderstanding,
     ) -> list[InsightSpecification]:
         """Detect significant correlations between numeric variables."""
         insights = []
@@ -180,22 +196,26 @@ class AutomaticInsightEngine:
             if corr["strength"] != "strong":
                 continue
 
-            insights.append(InsightSpecification(
-                title=f"Strong {corr['direction']} correlation between {self._label(corr['column_1'])} and {self._label(corr['column_2'])}",
-                description=f"{self._label(corr['column_1'])} and {self._label(corr['column_2'])} have a {corr['direction']} correlation of r={corr['correlation']:.2f}. This means they tend to {'increase' if corr['direction'] == 'positive' else 'move in opposite directions'} together.",
-                severity="info",
-                insight_type="correlation",
-                metric=f"{corr['column_1']} vs {corr['column_2']}",
-                value=corr["correlation"],
-                recommendation=f"Consider using {self._label(corr['column_1'])} to {'predict' if corr['direction'] == 'positive' else 'understand'} {self._label(corr['column_2'])} and vice versa.",
-                source_data=f"correlation:{corr['column_1']}:{corr['column_2']}",
-                priority=5,
-            ))
+            insights.append(
+                InsightSpecification(
+                    title=f"Strong {corr['direction']} correlation between {self._label(corr['column_1'])} and {self._label(corr['column_2'])}",
+                    description=f"{self._label(corr['column_1'])} and {self._label(corr['column_2'])} have a {corr['direction']} correlation of r={corr['correlation']:.2f}. This means they tend to {'increase' if corr['direction'] == 'positive' else 'move in opposite directions'} together.",
+                    severity="info",
+                    insight_type="correlation",
+                    metric=f"{corr['column_1']} vs {corr['column_2']}",
+                    value=corr["correlation"],
+                    recommendation=f"Consider using {self._label(corr['column_1'])} to {'predict' if corr['direction'] == 'positive' else 'understand'} {self._label(corr['column_2'])} and vice versa.",
+                    source_data=f"correlation:{corr['column_1']}:{corr['column_2']}",
+                    priority=5,
+                )
+            )
 
         return insights
 
     def _detect_dominance(
-        self, df: pd.DataFrame, understanding: DatasetUnderstanding,
+        self,
+        df: pd.DataFrame,
+        understanding: DatasetUnderstanding,
     ) -> list[InsightSpecification]:
         """Detect dominant categories (concentration risk)."""
         insights = []
@@ -212,41 +232,49 @@ class AutomaticInsightEngine:
             if top_pct > 50:
                 severity = "warning"
                 priority = 5
-                insights.append(InsightSpecification(
-                    title=f"{self._label(col_u.name)} is dominated by '{stats.get('top_value', '')}' ({top_pct:.1f}%)",
-                    description=f"A single value ('{stats.get('top_value', '')}') accounts for {top_pct:.1f}% of all {self._label(col_u.name)} records. This indicates high concentration.",
-                    severity=severity,
-                    insight_type="dominance",
-                    metric=col_u.name,
-                    value=top_pct,
-                    recommendation=f"Consider whether this concentration is expected or represents a risk. Diversification may be needed if this is a business metric.",
-                    source_data=f"dominance:{col_u.name}",
-                    priority=priority,
-                ))
+                insights.append(
+                    InsightSpecification(
+                        title=f"{self._label(col_u.name)} is dominated by '{stats.get('top_value', '')}' ({top_pct:.1f}%)",
+                        description=f"A single value ('{stats.get('top_value', '')}') accounts for {top_pct:.1f}% of all {self._label(col_u.name)} records. This indicates high concentration.",
+                        severity=severity,
+                        insight_type="dominance",
+                        metric=col_u.name,
+                        value=top_pct,
+                        recommendation="Consider whether this concentration is expected or represents a risk. Diversification may be needed if this is a business metric.",
+                        source_data=f"dominance:{col_u.name}",
+                        priority=priority,
+                    )
+                )
 
         return insights
 
     def _detect_quality_issues(
-        self, df: pd.DataFrame, understanding: DatasetUnderstanding,
+        self,
+        df: pd.DataFrame,
+        understanding: DatasetUnderstanding,
     ) -> list[InsightSpecification]:
         """Detect data quality issues that affect analysis."""
         insights = []
 
         for warning in understanding.quality_warnings:
-            insights.append(InsightSpecification(
-                title=warning,
-                description=warning,
-                severity="warning",
-                insight_type="quality",
-                recommendation="Address data quality issues before drawing conclusions from affected columns.",
-                source_data="quality_check",
-                priority=2,
-            ))
+            insights.append(
+                InsightSpecification(
+                    title=warning,
+                    description=warning,
+                    severity="warning",
+                    insight_type="quality",
+                    recommendation="Address data quality issues before drawing conclusions from affected columns.",
+                    source_data="quality_check",
+                    priority=2,
+                )
+            )
 
         return insights
 
     def _detect_distribution_patterns(
-        self, df: pd.DataFrame, understanding: DatasetUnderstanding,
+        self,
+        df: pd.DataFrame,
+        understanding: DatasetUnderstanding,
     ) -> list[InsightSpecification]:
         """Detect notable distribution patterns (skewness, bimodality)."""
         insights = []
@@ -268,18 +296,24 @@ class AutomaticInsightEngine:
             # Check for skewness (mean != median)
             skew_ratio = (mean - median) / std if std > 0 else 0
             if abs(skew_ratio) > 0.5:
-                direction = "right-skewed (mean > median)" if skew_ratio > 0 else "left-skewed (mean < median)"
-                insights.append(InsightSpecification(
-                    title=f"{self._label(col_u.name)} distribution is {direction}",
-                    description=f"The distribution of {self._label(col_u.name)} is {direction} (mean={mean:,.2f}, median={median:,.2f}, std={std:,.2f}). This means the data is not symmetrically distributed.",
-                    severity="info",
-                    insight_type="distribution",
-                    metric=col_u.name,
-                    value=skew_ratio,
-                    recommendation=f"Use median rather than mean for {self._label(col_u.name)} as it better represents the typical value in skewed distributions.",
-                    source_data=f"distribution:{col_u.name}",
-                    priority=2,
-                ))
+                direction = (
+                    "right-skewed (mean > median)"
+                    if skew_ratio > 0
+                    else "left-skewed (mean < median)"
+                )
+                insights.append(
+                    InsightSpecification(
+                        title=f"{self._label(col_u.name)} distribution is {direction}",
+                        description=f"The distribution of {self._label(col_u.name)} is {direction} (mean={mean:,.2f}, median={median:,.2f}, std={std:,.2f}). This means the data is not symmetrically distributed.",
+                        severity="info",
+                        insight_type="distribution",
+                        metric=col_u.name,
+                        value=skew_ratio,
+                        recommendation=f"Use median rather than mean for {self._label(col_u.name)} as it better represents the typical value in skewed distributions.",
+                        source_data=f"distribution:{col_u.name}",
+                        priority=2,
+                    )
+                )
 
         return insights
 
