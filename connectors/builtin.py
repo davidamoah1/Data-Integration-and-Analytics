@@ -519,9 +519,15 @@ class RESTAPIConnector(BaseConnector):
         try:
             import requests
 
+            from shared.url_validation import validate_url, UrlValidationError
+
             url = self.configuration.get("base_url", "")
             if not url:
                 return {"success": False, "message": "base_url is required"}
+            try:
+                validate_url(url)
+            except UrlValidationError as e:
+                return {"success": False, "message": str(e)}
             headers = self._build_headers()
             resp = requests.get(url, headers=headers, timeout=10)
             if resp.status_code < 400:
@@ -533,9 +539,15 @@ class RESTAPIConnector(BaseConnector):
     def extract_data(self, query: dict[str, Any] | None = None) -> pd.DataFrame:
         import requests
 
+        from shared.url_validation import validate_url, UrlValidationError
+
         base_url = self.configuration.get("base_url", "")
         endpoint = (query or {}).get("endpoint", self.configuration.get("endpoint", ""))
         url = f"{base_url.rstrip('/')}/{endpoint.lstrip('/')}"
+        try:
+            validate_url(url)
+        except UrlValidationError:
+            raise ValueError(f"URL validation failed for {url}") from None
         headers = self._build_headers()
         params = (query or {}).get("params", self.configuration.get("params", {}))
         method = (query or {}).get("method", self.configuration.get("method", "GET"))
@@ -761,6 +773,12 @@ class GovernmentOpenDataConnector(BaseConnector):
         try:
             import requests
 
+            from shared.url_validation import validate_url, UrlValidationError
+
+            try:
+                validate_url(url)
+            except UrlValidationError as e:
+                return {"success": False, "message": str(e)}
             resp = requests.get(url, timeout=10)
             if resp.status_code < 400:
                 return {"success": True, "message": "Open data portal reachable"}
@@ -771,10 +789,17 @@ class GovernmentOpenDataConnector(BaseConnector):
     def extract_data(self, query: dict[str, Any] | None = None) -> pd.DataFrame:
         import requests
 
+        from shared.url_validation import validate_url, UrlValidationError
+
         portal = self.configuration.get("portal_url", "")
         dataset_id = (query or {}).get("dataset_id", self.configuration.get("dataset_id", ""))
+        full_url = f"{portal}/api/3/action/datastore_search"
+        try:
+            validate_url(full_url)
+        except UrlValidationError:
+            raise ValueError(f"URL validation failed for portal URL") from None
         resp = requests.get(
-            f"{portal}/api/3/action/datastore_search",
+            full_url,
             params={"resource_id": dataset_id},
             timeout=30,
         )

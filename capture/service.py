@@ -49,6 +49,34 @@ IMAGE_EXTENSIONS = {"jpg", "jpeg", "png", "tiff", "tif", "bmp"}
 PDF_EXTENSIONS = {"pdf"}
 SUPPORTED_EXTENSIONS = IMAGE_EXTENSIONS | PDF_EXTENSIONS
 
+# Magic byte signatures for file type validation
+MAGIC_BYTES = {
+    "pdf": (b"%PDF",),
+    "jpg": (b"\xff\xd8\xff",),
+    "jpeg": (b"\xff\xd8\xff",),
+    "png": (b"\x89PNG\r\n\x1a\n",),
+    "tiff": (b"II*\x00", b"MM\x00*"),
+    "tif": (b"II*\x00", b"MM\x00*"),
+    "bmp": (b"BM",),
+}
+
+
+def _validate_magic_bytes(filename: str, content: bytes) -> None:
+    """Verify that file content matches the claimed extension via magic bytes."""
+    ext = (os.path.splitext(filename)[1] or "").lstrip(".").lower()
+    signatures = MAGIC_BYTES.get(ext)
+    if signatures is None:
+        return  # No signature to check for this extension
+    if len(content) < 4:
+        raise CaptureError(f"File '{filename}' is too small to be a valid .{ext} file.")
+    for sig in signatures:
+        if content.startswith(sig):
+            return
+    raise CaptureError(
+        f"File '{filename}' has extension .{ext} but its content does not match "
+        f"the expected file signature. The file may be corrupted or misnamed."
+    )
+
 # Zip bomb protection: cap total decompressed size and entry count for
 # batch ZIP uploads. A malicious ZIP can have a tiny compressed size but
 # decompress to gigabytes; both compressed and decompressed size are
@@ -151,6 +179,8 @@ class CaptureService:
             raise CaptureError(
                 f"Unsupported file type '.{ext}'. Supported: {', '.join(sorted(SUPPORTED_EXTENSIONS))}."
             )
+
+        _validate_magic_bytes(filename, file_content)
 
         size_mb = len(file_content) / (1024 * 1024)
         if size_mb > config.CAPTURE_MAX_FILE_SIZE_MB:
