@@ -197,7 +197,7 @@ class DocumentChatEngine:
     def _extract_pdf(self, file_path: str, metadata: dict) -> tuple[str, dict]:
         """Extract text from PDF."""
         try:
-            from PyPDF2 import PdfReader
+            from pypdf import PdfReader
 
             reader = PdfReader(file_path)
             metadata["page_count"] = len(reader.pages)
@@ -206,9 +206,9 @@ class DocumentChatEngine:
                 text += page.extract_text() + "\n"
             return text, metadata
         except ImportError:
-            return "PDF text extraction requires PyPDF2. Install with: pip install PyPDF2", metadata
+            return "PDF text extraction requires pypdf. Install with: pip install pypdf", metadata
         except ModuleNotFoundError:
-            return "PDF text extraction requires PyPDF2. Install with: pip install PyPDF2", metadata
+            return "PDF text extraction requires pypdf. Install with: pip install pypdf", metadata
         except Exception as e:
             return f"Error reading PDF: {e}", metadata
 
