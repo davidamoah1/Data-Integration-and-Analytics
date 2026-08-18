@@ -15,7 +15,7 @@
 #     lazy `try: import fitz / pytesseract` — OCR also requires a system
 #     Tesseract binary that isn't installable on Vercel, so it never works
 #     there anyway.
-#   - PyPDF2: lazy-imported in ai/engines/document_chat.py with an explicit
+#   - pypdf: lazy-imported in ai/engines/document_chat.py with an explicit
 #     ImportError fallback message.
 #   - python-pptx: lazy-imported in services/report_engine.py with a
 #     logger.warning + JSON-export fallback.
