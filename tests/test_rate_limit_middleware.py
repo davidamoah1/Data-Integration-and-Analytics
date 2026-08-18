@@ -49,7 +49,8 @@ class FakeRedis:
         return True
 
 
-def test_memory_backend_allows_requests_under_limit():
+def test_memory_backend_allows_requests_under_limit(monkeypatch):
+    monkeypatch.delenv("REDIS_URL", raising=False)
     app = _make_app(requests_per_minute=3, redis_url=None)
     client = TestClient(app)
 
@@ -58,7 +59,8 @@ def test_memory_backend_allows_requests_under_limit():
         assert resp.status_code == 200
 
 
-def test_memory_backend_blocks_requests_over_limit():
+def test_memory_backend_blocks_requests_over_limit(monkeypatch):
+    monkeypatch.delenv("REDIS_URL", raising=False)
     app = _make_app(requests_per_minute=2, redis_url=None)
     client = TestClient(app)
 
@@ -69,7 +71,8 @@ def test_memory_backend_blocks_requests_over_limit():
     assert blocked.headers["Retry-After"] == "60"
 
 
-def test_health_endpoints_are_never_rate_limited():
+def test_health_endpoints_are_never_rate_limited(monkeypatch):
+    monkeypatch.delenv("REDIS_URL", raising=False)
     app = _make_app(requests_per_minute=1, redis_url=None)
     client = TestClient(app)
 
