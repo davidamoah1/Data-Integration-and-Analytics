@@ -34,6 +34,7 @@ import organizations.models  # noqa: F401, E402
 import organizations.workspace_models  # noqa: F401, E402
 import saas.models  # noqa: F401, E402
 import scheduler.models  # noqa: F401, E402
+import services.dataset_workflow_models  # noqa: F401, E402
 import storage.models  # noqa: F401, E402
 import studios.models  # noqa: F401, E402
 import validation.models  # noqa: F401, E402

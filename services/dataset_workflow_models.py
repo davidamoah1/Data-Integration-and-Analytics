@@ -18,7 +18,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-from sqlalchemy import JSON, Boolean, Column, DateTime, String
+from sqlalchemy import JSON, Boolean, Column, DateTime, String, false, func
 
 from shared.database import Base, BigInt
 
@@ -37,13 +37,19 @@ class DatasetWorkflowRun(Base):
     # Mirrors WorkflowState.to_dict()["stages"] — keyed by stage value, each
     # entry has status/started_at/completed_at/duration_seconds/result/error.
     stages = Column(JSON, nullable=False, default=dict)
-    is_complete = Column(Boolean, nullable=False, default=False)
-    has_errors = Column(Boolean, nullable=False, default=False)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+    is_complete = Column(Boolean, nullable=False, default=False, server_default=false())
+    has_errors = Column(Boolean, nullable=False, default=False, server_default=false())
+    created_at = Column(
+        DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        server_default=func.now(),
+        nullable=False,
+    )
     updated_at = Column(
         DateTime,
         default=lambda: datetime.now(timezone.utc),
         onupdate=lambda: datetime.now(timezone.utc),
+        server_default=func.now(),
         nullable=False,
     )
 

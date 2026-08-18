@@ -12,6 +12,7 @@ from sqlalchemy import (
     String,
     Text,
     func,
+    text,
 )
 
 from shared.database import Base, BigInt
@@ -88,7 +89,13 @@ class CaptureDocument(Base):
     # authoritative verification. Never auto-set to "verified" — only an
     # external verification source can do that.
     # NOT_VERIFIED -> EXTRACTION_COMPLETE -> VERIFICATION_PENDING -> VERIFIED | VERIFICATION_FAILED
-    verification_status = Column(String(30), default="not_verified", nullable=False, index=True)
+    verification_status = Column(
+        String(30),
+        default="not_verified",
+        server_default="not_verified",
+        nullable=False,
+        index=True,
+    )
     verification_method = Column(String(100), nullable=True)  # e.g. "institution_api", "qr_scan"
     verified_at = Column(TIMESTAMP, nullable=True)
     verified_by = Column(BigInt, nullable=True)
@@ -116,7 +123,7 @@ class CertificateVerification(Base):
     notes = Column(Text, nullable=True)
     verified_fields = Column(JSON, nullable=True)  # which fields were confirmed
 
-    created_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
+    created_at = Column(TIMESTAMP, server_default=text("CURRENT_TIMESTAMP"), nullable=False)
 
 
 class CaptureField(Base):
