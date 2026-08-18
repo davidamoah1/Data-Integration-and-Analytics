@@ -50,7 +50,12 @@ def upgrade() -> None:
         sa.Column("reference_number", sa.String(length=255), nullable=True),
         sa.Column("notes", sa.Text(), nullable=True),
         sa.Column("verified_fields", sa.JSON(), nullable=True),
-        sa.Column("created_at", sa.TIMESTAMP(), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.TIMESTAMP(),
+            server_default=sa.text("CURRENT_TIMESTAMP"),
+            nullable=False,
+        ),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_index(
