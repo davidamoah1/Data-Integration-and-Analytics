@@ -10,26 +10,24 @@ Tests cover:
 All test data is realistic — no mocks or fabricated analysis results.
 """
 
-import pytest
-from certificates.normalizer import (
-    normalize_name,
-    normalize_date,
-    normalize_gpa,
-    normalize_certificate_number,
-    normalize_grade,
-    normalize_field,
-)
 from certificates.analysis import (
-    analyze_certificate,
     analyze_batch,
-    batch_analytics,
+    analyze_certificate,
     assess_completeness,
+    batch_analytics,
     check_consistency,
-    summarize_academic_performance,
     detect_anomalies,
     generate_recommendations,
+    summarize_academic_performance,
 )
-
+from certificates.normalizer import (
+    normalize_certificate_number,
+    normalize_date,
+    normalize_field,
+    normalize_gpa,
+    normalize_grade,
+    normalize_name,
+)
 
 # ═══════════════════════════════════════════════════════════════
 # Normalization Tests

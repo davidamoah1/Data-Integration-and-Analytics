@@ -1462,7 +1462,7 @@ async def generate_certificate_report(
         "anomaly_summary": analytics.common_anomalies,
         "certificates": [
             {
-                "id": a.document_type and d.id or d.id,
+                "id": d.id,
                 "filename": d.filename,
                 "document_type": d.document_type,
                 "document_type_label": d.document_type_label,
@@ -1575,10 +1575,10 @@ async def generate_certificate_presentation(
     # Build the PPTX
     try:
         from pptx import Presentation as PptxPresentation
-        from pptx.util import Inches, Pt, Emu
         from pptx.chart.data import CategoryChartData
-        from pptx.enum.chart import XL_CHART_TYPE
         from pptx.dml.color import RGBColor
+        from pptx.enum.chart import XL_CHART_TYPE
+        from pptx.util import Inches, Pt
     except ImportError as e:
         raise HTTPException(
             status_code=500,
@@ -1591,8 +1591,6 @@ async def generate_certificate_presentation(
 
     # Color palette
     DARK_BLUE = RGBColor(0x1B, 0x3A, 0x5C)
-    ACCENT_BLUE = RGBColor(0x2E, 0x86, 0xC1)
-    LIGHT_GRAY = RGBColor(0xF2, 0xF4, 0xF7)
     WHITE = RGBColor(0xFF, 0xFF, 0xFF)
     DARK_TEXT = RGBColor(0x2C, 0x3E, 0x50)
 
@@ -1723,7 +1721,7 @@ async def generate_certificate_presentation(
         txBox2 = slide.shapes.add_textbox(Inches(0.5), Inches(1.5), Inches(12), Inches(5.5))
         tf2 = txBox2.text_frame
         tf2.word_wrap = True
-        for i, (d, a) in enumerate(zip(docs[:10], analyses[:10])):
+        for i, (d, a) in enumerate(zip(docs[:10], analyses[:10], strict=False)):
             p = tf2.paragraphs[0] if i == 0 else tf2.add_paragraph()
             name = ""
             for fa in a.fields:

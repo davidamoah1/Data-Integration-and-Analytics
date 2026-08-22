@@ -23,7 +23,6 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy.orm import Session as DbSession
 
 import config
-from certificates.normalizer import normalize_field
 from capture import classifier, extractors, preprocessing, template_service, validators
 from capture.document_types import get_document_type
 from capture.models import (
@@ -44,6 +43,7 @@ from capture.repositories import (
     CaptureFieldRepository,
     CaptureTemplateRepository,
 )
+from certificates.normalizer import normalize_field
 
 logger = logging.getLogger(__name__)
 

@@ -3,7 +3,6 @@
 Sets environment variables for SQLite + CORS + CSP and starts uvicorn.
 """
 import os
-import sys
 
 os.environ["DATABASE_URL"] = ""
 os.environ["DB_TYPE"] = "sqlite"

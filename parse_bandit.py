@@ -1,4 +1,5 @@
 import json
+
 with open('/tmp/bandit_report.json') as f:
     d = json.load(f)
 totals = d.get('metrics', {}).get('_totals', {})

@@ -16,12 +16,10 @@ No data is fabricated; if a field is missing, it is reported as missing.
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass, field as dc_field
-from datetime import datetime, date
-from typing import Any
+from dataclasses import dataclass
+from datetime import date, datetime
 
-from capture.document_types import CERTIFICATE_TYPES, DocumentTypeSpec, get_document_type
-
+from capture.document_types import get_document_type
 
 # ── Data classes ─────────────────────────────────────────────────────
 
@@ -569,7 +567,6 @@ def analyze_certificate(
 
     # Field-level analysis
     spec = get_document_type(doc_type) if doc_type else None
-    spec_field_names = {f.name for f in spec.fields} if spec else set()
 
     field_analyses: list[FieldAnalysis] = []
     for f in fields:
