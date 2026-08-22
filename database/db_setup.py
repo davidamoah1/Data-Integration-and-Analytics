@@ -1,4 +1,4 @@
-from sqlalchemy import TIMESTAMP, Column, Date, Float, Index, Integer, String, func
+from sqlalchemy import TIMESTAMP, Column, Date, Index, Integer, Numeric, String, func
 
 from etl.logging_config import logger
 from shared.database import Base, get_engine
@@ -22,10 +22,10 @@ class SalesRecord(Base):
     category = Column(String(100), nullable=True, index=True)
     sub_category = Column(String(100), nullable=True)
     product_name = Column(String(500), nullable=True)
-    sales = Column(Float, nullable=False, default=0.0)
+    sales = Column(Numeric(18, 2), nullable=False, default=0.0)
     quantity = Column(Integer, nullable=False, default=0)
-    discount = Column(Float, nullable=False, default=0.0)
-    profit = Column(Float, nullable=False, default=0.0)
+    discount = Column(Numeric(18, 2), nullable=False, default=0.0)
+    profit = Column(Numeric(18, 2), nullable=False, default=0.0)
     created_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
     updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now(), nullable=False)
 

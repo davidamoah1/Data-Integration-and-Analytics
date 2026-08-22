@@ -13,6 +13,7 @@ const withPWA = require('@ducanh2912/next-pwa').default({
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  skipTrailingSlashRedirect: true,
   output: process.env.NODE_ENV === 'production' ? 'standalone' : undefined,
   experimental: {
     optimizePackageImports: ['lucide-react'],
@@ -24,20 +25,36 @@ const nextConfig = {
     const backendUrl = apiUrl && apiUrl.startsWith('http')
       ? apiUrl.replace(/\/$/, '')
       : process.env.NODE_ENV === 'development'
-        ? 'http://localhost:8001'
+        ? 'http://127.0.0.1:8000'
         : '';
     if (!backendUrl) return [];
 
-    return [
-      {
-        source: '/api/api/:path*',
-        destination: `${backendUrl}/api/:path*`,
-      },
-      {
-        source: '/api/:path*',
-        destination: `${backendUrl}/:path*`,
-      },
+    const beforeFileRewrites = [
+      // Specific backend paths that don't use /api/ prefix on the backend
+      { source: '/api/datasets', destination: `${backendUrl}/datasets/` },
+      { source: '/api/datasets/:path*', destination: `${backendUrl}/datasets/:path*` },
+      { source: '/api/analytics/:path*', destination: `${backendUrl}/analytics/:path*` },
+      { source: '/api/ai/:path*', destination: `${backendUrl}/ai/:path*` },
+      { source: '/api/etl/:path*', destination: `${backendUrl}/etl/:path*` },
+      { source: '/api/semantic/:path*', destination: `${backendUrl}/semantic/:path*` },
+      { source: '/api/validation/:path*', destination: `${backendUrl}/validation/:path*` },
+      { source: '/api/dataset-workflow/:path*', destination: `${backendUrl}/dataset-workflow/:path*` },
+      { source: '/api/ecosystem/:path*', destination: `${backendUrl}/ecosystem/:path*` },
+      { source: '/api/saas/:path*', destination: `${backendUrl}/saas/:path*` },
+      { source: '/api/studios/:path*', destination: `${backendUrl}/studios/:path*` },
+      { source: '/api/workflow/:path*', destination: `${backendUrl}/workflow/:path*` },
+      { source: '/api/reports/:path*', destination: `${backendUrl}/reports/:path*` },
+      // General /api/ prefix (backend routes that already use /api/)
+      { source: '/api/:path*', destination: `${backendUrl}/api/:path*` },
     ];
+
+    const afterFileRewrites = [];
+
+    return {
+      beforeFiles: beforeFileRewrites,
+      afterFiles: afterFileRewrites,
+      fallback: [],
+    };
   },
   async headers() {
     return [

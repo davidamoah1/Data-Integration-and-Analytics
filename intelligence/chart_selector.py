@@ -1,4 +1,9 @@
-"""Chart Selection Engine.
+"""Chart Selection Engine [DEPRECATED].
+
+.. deprecated::
+    Use ``services.auto.engine.VisualizationIntelligenceEngine`` instead.
+    This module is preserved for backward compatibility but will be removed
+    in a future release. All new code must use the canonical engine.
 
 Selects appropriate visualizations based on the dataset understanding.
 Each candidate chart is scored, deduplicated, and given a reason.
@@ -831,13 +836,13 @@ class ChartSelector:
         import json
 
         data_str = json.dumps(data, sort_keys=True, default=str)
-        return hashlib.md5(data_str.encode()).hexdigest()[:12]
+        return hashlib.sha256(data_str.encode()).hexdigest()[:12]
 
     def _hash_dataset(self, df: pd.DataFrame) -> str:
         """Create a hash of the dataset for versioning."""
         try:
             # Use shape + first/last rows for a quick hash
             info = f"{df.shape}_{list(df.columns)}"
-            return hashlib.md5(info.encode()).hexdigest()[:12]
+            return hashlib.sha256(info.encode()).hexdigest()[:12]
         except Exception:
             return "unknown"

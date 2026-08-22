@@ -135,7 +135,16 @@ async def upload_certificates(
     org_id = get_current_organization_id(current_user, db)
     max_batch = _get_max_batch_size()
 
+    logger.info(
+        "Certificate upload started: org_id=%s user_id=%s file_count=%d batch_name=%s",
+        org_id, current_user["id"], len(files), batch_name,
+    )
+
     if len(files) > max_batch:
+        logger.warning(
+            "Certificate upload rejected — too many files: org_id=%s count=%d max=%d",
+            org_id, len(files), max_batch,
+        )
         raise HTTPException(
             status_code=413,
             detail=f"Too many files. Maximum {max_batch} certificates per batch. "
@@ -146,6 +155,7 @@ async def upload_certificates(
     batch = svc.create_batch(
         org_id, current_user["id"], batch_name or "Certificate Batch", "certificates"
     )
+    logger.info("Batch created: batch_id=%s org_id=%s", batch.id, org_id)
 
     results: list[dict] = []
     succeeded = 0
@@ -162,6 +172,10 @@ async def upload_certificates(
                 content,
                 source="web",
                 batch_id=batch.id,
+            )
+            logger.info(
+                "Document stored: doc_id=%s filename=%s file_type=%s size=%d org_id=%s",
+                doc.id, doc.filename, doc.file_type, len(content), org_id,
             )
             # Enqueue background job for processing instead of synchronous
             job_id = None
@@ -183,8 +197,15 @@ async def upload_certificates(
                 )
                 job_id = job.id
                 db.commit()
+                logger.info(
+                    "Job enqueued: job_id=%s doc_id=%s type=ocr_document org_id=%s",
+                    job_id, doc.id, org_id,
+                )
             except Exception as e:
-                logger.warning("Job system unavailable for certificate, using thread: %s", e)
+                logger.warning(
+                    "Job system unavailable for doc_id=%s, using thread fallback: %s",
+                    doc.id, e,
+                )
                 import threading
 
                 def _process_doc(doc_id: int) -> None:
@@ -246,6 +267,11 @@ async def upload_certificates(
         },
     )
     db.commit()
+
+    logger.info(
+        "Certificate upload complete: batch_id=%s org_id=%s total=%d succeeded=%d failed=%d",
+        batch.id, org_id, len(files), succeeded, failed,
+    )
 
     return {
         "batch_id": batch.id,
@@ -956,3 +982,800 @@ async def certificates_to_dataset(
         "message": f"Exported {len(docs)} approved certificates to dataset '{dataset_name}'. "
         f"Use the Data-to-Decision workflow to analyze this data.",
     }
+
+
+# ═══════════════════════════════════════════════════════════════
+# Certificate detail with full analysis
+# ═══════════════════════════════════════════════════════════════
+
+
+def _serialize_fields(fields: list[CaptureField]) -> list[dict]:
+    """Serialize CaptureField objects to dicts for analysis."""
+    return [
+        {
+            "field_name": f.field_name,
+            "field_label": f.field_label,
+            "data_type": f.data_type,
+            "value": f.value,
+            "raw_value": f.raw_value,
+            "confidence_score": f.confidence_score,
+            "is_low_confidence": f.is_low_confidence,
+            "was_corrected": f.was_corrected,
+            "is_valid": f.is_valid,
+            "validation_message": f.validation_message,
+        }
+        for f in fields
+    ]
+
+
+@router.get("/{document_id}/status")
+async def get_certificate_status(
+    document_id: int,
+    db: DbSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Lightweight status check for a single certificate.
+
+    Returns only the document status, error message, and basic metadata.
+    Used by the frontend for polling during processing.
+    """
+    org_id = get_current_organization_id(current_user, db)
+
+    doc = db.execute(
+        select(CaptureDocument).where(
+            CaptureDocument.id == document_id,
+            CaptureDocument.organization_id == org_id,
+        )
+    ).scalar_one_or_none()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Certificate not found")
+
+    return {
+        "id": doc.id,
+        "status": doc.status,
+        "error_message": doc.error_message,
+        "document_type": doc.document_type,
+        "document_type_label": doc.document_type_label,
+        "overall_confidence": doc.overall_confidence,
+        "classification_confidence": doc.classification_confidence,
+    }
+
+
+@router.get("/{document_id}/detail")
+async def get_certificate_detail(
+    document_id: int,
+    db: DbSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Get a single certificate with full field data and intelligence analysis.
+
+    Returns the document record, all extracted fields with confidence scores,
+    and a comprehensive analysis including:
+    - Completeness assessment (required vs optional fields)
+    - Consistency checks (cross-field validation)
+    - Academic performance summary
+    - Anomaly detection
+    - Actionable recommendations
+    """
+    from certificates.analysis import analyze_certificate
+
+    org_id = get_current_organization_id(current_user, db)
+
+    doc = db.execute(
+        select(CaptureDocument).where(
+            CaptureDocument.id == document_id,
+            CaptureDocument.organization_id == org_id,
+        )
+    ).scalar_one_or_none()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Certificate not found")
+
+    fields = (
+        db.execute(
+            select(CaptureField)
+            .where(CaptureField.document_id == document_id)
+            .order_by(CaptureField.id)
+        )
+        .scalars()
+        .all()
+    )
+
+    doc_dict = _serialize_certificate(doc)
+    field_list = _serialize_fields(fields)
+    analysis = analyze_certificate(doc_dict, field_list)
+
+    return {
+        "certificate": doc_dict,
+        "fields": field_list,
+        "analysis": {
+            "document_type": analysis.document_type,
+            "document_type_label": analysis.document_type_label,
+            "classification_confidence": analysis.classification_confidence,
+            "overall_confidence": analysis.overall_confidence,
+            "summary": analysis.summary,
+            "verification_status": analysis.verification_status,
+            "is_duplicate": analysis.is_duplicate,
+            "duplicate_of_id": analysis.duplicate_of_id,
+            "completeness": {
+                "total_fields": analysis.completeness.total_fields,
+                "required_fields": analysis.completeness.required_fields,
+                "required_filled": analysis.completeness.required_filled,
+                "optional_fields": analysis.completeness.optional_fields,
+                "optional_filled": analysis.completeness.optional_filled,
+                "completeness_pct": analysis.completeness.completeness_pct,
+                "overall_pct": analysis.completeness.overall_pct,
+                "missing_required": analysis.completeness.missing_required,
+                "missing_optional": analysis.completeness.missing_optional,
+            },
+            "consistency_checks": [
+                {
+                    "check_name": c.check_name,
+                    "description": c.description,
+                    "passed": c.passed,
+                    "severity": c.severity,
+                    "detail": c.detail,
+                }
+                for c in analysis.consistency_checks
+            ],
+            "academic_performance": {
+                "gpa": analysis.academic_performance.gpa,
+                "grade": analysis.academic_performance.grade,
+                "qualification": analysis.academic_performance.qualification,
+                "programme": analysis.academic_performance.programme,
+                "has_performance_data": analysis.academic_performance.has_performance_data,
+                "summary": analysis.academic_performance.summary,
+            },
+            "anomalies": [
+                {
+                    "anomaly_type": a.anomaly_type,
+                    "field_name": a.field_name,
+                    "description": a.description,
+                    "severity": a.severity,
+                }
+                for a in analysis.anomalies
+            ],
+            "recommendations": [
+                {
+                    "action": r.action,
+                    "description": r.description,
+                    "priority": r.priority,
+                }
+                for r in analysis.recommendations
+            ],
+            "field_analysis": [
+                {
+                    "field_name": fa.field_name,
+                    "field_label": fa.field_label,
+                    "value": fa.value,
+                    "raw_value": fa.raw_value,
+                    "confidence": fa.confidence,
+                    "is_low_confidence": fa.is_low_confidence,
+                    "is_present": fa.is_present,
+                    "is_required": fa.is_required,
+                    "is_valid": fa.is_valid,
+                    "validation_message": fa.validation_message,
+                    "was_corrected": fa.was_corrected,
+                }
+                for fa in analysis.fields
+            ],
+        },
+    }
+
+
+# ═══════════════════════════════════════════════════════════════
+# Batch analytics with intelligence
+# ═══════════════════════════════════════════════════════════════
+
+
+@router.get("/batch/{batch_id}/analytics")
+async def get_batch_analytics(
+    batch_id: int,
+    db: DbSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Get aggregate analytics for a batch of certificates.
+
+    Returns batch-level intelligence including:
+    - Completeness distribution (high/medium/low)
+    - Average confidence and completeness
+    - Anomaly summary
+    - Institution and qualification breakdowns
+    - Verification status distribution
+    """
+    from certificates.analysis import analyze_batch, batch_analytics
+
+    org_id = get_current_organization_id(current_user, db)
+
+    docs = list(
+        db.execute(
+            select(CaptureDocument)
+            .where(
+                CaptureDocument.organization_id == org_id,
+                CaptureDocument.batch_id == batch_id,
+                CaptureDocument.document_type.in_(CERTIFICATE_DOC_TYPES),
+            )
+            .order_by(CaptureDocument.id)
+        )
+        .scalars()
+        .all()
+    )
+
+    if not docs:
+        raise HTTPException(status_code=404, detail="No certificates found in this batch")
+
+    doc_ids = [d.id for d in docs]
+    all_fields = (
+        db.execute(select(CaptureField).where(CaptureField.document_id.in_(doc_ids)))
+        .scalars()
+        .all()
+    )
+    fields_by_doc: dict[int, list[dict]] = {}
+    for f in all_fields:
+        fields_by_doc.setdefault(f.document_id, []).append({
+            "field_name": f.field_name,
+            "field_label": f.field_label,
+            "data_type": f.data_type,
+            "value": f.value,
+            "raw_value": f.raw_value,
+            "confidence_score": f.confidence_score,
+            "is_low_confidence": f.is_low_confidence,
+            "was_corrected": f.was_corrected,
+            "is_valid": f.is_valid,
+            "validation_message": f.validation_message,
+        })
+
+    doc_dicts = [_serialize_certificate(d) for d in docs]
+    analyses = analyze_batch(doc_dicts, fields_by_doc)
+    analytics = batch_analytics(analyses)
+
+    return {
+        "batch_id": batch_id,
+        "total": analytics.total,
+        "by_type": analytics.by_type,
+        "by_verification": analytics.by_verification,
+        "by_completeness_tier": analytics.by_completeness_tier,
+        "avg_completeness": analytics.avg_completeness,
+        "avg_confidence": analytics.avg_confidence,
+        "total_anomalies": analytics.total_anomalies,
+        "total_duplicates": analytics.total_duplicates,
+        "common_anomalies": analytics.common_anomalies,
+        "institutions": analytics.institutions,
+        "qualifications": analytics.qualifications,
+        "summary": analytics.summary,
+        "certificates": [
+            {
+                "id": d.id,
+                "filename": d.filename,
+                "document_type": d.document_type,
+                "document_type_label": d.document_type_label,
+                "status": d.status,
+                "verification_status": d.verification_status,
+                "overall_confidence": d.overall_confidence,
+                "duplicate_of_id": d.duplicate_of_id,
+            }
+            for d in docs
+        ],
+    }
+
+
+# ═══════════════════════════════════════════════════════════════
+# Field correction (human review)
+# ═══════════════════════════════════════════════════════════════
+
+
+@router.patch("/{document_id}/fields/{field_id}")
+async def correct_certificate_field(
+    document_id: int,
+    field_id: int,
+    payload: dict,
+    db: DbSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Correct a single extracted field value during human review.
+
+    The original OCR value is preserved in `raw_value`. The corrected value
+    is stored in `value` with confidence set to 1.0 and `was_corrected` flag
+    set. All corrections are logged in the audit trail.
+    """
+    org_id = get_current_organization_id(current_user, db)
+
+    doc = db.execute(
+        select(CaptureDocument).where(
+            CaptureDocument.id == document_id,
+            CaptureDocument.organization_id == org_id,
+        )
+    ).scalar_one_or_none()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Certificate not found")
+
+    if not _is_certificate_type(doc.document_type):
+        raise HTTPException(status_code=400, detail="Document is not a certificate type")
+
+    field = db.execute(
+        select(CaptureField).where(
+            CaptureField.id == field_id,
+            CaptureField.document_id == document_id,
+        )
+    ).scalar_one_or_none()
+    if not field:
+        raise HTTPException(status_code=404, detail="Field not found")
+
+    new_value = payload.get("value")
+    if new_value is None:
+        raise HTTPException(status_code=422, detail="Field 'value' is required")
+
+    old_value = field.value
+    field.value = str(new_value)
+    field.was_corrected = True
+    field.confidence_score = 1.0
+    field.is_low_confidence = False
+
+    # Re-validate the corrected value
+    from capture.document_types import get_document_type
+    from capture.validators import validate_field
+
+    doc_type_spec = get_document_type(doc.document_type) if doc.document_type else None
+    enum_values = None
+    if doc_type_spec:
+        spec = next((f for f in doc_type_spec.fields if f.name == field.field_name), None)
+        enum_values = spec.enum_values if spec else None
+    is_valid, message = validate_field(field.field_name, str(new_value), field.data_type, enum_values)
+    field.is_valid = is_valid
+    field.validation_message = message
+
+    # Record correction in the learning system
+    from capture.models import CaptureCorrection
+
+    correction = CaptureCorrection(
+        document_id=document_id,
+        field_id=field_id,
+        field_name=field.field_name,
+        old_value=old_value,
+        new_value=str(new_value),
+        corrected_by=current_user["id"],
+    )
+    db.add(correction)
+
+    log_audit_event(
+        db=db,
+        action="certificate.field_corrected",
+        user_id=current_user["id"],
+        organization_id=org_id,
+        resource_type="certificate",
+        resource_id=document_id,
+        old_values={"field": field.field_name, "value": old_value},
+        new_values={"field": field.field_name, "value": str(new_value)},
+    )
+    db.commit()
+
+    return {
+        "document_id": document_id,
+        "field_id": field_id,
+        "field_name": field.field_name,
+        "old_value": old_value,
+        "new_value": str(new_value),
+        "confidence_score": field.confidence_score,
+        "was_corrected": True,
+        "is_valid": field.is_valid,
+        "validation_message": field.validation_message,
+    }
+
+
+# ═══════════════════════════════════════════════════════════════
+# Certificate report generation
+# ═══════════════════════════════════════════════════════════════
+
+
+@router.get("/report")
+async def generate_certificate_report(
+    certificate_type: str | None = Query(None),
+    verification_status: str | None = Query(None),
+    review_status: str | None = Query(None),
+    db: DbSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Generate a structured JSON report from certificate data.
+
+    The report includes:
+    - Executive summary with key metrics
+    - Breakdown by type, verification status, institution
+    - Completeness and confidence statistics
+    - Anomaly summary
+    - Per-certificate analysis highlights
+
+    This report can be consumed by the existing report engine for PDF
+    generation or used standalone as a structured data export.
+    """
+    from certificates.analysis import analyze_batch, batch_analytics
+
+    org_id = get_current_organization_id(current_user, db)
+
+    query = (
+        select(CaptureDocument)
+        .where(
+            CaptureDocument.organization_id == org_id,
+            CaptureDocument.document_type.in_(CERTIFICATE_DOC_TYPES),
+        )
+        .order_by(CaptureDocument.id.desc())
+    )
+    if certificate_type:
+        query = query.where(CaptureDocument.document_type == certificate_type)
+    if verification_status:
+        query = query.where(CaptureDocument.verification_status == verification_status)
+    if review_status:
+        query = query.where(CaptureDocument.status == review_status)
+
+    docs = list(db.execute(query).scalars().all())
+    if not docs:
+        raise HTTPException(status_code=422, detail="No certificates found matching the criteria")
+
+    doc_ids = [d.id for d in docs]
+    all_fields = (
+        db.execute(select(CaptureField).where(CaptureField.document_id.in_(doc_ids)))
+        .scalars()
+        .all()
+    )
+    fields_by_doc: dict[int, list[dict]] = {}
+    for f in all_fields:
+        fields_by_doc.setdefault(f.document_id, []).append({
+            "field_name": f.field_name,
+            "field_label": f.field_label,
+            "data_type": f.data_type,
+            "value": f.value,
+            "raw_value": f.raw_value,
+            "confidence_score": f.confidence_score,
+            "is_low_confidence": f.is_low_confidence,
+            "was_corrected": f.was_corrected,
+            "is_valid": f.is_valid,
+            "validation_message": f.validation_message,
+        })
+
+    doc_dicts = [_serialize_certificate(d) for d in docs]
+    analyses = analyze_batch(doc_dicts, fields_by_doc)
+    analytics = batch_analytics(analyses)
+
+    report = {
+        "title": "Certificate Intelligence Report",
+        "organization_id": org_id,
+        "generated_at": __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat(),
+        "generated_by": current_user["id"],
+        "filters": {
+            "certificate_type": certificate_type,
+            "verification_status": verification_status,
+            "review_status": review_status,
+        },
+        "executive_summary": analytics.summary,
+        "metrics": {
+            "total_certificates": analytics.total,
+            "avg_completeness": analytics.avg_completeness,
+            "avg_confidence": analytics.avg_confidence,
+            "total_anomalies": analytics.total_anomalies,
+            "total_duplicates": analytics.total_duplicates,
+        },
+        "breakdowns": {
+            "by_type": analytics.by_type,
+            "by_verification": analytics.by_verification,
+            "by_completeness_tier": analytics.by_completeness_tier,
+            "by_institution": analytics.institutions,
+            "by_qualification": analytics.qualifications,
+        },
+        "anomaly_summary": analytics.common_anomalies,
+        "certificates": [
+            {
+                "id": a.document_type and d.id or d.id,
+                "filename": d.filename,
+                "document_type": d.document_type,
+                "document_type_label": d.document_type_label,
+                "status": d.status,
+                "verification_status": d.verification_status,
+                "overall_confidence": d.overall_confidence,
+                "completeness_pct": analyses[i].completeness.completeness_pct,
+                "anomaly_count": len(analyses[i].anomalies),
+                "is_duplicate": analyses[i].is_duplicate,
+                "summary": analyses[i].summary,
+                "top_recommendation": (
+                    {
+                        "action": analyses[i].recommendations[0].action,
+                        "description": analyses[i].recommendations[0].description,
+                        "priority": analyses[i].recommendations[0].priority,
+                    }
+                    if analyses[i].recommendations
+                    else None
+                ),
+            }
+            for i, d in enumerate(docs)
+        ],
+    }
+
+    log_audit_event(
+        db=db,
+        action="certificate.report_generated",
+        user_id=current_user["id"],
+        organization_id=org_id,
+        resource_type="certificate",
+        new_values={"total": analytics.total, "filters": report["filters"]},
+    )
+    db.commit()
+
+    return report
+
+
+# ═══════════════════════════════════════════════════════════════
+# Certificate PowerPoint generation
+# ═══════════════════════════════════════════════════════════════
+
+
+@router.get("/presentation")
+async def generate_certificate_presentation(
+    certificate_type: str | None = Query(None),
+    verification_status: str | None = Query(None),
+    review_status: str | None = Query(None),
+    db: DbSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Generate a PowerPoint presentation from certificate data.
+
+    Creates a professional PPTX with:
+    - Title slide
+    - Executive summary slide
+    - Distribution charts (by type, verification, completeness)
+    - Institution and qualification breakdowns
+    - Per-certificate highlights (top 10)
+
+    Uses real data from the database — no fabricated content.
+    """
+    from certificates.analysis import analyze_batch, batch_analytics
+
+    org_id = get_current_organization_id(current_user, db)
+
+    query = (
+        select(CaptureDocument)
+        .where(
+            CaptureDocument.organization_id == org_id,
+            CaptureDocument.document_type.in_(CERTIFICATE_DOC_TYPES),
+        )
+        .order_by(CaptureDocument.id.desc())
+    )
+    if certificate_type:
+        query = query.where(CaptureDocument.document_type == certificate_type)
+    if verification_status:
+        query = query.where(CaptureDocument.verification_status == verification_status)
+    if review_status:
+        query = query.where(CaptureDocument.status == review_status)
+
+    docs = list(db.execute(query).scalars().all())
+    if not docs:
+        raise HTTPException(status_code=422, detail="No certificates found matching the criteria")
+
+    doc_ids = [d.id for d in docs]
+    all_fields = (
+        db.execute(select(CaptureField).where(CaptureField.document_id.in_(doc_ids)))
+        .scalars()
+        .all()
+    )
+    fields_by_doc: dict[int, list[dict]] = {}
+    for f in all_fields:
+        fields_by_doc.setdefault(f.document_id, []).append({
+            "field_name": f.field_name,
+            "field_label": f.field_label,
+            "data_type": f.data_type,
+            "value": f.value,
+            "raw_value": f.raw_value,
+            "confidence_score": f.confidence_score,
+            "is_low_confidence": f.is_low_confidence,
+            "was_corrected": f.was_corrected,
+            "is_valid": f.is_valid,
+            "validation_message": f.validation_message,
+        })
+
+    doc_dicts = [_serialize_certificate(d) for d in docs]
+    analyses = analyze_batch(doc_dicts, fields_by_doc)
+    analytics = batch_analytics(analyses)
+
+    # Build the PPTX
+    try:
+        from pptx import Presentation as PptxPresentation
+        from pptx.util import Inches, Pt, Emu
+        from pptx.chart.data import CategoryChartData
+        from pptx.enum.chart import XL_CHART_TYPE
+        from pptx.dml.color import RGBColor
+    except ImportError as e:
+        raise HTTPException(
+            status_code=500,
+            detail="PowerPoint generation requires python-pptx. Install with: pip install python-pptx",
+        ) from e
+
+    prs = PptxPresentation()
+    prs.slide_width = Inches(13.333)
+    prs.slide_height = Inches(7.5)
+
+    # Color palette
+    DARK_BLUE = RGBColor(0x1B, 0x3A, 0x5C)
+    ACCENT_BLUE = RGBColor(0x2E, 0x86, 0xC1)
+    LIGHT_GRAY = RGBColor(0xF2, 0xF4, 0xF7)
+    WHITE = RGBColor(0xFF, 0xFF, 0xFF)
+    DARK_TEXT = RGBColor(0x2C, 0x3E, 0x50)
+
+    blank_layout = prs.slide_layouts[6]
+
+    def _add_title_slide():
+        slide = prs.slides.add_slide(blank_layout)
+        # Background
+        bg = slide.background
+        fill = bg.fill
+        fill.solid()
+        fill.fore_color.rgb = DARK_BLUE
+        # Title
+        txBox = slide.shapes.add_textbox(Inches(1), Inches(2.5), Inches(11), Inches(1.5))
+        tf = txBox.text_frame
+        tf.word_wrap = True
+        p = tf.paragraphs[0]
+        p.text = "Certificate Intelligence Report"
+        p.font.size = Pt(40)
+        p.font.bold = True
+        p.font.color.rgb = WHITE
+        # Subtitle
+        txBox2 = slide.shapes.add_textbox(Inches(1), Inches(4), Inches(11), Inches(1))
+        tf2 = txBox2.text_frame
+        tf2.word_wrap = True
+        p2 = tf2.paragraphs[0]
+        p2.text = f"{analytics.total} certificates analyzed | Generated {__import__('datetime').datetime.now().strftime('%Y-%m-%d')}"
+        p2.font.size = Pt(20)
+        p2.font.color.rgb = RGBColor(0xAE, 0xC7, 0xE0)
+
+    def _add_summary_slide():
+        slide = prs.slides.add_slide(blank_layout)
+        # Title
+        txBox = slide.shapes.add_textbox(Inches(0.5), Inches(0.3), Inches(12), Inches(0.8))
+        tf = txBox.text_frame
+        p = tf.paragraphs[0]
+        p.text = "Executive Summary"
+        p.font.size = Pt(32)
+        p.font.bold = True
+        p.font.color.rgb = DARK_BLUE
+
+        # Summary text
+        txBox2 = slide.shapes.add_textbox(Inches(0.5), Inches(1.5), Inches(12), Inches(2))
+        tf2 = txBox2.text_frame
+        tf2.word_wrap = True
+        p2 = tf2.paragraphs[0]
+        p2.text = analytics.summary
+        p2.font.size = Pt(18)
+        p2.font.color.rgb = DARK_TEXT
+
+        # Key metrics
+        metrics_text = (
+            f"Total Certificates: {analytics.total}\n"
+            f"Average Completeness: {analytics.avg_completeness:.0f}%\n"
+            f"Average Confidence: {analytics.avg_confidence:.0%}\n"
+            f"Total Anomalies: {analytics.total_anomalies}\n"
+            f"Duplicates: {analytics.total_duplicates}"
+        )
+        txBox3 = slide.shapes.add_textbox(Inches(0.5), Inches(4), Inches(6), Inches(3))
+        tf3 = txBox3.text_frame
+        tf3.word_wrap = True
+        for i, line in enumerate(metrics_text.split("\n")):
+            p = tf3.paragraphs[0] if i == 0 else tf3.add_paragraph()
+            p.text = line
+            p.font.size = Pt(16)
+            p.font.color.rgb = DARK_TEXT
+
+        # Completeness tiers
+        tier_text = (
+            f"Completeness Distribution:\n"
+            f"  High (≥80%): {analytics.by_completeness_tier.get('high', 0)}\n"
+            f"  Medium (50-80%): {analytics.by_completeness_tier.get('medium', 0)}\n"
+            f"  Low (<50%): {analytics.by_completeness_tier.get('low', 0)}"
+        )
+        txBox4 = slide.shapes.add_textbox(Inches(7), Inches(4), Inches(6), Inches(3))
+        tf4 = txBox4.text_frame
+        tf4.word_wrap = True
+        for i, line in enumerate(tier_text.split("\n")):
+            p = tf4.paragraphs[0] if i == 0 else tf4.add_paragraph()
+            p.text = line
+            p.font.size = Pt(16)
+            p.font.color.rgb = DARK_TEXT
+
+    def _add_chart_slide(title: str, data: dict[str, int], chart_type=XL_CHART_TYPE.BAR_CHART):
+        slide = prs.slides.add_slide(blank_layout)
+        # Title
+        txBox = slide.shapes.add_textbox(Inches(0.5), Inches(0.3), Inches(12), Inches(0.8))
+        tf = txBox.text_frame
+        p = tf.paragraphs[0]
+        p.text = title
+        p.font.size = Pt(28)
+        p.font.bold = True
+        p.font.color.rgb = DARK_BLUE
+
+        if not data:
+            txBox2 = slide.shapes.add_textbox(Inches(2), Inches(3), Inches(8), Inches(1))
+            tf2 = txBox2.text_frame
+            p2 = tf2.paragraphs[0]
+            p2.text = "No data available"
+            p2.font.size = Pt(20)
+            p2.font.color.rgb = RGBColor(0x99, 0x99, 0x99)
+            return
+
+        chart_data = CategoryChartData()
+        chart_data.categories = list(data.keys())
+        chart_data.add_series("Count", list(data.values()))
+
+        slide.shapes.add_chart(
+            chart_type,
+            Inches(0.5),
+            Inches(1.5),
+            Inches(12),
+            Inches(5.5),
+            chart_data,
+        )
+
+    def _add_certificate_highlights_slide():
+        slide = prs.slides.add_slide(blank_layout)
+        txBox = slide.shapes.add_textbox(Inches(0.5), Inches(0.3), Inches(12), Inches(0.8))
+        tf = txBox.text_frame
+        p = tf.paragraphs[0]
+        p.text = "Certificate Highlights"
+        p.font.size = Pt(28)
+        p.font.bold = True
+        p.font.color.rgb = DARK_BLUE
+
+        # Show top 10 certificates
+        txBox2 = slide.shapes.add_textbox(Inches(0.5), Inches(1.5), Inches(12), Inches(5.5))
+        tf2 = txBox2.text_frame
+        tf2.word_wrap = True
+        for i, (d, a) in enumerate(zip(docs[:10], analyses[:10])):
+            p = tf2.paragraphs[0] if i == 0 else tf2.add_paragraph()
+            name = ""
+            for fa in a.fields:
+                if fa.field_name == "full_name" and fa.value:
+                    name = fa.value
+                    break
+            p.text = (
+                f"{i + 1}. {d.filename} — {a.document_type_label or 'Unknown'}"
+                f" | Holder: {name or 'N/A'}"
+                f" | Completeness: {a.completeness.completeness_pct:.0f}%"
+                f" | Verification: {a.verification_status}"
+            )
+            p.font.size = Pt(14)
+            p.font.color.rgb = DARK_TEXT
+
+    # Build slides
+    _add_title_slide()
+    _add_summary_slide()
+
+    if analytics.by_type:
+        _add_chart_slide("Certificates by Type", analytics.by_type, XL_CHART_TYPE.BAR_CHART)
+
+    if analytics.by_verification:
+        _add_chart_slide("Verification Status", analytics.by_verification, XL_CHART_TYPE.PIE_CHART)
+
+    if analytics.institutions:
+        # Top 10 institutions
+        top_inst = dict(sorted(analytics.institutions.items(), key=lambda kv: kv[1], reverse=True)[:10])
+        _add_chart_slide("Top Institutions", top_inst, XL_CHART_TYPE.BAR_CHART)
+
+    if analytics.qualifications:
+        top_qual = dict(sorted(analytics.qualifications.items(), key=lambda kv: kv[1], reverse=True)[:10])
+        _add_chart_slide("Qualifications", top_qual, XL_CHART_TYPE.BAR_CHART)
+
+    _add_certificate_highlights_slide()
+
+    output = io.BytesIO()
+    prs.save(output)
+    output.seek(0)
+
+    log_audit_event(
+        db=db,
+        action="certificate.presentation_generated",
+        user_id=current_user["id"],
+        organization_id=org_id,
+        resource_type="certificate",
+        new_values={"total": analytics.total},
+    )
+    db.commit()
+
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        headers={"Content-Disposition": "attachment; filename=certificate_intelligence.pptx"},
+    )

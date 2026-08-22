@@ -40,11 +40,22 @@ export default function DemoPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!name.trim() || !email.trim() || !company.trim()) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1500));
-    setLoading(false);
-    setSubmitted(true);
-    toast.success('Demo request received! We will confirm your slot via email.');
+    try {
+      const { apiClient } = await import('@/services/api/client');
+      await apiClient.post('/api/saas/support/tickets', {
+        subject: `Demo request from ${name} (${company})`,
+        description: `Name: ${name}\nEmail: ${email}\nCompany: ${company}\nIndustry: ${industry}\nTeam size: ${teamSize}\nPreferred date: ${date}\nPreferred time: ${timeSlot}\nMessage: ${message}`,
+        priority: 'medium',
+      }, { skipAuth: true });
+      setSubmitted(true);
+      toast.success('Demo request received! We will confirm your slot via email.');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to submit demo request. Please try again or contact us directly.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

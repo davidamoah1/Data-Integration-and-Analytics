@@ -20,7 +20,10 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 os.environ["DB_TYPE"] = "sqlite"
 os.environ["SQLITE_DB_PATH"] = "test_auth.db"
 os.environ["PYTEST_RUNNING"] = "1"
+os.environ["SUPER_ADMIN_EMAIL"] = "admin@dataflow.io"
 os.environ["SUPER_ADMIN_PASSWORD"] = "Admin@12345"
+os.environ["JWT_SECRET_KEY"] = "test-secret-key-for-ci-not-for-production-32chars"
+os.environ["DISABLE_CONFIG_VALIDATION"] = "1"
 
 import ai.models  # noqa: F401
 import analytics.models  # noqa: F401
@@ -89,16 +92,29 @@ def client(db_engine):
         finally:
             db.close()
 
-    from api.main import app
+    from api import main as api_main
+
+    app = api_main.app
 
     app.dependency_overrides[get_db] = override_get_db
-    # Override get_engine so startup event uses the test engine
+    # Override get_engine so startup event uses the test engine.
+    # Must patch both shared.database.get_engine and the already-imported
+    # reference in api.main, since the lifespan calls the bound name.
     original_get_engine = db_module.get_engine
     db_module.get_engine = lambda **kw: db_engine
+    original_main_get_engine = api_main.get_engine
+    api_main.get_engine = lambda **kw: db_engine
+    # Use TestClient as a context manager so lifespan startup/shutdown
+    # events fire and the app is fully ready to serve requests.
     client = TestClient(app)
-    yield client
-    app.dependency_overrides.clear()
-    db_module.get_engine = original_get_engine
+    client.__enter__()
+    try:
+        yield client
+    finally:
+        client.__exit__(None, None, None)
+        app.dependency_overrides.clear()
+        db_module.get_engine = original_get_engine
+        api_main.get_engine = original_main_get_engine
 
 
 @pytest.fixture

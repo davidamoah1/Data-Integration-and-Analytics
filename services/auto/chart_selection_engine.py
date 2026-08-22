@@ -145,6 +145,35 @@ class IntelligentChartSelectionEngine:
                         candidates.append(chart)
                         order += 1
 
+        # ── 9. AREA CHART (time + numeric, emphasizing volume) ──
+        for time_col in time_cols[:1]:
+            for metric_col in good_measures[:2]:
+                chart = self._make_area_chart(df, time_col, metric_col, understanding, order)
+                if chart:
+                    candidates.append(chart)
+                    order += 1
+
+        # ── 10. BOX PLOT (distribution + group comparison) ──
+        for metric_col in good_measures[:2]:
+            # Grouped box plot if a dimension exists
+            if good_dimensions:
+                chart = self._make_box_plot(
+                    df, metric_col, good_dimensions[0], understanding, order
+                )
+            else:
+                chart = self._make_box_plot(df, metric_col, None, understanding, order)
+            if chart:
+                candidates.append(chart)
+                order += 1
+
+        # ── 11. TREEMAP (many categories + measure) ──
+        for dim_col in good_dimensions[:2]:
+            for metric_col in good_measures[:1]:
+                chart = self._make_treemap(df, dim_col, metric_col, understanding, order)
+                if chart:
+                    candidates.append(chart)
+                    order += 1
+
         # Limit candidates
         candidates = candidates[: self.MAX_CANDIDATE_CHARTS]
 
@@ -528,6 +557,185 @@ class IntelligentChartSelectionEngine:
             dataset_hash=understanding.dataset_hash,
         )
 
+    def _make_area_chart(
+        self,
+        df: pd.DataFrame,
+        time_col: str,
+        metric_col: str,
+        understanding: DatasetUnderstanding,
+        order: int,
+    ) -> ChartSpecification | None:
+        """Area chart for emphasizing volume/trend over time."""
+        if not pd.api.types.is_numeric_dtype(df[metric_col]):
+            return None
+
+        try:
+            if pd.api.types.is_datetime64_any_dtype(df[time_col]):
+                grouped = df.groupby(df[time_col].dt.to_period("M"))[metric_col].sum()
+                x_labels = [str(p) for p in grouped.index]
+            else:
+                parsed = pd.to_datetime(df[time_col], errors="coerce")
+                if parsed.notna().mean() < 0.8:
+                    return None
+                grouped = df.groupby(parsed.dt.to_period("M"))[metric_col].sum()
+                x_labels = [str(p) for p in grouped.index]
+        except Exception:
+            return None
+
+        if len(grouped) < 2:
+            return None
+
+        data = [{"x": x, "y": float(y)} for x, y in zip(x_labels, grouped.values, strict=False)]
+
+        return ChartSpecification(
+            chart_type="area_chart",
+            title=f"{self._label(metric_col)} Volume Over Time",
+            description=f"Cumulative trend of {self._label(metric_col)} over {self._label(time_col)}",
+            x_axis=time_col,
+            y_axis=metric_col,
+            aggregation="sum",
+            source_columns=[time_col, metric_col],
+            data=data,
+            section="supporting_charts",
+            width=6,
+            height=300,
+            order=order,
+            confidence=0.78,
+            reason=f"We selected an area chart to emphasize the volume of {self._label(metric_col)} over time. Area charts highlight magnitude and trend direction.",
+            source_analysis="time_series_volume",
+            dataset_hash=understanding.dataset_hash,
+        )
+
+    def _make_box_plot(
+        self,
+        df: pd.DataFrame,
+        metric_col: str,
+        group_col: str | None,
+        understanding: DatasetUnderstanding,
+        order: int,
+    ) -> ChartSpecification | None:
+        """Box plot for distribution/outlier/group comparison."""
+        if not pd.api.types.is_numeric_dtype(df[metric_col]):
+            return None
+
+        if group_col:
+            if df[group_col].nunique() > 15:
+                return None
+            data = []
+            for cat in df[group_col].dropna().unique():
+                vals = df[df[group_col] == cat][metric_col].dropna()
+                if len(vals) < 5:
+                    continue
+                q1 = float(vals.quantile(0.25))
+                q2 = float(vals.median())
+                q3 = float(vals.quantile(0.75))
+                iqr = q3 - q1
+                lower = q1 - 1.5 * iqr
+                upper = q3 + 1.5 * iqr
+                outliers = vals[(vals < lower) | (vals > upper)]
+                data.append({
+                    "x": str(cat),
+                    "min": float(vals.min()),
+                    "q1": q1,
+                    "median": q2,
+                    "q3": q3,
+                    "max": float(vals.max()),
+                    "outliers": [float(v) for v in outliers.head(10)],
+                })
+            title = f"{self._label(metric_col)} Distribution by {self._label(group_col)}"
+            reason = f"We selected a box plot to compare {self._label(metric_col)} distributions across {self._label(group_col)} groups. Box plots reveal medians, quartiles, and outliers."
+        else:
+            vals = df[metric_col].dropna()
+            if len(vals) < 5:
+                return None
+            q1 = float(vals.quantile(0.25))
+            q2 = float(vals.median())
+            q3 = float(vals.quantile(0.75))
+            iqr = q3 - q1
+            lower = q1 - 1.5 * iqr
+            upper = q3 + 1.5 * iqr
+            outliers = vals[(vals < lower) | (vals > upper)]
+            data = [{
+                "x": self._label(metric_col),
+                "min": float(vals.min()),
+                "q1": q1,
+                "median": q2,
+                "q3": q3,
+                "max": float(vals.max()),
+                "outliers": [float(v) for v in outliers.head(10)],
+            }]
+            title = f"{self._label(metric_col)} Distribution (Box Plot)"
+            reason = f"We selected a box plot to show the distribution of {self._label(metric_col)}. Box plots reveal the median, quartiles, and outliers at a glance."
+
+        if not data:
+            return None
+
+        source_cols = [metric_col] + ([group_col] if group_col else [])
+
+        return ChartSpecification(
+            chart_type="box_plot",
+            title=title,
+            description=f"Statistical distribution of {self._label(metric_col)}",
+            x_axis=group_col or metric_col,
+            y_axis=metric_col,
+            source_columns=source_cols,
+            data=data,
+            section="supporting_charts",
+            width=6,
+            height=300,
+            order=order,
+            confidence=0.68,
+            reason=reason,
+            source_analysis="distribution_box",
+            dataset_hash=understanding.dataset_hash,
+        )
+
+    def _make_treemap(
+        self,
+        df: pd.DataFrame,
+        dim_col: str,
+        metric_col: str,
+        understanding: DatasetUnderstanding,
+        order: int,
+    ) -> ChartSpecification | None:
+        """Treemap for hierarchical part-to-whole with many categories."""
+        if not pd.api.types.is_numeric_dtype(df[metric_col]):
+            return None
+
+        cardinality = df[dim_col].nunique()
+        if cardinality < 8:
+            return None  # Use pie/donut for small category counts
+        if cardinality > 100:
+            return None  # Too many for treemap
+
+        grouped = df.groupby(dim_col, dropna=False)[metric_col].sum().sort_values(ascending=False)
+        grouped = grouped.head(30)  # Cap at 30 for readability
+
+        total = float(grouped.sum())
+        if total <= 0:
+            return None
+
+        data = [{"x": str(k), "y": float(v), "pct": round(float(v / total * 100), 1)} for k, v in grouped.items()]
+
+        return ChartSpecification(
+            chart_type="treemap",
+            title=f"{self._label(metric_col)} Distribution by {self._label(dim_col)}",
+            description=f"Hierarchical view of {self._label(metric_col)} across {self._label(dim_col)} ({cardinality} categories)",
+            x_axis=dim_col,
+            y_axis=metric_col,
+            aggregation="sum",
+            source_columns=[dim_col, metric_col],
+            data=data,
+            section="supporting_charts",
+            width=6,
+            height=350,
+            order=order,
+            confidence=0.72,
+            reason=f"We selected a treemap because {self._label(dim_col)} has {cardinality} categories — too many for a pie chart but ideal for a treemap, which shows part-to-whole relationships at scale.",
+            source_analysis="composition_hierarchical",
+            dataset_hash=understanding.dataset_hash,
+        )
+
     # ── Scoring ──
 
     def _ensure_diversity(
@@ -552,7 +760,7 @@ class IntelligentChartSelectionEngine:
         types_in_top = {c.chart_type for c in top}
 
         # Priority types to ensure inclusion (if they exist)
-        priority_types = ["scatter_plot", "histogram", "heatmap"]
+        priority_types = ["scatter_plot", "histogram", "heatmap", "box_plot", "area_chart", "treemap"]
 
         for ptype in priority_types:
             if ptype in types_in_top:
@@ -618,6 +826,12 @@ class IntelligentChartSelectionEngine:
             score += 8
         elif chart.chart_type == "geo_map":
             score += 12
+        elif chart.chart_type == "area_chart":
+            score += 13
+        elif chart.chart_type == "box_plot":
+            score += 9
+        elif chart.chart_type == "treemap":
+            score += 10
 
         # 4. Business value (max 15) — charts with measures in name
         y_axis_lower = (chart.y_axis or "").lower()
@@ -694,11 +908,9 @@ class IntelligentChartSelectionEngine:
             # Signature 1: same columns + same type group
             sig1 = f"{type_group}:{','.join(cols)}"
 
-            # Signature 2: same x/y axes (regardless of chart type)
-            sig2 = f"axes:{chart.x_axis}:{chart.y_axis}"
-
-            # Signature 3: same columns (different chart types on same data)
-            # sig3 = f"cols:{','.join(cols)}"
+            # Signature 2: same x/y axes + same type group
+            # (different chart types with same axes are NOT duplicates)
+            sig2 = f"axes:{type_group}:{chart.x_axis}:{chart.y_axis}"
 
             if sig1 in seen_signatures or sig2 in seen_signatures:
                 # Duplicate — skip if the existing one has higher score

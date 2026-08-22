@@ -47,6 +47,7 @@ services:
     env_file:
       - .env
     environment:
+      - APP_ENV=production
       - DB_TYPE=mysql
       - MYSQL_HOST=db
       - MYSQL_PORT=3306
@@ -55,8 +56,10 @@ services:
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - REDIS_URL=redis://redis:6379/0
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
       - API_KEY=${API_KEY}
-      - CORS_ORIGINS=${CORS_ORIGINS:-https://example.com,http://localhost}
+      - CORS_ORIGINS=${CORS_ORIGINS}
+      - STORAGE_BACKEND=${STORAGE_BACKEND:-r2}
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
       - LOG_FORMAT=json
       - RATE_LIMIT_RPM=${RATE_LIMIT_RPM:-120}
@@ -149,12 +152,19 @@ services:
           cpus: '2.0'
 
   db:
-    image: mysql:8.0
+    image: mysql:8.4
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE:-aedip}
       MYSQL_USER: ${MYSQL_USER:-aedip_user}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_0900_ai_ci
+      --default-authentication-plugin=caching_sha2_password
+      --max-connections=200
+      --innodb-buffer-pool-size=1G
+      --innodb-log-file-size=256M
     volumes:
       - mysql_data:/var/lib/mysql
     expose:

@@ -8,6 +8,7 @@ Provides:
 """
 
 import logging
+import os
 import time
 from collections import defaultdict
 
@@ -28,6 +29,10 @@ logger = logging.getLogger("etl_project")
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     """Add security-related HTTP headers to every response."""
 
+    _extra_connect_src = os.getenv("CSP_CONNECT_SRC", "")
+    _connect_src = "'self'" + (f" {_extra_connect_src}" if _extra_connect_src else "")
+    _corp = os.getenv("CROSS_ORIGIN_RESOURCE_POLICY", "same-origin")
+    _coep = os.getenv("CROSS_ORIGIN_EMBEDDER_POLICY", "require-corp")
     _HEADERS = {
         "X-Content-Type-Options": "nosniff",
         "X-Frame-Options": "DENY",
@@ -40,14 +45,14 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             "style-src 'self' 'unsafe-inline'; "
             "img-src 'self' data: https:; "
             "font-src 'self'; "
-            "connect-src 'self'; "
+            f"connect-src {_connect_src}; "
             "frame-ancestors 'none'; "
             "base-uri 'self'; "
             "form-action 'self';"
         ),
         "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
-        "Cross-Origin-Resource-Policy": "same-origin",
-        "Cross-Origin-Embedder-Policy": "require-corp",
+        "Cross-Origin-Resource-Policy": _corp,
+        "Cross-Origin-Embedder-Policy": _coep,
         "Cross-Origin-Opener-Policy": "same-origin",
     }
 

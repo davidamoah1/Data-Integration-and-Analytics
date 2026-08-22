@@ -406,12 +406,16 @@ class TestChartDeduplication:
     """Test chart deduplication."""
 
     def test_no_duplicate_axes(self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding):
-        """No two charts should have the same x_axis + y_axis combination."""
+        """No two charts of the SAME type should have the same x_axis + y_axis.
+
+        Different chart types (e.g., line + area) with the same axes are
+        allowed because they communicate different visual messages.
+        """
         engine = IntelligentChartSelectionEngine()
         charts = engine.select_charts(sales_df, understanding)
         seen = set()
         for chart in charts:
-            key = (chart.x_axis, chart.y_axis)
+            key = (chart.chart_type, chart.x_axis, chart.y_axis)
             assert key not in seen, f"Duplicate chart with axes {key}"
             seen.add(key)
 

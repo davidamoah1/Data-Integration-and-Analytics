@@ -54,6 +54,7 @@ class CaptureDocument(Base):
     file_type = Column(String(20), nullable=False)  # jpg, png, pdf, tiff, etc.
     mime_type = Column(String(100), nullable=True)
     file_size_bytes = Column(Integer, nullable=True)
+    file_checksum = Column(String(64), nullable=True, index=True)
     page_count = Column(Integer, default=1, nullable=False)
     source = Column(String(20), default="web", nullable=False)  # web, mobile, api
 

@@ -1,5 +1,7 @@
 """Platform API routes — templates, collaboration, branding, and enterprise search."""
 
+import os
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import or_
 from sqlalchemy.orm import Session as DbSession
@@ -674,9 +676,20 @@ async def seed_demo(
     db: DbSession = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
-    """Seed demo organization, dashboards, KPIs, and ETL pipeline for pilot."""
+    """Seed demo organization, dashboards, KPIs, and ETL pipeline for pilot.
+
+    Blocked in production unless SEED_DEMO_DATA=true is explicitly set.
+    """
     if "super_admin" not in current_user["roles"] and "admin" not in current_user["roles"]:
         raise HTTPException(status_code=403, detail="Admin access required")
+    app_env = os.getenv("APP_ENV", "development").lower()
+    seed_enabled = os.getenv("SEED_DEMO_DATA", "false").lower() in ("true", "1", "yes")
+    if app_env == "production" and not seed_enabled:
+        raise HTTPException(
+            status_code=403,
+            detail="Demo data seeding is disabled in production. "
+            "Set SEED_DEMO_DATA=true to enable for pilot deployments.",
+        )
     if is_demo_seeded(db):
         return {"message": "Demo data already seeded", "already_seeded": True}
     result = seed_demo_data(db)

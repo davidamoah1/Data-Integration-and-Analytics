@@ -1,4 +1,11 @@
-"""Visualization Engine — intelligent chart selection and recommendation."""
+"""Visualization Engine — intelligent chart selection and recommendation [DEPRECATED].
+
+.. deprecated::
+    Use ``services.auto.engine.VisualizationIntelligenceEngine`` instead.
+    This module is preserved for backward compatibility with
+    ``studios.routes`` but will be removed in a future release.
+    All new code must use the canonical engine.
+"""
 
 from __future__ import annotations
 

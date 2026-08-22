@@ -5,7 +5,6 @@ Provides:
   - Product tour steps
   - Guided setup wizard
   - Quick start checklist
-  - Sample data seeding
 """
 
 import streamlit as st
@@ -194,7 +193,7 @@ def render_setup_wizard():
             "2. Drag and drop a CSV or Excel file (max 50MB on trial)\n"
             "3. DataFlow automatically detects columns and cleans the data\n"
             "4. Common issues fixed automatically: duplicates, date formats, currency strings\n\n"
-            "Try uploading one of the sample datasets from the `dataset/` folder!"
+            "Upload your own CSV or Excel file to get started with real data."
         )
 
     elif step["key"] == "etl_pipeline":

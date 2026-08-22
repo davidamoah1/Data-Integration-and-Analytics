@@ -112,7 +112,14 @@ async function request<T = unknown>(
     params,
   } = options;
 
-  let url = path;
+  // Normalize path: prefix with /api if it doesn't already start with /api/
+  // This prevents conflicts with Next.js page routes (e.g. /datasets page vs /datasets API)
+  let normalizedPath = path;
+  if (!normalizedPath.startsWith('/api/') && !normalizedPath.startsWith('/api?')) {
+    normalizedPath = '/api' + (normalizedPath.startsWith('/') ? '' : '/') + normalizedPath;
+  }
+
+  let url = normalizedPath;
   if (params) {
     const query = new URLSearchParams();
     for (const [key, value] of Object.entries(params)) {
@@ -122,7 +129,7 @@ async function request<T = unknown>(
     }
     const queryString = query.toString();
     if (queryString) {
-      url += (path.includes('?') ? '&' : '?') + queryString;
+      url += (normalizedPath.includes('?') ? '&' : '?') + queryString;
     }
   }
 
@@ -184,10 +191,20 @@ async function request<T = unknown>(
 
   if (!response.ok) {
     let errorData: unknown;
-    try {
-      errorData = await response.json();
-    } catch {
-      // non-JSON error
+    const contentType = response.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+      try {
+        errorData = await response.json();
+      } catch {
+        // non-JSON error
+      }
+    } else {
+      // Response is HTML or other non-JSON content
+      try {
+        await response.text();
+      } catch {
+        // ignore
+      }
     }
     const serverMessage =
       (errorData as { message?: string })?.message ||
@@ -214,13 +231,46 @@ async function request<T = unknown>(
     return null as T;
   }
 
-  const json = await response.json();
+  let responseText: string;
+  try {
+    responseText = await response.text();
+  } catch {
+    throw new ApiError(response.status, `The server returned an empty response (HTTP ${response.status}).`);
+  }
+
+  // Handle empty response body (e.g. 200 with no content)
+  if (!responseText || responseText.trim() === '') {
+    if (response.status === 200) {
+      return null as T;
+    }
+    throw new ApiError(response.status, `The server returned an empty response (HTTP ${response.status}).`);
+  }
+
+  let json: unknown;
+  try {
+    json = JSON.parse(responseText);
+  } catch {
+    // Response is not JSON (e.g. HTML error page from proxy/CDN)
+    if (responseText.includes('<!DOCTYPE') || responseText.includes('<html')) {
+      throw new ApiError(
+        response.status,
+        response.status === 200
+          ? 'The server returned an HTML page instead of JSON. The API endpoint may be misconfigured or the backend is down.'
+          : `Server returned HTML instead of JSON (HTTP ${response.status}). The backend may be restarting or unavailable.`,
+      );
+    }
+    throw new ApiError(
+      response.status,
+      `The server returned a non-JSON response (HTTP ${response.status}). Response: ${responseText.slice(0, 200)}`,
+    );
+  }
+
   // Backend wraps responses in { success, data, message }
   if (json && typeof json === 'object' && 'success' in json) {
-    if (!json.success) {
-      throw new ApiError(response.status, json.message || 'Request failed', json);
+    if (!(json as { success: boolean }).success) {
+      throw new ApiError(response.status, (json as { message?: string }).message || 'Request failed', json);
     }
-    return json.data as T;
+    return (json as unknown as { data: T }).data;
   }
   return json as T;
 }
@@ -263,7 +313,11 @@ export const apiClient = {
   ): Promise<T> => {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
-      const url = `${API_URL}${path}`;
+      let normalizedPath = path;
+      if (!normalizedPath.startsWith('/api/') && !normalizedPath.startsWith('/api?')) {
+        normalizedPath = '/api' + (normalizedPath.startsWith('/') ? '' : '/') + normalizedPath;
+      }
+      const url = `${API_URL}${normalizedPath}`;
       xhr.open('POST', url);
 
       // Auth header

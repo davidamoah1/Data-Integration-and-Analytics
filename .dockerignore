@@ -4,6 +4,8 @@ __pycache__/
 .git/
 .gitignore
 .env
+.env.*
+!.env.example
 *.db
 *.log
 logs/
@@ -15,7 +17,18 @@ venv/
 *.egg-info/
 .pytest_cache/
 .ruff_cache/
+.mypy_cache/
 htmlcov/
 .coverage
+tests/
+demo_datasets/
+docs/
+frontend/node_modules/
+frontend/.next/
 test_login.py
 init_super_admin.py
+debug_*.py
+_test_*.py
+_check_*.py
+*.md
+!README.md

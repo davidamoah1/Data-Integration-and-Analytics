@@ -13,6 +13,7 @@ polling from the UI.
 
 from __future__ import annotations
 
+import hashlib
 import io
 import logging
 import os
@@ -22,6 +23,7 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy.orm import Session as DbSession
 
 import config
+from certificates.normalizer import normalize_field
 from capture import classifier, extractors, preprocessing, template_service, validators
 from capture.document_types import get_document_type
 from capture.models import (
@@ -187,6 +189,34 @@ class CaptureService:
         if size_mb > config.CAPTURE_MAX_FILE_SIZE_MB:
             raise CaptureError(f"File exceeds maximum size of {config.CAPTURE_MAX_FILE_SIZE_MB}MB.")
 
+        # Compute SHA-256 checksum for duplicate detection
+        checksum = hashlib.sha256(file_content).hexdigest()
+
+        # Check for existing document with same checksum in this org
+        existing = (
+            self.db.query(CaptureDocument)
+            .filter(
+                CaptureDocument.organization_id == organization_id,
+                CaptureDocument.file_checksum == checksum,
+                CaptureDocument.status != "rejected",
+            )
+            .order_by(CaptureDocument.id.desc())
+            .first()
+        )
+        if existing:
+            # Return the existing document as a duplicate
+            existing.duplicate_of_id = existing.duplicate_of_id or existing.id
+            self._log(
+                organization_id,
+                "duplicate_detected",
+                document_id=existing.id,
+                batch_id=batch_id,
+                actor_id=user_id,
+                details={"filename": filename, "checksum": checksum, "existing_id": existing.id},
+            )
+            self.db.commit()
+            return existing
+
         # Upload to storage layer (Phase 12 — abstract object storage)
         key_prefix = f"capture/{organization_id}/"
         file_record = self.file_service.upload(
@@ -210,6 +240,7 @@ class CaptureService:
             original_file_path=original_path,
             file_type=ext,
             file_size_bytes=len(file_content),
+            file_checksum=checksum,
             source=source,
             status="uploaded",
             uploaded_by=user_id,
@@ -225,7 +256,7 @@ class CaptureService:
             document_id=doc.id,
             batch_id=batch_id,
             actor_id=user_id,
-            details={"filename": filename, "size_bytes": len(file_content)},
+            details={"filename": filename, "size_bytes": len(file_content), "checksum": checksum},
         )
         self.db.commit()
 
@@ -614,7 +645,7 @@ class CaptureService:
                 field_label=item.field_label,
                 data_type=item.data_type,
                 raw_value=item.value,
-                value=item.value,
+                value=normalize_field(item.field_name, item.value) if item.value else item.value,
                 confidence_score=item.confidence,
                 is_low_confidence=is_low_conf,
                 is_valid=is_valid,

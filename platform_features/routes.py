@@ -4,12 +4,14 @@ Endpoints for:
   - Audit summary and category stats
   - Role hierarchy and permission matrix
   - Tenant context info
-  - Enterprise seed data
+  - Enterprise seed data (demo only — blocked in production)
 """
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends
+import os
+
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session as DbSession
 
 from platform_features.audit_tracker import AuditCategory, AuditTracker
@@ -120,6 +122,18 @@ async def seed_enterprise(
     current_user: dict = Depends(require_any_role("super_admin", "org_admin")),
     db: DbSession = Depends(get_db),
 ):
-    """Seed enterprise demo data (organizations, roles, users)."""
+    """Seed enterprise demo data (organizations, roles, users).
+
+    Blocked in production. Only available when SEED_DEMO_DATA=true
+    or APP_ENV is not 'production'.
+    """
+    app_env = os.getenv("APP_ENV", "development").lower()
+    seed_enabled = os.getenv("SEED_DEMO_DATA", "false").lower() in ("true", "1", "yes")
+    if app_env == "production" and not seed_enabled:
+        raise HTTPException(
+            status_code=403,
+            detail="Demo data seeding is disabled in production. "
+            "Set SEED_DEMO_DATA=true to enable for pilot deployments.",
+        )
     result = seed_enterprise_data(db)
     return success_response(result, result["summary"])

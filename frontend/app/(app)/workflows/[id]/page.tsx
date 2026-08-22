@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, ArrowRight, CheckCircle2, Circle, Loader2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle2, Circle } from 'lucide-react';
 import { WORKFLOWS } from '@/lib/workflows';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -17,7 +17,6 @@ export default function WorkflowRunnerPage() {
 
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
-  const [loading, setLoading] = useState(false);
 
   if (!workflow) {
     return (
@@ -60,12 +59,8 @@ export default function WorkflowRunnerPage() {
   };
 
   const handleFinish = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      toast.success('Workflow completed successfully!');
-      router.push('/dashboard');
-    }, 1000);
+    toast.success('Workflow completed successfully!');
+    router.push('/dashboard');
   };
 
   return (
@@ -150,8 +145,8 @@ export default function WorkflowRunnerPage() {
 
           <div className="flex items-center gap-3">
             {isLastStep ? (
-              <Button onClick={handleFinish} disabled={loading} className="gap-2">
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+              <Button onClick={handleFinish} className="gap-2">
+                <CheckCircle2 className="h-4 w-4" />
                 Finish Workflow
               </Button>
             ) : (

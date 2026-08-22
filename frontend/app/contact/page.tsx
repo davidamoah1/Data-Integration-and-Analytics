@@ -28,14 +28,13 @@ export default function ContactPage() {
         description: `From: ${name} <${email}>\n\n${message}`,
         priority: 'medium',
       }, { skipAuth: true });
-    } catch {
-      // If the API is unavailable (unauthenticated visitor, endpoint down),
-      // still show success — the message was attempted.  A production
-      // deployment should wire this to an email/ticket service.
+      setSent(true);
+      toast.success('Message sent! We will get back to you soon.');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to send message. Please try again or email us directly at support@dataflow.io.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-    setSent(true);
-    toast.success('Message sent! We will get back to you soon.');
   };
 
   return (

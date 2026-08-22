@@ -92,7 +92,6 @@ jobs:
       - name: Run frontend tests
         working-directory: frontend
         run: npx vitest run --reporter=dot
-        continue-on-error: true
 
   # ── PR build check ──────────────────────────────────────────
   pr-build-check:

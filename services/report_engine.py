@@ -99,6 +99,49 @@ class ChartDefinition:
     series: list[dict[str, Any]] = field(default_factory=list)
     config: dict[str, Any] = field(default_factory=dict)
 
+    @classmethod
+    def from_canonical_spec(cls, spec: Any) -> ChartDefinition:
+        """Create a ChartDefinition from a canonical ChartSpecification.
+
+        This bridges the canonical chart spec (services.auto.chart_specification)
+        to the report engine's ChartDefinition, ensuring reports use the
+        SAME chart specifications as dashboards and presentations.
+        """
+        # Map canonical chart types to report ChartType enum
+        type_map = {
+            "bar_chart": ChartType.BAR,
+            "horizontal_bar": ChartType.BAR,
+            "line_chart": ChartType.LINE,
+            "area_chart": ChartType.AREA,
+            "pie_chart": ChartType.PIE,
+            "donut_chart": ChartType.DONUT,
+            "scatter_plot": ChartType.SCATTER,
+            "histogram": ChartType.BAR,  # histogram renders as bar
+            "box_plot": ChartType.BAR,  # box plot renders as bar variant
+            "heatmap": ChartType.HEATMAP,
+            "geo_map": ChartType.BAR,  # geo renders as bar variant in report
+            "treemap": ChartType.BAR,  # treemap renders as bar variant in report
+            "leaderboard": ChartType.BAR,
+        }
+        ct = type_map.get(spec.chart_type, ChartType.BAR)
+        return cls(
+            title=spec.title,
+            chart_type=ct,
+            data=spec.data[:100],  # cap for report
+            x_axis=spec.x_axis or "",
+            y_axis=spec.y_axis or "",
+            series=spec.series,
+            config={
+                "aggregation": spec.aggregation,
+                "source_columns": spec.source_columns,
+                "importance_score": spec.importance_score,
+                "reason": spec.reason,
+                "source_analysis": spec.source_analysis,
+                "chart_id": spec.id,
+                "original_chart_type": spec.chart_type,
+            },
+        )
+
 
 @dataclass
 class TableDefinition:
@@ -660,6 +703,84 @@ class ReportCompositionService:
             )
 
         return " ".join(summary_parts)
+
+    @classmethod
+    def populate_from_dashboard_spec(
+        cls,
+        report_id: str,
+        dashboard_spec: Any,
+    ) -> ReportComposition | None:
+        """Populate report sections from a canonical DashboardSpecification.
+
+        This ensures the report uses the SAME chart specifications as the
+        dashboard and presentation — no independent chart regeneration.
+
+        Args:
+            report_id: The report ID to populate.
+            dashboard_spec: DashboardSpecification from the Visualization Intelligence Engine.
+        """
+        report = cls._store.get(report_id)
+        if not report:
+            return None
+
+        # Find the chart section and key metrics section
+        chart_section = next(
+            (s for s in report.sections if s.section_type == ReportSectionType.CHART), None
+        )
+        kpi_section = next(
+            (s for s in report.sections if s.section_type == ReportSectionType.KEY_METRICS), None
+        )
+        insight_section = next(
+            (s for s in report.sections if s.section_type == ReportSectionType.INSIGHTS), None
+        )
+        rec_section = next(
+            (s for s in report.sections if s.section_type == ReportSectionType.RECOMMENDATIONS), None
+        )
+
+        # Convert canonical charts to report ChartDefinitions
+        if chart_section:
+            chart_section.charts = [
+                ChartDefinition.from_canonical_spec(c) for c in dashboard_spec.charts
+            ]
+
+        # Convert canonical KPIs to report KPIMetrics
+        if kpi_section:
+            kpi_section.kpis = [
+                KPIMetric(
+                    label=k.label,
+                    value=k.value,
+                    unit=k.unit,
+                    trend=k.comparison_direction or "",
+                    trend_value=str(k.comparison_value) if k.comparison_value is not None else "",
+                )
+                for k in dashboard_spec.kpis
+            ]
+
+        # Convert canonical insights to report Insights
+        if insight_section:
+            insight_section.insights = [
+                Insight(
+                    title=i.title,
+                    description=i.description,
+                    severity=i.severity,
+                    metric=i.metric,
+                    impact=i.recommendation,
+                )
+                for i in dashboard_spec.insights
+            ]
+
+        # Convert recommendations
+        if rec_section and dashboard_spec.recommendations:
+            rec_section.recommendations = [
+                Recommendation(
+                    title=rec[:80] if len(rec) > 80 else rec,
+                    description=rec,
+                    priority="medium",
+                )
+                for rec in dashboard_spec.recommendations
+            ]
+
+        return report
 
     @classmethod
     def export_to_dict(cls, report: ReportComposition) -> dict[str, Any]:

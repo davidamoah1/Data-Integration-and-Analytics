@@ -1,4 +1,10 @@
-"""Chart Recommendation Engine.
+"""Chart Recommendation Engine [DEPRECATED].
+
+.. deprecated::
+    Use ``services.auto.engine.VisualizationIntelligenceEngine`` instead.
+    This module is preserved for backward compatibility with
+    ``services.dashboard_engine_routes`` but will be removed in a future
+    release. All new code must use the canonical engine.
 
 Recommends visualizations based on data characteristics, semantic mappings,
 and industry knowledge. The engine analyzes:

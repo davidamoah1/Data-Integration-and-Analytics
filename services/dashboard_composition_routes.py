@@ -33,6 +33,7 @@ from services.dashboard_widget_catalog import INDUSTRY_DASHBOARD_TEMPLATES
 from shared.database import get_db
 from shared.dependencies import get_current_user
 from shared.response import success_response
+from shared.security import validate_sql_identifier
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/dashboards", tags=["Dashboard Composition"])
@@ -387,10 +388,24 @@ def _resolve_dataset_widget(widget, wt: str, ds, db: DbSession) -> dict:
     if table_name not in allowed:
         return _empty_widget_data(widget, wt, reason=f"restricted_table:{table_name}")
 
+    _ALLOWED_AGGS = {"sum", "avg", "min", "max", "count"}
+    if ds.group_by:
+        try:
+            validate_sql_identifier(ds.group_by)
+        except ValueError:
+            return _empty_widget_data(widget, wt, reason="invalid_group_by")
+    agg = ds.aggregation or "sum"
+    if agg not in _ALLOWED_AGGS:
+        return _empty_widget_data(widget, wt, reason=f"invalid_aggregation:{agg}")
+
     query = f"SELECT * FROM {table_name}"
     conditions = []
     params: dict = {}
     for key, val in ds.filters.items():
+        try:
+            validate_sql_identifier(key)
+        except ValueError:
+            continue
         conditions.append(f"{key} = :{key}")
         params[key] = val
     if conditions:
@@ -441,12 +456,27 @@ def _resolve_aggregate_widget(widget, wt: str, ds, db: DbSession) -> dict:
     if not ds.group_by:
         return _empty_widget_data(widget, wt, reason="aggregate_requires_group_by")
 
+    _ALLOWED_AGGS = {"sum", "avg", "min", "max", "count"}
+    try:
+        validate_sql_identifier(ds.group_by)
+    except ValueError:
+        return _empty_widget_data(widget, wt, reason="invalid_group_by")
     agg = ds.aggregation or "sum"
+    if agg not in _ALLOWED_AGGS:
+        return _empty_widget_data(widget, wt, reason=f"invalid_aggregation:{agg}")
     metric = ds.query or "sales"
+    try:
+        validate_sql_identifier(metric)
+    except ValueError:
+        return _empty_widget_data(widget, wt, reason="invalid_metric")
     query = f"SELECT {ds.group_by}, {agg}({metric}) as value FROM {table_name}"
     conditions = []
     params: dict = {}
     for key, val in ds.filters.items():
+        try:
+            validate_sql_identifier(key)
+        except ValueError:
+            continue
         conditions.append(f"{key} = :{key}")
         params[key] = val
     if conditions:

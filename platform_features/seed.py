@@ -138,55 +138,56 @@ def seed_enterprise_data(db: DbSession) -> dict:
 
     import os as _os
 
-    demo_password = _os.getenv("DEMO_USER_PASSWORD", "Demo@12345")
-    demo_password_hash = hash_password(demo_password)
+    demo_password = _os.getenv("DEMO_USER_PASSWORD", "")
+    if demo_password:
+        demo_password_hash = hash_password(demo_password)
 
-    demo_users = [
-        # Hospital A users
-        ("admin@hospitala.io", "Hospital A Admin", "hospital-a", "org_admin"),
-        ("analyst@hospitala.io", "Hospital A Analyst", "hospital-a", "analyst"),
-        ("manager@hospitala.io", "Hospital A Manager", "hospital-a", "manager"),
-        ("viewer@hospitala.io", "Hospital A Viewer", "hospital-a", "viewer"),
-        # School B users
-        ("admin@schoolb.io", "School B Admin", "school-b", "org_admin"),
-        ("analyst@schoolb.io", "School B Analyst", "school-b", "analyst"),
-        ("manager@schoolb.io", "School B Manager", "school-b", "manager"),
-        ("viewer@schoolb.io", "School B Viewer", "school-b", "viewer"),
-        # Company C users
-        ("admin@companyc.io", "Company C Admin", "company-c", "org_admin"),
-        ("analyst@companyc.io", "Company C Analyst", "company-c", "analyst"),
-        ("manager@companyc.io", "Company C Manager", "company-c", "manager"),
-        ("viewer@companyc.io", "Company C Viewer", "company-c", "viewer"),
-    ]
+        demo_users = [
+            # Hospital A users
+            ("admin@hospitala.io", "Hospital A Admin", "hospital-a", "org_admin"),
+            ("analyst@hospitala.io", "Hospital A Analyst", "hospital-a", "analyst"),
+            ("manager@hospitala.io", "Hospital A Manager", "hospital-a", "manager"),
+            ("viewer@hospitala.io", "Hospital A Viewer", "hospital-a", "viewer"),
+            # School B users
+            ("admin@schoolb.io", "School B Admin", "school-b", "org_admin"),
+            ("analyst@schoolb.io", "School B Analyst", "school-b", "analyst"),
+            ("manager@schoolb.io", "School B Manager", "school-b", "manager"),
+            ("viewer@schoolb.io", "School B Viewer", "school-b", "viewer"),
+            # Company C users
+            ("admin@companyc.io", "Company C Admin", "company-c", "org_admin"),
+            ("analyst@companyc.io", "Company C Analyst", "company-c", "analyst"),
+            ("manager@companyc.io", "Company C Manager", "company-c", "manager"),
+            ("viewer@companyc.io", "Company C Viewer", "company-c", "viewer"),
+        ]
 
-    for email, full_name, org_slug, role_name in demo_users:
-        if user_repo.get_by_email(email):
-            continue
+        for email, full_name, org_slug, role_name in demo_users:
+            if user_repo.get_by_email(email):
+                continue
 
-        org = db.execute(
-            select(Organization).where(Organization.slug == org_slug)
-        ).scalar_one_or_none()
-        org_id = org.id if org else None
+            org = db.execute(
+                select(Organization).where(Organization.slug == org_slug)
+            ).scalar_one_or_none()
+            org_id = org.id if org else None
 
-        user = User(
-            email=email,
-            password_hash=demo_password_hash,
-            full_name=full_name,
-            organization_id=org_id,
-            is_active=1,
-            email_verified_at=__import__("datetime").datetime.now(
-                __import__("datetime").timezone.utc
-            ),
-        )
-        user_repo.create(user)
+            user = User(
+                email=email,
+                password_hash=demo_password_hash,
+                full_name=full_name,
+                organization_id=org_id,
+                is_active=1,
+                email_verified_at=__import__("datetime").datetime.now(
+                    __import__("datetime").timezone.utc
+                ),
+            )
+            user_repo.create(user)
 
-        role = role_repo.get_by_name(role_name)
-        if role:
-            user_role_repo.assign_role(user.id, role.id)
+            role = role_repo.get_by_name(role_name)
+            if role:
+                user_role_repo.assign_role(user.id, role.id)
 
-        created["users"].append(
-            {"email": email, "name": full_name, "role": role_name, "org": org_slug}
-        )
+            created["users"].append(
+                {"email": email, "name": full_name, "role": role_name, "org": org_slug}
+            )
 
     db.commit()
 

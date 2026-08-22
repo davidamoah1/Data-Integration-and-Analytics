@@ -164,7 +164,9 @@ async def lifespan(app: FastAPI):
             validate_config()
         except Exception as e:
             logger.error(f"Configuration validation failed: {e}")
-            # Do not crash; health/ready endpoints will report the issue.
+            if os.getenv("APP_ENV", "development").lower() == "production":
+                raise
+            # In non-production, continue with degraded config for dev convenience.
 
     try:
         engine = get_engine()
@@ -487,19 +489,11 @@ if allow_origins:
             "X-Request-ID",
         ],
     )
-else:
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?",
-        allow_credentials=True,
-        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-        allow_headers=[
-            "Authorization",
-            "Content-Type",
-            "X-API-Key",
-            "X-Correlation-ID",
-            "X-Request-ID",
-        ],
+elif not _is_test_env:
+    logger.warning(
+        "CORS_ORIGINS is not set. No CORS middleware will be applied. "
+        "Set CORS_ORIGINS to your frontend domain(s) for production, "
+        "e.g. 'https://app.example.com'."
     )
 
 # Include Phase 4 routers
@@ -670,7 +664,7 @@ async def detailed_health_check():
 
 @app.get("/health/db", tags=["System"])
 async def db_health_check():
-    """Check database connectivity and pool status."""
+    """Check database connectivity, migration version, and pool status."""
     try:
         from sqlalchemy import text
 
@@ -679,7 +673,24 @@ async def db_health_check():
         engine = get_engine()
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))
-        return JSONResponse(content={"status": "ready", "database": "connected"})
+            # Get current alembic migration version
+            try:
+                result = conn.execute(text("SELECT version_num FROM alembic_version LIMIT 1"))
+                migration_version = result.scalar() or "unknown"
+            except Exception:
+                migration_version = "unknown"
+
+        pool = engine.pool
+        return JSONResponse(
+            content={
+                "status": "ready",
+                "database": "connected",
+                "migration_version": migration_version,
+                "pool_size": pool.size(),
+                "pool_checked_in": pool.checkedin(),
+                "pool_checked_out": pool.checkedout(),
+            }
+        )
     except Exception as e:
         return JSONResponse(status_code=503, content={"status": "not_ready", "error": str(e)})
 

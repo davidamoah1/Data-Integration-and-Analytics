@@ -47,9 +47,19 @@ TESSERACT_CMD = os.getenv("TESSERACT_CMD", "")
 CERTIFICATE_MAX_BATCH_SIZE = int(os.getenv("CERTIFICATE_MAX_BATCH_SIZE", "50"))
 
 # Database
+# DATABASE_URL takes precedence over individual MYSQL_* / SQLITE_* vars.
+# Example: mysql+pymysql://user:pass@host:3306/dbname?charset=utf8mb4
+DATABASE_URL = os.getenv("DATABASE_URL", "")
 DB_TYPE = os.getenv("DB_TYPE", "").lower()
 
-if DB_TYPE == "mysql":
+if DATABASE_URL:
+    # Use the explicit connection URL — infer DB_TYPE from the scheme
+    if DATABASE_URL.startswith("mysql"):
+        DB_TYPE = "mysql"
+    elif DATABASE_URL.startswith("sqlite"):
+        DB_TYPE = "sqlite"
+    DB_URL = DATABASE_URL
+elif DB_TYPE == "mysql":
     _mysql_host = os.getenv("MYSQL_HOST", "localhost")
     _mysql_port = os.getenv("MYSQL_PORT", "3306")
     _mysql_db = os.getenv("MYSQL_DATABASE", "")
@@ -349,6 +359,13 @@ def validate_config() -> None:
         if not ENCRYPTION_KEY:
             raise ValueError(
                 "ENCRYPTION_KEY must be set explicitly for production (separate from JWT_SECRET_KEY)."
+            )
+        if STORAGE_BACKEND == "local" and os.getenv("ALLOW_LOCAL_STORAGE_IN_PRODUCTION", "").lower() not in ("1", "true", "yes"):
+            raise ValueError(
+                "STORAGE_BACKEND=local is not permitted in production. "
+                "Set STORAGE_BACKEND to 'r2', 's3', or 'supabase' and configure the "
+                "corresponding credentials. Set ALLOW_LOCAL_STORAGE_IN_PRODUCTION=1 "
+                "only if you have a documented reason for local storage."
             )
         if BACKUP_ENABLED and not os.path.isabs(os.getenv("BACKUP_STORAGE_PATH", "")):
             import warnings

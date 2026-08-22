@@ -16,7 +16,7 @@ RUN pip install --no-cache-dir uv && uv pip install --system -r requirements.txt
 
 COPY . .
 
-ENV DB_TYPE=sqlite \
+ENV DB_TYPE=mysql \
     LOG_LEVEL=INFO \
     LOG_FORMAT=json \
     API_HOST=0.0.0.0 \

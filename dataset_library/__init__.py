@@ -117,7 +117,12 @@ class DatasetLibrary:
 
     def __init__(self):
         self._entries: dict[str, DatasetEntry] = {}
-        self._register_demo_datasets()
+        # Demo datasets are only registered when explicitly opted in via
+        # SEED_DEMO_DATA=true. Production must never expose demo data.
+        import os as _os
+
+        if _os.getenv("SEED_DEMO_DATA", "false").lower() in ("true", "1", "yes"):
+            self._register_demo_datasets()
 
     def register(self, entry: DatasetEntry) -> None:
         """Register a dataset entry."""

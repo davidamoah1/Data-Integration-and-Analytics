@@ -72,12 +72,19 @@ services:
           cpus: '1.0'
 
   db:
-    image: mysql:8.0
+    image: mysql:8.4
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_password}
       MYSQL_DATABASE: ${MYSQL_DATABASE:-etl_db}
       MYSQL_USER: ${MYSQL_USER:-etl_user}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-etl_password}
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_0900_ai_ci
+      --default-authentication-plugin=caching_sha2_password
+      --max-connections=200
+      --innodb-buffer-pool-size=512M
+      --innodb-log-file-size=128M
     ports:
       - "3306:3306"
     volumes:

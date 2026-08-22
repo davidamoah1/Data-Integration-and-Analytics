@@ -2,6 +2,7 @@
 .env
 .env.local
 .env.*.local
+!.env.example
 
 # Python
 __pycache__/
@@ -73,6 +74,9 @@ backups/
 
 # Stray test files
 /test.pdf
+/_test_*.py
+/debug_*.py
+/_check_*.py
 
 
 .vercel

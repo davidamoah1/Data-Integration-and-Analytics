@@ -10,6 +10,7 @@ from sqlalchemy import (
     Float,
     ForeignKey,
     Integer,
+    Numeric,
     String,
     Text,
     func,
@@ -33,8 +34,8 @@ class SubscriptionPlan(Base):
     )  # free, starter, professional, business, enterprise
     name = Column(String(100), nullable=False)
     description = Column(Text, nullable=True)
-    price_monthly = Column(Float, nullable=False, default=0.0)
-    price_yearly = Column(Float, nullable=False, default=0.0)
+    price_monthly = Column(Numeric(18, 2), nullable=False, default=0.0)
+    price_yearly = Column(Numeric(18, 2), nullable=False, default=0.0)
     currency = Column(String(10), nullable=False, default="USD")
     is_active = Column(Boolean, default=True, nullable=False)
     is_public = Column(Boolean, default=True, nullable=False)

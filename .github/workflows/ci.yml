@@ -70,18 +70,16 @@ jobs:
 
       - name: Python dependency audit (requirements.txt)
         run: pip-audit -r requirements.txt --strict --desc on
-        continue-on-error: true
         id: pip-audit-reqs
 
       - name: Python dependency audit (pyproject.toml)
         run: pip-audit --strict --desc on
-        continue-on-error: true
         id: pip-audit-project
 
       - name: Bandit security lint
         run: |
           pip install bandit
-          bandit -r . -x ./tests,./frontend,./node_modules,./.git -ll -ii || true
+          bandit -r . -x ./tests,./frontend,./node_modules,./.git -ll -ii
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -92,7 +90,7 @@ jobs:
 
       - name: npm audit (Frontend)
         working-directory: frontend
-        run: npm audit --audit-level=high || true
+        run: npm audit --audit-level=high
 
       - name: Run Trivy filesystem scan
         uses: aquasecurity/trivy-action@master
@@ -102,14 +100,12 @@ jobs:
           severity: HIGH,CRITICAL
           format: sarif
           output: trivy-results.sarif
-        continue-on-error: true
 
       - name: Upload Trivy results to GitHub Security
         uses: github/codeql-action/upload-sarif@v4
         if: always()
         with:
           sarif_file: trivy-results.sarif
-        continue-on-error: true
 
   # ── Stage 3: Unit Tests ────────────────────────────────────
   unit-tests:
@@ -138,6 +134,7 @@ jobs:
           SQLITE_DB_PATH: test_unit.db
           PYTEST_RUNNING: "1"
           SUPER_ADMIN_PASSWORD: Admin@12345
+          SUPER_ADMIN_EMAIL: admin@dataflow.io
           JWT_SECRET_KEY: test-secret-key-for-ci-not-for-production-32chars
           DISABLE_CONFIG_VALIDATION: "1"
         run: |
@@ -170,7 +167,6 @@ jobs:
       - name: Run frontend tests
         working-directory: frontend
         run: npx vitest run --reporter=verbose
-        continue-on-error: true
 
   # ── Stage 4: Integration Tests ─────────────────────────────
   integration-tests:
@@ -179,7 +175,7 @@ jobs:
     needs: [unit-tests]
     services:
       mysql:
-        image: mysql:8.0
+        image: mysql:8.4
         env:
           MYSQL_ROOT_PASSWORD: root_password
           MYSQL_DATABASE: aedip_test
@@ -252,17 +248,14 @@ jobs:
           JWT_SECRET_KEY: test-secret-key-for-ci-not-for-production-32chars
           PYTEST_RUNNING: "1"
           SUPER_ADMIN_PASSWORD: Admin@12345
+          SUPER_ADMIN_EMAIL: admin@dataflow.io
           DISABLE_CONFIG_VALIDATION: "1"
         run: |
           pytest tests/ \
             -m "integration" \
             --tb=short \
             -v \
-            --maxfail=5 || \
-          pytest tests/ \
-            --tb=short \
-            -v \
-            --maxfail=10
+            --maxfail=5
 
   # ── Stage 5: Build ─────────────────────────────────────────
   build:
