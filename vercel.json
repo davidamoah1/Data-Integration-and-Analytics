@@ -7,26 +7,32 @@
   "outputDirectory": "frontend/.next",
   "devCommand": "cd frontend && npm run dev",
   "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "/api/index.py"
-    },
-    {
-      "source": "/docs",
-      "destination": "/api/index.py"
-    },
-    {
-      "source": "/openapi.json",
-      "destination": "/api/index.py"
-    },
-    {
-      "source": "/health",
-      "destination": "/api/index.py"
-    },
-    {
-      "source": "/ready",
-      "destination": "/api/index.py"
-    }
+    { "source": "/api/:path*", "destination": "/api/index.py" },
+    { "source": "/admin/:path*", "destination": "/api/index.py" },
+    { "source": "/ai/:path*", "destination": "/api/index.py" },
+    { "source": "/analytics/:path*", "destination": "/api/index.py" },
+    { "source": "/audit/:path*", "destination": "/api/index.py" },
+    { "source": "/connectors/:path*", "destination": "/api/index.py" },
+    { "source": "/dashboard-engine/:path*", "destination": "/api/index.py" },
+    { "source": "/dataset-workflow/:path*", "destination": "/api/index.py" },
+    { "source": "/datasets/:path*", "destination": "/api/index.py" },
+    { "source": "/departments/:path*", "destination": "/api/index.py" },
+    { "source": "/etl/:path*", "destination": "/api/index.py" },
+    { "source": "/ml/:path*", "destination": "/api/index.py" },
+    { "source": "/monitoring/:path*", "destination": "/api/index.py" },
+    { "source": "/notifications/:path*", "destination": "/api/index.py" },
+    { "source": "/organizations/:path*", "destination": "/api/index.py" },
+    { "source": "/performance/:path*", "destination": "/api/index.py" },
+    { "source": "/platform/:path*", "destination": "/api/index.py" },
+    { "source": "/saas/:path*", "destination": "/api/index.py" },
+    { "source": "/scheduler/:path*", "destination": "/api/index.py" },
+    { "source": "/semantic/:path*", "destination": "/api/index.py" },
+    { "source": "/validation/:path*", "destination": "/api/index.py" },
+    { "source": "/workflows/:path*", "destination": "/api/index.py" },
+    { "source": "/docs", "destination": "/api/index.py" },
+    { "source": "/openapi.json", "destination": "/api/index.py" },
+    { "source": "/health", "destination": "/api/index.py" },
+    { "source": "/ready", "destination": "/api/index.py" }
   ],
   "env": {
     "NEXT_PUBLIC_API_URL": "",
@@ -34,7 +40,7 @@
   },
   "functions": {
     "api/index.py": {
-      "maxDuration": 30
+      "maxDuration": 60
     }
   }
 }
