@@ -60,14 +60,15 @@ if DATABASE_URL:
         DB_TYPE = "sqlite"
     DB_URL = DATABASE_URL
 elif DB_TYPE == "mysql":
+    from urllib.parse import quote_plus
     _mysql_host = os.getenv("MYSQL_HOST", "localhost")
     _mysql_port = os.getenv("MYSQL_PORT", "3306")
     _mysql_db = os.getenv("MYSQL_DATABASE", "")
     _mysql_user = os.getenv("MYSQL_USER", "")
     _mysql_pass = os.getenv("MYSQL_PASSWORD", "")
     DB_URL = (
-        f"mysql+pymysql://{_mysql_user}:{_mysql_pass}"
-        f"@{_mysql_host}:{_mysql_port}/{_mysql_db}?charset=utf8mb4"
+        f"mysql+pymysql://{quote_plus(_mysql_user)}:{quote_plus(_mysql_pass)}"
+        f"@{_mysql_host}:{_mysql_port}/{quote_plus(_mysql_db)}?charset=utf8mb4"
     )
 elif DB_TYPE == "sqlite":
     _sqlite_path = _resolve_path(os.getenv("SQLITE_DB_PATH", "database/etl_database.db"))
