@@ -26,8 +26,19 @@ export default function LoginPage() {
       await login(email, password, rememberMe);
       toast.success('Welcome back!');
       router.push('/dashboard');
-    } catch {
-      // error is set in store
+    } catch (err) {
+      const apiErr = err as { status?: number; message?: string };
+      if (apiErr?.status === 401) {
+        toast.error('Invalid email or password. Please try again.');
+      } else if (apiErr?.status === 423) {
+        toast.error('Your account is locked due to too many failed attempts. Please contact support.');
+      } else if (apiErr?.status === 0 || apiErr?.message?.includes('Unable to connect')) {
+        toast.error('We couldn\'t reach the server. Check your connection and try again.');
+      } else if (apiErr?.status && apiErr.status >= 500) {
+        toast.error('Something went wrong on our end. Please try again in a moment.');
+      } else {
+        toast.error(apiErr?.message || 'Sign in failed. Please try again.');
+      }
     }
   };
 

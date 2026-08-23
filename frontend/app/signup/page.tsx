@@ -159,8 +159,19 @@ export default function SignUpPage() {
       });
       toast.success('Account created successfully!');
       router.push('/onboarding');
-    } catch {
-      // error is set in store
+    } catch (err) {
+      const apiErr = err as { status?: number; message?: string };
+      if (apiErr?.status === 409) {
+        toast.error('An account with this email already exists. Try signing in instead.');
+      } else if (apiErr?.status === 422) {
+        toast.error(apiErr?.message || 'Please check your input and try again.');
+      } else if (apiErr?.status === 0 || apiErr?.message?.includes('Unable to connect')) {
+        toast.error('We couldn\'t reach the server. Check your connection and try again.');
+      } else if (apiErr?.status && apiErr.status >= 500) {
+        toast.error('We couldn\'t create your account right now. Please try again in a moment.');
+      } else {
+        toast.error(apiErr?.message || 'We couldn\'t create your account. Please try again.');
+      }
     }
   };
 
