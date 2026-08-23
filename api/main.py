@@ -174,56 +174,59 @@ async def lifespan(app: FastAPI):
         logger.error(f"Database engine creation failed: {e}")
         engine = None
 
+    # Import all models so they register with Base.metadata.
+    # This must happen even in serverless mode — otherwise Base.metadata is
+    # empty and ensure_tables()/create_all() creates zero tables, causing 500
+    # errors on every database operation.
+    import ai.models  # noqa: F401
+    import analytics.models  # noqa: F401
+    import audit.models  # noqa: F401
+    import authentication.mfa_models  # noqa: F401
+    import authentication.models  # noqa: F401
+    import authentication.sso_models  # noqa: F401
+
+    # Phase 16 — Smart Data Capture models
+    import capture.models  # noqa: F401
+
+    # Production MySQL schema is owned exclusively by Alembic migrations
+    # (`alembic upgrade head`). create_all() only runs for SQLite so it
+    # doesn't drift from migration history in production.
+    import config as _config
+
+    # Phase 12.9 — Ecosystem models
+    import connectors.models  # noqa: F401
+    import database.db_setup  # noqa: F401
+    import ecosystem.models  # noqa: F401
+    import ecosystem.plugin_models  # noqa: F401
+    import ecosystem.webhooks  # noqa: F401
+    import enterprise.models  # noqa: F401
+    import enterprise.subscription  # noqa: F401
+    import etl.models  # noqa: F401
+
+    # Phase 11 — Background Jobs
+    import jobs.models  # noqa: F401
+
+    # Phase 14 — ML platform models
+    import ml.models  # noqa: F401
+    import notifications.models  # noqa: F401
+    import organizations.models  # noqa: F401
+    import organizations.workspace_models  # noqa: F401
+
+    # Phase 13 — SaaS models
+    import saas.models  # noqa: F401
+    import scheduler.models  # noqa: F401
+
+    # Phase 12 — File Storage
+    import storage.models  # noqa: F401
+
+    # Phase 15 — Studios models
+    import studios.models  # noqa: F401
+    import validation.models  # noqa: F401
+
+    # Workflow engine models
+    import workflows.models  # noqa: F401
+
     if engine is not None and not serverless:
-        # Import all models so they register with Base.metadata
-        import ai.models  # noqa: F401
-        import analytics.models  # noqa: F401
-        import audit.models  # noqa: F401
-        import authentication.mfa_models  # noqa: F401
-        import authentication.models  # noqa: F401
-        import authentication.sso_models  # noqa: F401
-
-        # Phase 16 — Smart Data Capture models
-        import capture.models  # noqa: F401
-
-        # Production MySQL schema is owned exclusively by Alembic migrations
-        # (`alembic upgrade head`). create_all() only runs for SQLite so it
-        # doesn't drift from migration history in production.
-        import config as _config
-
-        # Phase 12.9 — Ecosystem models
-        import connectors.models  # noqa: F401
-        import database.db_setup  # noqa: F401
-        import ecosystem.models  # noqa: F401
-        import ecosystem.plugin_models  # noqa: F401
-        import ecosystem.webhooks  # noqa: F401
-        import enterprise.models  # noqa: F401
-        import enterprise.subscription  # noqa: F401
-        import etl.models  # noqa: F401
-
-        # Phase 11 — Background Jobs
-        import jobs.models  # noqa: F401
-
-        # Phase 14 — ML platform models
-        import ml.models  # noqa: F401
-        import notifications.models  # noqa: F401
-        import organizations.models  # noqa: F401
-        import organizations.workspace_models  # noqa: F401
-
-        # Phase 13 — SaaS models
-        import saas.models  # noqa: F401
-        import scheduler.models  # noqa: F401
-
-        # Phase 12 — File Storage
-        import storage.models  # noqa: F401
-
-        # Phase 15 — Studios models
-        import studios.models  # noqa: F401
-        import validation.models  # noqa: F401
-
-        # Workflow engine models
-        import workflows.models  # noqa: F401
-
         if _config.DB_TYPE == "mysql":
             logger.info("DB_TYPE=mysql; skipping create_all(), relying on Alembic migrations.")
         else:
