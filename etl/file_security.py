@@ -140,6 +140,6 @@ class FileValidator:
             with open(file_path) as f:
                 json.load(f)
         elif ext == "xml":
-            import xml.etree.ElementTree as ET
+            from defusedxml.ElementTree import parse as defused_parse
 
-            ET.parse(file_path)
+            defused_parse(file_path)

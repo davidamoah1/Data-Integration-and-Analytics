@@ -53,7 +53,11 @@ def validate_url(url: str, *, allow_localhost: bool = False) -> str:
 
     # Block obvious localhost strings
     if not allow_localhost:
-        if hostname.lower() in ("localhost", "0.0.0.0", "::"):
+        if hostname.lower() in (
+            "localhost",
+            "0.0.0.0",
+            "::",
+        ):  # nosec B104 - SSRF protection: these values are blocked, not bound
             raise UrlValidationError("Requests to localhost are not allowed.")
 
     # Resolve hostname and check against blocked networks

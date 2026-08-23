@@ -1,4 +1,5 @@
 import os
+import tempfile
 
 from dotenv import load_dotenv
 
@@ -35,7 +36,7 @@ CAPTURE_STORAGE_DIR = _resolve_path(os.getenv("CAPTURE_STORAGE_DIR", "storage/ca
 if os.getenv("VERCEL", "").lower() in ("1", "true", "yes") and not os.path.isabs(
     os.getenv("CAPTURE_STORAGE_DIR", "")
 ):
-    CAPTURE_STORAGE_DIR = os.path.join("/tmp", "capture")
+    CAPTURE_STORAGE_DIR = os.path.join(tempfile.gettempdir(), "capture")
 CAPTURE_MAX_FILE_SIZE_MB = int(os.getenv("CAPTURE_MAX_FILE_SIZE_MB", "25"))
 CAPTURE_LOW_CONFIDENCE_THRESHOLD = float(os.getenv("CAPTURE_LOW_CONFIDENCE_THRESHOLD", "0.75"))
 CAPTURE_RETENTION_DAYS = int(os.getenv("CAPTURE_RETENTION_DAYS", "365"))
@@ -73,10 +74,11 @@ elif DB_TYPE == "mysql":
     )
 elif DB_TYPE == "sqlite":
     _sqlite_path = _resolve_path(os.getenv("SQLITE_DB_PATH", "database/etl_database.db"))
-    # Vercel's filesystem is read-only; use /tmp for SQLite so tables can be created.
+    # Vercel's filesystem is read-only; use tempfile.gettempdir() for SQLite so tables can be created.
     if os.getenv("VERCEL", "").lower() in ("1", "true", "yes") and not os.path.isabs(_sqlite_path):
-        _sqlite_path = os.path.join("/tmp", _sqlite_path)
+        _sqlite_path = os.path.join(tempfile.gettempdir(), _sqlite_path)
     DB_URL = f"sqlite:///{_sqlite_path}"
+
 elif DB_TYPE:
     raise ValueError(
         "DB_TYPE environment variable must be set to 'mysql' or 'sqlite'. "
@@ -88,7 +90,7 @@ else:
     DB_TYPE = "sqlite"
     _sqlite_path = _resolve_path(os.getenv("SQLITE_DB_PATH", "database/etl_database.db"))
     if os.getenv("VERCEL", "").lower() in ("1", "true", "yes") and not os.path.isabs(_sqlite_path):
-        _sqlite_path = os.path.join("/tmp", _sqlite_path)
+        _sqlite_path = os.path.join(tempfile.gettempdir(), _sqlite_path)
     DB_URL = f"sqlite:///{_sqlite_path}"
 
 # --- Connection Pool Settings (MySQL) ---

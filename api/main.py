@@ -988,9 +988,14 @@ async def root():
 if __name__ == "__main__":
     import uvicorn
 
+    _default_host = (
+        "0.0.0.0"  # nosec B104 — production containers and Vercel require 0.0.0.0 binding; dev default is 127.0.0.1; API_HOST env var always takes precedence
+        if _is_vercel or os.getenv("APP_ENV", "").lower() == "production"
+        else "127.0.0.1"
+    )
     uvicorn.run(
         "api.main:app",
-        host=os.getenv("API_HOST", "0.0.0.0"),
+        host=os.getenv("API_HOST", _default_host),
         port=int(os.getenv("API_PORT", "8000")),
         reload=True,
     )

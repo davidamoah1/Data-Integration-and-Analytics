@@ -8,7 +8,13 @@ factory function to `NODE_REGISTRY`.
 from __future__ import annotations
 
 import io
+import json
 import logging
+import os
+import subprocess
+import sys
+import tempfile
+import textwrap
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 from dataclasses import dataclass, field
@@ -335,16 +341,94 @@ class ExecuteSqlNode(WorkflowNode):
             return NodeResult(status="failed", errors=[str(e), "DuckDB may not be installed"])
 
 
+_SANDBOX_RUNNER = textwrap.dedent(
+    """\
+    import json
+    import sys
+    import traceback
+
+    import pandas as pd
+
+    input_path = sys.argv[1]
+    output_path = sys.argv[2]
+    code = sys.stdin.read()
+
+    df = pd.read_parquet(input_path) if input_path else pd.DataFrame()
+    local_ns = {"df": df, "pd": pd}
+    try:
+        exec(compile(code, "<workflow>", "exec"), {"__builtins__": {}}, local_ns)
+        result = local_ns.get("result", df)
+        if isinstance(result, pd.DataFrame):
+            result.to_parquet(output_path)
+            print(json.dumps({"status": "ok", "rows": len(result)}))
+        else:
+            print(json.dumps({"status": "ok", "rows": 0, "message": str(result)}))
+    except Exception:
+        print(json.dumps({"status": "error", "traceback": traceback.format_exc()}))
+        sys.exit(1)
+    """
+)
+
+
+def _run_python_sandboxed(code: str, df: Any, timeout: float = 30) -> pd.DataFrame:
+    """Execute user-supplied Python code in an isolated subprocess.
+
+    Security measures:
+        - Runs in a separate process (no access to API memory, DB, or secrets).
+        - Clean environment — no application env vars are passed.
+        - CPU/time limit via subprocess timeout.
+        - Data passed via temporary parquet files (not pickle).
+        - Restricted builtins inside the subprocess.
+    """
+    import pandas as _pd
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        input_path = os.path.join(tmpdir, "input.parquet")
+        output_path = os.path.join(tmpdir, "output.parquet")
+
+        if isinstance(df, _pd.DataFrame) and not df.empty:
+            df.to_parquet(input_path)
+        else:
+            input_path = ""
+
+        try:
+            proc = subprocess.run(
+                [sys.executable, "-c", _SANDBOX_RUNNER, input_path, output_path],
+                input=code,
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+                env={"PATH": os.environ.get("PATH", "")},
+            )
+        except subprocess.TimeoutExpired:
+            raise RuntimeError(f"Python execution timed out after {timeout}s") from None
+
+        if proc.returncode != 0:
+            try:
+                result_info = json.loads(proc.stdout)
+                raise RuntimeError(result_info.get("traceback", proc.stderr))
+            except (json.JSONDecodeError, KeyError):
+                raise RuntimeError(proc.stderr or "Python execution failed") from None
+
+        result_info = json.loads(proc.stdout)
+        if result_info.get("status") == "error":
+            raise RuntimeError(result_info.get("traceback", "Unknown error"))
+
+        if os.path.exists(output_path):
+            return _pd.read_parquet(output_path)
+
+    return df if isinstance(df, _pd.DataFrame) else _pd.DataFrame()
+
+
 class ExecutePythonNode(WorkflowNode):
     NODE_TYPE = "execute_python"
 
     def run(self, ctx: WorkflowContext) -> NodeResult:
         code = _get_param(self.config, "code", required=True)
         df = ctx.resolve_ref(_get_param(self.config, "dataset"))
-        local_ns = {"df": df, "context": ctx, "pd": pd}
+        timeout = float(_get_param(self.config, "timeout_seconds", 30))
         try:
-            exec(code, {"__builtins__": {}}, local_ns)
-            result = local_ns.get("result", df)
+            result = _run_python_sandboxed(code, df, timeout)
             return NodeResult(
                 status="completed",
                 data=result,

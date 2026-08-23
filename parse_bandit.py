@@ -1,6 +1,15 @@
 import json
+import os
+import sys
+import tempfile
 
-with open("/tmp/bandit_report.json") as f:
+report_path = (
+    os.getenv("BANDIT_REPORT_PATH")
+    or (sys.argv[1] if len(sys.argv) > 1 else None)
+    or os.path.join(tempfile.gettempdir(), "bandit_report.json")
+)
+
+with open(report_path) as f:
     d = json.load(f)
 totals = d.get("metrics", {}).get("_totals", {})
 print(f"HIGH: {totals.get('SEVERITY.HIGH', 0)}")

@@ -256,5 +256,44 @@ class AutoMLEngine:
 
     @staticmethod
     def load_artifact(path: str) -> dict[str, Any]:
-        with open(path, "rb") as fh:
-            return pickle.load(fh)
+        """Load a model artifact from a trusted path.
+
+        Security:
+            - Path must be within the designated artifact directory
+              (tempdir for dev, or a configured ARTIFACT_DIR for production).
+            - Path traversal is rejected.
+            - The unpickler is restricted to known-safe ML classes.
+        """
+        artifact_dir = os.path.realpath(os.getenv("ARTIFACT_DIR", tempfile.gettempdir()))
+        real_path = os.path.realpath(path)
+        if not real_path.startswith(artifact_dir + os.sep) and real_path != artifact_dir:
+            raise ValueError(
+                f"Artifact path must be within the designated artifact directory "
+                f"({artifact_dir}). Got: {real_path}"
+            )
+        allowed_modules = {
+            "sklearn",
+            "sklearn.",
+            "numpy",
+            "numpy.",
+            "pandas",
+            "pandas.",
+            "scipy",
+            "scipy.",
+            "joblib",
+            "joblib.",
+        }
+
+        class _RestrictedUnpickler(pickle.Unpickler):
+            def find_class(self, module: str, name: str) -> Any:
+                if any(module.startswith(m) for m in allowed_modules):
+                    return super().find_class(module, name)
+                raise pickle.UnpicklingError(
+                    f"Blocked unsafe import during unpickling: {module}.{name}"
+                )
+
+        with open(real_path, "rb") as fh:
+            data = _RestrictedUnpickler(fh).load()
+        if not isinstance(data, dict) or "model" not in data:
+            raise ValueError("Invalid artifact: expected dict with 'model' key")
+        return data

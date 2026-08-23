@@ -20,6 +20,7 @@ alembic==1.14.0
 email-validator==2.2.0
 chardet==5.2.0
 xmltodict==0.14.2
+defusedxml==0.7.1
 requests>=2.33.0
 python-multipart>=0.0.31
 scipy==1.13.0
