@@ -153,6 +153,7 @@ export default function CertificateIntelligencePage() {
   const [pollingIds, setPollingIds] = useState<Set<number>>(new Set());
   const pollAttemptsRef = useRef<Map<number, number>>(new Map());
   const pollFailuresRef = useRef<Map<number, number>>(new Map());
+  const uploadResultsRef = useRef<UploadResultItem[] | null>(null);
 
   const loadData = useCallback(async () => {
     try {
@@ -219,10 +220,10 @@ export default function CertificateIntelligencePage() {
             } else {
               await loadData();
               if (cert.status === "ready_for_review") {
-                const filename = uploadResults?.find((r) => r.id === id)?.filename || "Certificate";
+                const filename = uploadResultsRef.current?.find((r) => r.id === id)?.filename || "Certificate";
                 toast.success(`Certificate "${filename}" extracted successfully`);
               } else if (cert.status === "failed") {
-                const filename = uploadResults?.find((r) => r.id === id)?.filename || "Certificate";
+                const filename = uploadResultsRef.current?.find((r) => r.id === id)?.filename || "Certificate";
                 toast.error(`Certificate "${filename}" processing failed: ${cert.error_message || "Unknown error"}`);
               }
               pollAttemptsRef.current.delete(id);
@@ -257,6 +258,10 @@ export default function CertificateIntelligencePage() {
 
     return () => clearInterval(interval);
   }, [pollingIds, loadData]);
+
+  useEffect(() => {
+    uploadResultsRef.current = uploadResults;
+  }, [uploadResults]);
 
   const loadDetail = useCallback((id: number) => {
     setSelectedCertId(id);

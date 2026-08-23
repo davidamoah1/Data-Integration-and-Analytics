@@ -137,13 +137,18 @@ async def upload_certificates(
 
     logger.info(
         "Certificate upload started: org_id=%s user_id=%s file_count=%d batch_name=%s",
-        org_id, current_user["id"], len(files), batch_name,
+        org_id,
+        current_user["id"],
+        len(files),
+        batch_name,
     )
 
     if len(files) > max_batch:
         logger.warning(
             "Certificate upload rejected — too many files: org_id=%s count=%d max=%d",
-            org_id, len(files), max_batch,
+            org_id,
+            len(files),
+            max_batch,
         )
         raise HTTPException(
             status_code=413,
@@ -175,7 +180,11 @@ async def upload_certificates(
             )
             logger.info(
                 "Document stored: doc_id=%s filename=%s file_type=%s size=%d org_id=%s",
-                doc.id, doc.filename, doc.file_type, len(content), org_id,
+                doc.id,
+                doc.filename,
+                doc.file_type,
+                len(content),
+                org_id,
             )
             # Enqueue background job for processing instead of synchronous
             job_id = None
@@ -199,12 +208,15 @@ async def upload_certificates(
                 db.commit()
                 logger.info(
                     "Job enqueued: job_id=%s doc_id=%s type=ocr_document org_id=%s",
-                    job_id, doc.id, org_id,
+                    job_id,
+                    doc.id,
+                    org_id,
                 )
             except Exception as e:
                 logger.warning(
                     "Job system unavailable for doc_id=%s, using thread fallback: %s",
-                    doc.id, e,
+                    doc.id,
+                    e,
                 )
                 import threading
 
@@ -270,7 +282,11 @@ async def upload_certificates(
 
     logger.info(
         "Certificate upload complete: batch_id=%s org_id=%s total=%d succeeded=%d failed=%d",
-        batch.id, org_id, len(files), succeeded, failed,
+        batch.id,
+        org_id,
+        len(files),
+        succeeded,
+        failed,
     )
 
     return {
@@ -1211,18 +1227,20 @@ async def get_batch_analytics(
     )
     fields_by_doc: dict[int, list[dict]] = {}
     for f in all_fields:
-        fields_by_doc.setdefault(f.document_id, []).append({
-            "field_name": f.field_name,
-            "field_label": f.field_label,
-            "data_type": f.data_type,
-            "value": f.value,
-            "raw_value": f.raw_value,
-            "confidence_score": f.confidence_score,
-            "is_low_confidence": f.is_low_confidence,
-            "was_corrected": f.was_corrected,
-            "is_valid": f.is_valid,
-            "validation_message": f.validation_message,
-        })
+        fields_by_doc.setdefault(f.document_id, []).append(
+            {
+                "field_name": f.field_name,
+                "field_label": f.field_label,
+                "data_type": f.data_type,
+                "value": f.value,
+                "raw_value": f.raw_value,
+                "confidence_score": f.confidence_score,
+                "is_low_confidence": f.is_low_confidence,
+                "was_corrected": f.was_corrected,
+                "is_valid": f.is_valid,
+                "validation_message": f.validation_message,
+            }
+        )
 
     doc_dicts = [_serialize_certificate(d) for d in docs]
     analyses = analyze_batch(doc_dicts, fields_by_doc)
@@ -1319,7 +1337,9 @@ async def correct_certificate_field(
     if doc_type_spec:
         spec = next((f for f in doc_type_spec.fields if f.name == field.field_name), None)
         enum_values = spec.enum_values if spec else None
-    is_valid, message = validate_field(field.field_name, str(new_value), field.data_type, enum_values)
+    is_valid, message = validate_field(
+        field.field_name, str(new_value), field.data_type, enum_values
+    )
     field.is_valid = is_valid
     field.validation_message = message
 
@@ -1417,18 +1437,20 @@ async def generate_certificate_report(
     )
     fields_by_doc: dict[int, list[dict]] = {}
     for f in all_fields:
-        fields_by_doc.setdefault(f.document_id, []).append({
-            "field_name": f.field_name,
-            "field_label": f.field_label,
-            "data_type": f.data_type,
-            "value": f.value,
-            "raw_value": f.raw_value,
-            "confidence_score": f.confidence_score,
-            "is_low_confidence": f.is_low_confidence,
-            "was_corrected": f.was_corrected,
-            "is_valid": f.is_valid,
-            "validation_message": f.validation_message,
-        })
+        fields_by_doc.setdefault(f.document_id, []).append(
+            {
+                "field_name": f.field_name,
+                "field_label": f.field_label,
+                "data_type": f.data_type,
+                "value": f.value,
+                "raw_value": f.raw_value,
+                "confidence_score": f.confidence_score,
+                "is_low_confidence": f.is_low_confidence,
+                "was_corrected": f.was_corrected,
+                "is_valid": f.is_valid,
+                "validation_message": f.validation_message,
+            }
+        )
 
     doc_dicts = [_serialize_certificate(d) for d in docs]
     analyses = analyze_batch(doc_dicts, fields_by_doc)
@@ -1437,7 +1459,9 @@ async def generate_certificate_report(
     report = {
         "title": "Certificate Intelligence Report",
         "organization_id": org_id,
-        "generated_at": __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat(),
+        "generated_at": __import__("datetime")
+        .datetime.now(__import__("datetime").timezone.utc)
+        .isoformat(),
         "generated_by": current_user["id"],
         "filters": {
             "certificate_type": certificate_type,
@@ -1555,18 +1579,20 @@ async def generate_certificate_presentation(
     )
     fields_by_doc: dict[int, list[dict]] = {}
     for f in all_fields:
-        fields_by_doc.setdefault(f.document_id, []).append({
-            "field_name": f.field_name,
-            "field_label": f.field_label,
-            "data_type": f.data_type,
-            "value": f.value,
-            "raw_value": f.raw_value,
-            "confidence_score": f.confidence_score,
-            "is_low_confidence": f.is_low_confidence,
-            "was_corrected": f.was_corrected,
-            "is_valid": f.is_valid,
-            "validation_message": f.validation_message,
-        })
+        fields_by_doc.setdefault(f.document_id, []).append(
+            {
+                "field_name": f.field_name,
+                "field_label": f.field_label,
+                "data_type": f.data_type,
+                "value": f.value,
+                "raw_value": f.raw_value,
+                "confidence_score": f.confidence_score,
+                "is_low_confidence": f.is_low_confidence,
+                "was_corrected": f.was_corrected,
+                "is_valid": f.is_valid,
+                "validation_message": f.validation_message,
+            }
+        )
 
     doc_dicts = [_serialize_certificate(d) for d in docs]
     analyses = analyze_batch(doc_dicts, fields_by_doc)
@@ -1749,11 +1775,15 @@ async def generate_certificate_presentation(
 
     if analytics.institutions:
         # Top 10 institutions
-        top_inst = dict(sorted(analytics.institutions.items(), key=lambda kv: kv[1], reverse=True)[:10])
+        top_inst = dict(
+            sorted(analytics.institutions.items(), key=lambda kv: kv[1], reverse=True)[:10]
+        )
         _add_chart_slide("Top Institutions", top_inst, XL_CHART_TYPE.BAR_CHART)
 
     if analytics.qualifications:
-        top_qual = dict(sorted(analytics.qualifications.items(), key=lambda kv: kv[1], reverse=True)[:10])
+        top_qual = dict(
+            sorted(analytics.qualifications.items(), key=lambda kv: kv[1], reverse=True)[:10]
+        )
         _add_chart_slide("Qualifications", top_qual, XL_CHART_TYPE.BAR_CHART)
 
     _add_certificate_highlights_slide()

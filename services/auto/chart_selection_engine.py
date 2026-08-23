@@ -633,15 +633,17 @@ class IntelligentChartSelectionEngine:
                 lower = q1 - 1.5 * iqr
                 upper = q3 + 1.5 * iqr
                 outliers = vals[(vals < lower) | (vals > upper)]
-                data.append({
-                    "x": str(cat),
-                    "min": float(vals.min()),
-                    "q1": q1,
-                    "median": q2,
-                    "q3": q3,
-                    "max": float(vals.max()),
-                    "outliers": [float(v) for v in outliers.head(10)],
-                })
+                data.append(
+                    {
+                        "x": str(cat),
+                        "min": float(vals.min()),
+                        "q1": q1,
+                        "median": q2,
+                        "q3": q3,
+                        "max": float(vals.max()),
+                        "outliers": [float(v) for v in outliers.head(10)],
+                    }
+                )
             title = f"{self._label(metric_col)} Distribution by {self._label(group_col)}"
             reason = f"We selected a box plot to compare {self._label(metric_col)} distributions across {self._label(group_col)} groups. Box plots reveal medians, quartiles, and outliers."
         else:
@@ -655,15 +657,17 @@ class IntelligentChartSelectionEngine:
             lower = q1 - 1.5 * iqr
             upper = q3 + 1.5 * iqr
             outliers = vals[(vals < lower) | (vals > upper)]
-            data = [{
-                "x": self._label(metric_col),
-                "min": float(vals.min()),
-                "q1": q1,
-                "median": q2,
-                "q3": q3,
-                "max": float(vals.max()),
-                "outliers": [float(v) for v in outliers.head(10)],
-            }]
+            data = [
+                {
+                    "x": self._label(metric_col),
+                    "min": float(vals.min()),
+                    "q1": q1,
+                    "median": q2,
+                    "q3": q3,
+                    "max": float(vals.max()),
+                    "outliers": [float(v) for v in outliers.head(10)],
+                }
+            ]
             title = f"{self._label(metric_col)} Distribution (Box Plot)"
             reason = f"We selected a box plot to show the distribution of {self._label(metric_col)}. Box plots reveal the median, quartiles, and outliers at a glance."
 
@@ -715,7 +719,10 @@ class IntelligentChartSelectionEngine:
         if total <= 0:
             return None
 
-        data = [{"x": str(k), "y": float(v), "pct": round(float(v / total * 100), 1)} for k, v in grouped.items()]
+        data = [
+            {"x": str(k), "y": float(v), "pct": round(float(v / total * 100), 1)}
+            for k, v in grouped.items()
+        ]
 
         return ChartSpecification(
             chart_type="treemap",
@@ -760,7 +767,14 @@ class IntelligentChartSelectionEngine:
         types_in_top = {c.chart_type for c in top}
 
         # Priority types to ensure inclusion (if they exist)
-        priority_types = ["scatter_plot", "histogram", "heatmap", "box_plot", "area_chart", "treemap"]
+        priority_types = [
+            "scatter_plot",
+            "histogram",
+            "heatmap",
+            "box_plot",
+            "area_chart",
+            "treemap",
+        ]
 
         for ptype in priority_types:
             if ptype in types_in_top:

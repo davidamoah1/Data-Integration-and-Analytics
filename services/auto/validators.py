@@ -127,9 +127,7 @@ class ChartValidator:
         if chart.chart_type in ("bar_chart", "horizontal_bar"):
             n_cats = len(chart.data)
             if n_cats > 15:
-                warnings.append(
-                    f"Bar chart has {n_cats} categories — showing top {n_cats} only"
-                )
+                warnings.append(f"Bar chart has {n_cats} categories — showing top {n_cats} only")
 
         return ValidationResult(valid=True, warnings=warnings)
 

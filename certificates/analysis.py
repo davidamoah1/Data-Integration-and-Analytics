@@ -211,21 +211,25 @@ def check_consistency(
         if d1 and d2:
             diff_days = abs((d1 - d2).days)
             if diff_days > 365:
-                checks.append(ConsistencyCheck(
-                    check_name="date_awarded_vs_graduation",
-                    description="Date awarded and graduation date differ by more than 1 year",
-                    passed=False,
-                    severity="warning",
-                    detail=f"Date awarded: {date_awarded}, Graduation date: {graduation_date} ({diff_days} days apart)",
-                ))
+                checks.append(
+                    ConsistencyCheck(
+                        check_name="date_awarded_vs_graduation",
+                        description="Date awarded and graduation date differ by more than 1 year",
+                        passed=False,
+                        severity="warning",
+                        detail=f"Date awarded: {date_awarded}, Graduation date: {graduation_date} ({diff_days} days apart)",
+                    )
+                )
             else:
-                checks.append(ConsistencyCheck(
-                    check_name="date_awarded_vs_graduation",
-                    description="Date awarded and graduation date are within 1 year",
-                    passed=True,
-                    severity="info",
-                    detail=f"Dates are {diff_days} days apart",
-                ))
+                checks.append(
+                    ConsistencyCheck(
+                        check_name="date_awarded_vs_graduation",
+                        description="Date awarded and graduation date are within 1 year",
+                        passed=True,
+                        severity="info",
+                        detail=f"Dates are {diff_days} days apart",
+                    )
+                )
 
     # 2. date_issued vs. expiry_date — expiry must be after issue
     date_issued = _get("date_issued")
@@ -234,21 +238,25 @@ def check_consistency(
         d1 = _parse_date(date_issued)
         d2 = _parse_date(expiry_date)
         if d1 and d2 and d2 <= d1:
-            checks.append(ConsistencyCheck(
-                check_name="expiry_before_issue",
-                description="Expiry date is on or before the issue date",
-                passed=False,
-                severity="error",
-                detail=f"Issued: {date_issued}, Expiry: {expiry_date}",
-            ))
+            checks.append(
+                ConsistencyCheck(
+                    check_name="expiry_before_issue",
+                    description="Expiry date is on or before the issue date",
+                    passed=False,
+                    severity="error",
+                    detail=f"Issued: {date_issued}, Expiry: {expiry_date}",
+                )
+            )
         elif d1 and d2:
-            checks.append(ConsistencyCheck(
-                check_name="expiry_after_issue",
-                description="Expiry date is after issue date",
-                passed=True,
-                severity="info",
-                detail=f"Valid for {(d2 - d1).days} days",
-            ))
+            checks.append(
+                ConsistencyCheck(
+                    check_name="expiry_after_issue",
+                    description="Expiry date is after issue date",
+                    passed=True,
+                    severity="info",
+                    detail=f"Valid for {(d2 - d1).days} days",
+                )
+            )
 
     # 3. GPA range check
     gpa = _get("gpa")
@@ -256,29 +264,35 @@ def check_consistency(
         try:
             gpa_val = float(re.search(r"(\d+\.?\d*)", gpa).group(1))
             if gpa_val > 10:
-                checks.append(ConsistencyCheck(
-                    check_name="gpa_range",
-                    description="GPA/CGPA value exceeds typical maximum (10.0)",
-                    passed=False,
-                    severity="warning",
-                    detail=f"GPA value: {gpa_val}",
-                ))
+                checks.append(
+                    ConsistencyCheck(
+                        check_name="gpa_range",
+                        description="GPA/CGPA value exceeds typical maximum (10.0)",
+                        passed=False,
+                        severity="warning",
+                        detail=f"GPA value: {gpa_val}",
+                    )
+                )
             elif gpa_val < 0:
-                checks.append(ConsistencyCheck(
-                    check_name="gpa_range",
-                    description="GPA/CGPA value is negative",
-                    passed=False,
-                    severity="error",
-                    detail=f"GPA value: {gpa_val}",
-                ))
+                checks.append(
+                    ConsistencyCheck(
+                        check_name="gpa_range",
+                        description="GPA/CGPA value is negative",
+                        passed=False,
+                        severity="error",
+                        detail=f"GPA value: {gpa_val}",
+                    )
+                )
             else:
-                checks.append(ConsistencyCheck(
-                    check_name="gpa_range",
-                    description="GPA/CGPA value is within valid range",
-                    passed=True,
-                    severity="info",
-                    detail=f"GPA: {gpa_val:.2f}",
-                ))
+                checks.append(
+                    ConsistencyCheck(
+                        check_name="gpa_range",
+                        description="GPA/CGPA value is within valid range",
+                        passed=True,
+                        severity="info",
+                        detail=f"GPA: {gpa_val:.2f}",
+                    )
+                )
         except (ValueError, AttributeError):
             pass
 
@@ -286,41 +300,49 @@ def check_consistency(
     cert_number = _get("certificate_number")
     if doc_type_key in ("academic_certificate", "degree_certificate", "diploma"):
         if not cert_number:
-            checks.append(ConsistencyCheck(
-                check_name="certificate_number_present",
-                description="Certificate number is missing for an academic certificate",
-                passed=False,
-                severity="warning",
-                detail="A certificate number helps with verification and traceability",
-            ))
+            checks.append(
+                ConsistencyCheck(
+                    check_name="certificate_number_present",
+                    description="Certificate number is missing for an academic certificate",
+                    passed=False,
+                    severity="warning",
+                    detail="A certificate number helps with verification and traceability",
+                )
+            )
         else:
-            checks.append(ConsistencyCheck(
-                check_name="certificate_number_present",
-                description="Certificate number is present",
-                passed=True,
-                severity="info",
-                detail=f"Number: {cert_number}",
-            ))
+            checks.append(
+                ConsistencyCheck(
+                    check_name="certificate_number_present",
+                    description="Certificate number is present",
+                    passed=True,
+                    severity="info",
+                    detail=f"Number: {cert_number}",
+                )
+            )
 
     # 5. Full name format — should not contain digits
     full_name = _get("full_name")
     if full_name:
         if re.search(r"\d", full_name):
-            checks.append(ConsistencyCheck(
-                check_name="name_format",
-                description="Full name contains numeric characters — possible OCR error",
-                passed=False,
-                severity="warning",
-                detail=f"Name value: '{full_name}'",
-            ))
+            checks.append(
+                ConsistencyCheck(
+                    check_name="name_format",
+                    description="Full name contains numeric characters — possible OCR error",
+                    passed=False,
+                    severity="warning",
+                    detail=f"Name value: '{full_name}'",
+                )
+            )
         else:
-            checks.append(ConsistencyCheck(
-                check_name="name_format",
-                description="Full name format appears valid",
-                passed=True,
-                severity="info",
-                detail=f"Name: {full_name}",
-            ))
+            checks.append(
+                ConsistencyCheck(
+                    check_name="name_format",
+                    description="Full name format appears valid",
+                    passed=True,
+                    severity="info",
+                    detail=f"Name: {full_name}",
+                )
+            )
 
     return checks
 
@@ -332,6 +354,7 @@ def summarize_academic_performance(
     field_values: dict[str, dict],
 ) -> AcademicPerformance:
     """Summarize academic performance from available fields."""
+
     def _get(name: str) -> str | None:
         fdata = field_values.get(name)
         return fdata.get("value") if fdata else None
@@ -384,59 +407,71 @@ def detect_anomalies(
         conf = fdata.get("confidence_score", 1.0) or 1.0
         is_low = fdata.get("is_low_confidence", False)
         if is_low and fdata.get("value"):
-            anomalies.append(Anomaly(
-                anomaly_type="low_confidence",
-                field_name=fname,
-                description=f"Field '{fdata.get('field_label', fname)}' has low extraction confidence ({conf:.0%})",
-                severity="warning",
-            ))
+            anomalies.append(
+                Anomaly(
+                    anomaly_type="low_confidence",
+                    field_name=fname,
+                    description=f"Field '{fdata.get('field_label', fname)}' has low extraction confidence ({conf:.0%})",
+                    severity="warning",
+                )
+            )
 
     # Validation failures
     for fname, fdata in field_values.items():
         if fdata.get("value") and not fdata.get("is_valid", True):
-            anomalies.append(Anomaly(
-                anomaly_type="validation_failed",
-                field_name=fname,
-                description=f"Field '{fdata.get('field_label', fname)}' failed validation: {fdata.get('validation_message', '')}",
-                severity="warning",
-            ))
+            anomalies.append(
+                Anomaly(
+                    anomaly_type="validation_failed",
+                    field_name=fname,
+                    description=f"Field '{fdata.get('field_label', fname)}' failed validation: {fdata.get('validation_message', '')}",
+                    severity="warning",
+                )
+            )
 
     # Failed consistency checks
     for check in consistency_checks:
         if not check.passed and check.severity == "error":
-            anomalies.append(Anomaly(
-                anomaly_type="consistency_error",
-                field_name=None,
-                description=check.detail,
-                severity="error",
-            ))
+            anomalies.append(
+                Anomaly(
+                    anomaly_type="consistency_error",
+                    field_name=None,
+                    description=check.detail,
+                    severity="error",
+                )
+            )
 
     # Duplicate
     if is_duplicate and duplicate_of_id:
-        anomalies.append(Anomaly(
-            anomaly_type="duplicate",
-            field_name=None,
-            description=f"This certificate appears to be a duplicate of document #{duplicate_of_id}",
-            severity="warning",
-        ))
+        anomalies.append(
+            Anomaly(
+                anomaly_type="duplicate",
+                field_name=None,
+                description=f"This certificate appears to be a duplicate of document #{duplicate_of_id}",
+                severity="warning",
+            )
+        )
 
     # Low classification confidence
     if classification_confidence is not None and classification_confidence < 0.35:
-        anomalies.append(Anomaly(
-            anomaly_type="low_classification_confidence",
-            field_name=None,
-            description=f"Document type classification confidence is low ({classification_confidence:.0%})",
-            severity="warning",
-        ))
+        anomalies.append(
+            Anomaly(
+                anomaly_type="low_classification_confidence",
+                field_name=None,
+                description=f"Document type classification confidence is low ({classification_confidence:.0%})",
+                severity="warning",
+            )
+        )
 
     # Missing required fields
     if completeness.missing_required:
-        anomalies.append(Anomaly(
-            anomaly_type="missing_required_fields",
-            field_name=None,
-            description=f"{len(completeness.missing_required)} required field(s) missing: {', '.join(completeness.missing_required[:3])}",
-            severity="warning",
-        ))
+        anomalies.append(
+            Anomaly(
+                anomaly_type="missing_required_fields",
+                field_name=None,
+                description=f"{len(completeness.missing_required)} required field(s) missing: {', '.join(completeness.missing_required[:3])}",
+                severity="warning",
+            )
+        )
 
     return anomalies
 
@@ -455,67 +490,83 @@ def generate_recommendations(
 
     # Missing required fields
     if completeness.missing_required:
-        recs.append(Recommendation(
-            action="review_missing_fields",
-            description=f"Review and manually fill {len(completeness.missing_required)} required field(s): {', '.join(completeness.missing_required[:3])}",
-            priority="high",
-        ))
+        recs.append(
+            Recommendation(
+                action="review_missing_fields",
+                description=f"Review and manually fill {len(completeness.missing_required)} required field(s): {', '.join(completeness.missing_required[:3])}",
+                priority="high",
+            )
+        )
 
     # Low confidence fields
     low_conf_count = sum(1 for a in anomalies if a.anomaly_type == "low_confidence")
     if low_conf_count:
-        recs.append(Recommendation(
-            action="verify_low_confidence_fields",
-            description=f"{low_conf_count} field(s) have low extraction confidence — verify against the source document",
-            priority="high",
-        ))
+        recs.append(
+            Recommendation(
+                action="verify_low_confidence_fields",
+                description=f"{low_conf_count} field(s) have low extraction confidence — verify against the source document",
+                priority="high",
+            )
+        )
 
     # Validation failures
     val_fail_count = sum(1 for a in anomalies if a.anomaly_type == "validation_failed")
     if val_fail_count:
-        recs.append(Recommendation(
-            action="fix_validation_errors",
-            description=f"{val_fail_count} field(s) failed validation — correct the values or confirm they are accurate",
-            priority="medium",
-        ))
+        recs.append(
+            Recommendation(
+                action="fix_validation_errors",
+                description=f"{val_fail_count} field(s) failed validation — correct the values or confirm they are accurate",
+                priority="medium",
+            )
+        )
 
     # Consistency errors
     consistency_errors = [c for c in consistency_checks if not c.passed and c.severity == "error"]
     if consistency_errors:
-        recs.append(Recommendation(
-            action="resolve_consistency_errors",
-            description=f"{len(consistency_errors)} consistency error(s) detected — review date and value relationships",
-            priority="high",
-        ))
+        recs.append(
+            Recommendation(
+                action="resolve_consistency_errors",
+                description=f"{len(consistency_errors)} consistency error(s) detected — review date and value relationships",
+                priority="high",
+            )
+        )
 
     # Verification
     if verification_status == "not_verified":
-        recs.append(Recommendation(
-            action="initiate_verification",
-            description="Certificate has not been verified — initiate verification through an authoritative source",
-            priority="medium",
-        ))
+        recs.append(
+            Recommendation(
+                action="initiate_verification",
+                description="Certificate has not been verified — initiate verification through an authoritative source",
+                priority="medium",
+            )
+        )
     elif verification_status == "verification_pending":
-        recs.append(Recommendation(
-            action="follow_up_verification",
-            description="Verification is pending — follow up with the verification source",
-            priority="medium",
-        ))
+        recs.append(
+            Recommendation(
+                action="follow_up_verification",
+                description="Verification is pending — follow up with the verification source",
+                priority="medium",
+            )
+        )
     elif verification_status == "verification_failed":
-        recs.append(Recommendation(
-            action="reverify_certificate",
-            description="Previous verification attempt failed — consider re-verifying with a different method",
-            priority="high",
-        ))
+        recs.append(
+            Recommendation(
+                action="reverify_certificate",
+                description="Previous verification attempt failed — consider re-verifying with a different method",
+                priority="high",
+            )
+        )
 
     # Duplicate
     dup_anomalies = [a for a in anomalies if a.anomaly_type == "duplicate"]
     if dup_anomalies:
-        recs.append(Recommendation(
-            action="review_duplicate",
-            description="This certificate may be a duplicate — compare with the linked document before approving",
-            priority="high",
-        ))
+        recs.append(
+            Recommendation(
+                action="review_duplicate",
+                description="This certificate may be a duplicate — compare with the linked document before approving",
+                priority="high",
+            )
+        )
 
     # Approve if everything looks good
     if (
@@ -525,11 +576,13 @@ def generate_recommendations(
         and not consistency_errors
         and not dup_anomalies
     ):
-        recs.append(Recommendation(
-            action="approve_certificate",
-            description="All required fields are present, confidence is acceptable, and no anomalies detected — ready for approval",
-            priority="low",
-        ))
+        recs.append(
+            Recommendation(
+                action="approve_certificate",
+                description="All required fields are present, confidence is acceptable, and no anomalies detected — ready for approval",
+                priority="low",
+            )
+        )
 
     return recs
 
@@ -575,30 +628,39 @@ def analyze_certificate(
         if spec:
             spec_field = next((sf for sf in spec.fields if sf.name == fname), None)
             is_required = spec_field.required if spec_field else False
-        field_analyses.append(FieldAnalysis(
-            field_name=fname,
-            field_label=f.get("field_label", fname),
-            value=f.get("value"),
-            raw_value=f.get("raw_value"),
-            confidence=f.get("confidence_score", 0.0) or 0.0,
-            is_low_confidence=f.get("is_low_confidence", False),
-            is_present=bool(f.get("value")),
-            is_required=is_required,
-            is_valid=f.get("is_valid", True),
-            validation_message=f.get("validation_message"),
-            was_corrected=f.get("was_corrected", False),
-        ))
+        field_analyses.append(
+            FieldAnalysis(
+                field_name=fname,
+                field_label=f.get("field_label", fname),
+                value=f.get("value"),
+                raw_value=f.get("raw_value"),
+                confidence=f.get("confidence_score", 0.0) or 0.0,
+                is_low_confidence=f.get("is_low_confidence", False),
+                is_present=bool(f.get("value")),
+                is_required=is_required,
+                is_valid=f.get("is_valid", True),
+                validation_message=f.get("validation_message"),
+                was_corrected=f.get("was_corrected", False),
+            )
+        )
 
     # Sub-analyses
     completeness = assess_completeness(doc_type, field_values)
     consistency_checks = check_consistency(doc_type, field_values)
     academic_perf = summarize_academic_performance(field_values)
     anomalies = detect_anomalies(
-        field_values, completeness, consistency_checks,
-        is_duplicate, duplicate_of_id, class_conf,
+        field_values,
+        completeness,
+        consistency_checks,
+        is_duplicate,
+        duplicate_of_id,
+        class_conf,
     )
     recommendations = generate_recommendations(
-        completeness, anomalies, verification_status, consistency_checks,
+        completeness,
+        anomalies,
+        verification_status,
+        consistency_checks,
     )
 
     # Build summary
@@ -635,7 +697,9 @@ def analyze_certificate(
     )
 
 
-def analyze_batch(documents: list[dict], fields_by_doc: dict[int, list[dict]]) -> list[CertificateAnalysis]:
+def analyze_batch(
+    documents: list[dict], fields_by_doc: dict[int, list[dict]]
+) -> list[CertificateAnalysis]:
     """Analyze a batch of certificate documents.
 
     Args:
@@ -677,10 +741,18 @@ def batch_analytics(analyses: list[CertificateAnalysis]) -> BatchAnalytics:
     total = len(analyses)
     if total == 0:
         return BatchAnalytics(
-            total=0, by_type={}, by_verification={}, by_completeness_tier={},
-            avg_completeness=0.0, avg_confidence=0.0, total_anomalies=0,
-            total_duplicates=0, common_anomalies={}, institutions={},
-            qualifications={}, summary="No certificates to analyze",
+            total=0,
+            by_type={},
+            by_verification={},
+            by_completeness_tier={},
+            avg_completeness=0.0,
+            avg_confidence=0.0,
+            total_anomalies=0,
+            total_duplicates=0,
+            common_anomalies={},
+            institutions={},
+            qualifications={},
+            summary="No certificates to analyze",
         )
 
     by_type: dict[str, int] = {}

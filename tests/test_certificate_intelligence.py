@@ -164,7 +164,9 @@ class TestCompleteness:
         result = assess_completeness("academic_certificate", fields)
         assert result.completeness_pct < 100.0
         assert len(result.missing_required) > 0
-        assert "Institution" in result.missing_required or "institution" in [m.lower() for m in result.missing_required]
+        assert "Institution" in result.missing_required or "institution" in [
+            m.lower() for m in result.missing_required
+        ]
 
     def test_no_spec_treats_all_as_optional(self):
         fields = {
@@ -291,7 +293,12 @@ class TestAcademicPerformance:
 class TestAnomalyDetection:
     def test_low_confidence_field_flagged(self):
         fields = {
-            "full_name": {"value": "John", "confidence_score": 0.3, "is_low_confidence": True, "field_label": "Full Name"},
+            "full_name": {
+                "value": "John",
+                "confidence_score": 0.3,
+                "is_low_confidence": True,
+                "field_label": "Full Name",
+            },
         }
         completeness = assess_completeness("academic_certificate", fields)
         anomalies = detect_anomalies(fields, completeness, [], False, None, 0.9)
@@ -300,7 +307,14 @@ class TestAnomalyDetection:
 
     def test_validation_failure_flagged(self):
         fields = {
-            "gpa": {"value": "15.5", "confidence_score": 0.9, "is_low_confidence": False, "is_valid": False, "validation_message": "Out of range", "field_label": "GPA"},
+            "gpa": {
+                "value": "15.5",
+                "confidence_score": 0.9,
+                "is_low_confidence": False,
+                "is_valid": False,
+                "validation_message": "Out of range",
+                "field_label": "GPA",
+            },
         }
         completeness = assess_completeness("academic_certificate", fields)
         anomalies = detect_anomalies(fields, completeness, [], False, None, 0.9)
@@ -343,23 +357,56 @@ class TestRecommendations:
         assert any(r.action == "review_missing_fields" for r in high_recs)
 
     def test_not_verified_generates_verification_rec(self):
-        completeness = assess_completeness("academic_certificate", {
-            "full_name": {"value": "John"},
-            "institution": {"value": "Univ"},
-            "date_awarded": {"value": "2024-01-01"},
-            "certificate_number": {"value": "CERT-001"},
-        })
+        completeness = assess_completeness(
+            "academic_certificate",
+            {
+                "full_name": {"value": "John"},
+                "institution": {"value": "Univ"},
+                "date_awarded": {"value": "2024-01-01"},
+                "certificate_number": {"value": "CERT-001"},
+            },
+        )
         recs = generate_recommendations(completeness, [], "not_verified", [])
         verify_recs = [r for r in recs if r.action == "initiate_verification"]
         assert len(verify_recs) == 1
 
     def test_all_good_generates_approve_rec(self):
         fields = {
-            "full_name": {"value": "John Doe", "confidence_score": 0.9, "is_low_confidence": False, "is_valid": True, "field_label": "Full Name"},
-            "qualification": {"value": "Bachelor of Science", "confidence_score": 0.9, "is_low_confidence": False, "is_valid": True, "field_label": "Qualification"},
-            "institution": {"value": "University", "confidence_score": 0.9, "is_low_confidence": False, "is_valid": True, "field_label": "Institution"},
-            "date_awarded": {"value": "2024-01-15", "confidence_score": 0.9, "is_low_confidence": False, "is_valid": True, "field_label": "Date Awarded"},
-            "certificate_number": {"value": "CERT-001", "confidence_score": 0.9, "is_low_confidence": False, "is_valid": True, "field_label": "Certificate Number"},
+            "full_name": {
+                "value": "John Doe",
+                "confidence_score": 0.9,
+                "is_low_confidence": False,
+                "is_valid": True,
+                "field_label": "Full Name",
+            },
+            "qualification": {
+                "value": "Bachelor of Science",
+                "confidence_score": 0.9,
+                "is_low_confidence": False,
+                "is_valid": True,
+                "field_label": "Qualification",
+            },
+            "institution": {
+                "value": "University",
+                "confidence_score": 0.9,
+                "is_low_confidence": False,
+                "is_valid": True,
+                "field_label": "Institution",
+            },
+            "date_awarded": {
+                "value": "2024-01-15",
+                "confidence_score": 0.9,
+                "is_low_confidence": False,
+                "is_valid": True,
+                "field_label": "Date Awarded",
+            },
+            "certificate_number": {
+                "value": "CERT-001",
+                "confidence_score": 0.9,
+                "is_low_confidence": False,
+                "is_valid": True,
+                "field_label": "Certificate Number",
+            },
         }
         completeness = assess_completeness("academic_certificate", fields)
         anomalies = detect_anomalies(fields, completeness, [], False, None, 0.9)
@@ -385,11 +432,61 @@ class TestAnalyzeCertificate:
             "status": "ready_for_review",
         }
         fields = [
-            {"field_name": "full_name", "field_label": "Full Name", "value": "John Doe", "raw_value": "JOHN DOE", "confidence_score": 0.95, "is_low_confidence": False, "is_valid": True, "validation_message": None, "was_corrected": False},
-            {"field_name": "institution", "field_label": "Institution", "value": "University of Ghana", "raw_value": "University of Ghana", "confidence_score": 0.9, "is_low_confidence": False, "is_valid": True, "validation_message": None, "was_corrected": False},
-            {"field_name": "date_awarded", "field_label": "Date Awarded", "value": "2024-01-15", "raw_value": "15/01/2024", "confidence_score": 0.85, "is_low_confidence": False, "is_valid": True, "validation_message": None, "was_corrected": False},
-            {"field_name": "certificate_number", "field_label": "Certificate Number", "value": "CERT-2024-001", "raw_value": "cert-2024-001", "confidence_score": 0.8, "is_low_confidence": False, "is_valid": True, "validation_message": None, "was_corrected": False},
-            {"field_name": "gpa", "field_label": "GPA", "value": "3.75", "raw_value": "3.75", "confidence_score": 0.7, "is_low_confidence": False, "is_valid": True, "validation_message": None, "was_corrected": False},
+            {
+                "field_name": "full_name",
+                "field_label": "Full Name",
+                "value": "John Doe",
+                "raw_value": "JOHN DOE",
+                "confidence_score": 0.95,
+                "is_low_confidence": False,
+                "is_valid": True,
+                "validation_message": None,
+                "was_corrected": False,
+            },
+            {
+                "field_name": "institution",
+                "field_label": "Institution",
+                "value": "University of Ghana",
+                "raw_value": "University of Ghana",
+                "confidence_score": 0.9,
+                "is_low_confidence": False,
+                "is_valid": True,
+                "validation_message": None,
+                "was_corrected": False,
+            },
+            {
+                "field_name": "date_awarded",
+                "field_label": "Date Awarded",
+                "value": "2024-01-15",
+                "raw_value": "15/01/2024",
+                "confidence_score": 0.85,
+                "is_low_confidence": False,
+                "is_valid": True,
+                "validation_message": None,
+                "was_corrected": False,
+            },
+            {
+                "field_name": "certificate_number",
+                "field_label": "Certificate Number",
+                "value": "CERT-2024-001",
+                "raw_value": "cert-2024-001",
+                "confidence_score": 0.8,
+                "is_low_confidence": False,
+                "is_valid": True,
+                "validation_message": None,
+                "was_corrected": False,
+            },
+            {
+                "field_name": "gpa",
+                "field_label": "GPA",
+                "value": "3.75",
+                "raw_value": "3.75",
+                "confidence_score": 0.7,
+                "is_low_confidence": False,
+                "is_valid": True,
+                "validation_message": None,
+                "was_corrected": False,
+            },
         ]
         analysis = analyze_certificate(document, fields)
         assert analysis.document_type == "academic_certificate"
@@ -464,14 +561,74 @@ class TestBatchAnalytics:
         ]
         fields_by_doc = {
             1: [
-                {"field_name": "full_name", "field_label": "Full Name", "value": "John Doe", "raw_value": "John Doe", "confidence_score": 0.9, "is_low_confidence": False, "is_valid": True, "validation_message": None, "was_corrected": False},
-                {"field_name": "qualification", "field_label": "Qualification", "value": "Bachelor of Science", "raw_value": "Bachelor of Science", "confidence_score": 0.9, "is_low_confidence": False, "is_valid": True, "validation_message": None, "was_corrected": False},
-                {"field_name": "institution", "field_label": "Institution", "value": "University of Ghana", "raw_value": "University of Ghana", "confidence_score": 0.9, "is_low_confidence": False, "is_valid": True, "validation_message": None, "was_corrected": False},
-                {"field_name": "date_awarded", "field_label": "Date Awarded", "value": "2024-01-15", "raw_value": "2024-01-15", "confidence_score": 0.85, "is_low_confidence": False, "is_valid": True, "validation_message": None, "was_corrected": False},
-                {"field_name": "certificate_number", "field_label": "Certificate Number", "value": "CERT-001", "raw_value": "CERT-001", "confidence_score": 0.8, "is_low_confidence": False, "is_valid": True, "validation_message": None, "was_corrected": False},
+                {
+                    "field_name": "full_name",
+                    "field_label": "Full Name",
+                    "value": "John Doe",
+                    "raw_value": "John Doe",
+                    "confidence_score": 0.9,
+                    "is_low_confidence": False,
+                    "is_valid": True,
+                    "validation_message": None,
+                    "was_corrected": False,
+                },
+                {
+                    "field_name": "qualification",
+                    "field_label": "Qualification",
+                    "value": "Bachelor of Science",
+                    "raw_value": "Bachelor of Science",
+                    "confidence_score": 0.9,
+                    "is_low_confidence": False,
+                    "is_valid": True,
+                    "validation_message": None,
+                    "was_corrected": False,
+                },
+                {
+                    "field_name": "institution",
+                    "field_label": "Institution",
+                    "value": "University of Ghana",
+                    "raw_value": "University of Ghana",
+                    "confidence_score": 0.9,
+                    "is_low_confidence": False,
+                    "is_valid": True,
+                    "validation_message": None,
+                    "was_corrected": False,
+                },
+                {
+                    "field_name": "date_awarded",
+                    "field_label": "Date Awarded",
+                    "value": "2024-01-15",
+                    "raw_value": "2024-01-15",
+                    "confidence_score": 0.85,
+                    "is_low_confidence": False,
+                    "is_valid": True,
+                    "validation_message": None,
+                    "was_corrected": False,
+                },
+                {
+                    "field_name": "certificate_number",
+                    "field_label": "Certificate Number",
+                    "value": "CERT-001",
+                    "raw_value": "CERT-001",
+                    "confidence_score": 0.8,
+                    "is_low_confidence": False,
+                    "is_valid": True,
+                    "validation_message": None,
+                    "was_corrected": False,
+                },
             ],
             2: [
-                {"field_name": "full_name", "field_label": "Full Name", "value": "Jane Smith", "raw_value": "JANE SMITH", "confidence_score": 0.3, "is_low_confidence": True, "is_valid": True, "validation_message": None, "was_corrected": False},
+                {
+                    "field_name": "full_name",
+                    "field_label": "Full Name",
+                    "value": "Jane Smith",
+                    "raw_value": "JANE SMITH",
+                    "confidence_score": 0.3,
+                    "is_low_confidence": True,
+                    "is_valid": True,
+                    "validation_message": None,
+                    "was_corrected": False,
+                },
             ],
         }
         analyses = analyze_batch(docs, fields_by_doc)
@@ -492,9 +649,11 @@ class TestBatchAnalytics:
 class TestMigration:
     def test_checksum_migration_exists(self):
         import os
+
         migration_path = os.path.join(
             os.path.dirname(os.path.dirname(__file__)),
-            "alembic", "versions",
+            "alembic",
+            "versions",
             "f1a2b3c4d5e6_add_file_checksum_to_capture_documents.py",
         )
         assert os.path.exists(migration_path)

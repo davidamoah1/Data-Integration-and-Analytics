@@ -48,10 +48,10 @@ _DATE_FORMATS = [
     "%m-%d-%Y",
     "%d.%m.%Y",
     "%Y/%m/%d",
-    "%B %d, %Y",       # January 15, 2024
-    "%d %B %Y",        # 15 January 2024
-    "%b %d, %Y",       # Jan 15, 2024
-    "%d %b %Y",        # 15 Jan 2024
+    "%B %d, %Y",  # January 15, 2024
+    "%d %B %Y",  # 15 January 2024
+    "%b %d, %Y",  # Jan 15, 2024
+    "%d %b %Y",  # 15 Jan 2024
 ]
 
 

@@ -61,6 +61,7 @@ if DATABASE_URL:
     DB_URL = DATABASE_URL
 elif DB_TYPE == "mysql":
     from urllib.parse import quote_plus
+
     _mysql_host = os.getenv("MYSQL_HOST", "localhost")
     _mysql_port = os.getenv("MYSQL_PORT", "3306")
     _mysql_db = os.getenv("MYSQL_DATABASE", "")
@@ -361,7 +362,9 @@ def validate_config() -> None:
             raise ValueError(
                 "ENCRYPTION_KEY must be set explicitly for production (separate from JWT_SECRET_KEY)."
             )
-        if STORAGE_BACKEND == "local" and os.getenv("ALLOW_LOCAL_STORAGE_IN_PRODUCTION", "").lower() not in ("1", "true", "yes"):
+        if STORAGE_BACKEND == "local" and os.getenv(
+            "ALLOW_LOCAL_STORAGE_IN_PRODUCTION", ""
+        ).lower() not in ("1", "true", "yes"):
             raise ValueError(
                 "STORAGE_BACKEND=local is not permitted in production. "
                 "Set STORAGE_BACKEND to 'r2', 's3', or 'supabase' and configure the "

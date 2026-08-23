@@ -734,7 +734,8 @@ class ReportCompositionService:
             (s for s in report.sections if s.section_type == ReportSectionType.INSIGHTS), None
         )
         rec_section = next(
-            (s for s in report.sections if s.section_type == ReportSectionType.RECOMMENDATIONS), None
+            (s for s in report.sections if s.section_type == ReportSectionType.RECOMMENDATIONS),
+            None,
         )
 
         # Convert canonical charts to report ChartDefinitions
