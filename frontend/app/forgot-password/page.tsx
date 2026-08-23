@@ -30,9 +30,9 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="flex min-h-screen items-center justify-center bg-muted/30">
       {/* Back to home */}
-      <Link href="/" className="absolute left-6 top-6 flex items-center gap-2 text-sm text-slate-400 transition-colors hover:text-white">
+      <Link href="/" className="absolute left-6 top-6 flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground">
         <ArrowLeft size={16} /> Back to home
       </Link>
 
@@ -41,7 +41,7 @@ export default function ForgotPasswordPage() {
           <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-2xl font-bold text-primary-foreground">
             D
           </div>
-          <h1 className="text-2xl font-bold text-white">DataFlow</h1>
+          <h1 className="text-xl font-bold text-foreground">DataFlow</h1>
         </div>
 
         <Card>

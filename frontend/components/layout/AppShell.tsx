@@ -29,8 +29,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   if (!isAuthenticated) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted border-t-primary" />
+          <p className="text-sm text-muted-foreground">Loading...</p>
+        </div>
       </div>
     );
   }

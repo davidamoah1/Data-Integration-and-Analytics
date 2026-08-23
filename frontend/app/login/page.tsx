@@ -32,20 +32,20 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4">
       {/* Back to home */}
-      <Link href="/" className="absolute left-6 top-6 flex items-center gap-2 text-sm text-slate-400 transition-colors hover:text-white">
+      <Link href="/" className="absolute left-6 top-6 flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground">
         <ArrowLeft size={16} /> Back to home
       </Link>
 
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="mb-8 flex flex-col items-center">
-          <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-2xl font-bold text-primary-foreground">
+          <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-md bg-primary text-lg font-bold text-primary-foreground">
             D
           </div>
-          <h1 className="text-2xl font-bold text-white">DataFlow</h1>
-          <p className="text-sm text-slate-400">Enterprise Data Intelligence Platform</p>
+          <h1 className="text-xl font-bold text-foreground">DataFlow</h1>
+          <p className="text-sm text-muted-foreground">Enterprise Data Intelligence Platform</p>
         </div>
 
         <Card>
@@ -136,13 +136,7 @@ export default function LoginPage() {
           </CardContent>
         </Card>
 
-        <div className="mt-6 text-center">
-          <Link href="/" className="text-sm text-slate-400 transition-colors hover:text-white">
-            ← Back to home
-          </Link>
-        </div>
-
-        <p className="mt-4 text-center text-xs text-slate-500">
+        <p className="mt-6 text-center text-xs text-muted-foreground">
           © 2026 DataFlow. All rights reserved.
         </p>
       </div>
