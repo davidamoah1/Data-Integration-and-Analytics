@@ -32,6 +32,7 @@ def get_mime_type(file_path: str) -> str:
         ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         ".json": "application/json",
         ".txt": "text/plain",
+        ".xml": "text/xml",
         ".parquet": "application/octet-stream",
     }.get(ext, "application/octet-stream")
 
