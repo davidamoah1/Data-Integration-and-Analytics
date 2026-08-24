@@ -51,6 +51,7 @@ export function DashboardPreview({ workflowId }: Props) {
 
   useEffect(() => {
     loadDashboard();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workflowId]);
 
   async function loadDashboard() {

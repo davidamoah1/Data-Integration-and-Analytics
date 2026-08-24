@@ -44,7 +44,7 @@ jobs:
 
       - name: ESLint (Frontend)
         working-directory: frontend
-        run: npx next lint --max-warnings 0
+        run: npm run lint
 
       - name: TypeScript type check
         working-directory: frontend

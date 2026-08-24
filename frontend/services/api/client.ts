@@ -187,6 +187,7 @@ async function request<T = unknown>(
     }
     clearTokens();
     if (typeof window !== 'undefined') {
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- plain service module (no router access); hard navigation intentionally resets all in-memory state on session expiry
       window.location.href = '/login';
     }
     throw new ApiError(401, 'Session expired');

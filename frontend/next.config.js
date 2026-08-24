@@ -15,6 +15,10 @@ const nextConfig = {
   poweredByHeader: false,
   skipTrailingSlashRedirect: true,
   output: process.env.NODE_ENV === 'production' ? 'standalone' : undefined,
+  // @ducanh2912/next-pwa injects webpack config; Turbopack (default in Next 16)
+  // is not compatible with it. Build/dev scripts explicitly pass --webpack,
+  // so this empty key just silences the Turbopack/webpack conflict warning.
+  turbopack: {},
   experimental: {
     optimizePackageImports: ['lucide-react'],
     workerThreads: false,
