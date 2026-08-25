@@ -129,6 +129,14 @@ class WebhookDispatcher:
         signature = WebhookDispatcher.sign_payload(body, sub.secret)
 
         try:
+            from shared.url_validation import UrlValidationError, validate_url
+
+            try:
+                validate_url(sub.url)
+            except UrlValidationError as e:
+                delivery.status = "failed"
+                delivery.error_message = f"URL validation failed: {e}"
+                return
             resp = requests.post(
                 sub.url,
                 data=body,

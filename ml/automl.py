@@ -264,7 +264,11 @@ class AutoMLEngine:
             - Path traversal is rejected.
             - The unpickler is restricted to known-safe ML classes.
         """
-        artifact_dir = os.path.realpath(os.getenv("ARTIFACT_DIR", tempfile.gettempdir()))
+        artifact_dir = os.path.realpath(
+            os.getenv("ML_ARTIFACT_DIR")
+            or os.getenv("ARTIFACT_DIR")
+            or os.path.join(os.getcwd(), "ml_artifacts")
+        )
         real_path = os.path.realpath(path)
         if not real_path.startswith(artifact_dir + os.sep) and real_path != artifact_dir:
             raise ValueError(
@@ -282,6 +286,8 @@ class AutoMLEngine:
             "scipy.",
             "joblib",
             "joblib.",
+            "ml.forecast",
+            "ml.",
         }
 
         class _RestrictedUnpickler(pickle.Unpickler):

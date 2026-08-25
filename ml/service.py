@@ -353,7 +353,7 @@ class MLService:
         if not model.artifact_path or not os.path.exists(model.artifact_path):
             raise RuntimeError("Model artifact not found")
 
-        artifact = joblib.load(model.artifact_path)
+        artifact = AutoMLEngine.load_artifact(model.artifact_path)
         df = pd.DataFrame(features)
         if model.model_type == ModelType.FORECASTING:
             engine = artifact["engine"]

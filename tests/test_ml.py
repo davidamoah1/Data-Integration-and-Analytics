@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import tempfile
 from datetime import datetime
 
 import numpy as np
@@ -178,7 +179,7 @@ class TestMLService:
                 "name": "Test Model",
                 "description": "",
                 "model_type": "classification",
-                "dataset_source": "/tmp/dummy.csv",
+                "dataset_source": os.path.join(tempfile.gettempdir(), "dummy.csv"),
                 "target_column": "y",
             }
         )

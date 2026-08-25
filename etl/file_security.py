@@ -134,7 +134,8 @@ class FileValidator:
         elif ext in ("xlsx", "xls"):
             import pandas as pd
 
-            pd.read_excel(file_path, nrows=5, engine="openpyxl")
+            engine = "xlrd" if ext == "xls" else "openpyxl"
+            pd.read_excel(file_path, nrows=5, engine=engine)
         elif ext == "json":
             import json
 

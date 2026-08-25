@@ -494,7 +494,8 @@ class TestReportGenerator:
 
     def test_export_csv_to_file(self, clean_healthcare_df, validation_engine):
         result = validation_engine.validate(clean_healthcare_df, "clean.csv")
-        tmp_path = tempfile.mktemp(suffix=".csv")
+        with tempfile.NamedTemporaryFile(suffix=".csv", delete=False) as tmp:
+            tmp_path = tmp.name
         try:
             path = ValidationReportGenerator.export_csv(result, tmp_path)
             assert os.path.exists(path)
@@ -504,7 +505,8 @@ class TestReportGenerator:
 
     def test_export_excel(self, clean_healthcare_df, validation_engine):
         result = validation_engine.validate(clean_healthcare_df, "clean.csv")
-        tmp_path = tempfile.mktemp(suffix=".xlsx")
+        with tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False) as tmp:
+            tmp_path = tmp.name
         try:
             path = ValidationReportGenerator.export_excel(result, tmp_path)
             assert os.path.exists(path)
@@ -514,7 +516,8 @@ class TestReportGenerator:
 
     def test_export_pdf(self, clean_healthcare_df, validation_engine):
         result = validation_engine.validate(clean_healthcare_df, "clean.csv")
-        tmp_path = tempfile.mktemp(suffix=".pdf")
+        with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
+            tmp_path = tmp.name
         try:
             path = ValidationReportGenerator.export_pdf(result, tmp_path)
             assert os.path.exists(path)

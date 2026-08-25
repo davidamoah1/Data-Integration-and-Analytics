@@ -46,6 +46,14 @@
 | `CORS_ORIGINS` | Allowed CORS origins | `http://localhost:8501` |
 | `API_KEY` | API key for legacy endpoints | (strong random key) |
 
+### Security-Critical
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `ENCRYPTION_KEY` | (derived from JWT key) | Fernet encryption key for secrets at rest. **Set explicitly in production.** |
+| `ALLOW_WORKFLOW_CODE_EXEC` | `false` | Enable `execute_python` workflow nodes. Disabled by default for security. |
+| `STORAGE_BACKEND` | `local` | File storage backend: `r2`, `s3`, `supabase`, or `local`. Production must use `r2`, `s3`, or `supabase`. |
+
 ### Optional
 
 | Variable | Default | Description |
@@ -82,13 +90,32 @@
    streamlit run dashboard/app.py --server.port 8501
    ```
 
+## Vercel Deployment
+
+The project includes `vercel.json` for serverless deployment on Vercel:
+
+1. **Frontend**: Next.js app deployed as static/server-rendered pages
+2. **Backend**: Python FastAPI deployed as serverless functions under `/api/*`
+3. **Environment**: Set all required env vars in Vercel project settings
+
+```bash
+# Install Vercel CLI
+npm i -g vercel
+
+# Deploy from project root
+vercel --prod
+```
+
+**Note**: Workflow code execution (`ALLOW_WORKFLOW_CODE_EXEC`) is disabled by default and not recommended for serverless deployments due to subprocess restrictions.
+
 ## CI/CD Pipeline
 
 The GitHub Actions workflow (`.github/workflows/ci.yml`) runs on every push/PR to `main`:
 
 1. **Lint** — `ruff check .`
-2. **Format** — `black --check .`
+2. **Security Scan** — `bandit -r . -ll`
 3. **Tests** — `pytest -q` with SQLite
+4. **Frontend Build** — `npm run build` in `frontend/`
 
 ## Backup Strategy
 
@@ -108,6 +135,7 @@ The GitHub Actions workflow (`.github/workflows/ci.yml`) runs on every push/PR t
 |----------|---------|-----------------|
 | `/health` | Liveness probe | 200 (always if process is up) |
 | `/ready` | Readiness probe | 200 (all subsystems ready) or 503 |
+| `/health/detailed` | Detailed subsystem checks | 200 with JSON details |
 | `/metrics` | Platform metrics | 200 with JSON metrics |
 
 ## Production Deployment Checklist
@@ -116,9 +144,12 @@ The GitHub Actions workflow (`.github/workflows/ci.yml`) runs on every push/PR t
 
 - [ ] Set `DB_TYPE=mysql` (not SQLite for production)
 - [ ] Set strong `JWT_SECRET_KEY` (32+ random characters)
+- [ ] Set strong `ENCRYPTION_KEY` (Fernet key, separate from JWT secret)
 - [ ] Set strong `API_KEY`
 - [ ] Configure `CORS_ORIGINS` to only allow your dashboard URL
 - [ ] Set `RATE_LIMIT_RPM` appropriately (default: 120)
+- [ ] Set `STORAGE_BACKEND` to `r2`, `s3`, or `supabase` (not `local`)
+- [ ] Set `ALLOW_WORKFLOW_CODE_EXEC=false` (unless workflow Python execution is explicitly needed)
 - [ ] Configure AI provider API keys
 - [ ] Set up MySQL with automated backups
 - [ ] Configure HTTPS reverse proxy (nginx, Caddy, or Traefik)

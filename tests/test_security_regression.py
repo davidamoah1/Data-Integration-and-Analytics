@@ -109,6 +109,7 @@ class TestPickleSecurity:
         from ml.automl import AutoMLEngine
 
         artifact_dir = tempfile.gettempdir()
+        os.environ["ARTIFACT_DIR"] = artifact_dir
         path = os.path.join(artifact_dir, "test_safe_model.pkl")
         model = LogisticRegression()
         model.fit([[0, 0], [1, 1]], [0, 1])
@@ -118,6 +119,7 @@ class TestPickleSecurity:
         data = AutoMLEngine.load_artifact(path)
         assert "model" in data
         os.unlink(path)
+        del os.environ["ARTIFACT_DIR"]
 
 
 # --- B102: exec security -----------------------------------------------------
@@ -196,22 +198,29 @@ class TestTempStorage:
         # On Vercel, paths should use tempfile.gettempdir(), not "/tmp"
         if os.getenv("VERCEL", "").lower() in ("1", "true", "yes"):
             assert (
-                "/tmp" not in config.CAPTURE_STORAGE_DIR
+                "/tmp" not in config.CAPTURE_STORAGE_DIR  # nosec B108 - string literal in assertion, not a temp path
                 or tempfile.gettempdir() in config.CAPTURE_STORAGE_DIR
             )
 
-    def test_parse_bandit_uses_env_or_arg(self):
-        """parse_bandit.py should not hardcode /tmp."""
+    def test_no_hardcoded_tmp_in_source(self):
+        """No Python source file should hardcode /tmp paths."""
         import ast
 
-        with open("parse_bandit.py") as f:
-            tree = ast.parse(f.read())
-        # Check no string literal contains "/tmp/bandit_report.json"
-        for node in ast.walk(tree):
-            if isinstance(node, ast.Constant) and isinstance(node.value, str):
-                assert (
-                    node.value != "/tmp/bandit_report.json"
-                ), "parse_bandit.py still hardcodes /tmp/bandit_report.json"
+        for root, _dirs, files in os.walk("."):
+            if "__pycache__" in root or ".git" in root or "node_modules" in root or "tests" in root:
+                continue
+            for fname in files:
+                if not fname.endswith(".py"):
+                    continue
+                fpath = os.path.join(root, fname)
+                with open(fpath, encoding="utf-8", errors="ignore") as f:
+                    tree = ast.parse(f.read(), filename=fpath)
+                for node in ast.walk(tree):
+                    if isinstance(node, ast.Constant) and isinstance(node.value, str):
+                        if node.value.startswith("/tmp/"):  # nosec B108 — string literal in assertion, not a temp path
+                            pytest.fail(
+                                f"{fpath} contains hardcoded /tmp path: {node.value}"
+                            )
 
 
 # --- B104: Server binding ----------------------------------------------------

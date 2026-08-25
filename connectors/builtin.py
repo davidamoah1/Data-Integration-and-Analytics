@@ -347,8 +347,16 @@ class XMLConnector(BaseConnector):
         return {"success": False, "message": f"File not found: {path}"}
 
     def extract_data(self, query: dict[str, Any] | None = None) -> pd.DataFrame:
+        from defusedxml.ElementTree import parse as defused_parse
+
         path = self.configuration.get("file_path", "")
-        return pd.read_xml(path)
+        tree = defused_parse(path)
+        root = tree.getroot()
+
+        records = []
+        for child in root:
+            records.append({elem.tag: elem.text for elem in child})
+        return pd.DataFrame(records) if records else pd.DataFrame()
 
 
 @ConnectorRegistry.register
@@ -594,9 +602,15 @@ class GraphQLAPIConnector(BaseConnector):
         try:
             import requests
 
+            from shared.url_validation import UrlValidationError, validate_url
+
             url = self.configuration.get("endpoint_url", "")
             if not url:
                 return {"success": False, "message": "endpoint_url is required"}
+            try:
+                validate_url(url)
+            except UrlValidationError as e:
+                return {"success": False, "message": str(e)}
             headers = self._build_headers()
             resp = requests.post(url, json={"query": "{ __typename }"}, headers=headers, timeout=10)
             if resp.status_code < 400:
@@ -608,7 +622,13 @@ class GraphQLAPIConnector(BaseConnector):
     def extract_data(self, query: dict[str, Any] | None = None) -> pd.DataFrame:
         import requests
 
+        from shared.url_validation import UrlValidationError, validate_url
+
         url = self.configuration.get("endpoint_url", "")
+        try:
+            validate_url(url)
+        except UrlValidationError:
+            raise ValueError(f"URL validation failed for {url}") from None
         graphql_query = (query or {}).get("query", "")
         headers = self._build_headers()
         resp = requests.post(url, json={"query": graphql_query}, headers=headers, timeout=30)
@@ -702,8 +722,15 @@ class MobileMoneyConnector(BaseConnector):
     def extract_data(self, query: dict[str, Any] | None = None) -> pd.DataFrame:
         import requests
 
+        from shared.url_validation import UrlValidationError, validate_url
+
         base_url = self.configuration.get("base_url", "")
         endpoint = (query or {}).get("endpoint", "transactions")
+        full_url = f"{base_url}/{endpoint}"
+        try:
+            validate_url(full_url)
+        except UrlValidationError:
+            raise ValueError(f"URL validation failed for {full_url}") from None
         headers = {
             "Ocp-Apim-Subscription-Key": self.auth_config.get("subscription_key", ""),
             "Authorization": f"Bearer {self.auth_config.get('api_key', '')}",

@@ -33,7 +33,7 @@ async def database_status(
 
     for table in sorted(tables):
         try:
-            count = db.execute(text(f"SELECT COUNT(*) FROM {table}")).scalar()
+            count = db.execute(text(f"SELECT COUNT(*) FROM {table}")).scalar()  # nosec B608 — table from inspector.get_table_names()
         except Exception:
             count = 0
         idx_count = len(inspector.get_indexes(table))

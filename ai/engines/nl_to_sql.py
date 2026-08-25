@@ -192,8 +192,8 @@ class NLToSQLEngine:
         """Estimate the number of rows the query will return."""
         try:
             # Wrap in a COUNT subquery
-            count_sql = f"SELECT COUNT(*) FROM ({sql}) AS _estimate"
-            result = self.db.execute(text(count_sql))
+            count_sql = f"SELECT COUNT(*) FROM ({sql}) AS _estimate"  # nosec B608 — sql is validated by _validate_sql() before reaching here
+            result = self.db.execute(text(count_sql))  # nosec B608
             row = result.fetchone()
             return row[0] if row else None
         except Exception:

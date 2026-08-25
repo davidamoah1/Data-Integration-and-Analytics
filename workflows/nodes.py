@@ -186,6 +186,12 @@ class ReadRestNode(WorkflowNode):
         try:
             import requests
 
+            from shared.url_validation import UrlValidationError, validate_url
+
+            try:
+                validate_url(url)
+            except UrlValidationError as e:
+                return NodeResult(status="failed", errors=[f"URL validation failed: {e}"])
             response = requests.get(url, timeout=30)
             response.raise_for_status()
             data = response.json()
@@ -356,7 +362,7 @@ _SANDBOX_RUNNER = textwrap.dedent(
     df = pd.read_parquet(input_path) if input_path else pd.DataFrame()
     local_ns = {"df": df, "pd": pd}
     try:
-        exec(compile(code, "<workflow>", "exec"), {"__builtins__": {}}, local_ns)
+        exec(compile(code, "<workflow>", "exec"), {"__builtins__": {}}, local_ns)  # nosec B102 — sandboxed subprocess with restricted builtins, clean env, timeout, no API memory access
         result = local_ns.get("result", df)
         if isinstance(result, pd.DataFrame):
             result.to_parquet(output_path)
@@ -424,6 +430,15 @@ class ExecutePythonNode(WorkflowNode):
     NODE_TYPE = "execute_python"
 
     def run(self, ctx: WorkflowContext) -> NodeResult:
+        import config
+
+        if not config.ALLOW_WORKFLOW_CODE_EXEC:
+            return NodeResult(
+                status="failed",
+                errors=[
+                    "Python code execution is disabled. Set ALLOW_WORKFLOW_CODE_EXEC=true to enable sandboxed execution."
+                ],
+            )
         code = _get_param(self.config, "code", required=True)
         df = ctx.resolve_ref(_get_param(self.config, "dataset"))
         timeout = float(_get_param(self.config, "timeout_seconds", 30))
@@ -683,6 +698,12 @@ class SendWebhookNode(WorkflowNode):
         try:
             import requests
 
+            from shared.url_validation import UrlValidationError, validate_url
+
+            try:
+                validate_url(url)
+            except UrlValidationError as e:
+                return NodeResult(status="failed", errors=[f"URL validation failed: {e}"])
             payload = self.config.get("payload", {})
             response = requests.post(url, json=payload, timeout=10)
             return NodeResult(

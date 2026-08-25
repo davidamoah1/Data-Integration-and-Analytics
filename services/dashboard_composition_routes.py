@@ -398,7 +398,7 @@ def _resolve_dataset_widget(widget, wt: str, ds, db: DbSession) -> dict:
     if agg not in _ALLOWED_AGGS:
         return _empty_widget_data(widget, wt, reason=f"invalid_aggregation:{agg}")
 
-    query = f"SELECT * FROM {table_name}"
+    query = f"SELECT * FROM {table_name}"  # nosec B608 — table_name validated by validate_sql_identifier above
     conditions = []
     params: dict = {}
     for key, val in ds.filters.items():
@@ -412,7 +412,7 @@ def _resolve_dataset_widget(widget, wt: str, ds, db: DbSession) -> dict:
         query += " WHERE " + " AND ".join(conditions)
     if ds.group_by:
         agg = ds.aggregation or "sum"
-        query = f"SELECT {ds.group_by}, {agg}(*) as value FROM {table_name}"
+        query = f"SELECT {ds.group_by}, {agg}(*) as value FROM {table_name}"  # nosec B608 — group_by and table_name validated by validate_sql_identifier above
         if conditions:
             query += " WHERE " + " AND ".join(conditions)
         query += f" GROUP BY {ds.group_by} ORDER BY value DESC"
@@ -469,7 +469,7 @@ def _resolve_aggregate_widget(widget, wt: str, ds, db: DbSession) -> dict:
         validate_sql_identifier(metric)
     except ValueError:
         return _empty_widget_data(widget, wt, reason="invalid_metric")
-    query = f"SELECT {ds.group_by}, {agg}({metric}) as value FROM {table_name}"
+    query = f"SELECT {ds.group_by}, {agg}({metric}) as value FROM {table_name}"  # nosec B608 — group_by, metric, and table_name all validated by validate_sql_identifier above
     conditions = []
     params: dict = {}
     for key, val in ds.filters.items():

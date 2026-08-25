@@ -178,11 +178,7 @@ _JWT_DEFAULT_SECRET = "change-this-to-a-strong-random-secret-min-32-chars"
 _jwt_env = os.getenv("JWT_SECRET_KEY", "")
 if _jwt_env:
     JWT_SECRET_KEY = _jwt_env
-elif os.getenv("DB_TYPE", "sqlite") == "mysql" or os.getenv("IS_PRODUCTION", "").lower() in (
-    "1",
-    "true",
-    "yes",
-):
+elif DB_TYPE == "mysql" or IS_PRODUCTION:
     # Production must set JWT_SECRET_KEY explicitly — do not provide a fallback
     JWT_SECRET_KEY = ""
 else:
@@ -231,14 +227,14 @@ ACCOUNT_LOCKOUT_DURATION_MINUTES = int(os.getenv("ACCOUNT_LOCKOUT_DURATION_MINUT
 _cors_env = os.getenv("CORS_ORIGINS", "")
 if _cors_env:
     CORS_ORIGINS = _cors_env
-elif DB_TYPE == "mysql":
-    # Production (MySQL) without explicit CORS_ORIGINS is likely a
+elif DB_TYPE == "mysql" or IS_PRODUCTION:
+    # Production without explicit CORS_ORIGINS is likely a
     # misconfiguration — default to empty so no cross-origin requests are
     # allowed until the deployer configures it deliberately.
     import warnings as _w
 
     _w.warn(
-        "CORS_ORIGINS is not set in a MySQL (production) environment. "
+        "CORS_ORIGINS is not set in a production environment. "
         "Cross-origin requests will be rejected. Set CORS_ORIGINS to your "
         "frontend domain(s), e.g. 'https://app.example.com'.",
         stacklevel=1,
@@ -329,7 +325,7 @@ def validate_config() -> None:
         raise ValueError("JWT_SECRET_KEY must be set to a strong secret.")
 
     if JWT_SECRET_KEY == _JWT_DEFAULT_SECRET:
-        if DB_TYPE == "mysql":
+        if DB_TYPE == "mysql" or IS_PRODUCTION:
             raise ValueError("JWT_SECRET_KEY must be set to a strong secret for production.")
         import warnings
 
@@ -338,11 +334,11 @@ def validate_config() -> None:
             stacklevel=2,
         )
 
-    if DB_TYPE == "mysql" and len(JWT_SECRET_KEY) < 32:
+    if (DB_TYPE == "mysql" or IS_PRODUCTION) and len(JWT_SECRET_KEY) < 32:
         raise ValueError("JWT_SECRET_KEY must be at least 32 characters in production.")
 
     # ENCRYPTION_KEY should be separate from JWT_SECRET_KEY in production
-    if DB_TYPE == "mysql" and not ENCRYPTION_KEY:
+    if (DB_TYPE == "mysql" or IS_PRODUCTION) and not ENCRYPTION_KEY:
         import warnings
 
         warnings.warn(
@@ -373,6 +369,7 @@ def validate_config() -> None:
                 "corresponding credentials. Set ALLOW_LOCAL_STORAGE_IN_PRODUCTION=1 "
                 "only if you have a documented reason for local storage."
             )
+
         if BACKUP_ENABLED and not os.path.isabs(os.getenv("BACKUP_STORAGE_PATH", "")):
             import warnings
 
@@ -380,3 +377,10 @@ def validate_config() -> None:
                 "BACKUP_STORAGE_PATH should be an absolute path in production.",
                 stacklevel=2,
             )
+
+# Workflow execution settings
+ALLOW_WORKFLOW_CODE_EXEC = os.getenv("ALLOW_WORKFLOW_CODE_EXEC", "").lower() in (
+    "1",
+    "true",
+    "yes",
+)

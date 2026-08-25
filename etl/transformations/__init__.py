@@ -4,7 +4,11 @@ Supports: rename, drop, filter, fill, convert, calculate, join, split, merge, so
 Each transformation is defined by a config dict with 'type' and type-specific parameters.
 """
 
+import re
+
 import pandas as pd
+
+_SAFE_EXPR_RE = re.compile(r"^[\w\s\.\+\-\*/%<>=!&|\(\),]+$")
 
 
 class TransformationEngine:
@@ -115,6 +119,11 @@ class TransformationEngine:
     def _t_calculate(self, df: pd.DataFrame, config: dict) -> pd.DataFrame:
         new_col = config["new_column"]
         expression = config["expression"]
+        if not _SAFE_EXPR_RE.match(expression):
+            raise ValueError(
+                "Expression contains disallowed characters. "
+                "Only column names, numbers, and arithmetic/comparison operators are permitted."
+            )
         df[new_col] = df.eval(expression)
         return df
 

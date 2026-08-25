@@ -378,7 +378,7 @@ def get_db_stats(db: DbSession) -> DBStats:
                 stats.index_count += len(indexes)
 
                 # Get row count (approximate for MySQL, exact for SQLite)
-                count_result = db.execute(text(f"SELECT COUNT(*) FROM {table_name}"))
+                count_result = db.execute(text(f"SELECT COUNT(*) FROM {table_name}"))  # nosec B608 — table_name from inspector.get_table_names()
                 row_count = count_result.scalar() or 0
                 stats.total_rows += row_count
 
