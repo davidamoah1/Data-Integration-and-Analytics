@@ -11,7 +11,6 @@ import io
 from typing import Any
 
 import pandas as pd
-from fpdf import FPDF
 
 SUPPORTED_FORMATS = {"csv", "excel", "xlsx", "pdf"}
 
@@ -149,6 +148,8 @@ class ReportExportService:
         summary = _sanitize_pdf_text(summary)
         sections = [_sanitize_pdf_text(s) for s in sections]
         created_at = _sanitize_pdf_text(str(created_at))
+
+        from fpdf import FPDF
 
         pdf = FPDF(format="A4")
         pdf.set_auto_page_break(auto=True, margin=15)
