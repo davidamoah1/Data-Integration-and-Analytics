@@ -6,8 +6,6 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
-from sklearn.ensemble import IsolationForest
-from sklearn.neighbors import LocalOutlierFactor
 
 from ml.metrics import anomaly_metrics
 
@@ -16,8 +14,8 @@ class AnomalyDetectionEngine:
     """Detect anomalies in a numeric DataFrame using supported algorithms."""
 
     ALGORITHMS = {
-        "isolation_forest": IsolationForest,
-        "local_outlier_factor": LocalOutlierFactor,
+        "isolation_forest": "sklearn.ensemble.IsolationForest",
+        "local_outlier_factor": "sklearn.neighbors.LocalOutlierFactor",
     }
 
     def __init__(self, algorithm: str = "isolation_forest", **kwargs: Any) -> None:
@@ -39,7 +37,10 @@ class AnomalyDetectionEngine:
             else {"n_neighbors": 20, "contamination": "auto"}
         )
         params = {**defaults, **self.kwargs}
-        estimator_class = self.ALGORITHMS[self.algorithm]
+        import importlib
+        estimator_path = self.ALGORITHMS[self.algorithm]
+        module_name, class_name = estimator_path.rsplit(".", 1)
+        estimator_class = getattr(importlib.import_module(module_name), class_name)
 
         self.model = estimator_class(**params)
         if self.algorithm == "local_outlier_factor":
