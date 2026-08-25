@@ -1,7 +1,8 @@
 """FastAPI routes for invitation and registration v2 endpoints."""
 
-# ruff: noqa: B008  # FastAPI Depends() calls in default arguments are intentional
+import logging
 
+# ruff: noqa: B008  # FastAPI Depends() calls in default arguments are intentional
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session as DbSession
 
@@ -15,6 +16,8 @@ from shared.database import get_db
 from shared.dependencies import require_permissions
 from shared.response import success_response
 from shared.tenant import get_current_organization_id
+
+logger = logging.getLogger("auth.signup")
 
 invitation_router = APIRouter(prefix="/api/invitations", tags=["Invitations"])
 registration_router = APIRouter(prefix="/api/auth", tags=["Authentication"])
@@ -33,7 +36,23 @@ async def signup_v2(request: SignupV2Request, db: DbSession = Depends(get_db)):
       - personal: User creates a personal workspace with viewer role
     """
     service = RegistrationService(db)
-    result = service.register(request)
+    try:
+        result = service.register(request)
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.error(
+            "Signup failed for email=%s mode=%s: %s: %s",
+            request.email,
+            request.registration_mode,
+            type(exc).__name__,
+            exc,
+        )
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail="An unexpected error occurred during account creation.",
+        ) from exc
     return success_response(result, "Account created successfully")
 
 
