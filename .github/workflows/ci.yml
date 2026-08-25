@@ -341,6 +341,13 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - name: Create Vercel project link
+        run: |
+          mkdir -p .vercel
+          cat > .vercel/project.json << 'EOF'
+          {"projectId":"${{ secrets.VERCEL_PROJECT_ID }}","orgId":"${{ secrets.VERCEL_ORG_ID }}","projectName":"data-integration-and-analytics"}
+          EOF
+
       - name: Deploy to Vercel
         id: deploy-vercel
         uses: amondnet/vercel-action@v25
