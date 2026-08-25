@@ -44,7 +44,8 @@ from shared.database import Base  # noqa: E402
 
 config = context.config
 validate_config()
-config.set_main_option("sqlalchemy.url", DB_URL)
+# Escape % as %% for configparser interpolation (passwords with @ encode to %40)
+config.set_main_option("sqlalchemy.url", DB_URL.replace("%", "%%"))
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
