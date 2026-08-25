@@ -9,8 +9,6 @@ from __future__ import annotations
 from typing import Any
 
 import pandas as pd
-from statsmodels.tsa.arima.model import ARIMA
-from statsmodels.tsa.holtwinters import ExponentialSmoothing
 
 from ml.metrics import forecast_metrics
 
@@ -29,6 +27,7 @@ def _prepare_series(df: pd.DataFrame, date_col: str, target_col: str, freq: str 
 def forecast_arima(series: pd.Series, horizon: int) -> dict[str, Any]:
     """Run ARIMA forecast."""
     try:
+        from statsmodels.tsa.arima.model import ARIMA
         model = ARIMA(series, order=(1, 1, 1))
         fitted = model.fit()
         pred = fitted.get_forecast(steps=horizon)
@@ -48,6 +47,7 @@ def forecast_arima(series: pd.Series, horizon: int) -> dict[str, Any]:
 def forecast_ets(series: pd.Series, horizon: int, seasonal: str = "add") -> dict[str, Any]:
     """Run Exponential Smoothing forecast."""
     try:
+        from statsmodels.tsa.holtwinters import ExponentialSmoothing
         seasonal_periods = 7 if len(series) >= 14 else None
         if seasonal_periods:
             model = ExponentialSmoothing(
@@ -108,8 +108,10 @@ class ForecastingEngine:
             return {"status": "failed", "error": "Need at least 3 observations"}
 
         if self.algorithm == "ARIMA":
+            from statsmodels.tsa.arima.model import ARIMA
             self.fitted_model = ARIMA(self.last_values, order=(1, 1, 1)).fit()
         elif self.algorithm == "ExponentialSmoothing":
+            from statsmodels.tsa.holtwinters import ExponentialSmoothing
             seasonal_periods = 7 if len(self.last_values) >= 14 else None
             if seasonal_periods:
                 model = ExponentialSmoothing(
@@ -121,6 +123,7 @@ class ForecastingEngine:
         else:
             # Auto-select: try ETS, fallback to ARIMA
             try:
+                from statsmodels.tsa.holtwinters import ExponentialSmoothing
                 seasonal_periods = 7 if len(self.last_values) >= 14 else None
                 if seasonal_periods:
                     model = ExponentialSmoothing(
@@ -134,6 +137,7 @@ class ForecastingEngine:
                 self.fitted_model = model.fit()
                 self.algorithm = "ExponentialSmoothing"
             except Exception:
+                from statsmodels.tsa.arima.model import ARIMA
                 self.fitted_model = ARIMA(self.last_values, order=(1, 1, 1)).fit()
                 self.algorithm = "ARIMA"
 
@@ -170,6 +174,7 @@ class ForecastingEngine:
         train = self.last_values.iloc[:-test_size]
         test = self.last_values.iloc[-test_size:]
         try:
+            from statsmodels.tsa.arima.model import ARIMA
             model = ARIMA(train, order=(1, 1, 1)).fit()
             pred = model.forecast(steps=test_size)
             return forecast_metrics(test.values, pred.values)
