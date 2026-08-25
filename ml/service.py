@@ -12,7 +12,6 @@ import os
 import uuid
 from typing import Any
 
-import joblib
 import pandas as pd
 from sqlalchemy.orm import Session
 
@@ -258,6 +257,7 @@ class MLService:
                     )
                     os.makedirs(artifact_dir, exist_ok=True)
                     artifact_path = os.path.join(artifact_dir, f"{model.id}.joblib")
+                    import joblib
                     joblib.dump(
                         {
                             "model": automl.best_model,
@@ -308,6 +308,7 @@ class MLService:
         artifact_dir = os.environ.get("ML_ARTIFACT_DIR", os.path.join(os.getcwd(), "ml_artifacts"))
         os.makedirs(artifact_dir, exist_ok=True)
         artifact_path = os.path.join(artifact_dir, f"{model.id}.joblib")
+        import joblib
         joblib.dump({"engine": engine}, artifact_path)
         run.artifact_path = artifact_path
         model.artifact_path = artifact_path
