@@ -1,7 +1,7 @@
 """Minimal diagnostic endpoint for Vercel.
 
-This function does NOT import the full FastAPI app. It tests basic
-Python functionality and environment configuration on Vercel.
+This is a standalone ASGI app that does NOT import the full FastAPI app.
+It returns diagnostic info to help identify why the main app returns 500.
 """
 
 import json
@@ -10,8 +10,11 @@ import sys
 import traceback
 
 
-def handler(request):
-    """Return diagnostic info as JSON."""
+async def app(scope, receive, send):
+    """ASGI app returning diagnostic info."""
+    if scope["type"] != "http":
+        return
+
     info = {
         "python": sys.version,
         "vercel": os.getenv("VERCEL", "not set"),
@@ -30,15 +33,15 @@ def handler(request):
         import config
 
         info["config_db_type"] = config.DB_TYPE
-        info["config_db_url_set"] = bool(config.DB_URL)
+        info["config_db_url_prefix"] = config.DB_URL[:30] + "..." if config.DB_URL else "not set"
         info["config_is_production"] = config.IS_PRODUCTION
     except Exception as e:
         info["config_error"] = str(e)
-        info["config_traceback"] = traceback.format_exc()
+        info["config_traceback"] = traceback.format_exc()[-1500:]
 
     # Try importing the main app
     try:
-        from api.main import app
+        from api.main import app as main_app
 
         info["app_import"] = "success"
     except Exception as e:
@@ -48,8 +51,11 @@ def handler(request):
 
     body = json.dumps(info, indent=2, default=str).encode("utf-8")
 
-    return {
-        "statusCode": 200,
-        "headers": {"Content-Type": "application/json"},
-        "body": body.decode("utf-8"),
-    }
+    await send(
+        {
+            "type": "http.response.start",
+            "status": 200,
+            "headers": [[b"content-type", b"application/json"]],
+        }
+    )
+    await send({"type": "http.response.body", "body": body})

@@ -33,7 +33,7 @@
     { "source": "/openapi.json", "destination": "/api/index.py" },
     { "source": "/health", "destination": "/api/index.py" },
     { "source": "/ready", "destination": "/api/index.py" },
-    { "source": "/api/diagnostic", "destination": "/api/diagnostic.py" }
+    { "source": "/diagnostic", "destination": "/api/diagnostic.py" }
   ],
   "env": {
     "NEXT_PUBLIC_API_URL": "",
