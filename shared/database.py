@@ -48,11 +48,9 @@ def _attach_slow_query_listener(engine, threshold_ms: int):
 def ensure_tables(engine):
     """Create all tables if they do not exist. Idempotent via module flag.
 
-    Only runs for SQLite (local dev, tests, and SQLite-backed serverless
-    cold starts). Production MySQL schema is owned exclusively by Alembic
-    migrations (`alembic upgrade head`) — calling create_all() against MySQL
-    could create tables/columns that drift from migration history, so it is
-    a deliberate no-op there.
+    Runs for both SQLite and MySQL. For MySQL, create_all() only creates
+    tables that don't exist — it won't modify existing tables. Missing
+    columns on existing tables are added explicitly below.
     """
     global _tables_initialized
     if _tables_initialized:
@@ -60,11 +58,30 @@ def ensure_tables(engine):
 
     import config
 
-    if config.DB_TYPE == "mysql":
-        _tables_initialized = True
-        return
-
     Base.metadata.create_all(engine)
+
+    # Add missing columns to existing tables (MySQL doesn't get these
+    # from create_all if the table already exists)
+    if config.DB_TYPE == "mysql":
+        from sqlalchemy import inspect as _inspect, text as _text
+
+        insp = _inspect(engine)
+
+        # Check users table for missing columns
+        if "users" in insp.get_table_names():
+            existing_cols = {c["name"] for c in insp.get_columns("users")}
+            missing_cols = {
+                "onboarding_completed": "INTEGER NOT NULL DEFAULT 0",
+                "onboarding_data": "JSON NULL",
+            }
+            with engine.begin() as conn:
+                for col_name, col_def in missing_cols.items():
+                    if col_name not in existing_cols:
+                        logger.info("Adding missing column users.%s", col_name)
+                        conn.execute(
+                            _text(f"ALTER TABLE users ADD COLUMN {col_name} {col_def}")
+                        )
+
     _tables_initialized = True
 
 
