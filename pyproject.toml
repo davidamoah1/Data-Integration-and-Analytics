@@ -27,7 +27,7 @@ dependencies = [
   "xmltodict==0.14.2",
   "requests>=2.33.0",
   "python-multipart>=0.0.31",
-  "scipy==1.13.0",
+  "scipy==1.15.3",
   "pypdf>=5.0.0",
   "python-docx==1.1.2",
   "python-pptx==1.0.2",
