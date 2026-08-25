@@ -40,8 +40,8 @@ def init_sentry() -> bool:
         return False
 
     environment = os.getenv("APP_ENV", "development")
-    sample_rate = float(os.getenv("SENTRY_TRACES_SAMPLE_RATE", "0.1"))
-    profiles_rate = float(os.getenv("SENTRY_PROFILES_SAMPLE_RATE", "0.1"))
+    sample_rate = float(os.getenv("SENTRY_TRACES_SAMPLE_RATE") or "0.1")
+    profiles_rate = float(os.getenv("SENTRY_PROFILES_SAMPLE_RATE") or "0.1")
 
     sentry_sdk.init(
         dsn=dsn,

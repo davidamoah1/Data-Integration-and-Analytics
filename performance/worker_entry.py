@@ -30,8 +30,8 @@ async def run_workers():
     register_builtin_handlers()
 
     redis_url = os.getenv("REDIS_URL", "")
-    min_workers = int(os.getenv("WORKER_MIN_WORKERS", "2"))
-    max_workers = int(os.getenv("WORKER_MAX_WORKERS", "20"))
+    min_workers = int(os.getenv("WORKER_MIN_WORKERS") or "2")
+    max_workers = int(os.getenv("WORKER_MAX_WORKERS") or "20")
 
     queue = TaskQueue(redis_url=redis_url if redis_url else None)
     pool = WorkerPool(
