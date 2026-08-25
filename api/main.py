@@ -427,7 +427,7 @@ async def path_root_middleware(request: Request, call_next):
 
 
 app.add_middleware(
-    RequestSizeLimitMiddleware, max_bytes=int(os.getenv("MAX_REQUEST_BODY_BYTES", "52428800"))
+    RequestSizeLimitMiddleware, max_bytes=int(os.getenv("MAX_REQUEST_BODY_BYTES") or "52428800")
 )
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 app.add_middleware(MonitoringMiddleware)
@@ -439,7 +439,7 @@ _is_test_env = os.getenv("PYTEST_RUNNING", "").lower() in ("1", "true", "yes")
 if not _is_test_env:
     app.add_middleware(
         RateLimitMiddleware,
-        requests_per_minute=int(os.getenv("RATE_LIMIT_RPM", "120")),
+        requests_per_minute=int(os.getenv("RATE_LIMIT_RPM") or "120"),
         redis_url=os.getenv("REDIS_URL") or None,
     )
 
@@ -997,6 +997,6 @@ if __name__ == "__main__":
     uvicorn.run(
         "api.main:app",
         host=os.getenv("API_HOST", _default_host),
-        port=int(os.getenv("API_PORT", "8000")),
+        port=int(os.getenv("API_PORT") or "8000"),
         reload=True,
     )
