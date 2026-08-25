@@ -378,6 +378,7 @@ def validate_config() -> None:
                 stacklevel=2,
             )
 
+
 # Workflow execution settings
 ALLOW_WORKFLOW_CODE_EXEC = os.getenv("ALLOW_WORKFLOW_CODE_EXEC", "").lower() in (
     "1",

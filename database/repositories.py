@@ -121,7 +121,8 @@ class SalesRepository:
 
         count_query = f"SELECT COUNT(*) as total FROM sales{where}"  # nosec B608 — where clause uses parameterized values, table name is hardcoded
         data_query = (
-            f"SELECT * FROM sales{where} ORDER BY order_date DESC " f"LIMIT :limit OFFSET :offset"  # nosec B608 — where clause uses parameterized values, table name is hardcoded
+            f"SELECT * FROM sales{where} ORDER BY order_date DESC "
+            f"LIMIT :limit OFFSET :offset"  # nosec B608 — where clause uses parameterized values, table name is hardcoded
         )
 
         with self.engine.connect() as conn:

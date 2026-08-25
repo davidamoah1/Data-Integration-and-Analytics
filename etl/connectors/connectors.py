@@ -229,7 +229,9 @@ class MySQLConnector(BaseConnector):
             df = self.extract(nrows=100)
         else:
             validate_sql_identifier(table)
-            df = pd.read_sql(f"SELECT * FROM `{table}` LIMIT 100", self._engine)  # nosec B608 — table validated by validate_sql_identifier above
+            df = pd.read_sql(
+                f"SELECT * FROM `{table}` LIMIT 100", self._engine
+            )  # nosec B608 — table validated by validate_sql_identifier above
         schema = []
         for col in df.columns:
             dtype = str(df[col].dtype)
@@ -340,11 +342,13 @@ class GraphQLConnector(BaseConnector):
             validate_url(self.config["url"])
         except UrlValidationError:
             raise ValueError(f"URL validation failed for {self.config['url']}") from None
-        response = requests.post(  # nosec B113 — timeout is set via self.config.get("timeout", 30) below
-            self.config["url"],
-            json={"query": self.config["query"], "variables": self.config.get("variables", {})},
-            headers=self.config.get("headers", {}),
-            timeout=self.config.get("timeout", 30),
+        response = (
+            requests.post(  # nosec B113 — timeout is set via self.config.get("timeout", 30) below
+                self.config["url"],
+                json={"query": self.config["query"], "variables": self.config.get("variables", {})},
+                headers=self.config.get("headers", {}),
+                timeout=self.config.get("timeout", 30),
+            )
         )
         response.raise_for_status()
         payload = response.json()

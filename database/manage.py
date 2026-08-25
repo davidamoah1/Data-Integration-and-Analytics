@@ -117,7 +117,9 @@ def cmd_status():
         with engine.connect() as conn:
             for table in sorted(tables):
                 try:
-                    count = conn.execute(text(f"SELECT COUNT(*) FROM {table}")).scalar()  # nosec B608 — table from inspector.get_table_names(), not user input
+                    count = conn.execute(
+                        text(f"SELECT COUNT(*) FROM {table}")
+                    ).scalar()  # nosec B608 — table from inspector.get_table_names(), not user input
                     idx_count = len(inspector.get_indexes(table))
                     print(f"│   {table:40s} {count:>10} rows  {idx_count:>3} indexes")
                 except Exception:

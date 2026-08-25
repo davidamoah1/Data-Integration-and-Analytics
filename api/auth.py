@@ -22,9 +22,10 @@ def _get_valid_api_key() -> str:
     In production (DB_TYPE=mysql or APP_ENV=production), the default dev key is rejected.
     """
     key = os.getenv("API_KEY", _DEV_KEY)
-    is_prod = os.getenv("DB_TYPE", "").lower() == "mysql" or os.getenv(
-        "APP_ENV", ""
-    ).lower() == "production"
+    is_prod = (
+        os.getenv("DB_TYPE", "").lower() == "mysql"
+        or os.getenv("APP_ENV", "").lower() == "production"
+    )
     if is_prod and key == _DEV_KEY:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

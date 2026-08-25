@@ -198,7 +198,8 @@ class TestTempStorage:
         # On Vercel, paths should use tempfile.gettempdir(), not "/tmp"
         if os.getenv("VERCEL", "").lower() in ("1", "true", "yes"):
             assert (
-                "/tmp" not in config.CAPTURE_STORAGE_DIR  # nosec B108 - string literal in assertion, not a temp path
+                "/tmp"
+                not in config.CAPTURE_STORAGE_DIR  # nosec B108 - string literal in assertion, not a temp path
                 or tempfile.gettempdir() in config.CAPTURE_STORAGE_DIR
             )
 
@@ -217,10 +218,10 @@ class TestTempStorage:
                     tree = ast.parse(f.read(), filename=fpath)
                 for node in ast.walk(tree):
                     if isinstance(node, ast.Constant) and isinstance(node.value, str):
-                        if node.value.startswith("/tmp/"):  # nosec B108 — string literal in assertion, not a temp path
-                            pytest.fail(
-                                f"{fpath} contains hardcoded /tmp path: {node.value}"
-                            )
+                        if node.value.startswith(
+                            "/tmp/"
+                        ):  # nosec B108 — string literal in assertion, not a temp path
+                            pytest.fail(f"{fpath} contains hardcoded /tmp path: {node.value}")
 
 
 # --- B104: Server binding ----------------------------------------------------
