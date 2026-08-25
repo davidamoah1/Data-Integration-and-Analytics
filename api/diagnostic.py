@@ -68,6 +68,57 @@ async def app(scope, receive, send):
         info["db_error"] = str(e)
         info["db_traceback"] = traceback.format_exc()[-1500:]
 
+    # Try a test signup flow to capture the exact error
+    try:
+        from sqlalchemy import create_engine as _ce
+        from sqlalchemy.orm import sessionmaker as _sm
+        eng = _ce(config.DB_URL)
+        SessionLocal = _sm(bind=eng, expire_on_commit=False)
+        db = SessionLocal()
+
+        # Check if default roles exist
+        from sqlalchemy import text as _text
+        roles = db.execute(_text("SELECT id, name FROM roles")).fetchall()
+        info["db_roles"] = [{"id": r[0], "name": r[1]} for r in roles]
+
+        # Check users table columns
+        from sqlalchemy import inspect as _insp
+        insp = _insp(eng)
+        user_cols = [c["name"] for c in insp.get_columns("users")]
+        info["db_user_columns"] = user_cols
+
+        # Try the actual registration service
+        from organizations.invitation_schemas import SignupV2Request
+        from organizations.invitation_service import RegistrationService
+        test_req = SignupV2Request(
+            email="diag_test@test.com",
+            password="TestPass123!",
+            full_name="Diag Test",
+            registration_mode="create_organization",
+            organization_name="Diag Test Org",
+            country="US",
+            industry="tech",
+            organization_type="startup",
+        )
+        svc = RegistrationService(db)
+        result = svc.register(test_req)
+        info["signup_test"] = "success"
+        info["signup_result"] = {k: v for k, v in result.items() if k != "access_token" and k != "refresh_token"}
+        # Clean up test data
+        db.rollback()
+        db.close()
+        eng.dispose()
+    except Exception as e:
+        info["signup_test"] = "failed"
+        info["signup_error"] = str(e)
+        info["signup_traceback"] = traceback.format_exc()[-2500:]
+        try:
+            db.rollback()
+            db.close()
+            eng.dispose()
+        except Exception:
+            pass
+
     body = json.dumps(info, indent=2, default=str).encode("utf-8")
 
     await send(
