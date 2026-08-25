@@ -2,28 +2,22 @@
 #
 # Vercel's Python builder uses the nearest requirements.txt to the function
 # entrypoint, so this file — NOT the root requirements.txt — determines what
-# gets bundled into the deployed function. It intentionally excludes
-# streamlit and plotly: those are only used by dashboard/ (a separate
-# standalone Streamlit app that is never deployed to Vercel), and including
-# them here previously pushed the function bundle past Vercel's 500 MB limit.
+# gets bundled into the deployed function.
 #
-# Keep this in sync with the root requirements.txt for every package other
-# than streamlit/plotly. Additionally excluded here (all bundle-size-only
-# cuts, safe because the code paths that use them already handle ImportError
-# gracefully, or the feature is unusable on Vercel regardless):
-#   - PyMuPDF / pytesseract: only used by capture/ocr_engine.py behind a
-#     lazy `try: import fitz / pytesseract` — OCR also requires a system
-#     Tesseract binary that isn't installable on Vercel, so it never works
-#     there anyway.
-#   - pypdf: lazy-imported in ai/engines/document_chat.py with an explicit
-#     ImportError fallback message.
-#   - python-pptx: lazy-imported in services/report_engine.py with a
-#     logger.warning + JSON-export fallback.
-#   - python-docx: not imported anywhere in the codebase (unused).
+# IMPORTANT: Vercel serverless functions have a 250MB bundle limit.
+# Heavy packages (pandas, numpy, scipy, scikit-learn, statsmodels, joblib,
+# Pillow, openpyxl, fpdf2) are excluded because they push the bundle past
+# the limit and are not needed for core API operations (auth, signup, CRUD).
+# Code paths that use them handle ImportError gracefully or are not reachable
+# on Vercel.
+# Also excluded (same reasons as before):
+#   - streamlit / plotly: only used by dashboard/ (standalone Streamlit app)
+#   - PyMuPDF / pytesseract: OCR requires system Tesseract binary
+#   - pypdf: lazy-imported with ImportError fallback
+#   - python-pptx: lazy-imported with JSON-export fallback
+#   - python-docx: not imported anywhere in the codebase
 
-pandas==2.2.3
 SQLAlchemy==2.0.36
-openpyxl==3.1.5
 python-dotenv==1.0.1
 pymysql==1.1.1
 cryptography==44.0.0
@@ -43,15 +37,8 @@ chardet==5.2.0
 xmltodict==0.14.2
 requests==2.32.3
 python-multipart==0.0.20
-scipy==1.13.0
-fpdf2==2.8.3
 psutil==6.1.1
 apscheduler==3.11.0
-numpy==1.26.4
-scikit-learn==1.6.1
-statsmodels==0.14.2
-joblib==1.4.2
-Pillow==11.0.0
 sentry-sdk[fastapi]==2.19.2
 opentelemetry-distro==0.49b0
 opentelemetry-exporter-otlp==1.28.0
