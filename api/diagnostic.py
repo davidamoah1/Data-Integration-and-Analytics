@@ -49,6 +49,25 @@ async def app(scope, receive, send):
         info["app_error"] = str(e)
         info["app_traceback"] = traceback.format_exc()[-2000:]
 
+    # Try database connection and check tables
+    try:
+        from sqlalchemy import create_engine, inspect as sa_inspect
+        db_url = config.DB_URL
+        eng = create_engine(db_url)
+        inspector = sa_inspect(eng)
+        all_tables = sorted(inspector.get_table_names())
+        info["db_tables"] = all_tables
+        required = [
+            "users", "roles", "user_roles", "organizations",
+            "workspaces", "invitations", "audit_logs", "sessions",
+            "departments", "role_permissions",
+        ]
+        info["db_missing_tables"] = [t for t in required if t not in all_tables]
+        eng.dispose()
+    except Exception as e:
+        info["db_error"] = str(e)
+        info["db_traceback"] = traceback.format_exc()[-1500:]
+
     body = json.dumps(info, indent=2, default=str).encode("utf-8")
 
     await send(
