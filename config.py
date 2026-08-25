@@ -37,15 +37,15 @@ if os.getenv("VERCEL", "").lower() in ("1", "true", "yes") and not os.path.isabs
     os.getenv("CAPTURE_STORAGE_DIR", "")
 ):
     CAPTURE_STORAGE_DIR = os.path.join(tempfile.gettempdir(), "capture")
-CAPTURE_MAX_FILE_SIZE_MB = int(os.getenv("CAPTURE_MAX_FILE_SIZE_MB", "25"))
-CAPTURE_LOW_CONFIDENCE_THRESHOLD = float(os.getenv("CAPTURE_LOW_CONFIDENCE_THRESHOLD", "0.75"))
-CAPTURE_RETENTION_DAYS = int(os.getenv("CAPTURE_RETENTION_DAYS", "365"))
+CAPTURE_MAX_FILE_SIZE_MB = int(os.getenv("CAPTURE_MAX_FILE_SIZE_MB") or "25")
+CAPTURE_LOW_CONFIDENCE_THRESHOLD = float(os.getenv("CAPTURE_LOW_CONFIDENCE_THRESHOLD") or "0.75")
+CAPTURE_RETENTION_DAYS = int(os.getenv("CAPTURE_RETENTION_DAYS") or "365")
 # Path to the Tesseract OCR binary. Leave unset to use the system PATH.
 TESSERACT_CMD = os.getenv("TESSERACT_CMD", "")
 
 # Certificate Intelligence — maximum files per normal batch upload.
 # Large batches (500+) should use background processing.
-CERTIFICATE_MAX_BATCH_SIZE = int(os.getenv("CERTIFICATE_MAX_BATCH_SIZE", "50"))
+CERTIFICATE_MAX_BATCH_SIZE = int(os.getenv("CERTIFICATE_MAX_BATCH_SIZE") or "50")
 
 # Database
 # DATABASE_URL takes precedence over individual MYSQL_* / SQLITE_* vars.
@@ -94,27 +94,27 @@ else:
     DB_URL = f"sqlite:///{_sqlite_path}"
 
 # --- Connection Pool Settings (MySQL) ---
-POOL_SIZE = int(os.getenv("POOL_SIZE", "10"))
-POOL_TIMEOUT = int(os.getenv("POOL_TIMEOUT", "30"))
-POOL_RECYCLE = int(os.getenv("POOL_RECYCLE", "3600"))
-MAX_OVERFLOW = int(os.getenv("MAX_OVERFLOW", "20"))
+POOL_SIZE = int(os.getenv("POOL_SIZE") or "10")
+POOL_TIMEOUT = int(os.getenv("POOL_TIMEOUT") or "30")
+POOL_RECYCLE = int(os.getenv("POOL_RECYCLE") or "3600")
+MAX_OVERFLOW = int(os.getenv("MAX_OVERFLOW") or "20")
 
 # --- Query Optimization ---
-SLOW_QUERY_THRESHOLD_MS = int(os.getenv("SLOW_QUERY_THRESHOLD_MS", "500"))
-QUERY_TIMEOUT_SECONDS = int(os.getenv("QUERY_TIMEOUT_SECONDS", "30"))
+SLOW_QUERY_THRESHOLD_MS = int(os.getenv("SLOW_QUERY_THRESHOLD_MS") or "500")
+QUERY_TIMEOUT_SECONDS = int(os.getenv("QUERY_TIMEOUT_SECONDS") or "30")
 ENABLE_QUERY_LOGGING = os.getenv("ENABLE_QUERY_LOGGING", "false").lower() in ("true", "1", "yes")
 
 # --- Backup Strategy ---
 BACKUP_ENABLED = os.getenv("BACKUP_ENABLED", "false").lower() in ("true", "1", "yes")
 BACKUP_SCHEDULE = os.getenv("BACKUP_SCHEDULE", "0 2 * * *")  # Daily at 2 AM
-BACKUP_RETENTION_DAYS = int(os.getenv("BACKUP_RETENTION_DAYS", "30"))
+BACKUP_RETENTION_DAYS = int(os.getenv("BACKUP_RETENTION_DAYS") or "30")
 BACKUP_STORAGE_PATH = _resolve_path(os.getenv("BACKUP_STORAGE_PATH", "backups"))
 BACKUP_COMPRESS = os.getenv("BACKUP_COMPRESS", "true").lower() in ("true", "1", "yes")
 
 # --- Redis / Performance (Phase 10) ---
 REDIS_URL = os.getenv("REDIS_URL", "")
 CACHE_ENABLED = os.getenv("CACHE_ENABLED", "true").lower() == "true"
-CACHE_DEFAULT_TTL = int(os.getenv("CACHE_DEFAULT_TTL", "300"))
+CACHE_DEFAULT_TTL = int(os.getenv("CACHE_DEFAULT_TTL") or "300")
 CACHE_KEY_PREFIX = os.getenv("CACHE_KEY_PREFIX", "aedip")
 
 # --- File Storage (Phase 12) ---
@@ -143,14 +143,14 @@ SUPABASE_STORAGE_BUCKET = os.getenv("SUPABASE_STORAGE_BUCKET", "files")
 SUPABASE_STORAGE_PUBLIC_URL = os.getenv("SUPABASE_STORAGE_PUBLIC_URL", "")
 
 # Background workers
-WORKER_MIN_WORKERS = int(os.getenv("WORKER_MIN_WORKERS", "2"))
-WORKER_MAX_WORKERS = int(os.getenv("WORKER_MAX_WORKERS", "20"))
-WORKER_SCALE_UP_THRESHOLD = int(os.getenv("WORKER_SCALE_UP_THRESHOLD", "10"))
-WORKER_SCALE_DOWN_THRESHOLD = int(os.getenv("WORKER_SCALE_DOWN_THRESHOLD", "2"))
-WORKER_SCALE_CHECK_INTERVAL = int(os.getenv("WORKER_SCALE_CHECK_INTERVAL", "30"))
+WORKER_MIN_WORKERS = int(os.getenv("WORKER_MIN_WORKERS") or "2")
+WORKER_MAX_WORKERS = int(os.getenv("WORKER_MAX_WORKERS") or "20")
+WORKER_SCALE_UP_THRESHOLD = int(os.getenv("WORKER_SCALE_UP_THRESHOLD") or "10")
+WORKER_SCALE_DOWN_THRESHOLD = int(os.getenv("WORKER_SCALE_DOWN_THRESHOLD") or "2")
+WORKER_SCALE_CHECK_INTERVAL = int(os.getenv("WORKER_SCALE_CHECK_INTERVAL") or "30")
 
 # Chunked query default size
-CHUNK_SIZE_DEFAULT = int(os.getenv("CHUNK_SIZE_DEFAULT", "5000"))
+CHUNK_SIZE_DEFAULT = int(os.getenv("CHUNK_SIZE_DEFAULT") or "5000")
 
 # Logging
 LOG_PATH = _resolve_path(os.getenv("LOG_PATH", "logs/pipeline.log"))
@@ -158,14 +158,14 @@ LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 
 # --- Monitoring (Phase 18) ---
 SENTRY_DSN = os.getenv("SENTRY_DSN", "")
-SENTRY_TRACES_SAMPLE_RATE = float(os.getenv("SENTRY_TRACES_SAMPLE_RATE", "0.1"))
-SENTRY_PROFILES_SAMPLE_RATE = float(os.getenv("SENTRY_PROFILES_SAMPLE_RATE", "0.1"))
+SENTRY_TRACES_SAMPLE_RATE = float(os.getenv("SENTRY_TRACES_SAMPLE_RATE") or "0.1")
+SENTRY_PROFILES_SAMPLE_RATE = float(os.getenv("SENTRY_PROFILES_SAMPLE_RATE") or "0.1")
 SENTRY_RELEASE = os.getenv("SENTRY_RELEASE", "aedip@1.0.0")
 
 OTEL_EXPORTER_OTLP_ENDPOINT = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "")
 OTEL_SERVICE_NAME = os.getenv("OTEL_SERVICE_NAME", "aedip-api")
 OTEL_SERVICE_VERSION = os.getenv("OTEL_SERVICE_VERSION", "1.0.0")
-OTEL_METRIC_EXPORT_INTERVAL = int(os.getenv("OTEL_METRIC_EXPORT_INTERVAL", "60000"))
+OTEL_METRIC_EXPORT_INTERVAL = int(os.getenv("OTEL_METRIC_EXPORT_INTERVAL") or "60000")
 
 PROMETHEUS_ENABLED = os.getenv("PROMETHEUS_ENABLED", "true").lower() in ("true", "1", "yes")
 MONITORING_ENABLED = os.getenv("MONITORING_ENABLED", "true").lower() in ("true", "1", "yes")
@@ -188,8 +188,8 @@ else:
     JWT_SECRET_KEY = _secrets.token_urlsafe(48)
     del _secrets
 JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
-JWT_ACCESS_EXPIRE_MINUTES = int(os.getenv("JWT_ACCESS_EXPIRE_MINUTES", "30"))
-JWT_REFRESH_EXPIRE_DAYS = int(os.getenv("JWT_REFRESH_EXPIRE_DAYS", "7"))
+JWT_ACCESS_EXPIRE_MINUTES = int(os.getenv("JWT_ACCESS_EXPIRE_MINUTES") or "30")
+JWT_REFRESH_EXPIRE_DAYS = int(os.getenv("JWT_REFRESH_EXPIRE_DAYS") or "7")
 
 # --- Encryption Key (separate from JWT for Fernet encryption of API keys, etc.) ---
 # Derives from JWT_SECRET_KEY only as a fallback for dev. Production must set ENCRYPTION_KEY explicitly.
@@ -210,16 +210,16 @@ SSO_SAML_ENTITY_ID = os.getenv("SSO_SAML_ENTITY_ID", "")
 SSO_SAML_ACS_URL = os.getenv("SSO_SAML_ACS_URL", "")
 
 # --- Password Policy ---
-PASSWORD_MIN_LENGTH = int(os.getenv("PASSWORD_MIN_LENGTH", "8"))
+PASSWORD_MIN_LENGTH = int(os.getenv("PASSWORD_MIN_LENGTH") or "8")
 PASSWORD_REQUIRE_UPPERCASE = os.getenv("PASSWORD_REQUIRE_UPPERCASE", "true").lower() == "true"
 PASSWORD_REQUIRE_LOWERCASE = os.getenv("PASSWORD_REQUIRE_LOWERCASE", "true").lower() == "true"
 PASSWORD_REQUIRE_DIGIT = os.getenv("PASSWORD_REQUIRE_DIGIT", "true").lower() == "true"
 PASSWORD_REQUIRE_SPECIAL = os.getenv("PASSWORD_REQUIRE_SPECIAL", "true").lower() == "true"
-PASSWORD_HISTORY_COUNT = int(os.getenv("PASSWORD_HISTORY_COUNT", "5"))
+PASSWORD_HISTORY_COUNT = int(os.getenv("PASSWORD_HISTORY_COUNT") or "5")
 
 # --- Account Lockout ---
-ACCOUNT_LOCKOUT_THRESHOLD = int(os.getenv("ACCOUNT_LOCKOUT_THRESHOLD", "5"))
-ACCOUNT_LOCKOUT_DURATION_MINUTES = int(os.getenv("ACCOUNT_LOCKOUT_DURATION_MINUTES", "30"))
+ACCOUNT_LOCKOUT_THRESHOLD = int(os.getenv("ACCOUNT_LOCKOUT_THRESHOLD") or "5")
+ACCOUNT_LOCKOUT_DURATION_MINUTES = int(os.getenv("ACCOUNT_LOCKOUT_DURATION_MINUTES") or "30")
 
 # --- CORS ---
 # Development defaults to localhost origins. In production set CORS_ORIGINS
@@ -246,9 +246,9 @@ else:
 # --- AI Platform (Phase 6) ---
 AI_DEFAULT_PROVIDER = os.getenv("AI_DEFAULT_PROVIDER", "openai")
 AI_DEFAULT_MODEL = os.getenv("AI_DEFAULT_MODEL", "gpt-4o-mini")
-AI_MAX_TOKENS = int(os.getenv("AI_MAX_TOKENS", "4096"))
-AI_TEMPERATURE = float(os.getenv("AI_TEMPERATURE", "0.7"))
-AI_REQUEST_TIMEOUT = int(os.getenv("AI_REQUEST_TIMEOUT", "60"))
+AI_MAX_TOKENS = int(os.getenv("AI_MAX_TOKENS") or "4096")
+AI_TEMPERATURE = float(os.getenv("AI_TEMPERATURE") or "0.7")
+AI_REQUEST_TIMEOUT = int(os.getenv("AI_REQUEST_TIMEOUT") or "60")
 
 # AI Provider API Keys
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
@@ -266,30 +266,30 @@ CLAUDE_BASE_URL = os.getenv("CLAUDE_BASE_URL", "https://api.anthropic.com/v1")
 LOCAL_LLM_BASE_URL = os.getenv("LOCAL_LLM_BASE_URL", "http://localhost:11434/v1")
 
 # AI Memory & Cache
-AI_MEMORY_MAX_MESSAGES = int(os.getenv("AI_MEMORY_MAX_MESSAGES", "20"))
+AI_MEMORY_MAX_MESSAGES = int(os.getenv("AI_MEMORY_MAX_MESSAGES") or "20")
 AI_CACHE_ENABLED = os.getenv("AI_CACHE_ENABLED", "true").lower() == "true"
-AI_CACHE_TTL_SECONDS = int(os.getenv("AI_CACHE_TTL_SECONDS", "3600"))
+AI_CACHE_TTL_SECONDS = int(os.getenv("AI_CACHE_TTL_SECONDS") or "3600")
 
 # AI Security
 AI_ENFORCE_PERMISSIONS = os.getenv("AI_ENFORCE_PERMISSIONS", "true").lower() == "true"
-AI_MAX_INPUT_LENGTH = int(os.getenv("AI_MAX_INPUT_LENGTH", "10000"))
-AI_DATA_RETENTION_DAYS = int(os.getenv("AI_DATA_RETENTION_DAYS", "90"))
+AI_MAX_INPUT_LENGTH = int(os.getenv("AI_MAX_INPUT_LENGTH") or "10000")
+AI_DATA_RETENTION_DAYS = int(os.getenv("AI_DATA_RETENTION_DAYS") or "90")
 
 # AI Usage Limits
-AI_DAILY_TOKEN_LIMIT = int(os.getenv("AI_DAILY_TOKEN_LIMIT", "1000000"))
-AI_MONTHLY_COST_LIMIT_USD = float(os.getenv("AI_MONTHLY_COST_LIMIT_USD", "100.0"))
+AI_DAILY_TOKEN_LIMIT = int(os.getenv("AI_DAILY_TOKEN_LIMIT") or "1000000")
+AI_MONTHLY_COST_LIMIT_USD = float(os.getenv("AI_MONTHLY_COST_LIMIT_USD") or "100.0")
 
 # AI Document Chat
-AI_DOC_MAX_SIZE_MB = int(os.getenv("AI_DOC_MAX_SIZE_MB", "20"))
+AI_DOC_MAX_SIZE_MB = int(os.getenv("AI_DOC_MAX_SIZE_MB") or "20")
 AI_DOC_ALLOWED_TYPES = os.getenv("AI_DOC_ALLOWED_TYPES", "pdf,docx,xlsx,csv,pptx,txt").split(",")
 
 # AI Forecasting
-AI_FORECAST_CONFIDENCE_LEVEL = float(os.getenv("AI_FORECAST_CONFIDENCE_LEVEL", "0.95"))
-AI_FORECAST_MAX_HORIZON = int(os.getenv("AI_FORECAST_MAX_HORIZON", "365"))
+AI_FORECAST_CONFIDENCE_LEVEL = float(os.getenv("AI_FORECAST_CONFIDENCE_LEVEL") or "0.95")
+AI_FORECAST_MAX_HORIZON = int(os.getenv("AI_FORECAST_MAX_HORIZON") or "365")
 
 # AI Anomaly Detection
-AI_ANOMALY_SENSITIVITY = float(os.getenv("AI_ANOMALY_SENSITIVITY", "2.0"))
-AI_ANOMALY_MIN_DATA_POINTS = int(os.getenv("AI_ANOMALY_MIN_DATA_POINTS", "10"))
+AI_ANOMALY_SENSITIVITY = float(os.getenv("AI_ANOMALY_SENSITIVITY") or "2.0")
+AI_ANOMALY_MIN_DATA_POINTS = int(os.getenv("AI_ANOMALY_MIN_DATA_POINTS") or "10")
 
 
 def validate_config() -> None:
