@@ -329,38 +329,20 @@ jobs:
           cache-from: type=gha,scope=aedip-build
           cache-to: type=gha,mode=max,scope=aedip-build
 
-  # ── Stage 6: Deploy ────────────────────────────────────────
+  # ── Stage 6: Post-deploy health check ──────────────────────
+  # Vercel auto-deploys from GitHub pushes, so no CLI deploy step is needed.
   deploy:
-    name: Deploy
+    name: Health Check
     runs-on: ubuntu-latest
     needs: [build, security-scan]
     if: github.ref == 'refs/heads/main'
-    environment:
-      name: production
-      url: ${{ steps.deploy-vercel.outputs.url }}
     steps:
-      - uses: actions/checkout@v5
+      - name: Wait for Vercel auto-deploy
+        run: sleep 60
 
-      - name: Create Vercel project link
+      - name: Run health check
         run: |
-          mkdir -p .vercel
-          cat > .vercel/project.json << 'EOF'
-          {"projectId":"${{ secrets.VERCEL_PROJECT_ID }}","orgId":"${{ secrets.VERCEL_ORG_ID }}","projectName":"data-integration-and-analytics"}
-          EOF
-
-      - name: Deploy to Vercel
-        id: deploy-vercel
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: '--prod'
-          working-directory: .
-
-      - name: Run post-deploy health check
-        run: |
-          URL="${{ steps.deploy-vercel.outputs.url }}"
+          URL="https://data-integration-and-analytics.vercel.app"
           echo "Checking health at $URL/health"
           for i in $(seq 1 10); do
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL/health" || echo "000")
@@ -369,8 +351,8 @@ jobs:
               exit 0
             fi
             echo "Health check attempt $i: status $STATUS, retrying..."
-            sleep 10
+            sleep 15
           done
-          echo "Health check failed after 10 attempts"
+          echo "Health check failed after 10 attempts (Vercel may still be deploying)"
           exit 1
 
