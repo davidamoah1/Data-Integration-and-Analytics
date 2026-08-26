@@ -1,4 +1,4 @@
-"""Base classes for Predictive Analytics.
+﻿"""Base classes for Predictive Analytics.
 
 Defines the core data structures and registry pattern for
 industry-specific prediction modules.
@@ -140,7 +140,7 @@ class PredictiveAnalyticsBase:
         """Run predictive analytics. Override in subclasses."""
         raise NotImplementedError
 
-    # ── Helpers ──────────────────────────────────────────
+    # â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     @staticmethod
     def _find_col(df: pd.DataFrame, col_mapping: dict, entity_keys: list[str]) -> str | None:

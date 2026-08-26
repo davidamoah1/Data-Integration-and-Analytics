@@ -1,4 +1,4 @@
-"""Repository for file metadata records."""
+﻿"""Repository for file metadata records."""
 
 from __future__ import annotations
 

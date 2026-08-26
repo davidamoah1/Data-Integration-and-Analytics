@@ -1,4 +1,4 @@
-"""Hospital Data Quality Dashboard — Streamlit rendering of validation results."""
+﻿"""Hospital Data Quality Dashboard â€” Streamlit rendering of validation results."""
 
 from __future__ import annotations
 
@@ -137,7 +137,7 @@ def _render_findings_summary(result: ValidationResult):
 
     findings = result.all_findings
     if not findings:
-        st.success("No findings — all checks passed!")
+        st.success("No findings â€” all checks passed!")
         return
 
     # By severity
@@ -298,7 +298,7 @@ def _render_schema_issues(result: ValidationResult):
     schema = result.schema_result
     if not schema.issues:
         st.markdown("### Schema Validation")
-        st.success("Schema validation passed — no issues found.")
+        st.success("Schema validation passed â€” no issues found.")
         return
 
     st.markdown("### Schema Validation Issues")
@@ -332,7 +332,7 @@ def _render_recommendations(result: ValidationResult):
             )
 
     if not recs:
-        st.info("No recommendations — all checks passed.")
+        st.info("No recommendations â€” all checks passed.")
         return
 
     for rec in recs[:20]:
@@ -407,7 +407,7 @@ def render_approval_section(
 ) -> bool:
     """Render the approval workflow section. Returns True if approved."""
     if result.can_proceed_to_etl:
-        st.success(f"Validation {result.status.value.replace('_', ' ')} — ETL can proceed.")
+        st.success(f"Validation {result.status.value.replace('_', ' ')} â€” ETL can proceed.")
         return True
 
     st.warning(

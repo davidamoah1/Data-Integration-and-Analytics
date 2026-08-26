@@ -1,16 +1,16 @@
-"""FastAPI routes for the Dataset Intelligence Workflow.
+﻿"""FastAPI routes for the Dataset Intelligence Workflow.
 
 Endpoints:
-  POST /dataset-workflow/run          — Start a full workflow on an uploaded file
-  GET  /dataset-workflow/{id}/status  — Get workflow status and progress
-  GET  /dataset-workflow/{id}/profile — Get dataset profile
-  GET  /dataset-workflow/{id}/quality — Get quality report
-  GET  /dataset-workflow/{id}/semantic — Get semantic analysis
-  GET  /dataset-workflow/{id}/industry — Get industry detection
-  GET  /dataset-workflow/{id}/insights — Get AI insights
-  GET  /dataset-workflow/{id}/dashboard — Get dashboard recommendations
-  POST /dataset-workflow/{id}/retry/{stage} — Retry a failed stage
-  POST /dataset-workflow/{id}/confirm-industry — Confirm industry detection
+  POST /dataset-workflow/run          â€” Start a full workflow on an uploaded file
+  GET  /dataset-workflow/{id}/status  â€” Get workflow status and progress
+  GET  /dataset-workflow/{id}/profile â€” Get dataset profile
+  GET  /dataset-workflow/{id}/quality â€” Get quality report
+  GET  /dataset-workflow/{id}/semantic â€” Get semantic analysis
+  GET  /dataset-workflow/{id}/industry â€” Get industry detection
+  GET  /dataset-workflow/{id}/insights â€” Get AI insights
+  GET  /dataset-workflow/{id}/dashboard â€” Get dashboard recommendations
+  POST /dataset-workflow/{id}/retry/{stage} â€” Retry a failed stage
+  POST /dataset-workflow/{id}/confirm-industry â€” Confirm industry detection
 """
 
 from __future__ import annotations
@@ -49,7 +49,7 @@ router = APIRouter(prefix="/dataset-workflow", tags=["Dataset Workflow"])
 # the dataset_workflow_runs table (see `_persist_workflow_state` below) so
 # status/results survive a restart and are visible to other worker
 # processes (C3). Retrying a stage still requires the original process
-# (it needs the in-memory DataFrame) — see `retry_stage` below.
+# (it needs the in-memory DataFrame) â€” see `retry_stage` below.
 _orchestrator = DatasetWorkflowOrchestrator()
 _validator = FileValidator()
 
@@ -1022,7 +1022,7 @@ def _generate_auto_pptx(
 ):
     """Render a PPTX from the canonical PresentationSpecification.
 
-    Uses the SAME chart specifications as the dashboard — no independent
+    Uses the SAME chart specifications as the dashboard â€” no independent
     chart recreation.  Each chart slide uses the placement computed by
     the PresentationLayoutEngine (validated: no overlaps, no cropping).
     """
@@ -1220,9 +1220,9 @@ async def generate_presentation(
     dashboard = _stage_result(state_dict, WorkflowStage.DASHBOARD_READY) or {}
 
     dataset_name = state_dict.get("dataset_name", "Dataset")
-    title = payload.title or f"{dataset_name} — Analysis Presentation"
+    title = payload.title or f"{dataset_name} â€” Analysis Presentation"
 
-    # ── Use canonical auto dashboard/presentation if available ──
+    # â”€â”€ Use canonical auto dashboard/presentation if available â”€â”€
     auto_dashboard = dashboard.get("auto_dashboard") if isinstance(dashboard, dict) else None
     auto_presentation = dashboard.get("auto_presentation") if isinstance(dashboard, dict) else None
 
@@ -1241,7 +1241,7 @@ async def generate_presentation(
             db=db,
         )
 
-    # ── Fallback: Legacy presentation generation ──
+    # â”€â”€ Fallback: Legacy presentation generation â”€â”€
     from studios.presentation_service import PresentationStudioService
 
     # Get recommended charts from the dashboard stage
@@ -1259,7 +1259,7 @@ async def generate_presentation(
         "subtitle": f"Generated from {dataset_name}",
         "summary": quality.get("summary", insights_data.get("executive_summary", "")),
         "findings": "\n".join(
-            f"• {i.get('title', '')}: {i.get('description', '')}"
+            f"â€¢ {i.get('title', '')}: {i.get('description', '')}"
             for i in insights_data.get("insights", [])[:5]
         ),
         "recommendations": "\n".join(quality.get("recommendations", [])[:5]),
@@ -1305,7 +1305,7 @@ async def generate_presentation(
         if slide.shapes.title:
             slide.shapes.title.text = slide_data.get("title", "")
 
-        # Set content (skip text body for chart slides — chart will fill the space)
+        # Set content (skip text body for chart slides â€” chart will fill the space)
         is_chart_slide = slide_data.get("layout") == "chart"
         content = slide_data.get("content", "")
         if is_chart_slide:
@@ -1383,7 +1383,7 @@ async def generate_presentation(
     )
 
 
-# ── Auto Engine Endpoints ─────────────────────────────
+# â”€â”€ Auto Engine Endpoints â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @router.get("/{workflow_id}/understanding")

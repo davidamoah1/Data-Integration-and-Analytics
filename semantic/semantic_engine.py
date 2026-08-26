@@ -1,4 +1,4 @@
-"""MODULE 3 — Semantic Engine.
+﻿"""MODULE 3 â€” Semantic Engine.
 
 Determines the BUSINESS MEANING of columns instead of relying on raw names.
 Maps column names to business entities using:
@@ -27,7 +27,7 @@ import pandas as pd
 from semantic.entity_library import ENTITY_LIBRARY, get_all_synonyms
 
 # Minimum confidence to auto-select an industry (without user confirmation)
-# Below 70%: do NOT auto-select — show "Industry detection uncertain. Please confirm."
+# Below 70%: do NOT auto-select â€” show "Industry detection uncertain. Please confirm."
 # 70%-85%: show recommendation with confidence
 # Above 85%: allow automatic selection
 MIN_INDUSTRY_CONFIDENCE = 70.0
@@ -95,7 +95,7 @@ class SemanticResult:
         }
 
     def get_column_mapping(self) -> dict[str, str]:
-        """Return a simple column → entity_key mapping."""
+        """Return a simple column â†’ entity_key mapping."""
         return {m.column_name: m.entity_key for m in self.mappings}
 
     def get_entity_columns(self, entity_key: str) -> list[str]:
@@ -331,7 +331,7 @@ class SemanticEngine:
     @staticmethod
     def _determine_role(normalized: str, entity_key: str, df: pd.DataFrame, col_name: str) -> str:
         """Determine if a column is an entity, attribute, metric, or dimension."""
-        # If the column name IS the entity (e.g. patient_id → patient), it's an entity
+        # If the column name IS the entity (e.g. patient_id â†’ patient), it's an entity
         entity = ENTITY_LIBRARY.get(entity_key, {})
         synonyms = entity.get("synonyms", [])
 
@@ -419,7 +419,7 @@ class SemanticEngine:
                         role="dimension",
                     )
 
-        # Numeric columns → potential revenue/metric
+        # Numeric columns â†’ potential revenue/metric
         if np.issubdtype(series.dtype, np.number):
             # Check if values look like monetary amounts
             non_null = series.dropna()

@@ -1,4 +1,4 @@
-"""Scheduled report runner using APScheduler.
+﻿"""Scheduled report runner using APScheduler.
 
 The runner reads active `ScheduledReport` records from the database and
 registers APScheduler cron jobs that generate AI reports. Each job creates a

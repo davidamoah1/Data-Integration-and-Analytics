@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import html
 
@@ -20,10 +20,10 @@ def render_semantic_dashboard(
     confidence = mapping_result.industry_confidence
     industry = mapping_result.industry
 
-    # Below 70%: do not auto-select — show uncertainty message
+    # Below 70%: do not auto-select â€” show uncertainty message
     if confidence < 70.0 and not admin_confirmed:
         st.warning(
-            f"⚠️ **Industry detection uncertain.** "
+            f"âš ï¸ **Industry detection uncertain.** "
             f"Best guess: '{industry.title()}' ({confidence:.0f}% confidence). "
             f"Please confirm the correct industry below to generate a sector-specific dashboard."
         )
@@ -73,7 +73,7 @@ def render_semantic_dashboard(
         with st.expander("Data Understanding Signals", expanded=False):
             for sig in value_signals:
                 st.caption(
-                    f"• **{sig.column_name}** → {sig.signal_type.replace('_', ' ').title()} "
+                    f"â€¢ **{sig.column_name}** â†’ {sig.signal_type.replace('_', ' ').title()} "
                     f"({sig.industry}): {sig.evidence}"
                 )
 
@@ -87,7 +87,7 @@ def render_semantic_dashboard(
             unsafe_allow_html=True,
         )
         for insight in template.ai_insights:
-            st.caption(f"• {insight}")
+            st.caption(f"â€¢ {insight}")
 
 
 def _entity_columns(mapping_result: SemanticMappingResult) -> dict[str, list[str]]:
@@ -200,7 +200,7 @@ def _render_generic_dashboard(df: pd.DataFrame, template: DashboardTemplate) -> 
             unsafe_allow_html=True,
         )
         for insight in template.ai_insights:
-            st.caption(f"• {insight}")
+            st.caption(f"â€¢ {insight}")
 
 
 def _render_cards(

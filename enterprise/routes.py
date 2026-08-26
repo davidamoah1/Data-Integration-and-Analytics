@@ -1,4 +1,4 @@
-"""Platform API routes — templates, collaboration, branding, and enterprise search."""
+﻿"""Platform API routes â€” templates, collaboration, branding, and enterprise search."""
 
 import os
 

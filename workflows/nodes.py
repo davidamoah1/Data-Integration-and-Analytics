@@ -1,4 +1,4 @@
-"""Built-in workflow node registry and implementations.
+﻿"""Built-in workflow node registry and implementations.
 
 A node is a callable that receives a `WorkflowContext` and returns a
 NodeResult. New node types can be registered at runtime by adding a
@@ -362,7 +362,7 @@ _SANDBOX_RUNNER = textwrap.dedent(
     df = pd.read_parquet(input_path) if input_path else pd.DataFrame()
     local_ns = {"df": df, "pd": pd}
     try:
-        exec(compile(code, "<workflow>", "exec"), {"__builtins__": {}}, local_ns)  # nosec B102 — sandboxed subprocess with restricted builtins, clean env, timeout, no API memory access
+        exec(compile(code, "<workflow>", "exec"), {"__builtins__": {}}, local_ns)  # nosec B102 â€” sandboxed subprocess with restricted builtins, clean env, timeout, no API memory access
         result = local_ns.get("result", df)
         if isinstance(result, pd.DataFrame):
             result.to_parquet(output_path)
@@ -381,7 +381,7 @@ def _run_python_sandboxed(code: str, df: Any, timeout: float = 30) -> pd.DataFra
 
     Security measures:
         - Runs in a separate process (no access to API memory, DB, or secrets).
-        - Clean environment — no application env vars are passed.
+        - Clean environment â€” no application env vars are passed.
         - CPU/time limit via subprocess timeout.
         - Data passed via temporary parquet files (not pickle).
         - Restricted builtins inside the subprocess.

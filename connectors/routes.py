@@ -1,4 +1,4 @@
-"""FastAPI routes for the Enterprise Connector Framework."""
+﻿"""FastAPI routes for the Enterprise Connector Framework."""
 
 from __future__ import annotations
 

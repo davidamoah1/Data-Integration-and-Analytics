@@ -1,8 +1,8 @@
-"""Tests for Predictive Analytics Engine.
+﻿"""Tests for Predictive Analytics Engine.
 
 Tests cover:
   - Time series forecasting (linear, exponential, moving average, seasonal, auto)
-  - Regression prediction (R², feature importance, predictions)
+  - Regression prediction (RÂ², feature importance, predictions)
   - Risk classification (rule-based, high/medium/low)
   - Industry modules (business, healthcare, education, agriculture)
   - Pipeline integration
@@ -25,7 +25,7 @@ from predictive_analytics import (
     TimeSeriesForecaster,
 )
 
-# ── Fixtures ──────────────────────────────────────────────
+# â”€â”€ Fixtures â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @pytest.fixture
@@ -150,7 +150,7 @@ def agriculture_col_mapping():
     }
 
 
-# ── Time Series Forecaster Tests ──────────────────────────
+# â”€â”€ Time Series Forecaster Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestTimeSeriesForecaster:
@@ -276,7 +276,7 @@ class TestTimeSeriesForecaster:
         assert result is None
 
 
-# ── Regression Predictor Tests ────────────────────────────
+# â”€â”€ Regression Predictor Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestRegressionPredictor:
@@ -325,7 +325,7 @@ class TestRegressionPredictor:
             feature_cols=["rainfall_mm", "fertilizer_kg"],
         )
         assert result.summary != ""
-        assert "R²" in result.summary
+        assert "RÂ²" in result.summary
 
     def test_to_dict(self, agriculture_df):
         result = RegressionPredictor.predict(
@@ -351,7 +351,7 @@ class TestRegressionPredictor:
         assert len(result.feature_importance) > 0
 
 
-# ── Risk Classifier Tests ─────────────────────────────────
+# â”€â”€ Risk Classifier Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestRiskClassifier:
@@ -498,7 +498,7 @@ class TestRiskClassifier:
                 assert len(item["triggered_factors"]) > 0
 
 
-# ── Business Predictive Analytics Tests ───────────────────
+# â”€â”€ Business Predictive Analytics Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestBusinessPredictiveAnalytics:
@@ -531,7 +531,7 @@ class TestBusinessPredictiveAnalytics:
         assert "predictions" in d
 
 
-# ── Healthcare Predictive Analytics Tests ─────────────────
+# â”€â”€ Healthcare Predictive Analytics Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestHealthcarePredictiveAnalytics:
@@ -563,7 +563,7 @@ class TestHealthcarePredictiveAnalytics:
         assert result.summary != ""
 
 
-# ── Education Predictive Analytics Tests ──────────────────
+# â”€â”€ Education Predictive Analytics Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestEducationPredictiveAnalytics:
@@ -597,7 +597,7 @@ class TestEducationPredictiveAnalytics:
         assert "risk" in result.summary.lower()
 
 
-# ── Agriculture Predictive Analytics Tests ────────────────
+# â”€â”€ Agriculture Predictive Analytics Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestAgriculturePredictiveAnalytics:
@@ -636,7 +636,7 @@ class TestAgriculturePredictiveAnalytics:
         assert result.summary != ""
 
 
-# ── Registry Tests ────────────────────────────────────────
+# â”€â”€ Registry Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestPredictiveAnalyticsRegistry:
@@ -654,7 +654,7 @@ class TestPredictiveAnalyticsRegistry:
         assert result.predictions == []
 
 
-# ── Pipeline Integration Tests ────────────────────────────
+# â”€â”€ Pipeline Integration Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestPipelineIntegration:

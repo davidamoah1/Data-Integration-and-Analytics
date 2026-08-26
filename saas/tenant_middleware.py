@@ -1,4 +1,4 @@
-"""Tenant isolation enforcement middleware.
+﻿"""Tenant isolation enforcement middleware.
 
 Ensures every API request that touches organization-owned resources
 is scoped to the authenticated user's organization.
@@ -46,10 +46,10 @@ class TenantIsolationMiddleware(BaseHTTPMiddleware):
     context without re-decoding the token.
 
     Defense-in-depth layers:
-    1. This middleware — sets request.state.tenant_org_id
-    2. Route-level — get_tenant_context / require_organization_access
-    3. Query-level — TenantQueryManager / apply_organization_filter
-    4. Resource-level — verify_resource_ownership
+    1. This middleware â€” sets request.state.tenant_org_id
+    2. Route-level â€” get_tenant_context / require_organization_access
+    3. Query-level â€” TenantQueryManager / apply_organization_filter
+    4. Resource-level â€” verify_resource_ownership
     """
 
     async def dispatch(self, request: Request, call_next):
@@ -82,7 +82,7 @@ class TenantIsolationMiddleware(BaseHTTPMiddleware):
                         request.state.tenant_org_id = int(org_id)
                         request.state.tenant_is_super_admin = "super_admin" in set(roles)
                     else:
-                        # Fallback: older tokens without org_id claim — fetch from DB
+                        # Fallback: older tokens without org_id claim â€” fetch from DB
                         from sqlalchemy.orm import Session as DbSession
 
                         from authentication.repositories import (
@@ -104,7 +104,7 @@ class TenantIsolationMiddleware(BaseHTTPMiddleware):
                         finally:
                             db.close()
             except Exception:
-                # Token invalid or expired — let downstream auth handle the 401
+                # Token invalid or expired â€” let downstream auth handle the 401
                 pass
 
         # Process request

@@ -1,4 +1,4 @@
-"""Enterprise Dataset Library — registry of datasets with full metadata.
+﻿"""Enterprise Dataset Library â€” registry of datasets with full metadata.
 
 Supports 11 industries: Healthcare, Education, Government, Retail, Church, NGO,
 Manufacturing, Agriculture, Insurance, Hospitality, Telecommunications.
@@ -286,7 +286,7 @@ class DatasetLibrary:
             self.register(entry)
 
 
-# ── Demo dataset definitions with full metadata ──
+# â”€â”€ Demo dataset definitions with full metadata â”€â”€
 
 _DEMO_DATASET_DEFINITIONS: dict[str, dict] = {
     "healthcare": {

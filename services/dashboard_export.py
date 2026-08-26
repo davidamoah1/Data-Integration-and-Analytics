@@ -1,10 +1,10 @@
-"""Dashboard Export Service.
+﻿"""Dashboard Export Service.
 
 Exports dashboards to multiple formats:
   - PDF (with branding and metadata)
   - Excel (multi-sheet with KPIs, charts data, filters)
   - CSV (flat data export)
-  - PNG (chart snapshots — requires frontend rendering)
+  - PNG (chart snapshots â€” requires frontend rendering)
   - Print-friendly view (HTML)
 
 Includes branding and metadata where appropriate.
@@ -356,7 +356,7 @@ class DashboardExportService:
         writer = csv.writer(output)
 
         # Header
-        writer.writerow([f"# {self.brand_name} — Dashboard Export"])
+        writer.writerow([f"# {self.brand_name} â€” Dashboard Export"])
         writer.writerow([f"# Title: {dashboard.title}"])
         writer.writerow([f"# Industry: {dashboard.industry}"])
         writer.writerow([f"# Generated: {datetime.now(timezone.utc).isoformat()}"])
@@ -428,7 +428,7 @@ class DashboardExportService:
             "<head>",
             '<meta charset="UTF-8">',
             '<meta name="viewport" content="width=device-width, initial-scale=1.0">',
-            f"<title>{dashboard.title} — Print View</title>",
+            f"<title>{dashboard.title} â€” Print View</title>",
             "<style>",
             "body { font-family: 'Segoe UI', Arial, sans-serif; margin: 20px; color: #333; }",
             ".header { background: #667eea; color: white; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; }",
@@ -493,7 +493,7 @@ class DashboardExportService:
             html_parts.append('<div class="section"><h2>Filters</h2>')
             for f in dashboard.filters:
                 html_parts.append(
-                    f'<div class="filter-item">• {f.label} ({f.filter_type.replace("_", " ").title()}) — Column: {f.column}</div>'
+                    f'<div class="filter-item">â€¢ {f.label} ({f.filter_type.replace("_", " ").title()}) â€” Column: {f.column}</div>'
                 )
             html_parts.append("</div>")
 
@@ -501,12 +501,12 @@ class DashboardExportService:
         if dashboard.ai_insights:
             html_parts.append('<div class="section"><h2>AI Insights</h2>')
             for insight in dashboard.ai_insights:
-                html_parts.append(f'<div class="insight-item">• {insight}</div>')
+                html_parts.append(f'<div class="insight-item">â€¢ {insight}</div>')
             html_parts.append("</div>")
 
         # Footer
         html_parts.append(
-            f'<div class="footer">{self.brand_name} — Dashboard Export | {dashboard.dashboard_id}</div>'
+            f'<div class="footer">{self.brand_name} â€” Dashboard Export | {dashboard.dashboard_id}</div>'
         )
         html_parts.append("</body></html>")
 

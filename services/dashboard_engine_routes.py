@@ -1,24 +1,24 @@
-"""FastAPI routes for the Enterprise Dashboard Intelligence Engine.
+﻿"""FastAPI routes for the Enterprise Dashboard Intelligence Engine.
 
 Endpoints:
-  - POST   /dashboard-engine/generate      — Generate dashboard from dataset
-  - GET    /dashboard-engine/{id}          — Get dashboard metadata
-  - GET    /dashboard-engine                — List dashboards
-  - PUT    /dashboard-engine/{id}          — Update dashboard
-  - DELETE /dashboard-engine/{id}          — Delete dashboard
-  - POST   /dashboard-engine/{id}/widget   — Add widget
-  - DELETE /dashboard-engine/{id}/widget/{wid} — Remove widget
-  - PUT    /dashboard-engine/{id}/widget/{wid}/resize — Resize widget
-  - PUT    /dashboard-engine/{id}/reorder  — Reorder widgets
-  - POST   /dashboard-engine/{id}/share    — Share dashboard
-  - POST   /dashboard-engine/{id}/reset    — Reset to recommended
-  - POST   /dashboard-engine/{id}/save-custom — Save custom layout
-  - GET    /dashboard-engine/{id}/kpi-values — Get computed KPI values
-  - POST   /dashboard-engine/{id}/filters  — Apply filters
-  - GET    /dashboard-engine/{id}/drilldown — Get drilldown data
-  - POST   /dashboard-engine/{id}/assistant — Parse NL query
-  - POST   /dashboard-engine/{id}/export   — Export dashboard
-  - GET    /dashboard-engine/{id}/permissions — Check permissions
+  - POST   /dashboard-engine/generate      â€” Generate dashboard from dataset
+  - GET    /dashboard-engine/{id}          â€” Get dashboard metadata
+  - GET    /dashboard-engine                â€” List dashboards
+  - PUT    /dashboard-engine/{id}          â€” Update dashboard
+  - DELETE /dashboard-engine/{id}          â€” Delete dashboard
+  - POST   /dashboard-engine/{id}/widget   â€” Add widget
+  - DELETE /dashboard-engine/{id}/widget/{wid} â€” Remove widget
+  - PUT    /dashboard-engine/{id}/widget/{wid}/resize â€” Resize widget
+  - PUT    /dashboard-engine/{id}/reorder  â€” Reorder widgets
+  - POST   /dashboard-engine/{id}/share    â€” Share dashboard
+  - POST   /dashboard-engine/{id}/reset    â€” Reset to recommended
+  - POST   /dashboard-engine/{id}/save-custom â€” Save custom layout
+  - GET    /dashboard-engine/{id}/kpi-values â€” Get computed KPI values
+  - POST   /dashboard-engine/{id}/filters  â€” Apply filters
+  - GET    /dashboard-engine/{id}/drilldown â€” Get drilldown data
+  - POST   /dashboard-engine/{id}/assistant â€” Parse NL query
+  - POST   /dashboard-engine/{id}/export   â€” Export dashboard
+  - GET    /dashboard-engine/{id}/permissions â€” Check permissions
 """
 
 from __future__ import annotations
@@ -48,7 +48,7 @@ from shared.dependencies import get_current_user, require_permissions
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/dashboard-engine", tags=["Dashboard Intelligence Engine"])
 
-# ── Engine instances ───────────────────────────────────
+# â”€â”€ Engine instances â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 _engine = DashboardEngine()
 _kpi_engine = KPIIntelligenceEngine()
@@ -65,7 +65,7 @@ _datasets: dict[str, pd.DataFrame] = {}
 _semantic_mappings: dict[str, dict] = {}
 
 
-# ── Request/Response Models ────────────────────────────
+# â”€â”€ Request/Response Models â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class GenerateDashboardRequest(BaseModel):
@@ -154,7 +154,7 @@ class ExportRequest(BaseModel):
     include_data: bool = True
 
 
-# ── Endpoints ──────────────────────────────────────────
+# â”€â”€ Endpoints â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @router.post("/generate")
@@ -585,7 +585,7 @@ async def check_permissions(
     }
 
 
-# ── Helper: Register dataset ───────────────────────────
+# â”€â”€ Helper: Register dataset â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def register_dataset(dataset_id: str, df: pd.DataFrame) -> None:

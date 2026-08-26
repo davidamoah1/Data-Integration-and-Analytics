@@ -1,4 +1,4 @@
-"""Validation Audit Logger — tracks all validation events for compliance."""
+﻿"""Validation Audit Logger â€” tracks all validation events for compliance."""
 
 from __future__ import annotations
 

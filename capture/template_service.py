@@ -1,9 +1,9 @@
-"""Template learning system for the Smart Data Capture platform.
+﻿"""Template learning system for the Smart Data Capture platform.
 
 When users repeatedly correct the same field on the same document_type
 within an organization, this records the correction pattern so future
 uploads of that layout get a confidence boost on that field (see
-`capture.extractors.extract_fields`'s `template_boost` parameter) — a real,
+`capture.extractors.extract_fields`'s `template_boost` parameter) â€” a real,
 inspectable learning signal rather than an opaque ML model.
 """
 
@@ -55,7 +55,7 @@ def record_correction(
         template = CaptureTemplate(
             organization_id=organization_id,
             document_type=document_type,
-            template_name=f"Learned template — {document_type}",
+            template_name=f"Learned template â€” {document_type}",
             field_mapping={},
             documents_learned_from=0,
         )

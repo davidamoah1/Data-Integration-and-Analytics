@@ -1,4 +1,4 @@
-"""Automatic Analysis Engine — column semantic role detection.
+﻿"""Automatic Analysis Engine â€” column semantic role detection.
 
 After a dataset is uploaded, this engine inspects every column using:
   - column name
@@ -24,7 +24,7 @@ from typing import Any
 
 import pandas as pd
 
-# ── Semantic roles ──
+# â”€â”€ Semantic roles â”€â”€
 
 
 class SemanticRole:
@@ -41,7 +41,7 @@ class SemanticRole:
     UNKNOWN = "unknown"
 
 
-# ── Name-based hints ──
+# â”€â”€ Name-based hints â”€â”€
 
 _ID_KEYWORDS = {"id", "_id", "uuid", "guid", "ref", "code", "number", "no", "num", "seq"}
 _DATE_KEYWORDS = {
@@ -379,7 +379,7 @@ class AutomaticAnalysisEngine:
 
         return understanding
 
-    # ── Column analysis ──
+    # â”€â”€ Column analysis â”€â”€
 
     @classmethod
     def _analyze_column(cls, df: pd.DataFrame, col_name: str) -> ColumnUnderstanding:
@@ -407,7 +407,7 @@ class AutomaticAnalysisEngine:
             col.confidence = 1.0
             return col
 
-        # ── Step 1: Check data type ──
+        # â”€â”€ Step 1: Check data type â”€â”€
         if col.is_datetime:
             col.semantic_role = SemanticRole.DATE_TIME
             col.confidence = 0.95
@@ -415,7 +415,7 @@ class AutomaticAnalysisEngine:
             col.detected_patterns.append("datetime_dtype")
             return col
 
-        # ── Step 2: Check for boolean (before numeric, since bool is numeric dtype) ──
+        # â”€â”€ Step 2: Check for boolean (before numeric, since bool is numeric dtype) â”€â”€
         if n_non_null > 0:
             unique_vals = set(non_null.dropna().unique())
             bool_vals = {
@@ -441,7 +441,7 @@ class AutomaticAnalysisEngine:
                 col.stats = cls._categorical_stats(non_null)
                 return col
 
-        # ── Step 3: Check for date-like strings ──
+        # â”€â”€ Step 3: Check for date-like strings â”€â”€
         if col.is_categorical:
             date_parsed = cls._try_parse_dates(non_null.head(20))
             if date_parsed is not None:
@@ -455,7 +455,7 @@ class AutomaticAnalysisEngine:
                 }
                 return col
 
-        # ── Step 4: Numeric columns ──
+        # â”€â”€ Step 4: Numeric columns â”€â”€
         if col.is_numeric:
             col.stats = cls._numeric_stats(non_null)
 
@@ -495,13 +495,13 @@ class AutomaticAnalysisEngine:
                     col.detected_patterns.append("currency_name_hint")
                     return col
 
-            # Default numeric → measure
+            # Default numeric â†’ measure
             col.semantic_role = SemanticRole.MEASURE
             col.confidence = 0.7
             col.detected_patterns.append("numeric_measure")
             return col
 
-        # ── Step 5: Categorical / text columns ──
+        # â”€â”€ Step 5: Categorical / text columns â”€â”€
         if col.is_categorical:
             col_name_lower = col_name.lower()
 
@@ -529,7 +529,7 @@ class AutomaticAnalysisEngine:
                 col.stats = cls._categorical_stats(non_null)
                 return col
 
-            # Low cardinality → category/dimension
+            # Low cardinality â†’ category/dimension
             if col.unique_percentage < 50 or col.cardinality <= 30:
                 col.semantic_role = SemanticRole.CATEGORY
                 col.confidence = 0.75
@@ -537,7 +537,7 @@ class AutomaticAnalysisEngine:
                 col.stats = cls._categorical_stats(non_null)
                 return col
 
-            # High cardinality text → text
+            # High cardinality text â†’ text
             col.semantic_role = SemanticRole.TEXT
             col.confidence = 0.6
             col.detected_patterns.append("high_cardinality_text")
@@ -549,7 +549,7 @@ class AutomaticAnalysisEngine:
         col.confidence = 0.3
         return col
 
-    # ── Helpers ──
+    # â”€â”€ Helpers â”€â”€
 
     @staticmethod
     def _datetime_stats(series: pd.Series) -> dict[str, Any]:
@@ -665,7 +665,7 @@ class AutomaticAnalysisEngine:
         dependent = []
         independent = []
 
-        # Measures with "revenue", "sales", "amount" in name → likely dependent
+        # Measures with "revenue", "sales", "amount" in name â†’ likely dependent
         for m in understanding.measures:
             m_lower = m.lower()
             if any(
@@ -687,7 +687,7 @@ class AutomaticAnalysisEngine:
         if not dependent and understanding.measures:
             dependent = [understanding.measures[0]]
 
-        # Dimensions, time columns → independent
+        # Dimensions, time columns â†’ independent
         independent = understanding.dimensions + understanding.time_columns
         # Also measures that aren't dependent are independent
         for m in understanding.measures:
@@ -701,21 +701,21 @@ class AutomaticAnalysisEngine:
         """Recommend statistical analyses based on data structure."""
         recommendations = []
 
-        # Time series → trend analysis
+        # Time series â†’ trend analysis
         if understanding.time_columns and understanding.measures:
             recommendations.append("trend_analysis")
             recommendations.append("time_series_decomposition")
 
-        # Two numeric variables → correlation
+        # Two numeric variables â†’ correlation
         if len(understanding.measures) >= 2:
             recommendations.append("correlation_analysis")
 
-        # Multiple numeric variables → correlation matrix
+        # Multiple numeric variables â†’ correlation matrix
         if len(understanding.measures) >= 3:
             recommendations.append("correlation_matrix")
             recommendations.append("regression_analysis")
 
-        # Categorical + numeric → group comparison
+        # Categorical + numeric â†’ group comparison
         if understanding.dimensions and understanding.measures:
             recommendations.append("group_comparison")
             # t-test if 2 groups, ANOVA if more
@@ -753,18 +753,18 @@ class AutomaticAnalysisEngine:
         for col in understanding.columns:
             if col.missing_percentage > 80:
                 warnings.append(
-                    f"Column '{col.name}' has {col.missing_percentage:.0f}% missing values — excluded from automatic charts"
+                    f"Column '{col.name}' has {col.missing_percentage:.0f}% missing values â€” excluded from automatic charts"
                 )
             elif col.missing_percentage > 50:
                 warnings.append(
-                    f"Column '{col.name}' has {col.missing_percentage:.0f}% missing values — use with caution"
+                    f"Column '{col.name}' has {col.missing_percentage:.0f}% missing values â€” use with caution"
                 )
 
             if col.is_numeric and col.stats.get("outlier_count", 0) > 0:
                 outlier_pct = col.stats["outlier_count"] / max(understanding.row_count, 1) * 100
                 if outlier_pct > 10:
                     warnings.append(
-                        f"Column '{col.name}' has {outlier_pct:.0f}% outliers — may affect visualizations"
+                        f"Column '{col.name}' has {outlier_pct:.0f}% outliers â€” may affect visualizations"
                     )
 
         # Check for duplicate rows
@@ -773,7 +773,7 @@ class AutomaticAnalysisEngine:
             dup_pct = dup_count / max(len(df), 1) * 100
             if dup_pct > 10:
                 warnings.append(
-                    f"Dataset has {dup_count} duplicate rows ({dup_pct:.0f}%) — consider deduplication"
+                    f"Dataset has {dup_count} duplicate rows ({dup_pct:.0f}%) â€” consider deduplication"
                 )
 
         return warnings

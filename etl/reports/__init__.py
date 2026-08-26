@@ -1,4 +1,4 @@
-"""Report generation for imports, quality, pipeline execution, and transformations."""
+﻿"""Report generation for imports, quality, pipeline execution, and transformations."""
 
 from datetime import datetime, timezone
 

@@ -1,4 +1,4 @@
-"""Column Semantic Analyzer.
+﻿"""Column Semantic Analyzer.
 
 Inspects each column in a DataFrame and classifies it into a semantic
 role using multiple signals:
@@ -10,17 +10,17 @@ role using multiple signals:
   - missing value ratio
 
 Roles:
-  MEASURE       — numeric metric (revenue, sales, count)
-  DIMENSION     — categorical grouping (region, product, department)
-  DATE_TIME     — temporal column (date, timestamp)
-  IDENTIFIER    — unique ID (customer_id, transaction_id)
-  CATEGORY      — low-cardinality categorical (status, gender, type)
-  TEXT          — high-cardinality string (description, name)
-  GEOGRAPHY     — location (country, city, region, lat/lon)
-  BOOLEAN       — true/false column
-  CURRENCY      — monetary values
-  PERCENTAGE    — 0-100 or 0-1 ratio values
-  UNKNOWN       — cannot classify
+  MEASURE       â€” numeric metric (revenue, sales, count)
+  DIMENSION     â€” categorical grouping (region, product, department)
+  DATE_TIME     â€” temporal column (date, timestamp)
+  IDENTIFIER    â€” unique ID (customer_id, transaction_id)
+  CATEGORY      â€” low-cardinality categorical (status, gender, type)
+  TEXT          â€” high-cardinality string (description, name)
+  GEOGRAPHY     â€” location (country, city, region, lat/lon)
+  BOOLEAN       â€” true/false column
+  CURRENCY      â€” monetary values
+  PERCENTAGE    â€” 0-100 or 0-1 ratio values
+  UNKNOWN       â€” cannot classify
 """
 
 from __future__ import annotations
@@ -46,7 +46,7 @@ class ColumnSemanticRole(str, Enum):
     UNKNOWN = "unknown"
 
 
-# ─── Name-based heuristics ─────────────────────────────────────────────────
+# â”€â”€â”€ Name-based heuristics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 ID_PATTERNS = re.compile(
     r"\b(id|uuid|guid|ref|reference|serial|code|number|num|no|hash)\b",
@@ -243,8 +243,8 @@ class ColumnAnalyzer:
     """Analyzes DataFrame columns and infers semantic roles."""
 
     # Cardinality thresholds
-    CATEGORY_MAX_CARDINALITY = 30  # above this, categorical → dimension/text
-    IDENTIFIER_MIN_UNIQUENESS = 0.95  # 95%+ unique → identifier
+    CATEGORY_MAX_CARDINALITY = 30  # above this, categorical â†’ dimension/text
+    IDENTIFIER_MIN_UNIQUENESS = 0.95  # 95%+ unique â†’ identifier
 
     def analyze(self, df: pd.DataFrame) -> DatasetUnderstanding:
         """Analyze all columns in the DataFrame."""
@@ -404,7 +404,7 @@ class ColumnAnalyzer:
     ) -> tuple[ColumnSemanticRole, float, str]:
         """Classify a column into a semantic role. Returns (role, confidence, reasoning)."""
 
-        # 1. Boolean — highest priority, unambiguous
+        # 1. Boolean â€” highest priority, unambiguous
         if is_bool:
             return ColumnSemanticRole.BOOLEAN, 0.98, "Column has boolean dtype"
 
@@ -418,7 +418,7 @@ class ColumnAnalyzer:
                 f"Values match date format: {detected_date_format}",
             )
 
-        # 3. Identifier — very high uniqueness + name matches ID patterns
+        # 3. Identifier â€” very high uniqueness + name matches ID patterns
         if uniqueness_ratio >= self.IDENTIFIER_MIN_UNIQUENESS and row_count > 5:
             if ID_PATTERNS.search(col_name):
                 return (
@@ -426,15 +426,15 @@ class ColumnAnalyzer:
                     0.92,
                     f"Column is {uniqueness_ratio:.0%} unique and name matches ID pattern",
                 )
-            # Very high uniqueness without ID name → could be identifier or text
+            # Very high uniqueness without ID name â†’ could be identifier or text
             if is_string and cardinality == row_count:
                 return (
                     ColumnSemanticRole.IDENTIFIER,
                     0.70,
-                    "100% unique values — likely an identifier",
+                    "100% unique values â€” likely an identifier",
                 )
 
-        # 4. Geography — name or value matches geo patterns
+        # 4. Geography â€” name or value matches geo patterns
         if GEO_PATTERNS.search(col_name):
             if is_string and cardinality <= 200:
                 return ColumnSemanticRole.GEOGRAPHY, 0.88, "Column name matches geographic pattern"
@@ -447,11 +447,11 @@ class ColumnAnalyzer:
                     f"{geo_matches}/{len(category_distribution)} values match known geographic names",
                 )
 
-        # 5. Currency — numeric + name matches currency patterns
+        # 5. Currency â€” numeric + name matches currency patterns
         if is_numeric and CURRENCY_PATTERNS.search(col_name):
             return ColumnSemanticRole.CURRENCY, 0.85, "Numeric column with currency-related name"
 
-        # 6. Percentage — numeric + name matches percentage + values in 0-100 or 0-1
+        # 6. Percentage â€” numeric + name matches percentage + values in 0-100 or 0-1
         if is_numeric and PERCENTAGE_PATTERNS.search(col_name):
             if numeric_stats and numeric_stats.get("min") is not None:
                 mn, mx = numeric_stats["min"], numeric_stats["max"]
@@ -468,7 +468,7 @@ class ColumnAnalyzer:
                         "Numeric column with percentage name and values in 0-1 range",
                     )
 
-        # 7. Measure — numeric + name matches measure patterns
+        # 7. Measure â€” numeric + name matches measure patterns
         if is_numeric and MEASURE_PATTERNS.search(col_name):
             return (
                 ColumnSemanticRole.MEASURE,
@@ -476,7 +476,7 @@ class ColumnAnalyzer:
                 "Numeric column with measure/metric-related name",
             )
 
-        # 8. Measure — numeric without ID pattern, not unique
+        # 8. Measure â€” numeric without ID pattern, not unique
         if is_numeric and uniqueness_ratio < self.IDENTIFIER_MIN_UNIQUENESS:
             if cardinality > 1:
                 return (
@@ -485,7 +485,7 @@ class ColumnAnalyzer:
                     "Numeric column with multiple distinct values",
                 )
 
-        # 9. Category — low cardinality string + name matches category patterns
+        # 9. Category â€” low cardinality string + name matches category patterns
         if is_string and cardinality <= self.CATEGORY_MAX_CARDINALITY:
             if CATEGORY_PATTERNS.search(col_name):
                 return (
@@ -498,23 +498,23 @@ class ColumnAnalyzer:
                 return (
                     ColumnSemanticRole.CATEGORY,
                     0.65,
-                    f"Very low cardinality ({cardinality}) string — likely a category",
+                    f"Very low cardinality ({cardinality}) string â€” likely a category",
                 )
 
-        # 10. Dimension — medium cardinality string, not unique
+        # 10. Dimension â€” medium cardinality string, not unique
         if is_string and cardinality > self.CATEGORY_MAX_CARDINALITY and uniqueness_ratio < 0.5:
             return (
                 ColumnSemanticRole.DIMENSION,
                 0.65,
-                f"Medium-cardinality ({cardinality}) string — likely a dimension",
+                f"Medium-cardinality ({cardinality}) string â€” likely a dimension",
             )
 
-        # 11. Text — high cardinality string
+        # 11. Text â€” high cardinality string
         if is_string and uniqueness_ratio > 0.5:
             if not ID_PATTERNS.search(col_name):
-                return ColumnSemanticRole.TEXT, 0.60, "High-cardinality string — likely free text"
+                return ColumnSemanticRole.TEXT, 0.60, "High-cardinality string â€” likely free text"
 
-        # 12. Dimension — fallback for categorical strings
+        # 12. Dimension â€” fallback for categorical strings
         if is_string and cardinality <= self.CATEGORY_MAX_CARDINALITY * 3:
             return (
                 ColumnSemanticRole.DIMENSION,

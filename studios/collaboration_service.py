@@ -1,4 +1,4 @@
-"""Collaboration service — comments, sharing, workspaces, version control."""
+﻿"""Collaboration service â€” comments, sharing, workspaces, version control."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ class CollaborationService:
     def __init__(self, db: DbSession):
         self.db = db
 
-    # ─── Comments ────────────────────────────────────────────
+    # â”€â”€â”€ Comments â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def add_comment(
         self,
@@ -85,7 +85,7 @@ class CollaborationService:
             self.db.delete(comment)
             self.db.commit()
 
-    # ─── Sharing ─────────────────────────────────────────────
+    # â”€â”€â”€ Sharing â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def share_resource(
         self,

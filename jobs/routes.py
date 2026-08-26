@@ -1,15 +1,15 @@
-"""FastAPI routes for the background job system.
+﻿"""FastAPI routes for the background job system.
 
 Endpoints:
-  - POST   /api/jobs                 — Create a new job
-  - GET    /api/jobs                 — List jobs (with filters)
-  - GET    /api/jobs/active          — List active jobs for the org
-  - GET    /api/jobs/summary         — Job summary stats
-  - GET    /api/jobs/types           — List registered job types
-  - GET    /api/jobs/{job_id}        — Get job details
-  - POST   /api/jobs/{job_id}/cancel — Cancel a pending/running job
-  - POST   /api/jobs/{job_id}/retry  — Retry a failed/cancelled job
-  - GET    /api/jobs/{job_id}/poll   — Poll job status (lightweight)
+  - POST   /api/jobs                 â€” Create a new job
+  - GET    /api/jobs                 â€” List jobs (with filters)
+  - GET    /api/jobs/active          â€” List active jobs for the org
+  - GET    /api/jobs/summary         â€” Job summary stats
+  - GET    /api/jobs/types           â€” List registered job types
+  - GET    /api/jobs/{job_id}        â€” Get job details
+  - POST   /api/jobs/{job_id}/cancel â€” Cancel a pending/running job
+  - POST   /api/jobs/{job_id}/retry  â€” Retry a failed/cancelled job
+  - GET    /api/jobs/{job_id}/poll   â€” Poll job status (lightweight)
 """
 
 from __future__ import annotations
@@ -26,7 +26,7 @@ from shared.tenant import get_current_organization_id
 router = APIRouter(prefix="/api/jobs", tags=["background-jobs"])
 
 
-# ── Request models ────────────────────────────────────────────────────────
+# â”€â”€ Request models â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class CreateJobRequest(BaseModel):
@@ -39,7 +39,7 @@ class CreateJobRequest(BaseModel):
     max_retries: int = Field(default=3, ge=0, le=10)
 
 
-# ── Routes ────────────────────────────────────────────────────────────────
+# â”€â”€ Routes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @router.get("/types")
@@ -141,7 +141,7 @@ async def poll_job_status(
     db: DbSession = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
-    """Lightweight poll — returns only status, progress, and message."""
+    """Lightweight poll â€” returns only status, progress, and message."""
     org_id = get_current_organization_id(current_user, db)
     svc = JobService(db)
     job = svc.get_job(job_id, org_id)

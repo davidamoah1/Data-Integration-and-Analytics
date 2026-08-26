@@ -1,4 +1,4 @@
-"""Support tools module — feedback, bug reports, feature requests, diagnostics.
+﻿"""Support tools module â€” feedback, bug reports, feature requests, diagnostics.
 
 Provides a unified support interface for users to:
   - Submit feedback
@@ -47,10 +47,10 @@ def render_support_page():
     )
 
     tab1, tab2, tab3, tab4 = st.tabs(
-        ["📝 Submit Ticket", "🐛 Bug Report", "💡 Feature Request", "🔧 Diagnostics"]
+        ["ðŸ“ Submit Ticket", "ðŸ› Bug Report", "ðŸ’¡ Feature Request", "ðŸ”§ Diagnostics"]
     )
 
-    # ── Tab 1: General Feedback / Contact Support ──
+    # â”€â”€ Tab 1: General Feedback / Contact Support â”€â”€
     with tab1:
         st.markdown("### Submit Feedback or Contact Support")
         with st.form("feedback_form"):
@@ -87,7 +87,7 @@ def render_support_page():
                     _save_support_ticket(ticket)
                     st.success(f"Ticket {ticket['id']} submitted! Our team will review it shortly.")
 
-    # ── Tab 2: Bug Report ──
+    # â”€â”€ Tab 2: Bug Report â”€â”€
     with tab2:
         st.markdown("### Report a Bug")
         with st.form("bug_form"):
@@ -153,7 +153,7 @@ def render_support_page():
                         f"Bug report {ticket['id']} submitted! Thank you for helping improve DataFlow."
                     )
 
-    # ── Tab 3: Feature Request ──
+    # â”€â”€ Tab 3: Feature Request â”€â”€
     with tab3:
         st.markdown("### Request a Feature")
         with st.form("feature_form"):
@@ -207,7 +207,7 @@ def render_support_page():
                         f"Feature request {ticket['id']} submitted! We'll consider it for future releases."
                     )
 
-    # ── Tab 4: System Diagnostics ──
+    # â”€â”€ Tab 4: System Diagnostics â”€â”€
     with tab4:
         st.markdown("### System Diagnostics")
         st.markdown("View real-time system health and platform information.")
@@ -268,13 +268,13 @@ def render_support_page():
         except Exception as e:
             st.error(f"Cannot reach API: {e}")
 
-    # ── Ticket History ──
+    # â”€â”€ Ticket History â”€â”€
     st.markdown("---")
     st.markdown("### Your Support Tickets")
     tickets = st.session_state.get("support_tickets", [])
     if tickets:
         for t in reversed(tickets):
-            with st.expander(f"{t['id']} — {t['subject']} ({t['status'].title()})"):
+            with st.expander(f"{t['id']} â€” {t['subject']} ({t['status'].title()})"):
                 st.json(t)
     else:
         st.info("No support tickets yet. Submit one above to get started.")

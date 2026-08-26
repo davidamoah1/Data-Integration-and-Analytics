@@ -1,4 +1,4 @@
-"""Tests for the AI Data Analyst Copilot.
+﻿"""Tests for the AI Data Analyst Copilot.
 
 Tests cover:
   - Natural language query parsing (intent detection, metric/dimension extraction)
@@ -20,7 +20,7 @@ from ai_copilot.query_engine import QueryEngine, QueryIntent
 from ai_copilot.report_generator import Report, ReportGenerator
 from ai_copilot.root_cause import RootCauseAnalyzer, RootCauseResult
 
-# ── Fixtures ──────────────────────────────────────────────
+# â”€â”€ Fixtures â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @pytest.fixture
@@ -95,7 +95,7 @@ def simple_df():
     )
 
 
-# ── Query Engine Tests ────────────────────────────────────
+# â”€â”€ Query Engine Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestQueryEngine:
@@ -176,7 +176,7 @@ class TestQueryEngine:
         assert d["top_n"] == 5
 
 
-# ── Root Cause Analyzer Tests ─────────────────────────────
+# â”€â”€ Root Cause Analyzer Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestRootCauseAnalyzer:
@@ -269,7 +269,7 @@ class TestRootCauseAnalyzer:
         assert result is None
 
 
-# ── Insight Generator Tests ───────────────────────────────
+# â”€â”€ Insight Generator Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestInsightGenerator:
@@ -331,7 +331,7 @@ class TestInsightGenerator:
             assert s1 <= s2
 
 
-# ── Report Generator Tests ────────────────────────────────
+# â”€â”€ Report Generator Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestReportGenerator:
@@ -374,7 +374,7 @@ class TestReportGenerator:
         assert len(overview) > 0
 
 
-# ── DataAnalystCopilot Tests ──────────────────────────────
+# â”€â”€ DataAnalystCopilot Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestDataAnalystCopilot:
@@ -459,7 +459,7 @@ class TestDataAnalystCopilot:
         assert response.data  # Should have structured data
 
 
-# ── Healthcare Copilot Tests ──────────────────────────────
+# â”€â”€ Healthcare Copilot Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestHealthcareCopilot:
@@ -482,7 +482,7 @@ class TestHealthcareCopilot:
         assert "40" in response.answer  # 40 records
 
 
-# ── Pipeline Integration Tests ────────────────────────────
+# â”€â”€ Pipeline Integration Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestPipelineIntegration:

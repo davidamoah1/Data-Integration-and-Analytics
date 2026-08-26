@@ -1,4 +1,4 @@
-"""Utility functions for the dashboard.
+﻿"""Utility functions for the dashboard.
 
 Formatting helpers and HTML sanitization for safe rendering.
 """

@@ -1,4 +1,4 @@
-"""AI Context Builder — constructs platform context for AI requests.
+﻿"""AI Context Builder â€” constructs platform context for AI requests.
 
 Gathers relevant data from the platform (sales, ETL jobs, pipelines, quality
 reports, organizations, etc.) and structures it as context for the AI.
@@ -109,7 +109,7 @@ class ContextBuilder:
         return ctx
 
     def _data_context(self) -> dict:
-        """Context for data copilot — dynamically discovered dataset summary."""
+        """Context for data copilot â€” dynamically discovered dataset summary."""
         ctx = {}
         try:
             tables = self._discover_tables()
@@ -173,7 +173,7 @@ class ContextBuilder:
         return result
 
     def _etl_context(self) -> dict:
-        """Context for ETL copilot — pipeline and job info."""
+        """Context for ETL copilot â€” pipeline and job info."""
         ctx = {}
         try:
             pipelines = (
@@ -279,7 +279,7 @@ class ContextBuilder:
         return ctx
 
     def _decision_context(self) -> dict:
-        """Context for decision copilot — dataset-agnostic trends and metrics."""
+        """Context for decision copilot â€” dataset-agnostic trends and metrics."""
         ctx = {}
         try:
             tables = self._discover_tables()
@@ -323,7 +323,7 @@ class ContextBuilder:
         }
 
     def _quality_context(self) -> dict:
-        """Context for quality copilot — recent quality reports."""
+        """Context for quality copilot â€” recent quality reports."""
         ctx = {}
         try:
             reports = (
@@ -365,7 +365,7 @@ class ContextBuilder:
         return ctx
 
     def _sql_context(self) -> dict:
-        """Context for SQL copilot — dynamically discovered table schemas."""
+        """Context for SQL copilot â€” dynamically discovered table schemas."""
         return {
             "tables": self._discover_tables(),
         }

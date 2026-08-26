@@ -1,4 +1,4 @@
-"""ML Lab service — no-code and professional machine learning."""
+﻿"""ML Lab service â€” no-code and professional machine learning."""
 
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ class MLLabService:
     def __init__(self, db: DbSession):
         self.db = db
 
-    # ─── Experiment Management ───────────────────────────────
+    # â”€â”€â”€ Experiment Management â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def create_experiment(
         self,
@@ -64,7 +64,7 @@ class MLLabService:
             )
         ).scalar_one_or_none()
 
-    # ─── Training ────────────────────────────────────────────
+    # â”€â”€â”€ Training â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     @staticmethod
     def train_classification(
@@ -157,7 +157,7 @@ class MLLabService:
             "model_summary": (
                 f"{algorithm.replace('_', ' ').title()} classifier achieved "
                 f"{metrics['accuracy']*100:.1f}% accuracy with F1={metrics['f1']:.4f}. "
-                f"Cross-validation: {metrics['cv_mean']*100:.1f}% ± {metrics['cv_std']*100:.1f}%."
+                f"Cross-validation: {metrics['cv_mean']*100:.1f}% Â± {metrics['cv_std']*100:.1f}%."
             ),
             "explanation": (
                 f"The model was trained on {len(X_train)} samples and tested on {len(X_test)} samples. "
@@ -227,7 +227,7 @@ class MLLabService:
             "n_features": len(features),
             "n_samples": int(len(X)),
             "model_summary": (
-                f"{algorithm.replace('_', ' ').title()} regressor achieved R²={r2:.4f} "
+                f"{algorithm.replace('_', ' ').title()} regressor achieved RÂ²={r2:.4f} "
                 f"with RMSE={rmse:.4f} and MAE={mae:.4f}."
             ),
             "explanation": (
@@ -351,7 +351,7 @@ class MLLabService:
             },
         }
 
-    # ─── Model Comparison ────────────────────────────────────
+    # â”€â”€â”€ Model Comparison â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def create_comparison(
         self,

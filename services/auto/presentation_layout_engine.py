@@ -1,4 +1,4 @@
-"""Presentation Layout Engine.
+﻿"""Presentation Layout Engine.
 
 Automatically determines:
   - Number of slides
@@ -8,10 +8,10 @@ Automatically determines:
   - Titles, captions, and supporting insights
   - Validation: no overlaps, no cropping, no off-slide content
 
-Uses the SAME ChartSpecification objects as the dashboard — never
+Uses the SAME ChartSpecification objects as the dashboard â€” never
 creates independent chart representations.
 
-PPTX dimensions: 13.333 × 7.5 inches (16:9 widescreen)
+PPTX dimensions: 13.333 Ã— 7.5 inches (16:9 widescreen)
 
 Slide structure:
   1. Title slide
@@ -106,7 +106,7 @@ class PresentationLayoutEngine:
                     }
                 )
 
-        # ── Slide 1: Title ──
+        # â”€â”€ Slide 1: Title â”€â”€
         slides.append(
             {
                 "slide_number": 1,
@@ -117,30 +117,30 @@ class PresentationLayoutEngine:
             }
         )
 
-        # ── Slide 2: Executive Summary (KPIs) ──
+        # â”€â”€ Slide 2: Executive Summary (KPIs) â”€â”€
         if dashboard.kpis:
             kpi_slide = self._make_kpi_slide(dashboard.kpis, slide_number=len(slides) + 1)
             slides.append(kpi_slide)
 
-        # ── Slides 3-N: Chart slides (1 chart per slide) ──
+        # â”€â”€ Slides 3-N: Chart slides (1 chart per slide) â”€â”€
         for _i, chart in enumerate(presentation_charts):
             slide = self._make_chart_slide(chart, slide_number=len(slides) + 1)
             slides.append(slide)
             included_chart_ids.append(chart.id)
 
-        # ── Key Insights slide ──
+        # â”€â”€ Key Insights slide â”€â”€
         if dashboard.insights:
             slide = self._make_insights_slide(dashboard.insights, slide_number=len(slides) + 1)
             slides.append(slide)
 
-        # ── Recommendations slide ──
+        # â”€â”€ Recommendations slide â”€â”€
         if dashboard.recommendations:
             slide = self._make_recommendations_slide(
                 dashboard.recommendations, slide_number=len(slides) + 1
             )
             slides.append(slide)
 
-        # ── Closing slide ──
+        # â”€â”€ Closing slide â”€â”€
         slides.append(
             {
                 "slide_number": len(slides) + 1,
@@ -164,7 +164,7 @@ class PresentationLayoutEngine:
             validation=validation,
         )
 
-    # ── Slide factories ──
+    # â”€â”€ Slide factories â”€â”€
 
     def _make_kpi_slide(self, kpis: list[KPISpecification], slide_number: int) -> dict[str, Any]:
         """Create a KPI summary slide with validated card placements."""
@@ -244,9 +244,9 @@ class PresentationLayoutEngine:
         content_lines = []
         for insight in top_insights:
             icon = (
-                "⚠️"
+                "âš ï¸"
                 if insight.severity == "critical"
-                else "✅" if insight.severity == "positive" else "•"
+                else "âœ…" if insight.severity == "positive" else "â€¢"
             )
             content_lines.append(f"{icon} {insight.title}: {insight.description}")
 
@@ -263,7 +263,7 @@ class PresentationLayoutEngine:
         self, recommendations: list[str], slide_number: int
     ) -> dict[str, Any]:
         """Create a recommendations slide."""
-        content = "\n".join(f"• {r}" for r in recommendations[:6])
+        content = "\n".join(f"â€¢ {r}" for r in recommendations[:6])
         return {
             "slide_number": slide_number,
             "layout": "bullets",
@@ -272,7 +272,7 @@ class PresentationLayoutEngine:
             "speaker_notes": "Present clear, actionable recommendations with expected impact.",
         }
 
-    # ── Validation ──
+    # â”€â”€ Validation â”€â”€
 
     def _validate_presentation(self, slides: list[dict[str, Any]]) -> dict[str, Any]:
         """Validate that all chart placements are within slide bounds and no overlaps."""
@@ -303,7 +303,7 @@ class PresentationLayoutEngine:
                     )
                 if w < 2 or h < 2:
                     warnings.append(
-                        f"Slide {slide_num}: Chart is too small ({w:.1f}×{h:.1f} inches)"
+                        f"Slide {slide_num}: Chart is too small ({w:.1f}Ã—{h:.1f} inches)"
                     )
 
             # Validate KPI card placements

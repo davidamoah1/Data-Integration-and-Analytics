@@ -1,4 +1,4 @@
-"""Tests for the Certificate Intelligence module."""
+﻿"""Tests for the Certificate Intelligence module."""
 
 from __future__ import annotations
 

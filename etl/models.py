@@ -1,4 +1,4 @@
-"""SQLAlchemy ORM models for Phase 5 — ETL Engine.
+﻿"""SQLAlchemy ORM models for Phase 5 â€” ETL Engine.
 
 Tables: etl_pipelines, etl_pipeline_versions, etl_pipeline_steps,
 etl_jobs, etl_import_templates, etl_data_profiles, etl_quality_reports,
@@ -94,7 +94,7 @@ class ETLJob(Base):
     rows_loaded = Column(Integer, nullable=False, default=0)
     rows_rejected = Column(Integer, nullable=False, default=0)
     error_message = Column(Text, nullable=True)
-    extra_data = Column(JSON, nullable=True)  # was 'metadata' — reserved by SQLAlchemy
+    extra_data = Column(JSON, nullable=True)  # was 'metadata' â€” reserved by SQLAlchemy
     started_at = Column(TIMESTAMP, nullable=True)
     completed_at = Column(TIMESTAMP, nullable=True)
     duration_seconds = Column(Integer, nullable=True)

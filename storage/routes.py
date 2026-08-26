@@ -1,12 +1,12 @@
-"""API routes for file storage operations.
+﻿"""API routes for file storage operations.
 
 Endpoints:
-  - POST   /api/files/upload          — Upload a file
-  - GET    /api/files                 — List files for organization
-  - GET    /api/files/{file_id}       — Get file metadata
-  - GET    /api/files/{file_id}/download — Download file content
-  - GET    /api/files/{file_id}/url   — Get presigned/public URL
-  - DELETE /api/files/{file_id}       — Delete a file
+  - POST   /api/files/upload          â€” Upload a file
+  - GET    /api/files                 â€” List files for organization
+  - GET    /api/files/{file_id}       â€” Get file metadata
+  - GET    /api/files/{file_id}/download â€” Download file content
+  - GET    /api/files/{file_id}/url   â€” Get presigned/public URL
+  - DELETE /api/files/{file_id}       â€” Delete a file
 """
 
 from __future__ import annotations

@@ -1,10 +1,10 @@
-"""AI Decision Center — the flagship decision intelligence engine.
+﻿"""AI Decision Center â€” the flagship decision intelligence engine.
 
 Instead of only showing charts, the AI explains:
-1. WHAT HAPPENED — observed changes or patterns
-2. WHY IT HAPPENED — contributing factors and root causes
-3. WHAT MAY HAPPEN NEXT — forecast likely future scenarios
-4. RECOMMENDED ACTIONS — specific, prioritized action items
+1. WHAT HAPPENED â€” observed changes or patterns
+2. WHY IT HAPPENED â€” contributing factors and root causes
+3. WHAT MAY HAPPEN NEXT â€” forecast likely future scenarios
+4. RECOMMENDED ACTIONS â€” specific, prioritized action items
 """
 
 import json
@@ -165,10 +165,10 @@ class DecisionCenterEngine:
             f"Provide a decision intelligence analysis{metric_str}.\n\n"
             f"Platform data:\n{json.dumps(data, default=str)}\n\n"
             f"Follow this structure:\n"
-            f"1. WHAT HAPPENED — Describe the observed change or pattern\n"
-            f"2. WHY IT HAPPENED — Identify contributing factors and root causes\n"
-            f"3. WHAT MAY HAPPEN NEXT — Forecast likely future scenarios\n"
-            f"4. RECOMMENDED ACTIONS — Specific, prioritized action items\n\n"
+            f"1. WHAT HAPPENED â€” Describe the observed change or pattern\n"
+            f"2. WHY IT HAPPENED â€” Identify contributing factors and root causes\n"
+            f"3. WHAT MAY HAPPEN NEXT â€” Forecast likely future scenarios\n"
+            f"4. RECOMMENDED ACTIONS â€” Specific, prioritized action items\n\n"
             f"Respond with JSON:\n"
             f'{{"title": "...", "summary": "...", '
             f'"key_findings": [{{"finding": "...", "metric": "...", "change": "..."}}], '

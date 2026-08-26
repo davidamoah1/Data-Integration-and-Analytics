@@ -1,4 +1,4 @@
-"""Request-scoped context variables for correlation and observability.
+﻿"""Request-scoped context variables for correlation and observability.
 
 Provides:
 - request_id: unique identifier for the current request

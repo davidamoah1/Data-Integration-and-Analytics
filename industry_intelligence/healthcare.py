@@ -1,4 +1,4 @@
-"""Healthcare Intelligence — Patient analytics, disease trends, doctor performance, revenue.
+﻿"""Healthcare Intelligence â€” Patient analytics, disease trends, doctor performance, revenue.
 
 Specialized analytics for hospitals, clinics, and healthcare facilities:
   - Patient demographics and volume
@@ -45,7 +45,7 @@ class HealthcareAnalytics(IndustryAnalytics):
         admission_col = cls._find_col(df, col_mapping, ["admission", "appointment"])
         gender_col = cls._find_col(df, col_mapping, ["gender"])
 
-        # ── Patient Analytics ────────────────────────────
+        # â”€â”€ Patient Analytics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if patient_col and patient_col in df.columns:
             patient_count = int(df[patient_col].nunique())
             insights.append(
@@ -91,7 +91,7 @@ class HealthcareAnalytics(IndustryAnalytics):
                     )
                 )
 
-        # ── Disease Trends ───────────────────────────────
+        # â”€â”€ Disease Trends â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if diagnosis_col and diagnosis_col in df.columns:
             diag_count = int(df[diagnosis_col].nunique())
             insights.append(
@@ -118,7 +118,7 @@ class HealthcareAnalytics(IndustryAnalytics):
                     trend.metric = "diagnoses"
                     trends.append(trend)
 
-        # ── Doctor Performance ───────────────────────────
+        # â”€â”€ Doctor Performance â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if doctor_col and doctor_col in df.columns:
             doctor_count = int(df[doctor_col].nunique())
             insights.append(
@@ -151,7 +151,7 @@ class HealthcareAnalytics(IndustryAnalytics):
                         )
                     )
 
-        # ── Revenue / Billing ────────────────────────────
+        # â”€â”€ Revenue / Billing â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if billing_col and billing_col in df.columns:
             total_billing = float(df[billing_col].sum())
             insights.append(
@@ -191,7 +191,7 @@ class HealthcareAnalytics(IndustryAnalytics):
                     rev_trend.metric = "billing"
                     trends.append(rev_trend)
 
-        # ── Department Efficiency ────────────────────────
+        # â”€â”€ Department Efficiency â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if dept_col and dept_col in df.columns:
             dept_count = int(df[dept_col].nunique())
             insights.append(
@@ -211,7 +211,7 @@ class HealthcareAnalytics(IndustryAnalytics):
                     dept_patient_bd.metric = "patients"
                     breakdowns.append(dept_patient_bd)
 
-        # ── Insurance Coverage ───────────────────────────
+        # â”€â”€ Insurance Coverage â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if insurance_col and insurance_col in df.columns:
             ins_bd = cls._compute_breakdown(df, insurance_col, insurance_col, "count")
             if ins_bd:
@@ -219,7 +219,7 @@ class HealthcareAnalytics(IndustryAnalytics):
                 ins_bd.metric = "claims"
                 breakdowns.append(ins_bd)
 
-        # ── Recommendations ──────────────────────────────
+        # â”€â”€ Recommendations â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         recommendations.extend(
             [
                 "Monitor patient volume by department to optimize staffing.",
@@ -229,10 +229,10 @@ class HealthcareAnalytics(IndustryAnalytics):
             ]
         )
 
-        # ── Alerts ───────────────────────────────────────
+        # â”€â”€ Alerts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         for insight in insights:
             if insight.alert == "warning":
-                alerts.append(f"{insight.title}: {insight.formatted} — above normal threshold.")
+                alerts.append(f"{insight.title}: {insight.formatted} â€” above normal threshold.")
 
         return AnalyticsResult(
             industry="healthcare",

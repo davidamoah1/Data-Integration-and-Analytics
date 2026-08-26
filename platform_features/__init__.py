@@ -1,12 +1,12 @@
-"""Enterprise Platform Features.
+﻿"""Enterprise Platform Features.
 
 Multi-tenancy, RBAC enhancements, and comprehensive audit tracking.
 
 Modules:
-  tenant — TenantContext for org-scoped data isolation
-  rbac — Role hierarchy, permission matrix, role checks
-  audit_tracker — Automatic audit logging for all actions
-  seed — Seed organizations (Hospital A, School B, Company C) and roles
+  tenant â€” TenantContext for org-scoped data isolation
+  rbac â€” Role hierarchy, permission matrix, role checks
+  audit_tracker â€” Automatic audit logging for all actions
+  seed â€” Seed organizations (Hospital A, School B, Company C) and roles
 """
 
 from __future__ import annotations

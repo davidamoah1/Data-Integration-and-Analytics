@@ -1,4 +1,4 @@
-"""add onboarding tracking table for Phase 7 smart onboarding
+﻿"""add onboarding tracking table for Phase 7 smart onboarding
 
 Creates a table for tracking role-specific onboarding step completion.
 

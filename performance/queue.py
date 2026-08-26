@@ -1,4 +1,4 @@
-"""Task Queue System.
+﻿"""Task Queue System.
 
 Multi-priority task queue with Redis backend and in-memory fallback.
 Supports:
@@ -108,7 +108,7 @@ class Task:
 def _resolve_func_path(func: Callable) -> str | None:
     """Return a "module:qualname" path that can later re-import `func`.
 
-    Only works for plain module-level (or nested-class) functions — not
+    Only works for plain module-level (or nested-class) functions â€” not
     lambdas, closures, or bound methods on instances. Returns None if the
     function cannot be resolved this way.
     """
@@ -237,7 +237,7 @@ class TaskQueue:
                         task = self._tasks.get(task_dict["id"])
                         if task:
                             return task
-                        # Not in this process's local cache — likely dequeued
+                        # Not in this process's local cache â€” likely dequeued
                         # by a separate worker process. Reconstruct the task
                         # from the serialized payload so it can still run.
                         task = self._reconstruct_task(task_dict)

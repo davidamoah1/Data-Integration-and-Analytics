@@ -1,4 +1,4 @@
-"""Tenant context helpers for multi-organization isolation.
+﻿"""Tenant context helpers for multi-organization isolation.
 
 Provides centralized utilities to extract the current user's organization,
 enforce organization-scoped access, and build organization-filtered queries.
@@ -166,7 +166,7 @@ def tenant_scoped_dependency() -> Callable:
     return _resolve
 
 
-# ─── Automatic Tenant Query Filtering ────────────────────────────────
+# â”€â”€â”€ Automatic Tenant Query Filtering â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TenantQueryManager:

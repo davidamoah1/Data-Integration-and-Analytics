@@ -1,7 +1,7 @@
-"""Enterprise Recommendation Engine.
+﻿"""Enterprise Recommendation Engine.
 
 Generates actionable, industry-specific recommendations with:
-  - Data-driven triggers (e.g., low inventory → restock)
+  - Data-driven triggers (e.g., low inventory â†’ restock)
   - Expected impact estimation
   - Priority (high/medium/low)
   - Feasibility (easy/medium/hard)
@@ -34,7 +34,7 @@ from ai.prompt_orchestrator import PromptOrchestrator
 logger = logging.getLogger(__name__)
 
 
-# ── Industry Recommendation Templates ──────────────────
+# â”€â”€ Industry Recommendation Templates â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 _RETAIL_RECOMMENDATIONS = [

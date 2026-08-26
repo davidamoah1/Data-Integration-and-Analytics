@@ -1,4 +1,4 @@
-"""Health check and monitoring utilities.
+﻿"""Health check and monitoring utilities.
 
 Provides functions for:
   - Database connectivity checks

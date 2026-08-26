@@ -1,4 +1,4 @@
-"""FastAPI routes for the ETL Engine — imports, pipelines, schedules, profiling, quality, jobs, lineage, templates."""
+﻿"""FastAPI routes for the ETL Engine â€” imports, pipelines, schedules, profiling, quality, jobs, lineage, templates."""
 
 # ruff: noqa: B008  # FastAPI Depends() calls in default arguments are intentional
 

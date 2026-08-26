@@ -1,4 +1,4 @@
-"""Webhook event system — models, dispatcher, and delivery."""
+﻿"""Webhook event system â€” models, dispatcher, and delivery."""
 
 from __future__ import annotations
 

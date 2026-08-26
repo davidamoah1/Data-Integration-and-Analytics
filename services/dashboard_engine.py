@@ -1,4 +1,4 @@
-"""Dashboard Metadata Model & Engine.
+﻿"""Dashboard Metadata Model & Engine.
 
 Provides a reusable, persistable dashboard schema and the engine to
 generate, store, and manage dashboard configurations dynamically.
@@ -28,7 +28,7 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 
-# ── Enums ──────────────────────────────────────────────
+# â”€â”€ Enums â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class WidgetType(str, Enum):
@@ -77,7 +77,7 @@ class PermissionLevel(str, Enum):
     ADMIN = "admin"
 
 
-# ── Data Classes ───────────────────────────────────────
+# â”€â”€ Data Classes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @dataclass
@@ -93,7 +93,7 @@ class KPIDefinition:
     source_columns: list[str] = field(default_factory=list)
     aggregation: str = "sum"
     confidence: float = 1.0
-    icon: str = "📊"
+    icon: str = "ðŸ“Š"
     unit: str = ""
     threshold_warning: float | None = None
     threshold_critical: float | None = None
@@ -219,7 +219,7 @@ class DashboardPermissions:
     visibility: str = "private"  # private, org, public
     allowed_roles: list[str] = field(default_factory=list)
     allowed_users: list[str] = field(default_factory=list)
-    permissions: dict[str, list[str]] = field(default_factory=dict)  # user_id → [PermissionLevel]
+    permissions: dict[str, list[str]] = field(default_factory=dict)  # user_id â†’ [PermissionLevel]
 
     def to_dict(self) -> dict:
         return {
@@ -236,7 +236,7 @@ class DashboardPermissions:
 class DashboardLayout:
     """Layout configuration for a dashboard."""
 
-    sections: dict[str, list[str]] = field(default_factory=dict)  # section → widget IDs
+    sections: dict[str, list[str]] = field(default_factory=dict)  # section â†’ widget IDs
     grid_columns: int = 12
     responsive: bool = True
     background_color: str = ""
@@ -348,7 +348,7 @@ class DashboardMetadata:
         return hashlib.sha256(content.encode()).hexdigest()[:16]
 
 
-# ── Dashboard Engine ───────────────────────────────────
+# â”€â”€ Dashboard Engine â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class DashboardEngine:
@@ -359,10 +359,10 @@ class DashboardEngine:
 
     def __init__(self):
         self._store: dict[str, DashboardMetadata] = {}
-        self._by_dataset: dict[str, list[str]] = {}  # dataset_id → dashboard_ids
-        self._by_org: dict[str, list[str]] = {}  # org_id → dashboard_ids
+        self._by_dataset: dict[str, list[str]] = {}  # dataset_id â†’ dashboard_ids
+        self._by_org: dict[str, list[str]] = {}  # org_id â†’ dashboard_ids
 
-    # ── CRUD ──────────────────────────────────────────
+    # â”€â”€ CRUD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def create(self, dashboard: DashboardMetadata) -> DashboardMetadata:
         """Store a new dashboard."""
@@ -439,7 +439,7 @@ class DashboardEngine:
     def list_all(self, limit: int = 100) -> list[DashboardMetadata]:
         return list(self._store.values())[:limit]
 
-    # ── Customization ─────────────────────────────────
+    # â”€â”€ Customization â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def save_custom_layout(
         self,
@@ -565,7 +565,7 @@ class DashboardEngine:
         dashboard.version += 1
         return dashboard
 
-    # ── Sharing ───────────────────────────────────────
+    # â”€â”€ Sharing â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def share(
         self,
@@ -595,7 +595,7 @@ class DashboardEngine:
         dashboard.updated_at = self._now()
         return dashboard
 
-    # ── Permissions ───────────────────────────────────
+    # â”€â”€ Permissions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def can_access(self, dashboard_id: str, user_id: str, user_roles: list[str]) -> bool:
         """Check if a user can access a dashboard."""
@@ -641,7 +641,7 @@ class DashboardEngine:
             or PermissionLevel.EDIT.value in perms
         )
 
-    # ── Reset ─────────────────────────────────────────
+    # â”€â”€ Reset â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def reset_to_recommended(self, custom_dashboard_id: str) -> DashboardMetadata | None:
         """Reset a custom dashboard to its parent (recommended) layout."""
@@ -663,7 +663,7 @@ class DashboardEngine:
         custom.version += 1
         return custom
 
-    # ── Helpers ───────────────────────────────────────
+    # â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def _index(self, dashboard: DashboardMetadata) -> None:
         self._by_dataset.setdefault(dashboard.dataset_id, []).append(dashboard.dashboard_id)

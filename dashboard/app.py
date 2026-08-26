@@ -1,9 +1,9 @@
-"""DataFlow — Business Analytics Dashboard.
+﻿"""DataFlow â€” Business Analytics Dashboard.
 
 Main Streamlit application entry point.
 Supports two data sources:
-  1. Live database (MySQL/SQLite) — queries via DashboardDataService
-  2. File upload (CSV/Excel) — processes uploaded files
+  1. Live database (MySQL/SQLite) â€” queries via DashboardDataService
+  2. File upload (CSV/Excel) â€” processes uploaded files
 
 Features:
   - Authentication with role-based access
@@ -42,7 +42,7 @@ from validation.engine import ValidationEngine
 
 st.set_page_config(
     page_title="DataFlow - Business Analytics",
-    page_icon="📊",
+    page_icon="ðŸ“Š",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -51,24 +51,24 @@ st.markdown(f"<style>{DARK_THEME_CSS}\n{RESPONSIVE_CSS}</style>", unsafe_allow_h
 register_pwa()
 
 
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Authentication
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 if not require_auth():
     st.stop()
 
 user = get_current_user()
 
 
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Onboarding (first-time users)
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 render_onboarding()
 
 
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Cached data service
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @st.cache_resource
 def get_data_service() -> DashboardDataService:
     """Create a cached DashboardDataService instance."""
@@ -103,16 +103,16 @@ def get_db_record_count(_service) -> int:
     return _service.get_record_count()
 
 
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Sidebar
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 with st.sidebar:
     st.markdown('<div class="sidebar-logo">Data<span>Flow</span></div>', unsafe_allow_html=True)
 
     st.markdown(
         f"""
     <div style="color:rgba(255,255,255,0.5);font-size:0.8rem;margin-bottom:12px;">
-        👤 {sanitize_text(user.get('name', ''))} <span style="color:#a78bfa;">({sanitize_text(user.get('role', ''))})</span>
+        ðŸ‘¤ {sanitize_text(user.get('name', ''))} <span style="color:#a78bfa;">({sanitize_text(user.get('role', ''))})</span>
     </div>
     """,
         unsafe_allow_html=True,
@@ -184,14 +184,14 @@ with st.sidebar:
     )
 
 
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Industry labels (from selected pack)
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 labels = get_industry_labels()
 
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Page routing
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 _current_page = st.session_state.get("nav_page", "Dashboard")
 
 if _current_page == "Administration":
@@ -213,9 +213,9 @@ elif _current_page == "Observability":
     st.stop()
 
 
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Hero
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 st.markdown(
     """
 <div class="hero-header">
@@ -229,9 +229,9 @@ st.markdown(
 )
 
 
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Load data
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 df = None
 semantic_mapping_result = None
 
@@ -240,7 +240,7 @@ if data_source == "Live Database":
         st.markdown(
             """
         <div class="empty-state">
-            <div class="empty-state-icon">🗄️</div>
+            <div class="empty-state-icon">ðŸ—„ï¸</div>
             <div class="empty-state-title">Database is empty</div>
             <div class="empty-state-desc">
                 No data has been loaded into the database yet. You can:<br><br>
@@ -307,7 +307,7 @@ if data_source == "Live Database":
     st.markdown(
         f"""
     <div class="info-banner">
-        📡 Connected to live database. {len(df):,} records matching current filters.
+        ðŸ“¡ Connected to live database. {len(df):,} records matching current filters.
     </div>
     """,
         unsafe_allow_html=True,
@@ -319,7 +319,7 @@ else:
         st.markdown(
             """
         <div class="empty-state">
-            <div class="empty-state-icon">📂</div>
+            <div class="empty-state-icon">ðŸ“‚</div>
             <div class="empty-state-title">No dataset loaded yet</div>
             <div class="empty-state-desc">
                 Upload a CSV or Excel file using the panel on the left to get started.<br>
@@ -350,7 +350,7 @@ else:
     try:
         with st.spinner("Reading your file..."):
             # Clear all previous session state related to prior uploads
-            # This ensures complete dataset isolation — no old metadata reuse
+            # This ensures complete dataset isolation â€” no old metadata reuse
             for key in (
                 "semantic_dataset_context",
                 "admin_confirmed_industry",
@@ -387,7 +387,7 @@ else:
         )
         st.stop()
 
-    # ── Hospital Data Validation (mandatory pre-ETL stage) ──
+    # â”€â”€ Hospital Data Validation (mandatory pre-ETL stage) â”€â”€
     if (
         "validation_result" not in st.session_state
         or st.session_state.get("validation_filename") != uploaded_file.name
@@ -403,7 +403,7 @@ else:
     # Render validation dashboard
     render_validation_dashboard(validation_result)
 
-    # Approval workflow — block ETL if validation failed
+    # Approval workflow â€” block ETL if validation failed
     if not validation_result.can_proceed_to_etl:
         approved = render_approval_section(validation_result)
         if not approved:
@@ -448,7 +448,7 @@ else:
 
         if semantic_mapping_result.industry_confidence < uncertainty_threshold:
             st.warning(
-                f"⚠️ **Industry detection uncertain.** "
+                f"âš ï¸ **Industry detection uncertain.** "
                 f"Best guess: **{semantic_mapping_result.industry.title()}** "
                 f"({semantic_mapping_result.industry_confidence:.0f}% confidence). "
                 f"Please confirm the correct industry below."
@@ -512,7 +512,7 @@ else:
         unsafe_allow_html=True,
     )
 
-    # File mode filters — auto-detect filterable columns
+    # File mode filters â€” auto-detect filterable columns
     with st.sidebar:
         st.markdown('<div class="sidebar-section">Filters</div>', unsafe_allow_html=True)
 
@@ -567,9 +567,9 @@ else:
     kpis = {}
 
 
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Sector Dashboard (KPIs + Charts)
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 if semantic_mapping_result is not None:
     admin_confirmed = st.session_state.get("admin_confirmed_industry", False)
     render_semantic_dashboard(df, semantic_mapping_result, admin_confirmed=admin_confirmed)
@@ -578,9 +578,9 @@ else:
     render_sector_dashboard(df, kpis, pack_key=pack_key)
 
 
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Data Table
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 st.markdown(
     '<div class="section-header">Data Preview</div><hr class="section-divider">',
     unsafe_allow_html=True,
@@ -612,9 +612,9 @@ st.markdown(
 )
 
 
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # AI Copilot
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 st.markdown(
     '<div class="section-header">AI Copilot</div><hr class="section-divider">',
     unsafe_allow_html=True,
@@ -622,9 +622,9 @@ st.markdown(
 render_copilot_panel()
 
 
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Footer
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 st.markdown(
     """
     <div class="app-footer">

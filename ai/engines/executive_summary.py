@@ -1,4 +1,4 @@
-"""Enterprise Executive Summary Engine.
+﻿"""Enterprise Executive Summary Engine.
 
 Generates executive-ready summaries containing:
   - Business overview

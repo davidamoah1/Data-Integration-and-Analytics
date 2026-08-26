@@ -1,4 +1,4 @@
-"""Agriculture Predictive Analytics.
+﻿"""Agriculture Predictive Analytics.
 
 Crop yield prediction using regression analysis based on:
   - Rainfall
@@ -153,7 +153,7 @@ class AgriculturePredictiveAnalytics(PredictiveAnalyticsBase):
             summary_parts.append(f"{len(forecasts)} forecast(s) generated")
         if predictions:
             pred = predictions[0]
-            summary_parts.append(f"R²={pred.r_squared:.2f} for {pred.name}")
+            summary_parts.append(f"RÂ²={pred.r_squared:.2f} for {pred.name}")
         summary = (
             " | ".join(summary_parts) if summary_parts else "No predictions could be generated."
         )

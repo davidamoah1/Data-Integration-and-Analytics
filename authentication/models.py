@@ -1,4 +1,4 @@
-"""SQLAlchemy ORM models for the Authentication domain.
+﻿"""SQLAlchemy ORM models for the Authentication domain.
 
 Tables: users, roles, permissions, role_permissions, user_roles,
 sessions, password_resets, api_tokens, login_history, activity_logs,

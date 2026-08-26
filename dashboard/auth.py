@@ -1,4 +1,4 @@
-"""Authentication module for the dashboard.
+﻿"""Authentication module for the dashboard.
 
 Simple session-based auth using Streamlit's session_state.
 Credentials are loaded from environment variables or a config file.
@@ -12,7 +12,7 @@ from passlib.context import CryptContext
 
 _pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
-# No hardcoded default users — credentials must come from environment variables or database
+# No hardcoded default users â€” credentials must come from environment variables or database
 _ENV_USER_KEYS = {
     "admin": {"role": "admin", "name": "Administrator"},
     "viewer": {"role": "viewer", "name": "Viewer"},
@@ -141,7 +141,7 @@ def require_auth():
                 else:
                     st.error("Invalid username or password.")
         st.markdown(
-            '<div class="login-security">Protected workspace <span>•</span> Role-based access</div>',
+            '<div class="login-security">Protected workspace <span>â€¢</span> Role-based access</div>',
             unsafe_allow_html=True,
         )
 

@@ -1,4 +1,4 @@
-"""Tests for Enterprise Platform Features.
+﻿"""Tests for Enterprise Platform Features.
 
 Tests cover:
   - Multi-tenancy: TenantContext, TenantFilter, org-scoped access
@@ -24,7 +24,7 @@ from platform_features import (
 )
 from platform_features.audit_tracker import ACTION_CATEGORY_MAP
 
-# ── Tenant Context Tests ──────────────────────────────────
+# â”€â”€ Tenant Context Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestTenantContext:
@@ -79,7 +79,7 @@ class TestTenantFilter:
         ctx = TenantContext(
             organization_id=None, user_id=1, roles=["super_admin"], is_super_admin=True
         )
-        # Simulate a query — just verify no filtering happens
+        # Simulate a query â€” just verify no filtering happens
         # In practice, the query is returned unchanged
         assert ctx.is_super_admin is True
 
@@ -89,7 +89,7 @@ class TestTenantFilter:
         assert ctx.organization_id == 5
 
 
-# ── RBAC Tests ────────────────────────────────────────────
+# â”€â”€ RBAC Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestRoleHierarchy:
@@ -204,7 +204,7 @@ class TestRBACHelpers:
         assert get_role_level("viewer") == 20
 
 
-# ── Audit Tracker Tests ───────────────────────────────────
+# â”€â”€ Audit Tracker Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestAuditCategory:
@@ -251,7 +251,7 @@ class TestAuditSummary:
         assert "by_action" in d
 
 
-# ── Seed Data Tests ───────────────────────────────────────
+# â”€â”€ Seed Data Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestSeedData:
@@ -270,7 +270,7 @@ class TestSeedData:
         assert "users_created" in result
 
     def test_seed_idempotent(self, db_session):
-        # Run twice — second run should not create duplicates
+        # Run twice â€” second run should not create duplicates
         seed_enterprise_data(db_session)
         result2 = seed_enterprise_data(db_session)
         # Second run should create 0 new items
@@ -279,7 +279,7 @@ class TestSeedData:
         assert len(result2["users_created"]) == 0
 
 
-# ── Integration Tests ─────────────────────────────────────
+# â”€â”€ Integration Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestPlatformIntegration:

@@ -1,4 +1,4 @@
-from shared.contracts.api import APIError, PageRequest, PageResponse
+﻿from shared.contracts.api import APIError, PageRequest, PageResponse
 from shared.contracts.events import DomainEvent, EventBus
 from shared.contracts.models import (
     AIAgentContract,

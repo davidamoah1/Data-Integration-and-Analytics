@@ -1,4 +1,4 @@
-"""Metric Engine — computes business metrics from a SemanticModel + DataFrame.
+﻿"""Metric Engine â€” computes business metrics from a SemanticModel + DataFrame.
 
 Goes beyond simple KPIs to compute:
   - Aggregations (sum, count, avg, min, max, distinct_count)
@@ -35,7 +35,7 @@ class MetricResult:
     category: str
     entity: str
     aggregation: str
-    breakdown: dict | None = None  # dimension → {value: metric_value}
+    breakdown: dict | None = None  # dimension â†’ {value: metric_value}
     trend: list[dict] | None = None  # [{period: "2024-01", value: 1234}, ...]
     definition: str = ""
     threshold: dict | None = None
@@ -109,7 +109,7 @@ def _fmt_pct(v: float) -> str:
 class MetricEngine:
     """Computes business metrics from a SemanticModel and DataFrame.
 
-    This is the engine that turns "patient_id column → Patient entity"
+    This is the engine that turns "patient_id column â†’ Patient entity"
     into "patient_count = 1,247 unique patients" and then breaks it
     down by region, trends it over time, and checks it against thresholds.
     """

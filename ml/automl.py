@@ -1,4 +1,4 @@
-"""AutoML engine.
+﻿"""AutoML engine.
 
 Trains, evaluates, and compares a configurable set of models for classification,
 regression, clustering, anomaly detection, and time-series forecasting.

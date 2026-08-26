@@ -1,4 +1,4 @@
-"""MODULE 1 — Metadata Extraction.
+﻿"""MODULE 1 â€” Metadata Extraction.
 
 Automatically discovers schema, data types, constraints, statistics,
 and value distributions from a pandas DataFrame.

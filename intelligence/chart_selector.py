@@ -1,4 +1,4 @@
-"""Chart Selection Engine [DEPRECATED].
+﻿"""Chart Selection Engine [DEPRECATED].
 
 .. deprecated::
     Use ``services.auto.engine.VisualizationIntelligenceEngine`` instead.
@@ -9,14 +9,14 @@ Selects appropriate visualizations based on the dataset understanding.
 Each candidate chart is scored, deduplicated, and given a reason.
 
 Selection rules (deterministic first, then scored):
-  TIME + NUMERIC        → line chart
-  CATEGORY + NUMERIC    → bar chart
-  CATEGORY + PROPORTION → pie/donut (small category count only)
-  TWO NUMERIC           → scatter plot
-  DISTRIBUTION          → histogram / box plot
-  CORRELATION           → heatmap
-  RANKING               → sorted bar chart
-  GEOGRAPHIC            → map (only if geo confirmed)
+  TIME + NUMERIC        â†’ line chart
+  CATEGORY + NUMERIC    â†’ bar chart
+  CATEGORY + PROPORTION â†’ pie/donut (small category count only)
+  TWO NUMERIC           â†’ scatter plot
+  DISTRIBUTION          â†’ histogram / box plot
+  CORRELATION           â†’ heatmap
+  RANKING               â†’ sorted bar chart
+  GEOGRAPHIC            â†’ map (only if geo confirmed)
 
 Scoring factors:
   analytical_relevance  (0-30)
@@ -68,7 +68,7 @@ class ChartType(str, Enum):
 
 @dataclass
 class ChartSpecification:
-    """Canonical chart specification — single source of truth.
+    """Canonical chart specification â€” single source of truth.
 
     This specification is used by:
       - Dashboard renderer
@@ -196,7 +196,7 @@ class ChartSelector:
         date_cols = understanding.date_columns
         geo_cols = understanding.geo_columns
 
-        # ─── Time series: DATE + MEASURE → line chart ───────────────────
+        # â”€â”€â”€ Time series: DATE + MEASURE â†’ line chart â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         for date_col in date_cols:
             for measure in measures:
                 if self._column_quality_ok(df, measure) and self._column_quality_ok(df, date_col):
@@ -204,7 +204,7 @@ class ChartSelector:
                     if chart:
                         candidates.append(chart)
 
-        # ─── Category + Measure → bar chart ──────────────────────────────
+        # â”€â”€â”€ Category + Measure â†’ bar chart â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         for cat_col in categories + dimensions:
             for measure in measures:
                 if self._column_quality_ok(df, measure) and self._column_quality_ok(df, cat_col):
@@ -212,7 +212,7 @@ class ChartSelector:
                     if chart:
                         candidates.append(chart)
 
-        # ─── Category proportion → pie/donut (small cardinality only) ────
+        # â”€â”€â”€ Category proportion â†’ pie/donut (small cardinality only) â”€â”€â”€â”€
         for cat_col in categories:
             cardinality = self._cardinality(df, cat_col)
             if 2 <= cardinality <= 8:
@@ -220,7 +220,7 @@ class ChartSelector:
                 if chart:
                     candidates.append(chart)
 
-        # ─── Two numeric → scatter plot ──────────────────────────────────
+        # â”€â”€â”€ Two numeric â†’ scatter plot â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if len(measures) >= 2:
             for i, m1 in enumerate(measures):
                 for m2 in measures[i + 1 :]:
@@ -229,20 +229,20 @@ class ChartSelector:
                         if chart:
                             candidates.append(chart)
 
-        # ─── Distribution → histogram ────────────────────────────────────
+        # â”€â”€â”€ Distribution â†’ histogram â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         for measure in measures:
             if self._column_quality_ok(df, measure):
                 chart = self._make_histogram(df, measure, understanding)
                 if chart:
                     candidates.append(chart)
 
-        # ─── Correlation heatmap (3+ numeric columns) ────────────────────
+        # â”€â”€â”€ Correlation heatmap (3+ numeric columns) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if len(measures) >= 3:
             chart = self._make_heatmap(df, measures, understanding)
             if chart:
                 candidates.append(chart)
 
-        # ─── Geographic → map (only if geo detected) ─────────────────────
+        # â”€â”€â”€ Geographic â†’ map (only if geo detected) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         for geo_col in geo_cols:
             for measure in measures:
                 if self._column_quality_ok(df, measure) and self._column_quality_ok(df, geo_col):
@@ -250,7 +250,7 @@ class ChartSelector:
                     if chart:
                         candidates.append(chart)
 
-        # ─── Ranking → sorted bar (top N) ────────────────────────────────
+        # â”€â”€â”€ Ranking â†’ sorted bar (top N) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         for cat_col in categories + dimensions:
             for measure in measures:
                 if self._cardinality(df, cat_col) > 5:
@@ -260,7 +260,7 @@ class ChartSelector:
 
         return candidates[:MAX_CANDIDATE_CHARTS]
 
-    # ─── Chart builders ──────────────────────────────────────────────────
+    # â”€â”€â”€ Chart builders â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def _make_line_chart(
         self, df: pd.DataFrame, date_col: str, measure: str, u: DatasetUnderstanding
@@ -327,7 +327,7 @@ class ChartSelector:
 
             cardinality = temp[cat_col].nunique()
             if cardinality > 50:
-                # Too many categories — use top N
+                # Too many categories â€” use top N
                 grouped = temp.groupby(cat_col)[measure].sum().nlargest(15).reset_index()
             else:
                 grouped = temp.groupby(cat_col)[measure].sum().reset_index()
@@ -494,7 +494,7 @@ class ChartSelector:
                 reason=f"Histogram shows the distribution shape of {measure_label}",
                 why_this_chart=(
                     f"We selected a histogram because '{measure}' is a numerical "
-                    f"column. Histograms reveal the distribution shape — whether "
+                    f"column. Histograms reveal the distribution shape â€” whether "
                     f"values are normally distributed, skewed, or have outliers."
                 ),
                 source_analysis="distribution",
@@ -635,7 +635,7 @@ class ChartSelector:
             logger.debug("Ranking chart failed for %s + %s: %s", cat_col, measure, e)
             return None
 
-    # ─── Scoring ─────────────────────────────────────────────────────────
+    # â”€â”€â”€ Scoring â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def _score_chart(
         self,
@@ -659,7 +659,7 @@ class ChartSelector:
         # Statistical significance (0-10)
         significance = self._score_significance(chart, df)
 
-        # Uniqueness (0-10) — will be adjusted during dedup
+        # Uniqueness (0-10) â€” will be adjusted during dedup
         uniqueness = 10.0
 
         chart.importance_score = (
@@ -670,27 +670,27 @@ class ChartSelector:
         """Score analytical relevance (0-30)."""
         score = 0.0
 
-        # Time series with measures → high relevance
+        # Time series with measures â†’ high relevance
         if chart.type == ChartType.LINE and chart.source_analysis == "time_series":
             score = 28.0
-        # Category comparison → high
+        # Category comparison â†’ high
         elif chart.type == ChartType.BAR and chart.source_analysis == "category_comparison":
             score = 25.0
-        # Correlation → high if multiple measures
+        # Correlation â†’ high if multiple measures
         elif chart.type == ChartType.SCATTER:
             score = 22.0
         elif chart.type == ChartType.HEATMAP:
             score = 20.0
-        # Distribution → moderate
+        # Distribution â†’ moderate
         elif chart.type == ChartType.HISTOGRAM:
             score = 18.0
-        # Proportion → moderate
+        # Proportion â†’ moderate
         elif chart.type in (ChartType.PIE, ChartType.DONUT):
             score = 16.0
-        # Ranking → moderate-high
+        # Ranking â†’ moderate-high
         elif chart.type == ChartType.HORIZONTAL_BAR:
             score = 22.0
-        # Geographic → high if geo detected
+        # Geographic â†’ high if geo detected
         elif chart.type == ChartType.GEO_MAP:
             score = 24.0
         else:
@@ -788,11 +788,11 @@ class ChartSelector:
                 max_val = max(values)
                 total = sum(values)
                 if total > 0 and max_val / total > 0.4:
-                    score += 3  # One category dominates → interesting
+                    score += 3  # One category dominates â†’ interesting
 
         return min(10, score)
 
-    # ─── Deduplication ───────────────────────────────────────────────────
+    # â”€â”€â”€ Deduplication â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def _deduplicate(self, charts: list[ChartSpecification]) -> list[ChartSpecification]:
         """Remove charts that communicate nearly identical information."""
@@ -816,7 +816,7 @@ class ChartSelector:
 
         return result
 
-    # ─── Utilities ───────────────────────────────────────────────────────
+    # â”€â”€â”€ Utilities â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def _column_quality_ok(self, df: pd.DataFrame, col: str) -> bool:
         """Check if a column has sufficient quality for visualization."""

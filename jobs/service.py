@@ -1,4 +1,4 @@
-"""Job service — orchestrates background job lifecycle.
+﻿"""Job service â€” orchestrates background job lifecycle.
 
 Bridges the persistent Job model with the in-memory/Redis TaskQueue.
 When a user creates a job:
@@ -28,7 +28,7 @@ from performance.queue import Task, TaskPriority, TaskQueue
 
 logger = logging.getLogger(__name__)
 
-# ── Handler registry ──────────────────────────────────────────────────────
+# â”€â”€ Handler registry â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 JobHandler = Callable[[int, dict, DbSession], dict]
 """A job handler function: (job_id, payload, db) -> result_dict."""
@@ -51,7 +51,7 @@ def get_registered_types() -> list[str]:
     return list(_HANDLERS.keys())
 
 
-# ── Singleton queue ───────────────────────────────────────────────────────
+# â”€â”€ Singleton queue â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 _queue: TaskQueue | None = None
 _queue_lock = threading.Lock()
@@ -74,7 +74,7 @@ def get_task_queue() -> TaskQueue:
     return _queue
 
 
-# ── Job Service ───────────────────────────────────────────────────────────
+# â”€â”€ Job Service â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class JobService:
@@ -84,7 +84,7 @@ class JobService:
         self.db = db
         self.repo = JobRepository(db)
 
-    # ── Create ──────────────────────────────────────────────────────────
+    # â”€â”€ Create â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def create_job(
         self,
@@ -140,7 +140,7 @@ class JobService:
             loop = asyncio.get_running_loop()
             loop.create_task(queue.enqueue(task))
         except RuntimeError:
-            # No running event loop — enqueue in a thread
+            # No running event loop â€” enqueue in a thread
             threading.Thread(
                 target=lambda: asyncio.run(queue.enqueue(task)),
                 daemon=True,
@@ -149,7 +149,7 @@ class JobService:
         logger.info("Job %d created and enqueued: %s '%s'", job.id, job_type, name)
         return job
 
-    # ── Read ────────────────────────────────────────────────────────────
+    # â”€â”€ Read â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def get_job(self, job_id: int, organization_id: int) -> Job | None:
         return self.repo.get_by_org(job_id, organization_id)
@@ -188,7 +188,7 @@ class JobService:
             "cancelled": counts.get("cancelled", 0),
         }
 
-    # ── Cancel ──────────────────────────────────────────────────────────
+    # â”€â”€ Cancel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def cancel_job(self, job_id: int, organization_id: int) -> Job | None:
         job = self.get_job(job_id, organization_id)
@@ -207,7 +207,7 @@ class JobService:
         logger.info("Job %d cancelled", job_id)
         return self.repo.get_by_id(job_id)
 
-    # ── Retry ───────────────────────────────────────────────────────────
+    # â”€â”€ Retry â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def retry_job(self, job_id: int, organization_id: int) -> Job | None:
         job = self.get_job(job_id, organization_id)
@@ -254,7 +254,7 @@ class JobService:
         return self.repo.get_by_id(job_id)
 
 
-# ── Job execution wrapper ─────────────────────────────────────────────────
+# â”€â”€ Job execution wrapper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def _run_job_wrapper(job_id: int, job_type: str) -> dict:
@@ -350,7 +350,7 @@ def _run_job_wrapper(job_id: int, job_type: str) -> dict:
         db.close()
 
 
-# ── Progress helper ───────────────────────────────────────────────────────
+# â”€â”€ Progress helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def update_job_progress(job_id: int, progress: float, message: str | None = None) -> None:

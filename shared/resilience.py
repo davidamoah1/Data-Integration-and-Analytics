@@ -1,4 +1,4 @@
-"""Reliability utilities — retry, circuit breaker, and timeout helpers.
+﻿"""Reliability utilities â€” retry, circuit breaker, and timeout helpers.
 
 Provides:
 - retry: Decorator for automatic retry with exponential backoff.
@@ -103,7 +103,7 @@ class CircuitBreaker:
         """Call func through the circuit breaker."""
         current_state = self.state
         if current_state == self.OPEN:
-            raise RuntimeError("Circuit breaker is OPEN — failing fast")
+            raise RuntimeError("Circuit breaker is OPEN â€” failing fast")
 
         try:
             result = func(*args, **kwargs)

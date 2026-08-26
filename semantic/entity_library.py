@@ -1,4 +1,4 @@
-"""MODULE 4 — Business Entity Library.
+﻿"""MODULE 4 â€” Business Entity Library.
 
 Reusable business entities per industry. Each entity has:
   - name, display_name, industry
@@ -13,7 +13,7 @@ from __future__ import annotations
 from semantic.extra_industries import EXTRA_ENTITIES
 
 ENTITY_LIBRARY: dict[str, dict] = {
-    # ── Healthcare ──
+    # â”€â”€ Healthcare â”€â”€
     "patient": {
         "display_name": "Patient",
         "industry": "healthcare",
@@ -167,7 +167,7 @@ ENTITY_LIBRARY: dict[str, dict] = {
             {"target": "insurance", "type": "covered_by", "label": "insurance"},
         ],
     },
-    # ── Education ──
+    # â”€â”€ Education â”€â”€
     "student": {
         "display_name": "Student",
         "industry": "education",
@@ -301,7 +301,7 @@ ENTITY_LIBRARY: dict[str, dict] = {
             {"target": "course", "type": "for", "label": "course"},
         ],
     },
-    # ── Church ──
+    # â”€â”€ Church â”€â”€
     "member": {
         "display_name": "Member",
         "industry": "church",
@@ -403,7 +403,7 @@ ENTITY_LIBRARY: dict[str, dict] = {
             {"target": "offering", "type": "generates", "label": "offerings"},
         ],
     },
-    # ── Retail / SME ──
+    # â”€â”€ Retail / SME â”€â”€
     "customer": {
         "display_name": "Customer",
         "industry": "universal",
@@ -484,7 +484,7 @@ ENTITY_LIBRARY: dict[str, dict] = {
             {"target": "warehouse", "type": "in", "label": "warehouse"},
         ],
     },
-    # ── Government ──
+    # â”€â”€ Government â”€â”€
     "citizen": {
         "display_name": "Citizen",
         "industry": "government",
@@ -591,7 +591,7 @@ ENTITY_LIBRARY: dict[str, dict] = {
             {"target": "department_gov", "type": "owned_by", "label": "department"},
         ],
     },
-    # ── NGO ──
+    # â”€â”€ NGO â”€â”€
     "beneficiary": {
         "display_name": "Beneficiary",
         "industry": "ngo",
@@ -677,7 +677,7 @@ ENTITY_LIBRARY: dict[str, dict] = {
             {"target": "program", "type": "for", "label": "program"},
         ],
     },
-    # ── Manufacturing ──
+    # â”€â”€ Manufacturing â”€â”€
     "machine": {
         "display_name": "Machine",
         "industry": "manufacturing",
@@ -736,7 +736,7 @@ ENTITY_LIBRARY: dict[str, dict] = {
             {"target": "production", "type": "produced_in", "label": "production"},
         ],
     },
-    # ── Agriculture ──
+    # â”€â”€ Agriculture â”€â”€
     "farm": {
         "display_name": "Farm",
         "industry": "agriculture",
@@ -789,7 +789,7 @@ ENTITY_LIBRARY: dict[str, dict] = {
             {"target": "farm", "type": "recorded_at", "label": "farm"},
         ],
     },
-    # ── Cross-industry / Universal ──
+    # â”€â”€ Cross-industry / Universal â”€â”€
     "revenue": {
         "display_name": "Revenue",
         "industry": "universal",

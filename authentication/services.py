@@ -1,4 +1,4 @@
-"""Authentication service layer — business logic for auth operations.
+﻿"""Authentication service layer â€” business logic for auth operations.
 
 Orchestrates repositories, security utilities, and audit logging.
 No business logic in route handlers.
@@ -113,7 +113,7 @@ class AuthService:
                 raise AccountLockedError()
             raise AuthenticationError("Invalid email or password")
 
-        # Success — reset failed logins
+        # Success â€” reset failed logins
         self.user_repo.reset_failed_logins(user.id)
         self.user_repo.update_last_login(user.id)
 
@@ -1272,7 +1272,7 @@ def seed_default_data(db: DbSession):
         (
             "super_admin",
             "Super Administrator",
-            "Full system access — backward compatible",
+            "Full system access â€” backward compatible",
             "platform",
             True,
             False,
@@ -1528,7 +1528,7 @@ def seed_default_data(db: DbSession):
         (
             "personal_user",
             "Personal Workspace User",
-            "Individual user with personal workspace — limited to own resources",
+            "Individual user with personal workspace â€” limited to own resources",
             "personal",
             True,
             True,
@@ -1581,7 +1581,7 @@ def seed_default_data(db: DbSession):
         perm_ids = role_perm_repo.get_permission_ids_by_names(perm_names)
         role_perm_repo.set_role_permissions(role.id, perm_ids)
 
-    # Create default super admin user (credentials from env vars — no hardcoded passwords)
+    # Create default super admin user (credentials from env vars â€” no hardcoded passwords)
     import os as _os
 
     admin_email = _os.getenv("SUPER_ADMIN_EMAIL", "admin@dataflow.io")

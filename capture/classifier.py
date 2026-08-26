@@ -1,4 +1,4 @@
-"""Document type classification for the Smart Data Capture platform.
+﻿"""Document type classification for the Smart Data Capture platform.
 
 Uses keyword/pattern scoring against the `capture.document_types` registry.
 This is deliberately simple, transparent, and dependency-free (no ML model

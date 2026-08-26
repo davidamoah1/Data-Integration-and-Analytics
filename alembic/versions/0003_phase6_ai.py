@@ -1,4 +1,4 @@
-"""Phase 6 — AI Intelligence Platform tables.
+﻿"""Phase 6 â€” AI Intelligence Platform tables.
 
 Revision ID: 0003_phase6_ai
 Revises: 0002_phase5_etl

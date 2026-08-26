@@ -1,4 +1,4 @@
-"""MFA (Multi-Factor Authentication) service layer.
+﻿"""MFA (Multi-Factor Authentication) service layer.
 
 Provides TOTP-based MFA setup, verification, and management.
 Uses pyotp for TOTP generation and verification.

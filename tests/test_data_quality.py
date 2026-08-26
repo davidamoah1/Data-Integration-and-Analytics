@@ -1,4 +1,4 @@
-"""Tests for Data Quality Intelligence.
+﻿"""Tests for Data Quality Intelligence.
 
 Tests cover:
   - Quality checks (missing values, duplicates, sentinels, out-of-range, formats, types)
@@ -25,7 +25,7 @@ from data_quality import (
 )
 from data_quality.quality_engine import QualityIntelligenceResult, QualityScore
 
-# ── Fixtures ──────────────────────────────────────────────
+# â”€â”€ Fixtures â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @pytest.fixture
@@ -117,7 +117,7 @@ def drift_new_df():
     )
 
 
-# ── Quality Check Engine Tests ────────────────────────────
+# â”€â”€ Quality Check Engine Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestQualityCheckEngine:
@@ -217,7 +217,7 @@ class TestQualityCheckEngine:
         assert len(errors) == 0
 
 
-# ── Drift Detector Tests ──────────────────────────────────
+# â”€â”€ Drift Detector Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestDriftDetector:
@@ -274,7 +274,7 @@ class TestDriftDetector:
         assert "significant" in severities or "moderate" in severities
 
 
-# ── Schema Monitor Tests ──────────────────────────────────
+# â”€â”€ Schema Monitor Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestSchemaMonitor:
@@ -344,7 +344,7 @@ class TestSchemaMonitor:
             assert s1 <= s2
 
 
-# ── Quality Engine Tests ──────────────────────────────────
+# â”€â”€ Quality Engine Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestQualityEngine:
@@ -439,7 +439,7 @@ class TestQualityEngine:
         assert result.drift_result is not None
 
 
-# ── Pipeline Integration Tests ────────────────────────────
+# â”€â”€ Pipeline Integration Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestPipelineIntegration:

@@ -1,4 +1,4 @@
-"""Background Worker Pool.
+﻿"""Background Worker Pool.
 
 Manages a pool of workers that process tasks from the queue.
 Features:
@@ -79,7 +79,7 @@ class Worker:
         logger.info(f"Worker {self.worker_id} stopped")
 
     async def _loop(self) -> None:
-        """Main worker loop — dequeue and execute tasks."""
+        """Main worker loop â€” dequeue and execute tasks."""
         while self._running:
             try:
                 task = await self.task_queue.dequeue(timeout=1.0)

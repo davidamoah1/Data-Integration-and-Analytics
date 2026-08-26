@@ -1,4 +1,4 @@
-"""Dashboard Composition Engine — Phase 6.
+﻿"""Dashboard Composition Engine â€” Phase 6.
 
 Provides a widget registry, data source bindings, and composition service
 for building dashboards from reusable widgets that adapt by industry.
@@ -6,7 +6,7 @@ for building dashboards from reusable widgets that adapt by industry.
 Widget types: kpi_card, chart, table, map, trend, alert, report
 
 Architecture:
-    Dashboard → Widgets → Permissions → Data Sources
+    Dashboard â†’ Widgets â†’ Permissions â†’ Data Sources
 """
 
 from __future__ import annotations
@@ -19,7 +19,7 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 
-# ── Enums ──────────────────────────────────────────────
+# â”€â”€ Enums â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class WidgetType(str, Enum):
@@ -64,7 +64,7 @@ class Industry(str, Enum):
     GENERIC = "generic"
 
 
-# ── Data Classes ───────────────────────────────────────
+# â”€â”€ Data Classes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @dataclass
@@ -194,7 +194,7 @@ class DashboardComposition:
         }
 
 
-# ── Widget Registry ───────────────────────────────────
+# â”€â”€ Widget Registry â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class WidgetRegistry:
@@ -247,7 +247,7 @@ class WidgetRegistry:
         return sorted({w.widget_type.value for w in cls._widgets.values()})
 
 
-# ── Dashboard Composition Service ─────────────────────
+# â”€â”€ Dashboard Composition Service â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class DashboardCompositionService:

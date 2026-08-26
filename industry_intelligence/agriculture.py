@@ -1,4 +1,4 @@
-"""Agriculture Intelligence — Production, yield, crop analysis, livestock.
+﻿"""Agriculture Intelligence â€” Production, yield, crop analysis, livestock.
 
 Specialized analytics for farms, agricultural operations:
   - Production volume and harvest totals
@@ -43,7 +43,7 @@ class AgricultureAnalytics(IndustryAnalytics):
         date_col = cls._find_date_col(df, col_mapping)
         region_col = cls._find_col(df, col_mapping, ["region"])
 
-        # ── Farm Analytics ───────────────────────────────
+        # â”€â”€ Farm Analytics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if farm_col and farm_col in df.columns:
             farm_count = int(df[farm_col].nunique())
             insights.append(
@@ -56,7 +56,7 @@ class AgricultureAnalytics(IndustryAnalytics):
                 )
             )
 
-        # ── Production / Harvest ─────────────────────────
+        # â”€â”€ Production / Harvest â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if harvest_col and harvest_col in df.columns:
             total_harvest = float(df[harvest_col].sum())
             insights.append(
@@ -104,7 +104,7 @@ class AgricultureAnalytics(IndustryAnalytics):
                     prod_trend.metric = "production"
                     trends.append(prod_trend)
 
-        # ── Crop Analysis ────────────────────────────────
+        # â”€â”€ Crop Analysis â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if crop_col and crop_col in df.columns:
             crop_count = int(df[crop_col].nunique())
             insights.append(
@@ -124,7 +124,7 @@ class AgricultureAnalytics(IndustryAnalytics):
                     crop_bd.metric = "production"
                     breakdowns.append(crop_bd)
 
-        # ── Livestock ────────────────────────────────────
+        # â”€â”€ Livestock â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if livestock_col and livestock_col in df.columns:
             livestock_count = int(df[livestock_col].nunique())
             insights.append(
@@ -143,7 +143,7 @@ class AgricultureAnalytics(IndustryAnalytics):
                 livestock_bd.metric = "count"
                 breakdowns.append(livestock_bd)
 
-        # ── Weather Impact ───────────────────────────────
+        # â”€â”€ Weather Impact â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if weather_col and weather_col in df.columns:
             avg_weather = float(df[weather_col].dropna().mean())
             insights.append(
@@ -157,7 +157,7 @@ class AgricultureAnalytics(IndustryAnalytics):
                 )
             )
 
-        # ── Regional Analytics ───────────────────────────
+        # â”€â”€ Regional Analytics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if region_col and region_col in df.columns:
             region_count = int(df[region_col].nunique())
             insights.append(
@@ -177,7 +177,7 @@ class AgricultureAnalytics(IndustryAnalytics):
                     region_bd.metric = "production"
                     breakdowns.append(region_bd)
 
-        # ── Farm Performance ─────────────────────────────
+        # â”€â”€ Farm Performance â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if farm_col and farm_col in df.columns and harvest_col and harvest_col in df.columns:
             farm_bd = cls._compute_breakdown(df, farm_col, harvest_col, "sum")
             if farm_bd:
@@ -197,7 +197,7 @@ class AgricultureAnalytics(IndustryAnalytics):
         for insight in insights:
             if insight.alert == "warning":
                 alerts.append(
-                    f"{insight.title}: {insight.formatted} — below recommended threshold."
+                    f"{insight.title}: {insight.formatted} â€” below recommended threshold."
                 )
 
         return AnalyticsResult(

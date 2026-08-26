@@ -1,4 +1,4 @@
-"""Regression test: track_action decorator must log (not silently swallow)
+﻿"""Regression test: track_action decorator must log (not silently swallow)
 audit-logging failures, so gaps in the audit trail are visible in logs.
 """
 

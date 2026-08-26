@@ -1,4 +1,4 @@
-"""Regression tests for AI Document Chat upload/access security fixes.
+﻿"""Regression tests for AI Document Chat upload/access security fixes.
 
 Covers:
   - Path traversal protection: a crafted filename cannot escape the
@@ -12,7 +12,7 @@ from __future__ import annotations
 import os
 import tempfile
 
-import ai.models  # noqa: F401 — registers tables with shared Base
+import ai.models  # noqa: F401 â€” registers tables with shared Base
 from ai.engines.document_chat import DocumentChatEngine
 from ai.models import AIDocument
 

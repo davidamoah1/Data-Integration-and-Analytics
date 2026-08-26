@@ -1,4 +1,4 @@
-"""DeepSeek provider — supports DeepSeek Chat and Coder models."""
+﻿"""DeepSeek provider â€” supports DeepSeek Chat and Coder models."""
 
 import json
 from collections.abc import Generator
@@ -10,7 +10,7 @@ from ai.providers.base import BaseProvider, LLMResponse
 
 
 class DeepSeekProvider(BaseProvider):
-    """DeepSeek AI provider — OpenAI-compatible API."""
+    """DeepSeek AI provider â€” OpenAI-compatible API."""
 
     def __init__(
         self, api_key: str = "", base_url: str = "", model: str = "deepseek-chat", **kwargs

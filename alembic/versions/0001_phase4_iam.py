@@ -1,4 +1,4 @@
-"""Initial Phase 4 migration — authentication, organization, and audit tables.
+﻿"""Initial Phase 4 migration â€” authentication, organization, and audit tables.
 
 Creates all new tables for the Enterprise IAM system:
 - Authentication: users, roles, permissions, role_permissions, user_roles,

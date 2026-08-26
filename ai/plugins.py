@@ -1,4 +1,4 @@
-"""AI Plugin System — extensible architecture for custom AI capabilities.
+﻿"""AI Plugin System â€” extensible architecture for custom AI capabilities.
 
 Plugins can be:
 - Custom providers (new LLM backends)

@@ -1,4 +1,4 @@
-"""Minimal diagnostic endpoint for Vercel.
+﻿"""Minimal diagnostic endpoint for Vercel.
 
 This is a standalone ASGI app that does NOT import the full FastAPI app.
 It returns diagnostic info to help identify why the main app returns 500.

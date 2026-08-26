@@ -1,4 +1,4 @@
-"""AI Memory — conversation history management with summarization.
+﻿"""AI Memory â€” conversation history management with summarization.
 
 Manages message history for conversations, with automatic summarization
 when conversations get long to stay within token limits.

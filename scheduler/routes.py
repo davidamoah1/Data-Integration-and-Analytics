@@ -1,4 +1,4 @@
-"""REST routes for scheduled report jobs."""
+﻿"""REST routes for scheduled report jobs."""
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, ConfigDict, Field

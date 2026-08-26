@@ -1,4 +1,4 @@
-"""Local development startup script.
+﻿"""Local development startup script.
 
 Sets environment variables for SQLite + CORS + CSP and starts uvicorn.
 """

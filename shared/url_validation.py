@@ -1,4 +1,4 @@
-"""URL validation utilities to prevent SSRF attacks.
+﻿"""URL validation utilities to prevent SSRF attacks.
 
 Validates that user-supplied URLs:
 - Use allowed protocols (http, https only)

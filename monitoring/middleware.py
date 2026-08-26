@@ -1,4 +1,4 @@
-"""Enhanced monitoring middleware for request tracing, metrics, and error tracking.
+﻿"""Enhanced monitoring middleware for request tracing, metrics, and error tracking.
 
 Combines:
 - Prometheus metrics collection (request count, duration, errors)

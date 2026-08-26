@@ -1,4 +1,4 @@
-"""add report engine tables for Phase 8 reporting & presentation engine
+﻿"""add report engine tables for Phase 8 reporting & presentation engine
 
 Creates tables for structured report compositions with sections, KPIs,
 charts, tables, insights, and recommendations.

@@ -1,4 +1,4 @@
-"""ORM models for the background job system."""
+﻿"""ORM models for the background job system."""
 
 from __future__ import annotations
 
@@ -19,15 +19,15 @@ from shared.database import Base, BigInt
 class Job(Base):
     """A persistent background job tracked across the platform.
 
-    Lifecycle: pending → running → completed | failed | cancelled
+    Lifecycle: pending â†’ running â†’ completed | failed | cancelled
 
     Job types:
-      - etl_run        — ETL pipeline execution
-      - ocr_batch      — OCR processing for capture batches
-      - report_gen     — AI report generation
-      - data_import    — Large dataset imports
-      - export         — Data exports
-      - custom         — Custom user-defined tasks
+      - etl_run        â€” ETL pipeline execution
+      - ocr_batch      â€” OCR processing for capture batches
+      - report_gen     â€” AI report generation
+      - data_import    â€” Large dataset imports
+      - export         â€” Data exports
+      - custom         â€” Custom user-defined tasks
     """
 
     __tablename__ = "background_jobs"
@@ -45,17 +45,17 @@ class Job(Base):
     status = Column(String(32), nullable=False, default="pending", index=True)
     # pending | running | completed | failed | cancelled
 
-    # Progress (0.0 – 1.0)
+    # Progress (0.0 â€“ 1.0)
     progress = Column(Float, nullable=False, default=0.0)
     progress_message = Column(String(512), nullable=True)
 
-    # Payload — JSON-serializable input parameters
+    # Payload â€” JSON-serializable input parameters
     payload = Column(Text, nullable=True)  # JSON string
 
-    # Result — JSON-serializable output (on success)
+    # Result â€” JSON-serializable output (on success)
     result = Column(Text, nullable=True)  # JSON string
 
-    # Error — error message (on failure)
+    # Error â€” error message (on failure)
     error = Column(Text, nullable=True)
 
     # Retry tracking

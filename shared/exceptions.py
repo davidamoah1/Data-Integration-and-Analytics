@@ -1,4 +1,4 @@
-"""Custom exceptions for the platform.
+﻿"""Custom exceptions for the platform.
 
 These are caught by FastAPI exception handlers and converted to
 standard JSON responses.

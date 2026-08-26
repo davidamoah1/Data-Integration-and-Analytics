@@ -1,4 +1,4 @@
-import json
+﻿import json
 import logging
 import os
 import sys
@@ -67,7 +67,7 @@ def setup_logging() -> logging.Logger:
     console_handler.addFilter(_ContextFilter())
     logger.addHandler(console_handler)
 
-    # Optional file handler — only when LOG_PATH is explicitly configured and writable
+    # Optional file handler â€” only when LOG_PATH is explicitly configured and writable
     log_path = os.getenv("LOG_PATH", "").strip()
     if log_path:
         try:

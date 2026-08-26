@@ -1,4 +1,4 @@
-"""Tests for the Semantic Model, Business Definitions, and Metric Engine.
+﻿"""Tests for the Semantic Model, Business Definitions, and Metric Engine.
 
 Verifies that every dataset gets a structured metadata model with:
   - Domain (industry) classification
@@ -349,7 +349,7 @@ class TestMetricEngine:
 
 
 class TestFullPipeline:
-    """Test the full pipeline: analyze → model → metrics → to_dict."""
+    """Test the full pipeline: analyze â†’ model â†’ metrics â†’ to_dict."""
 
     def test_full_result_has_semantic_model(self, healthcare_df):
         result = SemanticMappingEngine.analyze(healthcare_df)

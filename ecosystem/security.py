@@ -1,4 +1,4 @@
-"""Security utilities for the ecosystem.
+﻿"""Security utilities for the ecosystem.
 
 - API key authentication middleware for public API routes
 - Scope enforcement

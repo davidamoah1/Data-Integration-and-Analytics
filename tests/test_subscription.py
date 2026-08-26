@@ -1,4 +1,4 @@
-"""Tests for the subscription & licensing module."""
+﻿"""Tests for the subscription & licensing module."""
 
 from datetime import datetime, timedelta, timezone
 

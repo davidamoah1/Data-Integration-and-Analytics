@@ -1,9 +1,9 @@
-"""Enterprise Dataset Workflow Orchestrator.
+﻿"""Enterprise Dataset Workflow Orchestrator.
 
 Manages the full dataset intelligence pipeline:
-  Upload → Validate → Profile → Quality Check → Semantic Analysis
-  → Industry Detection → Metadata Generation → Business Knowledge
-  → AI Insights → Dashboard Recommendation → Analysis Complete
+  Upload â†’ Validate â†’ Profile â†’ Quality Check â†’ Semantic Analysis
+  â†’ Industry Detection â†’ Metadata Generation â†’ Business Knowledge
+  â†’ AI Insights â†’ Dashboard Recommendation â†’ Analysis Complete
 
 Each stage:
   - Saves status
@@ -152,7 +152,7 @@ class DatasetWorkflowOrchestrator:
     Usage:
         orchestrator = DatasetWorkflowOrchestrator()
         state = orchestrator.start(df, dataset_name="sales_data.csv")
-        # state.to_dict() → JSON-serializable progress
+        # state.to_dict() â†’ JSON-serializable progress
     """
 
     MAX_RETRIES = 2
@@ -361,7 +361,7 @@ class DatasetWorkflowOrchestrator:
         state.updated_at = self._now()
         self._emit_progress(state)
 
-    # ─── Stage Handlers ─────────────────────────────────────────
+    # â”€â”€â”€ Stage Handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def _stage_handlers(self) -> dict[WorkflowStage, Callable]:
         return {
@@ -561,7 +561,7 @@ class DatasetWorkflowOrchestrator:
         recommendations = engine.recommend(df, mapping_result, admin_confirmed=admin_confirmed)
         state.context["dashboard_recommendations"] = recommendations
 
-        # New auto engine — produces canonical DashboardSpecification
+        # New auto engine â€” produces canonical DashboardSpecification
         try:
             industry = state.context.get("industry_result", {}).get("industry", "unknown")
             quality_score = 0.0
@@ -648,7 +648,7 @@ class DatasetWorkflowOrchestrator:
 
         return " ".join(summary_parts)
 
-    # ─── Caching ─────────────────────────────────────────
+    # â”€â”€â”€ Caching â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def _compute_hash(self, df: pd.DataFrame, name: str) -> str:
         """Compute a hash for a dataset to use as cache key."""

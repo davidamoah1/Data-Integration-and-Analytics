@@ -1,4 +1,4 @@
-"""Decision intelligence and recommendation generation.
+﻿"""Decision intelligence and recommendation generation.
 
 Generates data-driven narrative recommendations by combining metric changes,
 outliers, forecasts, and domain heuristics.

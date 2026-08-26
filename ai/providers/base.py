@@ -1,4 +1,4 @@
-"""Base AI provider interface — all providers implement this contract."""
+﻿"""Base AI provider interface â€” all providers implement this contract."""
 
 from abc import ABC, abstractmethod
 from collections.abc import Generator

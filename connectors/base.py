@@ -1,4 +1,4 @@
-"""Base connector abstract class and connector registry.
+﻿"""Base connector abstract class and connector registry.
 
 Every connector implements a standardised interface:
   - metadata
@@ -21,7 +21,7 @@ logger = logging.getLogger("etl_project.connectors")
 class BaseConnector(abc.ABC):
     """Abstract base class for all connectors."""
 
-    # Metadata — overridden by subclasses
+    # Metadata â€” overridden by subclasses
     type_code: ClassVar[str] = ""
     display_name: ClassVar[str] = ""
     category: ClassVar[str] = ""

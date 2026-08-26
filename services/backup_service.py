@@ -1,4 +1,4 @@
-"""Backup and restore verification service.
+﻿"""Backup and restore verification service.
 
 Provides scheduled and on-demand backups of the application database and
 critical configuration. Supports SQLite (file copy) and MySQL (mysqldump).

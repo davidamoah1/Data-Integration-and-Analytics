@@ -1,11 +1,11 @@
-"""Base API controller — thin route layer with standard patterns.
+﻿"""Base API controller â€” thin route layer with standard patterns.
 
 Controllers handle HTTP concerns only: request parsing, dependency
 injection, response serialization, and exception translation. All
 business logic lives in services.
 
 Architecture layer:
-    API Routes (Controller) → Service Layer → Repository Layer → Database
+    API Routes (Controller) â†’ Service Layer â†’ Repository Layer â†’ Database
 
 Usage:
     class CaptureController(BaseController):
@@ -38,7 +38,7 @@ class BaseController:
     handles:
       - Auth dependency injection
       - Tenant scoping (organization_id)
-      - Exception → HTTP status translation
+      - Exception â†’ HTTP status translation
       - Standard response formatting
     """
 
@@ -61,7 +61,7 @@ class BaseController:
             raise HTTPException(status_code=401, detail="Authentication required")
         return self.current_user["id"]
 
-    # ── Response helpers ────────────────────────────────────────────────
+    # â”€â”€ Response helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     @staticmethod
     def ok(data: Any = None, message: str = "OK") -> dict:
@@ -75,7 +75,7 @@ class BaseController:
     def deleted(message: str = "Deleted") -> dict:
         return success_response(None, message)
 
-    # ── Exception translation ───────────────────────────────────────────
+    # â”€â”€ Exception translation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     @staticmethod
     def handle_error(e: Exception) -> None:

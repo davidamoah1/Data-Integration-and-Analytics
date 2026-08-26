@@ -1,6 +1,6 @@
-"""add composite indexes and analytics tables
+﻿"""add composite indexes and analytics tables
 
-Redundant migration — all tables and indexes were already created by
+Redundant migration â€” all tables and indexes were already created by
 revision 3ab0de986206. Kept as a no-op placeholder to preserve the
 migration chain integrity (0006 depends on this revision).
 

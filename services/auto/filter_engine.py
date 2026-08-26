@@ -1,4 +1,4 @@
-"""Automatic Filter Engine.
+﻿"""Automatic Filter Engine.
 
 Intelligently selects useful filters for dashboard interaction.
 
@@ -103,7 +103,7 @@ class AutomaticFilterEngine:
                     str(v) for v in df[col_u.name].dropna().unique()[: self.MULTI_SELECT_MAX]
                 ]
             else:
-                # Too many values — skip
+                # Too many values â€” skip
                 continue
 
             filters.append(

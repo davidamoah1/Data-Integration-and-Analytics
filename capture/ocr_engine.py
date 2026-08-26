@@ -1,11 +1,11 @@
-"""OCR engine abstraction for the Smart Data Capture platform.
+﻿"""OCR engine abstraction for the Smart Data Capture platform.
 
 Uses `pytesseract` (a thin wrapper around the Tesseract OCR binary) for text
 extraction with per-word confidence and bounding boxes, and `PyMuPDF` (pure
 pip-installable, no external binary) to rasterize PDF pages to images before
 OCR.
 
-IMPORTANT — system dependency: Tesseract OCR must be installed separately on
+IMPORTANT â€” system dependency: Tesseract OCR must be installed separately on
 the host machine (it is NOT installable via pip). If it is missing, OCR
 calls raise `OcrUnavailableError` with a clear message instead of crashing
 the whole pipeline; callers should catch this and mark the document as
@@ -13,7 +13,7 @@ the whole pipeline; callers should catch this and mark the document as
 
 This module is intentionally the only place that talks to the OCR backend,
 so a cloud OCR provider (Azure Document Intelligence, Google Vision, AWS
-Textract — all of which handle handwriting far better than Tesseract) can be
+Textract â€” all of which handle handwriting far better than Tesseract) can be
 swapped in later without touching classification/extraction/validation code.
 """
 

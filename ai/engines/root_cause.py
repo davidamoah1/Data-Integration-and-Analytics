@@ -1,4 +1,4 @@
-"""Root Cause Analysis Engine.
+﻿"""Root Cause Analysis Engine.
 
 Performs structured root cause analysis:
   1. State the observation and its magnitude

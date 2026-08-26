@@ -1,4 +1,4 @@
-"""REST routes for user/organization in-app notifications."""
+﻿"""REST routes for user/organization in-app notifications."""
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session as DbSession

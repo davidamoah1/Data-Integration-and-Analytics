@@ -1,4 +1,4 @@
-"""Pydantic schemas for organization endpoints."""
+﻿"""Pydantic schemas for organization endpoints."""
 
 from datetime import datetime
 

@@ -1,14 +1,14 @@
-"""Hospital Data Validation & Quality Management Engine.
+﻿"""Hospital Data Validation & Quality Management Engine.
 
 A mandatory pre-ETL validation stage for all hospital datasets.
 
 Pipeline:
-    Upload → Schema Validation → Structural Validation → Data Profiling
-    → Data Quality Rules → Business Rule Validation → Duplicate Detection
-    → Missing Data Analysis → Outlier Detection → Clinical Consistency Checks
-    → Data Quality Score → Validation Report → User Review → Approval
-    → ETL → Metadata → Semantic Layer → Knowledge Graph → KPIs
-    → Dashboards → Reports → AI Insights
+    Upload â†’ Schema Validation â†’ Structural Validation â†’ Data Profiling
+    â†’ Data Quality Rules â†’ Business Rule Validation â†’ Duplicate Detection
+    â†’ Missing Data Analysis â†’ Outlier Detection â†’ Clinical Consistency Checks
+    â†’ Data Quality Score â†’ Validation Report â†’ User Review â†’ Approval
+    â†’ ETL â†’ Metadata â†’ Semantic Layer â†’ Knowledge Graph â†’ KPIs
+    â†’ Dashboards â†’ Reports â†’ AI Insights
 """
 
 from validation.ai_copilot import ValidationAICopilot

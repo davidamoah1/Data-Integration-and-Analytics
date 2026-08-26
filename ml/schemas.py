@@ -1,4 +1,4 @@
-"""Pydantic schemas for the ML platform API."""
+﻿"""Pydantic schemas for the ML platform API."""
 
 from __future__ import annotations
 

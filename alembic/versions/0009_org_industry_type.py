@@ -1,4 +1,4 @@
-"""add industry and organization_type columns to organizations table
+﻿"""add industry and organization_type columns to organizations table
 
 These columns support adaptive UI navigation based on the user's
 organization industry and type.

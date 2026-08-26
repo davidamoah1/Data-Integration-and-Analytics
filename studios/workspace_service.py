@@ -1,4 +1,4 @@
-"""Data Workspace service — Excel-like spreadsheet experience with AI assistance."""
+﻿"""Data Workspace service â€” Excel-like spreadsheet experience with AI assistance."""
 
 from __future__ import annotations
 
@@ -255,7 +255,7 @@ class DataWorkspaceService:
                         "formula": formula,
                         "column_name": "profit_margin",
                         "data_type": "float",
-                        "explanation": f"Calculates profit margin as ({profit_cols[0]} / {revenue_cols[0]}) × 100",
+                        "explanation": f"Calculates profit margin as ({profit_cols[0]} / {revenue_cols[0]}) Ã— 100",
                     }
                 )
 

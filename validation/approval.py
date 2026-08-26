@@ -1,4 +1,4 @@
-"""Approval Workflow — manages validation approval/rejection decisions."""
+﻿"""Approval Workflow â€” manages validation approval/rejection decisions."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""Tests for data profiling engine."""
+﻿"""Tests for data profiling engine."""
 
 import pandas as pd
 import pytest

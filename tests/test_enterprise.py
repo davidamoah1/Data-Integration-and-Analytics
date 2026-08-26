@@ -1,4 +1,4 @@
-"""Tests for Sprint 6 enterprise hardening — security, resilience, observability."""
+﻿"""Tests for Sprint 6 enterprise hardening â€” security, resilience, observability."""
 
 import os
 import sys

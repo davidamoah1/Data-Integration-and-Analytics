@@ -1,4 +1,4 @@
-"""Quick MySQL connection test."""
+﻿"""Quick MySQL connection test."""
 
 import pymysql
 from sqlalchemy import create_engine, text

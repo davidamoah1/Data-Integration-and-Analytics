@@ -1,4 +1,4 @@
-"""Notification domain models."""
+﻿"""Notification domain models."""
 
 from datetime import datetime, timezone
 

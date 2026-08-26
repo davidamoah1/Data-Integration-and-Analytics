@@ -1,4 +1,4 @@
-"""Service layer for ETL operations.
+﻿"""Service layer for ETL operations.
 
 Encapsulates business logic for the ETL pipeline, coordinating between
 extract, transform, load modules and the repository layer.

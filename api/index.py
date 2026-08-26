@@ -1,4 +1,4 @@
-"""Vercel serverless function entrypoint.
+﻿"""Vercel serverless function entrypoint.
 
 Vercel Python functions expose the ASGI app through a module-level callable.
 This adapter imports the canonical FastAPI application from api.main so the

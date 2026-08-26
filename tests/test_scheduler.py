@@ -1,4 +1,4 @@
-"""Tests for scheduled report API and scheduler."""
+﻿"""Tests for scheduled report API and scheduler."""
 
 import pytest
 

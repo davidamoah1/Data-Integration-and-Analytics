@@ -1,4 +1,4 @@
-"""AI Usage Tracker — tracks token usage and costs per request.
+﻿"""AI Usage Tracker â€” tracks token usage and costs per request.
 
 Provides:
 - Per-request usage logging

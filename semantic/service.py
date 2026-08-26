@@ -1,8 +1,8 @@
-"""Main Semantic Intelligence Service.
+﻿"""Main Semantic Intelligence Service.
 
 Orchestrates the full pipeline:
-  Upload → Metadata → Profiling → Semantic Mapping → Relationships
-  → Industry Detection → Knowledge Graph → KPIs → Dashboard → Governance
+  Upload â†’ Metadata â†’ Profiling â†’ Semantic Mapping â†’ Relationships
+  â†’ Industry Detection â†’ Knowledge Graph â†’ KPIs â†’ Dashboard â†’ Governance
 
 This is the single entry point for the semantic layer.
 """

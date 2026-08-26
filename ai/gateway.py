@@ -1,4 +1,4 @@
-"""AI Gateway — central orchestrator for all AI requests.
+﻿"""AI Gateway â€” central orchestrator for all AI requests.
 
 This is the single entry point for all AI operations across the platform.
 It coordinates providers, memory, context, security, usage tracking, caching,
@@ -28,7 +28,7 @@ from ai.usage import UsageTracker
 
 
 class AIGateway:
-    """Central AI orchestrator — routes requests through the full AI stack."""
+    """Central AI orchestrator â€” routes requests through the full AI stack."""
 
     def __init__(self, db: DbSession):
         self.db = db

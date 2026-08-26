@@ -1,4 +1,4 @@
-"""Kenya Country Profile."""
+﻿"""Kenya Country Profile."""
 
 from __future__ import annotations
 

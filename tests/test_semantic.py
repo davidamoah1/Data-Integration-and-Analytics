@@ -1,4 +1,4 @@
-"""Tests for the Semantic Intelligence Engine."""
+﻿"""Tests for the Semantic Intelligence Engine."""
 
 import pandas as pd
 import pytest
@@ -17,7 +17,7 @@ from semantic.relationship_engine import RelationshipEngine
 from semantic.semantic_engine import SemanticEngine
 from semantic.semantic_search import SemanticSearch
 
-# ── Test Data Fixtures ──
+# â”€â”€ Test Data Fixtures â”€â”€
 
 
 @pytest.fixture
@@ -100,7 +100,7 @@ def ngo_df():
     )
 
 
-# ── MODULE 1: Metadata Extraction ──
+# â”€â”€ MODULE 1: Metadata Extraction â”€â”€
 
 
 class TestMetadataExtraction:
@@ -159,7 +159,7 @@ class TestMetadataExtraction:
         assert len(d["columns"]) == 9
 
 
-# ── MODULE 2: Data Profiling ──
+# â”€â”€ MODULE 2: Data Profiling â”€â”€
 
 
 class TestDataProfiling:
@@ -201,7 +201,7 @@ class TestDataProfiling:
         assert "columns" in d
 
 
-# ── MODULE 3: Semantic Engine ──
+# â”€â”€ MODULE 3: Semantic Engine â”€â”€
 
 
 class TestSemanticEngine:
@@ -251,7 +251,7 @@ class TestSemanticEngine:
         assert "detected_industry" in d
 
 
-# ── MODULE 4: Entity Library ──
+# â”€â”€ MODULE 4: Entity Library â”€â”€
 
 
 class TestEntityLibrary:
@@ -303,7 +303,7 @@ class TestEntityLibrary:
             ), f"{industry} has only {len(industry_entities)} entities"
 
 
-# ── MODULE 5: Relationship Engine ──
+# â”€â”€ MODULE 5: Relationship Engine â”€â”€
 
 
 class TestRelationshipEngine:
@@ -332,7 +332,7 @@ class TestRelationshipEngine:
         assert "entity_graph" in d
 
 
-# ── MODULE 6: Industry Knowledge Base ──
+# â”€â”€ MODULE 6: Industry Knowledge Base â”€â”€
 
 
 class TestIndustryKnowledge:
@@ -375,7 +375,7 @@ class TestIndustryKnowledge:
         assert len(prompts) > 0
 
 
-# ── MODULE 7: Semantic Mapping Engine ──
+# â”€â”€ MODULE 7: Semantic Mapping Engine â”€â”€
 
 
 class TestSemanticMappingEngine:
@@ -423,7 +423,7 @@ class TestSemanticMappingEngine:
         assert "relationships" in d
 
 
-# ── MODULE 8: Knowledge Graph ──
+# â”€â”€ MODULE 8: Knowledge Graph â”€â”€
 
 
 class TestKnowledgeGraph:
@@ -472,7 +472,7 @@ class TestKnowledgeGraph:
         assert "stats" in d
 
 
-# ── MODULE 9: KPI Generator ──
+# â”€â”€ MODULE 9: KPI Generator â”€â”€
 
 
 class TestKPIGenerator:
@@ -509,7 +509,7 @@ class TestKPIGenerator:
         assert "value" in cards[0]
 
 
-# ── MODULE 10: Dashboard Generator ──
+# â”€â”€ MODULE 10: Dashboard Generator â”€â”€
 
 
 class TestDashboardGenerator:
@@ -554,7 +554,7 @@ class TestDashboardGenerator:
         assert "charts" in d
 
 
-# ── MODULE 12: Semantic Search ──
+# â”€â”€ MODULE 12: Semantic Search â”€â”€
 
 
 class TestSemanticSearch:
@@ -587,7 +587,7 @@ class TestSemanticSearch:
         assert len(results["suggestions"]) > 0
 
 
-# ── MODULE 13: Governance ──
+# â”€â”€ MODULE 13: Governance â”€â”€
 
 
 class TestGovernance:
@@ -634,7 +634,7 @@ class TestGovernance:
         assert "lineage" in d
 
 
-# ── Integration: Full Pipeline ──
+# â”€â”€ Integration: Full Pipeline â”€â”€
 
 
 class TestFullPipeline:
@@ -676,7 +676,7 @@ class TestFullPipeline:
         assert len(ctx["ai_prompts"]) > 0
 
 
-# ── API Routes ──
+# â”€â”€ API Routes â”€â”€
 
 
 class TestSemanticAPI:

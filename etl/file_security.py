@@ -1,4 +1,4 @@
-"""File upload security — validates uploaded files for safety.
+﻿"""File upload security â€” validates uploaded files for safety.
 
 Validates MIME types, file sizes, file structure, and records audit entries.
 """
@@ -112,7 +112,7 @@ class FileValidator:
                 errors.append(f"MIME type '{mime}' does not match expected '{expected_type}'")
                 result["valid"] = False
 
-        # Structure scan — try to read the file
+        # Structure scan â€” try to read the file
         try:
             self._scan_structure(file_path, ext)
         except Exception as e:

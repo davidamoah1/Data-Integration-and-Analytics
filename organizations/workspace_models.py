@@ -1,4 +1,4 @@
-"""SQLAlchemy ORM models for Workspace and Invitation management.
+﻿"""SQLAlchemy ORM models for Workspace and Invitation management.
 
 Tables: workspaces, invitations
 """

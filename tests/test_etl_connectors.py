@@ -1,4 +1,4 @@
-"""Tests for ETL connectors — CSV, Excel, JSON, XML connectors."""
+﻿"""Tests for ETL connectors â€” CSV, Excel, JSON, XML connectors."""
 
 import pandas as pd
 import pytest

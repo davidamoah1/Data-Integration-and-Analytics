@@ -1,17 +1,17 @@
-"""Automatic KPI Engine.
+﻿"""Automatic KPI Engine.
 
 Detects and computes meaningful KPIs from the dataset.  Unlike the
 existing KPIIntelligenceEngine which only *detects* KPI templates,
 this engine actually *computes* the values from the data.
 
 Rules:
-  - Total Records (COUNT) — always
-  - Total of primary measure (SUM) — if a currency/measure exists
-  - Average of primary measure (AVG) — if a currency/measure exists
-  - Unique dimension count (COUNT DISTINCT) — for primary dimension
-  - Date range span — if a time column exists
-  - Growth rate — if time column + measure exist (period over period)
-  - Top category share — if a dimension exists
+  - Total Records (COUNT) â€” always
+  - Total of primary measure (SUM) â€” if a currency/measure exists
+  - Average of primary measure (AVG) â€” if a currency/measure exists
+  - Unique dimension count (COUNT DISTINCT) â€” for primary dimension
+  - Date range span â€” if a time column exists
+  - Growth rate â€” if time column + measure exist (period over period)
+  - Top category share â€” if a dimension exists
 
 Meaningless KPIs are rejected:
   - KPIs from identifier columns
@@ -54,7 +54,7 @@ class AutomaticKPIEngine:
         kpis: list[KPISpecification] = []
         order = 0
 
-        # 1. Total Records — always meaningful
+        # 1. Total Records â€” always meaningful
         kpis.append(
             KPISpecification(
                 key="total_records",
@@ -66,7 +66,7 @@ class AutomaticKPIEngine:
                 source_columns=[],
                 aggregation="count",
                 confidence=1.0,
-                icon="📋",
+                icon="ðŸ“‹",
                 description="Total number of records in the dataset",
                 order=order,
             )
@@ -85,7 +85,7 @@ class AutomaticKPIEngine:
                 source_columns=[],
                 aggregation="count",
                 confidence=1.0,
-                icon="📊",
+                icon="ðŸ“Š",
                 description="Number of columns in the dataset",
                 order=order,
             )
@@ -113,7 +113,9 @@ class AutomaticKPIEngine:
                     source_columns=[primary_measure],
                     aggregation="sum",
                     confidence=0.9,
-                    icon="💰" if col_u and col_u.semantic_role == SemanticRole.CURRENCY else "📈",
+                    icon=(
+                        "ðŸ’°" if col_u and col_u.semantic_role == SemanticRole.CURRENCY else "ðŸ“ˆ"
+                    ),
                     description=f"Sum of all {self._label(primary_measure)} values",
                     order=order,
                 )
@@ -137,7 +139,7 @@ class AutomaticKPIEngine:
                     source_columns=[primary_measure],
                     aggregation="avg",
                     confidence=0.85,
-                    icon="📊",
+                    icon="ðŸ“Š",
                     description=f"Average {self._label(primary_measure)} per record",
                     order=order,
                 )
@@ -159,7 +161,7 @@ class AutomaticKPIEngine:
                     source_columns=[primary_dim],
                     aggregation="count_distinct",
                     confidence=0.8,
-                    icon="🏷️",
+                    icon="ðŸ·ï¸",
                     description=f"Number of distinct {self._label(primary_dim)} values",
                     order=order,
                 )
@@ -188,7 +190,7 @@ class AutomaticKPIEngine:
                             source_columns=[time_col],
                             aggregation="range",
                             confidence=0.9,
-                            icon="📅",
+                            icon="ðŸ“…",
                             description=f"Data spans {span_days} days from {dates.min().strftime('%Y-%m-%d')} to {dates.max().strftime('%Y-%m-%d')}",
                             time_context=f"{dates.min().strftime('%Y-%m-%d')} to {dates.max().strftime('%Y-%m-%d')}",
                             order=order,
@@ -196,7 +198,7 @@ class AutomaticKPIEngine:
                     )
                     order += 1
 
-        # 7. Growth rate (period over period) — if time + measure
+        # 7. Growth rate (period over period) â€” if time + measure
         if understanding.time_columns and primary_measure:
             growth = self._compute_growth_rate(df, understanding.time_columns[0], primary_measure)
             if growth is not None:
@@ -211,7 +213,7 @@ class AutomaticKPIEngine:
                         source_columns=[understanding.time_columns[0], primary_measure],
                         aggregation="custom",
                         confidence=0.75,
-                        icon="📈" if growth["rate"] > 0 else "📉",
+                        icon="ðŸ“ˆ" if growth["rate"] > 0 else "ðŸ“‰",
                         description=growth["description"],
                         comparison_value=growth["previous_value"],
                         comparison_label="vs previous period",
@@ -238,7 +240,7 @@ class AutomaticKPIEngine:
                         source_columns=[primary_dim, primary_measure],
                         aggregation="custom",
                         confidence=0.7,
-                        icon="🏆",
+                        icon="ðŸ†",
                         description=share["description"],
                         order=order,
                     )
@@ -248,7 +250,7 @@ class AutomaticKPIEngine:
         # Limit and return
         return kpis[: self.MAX_KPIS]
 
-    # ── Helpers ──
+    # â”€â”€ Helpers â”€â”€
 
     @staticmethod
     def _find_primary_measure(df: pd.DataFrame, understanding: DatasetUnderstanding) -> str | None:

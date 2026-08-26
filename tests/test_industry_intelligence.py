@@ -1,4 +1,4 @@
-"""Tests for the Industry Intelligence Platform.
+﻿"""Tests for the Industry Intelligence Platform.
 
 Verifies that each sector analytics module produces correct insights,
 breakdowns, trends, and alerts for domain-specific data.

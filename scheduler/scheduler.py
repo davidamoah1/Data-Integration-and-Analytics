@@ -1,4 +1,4 @@
-"""APScheduler-based pipeline scheduler.
+﻿"""APScheduler-based pipeline scheduler.
 
 Replaces the basic schedule library with APScheduler for:
   - Cron-style scheduling

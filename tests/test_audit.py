@@ -1,4 +1,4 @@
-"""Tests for audit log endpoints."""
+﻿"""Tests for audit log endpoints."""
 
 
 class TestAuditLogs:

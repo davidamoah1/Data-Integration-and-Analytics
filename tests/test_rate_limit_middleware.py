@@ -1,9 +1,9 @@
-"""Tests for shared.middleware.RateLimitMiddleware.
+﻿"""Tests for shared.middleware.RateLimitMiddleware.
 
 Covers:
-  - In-memory fallback path (no REDIS_URL / Redis unreachable) — preserves
+  - In-memory fallback path (no REDIS_URL / Redis unreachable) â€” preserves
     original sliding-window behavior.
-  - Redis-backed path — uses a fake Redis client so the test suite does not
+  - Redis-backed path â€” uses a fake Redis client so the test suite does not
     require a live Redis server, verifying the INCR/EXPIRE fixed-window
     logic and the fail-open behavior on Redis errors.
 """

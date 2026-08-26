@@ -1,4 +1,4 @@
-"""Tests for enterprise security, governance, tenant isolation, and admin services."""
+﻿"""Tests for enterprise security, governance, tenant isolation, and admin services."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""add missing domain tables — notifications, scheduled_reports, subscriptions, feature_flags
+﻿"""add missing domain tables â€” notifications, scheduled_reports, subscriptions, feature_flags
 
 These tables are defined in ORM models but were not included in earlier
 migrations. This migration creates them for both SQLite and MySQL.

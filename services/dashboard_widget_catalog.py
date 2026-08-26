@@ -1,4 +1,4 @@
-"""Industry-adaptive widget catalog for the Dashboard Composition Engine.
+﻿"""Industry-adaptive widget catalog for the Dashboard Composition Engine.
 
 Pre-built widget definitions organized by industry:
   - Healthcare: patient statistics, admission trends, laboratory reports
@@ -23,7 +23,7 @@ from services.dashboard_composition import (
 logger = logging.getLogger(__name__)
 
 
-# ── Helper functions ───────────────────────────────────
+# â”€â”€ Helper functions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def _kpi(
@@ -177,7 +177,7 @@ def _map(
     )
 
 
-# ── Healthcare Widgets ─────────────────────────────────
+# â”€â”€ Healthcare Widgets â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 HEALTHCARE_WIDGETS = [
     _kpi(
@@ -335,7 +335,7 @@ HEALTHCARE_WIDGETS = [
     ),
 ]
 
-# ── Education Widgets ──────────────────────────────────
+# â”€â”€ Education Widgets â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 EDUCATION_WIDGETS = [
     _kpi(
@@ -471,7 +471,7 @@ EDUCATION_WIDGETS = [
     _report("edu_enrollment_report", "Enrollment Report", "enrollment", "education", "Reports", 1),
 ]
 
-# ── Business Widgets ──────────────────────────────────
+# â”€â”€ Business Widgets â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 BUSINESS_WIDGETS = [
     _kpi(
@@ -622,7 +622,7 @@ BUSINESS_WIDGETS = [
     _report("biz_inventory_report", "Inventory Report", "inventory", "business", "Reports", 1),
 ]
 
-# ── Research Widgets ───────────────────────────────────
+# â”€â”€ Research Widgets â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 RESEARCH_WIDGETS = [
     _kpi(
@@ -769,7 +769,7 @@ RESEARCH_WIDGETS = [
     _report("res_pub_report", "Publication Report", "publication", "research", "Reports", 2),
 ]
 
-# ── Generic / Cross-Industry Widgets ─────────────────
+# â”€â”€ Generic / Cross-Industry Widgets â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 GENERIC_WIDGETS = [
     _kpi(
@@ -819,7 +819,7 @@ GENERIC_WIDGETS = [
 ]
 
 
-# ── Registration ───────────────────────────────────────
+# â”€â”€ Registration â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def register_all_widgets() -> None:
@@ -840,7 +840,7 @@ def register_all_widgets() -> None:
 register_all_widgets()
 
 
-# ── Industry Dashboard Templates ──────────────────────
+# â”€â”€ Industry Dashboard Templates â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 INDUSTRY_DASHBOARD_TEMPLATES = {

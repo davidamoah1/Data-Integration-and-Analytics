@@ -1,4 +1,4 @@
-"""reconcile schema metadata
+﻿"""reconcile schema metadata
 
 Revision ID: 0004_schema_reconciliation
 Revises: 0003_phase6_ai

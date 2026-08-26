@@ -1,4 +1,4 @@
-"""Standard API response format for consistent API responses."""
+﻿"""Standard API response format for consistent API responses."""
 
 from typing import Any
 

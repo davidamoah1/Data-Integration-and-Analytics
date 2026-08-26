@@ -1,4 +1,4 @@
-"""Enterprise Forecasting Engine.
+﻿"""Enterprise Forecasting Engine.
 
 Enhances the existing ForecastingEngine with:
   - Semantic-aware column detection (auto-detect date/value columns)
@@ -398,15 +398,15 @@ class EnterpriseForecastEngine:
             )
         if len(ts) < 10:
             limitations.append(
-                "Very few data points — forecast should be treated as indicative only"
+                "Very few data points â€” forecast should be treated as indicative only"
             )
 
         if accuracy < 0.5:
             limitations.append(
-                f"Low accuracy score ({accuracy:.2f}) — forecast has high uncertainty"
+                f"Low accuracy score ({accuracy:.2f}) â€” forecast has high uncertainty"
             )
         elif accuracy < 0.7:
-            limitations.append(f"Moderate accuracy score ({accuracy:.2f}) — use with caution")
+            limitations.append(f"Moderate accuracy score ({accuracy:.2f}) â€” use with caution")
 
         if method == "linear":
             limitations.append("Linear model cannot capture non-linear patterns or regime changes")
@@ -416,7 +416,7 @@ class EnterpriseForecastEngine:
             limitations.append("Exponential smoothing may lag behind rapid changes")
 
         limitations.append(
-            "Confidence intervals widen with forecast horizon — longer predictions are less certain"
+            "Confidence intervals widen with forecast horizon â€” longer predictions are less certain"
         )
         limitations.append(
             "Forecast does not account for external factors (market changes, policy shifts, etc.)"

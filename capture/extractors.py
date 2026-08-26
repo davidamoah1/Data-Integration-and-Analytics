@@ -1,15 +1,15 @@
-"""Field and table extraction for the Smart Data Capture platform.
+﻿"""Field and table extraction for the Smart Data Capture platform.
 
 Two complementary strategies:
-  1. Label-anchored extraction — search OCR text for a field's known label
+  1. Label-anchored extraction â€” search OCR text for a field's known label
      keywords (e.g. "Patient Name", "DOB") and capture the value that follows
      on the same line. This is the primary strategy for forms/cards.
-  2. Pattern-based extraction — regex scans for universally-shaped values
+  2. Pattern-based extraction â€” regex scans for universally-shaped values
      (phone, email, currency, date, ID numbers) anywhere in the text, used
      both as a fallback and to sanity-check/label-anchored matches.
 
 Table detection groups OCR words into rows/columns using coordinate
-clustering — effective for register-style tabular documents (the dominant
+clustering â€” effective for register-style tabular documents (the dominant
 paper format in the target industries) without requiring a deep-learning
 table-structure model.
 """
@@ -29,7 +29,7 @@ DATE_PATTERNS = [
 ]
 PHONE_PATTERN = r"\b(\+?\d[\d\s\-]{7,14}\d)\b"
 EMAIL_PATTERN = r"\b([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})\b"
-CURRENCY_PATTERN = r"(?:GHS|USD|\$|₦|GH₵|£|€)\s?([\d,]+\.?\d{0,2})"
+CURRENCY_PATTERN = r"(?:GHS|USD|\$|â‚¦|GHâ‚µ|Â£|â‚¬)\s?([\d,]+\.?\d{0,2})"
 NUMBER_PATTERN = r"\b(\d{1,4})\b"
 
 
@@ -131,7 +131,7 @@ def extract_fields(
         # Apply learned template boost: if this org has previously corrected
         # this field on this document type multiple times, nudge confidence
         # up slightly when a value was found (reflects real-world accuracy
-        # improvement from a known layout) — never fabricate a missing value.
+        # improvement from a known layout) â€” never fabricate a missing value.
         if field_result.value is not None and template_boost:
             boost = template_boost.get(spec.name, {}).get("correction_count", 0)
             if boost:

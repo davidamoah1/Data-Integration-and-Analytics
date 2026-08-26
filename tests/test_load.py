@@ -1,4 +1,4 @@
-"""Tests for the load module."""
+﻿"""Tests for the load module."""
 
 import os
 import sys

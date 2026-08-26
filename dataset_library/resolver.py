@@ -1,4 +1,4 @@
-"""Data source resolver — enforces strict separation between Production, Demo, and Test data.
+﻿"""Data source resolver â€” enforces strict separation between Production, Demo, and Test data.
 
 Production data sources:
     - User-uploaded files (registered via DatasetLibrary)

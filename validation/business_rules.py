@@ -1,4 +1,4 @@
-"""Hospital Business Rules Engine — configurable clinical and administrative rule validation."""
+﻿"""Hospital Business Rules Engine â€” configurable clinical and administrative rule validation."""
 
 from __future__ import annotations
 
@@ -184,7 +184,7 @@ class BusinessRuleEngine:
             ),
         ]
 
-    # ── Rule implementations ──
+    # â”€â”€ Rule implementations â”€â”€
 
     @staticmethod
     def _find_col(df: pd.DataFrame, keywords: list[str]) -> str | None:

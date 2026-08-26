@@ -1,4 +1,4 @@
-"""MODULE 8 — Knowledge Graph.
+﻿"""MODULE 8 â€” Knowledge Graph.
 
 Internal knowledge graph representing entities, relationships,
 business concepts, KPIs, industry concepts, and AI context.

@@ -1,4 +1,4 @@
-"""Tests for async (job-queue) execution of the dataset workflow (C4).
+﻿"""Tests for async (job-queue) execution of the dataset workflow (C4).
 
 Covers:
   - `_async_workflow_execution_available()` gating logic (REDIS_URL +

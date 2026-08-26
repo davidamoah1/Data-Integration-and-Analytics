@@ -1,4 +1,4 @@
-"""Data classification levels and dataset lifecycle states.
+﻿"""Data classification levels and dataset lifecycle states.
 
 These enums are used by the governance engine to classify datasets and control
 transitions between lifecycle stages.

@@ -1,14 +1,14 @@
-"""Performance & Global Scale Infrastructure.
+﻿"""Performance & Global Scale Infrastructure.
 
 Prepares the platform for millions of records, thousands of users,
 and large organizations.
 
 Modules:
-  queue — Task queue with Redis backend + in-memory fallback
-  workers — Background worker pool for ETL, reports, AI tasks
-  cache — Redis caching layer with decorators and invalidation
-  db_optimization — Indexes, connection pooling, query helpers
-  routes — Performance monitoring and management endpoints
+  queue â€” Task queue with Redis backend + in-memory fallback
+  workers â€” Background worker pool for ETL, reports, AI tasks
+  cache â€” Redis caching layer with decorators and invalidation
+  db_optimization â€” Indexes, connection pooling, query helpers
+  routes â€” Performance monitoring and management endpoints
 """
 
 from __future__ import annotations

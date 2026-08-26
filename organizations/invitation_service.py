@@ -1,4 +1,4 @@
-"""Service for invitation and workspace management."""
+﻿"""Service for invitation and workspace management."""
 
 from datetime import datetime, timedelta, timezone
 

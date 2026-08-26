@@ -1,4 +1,4 @@
-"""Database Optimization.
+﻿"""Database Optimization.
 
 Provides:
   - IndexManager: Define and create optimized indexes for large tables
@@ -59,7 +59,7 @@ class IndexManager:
     """Manages database indexes for performance optimization.
 
     Ensures critical indexes exist without manual migration.
-    Idempotent — safe to call multiple times.
+    Idempotent â€” safe to call multiple times.
     """
 
     # Critical indexes for production performance
@@ -187,7 +187,7 @@ class QueryOptimizer:
             suggestions.append(
                 {
                     "type": "missing_filter",
-                    "message": "Query has no WHERE clause — will scan entire table. Add filters or use LIMIT.",
+                    "message": "Query has no WHERE clause â€” will scan entire table. Add filters or use LIMIT.",
                     "severity": "high",
                 }
             )
@@ -197,7 +197,7 @@ class QueryOptimizer:
             suggestions.append(
                 {
                     "type": "column_selection",
-                    "message": "Good — query selects specific columns.",
+                    "message": "Good â€” query selects specific columns.",
                     "severity": "info",
                 }
             )
@@ -337,7 +337,7 @@ class ChunkedQuery:
         Args:
             db: Database session.
             model_class: SQLAlchemy model class.
-            records: Iterable of dicts with column → value.
+            records: Iterable of dicts with column â†’ value.
             batch_size: Number of records per insert batch.
 
         Returns:
@@ -380,7 +380,7 @@ def get_db_stats(db: DbSession) -> DBStats:
                 # Get row count (approximate for MySQL, exact for SQLite)
                 count_result = db.execute(
                     text(f"SELECT COUNT(*) FROM {table_name}")
-                )  # nosec B608 — table_name from inspector.get_table_names()
+                )  # nosec B608 â€” table_name from inspector.get_table_names()
                 row_count = count_result.scalar() or 0
                 stats.total_rows += row_count
 

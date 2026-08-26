@@ -1,4 +1,4 @@
-"""SQLAlchemy ORM models for Phase 6 AI Intelligence Platform.
+﻿"""SQLAlchemy ORM models for Phase 6 AI Intelligence Platform.
 
 Tables:
   - ai_conversations: Chat sessions between users and AI assistants
@@ -75,7 +75,7 @@ class AIMessage(Base):
 
 
 class AIProviderConfig(Base):
-    """Configuration for AI providers — admin managed."""
+    """Configuration for AI providers â€” admin managed."""
 
     __tablename__ = "ai_provider_configs"
 
@@ -120,7 +120,7 @@ class AIUsageLog(Base):
 
 
 class AIAuditLog(Base):
-    """Audit trail for all AI actions — compliance and security."""
+    """Audit trail for all AI actions â€” compliance and security."""
 
     __tablename__ = "ai_audit_logs"
 

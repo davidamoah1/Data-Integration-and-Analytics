@@ -1,4 +1,4 @@
-"""MODULE 7 — Semantic Mapping Engine.
+﻿"""MODULE 7 â€” Semantic Mapping Engine.
 
 Orchestrates metadata extraction, data profiling, semantic analysis,
 relationship detection, and industry detection into a unified pipeline.

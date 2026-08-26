@@ -1,4 +1,4 @@
-"""Validation Profiler — generates column statistics and data profiling metrics."""
+﻿"""Validation Profiler â€” generates column statistics and data profiling metrics."""
 
 from __future__ import annotations
 

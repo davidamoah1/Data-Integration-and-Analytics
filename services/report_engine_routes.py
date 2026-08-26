@@ -1,4 +1,4 @@
-"""FastAPI routes for the Reporting & Presentation Engine (Phase 8)."""
+﻿"""FastAPI routes for the Reporting & Presentation Engine (Phase 8)."""
 
 from __future__ import annotations
 
@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/reports", tags=["Reports & Presentations"])
 
 
-# ── Request / Response Models ─────────────────────────
+# â”€â”€ Request / Response Models â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class CreateReportRequest(BaseModel):
@@ -85,7 +85,7 @@ class ExportRequest(BaseModel):
     format: str = "pdf"
 
 
-# ── Report CRUD ───────────────────────────────────────
+# â”€â”€ Report CRUD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @router.post("")
@@ -138,7 +138,7 @@ async def delete_report(
     return {"deleted": True}
 
 
-# ── Section Management ────────────────────────────────
+# â”€â”€ Section Management â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @router.post("/{report_id}/sections")
@@ -197,7 +197,7 @@ async def remove_section(
     return updated.to_dict()
 
 
-# ── KPI Management ────────────────────────────────────
+# â”€â”€ KPI Management â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @router.post("/{report_id}/sections/{section_order}/kpis")
@@ -215,7 +215,7 @@ async def add_kpis(
     return updated.to_dict()
 
 
-# ── Chart Management ──────────────────────────────────
+# â”€â”€ Chart Management â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @router.post("/{report_id}/sections/{section_order}/charts")
@@ -248,7 +248,7 @@ async def add_chart(
     return updated.to_dict()
 
 
-# ── Table Management ──────────────────────────────────
+# â”€â”€ Table Management â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @router.post("/{report_id}/sections/{section_order}/tables")
@@ -277,7 +277,7 @@ async def add_table(
     return report.to_dict()
 
 
-# ── Insight Management ────────────────────────────────
+# â”€â”€ Insight Management â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @router.post("/{report_id}/sections/{section_order}/insights")
@@ -295,7 +295,7 @@ async def add_insights(
     return updated.to_dict()
 
 
-# ── Recommendation Management ─────────────────────────
+# â”€â”€ Recommendation Management â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @router.post("/{report_id}/sections/{section_order}/recommendations")
@@ -313,7 +313,7 @@ async def add_recommendations(
     return updated.to_dict()
 
 
-# ── Executive Summary ─────────────────────────────────
+# â”€â”€ Executive Summary â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @router.get("/{report_id}/executive-summary")
@@ -326,7 +326,7 @@ async def get_executive_summary(report_id: str, current_user: dict = Depends(get
     return {"report_id": report_id, "executive_summary": summary}
 
 
-# ── Export ────────────────────────────────────────────
+# â”€â”€ Export â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @router.get("/{report_id}/export")
@@ -353,7 +353,7 @@ async def export_report(
     )
 
 
-# ── Presentation Generation ───────────────────────────
+# â”€â”€ Presentation Generation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @router.get("/{report_id}/presentation")
@@ -389,7 +389,7 @@ async def export_presentation(
     )
 
 
-# ── Templates ─────────────────────────────────────────
+# â”€â”€ Templates â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @router.get("/templates/list")

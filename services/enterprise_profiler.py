@@ -1,4 +1,4 @@
-"""Enterprise Dataset Profiler.
+﻿"""Enterprise Dataset Profiler.
 
 Consolidates and extends the three existing profilers into one comprehensive profiler:
   - semantic/data_profiler.py

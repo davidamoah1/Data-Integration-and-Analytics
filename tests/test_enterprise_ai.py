@@ -1,4 +1,4 @@
-"""Tests for the Enterprise AI Decision Support System.
+﻿"""Tests for the Enterprise AI Decision Support System.
 
 Covers:
   - Enterprise Context Engine
@@ -42,7 +42,7 @@ from ai.performance import (
 from ai.prompt_orchestrator import PromptOrchestrator, PromptTaskType
 from ai.security import AISecurityLayer
 
-# ── Fixtures ───────────────────────────────────────────
+# â”€â”€ Fixtures â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @pytest.fixture
@@ -100,7 +100,7 @@ def mock_db():
     return MagicMock()
 
 
-# ── Context Engine Tests ───────────────────────────────
+# â”€â”€ Context Engine Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestEnterpriseContextEngine:
@@ -170,7 +170,7 @@ class TestEnterpriseContextEngine:
         assert "admission_date" in ctx.dataset.date_columns
 
 
-# ── Prompt Orchestrator Tests ──────────────────────────
+# â”€â”€ Prompt Orchestrator Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestPromptOrchestrator:
@@ -217,7 +217,7 @@ class TestPromptOrchestrator:
         assert all("task_type" in t for t in types)
 
 
-# ── Data Gatherer Tests ────────────────────────────────
+# â”€â”€ Data Gatherer Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestDataGatherer:
@@ -281,7 +281,7 @@ class TestDataGatherer:
         assert "note" in data
 
 
-# ── Executive Summary Engine Tests ─────────────────────
+# â”€â”€ Executive Summary Engine Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestExecutiveSummaryEngine:
@@ -314,7 +314,7 @@ class TestExecutiveSummaryEngine:
         assert isinstance(result["confidence"], dict)
 
 
-# ── Root Cause Analysis Engine Tests ───────────────────
+# â”€â”€ Root Cause Analysis Engine Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestRootCauseAnalysisEngine:
@@ -348,7 +348,7 @@ class TestRootCauseAnalysisEngine:
         assert direction == "increase"
 
 
-# ── Enterprise Forecast Engine Tests ───────────────────
+# â”€â”€ Enterprise Forecast Engine Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestEnterpriseForecastEngine:
@@ -430,7 +430,7 @@ class TestEnterpriseForecastEngine:
         assert len(result["model_limitations"]) > 0
 
 
-# ── Enterprise Anomaly Engine Tests ────────────────────
+# â”€â”€ Enterprise Anomaly Engine Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestEnterpriseAnomalyEngine:
@@ -492,7 +492,7 @@ class TestEnterpriseAnomalyEngine:
         assert len(statistical) == 0
 
 
-# ── Recommendation Engine Tests ────────────────────────
+# â”€â”€ Recommendation Engine Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestRecommendationEngine:
@@ -556,7 +556,7 @@ class TestRecommendationEngine:
         assert isinstance(triggers, list)
 
 
-# ── NL Analytics Engine Tests ──────────────────────────
+# â”€â”€ NL Analytics Engine Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestNLAnalyticsEngine:
@@ -615,7 +615,7 @@ class TestNLAnalyticsEngine:
         assert "rationale" in result["visualizations"][0]
 
 
-# ── Enterprise Report Engine Tests ─────────────────────
+# â”€â”€ Enterprise Report Engine Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestEnterpriseReportEngine:
@@ -667,7 +667,7 @@ class TestEnterpriseReportEngine:
         )
 
 
-# ── Security Tests ─────────────────────────────────────
+# â”€â”€ Security Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestAISecurityLayer:
@@ -758,7 +758,7 @@ class TestAISecurityLayer:
         assert result["sanitized_input"] == "What happened?"
 
 
-# ── Performance Tests ──────────────────────────────────
+# â”€â”€ Performance Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestPerformanceMonitor:

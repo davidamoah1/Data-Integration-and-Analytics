@@ -1,4 +1,4 @@
-"""Generate realistic synthetic datasets for RC3 industry validation."""
+﻿"""Generate realistic synthetic datasets for RC3 industry validation."""
 
 from __future__ import annotations
 

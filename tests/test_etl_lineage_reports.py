@@ -1,4 +1,4 @@
-"""Tests for data lineage tracking and report generation."""
+﻿"""Tests for data lineage tracking and report generation."""
 
 import pytest
 

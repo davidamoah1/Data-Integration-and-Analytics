@@ -1,4 +1,4 @@
-"""MFA (Multi-Factor Authentication) domain models.
+﻿"""MFA (Multi-Factor Authentication) domain models.
 
 Future-ready architecture for TOTP-based MFA.
 Supports enable/disable, backup codes, and recovery.
@@ -35,7 +35,7 @@ class UserMFA(Base):
 
 
 class MFASession(Base):
-    """Tracks MFA verification state during login (pending → verified)."""
+    """Tracks MFA verification state during login (pending â†’ verified)."""
 
     __tablename__ = "mfa_sessions"
 

@@ -1,4 +1,4 @@
-"""Base structures for the Africa Intelligence Layer.
+﻿"""Base structures for the Africa Intelligence Layer.
 
 Defines:
   - CountryProfile: Full profile for a country (regions, currency, industries, structures)

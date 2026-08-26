@@ -1,4 +1,4 @@
-"""Redis Caching Layer.
+﻿"""Redis Caching Layer.
 
 Provides:
   - CacheManager: Get/set/delete with TTL, Redis or in-memory backend
@@ -104,7 +104,7 @@ class CacheManager:
         self.default_ttl = default_ttl
         self.key_prefix = key_prefix
         self.stats = CacheStats()
-        self._memory: dict[str, tuple[Any, float]] = {}  # key → (value, expiry)
+        self._memory: dict[str, tuple[Any, float]] = {}  # key â†’ (value, expiry)
         self._lock = asyncio.Lock()
 
         if redis_url and HAS_REDIS:
@@ -197,7 +197,7 @@ class CacheManager:
                 self.stats.errors += 1
         else:
             async with self._lock:
-                # Pattern like "aedip:user:*" → match keys starting with "aedip:user:"
+                # Pattern like "aedip:user:*" â†’ match keys starting with "aedip:user:"
                 search_prefix = full_pattern.rstrip("*")
                 to_delete = [k for k in self._memory if k.startswith(search_prefix)]
                 for k in to_delete:
@@ -259,7 +259,7 @@ def cache_key(*args, **kwargs) -> str:
 
     Usage:
         key = cache_key("user", user_id, "stats", period="monthly")
-        # → "user:123:stats:period=monthly"
+        # â†’ "user:123:stats:period=monthly"
     """
     parts = [str(a) for a in args]
     for k, v in sorted(kwargs.items()):

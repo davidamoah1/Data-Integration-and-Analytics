@@ -1,4 +1,4 @@
-"""FastAPI routes for authentication and user management.
+﻿"""FastAPI routes for authentication and user management.
 
 All endpoints use standard response format and proper permission checks.
 """
@@ -402,7 +402,7 @@ async def setup_mfa(
     current_user: dict = Depends(get_current_user),
     db: DbSession = Depends(get_db),
 ):
-    """Begin MFA setup — generates TOTP secret and backup codes."""
+    """Begin MFA setup â€” generates TOTP secret and backup codes."""
     service = MFAService(db)
     result = service.setup(current_user["id"])
     return success_response(result, "MFA setup initiated. Verify with a code to enable.")
@@ -469,7 +469,7 @@ async def mfa_login_challenge(
             "MFA verification required",
         )
 
-    # MFA not enabled — proceed with standard login
+    # MFA not enabled â€” proceed with standard login
     result = auth_service.login(request, ip=None, user_agent=None)
     result["mfa_required"] = False
     return success_response(result, "Login successful")
@@ -1790,7 +1790,7 @@ async def list_permissions(
     return success_response(perms)
 
 
-# ─── Enterprise RBAC Routes ──────────────────────────────────────────
+# â”€â”€â”€ Enterprise RBAC Routes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @roles_router.get("/level/{level}")

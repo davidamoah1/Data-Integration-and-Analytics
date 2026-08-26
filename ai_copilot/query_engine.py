@@ -1,4 +1,4 @@
-"""Natural Language Query Engine.
+﻿"""Natural Language Query Engine.
 
 Parses user questions into structured analytical queries. Understands
 intent types like:
@@ -61,7 +61,7 @@ class ParsedQuery:
 class QueryEngine:
     """Parses natural language questions into structured queries."""
 
-    # Metric synonyms — maps natural language to entity keys
+    # Metric synonyms â€” maps natural language to entity keys
     METRIC_SYNONYMS: dict[str, list[str]] = {
         "revenue": ["sales", "revenue", "income", "turnover", "billing", "amount", "earnings"],
         "profit": ["profit", "margin", "earnings", "net"],

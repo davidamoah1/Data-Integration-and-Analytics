@@ -1,4 +1,4 @@
-"""Public API routes for external developers.
+﻿"""Public API routes for external developers.
 
 These endpoints are accessible via API key authentication (X-API-Key header)
 and provide programmatic access to platform features.
@@ -19,7 +19,7 @@ from shared.response import success_response
 public_router = APIRouter(prefix="/public", tags=["Public API"])
 
 
-# ─── API Key Authentication ────────────────────────────────
+# â”€â”€â”€ API Key Authentication â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def _get_api_key_from_request(request: Request) -> str | None:
@@ -113,7 +113,7 @@ def require_scope(scope: str):
     return scope_checker
 
 
-# ─── Dataset APIs ──────────────────────────────────────────
+# â”€â”€â”€ Dataset APIs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @public_router.post("/datasets/upload")
@@ -165,7 +165,7 @@ async def public_list_datasets(
     )
 
 
-# ─── Analytics APIs ────────────────────────────────────────
+# â”€â”€â”€ Analytics APIs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @public_router.get("/analytics/dashboards")
@@ -224,7 +224,7 @@ async def public_list_kpis(
     )
 
 
-# ─── AI APIs ───────────────────────────────────────────────
+# â”€â”€â”€ AI APIs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @public_router.post("/ai/ask")
@@ -248,7 +248,7 @@ async def public_ai_ask(
     return success_response(result)
 
 
-# ─── Workflow APIs ─────────────────────────────────────────
+# â”€â”€â”€ Workflow APIs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @public_router.get("/workflows")
@@ -281,7 +281,7 @@ async def public_list_workflows(
     )
 
 
-# ─── Reports APIs ──────────────────────────────────────────
+# â”€â”€â”€ Reports APIs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @public_router.get("/reports")

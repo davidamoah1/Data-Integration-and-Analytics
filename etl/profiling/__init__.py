@@ -1,4 +1,4 @@
-"""Data profiling engine — computes statistics and quality metrics for a DataFrame."""
+﻿"""Data profiling engine â€” computes statistics and quality metrics for a DataFrame."""
 
 from datetime import datetime, timezone
 

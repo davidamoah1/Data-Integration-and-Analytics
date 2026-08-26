@@ -1,4 +1,4 @@
-"""Reporting & Presentation Engine — Phase 8.
+﻿"""Reporting & Presentation Engine â€” Phase 8.
 
 Builds executive-ready reports with:
   - Professional PDF export (cover page, TOC, sections, charts, tables)
@@ -8,17 +8,17 @@ Builds executive-ready reports with:
 
 Report structure:
   Report
-    ├── Cover Page (title, org, date, author)
-    ├── Executive Summary
-    ├── Sections
-    │     ├── Key Metrics (KPI cards)
-    │     ├── Charts (visualizations)
-    │     ├── Data Tables
-    │     ├── Insights (AI-generated)
-    │     └── Recommendations
-    └── Appendix
+    â”œâ”€â”€ Cover Page (title, org, date, author)
+    â”œâ”€â”€ Executive Summary
+    â”œâ”€â”€ Sections
+    â”‚     â”œâ”€â”€ Key Metrics (KPI cards)
+    â”‚     â”œâ”€â”€ Charts (visualizations)
+    â”‚     â”œâ”€â”€ Data Tables
+    â”‚     â”œâ”€â”€ Insights (AI-generated)
+    â”‚     â””â”€â”€ Recommendations
+    â””â”€â”€ Appendix
 
-Workflow: Dataset → Analysis → Insights → Report → Presentation
+Workflow: Dataset â†’ Analysis â†’ Insights â†’ Report â†’ Presentation
 """
 
 from __future__ import annotations
@@ -33,7 +33,7 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 
-# ── Enums ─────────────────────────────────────────────
+# â”€â”€ Enums â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class ReportSectionType(str, Enum):
@@ -75,7 +75,7 @@ class ChartType(str, Enum):
     GAUGE = "gauge"
 
 
-# ── Data Classes ──────────────────────────────────────
+# â”€â”€ Data Classes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @dataclass
@@ -279,7 +279,7 @@ class ReportComposition:
         }
 
 
-# ── Report Templates ──────────────────────────────────
+# â”€â”€ Report Templates â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class ReportTemplateFactory:
@@ -305,7 +305,7 @@ class ReportTemplateFactory:
                 ReportSection(
                     section_type=ReportSectionType.COVER,
                     title=title,
-                    content=f"{org_name} — Executive Report",
+                    content=f"{org_name} â€” Executive Report",
                     order=0,
                     page_break=True,
                 ),
@@ -364,7 +364,7 @@ class ReportTemplateFactory:
                 ReportSection(
                     section_type=ReportSectionType.COVER,
                     title=title,
-                    content=f"{org_name} — Analytical Report",
+                    content=f"{org_name} â€” Analytical Report",
                     order=0,
                     page_break=True,
                 ),
@@ -407,7 +407,7 @@ class ReportTemplateFactory:
                 ),
                 ReportSection(
                     section_type=ReportSectionType.APPENDIX,
-                    title="Appendix — Raw Data",
+                    title="Appendix â€” Raw Data",
                     order=8,
                     page_break=True,
                 ),
@@ -434,7 +434,7 @@ class ReportTemplateFactory:
                 ReportSection(
                     section_type=ReportSectionType.COVER,
                     title=title,
-                    content=f"{org_name} — Research Report",
+                    content=f"{org_name} â€” Research Report",
                     order=0,
                     page_break=True,
                 ),
@@ -503,7 +503,7 @@ class ReportTemplateFactory:
             return cls.executive_template(title, org_name, author, industry)
 
 
-# ── Report Composition Service ────────────────────────
+# â”€â”€ Report Composition Service â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class ReportCompositionService:
@@ -713,7 +713,7 @@ class ReportCompositionService:
         """Populate report sections from a canonical DashboardSpecification.
 
         This ensures the report uses the SAME chart specifications as the
-        dashboard and presentation — no independent chart regeneration.
+        dashboard and presentation â€” no independent chart regeneration.
 
         Args:
             report_id: The report ID to populate.
@@ -1196,7 +1196,7 @@ class ReportCompositionService:
             tf2.word_wrap = True
             for i, bullet in enumerate(bullets):
                 p = tf2.paragraphs[0] if i == 0 else tf2.add_paragraph()
-                p.text = f"• {bullet}"
+                p.text = f"â€¢ {bullet}"
                 p.font.size = Pt(16)
                 p.font.color.rgb = DARK
                 p.space_after = Pt(8)
@@ -1299,11 +1299,11 @@ class ReportCompositionService:
                 bullets = []
                 for insight in section.insights:
                     prefix = {
-                        "critical": "⚠️",
-                        "warning": "⚡",
-                        "positive": "✅",
-                        "info": "ℹ️",
-                    }.get(insight.severity, "•")
+                        "critical": "âš ï¸",
+                        "warning": "âš¡",
+                        "positive": "âœ…",
+                        "info": "â„¹ï¸",
+                    }.get(insight.severity, "â€¢")
                     bullets.append(f"{prefix} {insight.title}: {insight.description}")
                 if not bullets:
                     bullets = ["Insights will appear here after analysis."]
@@ -1358,7 +1358,7 @@ class ReportCompositionService:
             raise ValueError(f"Unsupported format: {format}")
 
 
-# ── Presentation Generator ────────────────────────────
+# â”€â”€ Presentation Generator â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class PresentationGenerator:
@@ -1449,7 +1449,7 @@ class PresentationGenerator:
                         "title": section.title,
                         "content": "\n".join(
                             [
-                                f"{'⚠️' if i.severity == 'critical' else '✅' if i.severity == 'positive' else '•'} {i.title}: {i.description}"
+                                f"{'âš ï¸' if i.severity == 'critical' else 'âœ…' if i.severity == 'positive' else 'â€¢'} {i.title}: {i.description}"
                                 for i in section.insights
                             ]
                         ),

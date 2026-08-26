@@ -1,4 +1,4 @@
-"""Dashboard Performance Layer.
+﻿"""Dashboard Performance Layer.
 
 Provides caching, lazy loading, and pagination for dashboard operations.
 
@@ -186,7 +186,7 @@ class DashboardPerformanceLayer:
         kpi_definitions: list[dict],
         dataset_hash: str,
     ) -> dict[str, Any]:
-        """Lazy-load KPI values — only compute requested KPIs.
+        """Lazy-load KPI values â€” only compute requested KPIs.
 
         Args:
             kpi_keys: KPI keys to compute (if None, compute all).
@@ -195,7 +195,7 @@ class DashboardPerformanceLayer:
             dataset_hash: Hash of the dataset.
 
         Returns:
-            Dict of kpi_key → value.
+            Dict of kpi_key â†’ value.
         """
         results: dict[str, Any] = {}
         def_map = {d["key"]: d for d in kpi_definitions}
@@ -276,7 +276,7 @@ class DashboardPerformanceLayer:
             json.dumps(filters, sort_keys=True, default=str).encode()
         ).hexdigest()[:16]
 
-    # ── Private ─────────────────────────────────────────
+    # â”€â”€ Private â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     @staticmethod
     def _compute_aggregation(

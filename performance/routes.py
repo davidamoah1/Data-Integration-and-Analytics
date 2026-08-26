@@ -1,4 +1,4 @@
-"""Performance monitoring and management routes.
+﻿"""Performance monitoring and management routes.
 
 Endpoints for:
   - Queue stats and management
@@ -27,7 +27,7 @@ async def performance_overview(
     current_user: dict = Depends(require_permissions("settings.manage")),
     db: DbSession = Depends(get_db),
 ):
-    """Get performance overview — queue, cache, and DB stats."""
+    """Get performance overview â€” queue, cache, and DB stats."""
     cache = get_cache_manager()
     db_stats = get_db_stats(db)
 

@@ -1,4 +1,4 @@
-"""Automated Insight Generator.
+﻿"""Automated Insight Generator.
 
 Surfaces interesting patterns in the data without being asked:
   - Anomalies (outliers, sudden spikes/dips)
@@ -247,13 +247,13 @@ class InsightGenerator:
                         AutoInsight(
                             type=InsightType.CORRELATION,
                             severity=severity,
-                            title=f"{strength.title()} {direction} correlation: {col1} ↔ {col2}",
+                            title=f"{strength.title()} {direction} correlation: {col1} â†” {col2}",
                             description=f"{col1.replace('_', ' ').title()} and {col2.replace('_', ' ').title()} "
                             f"have a {strength} {direction} correlation (r={val:.2f}). "
                             f"{'They tend to move together.' if val > 0 else 'They tend to move in opposite directions.'}",
                             metric=f"{col1} vs {col2}",
                             value=float(val),
-                            recommendation=f"Use this correlation for predictive insights — "
+                            recommendation=f"Use this correlation for predictive insights â€” "
                             f"{'when one increases, expect the other to increase too.' if val > 0 else 'when one increases, expect the other to decrease.'}",
                         )
                     )

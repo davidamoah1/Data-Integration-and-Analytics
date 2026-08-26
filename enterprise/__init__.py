@@ -1,1 +1,1 @@
-"""Platform module — templates, collaboration, branding, and enterprise search."""
+﻿"""Platform module â€” templates, collaboration, branding, and enterprise search."""

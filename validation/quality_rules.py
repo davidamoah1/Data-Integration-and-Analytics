@@ -1,4 +1,4 @@
-"""Data Quality Rules Engine — detects missing values, duplicates, invalid formats."""
+﻿"""Data Quality Rules Engine â€” detects missing values, duplicates, invalid formats."""
 
 from __future__ import annotations
 

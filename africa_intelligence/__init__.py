@@ -1,4 +1,4 @@
-"""Africa Intelligence Layer.
+﻿"""Africa Intelligence Layer.
 
 Provides Ghana/Africa-specific understanding for the platform:
   - Country profiles (regions, currency, industries, structures)

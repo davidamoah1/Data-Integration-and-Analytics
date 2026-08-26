@@ -1,4 +1,4 @@
-"""Service layer for dashboard data operations.
+﻿"""Service layer for dashboard data operations.
 
 Provides a clean interface for the dashboard to query data from either
 the database or uploaded files, with caching support.
@@ -16,8 +16,8 @@ class DashboardDataService:
     """Service for providing data to the dashboard.
 
     Supports two data sources:
-    1. Database mode — queries MySQL/SQLite via SalesRepository
-    2. File mode — processes uploaded CSV/Excel files (existing behavior)
+    1. Database mode â€” queries MySQL/SQLite via SalesRepository
+    2. File mode â€” processes uploaded CSV/Excel files (existing behavior)
     """
 
     def __init__(self, sales_repo: SalesRepository | None = None):

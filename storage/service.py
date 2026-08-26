@@ -1,4 +1,4 @@
-"""File service — orchestrates file upload/download/delete.
+﻿"""File service â€” orchestrates file upload/download/delete.
 
 Bridges the storage backend (R2/S3/Supabase/Local) with the file
 metadata database. The service:
@@ -32,7 +32,7 @@ class FileService:
         self.repo = FileRepository(db)
         self.backend = backend or get_storage_backend()
 
-    # ── Upload ──────────────────────────────────────────────────────────
+    # â”€â”€ Upload â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def upload(
         self,
@@ -102,7 +102,7 @@ class FileService:
         logger.info("FileRecord created: file_id=%s, id=%d", file_id, record.id)
         return record
 
-    # ── Download ────────────────────────────────────────────────────────
+    # â”€â”€ Download â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def download(self, file_id: str, organization_id: int) -> tuple[bytes, FileRecord]:
         """Download a file by its file_id.
@@ -118,7 +118,7 @@ class FileService:
         self.db.commit()
         return data, record
 
-    # ── Get URL ─────────────────────────────────────────────────────────
+    # â”€â”€ Get URL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def get_url(self, file_id: str, organization_id: int, expires: int = 3600) -> str:
         """Get a URL to access the file (presigned or public)."""
@@ -127,7 +127,7 @@ class FileService:
             raise FileNotFoundError(f"File not found: {file_id}")
         return self.backend.get_url(record.storage_key, expires=expires)
 
-    # ── Delete ──────────────────────────────────────────────────────────
+    # â”€â”€ Delete â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def delete(self, file_id: str, organization_id: int) -> bool:
         """Delete a file from storage and soft-delete metadata."""
@@ -147,7 +147,7 @@ class FileService:
         logger.info("File deleted: file_id=%s", file_id)
         return True
 
-    # ── List ───────────────────────────────────────────────────────────
+    # â”€â”€ List â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def list_files(
         self,
@@ -167,7 +167,7 @@ class FileService:
         """Get total file count for an organization."""
         return self.repo.count_by_org(organization_id)
 
-    # ── Helpers ─────────────────────────────────────────────────────────
+    # â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     @staticmethod
     def _guess_content_type(filename: str) -> str:

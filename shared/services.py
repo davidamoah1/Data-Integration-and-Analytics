@@ -1,11 +1,11 @@
-"""Base service layer — business logic abstraction.
+﻿"""Base service layer â€” business logic abstraction.
 
 Services orchestrate business rules, validation, and cross-cutting
 concerns. They receive repositories via constructor injection and
 never touch the database session directly.
 
 Architecture layer:
-    API Routes → Service Layer → Repository Layer → Database
+    API Routes â†’ Service Layer â†’ Repository Layer â†’ Database
 
 Services raise domain exceptions (from shared.exceptions) which the
 API layer catches and converts to HTTP responses.
@@ -44,7 +44,7 @@ class BaseService(Generic[R]):
         self.db = db
         self.repository: BaseRepository = self.repository_class(db)
 
-    # ── Helpers ─────────────────────────────────────────────────────────
+    # â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def _get_or_404(self, id: int, message: str = "Resource not found") -> Any:
         instance = self.repository.get_by_id(id)
@@ -60,7 +60,7 @@ class BaseService(Generic[R]):
     def commit(self) -> None:
         self.db.commit()
 
-    # ── Standard CRUD (can be overridden) ───────────────────────────────
+    # â”€â”€ Standard CRUD (can be overridden) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def get(self, id: int) -> Any:
         return self._get_or_404(id)

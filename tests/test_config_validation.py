@@ -1,4 +1,4 @@
-"""Tests for production configuration validation."""
+﻿"""Tests for production configuration validation."""
 
 import os
 from unittest import mock

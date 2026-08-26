@@ -1,4 +1,4 @@
-"""CSV connector — read CSV files with encoding detection and delimiter support."""
+﻿"""CSV connector â€” read CSV files with encoding detection and delimiter support."""
 
 import os
 
@@ -212,10 +212,10 @@ class MySQLConnector(BaseConnector):
         if query:
             sql = query
             if nrows:
-                sql = f"SELECT * FROM ({query}) AS sub LIMIT {int(nrows)}"  # nosec B608 — query from config, nrows cast to int
+                sql = f"SELECT * FROM ({query}) AS sub LIMIT {int(nrows)}"  # nosec B608 â€” query from config, nrows cast to int
         elif table:
             validate_sql_identifier(table)
-            sql = f"SELECT * FROM `{table}`"  # nosec B608 — table validated by validate_sql_identifier above
+            sql = f"SELECT * FROM `{table}`"  # nosec B608 â€” table validated by validate_sql_identifier above
             if nrows:
                 sql += f" LIMIT {int(nrows)}"
         else:
@@ -231,7 +231,7 @@ class MySQLConnector(BaseConnector):
             validate_sql_identifier(table)
             df = pd.read_sql(
                 f"SELECT * FROM `{table}` LIMIT 100", self._engine
-            )  # nosec B608 — table validated by validate_sql_identifier above
+            )  # nosec B608 â€” table validated by validate_sql_identifier above
         schema = []
         for col in df.columns:
             dtype = str(df[col].dtype)
@@ -278,11 +278,11 @@ class SQLAlchemyConnector(BaseConnector):
             sql = query
         elif table:
             validate_sql_identifier(table)
-            sql = f'SELECT * FROM "{table}"'  # nosec B608 — table validated by validate_sql_identifier above
+            sql = f'SELECT * FROM "{table}"'  # nosec B608 â€” table validated by validate_sql_identifier above
         else:
             raise ValueError("Database connectors require either 'query' or 'table'")
         if nrows:
-            sql = f"SELECT * FROM ({sql}) AS source_query LIMIT {int(nrows)}"  # nosec B608 — sql from validated query/table, nrows cast to int
+            sql = f"SELECT * FROM ({sql}) AS source_query LIMIT {int(nrows)}"  # nosec B608 â€” sql from validated query/table, nrows cast to int
         return pd.read_sql(text(sql), self._engine)
 
     def get_schema(self) -> list[dict]:
@@ -343,7 +343,7 @@ class GraphQLConnector(BaseConnector):
         except UrlValidationError:
             raise ValueError(f"URL validation failed for {self.config['url']}") from None
         response = (
-            requests.post(  # nosec B113 — timeout is set via self.config.get("timeout", 30) below
+            requests.post(  # nosec B113 â€” timeout is set via self.config.get("timeout", 30) below
                 self.config["url"],
                 json={"query": self.config["query"], "variables": self.config.get("variables", {})},
                 headers=self.config.get("headers", {}),

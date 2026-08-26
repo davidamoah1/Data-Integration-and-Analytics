@@ -1,4 +1,4 @@
-"""Notification service supporting email, SMS, WhatsApp, push, and in-app channels.
+﻿"""Notification service supporting email, SMS, WhatsApp, push, and in-app channels.
 
 Email is sent via SMTP when the required environment variables are set. SMS,
 WhatsApp, and push are stubbed with clear configuration messages so that real
@@ -114,7 +114,7 @@ class NotificationService:
         user_id: int | None = None,
         org_id: int | None = None,
     ) -> dict:
-        """SMS stub — integrate Twilio or similar in production."""
+        """SMS stub â€” integrate Twilio or similar in production."""
         self._log("sms", "SMS notification", message, "skipped", user_id, org_id)
         return {"sent": False, "channel": "sms", "note": "SMS provider not configured"}
 
@@ -125,7 +125,7 @@ class NotificationService:
         user_id: int | None = None,
         org_id: int | None = None,
     ) -> dict:
-        """WhatsApp stub — integrate Twilio/WhatsApp Business API in production."""
+        """WhatsApp stub â€” integrate Twilio/WhatsApp Business API in production."""
         self._log("whatsapp", "WhatsApp notification", message, "skipped", user_id, org_id)
         return {"sent": False, "channel": "whatsapp", "note": "WhatsApp provider not configured"}
 
@@ -137,7 +137,7 @@ class NotificationService:
         user_id: int | None = None,
         org_id: int | None = None,
     ) -> dict:
-        """Push notification stub — integrate Firebase Cloud Messaging in production."""
+        """Push notification stub â€” integrate Firebase Cloud Messaging in production."""
         self._log("push", title, body, "skipped", user_id, org_id)
         return {"sent": False, "channel": "push", "note": "Push provider not configured"}
 

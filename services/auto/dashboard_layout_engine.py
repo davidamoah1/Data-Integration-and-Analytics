@@ -1,4 +1,4 @@
-"""Intelligent Dashboard Layout Engine.
+﻿"""Intelligent Dashboard Layout Engine.
 
 Automatically decides:
   - Which charts appear on the dashboard

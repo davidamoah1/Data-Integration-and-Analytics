@@ -1,4 +1,4 @@
-"""SQLAlchemy models for the enterprise workflow engine.
+﻿"""SQLAlchemy models for the enterprise workflow engine.
 
 A workflow is a versioned DAG of nodes. Executions are stored with full
 context, metrics, errors, and lineage links.

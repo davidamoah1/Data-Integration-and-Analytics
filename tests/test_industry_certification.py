@@ -1,4 +1,4 @@
-"""Industry Certification Tests.
+﻿"""Industry Certification Tests.
 
 Verifies that every supported industry:
 1. Is correctly detected from a representative dataset
@@ -20,7 +20,7 @@ from semantic.kpi_registry import KPIRegistry
 from semantic.mapping_engine import SemanticMappingEngine
 from semantic.report_registry import ReportRegistry
 
-# ── Industry-specific test datasets ──
+# â”€â”€ Industry-specific test datasets â”€â”€
 
 
 def _healthcare_df() -> pd.DataFrame:
@@ -204,7 +204,7 @@ def _telecom_df() -> pd.DataFrame:
     )
 
 
-# ── Test data registry ──
+# â”€â”€ Test data registry â”€â”€
 
 INDUSTRY_DATASETS = {
     "healthcare": _healthcare_df,
@@ -222,7 +222,7 @@ INDUSTRY_DATASETS = {
 }
 
 
-# ── Certification Tests ──
+# â”€â”€ Certification Tests â”€â”€
 
 
 @pytest.fixture(params=sorted(INDUSTRY_DATASETS.keys()))

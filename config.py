@@ -1,4 +1,4 @@
-import os
+﻿import os
 import tempfile
 
 from dotenv import load_dotenv
@@ -21,17 +21,17 @@ def _resolve_path(path_str: str) -> str:
     return os.path.join(BASE_DIR, path_str)
 
 
-# Data paths — production must set RAW_DATA_PATH explicitly (no default sample data)
+# Data paths â€” production must set RAW_DATA_PATH explicitly (no default sample data)
 RAW_DATA_PATH = _resolve_path(os.getenv("RAW_DATA_PATH", ""))
 PROCESSED_DATA_PATH = _resolve_path(
     os.getenv("PROCESSED_DATA_PATH", "data/processed/cleaned_data.csv")
 )
 
-# Demo / onboarding datasets — opt-in only, never used in production automatically
+# Demo / onboarding datasets â€” opt-in only, never used in production automatically
 DEMO_DATASETS_DIR = _resolve_path(os.getenv("DEMO_DATASETS_DIR", "demo_datasets"))
 SEED_DEMO_DATA = os.getenv("SEED_DEMO_DATA", "false").lower() in ("true", "1", "yes")
 
-# Smart Data Capture — original + enhanced uploaded document storage
+# Smart Data Capture â€” original + enhanced uploaded document storage
 CAPTURE_STORAGE_DIR = _resolve_path(os.getenv("CAPTURE_STORAGE_DIR", "storage/capture"))
 if os.getenv("VERCEL", "").lower() in ("1", "true", "yes") and not os.path.isabs(
     os.getenv("CAPTURE_STORAGE_DIR", "")
@@ -43,7 +43,7 @@ CAPTURE_RETENTION_DAYS = int(os.getenv("CAPTURE_RETENTION_DAYS") or "365")
 # Path to the Tesseract OCR binary. Leave unset to use the system PATH.
 TESSERACT_CMD = os.getenv("TESSERACT_CMD", "")
 
-# Certificate Intelligence — maximum files per normal batch upload.
+# Certificate Intelligence â€” maximum files per normal batch upload.
 # Large batches (500+) should use background processing.
 CERTIFICATE_MAX_BATCH_SIZE = int(os.getenv("CERTIFICATE_MAX_BATCH_SIZE") or "50")
 
@@ -54,7 +54,7 @@ DATABASE_URL = os.getenv("DATABASE_URL", "")
 DB_TYPE = os.getenv("DB_TYPE", "").lower()
 
 if DATABASE_URL:
-    # Use the explicit connection URL — infer DB_TYPE from the scheme
+    # Use the explicit connection URL â€” infer DB_TYPE from the scheme
     if DATABASE_URL.startswith("mysql"):
         DB_TYPE = "mysql"
     elif DATABASE_URL.startswith("sqlite"):
@@ -179,7 +179,7 @@ _jwt_env = os.getenv("JWT_SECRET_KEY", "")
 if _jwt_env:
     JWT_SECRET_KEY = _jwt_env
 elif DB_TYPE == "mysql" or IS_PRODUCTION:
-    # Production must set JWT_SECRET_KEY explicitly — do not provide a fallback
+    # Production must set JWT_SECRET_KEY explicitly â€” do not provide a fallback
     JWT_SECRET_KEY = ""
 else:
     # Dev/test only: generate a random ephemeral secret so no known default is used
@@ -229,7 +229,7 @@ if _cors_env:
     CORS_ORIGINS = _cors_env
 elif DB_TYPE == "mysql" or IS_PRODUCTION:
     # Production without explicit CORS_ORIGINS is likely a
-    # misconfiguration — default to empty so no cross-origin requests are
+    # misconfiguration â€” default to empty so no cross-origin requests are
     # allowed until the deployer configures it deliberately.
     import warnings as _w
 

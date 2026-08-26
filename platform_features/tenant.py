@@ -1,4 +1,4 @@
-"""Multi-Tenancy — Tenant Context and Data Isolation.
+﻿"""Multi-Tenancy â€” Tenant Context and Data Isolation.
 
 Ensures users only access data within their organization.
 Provides:

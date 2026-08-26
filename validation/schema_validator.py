@@ -1,4 +1,4 @@
-"""Schema Validator — validates dataset structure, column names, types, and formats."""
+﻿"""Schema Validator â€” validates dataset structure, column names, types, and formats."""
 
 from __future__ import annotations
 

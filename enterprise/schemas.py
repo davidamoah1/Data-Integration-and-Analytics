@@ -1,4 +1,4 @@
-"""Pydantic schemas for platform domain — templates, collaboration, branding."""
+﻿"""Pydantic schemas for platform domain â€” templates, collaboration, branding."""
 
 from datetime import datetime
 from typing import Any

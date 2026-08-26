@@ -1,4 +1,4 @@
-"""Presentation Studio — AI-generated presentations from analysis results."""
+﻿"""Presentation Studio â€” AI-generated presentations from analysis results."""
 
 from __future__ import annotations
 

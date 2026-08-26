@@ -1,4 +1,4 @@
-"""Models for scheduled report jobs."""
+﻿"""Models for scheduled report jobs."""
 
 from datetime import datetime, timezone
 

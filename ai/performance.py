@@ -1,4 +1,4 @@
-"""AI Performance Optimization.
+﻿"""AI Performance Optimization.
 
 Provides:
   - Lazy context loading (only gather relevant data for the query)
@@ -250,7 +250,7 @@ class LazyContextLoader:
         return True
 
 
-# ── Global instances ───────────────────────────────────
+# â”€â”€ Global instances â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 _performance_monitor: PerformanceMonitor | None = None
 _token_manager: TokenBudgetManager | None = None

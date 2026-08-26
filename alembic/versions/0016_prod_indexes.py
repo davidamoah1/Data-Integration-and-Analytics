@@ -1,4 +1,4 @@
-"""Phase 15 — Production database indexes
+﻿"""Phase 15 â€” Production database indexes
 
 Adds comprehensive indexes across all major tables for production query
 performance. Uses conditional creation to handle environments where some

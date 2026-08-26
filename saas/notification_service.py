@@ -1,4 +1,4 @@
-"""Centralized notification system — multi-channel event notifications.
+﻿"""Centralized notification system â€” multi-channel event notifications.
 
 Channels: in-app, email, SMS (pluggable), webhooks.
 Events: workflow completed, dataset processed, subscription changes, security alerts, billing, maintenance.

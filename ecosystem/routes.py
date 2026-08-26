@@ -1,4 +1,4 @@
-"""FastAPI routes for the Public API Platform — API keys, usage, and developer access."""
+﻿"""FastAPI routes for the Public API Platform â€” API keys, usage, and developer access."""
 
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ from shared.tenant import get_current_organization_id
 router = APIRouter(prefix="/platform", tags=["Platform / API Keys"])
 
 
-# ─── Schemas ───────────────────────────────────────────────
+# â”€â”€â”€ Schemas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class APIKeyCreate(BaseModel):
@@ -41,7 +41,7 @@ class APIKeyResponse(BaseModel):
     created_at: str | None = None
 
 
-# ─── API Key CRUD ──────────────────────────────────────────
+# â”€â”€â”€ API Key CRUD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @router.post("/api-keys")
@@ -79,7 +79,7 @@ async def create_api_key(
             "scopes": api_key.scopes,
             "expires_at": str(expires_at) if expires_at else None,
         },
-        "API key created — save it now, it won't be shown again",
+        "API key created â€” save it now, it won't be shown again",
     )
 
 
@@ -145,7 +145,7 @@ async def rotate_api_key(
     current_user: dict = Depends(get_current_user),
     db: DbSession = Depends(get_db),
 ):
-    """Rotate an API key — generates a new key and revokes the old one."""
+    """Rotate an API key â€” generates a new key and revokes the old one."""
     org_id = get_current_organization_id(current_user, db)
     key = db.execute(
         select(APIKey).where(APIKey.id == key_id, APIKey.organization_id == org_id)
@@ -160,11 +160,11 @@ async def rotate_api_key(
     db.commit()
     return success_response(
         {"id": key_id, "api_key": raw_key, "key_prefix": key_prefix},
-        "API key rotated — save the new key, it won't be shown again",
+        "API key rotated â€” save the new key, it won't be shown again",
     )
 
 
-# ─── Usage Analytics ───────────────────────────────────────
+# â”€â”€â”€ Usage Analytics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @router.get("/usage")

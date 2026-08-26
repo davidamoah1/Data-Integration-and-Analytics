@@ -1,4 +1,4 @@
-"""Report export service.
+﻿"""Report export service.
 
 Exports AI-generated reports to csv, xlsx, or pdf using the persisted
 `data_sources` JSON for tabular data and markdown `content` for PDF.

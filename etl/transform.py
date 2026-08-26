@@ -1,4 +1,4 @@
-import os
+﻿import os
 
 import pandas as pd
 
@@ -72,14 +72,14 @@ def transform_data(df: pd.DataFrame) -> pd.DataFrame:
         logger.info(f"Transform: Removed {before - after} duplicate rows.")
 
         # Drop rows where key identifier columns are missing (only if they exist)
-        # Only drop if order_id exists — don't assume sales/order_date are present
+        # Only drop if order_id exists â€” don't assume sales/order_date are present
         if "order_id" in df.columns:
             df = df.dropna(subset=["order_id"])
         # For sales-specific datasets, also drop rows missing critical sales data
         if "sales" in df.columns and "order_date" in df.columns:
             df = df.dropna(subset=["sales", "order_date"])
 
-        # Fix data types — only for columns that exist
+        # Fix data types â€” only for columns that exist
         numeric_cols = ("sales", "quantity", "discount", "profit")
         for col in numeric_cols:
             if col in df.columns:

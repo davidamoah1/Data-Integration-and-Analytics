@@ -1,4 +1,4 @@
-"""Security regression tests for Bandit fixes.
+﻿"""Security regression tests for Bandit fixes.
 
 Tests that the security fixes are effective and cannot be bypassed.
 """
@@ -180,7 +180,7 @@ class TestExecSecurity:
     def test_timeout_enforced(self, sample_df):
         from workflows.nodes import _run_python_sandboxed
 
-        # Pure Python busy loop — no imports needed
+        # Pure Python busy loop â€” no imports needed
         code = "while True:\n    pass\n"
         with pytest.raises(RuntimeError, match="timed out"):
             _run_python_sandboxed(code, sample_df, timeout=2)
@@ -220,7 +220,7 @@ class TestTempStorage:
                     if isinstance(node, ast.Constant) and isinstance(node.value, str):
                         if node.value.startswith(
                             "/tmp/"
-                        ):  # nosec B108 — string literal in assertion, not a temp path
+                        ):  # nosec B108 â€” string literal in assertion, not a temp path
                             pytest.fail(f"{fpath} contains hardcoded /tmp path: {node.value}")
 
 

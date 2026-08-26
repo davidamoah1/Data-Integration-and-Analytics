@@ -1,7 +1,7 @@
-"""AI-ready hooks architecture — interfaces for future AI features.
+﻿"""AI-ready hooks architecture â€” interfaces for future AI features.
 
 These are abstract interfaces that future AI implementations can plug into.
-No AI logic is implemented here — only the architecture and data contracts.
+No AI logic is implemented here â€” only the architecture and data contracts.
 """
 
 from abc import ABC, abstractmethod

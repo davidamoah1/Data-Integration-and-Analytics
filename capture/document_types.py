@@ -1,4 +1,4 @@
-"""Registry of supported document types across industries.
+﻿"""Registry of supported document types across industries.
 
 Each document type defines:
   - key: machine identifier
@@ -36,7 +36,7 @@ class DocumentTypeSpec:
     fields: list[FieldSpec]
 
 
-# ─── Healthcare (flagship vertical) ─────────────────────────────────────────
+# â”€â”€â”€ Healthcare (flagship vertical) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 HEALTHCARE_TYPES: list[DocumentTypeSpec] = [
     DocumentTypeSpec(
@@ -262,7 +262,7 @@ HEALTHCARE_TYPES: list[DocumentTypeSpec] = [
     ),
 ]
 
-# ─── Education ──────────────────────────────────────────────────────────────
+# â”€â”€â”€ Education â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 EDUCATION_TYPES: list[DocumentTypeSpec] = [
     DocumentTypeSpec(
@@ -331,7 +331,7 @@ EDUCATION_TYPES: list[DocumentTypeSpec] = [
     ),
 ]
 
-# ─── Government ─────────────────────────────────────────────────────────────
+# â”€â”€â”€ Government â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 GOVERNMENT_TYPES: list[DocumentTypeSpec] = [
     DocumentTypeSpec(
@@ -386,7 +386,7 @@ GOVERNMENT_TYPES: list[DocumentTypeSpec] = [
     ),
 ]
 
-# ─── Business (generic across Banking, Retail, Manufacturing, Logistics, Insurance) ─
+# â”€â”€â”€ Business (generic across Banking, Retail, Manufacturing, Logistics, Insurance) â”€
 
 BUSINESS_TYPES: list[DocumentTypeSpec] = [
     DocumentTypeSpec(
@@ -470,7 +470,7 @@ BUSINESS_TYPES: list[DocumentTypeSpec] = [
     ),
 ]
 
-# ─── Generic Forms (cross-industry) ─────────────────────────────────────────
+# â”€â”€â”€ Generic Forms (cross-industry) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 FORM_TYPES: list[DocumentTypeSpec] = [
     DocumentTypeSpec(
@@ -522,12 +522,12 @@ FORM_TYPES: list[DocumentTypeSpec] = [
     ),
 ]
 
-# ─── Certificates ───────────────────────────────────────────────────────────
+# â”€â”€â”€ Certificates â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Certificate-specific document types covering academic, professional,
 # training, and membership certificates. Each type defines the fields
 # expected on that certificate variant. The extraction engine uses these
 # field specs (keywords + data types) to locate and validate values in
-# OCR text. Fields are optional unless marked required — a real
+# OCR text. Fields are optional unless marked required â€” a real
 # certificate may not contain every field listed here.
 
 CERTIFICATE_TYPES: list[DocumentTypeSpec] = [
@@ -1054,7 +1054,7 @@ CERTIFICATE_TYPES: list[DocumentTypeSpec] = [
 ]
 
 
-# ─── Combined registry ──────────────────────────────────────────────────────
+# â”€â”€â”€ Combined registry â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 ALL_DOCUMENT_TYPES: list[DocumentTypeSpec] = (
     HEALTHCARE_TYPES

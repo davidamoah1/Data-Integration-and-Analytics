@@ -1,4 +1,4 @@
-"""Visualization Intelligence Engine — the single canonical entry point.
+﻿"""Visualization Intelligence Engine â€” the single canonical entry point.
 
 This is the ONE authoritative visualization service. Every visualization-
 producing workflow (dashboard, report, presentation, studios) must call
@@ -6,33 +6,33 @@ this engine. No subsystem may independently decide chart types.
 
 Pipeline:
   DataFrame + metadata
-       │
-       ▼
-  AutomaticAnalysisEngine  → DatasetUnderstanding
-       │
-       ▼
-  IntelligentChartSelectionEngine → list[ChartSpecification]
-       │
-       ▼
-  ChartValidator → validated list[ChartSpecification]
-       │
-       ▼
-  AutomaticKPIEngine → list[KPISpecification]
-       │
-       ▼
-  AutomaticInsightEngine → list[InsightSpecification]
-       │
-       ▼
-  AutomaticFilterEngine → list[FilterSpecification]
-       │
-       ▼
-  IntelligentDashboardLayoutEngine → DashboardSpecification
-       │
-       ▼
-  PresentationLayoutEngine → PresentationSpecification
+       â”‚
+       â–¼
+  AutomaticAnalysisEngine  â†’ DatasetUnderstanding
+       â”‚
+       â–¼
+  IntelligentChartSelectionEngine â†’ list[ChartSpecification]
+       â”‚
+       â–¼
+  ChartValidator â†’ validated list[ChartSpecification]
+       â”‚
+       â–¼
+  AutomaticKPIEngine â†’ list[KPISpecification]
+       â”‚
+       â–¼
+  AutomaticInsightEngine â†’ list[InsightSpecification]
+       â”‚
+       â–¼
+  AutomaticFilterEngine â†’ list[FilterSpecification]
+       â”‚
+       â–¼
+  IntelligentDashboardLayoutEngine â†’ DashboardSpecification
+       â”‚
+       â–¼
+  PresentationLayoutEngine â†’ PresentationSpecification
 
 The DashboardSpecification and PresentationSpecification share the
-SAME ChartSpecification objects — they are the single source of truth.
+SAME ChartSpecification objects â€” they are the single source of truth.
 
 Usage:
   from services.auto.engine import VisualizationIntelligenceEngine
@@ -160,7 +160,7 @@ class VisualizationIntelligenceEngine:
 
         # 8. Generate dashboard layout
         dashboard = self.dashboard_layout_engine.generate_layout(
-            title=f"{dataset_name} — Dashboard",
+            title=f"{dataset_name} â€” Dashboard",
             subtitle=f"Auto-generated from {dataset_name} ({industry} industry)",
             industry=industry,
             dataset_name=dataset_name,

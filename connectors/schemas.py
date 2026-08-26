@@ -1,4 +1,4 @@
-"""Pydantic schemas for the Connector Framework."""
+﻿"""Pydantic schemas for the Connector Framework."""
 
 from __future__ import annotations
 

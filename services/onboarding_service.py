@@ -1,13 +1,13 @@
-"""Smart Onboarding Service — Phase 7.
+﻿"""Smart Onboarding Service â€” Phase 7.
 
 Provides role-specific guided onboarding flows with step tracking.
 
 Flows:
-  - org_admin / org_owner: Create Org → Invite Members → Create Departments → Upload Data → Create Dashboard
-  - data_analyst: Upload Dataset → Validate → Analyze → Generate Report
-  - viewer: View Dashboard → Explore Reports
+  - org_admin / org_owner: Create Org â†’ Invite Members â†’ Create Departments â†’ Upload Data â†’ Create Dashboard
+  - data_analyst: Upload Dataset â†’ Validate â†’ Analyze â†’ Generate Report
+  - viewer: View Dashboard â†’ Explore Reports
 
-New users get a blank workspace — NO demo datasets are auto-loaded.
+New users get a blank workspace â€” NO demo datasets are auto-loaded.
 """
 
 from __future__ import annotations
@@ -20,7 +20,7 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 
-# ── Role-Specific Onboarding Flow Definitions ─────────
+# â”€â”€ Role-Specific Onboarding Flow Definitions â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @dataclass(frozen=True)
@@ -328,14 +328,14 @@ def flow_to_dict(flow: OnboardingFlowDef) -> dict[str, Any]:
     }
 
 
-# ── Onboarding Progress Tracker ───────────────────────
+# â”€â”€ Onboarding Progress Tracker â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class OnboardingService:
     """Tracks onboarding progress per user.
 
     Uses the user.onboarding_data JSON field to store step completion.
-    No demo datasets are loaded — users start with a blank workspace.
+    No demo datasets are loaded â€” users start with a blank workspace.
     """
 
     def get_status(self, user: Any) -> dict[str, Any]:

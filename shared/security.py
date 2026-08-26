@@ -1,4 +1,4 @@
-"""Security utilities — JWT tokens, password hashing, password policies.
+﻿"""Security utilities â€” JWT tokens, password hashing, password policies.
 
 Uses Argon2 for password hashing (preferred) with bcrypt fallback.
 JWT tokens signed with HS256.

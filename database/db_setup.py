@@ -1,4 +1,4 @@
-from sqlalchemy import TIMESTAMP, Column, Date, Index, Integer, Numeric, String, func
+﻿from sqlalchemy import TIMESTAMP, Column, Date, Index, Integer, Numeric, String, func
 
 from etl.logging_config import logger
 from shared.database import Base, get_engine
@@ -61,7 +61,7 @@ def init_db():
     authentication/organization/audit tables, then seeds default data.
 
     This is a manual dev/test convenience script only. Production MySQL
-    schema must be created exclusively via `alembic upgrade head` — running
+    schema must be created exclusively via `alembic upgrade head` â€” running
     this against a MySQL DB_TYPE raises instead of calling create_all(),
     to avoid schema drift from migration history.
 

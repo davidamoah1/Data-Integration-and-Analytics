@@ -1,4 +1,4 @@
-"""AI Forecasting Engine — time series forecasting with confidence intervals.
+﻿"""AI Forecasting Engine â€” time series forecasting with confidence intervals.
 
 Supports forecasting for revenue, attendance, enrollment, disease cases,
 crop production, inventory, demand, budgets, and any numeric time series.
@@ -199,7 +199,7 @@ class ForecastingEngine:
         except Exception:
             z = 1.96  # 95% default
 
-        # Calculate R² for accuracy
+        # Calculate RÂ² for accuracy
         ss_res = np.sum(residuals**2)
         ss_tot = np.sum((y - np.mean(y)) ** 2)
         r_squared = 1 - (ss_res / ss_tot) if ss_tot > 0 else 0

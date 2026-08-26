@@ -1,4 +1,4 @@
-"""Alembic migration environment for AEDIP."""
+﻿"""Alembic migration environment for AEDIP."""
 
 import sys
 from logging.config import fileConfig

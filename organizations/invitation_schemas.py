@@ -1,4 +1,4 @@
-"""Pydantic schemas for invitation and workspace endpoints."""
+﻿"""Pydantic schemas for invitation and workspace endpoints."""
 
 from datetime import datetime
 

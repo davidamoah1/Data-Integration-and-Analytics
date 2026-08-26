@@ -1,4 +1,4 @@
-"""Analytics API routes — dashboards, KPIs, and alerts."""
+﻿"""Analytics API routes â€” dashboards, KPIs, and alerts."""
 
 from datetime import datetime, timezone
 

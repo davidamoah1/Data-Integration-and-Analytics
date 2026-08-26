@@ -1,4 +1,4 @@
-"""DEMO/TEST TOOLING — Generate synthetic DIRTY CSV datasets for each industry sector.
+﻿"""DEMO/TEST TOOLING â€” Generate synthetic DIRTY CSV datasets for each industry sector.
 
 NOT for production use. These datasets are for testing the ETL pipeline and
 semantic detection with realistic data quality issues.
@@ -118,9 +118,9 @@ def inject_empty_rows(rows: list, rate: float = 0.02) -> list:
     return rows
 
 
-# ──────────────────────────────────────────────
-# Education Dataset — Tuition & Enrollment
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# Education Dataset â€” Tuition & Enrollment
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def generate_education():
     regions = ["North", "South", "East", "West", "Central"]
     categories = ["Undergraduate", "Graduate", "PhD", "Certificate", "Diploma"]
@@ -177,9 +177,9 @@ def generate_education():
     return path
 
 
-# ──────────────────────────────────────────────
-# Healthcare Dataset — Patient Billing
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# Healthcare Dataset â€” Patient Billing
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def generate_healthcare():
     regions = ["North", "South", "East", "West", "Central"]
     departments = [
@@ -255,9 +255,9 @@ def generate_healthcare():
     return path
 
 
-# ──────────────────────────────────────────────
-# Government Dataset — Public Spending
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# Government Dataset â€” Public Spending
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def generate_government():
     regions = ["North", "South", "East", "West", "Central"]
     departments = [
@@ -328,9 +328,9 @@ def generate_government():
     return path
 
 
-# ──────────────────────────────────────────────
-# Church Dataset — Tithes & Offerings
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# Church Dataset â€” Tithes & Offerings
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def generate_church():
     regions = ["North", "South", "East", "West", "Central"]
     event_types = [
@@ -398,9 +398,9 @@ def generate_church():
     return path
 
 
-# ──────────────────────────────────────────────
-# NGO Dataset — Donations & Programs
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# NGO Dataset â€” Donations & Programs
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def generate_ngo():
     regions = ["North", "South", "East", "West", "Central", "International"]
     program_types = [

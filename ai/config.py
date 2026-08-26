@@ -1,4 +1,4 @@
-"""AI Platform configuration — reads from environment variables with sensible defaults."""
+﻿"""AI Platform configuration â€” reads from environment variables with sensible defaults."""
 
 import os
 

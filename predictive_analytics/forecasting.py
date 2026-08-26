@@ -1,4 +1,4 @@
-"""Time Series Forecaster.
+﻿"""Time Series Forecaster.
 
 Core forecasting engine with 4 methods:
   - Linear regression (trend-based)
@@ -335,7 +335,7 @@ class TimeSeriesForecaster:
             first = predictions[0]
             last = predictions[-1]
             parts.append(
-                f"Forecast: {first.value:,.0f} on {first.date} → "
+                f"Forecast: {first.value:,.0f} on {first.date} â†’ "
                 f"{last.value:,.0f} on {last.date} over {len(predictions)} periods"
             )
         return " | ".join(parts)

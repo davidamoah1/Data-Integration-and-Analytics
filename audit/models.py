@@ -1,4 +1,4 @@
-"""SQLAlchemy ORM models for the Audit domain."""
+﻿"""SQLAlchemy ORM models for the Audit domain."""
 
 from sqlalchemy import JSON, TIMESTAMP, BigInteger, Column, Index, Integer, String, Text, func
 

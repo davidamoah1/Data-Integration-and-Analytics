@@ -1,4 +1,4 @@
-"""Automated tests for industry classification accuracy.
+﻿"""Automated tests for industry classification accuracy.
 
 Tests that the SemanticEngine correctly identifies the industry of uploaded
 datasets across Healthcare, Education, Banking, Agriculture, Government,
@@ -19,7 +19,7 @@ import pytest
 
 from semantic.semantic_engine import SemanticEngine
 
-# ── Test Data Fixtures ──
+# â”€â”€ Test Data Fixtures â”€â”€
 
 
 @pytest.fixture
@@ -206,7 +206,7 @@ def telecom_df():
 
 @pytest.fixture
 def generic_df():
-    """Dataset with only generic columns — should classify as unknown."""
+    """Dataset with only generic columns â€” should classify as unknown."""
     return pd.DataFrame(
         {
             "id": [1, 2, 3],
@@ -234,7 +234,7 @@ def banking_biased_generic_df():
     )
 
 
-# ── Classification Accuracy Tests ──
+# â”€â”€ Classification Accuracy Tests â”€â”€
 
 
 class TestIndustryClassification:

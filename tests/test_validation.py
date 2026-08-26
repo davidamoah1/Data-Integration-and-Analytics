@@ -1,4 +1,4 @@
-"""Comprehensive tests for the Hospital Data Validation & Quality Management Engine."""
+﻿"""Comprehensive tests for the Hospital Data Validation & Quality Management Engine."""
 
 from __future__ import annotations
 
@@ -23,7 +23,7 @@ from validation.quality_rules import QualityRulesEngine
 from validation.report_generator import ValidationReportGenerator
 from validation.schema_validator import SchemaValidator
 
-# ── Fixtures ──
+# â”€â”€ Fixtures â”€â”€
 
 
 @pytest.fixture
@@ -106,7 +106,7 @@ def validation_engine():
     return ValidationEngine()
 
 
-# ── Schema Validator Tests ──
+# â”€â”€ Schema Validator Tests â”€â”€
 
 
 class TestSchemaValidator:
@@ -144,7 +144,7 @@ class TestSchemaValidator:
         assert any(i.rule_name == "whitespace_column_name" for i in result.issues)
 
 
-# ── Quality Rules Tests ──
+# â”€â”€ Quality Rules Tests â”€â”€
 
 
 class TestQualityRules:
@@ -203,7 +203,7 @@ class TestQualityRules:
         assert const[0].column == "a"
 
 
-# ── Business Rules Tests ──
+# â”€â”€ Business Rules Tests â”€â”€
 
 
 class TestBusinessRules:
@@ -272,7 +272,7 @@ class TestBusinessRules:
         assert pediatric[0].affected_rows == 1
 
 
-# ── Clinical Checks Tests ──
+# â”€â”€ Clinical Checks Tests â”€â”€
 
 
 class TestClinicalChecks:
@@ -310,7 +310,7 @@ class TestClinicalChecks:
         assert len(neg) == 1
 
 
-# ── Outlier Detection Tests ──
+# â”€â”€ Outlier Detection Tests â”€â”€
 
 
 class TestOutlierDetector:
@@ -339,7 +339,7 @@ class TestOutlierDetector:
         assert len(dup_adm) == 1
 
 
-# ── Profiler Tests ──
+# â”€â”€ Profiler Tests â”€â”€
 
 
 class TestProfiler:
@@ -366,7 +366,7 @@ class TestProfiler:
         assert col.mean_value == 30
 
 
-# ── Scoring Tests ──
+# â”€â”€ Scoring Tests â”€â”€
 
 
 class TestScoring:
@@ -396,7 +396,7 @@ class TestScoring:
         assert 0 <= score.integrity <= 100
 
 
-# ── Engine Integration Tests ──
+# â”€â”€ Engine Integration Tests â”€â”€
 
 
 class TestValidationEngine:
@@ -437,7 +437,7 @@ class TestValidationEngine:
         assert dirty_result.can_proceed_to_etl is False
 
 
-# ── Approval Workflow Tests ──
+# â”€â”€ Approval Workflow Tests â”€â”€
 
 
 class TestApprovalWorkflow:
@@ -475,7 +475,7 @@ class TestApprovalWorkflow:
         assert ApprovalWorkflow.is_etl_blocked(result) is True
 
 
-# ── Report Generator Tests ──
+# â”€â”€ Report Generator Tests â”€â”€
 
 
 class TestReportGenerator:
@@ -526,7 +526,7 @@ class TestReportGenerator:
                 os.unlink(tmp_path)
 
 
-# ── Audit Logger Tests ──
+# â”€â”€ Audit Logger Tests â”€â”€
 
 
 class TestAuditLogger:
@@ -561,7 +561,7 @@ class TestAuditLogger:
         assert len(ValidationAuditLogger.get_entries()) == 0
 
 
-# ── AI Copilot Tests ──
+# â”€â”€ AI Copilot Tests â”€â”€
 
 
 class TestValidationAICopilot:
@@ -598,7 +598,7 @@ class TestValidationAICopilot:
         assert "validation" in answer.lower()
 
 
-# ── Performance Tests ──
+# â”€â”€ Performance Tests â”€â”€
 
 
 class TestPerformance:
@@ -623,7 +623,7 @@ class TestPerformance:
         assert result.status in (ValidationStatus.PASSED, ValidationStatus.PASSED_WITH_WARNINGS)
 
 
-# ── API Route Tests ──
+# â”€â”€ API Route Tests â”€â”€
 
 
 class TestValidationAPI:

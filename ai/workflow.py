@@ -1,8 +1,8 @@
-"""AI Workflow Automation Engine — create and execute automated AI workflows.
+﻿"""AI Workflow Automation Engine â€” create and execute automated AI workflows.
 
 Users can create workflows like:
-- Import file → Clean data → Generate dashboard → Email report → Notify manager
-- Run every Monday: Import → Profile → Quality check → Archive
+- Import file â†’ Clean data â†’ Generate dashboard â†’ Email report â†’ Notify manager
+- Run every Monday: Import â†’ Profile â†’ Quality check â†’ Archive
 
 Workflow steps can call any platform API or AI engine.
 """
@@ -349,7 +349,7 @@ class WorkflowEngine:
         return {"insight_id": result["id"], "title": result["title"]}
 
     def _step_notify(self, config: dict, context: dict, user_id: int) -> dict:
-        """Notify step — create an in-app notification."""
+        """Notify step â€” create an in-app notification."""
         from notifications.service import NotificationService
 
         message = config.get("message", "Workflow notification")
@@ -361,7 +361,7 @@ class WorkflowEngine:
         return {"notification_sent": result.get("sent"), "message": message, "id": result.get("id")}
 
     def _step_email(self, config: dict, context: dict, user_id: int) -> dict:
-        """Email step — send email via SMTP when configured."""
+        """Email step â€” send email via SMTP when configured."""
         from notifications.service import NotificationService
 
         to = config.get("to")

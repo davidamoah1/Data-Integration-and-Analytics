@@ -1,4 +1,4 @@
-"""FastAPI routes for Enterprise AI Decision Support System.
+﻿"""FastAPI routes for Enterprise AI Decision Support System.
 
 Endpoints:
   - Executive Summary generation
@@ -32,7 +32,7 @@ from shared.tenant import get_current_organization_id
 router = APIRouter(prefix="/ai/enterprise", tags=["Enterprise AI Decision Support"])
 
 
-# ── Request/Response Schemas ───────────────────────────
+# â”€â”€ Request/Response Schemas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class ExecutiveSummaryRequest(BaseModel):
@@ -88,7 +88,7 @@ class TaskTypeResponse(BaseModel):
     task_types: list[dict] = Field(default_factory=list)
 
 
-# ── Endpoints ──────────────────────────────────────────
+# â”€â”€ Endpoints â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @router.post("/executive-summary")

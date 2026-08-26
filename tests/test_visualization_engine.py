@@ -1,4 +1,4 @@
-"""Tests for the Visualization Intelligence Engine.
+﻿"""Tests for the Visualization Intelligence Engine.
 
 Tests cover:
   - Full pipeline generation (dashboard + presentation)
@@ -23,7 +23,7 @@ from services.auto.chart_specification import (
 from services.auto.engine import VISUALIZATION_SCHEMA_VERSION, VisualizationIntelligenceEngine
 from services.auto.validators import ChartValidator
 
-# ── Fixtures ──────────────────────────────────────────
+# â”€â”€ Fixtures â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @pytest.fixture
@@ -82,7 +82,7 @@ def engine() -> VisualizationIntelligenceEngine:
     return VisualizationIntelligenceEngine()
 
 
-# ── Full Pipeline Tests ───────────────────────────────
+# â”€â”€ Full Pipeline Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestFullPipeline:
@@ -141,7 +141,7 @@ class TestFullPipeline:
             assert chart.reason  # All charts should have explanations
 
 
-# ── Chart Type Tests ──────────────────────────────────
+# â”€â”€ Chart Type Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestChartTypes:
@@ -179,7 +179,7 @@ class TestChartTypes:
         assert "treemap" in chart_types
 
 
-# ── Validation Tests ──────────────────────────────────
+# â”€â”€ Validation Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestChartValidation:
@@ -271,7 +271,7 @@ class TestChartValidation:
             assert len(explanation) > 10
 
 
-# ── Edge Case Tests ───────────────────────────────────
+# â”€â”€ Edge Case Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestEdgeCases:
@@ -321,7 +321,7 @@ class TestEdgeCases:
             assert is_valid, f"Chart {chart.title} should be valid: {reason}"
 
 
-# ── Report Integration Tests ──────────────────────────
+# â”€â”€ Report Integration Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestReportIntegration:
@@ -389,7 +389,7 @@ class TestReportIntegration:
         assert len(kpi_section.kpis) > 0
 
 
-# ── Orchestrator Backward Compatibility ───────────────
+# â”€â”€ Orchestrator Backward Compatibility â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestOrchestratorCompat:

@@ -1,4 +1,4 @@
-"""SSO (Single Sign-On) service layer.
+﻿"""SSO (Single Sign-On) service layer.
 
 Future-ready architecture for OAuth2 and SAML-based SSO.
 Provides provider configuration, initiation, and callback handling.

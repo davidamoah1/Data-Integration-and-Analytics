@@ -1,4 +1,4 @@
-"""add platform tables — templates, collaboration, branding
+﻿"""add platform tables â€” templates, collaboration, branding
 
 Revision ID: 0006_platform_tables
 Revises: 0005_composite_indexes_analytics

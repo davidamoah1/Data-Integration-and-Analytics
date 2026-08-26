@@ -1,4 +1,4 @@
-"""AI Data Cleaning Engine — automatic detection and transformation of data issues."""
+﻿"""AI Data Cleaning Engine â€” automatic detection and transformation of data issues."""
 
 from __future__ import annotations
 
@@ -229,7 +229,7 @@ class DataCleaningService:
                         "column": col,
                         "action": "normalize_countries",
                         "mapping": COUNTRY_NORMALIZATION,
-                        "reason": "Standardize country names (e.g., USA → United States)",
+                        "reason": "Standardize country names (e.g., USA â†’ United States)",
                     }
                 )
 
@@ -239,7 +239,7 @@ class DataCleaningService:
                         "column": col,
                         "action": "normalize_categories",
                         "mapping": CATEGORY_NORMALIZATION,
-                        "reason": "Standardize category values (e.g., y → Yes, n → No)",
+                        "reason": "Standardize category values (e.g., y â†’ Yes, n â†’ No)",
                     }
                 )
 
@@ -375,7 +375,7 @@ class DataCleaningService:
         self.db.commit()
         return job
 
-    # ─── Helpers ─────────────────────────────────────────────
+    # â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     @staticmethod
     def _is_date(value: str) -> bool:

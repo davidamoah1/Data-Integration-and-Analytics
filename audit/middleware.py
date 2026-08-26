@@ -1,4 +1,4 @@
-"""Audit middleware — automatically logs API requests.
+﻿"""Audit middleware â€” automatically logs API requests.
 
 Intercepts all mutating requests (POST, PUT, PATCH, DELETE) and creates
 audit log entries with user, action, resource, IP, and metadata. This
@@ -50,9 +50,9 @@ def _extract_resource_info(path: str) -> tuple[str | None, str | None]:
     """Extract resource_type and action from URL path.
 
     Examples:
-      /api/datasets/upload  → ("dataset", "upload")
-      /api/reports/42/export → ("report", "export")
-      /api/users/42/roles    → ("user", "roles")
+      /api/datasets/upload  â†’ ("dataset", "upload")
+      /api/reports/42/export â†’ ("report", "export")
+      /api/users/42/roles    â†’ ("user", "roles")
     """
     parts = [p for p in path.strip("/").split("/") if p]
     if not parts:
@@ -65,17 +65,17 @@ def _extract_resource_info(path: str) -> tuple[str | None, str | None]:
         return None, None
 
     resource_type = parts[0]
-    # Remove trailing 's' for singular form (datasets → dataset)
+    # Remove trailing 's' for singular form (datasets â†’ dataset)
     if resource_type.endswith("s") and len(resource_type) > 3:
         resource_type = resource_type[:-1]
 
     # Determine sub-action from path
     action_suffix = None
     if len(parts) >= 3:
-        # e.g., /reports/42/export → action = "export"
+        # e.g., /reports/42/export â†’ action = "export"
         action_suffix = parts[-1]
     elif len(parts) == 2 and not parts[1].isdigit():
-        # e.g., /files/upload → action = "upload"
+        # e.g., /files/upload â†’ action = "upload"
         action_suffix = parts[1]
 
     return resource_type, action_suffix
@@ -142,7 +142,7 @@ class AuditMiddleware(BaseHTTPMiddleware):
 
         user_agent = request.headers.get("user-agent", "")[:500] or None
 
-        # Asynchronously log to DB (non-blocking — failures don't affect the response)
+        # Asynchronously log to DB (non-blocking â€” failures don't affect the response)
         try:
             factory = get_session_factory()
             db: DbSession = factory()

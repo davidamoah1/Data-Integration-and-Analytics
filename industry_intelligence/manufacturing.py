@@ -1,4 +1,4 @@
-"""Manufacturing Intelligence — Production, downtime, quality analytics.
+﻿"""Manufacturing Intelligence â€” Production, downtime, quality analytics.
 
 Specialized analytics for manufacturing operations:
   - Production volume and throughput
@@ -41,7 +41,7 @@ class ManufacturingAnalytics(IndustryAnalytics):
         yield_col = cls._find_numeric_col(df, col_mapping, ["yield", "yield_rate"])
         defect_col = cls._find_numeric_col(df, col_mapping, ["defect", "defect_rate"])
 
-        # ── Production Analytics ─────────────────────────
+        # â”€â”€ Production Analytics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if production_col and production_col in df.columns:
             total_production = float(df[production_col].sum())
             insights.append(
@@ -60,7 +60,7 @@ class ManufacturingAnalytics(IndustryAnalytics):
                     prod_trend.metric = "production"
                     trends.append(prod_trend)
 
-        # ── Machine Analytics ────────────────────────────
+        # â”€â”€ Machine Analytics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if machine_col and machine_col in df.columns:
             machine_count = int(df[machine_col].nunique())
             insights.append(
@@ -92,7 +92,7 @@ class ManufacturingAnalytics(IndustryAnalytics):
                         )
                     )
 
-        # ── Downtime Analysis ────────────────────────────
+        # â”€â”€ Downtime Analysis â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if downtime_col and downtime_col in df.columns:
             total_downtime = float(df[downtime_col].sum())
             insights.append(
@@ -117,7 +117,7 @@ class ManufacturingAnalytics(IndustryAnalytics):
                     dt_bd.metric = "downtime"
                     breakdowns.append(dt_bd)
 
-        # ── Quality Metrics ──────────────────────────────
+        # â”€â”€ Quality Metrics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if yield_col and yield_col in df.columns:
             avg_yield = float(df[yield_col].dropna().mean())
             insights.append(
@@ -150,7 +150,7 @@ class ManufacturingAnalytics(IndustryAnalytics):
                 )
             )
 
-        # ── Product Line Analytics ───────────────────────
+        # â”€â”€ Product Line Analytics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if product_col and product_col in df.columns:
             product_count = int(df[product_col].nunique())
             insights.append(
@@ -182,10 +182,10 @@ class ManufacturingAnalytics(IndustryAnalytics):
         for insight in insights:
             if insight.alert == "critical":
                 alerts.append(
-                    f"CRITICAL: {insight.title}: {insight.formatted} — immediate action required."
+                    f"CRITICAL: {insight.title}: {insight.formatted} â€” immediate action required."
                 )
             elif insight.alert == "warning":
-                alerts.append(f"{insight.title}: {insight.formatted} — needs attention.")
+                alerts.append(f"{insight.title}: {insight.formatted} â€” needs attention.")
 
         return AnalyticsResult(
             industry="manufacturing",

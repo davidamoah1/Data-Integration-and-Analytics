@@ -1,4 +1,4 @@
-"""Root Cause Analysis Engine.
+﻿"""Root Cause Analysis Engine.
 
 Decomposes a metric change into its contributing factors by dimension.
 When a metric changes (e.g., "sales dropped 15%"), this engine identifies
@@ -6,12 +6,12 @@ which dimension values (products, regions, customers) contributed most
 to the change.
 
 Example output:
-    Sales dropped 15% ($12,000 → $10,200, -$1,800)
+    Sales dropped 15% ($12,000 â†’ $10,200, -$1,800)
 
     Main reasons:
-    1. Product A declined by 40% (-$1,200) — 67% of total decline
-    2. Northern region sales reduced by 25% (-$800) — 44% of total decline
-    3. Customer segment 'Enterprise' dropped 30% (-$500) — 28% of total decline
+    1. Product A declined by 40% (-$1,200) â€” 67% of total decline
+    2. Northern region sales reduced by 25% (-$800) â€” 44% of total decline
+    3. Customer segment 'Enterprise' dropped 30% (-$500) â€” 28% of total decline
 
     Recommendation:
     Increase Product A marketing in the Northern region.
@@ -265,19 +265,19 @@ class RootCauseAnalyzer:
             for c in top_aligned:
                 recommendations.append(
                     f"Increase {c.dimension.replace('_', ' ').title()} '{c.value}' "
-                    f"marketing/effort — it declined {abs(c.change_pct):.0f}% "
+                    f"marketing/effort â€” it declined {abs(c.change_pct):.0f}% "
                     f"and accounts for {c.contribution_pct:.0f}% of the total drop."
                 )
             for c in top_opposite:
                 recommendations.append(
                     f"Study what worked for {c.dimension.replace('_', ' ').title()} '{c.value}' "
-                    f"— it grew {c.change_pct:.0f}% despite the overall decline."
+                    f"â€” it grew {c.change_pct:.0f}% despite the overall decline."
                 )
         elif direction == "increase":
             for c in top_aligned:
                 recommendations.append(
                     f"Replicate the success of {c.dimension.replace('_', ' ').title()} '{c.value}' "
-                    f"— it grew {c.change_pct:.0f}% and drove {c.contribution_pct:.0f}% of the increase."
+                    f"â€” it grew {c.change_pct:.0f}% and drove {c.contribution_pct:.0f}% of the increase."
                 )
             for c in top_opposite:
                 recommendations.append(
@@ -314,7 +314,7 @@ class RootCauseAnalyzer:
 
         summary_parts = [
             f"{metric_label} {verb} {abs(total_change_pct):.1f}% "
-            f"(${old_total:,.0f} → ${new_total:,.0f}"
+            f"(${old_total:,.0f} â†’ ${new_total:,.0f}"
             f"{f', {preposition} {abs(total_change):,.0f}' if preposition else ''}).\n\n"
             f"Main reasons:"
         ]

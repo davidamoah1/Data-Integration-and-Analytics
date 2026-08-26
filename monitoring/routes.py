@@ -1,4 +1,4 @@
-"""Monitoring API routes.
+﻿"""Monitoring API routes.
 
 Provides endpoints for:
 - Prometheus metrics scraping (/metrics)
@@ -45,7 +45,7 @@ async def monitoring_status():
 
 @router.get("/health/live")
 async def liveness():
-    """Liveness probe — returns 200 if the process is running.
+    """Liveness probe â€” returns 200 if the process is running.
 
     This probe indicates the application process has not deadlocked
     or crashed. It does NOT check dependencies.
@@ -60,7 +60,7 @@ async def liveness():
 
 @router.get("/health/ready")
 async def readiness():
-    """Readiness probe — returns 200 if the app can serve traffic.
+    """Readiness probe â€” returns 200 if the app can serve traffic.
 
     Checks database connectivity. Returns 503 if the database is unreachable.
     """

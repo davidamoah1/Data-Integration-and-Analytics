@@ -1,4 +1,4 @@
-"""Statistics Engine — descriptive, inferential, and advanced statistical analysis."""
+﻿"""Statistics Engine â€” descriptive, inferential, and advanced statistical analysis."""
 
 from __future__ import annotations
 
@@ -19,9 +19,9 @@ class StatisticsService:
     def __init__(self, db: DbSession):
         self.db = self.db = db
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # Descriptive Statistics
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     @staticmethod
     def descriptive(df: pd.DataFrame, columns: list[str] | None = None) -> dict:
@@ -72,9 +72,9 @@ class StatisticsService:
             "interpretation": "Descriptive statistics summarize the central tendency, dispersion, and shape of the data distribution.",
         }
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # Inferential Statistics
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     @staticmethod
     def ttest(
@@ -213,12 +213,12 @@ class StatisticsService:
             "contingency_table": contingency.to_dict(),
             "reject_null_hypothesis": bool(p_value < alpha),
             "interpretation": (
-                f"Chi-square test (χ²={chi2:.4f}, p={p_value:.4f}) indicates "
+                f"Chi-square test (Ï‡Â²={chi2:.4f}, p={p_value:.4f}) indicates "
                 f"{'a significant association' if p_value < alpha else 'no significant association'} "
                 f"between {col1} and {col2}."
             ),
             "assumptions": [
-                "Expected cell frequencies ≥ 5",
+                "Expected cell frequencies â‰¥ 5",
                 "Independence of observations",
                 "Categorical variables",
             ],
@@ -304,7 +304,7 @@ class StatisticsService:
             "intercept": float(model.intercept_),
             "n_observations": int(len(y)),
             "interpretation": (
-                f"Regression model explains {r2*100:.1f}% of variance in {target} (R²={r2:.4f}). "
+                f"Regression model explains {r2*100:.1f}% of variance in {target} (RÂ²={r2:.4f}). "
                 f"RMSE = {rmse:.4f}. "
                 f"{'Good fit.' if r2 >= 0.7 else 'Moderate fit.' if r2 >= 0.4 else 'Poor fit.'}"
             ),
@@ -315,12 +315,12 @@ class StatisticsService:
                 "Normality of residuals",
                 "No multicollinearity",
             ],
-            "limitations": "R² alone doesn't validate the model. Check residual plots and consider cross-validation.",
+            "limitations": "RÂ² alone doesn't validate the model. Check residual plots and consider cross-validation.",
         }
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # Advanced Statistics
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     @staticmethod
     def normality_test(df: pd.DataFrame, column: str) -> dict:
@@ -370,7 +370,7 @@ class StatisticsService:
                 "Ordinal or continuous data",
                 "Similar distributions",
             ],
-            "limitations": "Non-parametric test — use when t-test assumptions are violated.",
+            "limitations": "Non-parametric test â€” use when t-test assumptions are violated.",
         }
 
     @staticmethod
@@ -399,9 +399,9 @@ class StatisticsService:
             "limitations": "Non-parametric alternative to ANOVA. Use when normality assumption is violated.",
         }
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # Persistence
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     def save_analysis(
         self,

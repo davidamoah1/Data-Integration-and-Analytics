@@ -1,4 +1,4 @@
-"""Ghana Country Profile.
+﻿"""Ghana Country Profile.
 
 Ghana-specific data including:
   - 16 regions (post-2018 reorganization)
@@ -30,7 +30,7 @@ GHANA_PROFILE = CountryProfile(
     currency=CurrencyInfo(
         code="GHS",
         name="Ghana Cedi",
-        symbol="₵",
+        symbol="â‚µ",
         subunit="Pesewa",
         subunit_symbol="p",
         decimal_places=2,

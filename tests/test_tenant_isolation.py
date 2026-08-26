@@ -1,4 +1,4 @@
-"""Tests proving that organization A cannot access organization B's data.
+﻿"""Tests proving that organization A cannot access organization B's data.
 
 These tests verify multi-tenant isolation at the database/query level using
 TenantQueryManager and verify_resource_ownership.
@@ -29,7 +29,7 @@ def two_orgs(db_session: DbSession):
     return org_a.id, org_b.id
 
 
-# ─── TenantQueryManager isolation tests ──────────────────────────────
+# â”€â”€â”€ TenantQueryManager isolation tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestTenantQueryManagerList:
@@ -197,7 +197,7 @@ class TestTenantQueryManagerCount:
         assert mgr_b.count(ETLJob, status="completed") == 2
 
 
-# ─── verify_resource_ownership tests ─────────────────────────────────
+# â”€â”€â”€ verify_resource_ownership tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestVerifyResourceOwnership:
@@ -227,7 +227,7 @@ class TestVerifyResourceOwnership:
             verify_resource_ownership(db_session, ETLPipeline, 999999, org_a)
 
 
-# ─── assert_same_organization tests ──────────────────────────────────
+# â”€â”€â”€ assert_same_organization tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestAssertSameOrganization:
@@ -247,7 +247,7 @@ class TestAssertSameOrganization:
         assert_same_organization(user, 2)
 
 
-# ─── AI model isolation tests ────────────────────────────────────────
+# â”€â”€â”€ AI model isolation tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestAIModelIsolation:
@@ -315,7 +315,7 @@ class TestAIModelIsolation:
         assert insights[0].title == "A insight"
 
 
-# ─── ETL model isolation tests ───────────────────────────────────────
+# â”€â”€â”€ ETL model isolation tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestETLModelIsolation:

@@ -1,4 +1,4 @@
-"""Education Intelligence — Student performance, attendance, fees, teacher analytics.
+﻿"""Education Intelligence â€” Student performance, attendance, fees, teacher analytics.
 
 Specialized analytics for schools, universities, and educational institutions:
   - Student enrollment and demographics
@@ -44,7 +44,7 @@ class EducationAnalytics(IndustryAnalytics):
         date_col = cls._find_date_col(df, col_mapping)
         cls._find_col(df, col_mapping, ["exam"])
 
-        # ── Student Analytics ────────────────────────────
+        # â”€â”€ Student Analytics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if student_col and student_col in df.columns:
             student_count = int(df[student_col].nunique())
             insights.append(
@@ -57,7 +57,7 @@ class EducationAnalytics(IndustryAnalytics):
                 )
             )
 
-        # ── Academic Performance ─────────────────────────
+        # â”€â”€ Academic Performance â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if grade_col and grade_col in df.columns:
             grade_count = int(df[grade_col].nunique())
             insights.append(
@@ -120,7 +120,7 @@ class EducationAnalytics(IndustryAnalytics):
                     )
                 )
 
-        # ── Attendance ───────────────────────────────────
+        # â”€â”€ Attendance â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if attendance_col and attendance_col in df.columns:
             if pd.api.types.is_numeric_dtype(df[attendance_col]):
                 avg_attendance = float(df[attendance_col].dropna().mean())
@@ -150,7 +150,7 @@ class EducationAnalytics(IndustryAnalytics):
                     )
                 )
 
-        # ── Fee Collection ───────────────────────────────
+        # â”€â”€ Fee Collection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if fee_col and fee_col in df.columns:
             total_fees = float(df[fee_col].sum())
             insights.append(
@@ -183,7 +183,7 @@ class EducationAnalytics(IndustryAnalytics):
                     fee_trend.metric = "fees"
                     trends.append(fee_trend)
 
-        # ── Teacher Analytics ────────────────────────────
+        # â”€â”€ Teacher Analytics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if teacher_col and teacher_col in df.columns:
             teacher_count = int(df[teacher_col].nunique())
             insights.append(
@@ -215,7 +215,7 @@ class EducationAnalytics(IndustryAnalytics):
                         )
                     )
 
-        # ── Course Analytics ─────────────────────────────
+        # â”€â”€ Course Analytics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if course_col and course_col in df.columns:
             course_count = int(df[course_col].nunique())
             insights.append(
@@ -235,7 +235,7 @@ class EducationAnalytics(IndustryAnalytics):
                     course_bd.metric = "students"
                     breakdowns.append(course_bd)
 
-        # ── Department Analytics ─────────────────────────
+        # â”€â”€ Department Analytics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if dept_col and dept_col in df.columns:
             dept_count = int(df[dept_col].nunique())
             insights.append(
@@ -266,10 +266,10 @@ class EducationAnalytics(IndustryAnalytics):
 
         for insight in insights:
             if insight.alert == "warning":
-                alerts.append(f"{insight.title}: {insight.formatted} — needs attention.")
+                alerts.append(f"{insight.title}: {insight.formatted} â€” needs attention.")
             elif insight.alert == "critical":
                 alerts.append(
-                    f"CRITICAL: {insight.title}: {insight.formatted} — immediate action required."
+                    f"CRITICAL: {insight.title}: {insight.formatted} â€” immediate action required."
                 )
 
         return AnalyticsResult(

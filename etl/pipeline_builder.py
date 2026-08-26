@@ -1,4 +1,4 @@
-"""ETL Pipeline Builder — create, version, execute, and manage reusable pipelines.
+﻿"""ETL Pipeline Builder â€” create, version, execute, and manage reusable pipelines.
 
 Pipelines consist of steps (extract, validate, clean, transform, load, report, notify).
 Each step has configuration, validation, logging, execution status, duration, and retry count.

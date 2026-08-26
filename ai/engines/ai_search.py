@@ -1,4 +1,4 @@
-"""AI Search Engine — global intelligent search using natural language.
+﻿"""AI Search Engine â€” global intelligent search using natural language.
 
 Users can search using natural language queries like:
 - "Show all failed ETL jobs"

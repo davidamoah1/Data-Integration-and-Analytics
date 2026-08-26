@@ -1,4 +1,4 @@
-"""Visualization Engine — intelligent chart selection and recommendation [DEPRECATED].
+﻿"""Visualization Engine â€” intelligent chart selection and recommendation [DEPRECATED].
 
 .. deprecated::
     Use ``services.auto.engine.VisualizationIntelligenceEngine`` instead.
@@ -20,13 +20,13 @@ from studios.models import ChartRecommendation
 class VisualizationEngine:
     """Intelligent chart recommendation engine.
 
-    Decides which chart best explains the data — quality over quantity.
+    Decides which chart best explains the data â€” quality over quantity.
     """
 
     def __init__(self, db: DbSession):
         self.db = db
 
-    # ─── Chart Type Selection Logic ──────────────────────────
+    # â”€â”€â”€ Chart Type Selection Logic â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     @staticmethod
     def recommend_chart(
@@ -88,23 +88,23 @@ class VisualizationEngine:
     @staticmethod
     def _auto_recommend(df, numeric_cols, categorical_cols, datetime_cols) -> dict:
         """Automatically select the best chart type."""
-        # Time series + numeric → line chart
+        # Time series + numeric â†’ line chart
         if datetime_cols and numeric_cols:
             return VisualizationEngine._recommend_trend(df, datetime_cols, numeric_cols)
 
-        # Categorical + numeric → bar chart
+        # Categorical + numeric â†’ bar chart
         if categorical_cols and numeric_cols:
             return VisualizationEngine._recommend_comparison(df, categorical_cols, numeric_cols)
 
-        # Two numeric → scatter
+        # Two numeric â†’ scatter
         if len(numeric_cols) >= 2:
             return VisualizationEngine._recommend_relationship(df, numeric_cols)
 
-        # Single numeric → distribution
+        # Single numeric â†’ distribution
         if len(numeric_cols) == 1:
             return VisualizationEngine._recommend_distribution(df, numeric_cols)
 
-        # Categorical only → pie/bar
+        # Categorical only â†’ pie/bar
         if categorical_cols:
             return VisualizationEngine._recommend_composition(df, categorical_cols, [])
 
@@ -336,7 +336,7 @@ class VisualizationEngine:
 
         return recommendations[:max_charts]
 
-    # ─── Persistence ─────────────────────────────────────────
+    # â”€â”€â”€ Persistence â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def save_recommendation(
         self,

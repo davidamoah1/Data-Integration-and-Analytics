@@ -1,4 +1,4 @@
-"""Natural Language to Dashboard Engine — generates dashboard configs from descriptions.
+﻿"""Natural Language to Dashboard Engine â€” generates dashboard configs from descriptions.
 
 Translates descriptions like "Create a sales dashboard" into structured
 dashboard configurations with appropriate chart types and data mappings.

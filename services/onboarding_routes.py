@@ -1,11 +1,11 @@
-"""FastAPI routes for Smart Onboarding — Phase 7.
+﻿"""FastAPI routes for Smart Onboarding â€” Phase 7.
 
 Endpoints:
-  - GET  /api/onboarding/status    — Get onboarding status & flow
-  - POST /api/onboarding/complete   — Complete a specific step
-  - POST /api/onboarding/skip       — Skip onboarding
-  - POST /api/onboarding/reset      — Reset onboarding progress
-  - GET  /api/onboarding/next-action — Get next recommended action
+  - GET  /api/onboarding/status    â€” Get onboarding status & flow
+  - POST /api/onboarding/complete   â€” Complete a specific step
+  - POST /api/onboarding/skip       â€” Skip onboarding
+  - POST /api/onboarding/reset      â€” Reset onboarding progress
+  - GET  /api/onboarding/next-action â€” Get next recommended action
 """
 
 from __future__ import annotations
@@ -133,5 +133,5 @@ async def get_next_action(
     """Get the next recommended onboarding action for the user."""
     action = _service.get_next_action(current_user)
     if not action:
-        return success_response(None, "Onboarding complete — no pending actions")
+        return success_response(None, "Onboarding complete â€” no pending actions")
     return success_response(action)

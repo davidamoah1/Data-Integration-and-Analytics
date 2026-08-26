@@ -1,13 +1,13 @@
-"""Enhanced API routes for enterprise audit trails.
+﻿"""Enhanced API routes for enterprise audit trails.
 
 Endpoints:
-  - GET  /api/audit/logs          — List audit logs with rich filtering
-  - GET  /api/audit/logs/{id}     — Get single audit log entry
-  - GET  /api/audit/logs/export   — Export audit logs (CSV/JSON)
-  - GET  /api/audit/stats         — Audit statistics (action counts, daily counts, top users)
-  - GET  /api/audit/filters       — Available filter values (actions, resource types)
-  - GET  /api/audit/security      — List security logs
-  - GET  /api/audit/activity/{user_id} — User activity history
+  - GET  /api/audit/logs          â€” List audit logs with rich filtering
+  - GET  /api/audit/logs/{id}     â€” Get single audit log entry
+  - GET  /api/audit/logs/export   â€” Export audit logs (CSV/JSON)
+  - GET  /api/audit/stats         â€” Audit statistics (action counts, daily counts, top users)
+  - GET  /api/audit/filters       â€” Available filter values (actions, resource types)
+  - GET  /api/audit/security      â€” List security logs
+  - GET  /api/audit/activity/{user_id} â€” User activity history
 """
 
 from __future__ import annotations
@@ -64,7 +64,7 @@ def _security_to_dict(log) -> dict[str, Any]:
     }
 
 
-# ── Audit Logs ────────────────────────────────────────────────────────────
+# â”€â”€ Audit Logs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @router.get("/logs")
@@ -224,7 +224,7 @@ async def export_audit_logs(
     )
 
 
-# ── Stats ─────────────────────────────────────────────────────────────────
+# â”€â”€ Stats â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @router.get("/stats")
@@ -251,7 +251,7 @@ async def get_audit_stats(
     }
 
 
-# ── Filter Values ─────────────────────────────────────────────────────────
+# â”€â”€ Filter Values â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @router.get("/filters")
@@ -271,7 +271,7 @@ async def get_filter_values(
     }
 
 
-# ── Security Logs ─────────────────────────────────────────────────────────
+# â”€â”€ Security Logs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @router.get("/security")
@@ -310,7 +310,7 @@ async def list_security_logs(
     }
 
 
-# ── User Activity ─────────────────────────────────────────────────────────
+# â”€â”€ User Activity â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @router.get("/activity/{user_id}")

@@ -1,4 +1,4 @@
-"""AI Anomaly Detection Engine — detects unexpected patterns in data.
+﻿"""AI Anomaly Detection Engine â€” detects unexpected patterns in data.
 
 Detects:
 - Unexpected spikes

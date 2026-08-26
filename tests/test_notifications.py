@@ -1,4 +1,4 @@
-"""Unit tests for the notification service and workflow wiring."""
+﻿"""Unit tests for the notification service and workflow wiring."""
 
 from unittest.mock import patch
 

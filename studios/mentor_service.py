@@ -1,4 +1,4 @@
-"""AI Mentors — role-based conversational AI assistants.
+﻿"""AI Mentors â€” role-based conversational AI assistants.
 
 Mentors:
   - data_mentor: Teaches beginners analytics
@@ -265,7 +265,7 @@ class AIMentorService:
             if "mean" in msg or "average" in msg:
                 return (
                     "Great question! The **mean** (or average) is like sharing equally. "
-                    "If you have 10, 20, and 30, the mean is (10+20+30)÷3 = 20. "
+                    "If you have 10, 20, and 30, the mean is (10+20+30)Ã·3 = 20. "
                     "Everyone gets 20. It's the most common way to describe 'typical' values. "
                     "\n\n**Tip:** The mean can be affected by very large or very small numbers (outliers). "
                     "That's why we also have the **median** (the middle value when sorted). "
@@ -290,12 +290,12 @@ class AIMentorService:
                 )
             elif "outlier" in msg:
                 return (
-                    "An **outlier** is a value that's very different from the rest — like a 6-foot person "
+                    "An **outlier** is a value that's very different from the rest â€” like a 6-foot person "
                     "in a group of 5-foot people. They can distort your analysis.\n\n"
                     "To find them:\n"
                     "1. Sort your data\n"
                     "2. Look for values that are much higher or lower than most\n"
-                    "3. Use the IQR method: values below Q1-1.5×IQR or above Q3+1.5×IQR are outliers\n\n"
+                    "3. Use the IQR method: values below Q1-1.5Ã—IQR or above Q3+1.5Ã—IQR are outliers\n\n"
                     "Would you like me to help you identify outliers in your dataset?"
                 )
             return (
@@ -318,11 +318,11 @@ class AIMentorService:
                     "3. **Number of groups** (2 groups, 3+ groups?)\n"
                     "4. **Sample size**\n\n"
                     "Quick guide:\n"
-                    "- 2 groups, continuous → **t-test** (or Mann-Whitney U if non-normal)\n"
-                    "- 3+ groups, continuous → **ANOVA** (or Kruskal-Wallis)\n"
-                    "- 2 categorical variables → **Chi-square test**\n"
-                    "- 2 continuous variables → **Correlation** (Pearson or Spearman)\n"
-                    "- Predict a continuous outcome → **Regression**\n\n"
+                    "- 2 groups, continuous â†’ **t-test** (or Mann-Whitney U if non-normal)\n"
+                    "- 3+ groups, continuous â†’ **ANOVA** (or Kruskal-Wallis)\n"
+                    "- 2 categorical variables â†’ **Chi-square test**\n"
+                    "- 2 continuous variables â†’ **Correlation** (Pearson or Spearman)\n"
+                    "- Predict a continuous outcome â†’ **Regression**\n\n"
                     "What's your research question?"
                 )
             elif "hypothesis" in msg:
@@ -341,13 +341,13 @@ class AIMentorService:
                 return (
                     "Sample size depends on:\n"
                     "1. **Effect size** (how big a difference you expect)\n"
-                    "2. **Significance level** (α, usually 0.05)\n"
+                    "2. **Significance level** (Î±, usually 0.05)\n"
                     "3. **Power** (usually 0.80 or 80%)\n"
                     "4. **Number of groups/predictors**\n\n"
                     "Rule of thumb:\n"
-                    "- t-test: ≥30 per group\n"
-                    "- ANOVA: ≥30 per group\n"
-                    "- Regression: ≥10 observations per predictor\n\n"
+                    "- t-test: â‰¥30 per group\n"
+                    "- ANOVA: â‰¥30 per group\n"
+                    "- Regression: â‰¥10 observations per predictor\n\n"
                     "For precise calculation, use a power analysis tool."
                 )
             return (
@@ -411,8 +411,8 @@ class AIMentorService:
                     "- Kolmogorov-Smirnov: For larger samples\n"
                     "- Anderson-Darling: More sensitive to tails\n\n"
                     "**Interpretation:**\n"
-                    "- p > 0.05 → Data is likely normal\n"
-                    "- p < 0.05 → Data is likely not normal → use non-parametric tests\n\n"
+                    "- p > 0.05 â†’ Data is likely normal\n"
+                    "- p < 0.05 â†’ Data is likely not normal â†’ use non-parametric tests\n\n"
                     "Would you like me to run a normality test on your data?"
                 )
             elif "non-parametric" in msg or "nonparametric" in msg:
@@ -434,7 +434,7 @@ class AIMentorService:
                     "Effect size tells you how **meaningful** a difference is, not just if it's statistically significant.\n\n"
                     "**Common effect sizes:**\n"
                     "- Cohen's d (t-test): 0.2=small, 0.5=medium, 0.8=large\n"
-                    "- η² (ANOVA): 0.01=small, 0.06=medium, 0.14=large\n"
+                    "- Î·Â² (ANOVA): 0.01=small, 0.06=medium, 0.14=large\n"
                     "- r (correlation): 0.1=small, 0.3=medium, 0.5=large\n\n"
                     "**Why it matters:**\n"
                     "A large sample can find a 'significant' result that's trivially small. "
@@ -473,7 +473,7 @@ class AIMentorService:
                     "- **Healthcare:** Patient satisfaction, readmission rate, bed occupancy\n"
                     "- **Education:** Student performance, graduation rate, attendance\n"
                     "- **Banking:** NIM, default rate, capital adequacy\n"
-                    "- **Retail:** Sales/m², inventory turnover, customer retention\n"
+                    "- **Retail:** Sales/mÂ², inventory turnover, customer retention\n"
                     "- **Manufacturing:** OEE, defect rate, on-time delivery\n\n"
                     "What industry are you in? I'll suggest the right KPIs."
                 )

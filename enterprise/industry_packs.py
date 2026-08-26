@@ -1,4 +1,4 @@
-"""Industry Solution Packs — pre-built templates for multiple industries.
+﻿"""Industry Solution Packs â€” pre-built templates for multiple industries.
 
 Each pack contains dashboard templates, KPI templates, ETL templates,
 report templates, and AI prompt templates tailored to a specific industry.

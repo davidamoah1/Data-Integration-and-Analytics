@@ -1,4 +1,4 @@
-"""Migrate data from SQLite to MySQL.
+﻿"""Migrate data from SQLite to MySQL.
 
 Usage:
     python database/migrate_to_mysql.py
@@ -7,7 +7,7 @@ Prerequisites:
     - Set DB_TYPE=sqlite in .env (source database)
     - Set MYSQL_* variables in .env (target database)
     - The MySQL target schema must already exist, created via
-      `alembic upgrade head` against MYSQL_* — this script only copies data,
+      `alembic upgrade head` against MYSQL_* â€” this script only copies data,
       it does not create or alter schema.
 """
 
@@ -66,7 +66,7 @@ def migrate():
         "(created via 'alembic upgrade head'); this script only copies data."
     )
     # Import all model modules so Base.metadata reflects the full table set
-    # for ordering/copying purposes only — schema itself is NOT created here.
+    # for ordering/copying purposes only â€” schema itself is NOT created here.
     import ai.models  # noqa: F401
     import analytics.models  # noqa: F401
     import audit.models  # noqa: F401

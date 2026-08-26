@@ -1,4 +1,4 @@
-"""Data Quality Intelligence.
+﻿"""Data Quality Intelligence.
 
 Automated data quality checks with intelligent detection of:
   - Missing values and blank fields
@@ -17,9 +17,9 @@ Usage:
 
     engine = QualityEngine()
     result = engine.run(df)
-    # result.score → 78.5 (yellow)
-    # result.findings → [QualityFinding(...), ...]
-    # result.summary → "3 warnings, 1 error detected..."
+    # result.score â†’ 78.5 (yellow)
+    # result.findings â†’ [QualityFinding(...), ...]
+    # result.summary â†’ "3 warnings, 1 error detected..."
 """
 
 from __future__ import annotations

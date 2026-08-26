@@ -1,4 +1,4 @@
-"""Certificate Intelligence API routes.
+﻿"""Certificate Intelligence API routes.
 
 Builds on the existing Smart Data Capture pipeline to provide
 certificate-specific endpoints for:
@@ -114,9 +114,9 @@ def _is_certificate_type(doc_type: str | None) -> bool:
     return doc_type in CERTIFICATE_DOC_TYPES
 
 
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # Batch upload (multi-file)
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.post("/upload", status_code=status.HTTP_201_CREATED)
@@ -130,7 +130,7 @@ async def upload_certificates(
 
     Accepts up to CERTIFICATE_MAX_BATCH_SIZE files (default 50).
     Each file is processed through the existing capture pipeline:
-    upload → preprocess → OCR → classify → extract → validate.
+    upload â†’ preprocess â†’ OCR â†’ classify â†’ extract â†’ validate.
     """
     org_id = get_current_organization_id(current_user, db)
     max_batch = _get_max_batch_size()
@@ -145,7 +145,7 @@ async def upload_certificates(
 
     if len(files) > max_batch:
         logger.warning(
-            "Certificate upload rejected — too many files: org_id=%s count=%d max=%d",
+            "Certificate upload rejected â€” too many files: org_id=%s count=%d max=%d",
             org_id,
             len(files),
             max_batch,
@@ -300,9 +300,9 @@ async def upload_certificates(
     }
 
 
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # Search
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/search")
@@ -410,9 +410,9 @@ async def search_certificates(
     }
 
 
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # Dashboard analytics
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/dashboard")
@@ -511,9 +511,9 @@ async def certificate_dashboard(
     }
 
 
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # Export (CSV / XLSX)
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def _get_certificate_field_dict(db: DbSession, doc_ids: list[int]) -> dict[int, dict[str, str]]:
@@ -720,9 +720,9 @@ async def export_certificates_xlsx(
     )
 
 
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # Verification
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.post("/{document_id}/verify")
@@ -735,7 +735,7 @@ async def verify_certificate(
     """Record a verification attempt for a certificate.
 
     Verification means an authoritative source confirmed the certificate.
-    This does NOT mean the certificate is "genuine" — it means an external
+    This does NOT mean the certificate is "genuine" â€” it means an external
     source was contacted and returned a verification result.
     """
     org_id = get_current_organization_id(current_user, db)
@@ -865,9 +865,9 @@ async def list_verifications(
     }
 
 
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # Certificate types
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/types")
@@ -898,9 +898,9 @@ async def list_certificate_types():
     }
 
 
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # Analytics dataset (for integration with existing analytics pipeline)
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.post("/to-dataset")
@@ -912,7 +912,7 @@ async def certificates_to_dataset(
     """Convert approved certificate data into a dataset for the analytics pipeline.
 
     This bridges certificate data into the existing Data-to-Decision workflow:
-    certificates → structured dataset → analysis → dashboard → report → presentation.
+    certificates â†’ structured dataset â†’ analysis â†’ dashboard â†’ report â†’ presentation.
     """
     org_id = get_current_organization_id(current_user, db)
     dataset_name = (payload or {}).get("dataset_name", "Certificate Data")
@@ -1000,9 +1000,9 @@ async def certificates_to_dataset(
     }
 
 
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # Certificate detail with full analysis
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def _serialize_fields(fields: list[CaptureField]) -> list[dict]:
@@ -1178,9 +1178,9 @@ async def get_certificate_detail(
     }
 
 
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # Batch analytics with intelligence
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/batch/{batch_id}/analytics")
@@ -1276,9 +1276,9 @@ async def get_batch_analytics(
     }
 
 
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # Field correction (human review)
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.patch("/{document_id}/fields/{field_id}")
@@ -1381,9 +1381,9 @@ async def correct_certificate_field(
     }
 
 
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # Certificate report generation
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/report")
@@ -1524,9 +1524,9 @@ async def generate_certificate_report(
     return report
 
 
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # Certificate PowerPoint generation
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/presentation")
@@ -1546,7 +1546,7 @@ async def generate_certificate_presentation(
     - Institution and qualification breakdowns
     - Per-certificate highlights (top 10)
 
-    Uses real data from the database — no fabricated content.
+    Uses real data from the database â€” no fabricated content.
     """
     from certificates.analysis import analyze_batch, batch_analytics
 
@@ -1687,7 +1687,7 @@ async def generate_certificate_presentation(
         # Completeness tiers
         tier_text = (
             f"Completeness Distribution:\n"
-            f"  High (≥80%): {analytics.by_completeness_tier.get('high', 0)}\n"
+            f"  High (â‰¥80%): {analytics.by_completeness_tier.get('high', 0)}\n"
             f"  Medium (50-80%): {analytics.by_completeness_tier.get('medium', 0)}\n"
             f"  Low (<50%): {analytics.by_completeness_tier.get('low', 0)}"
         )
@@ -1755,7 +1755,7 @@ async def generate_certificate_presentation(
                     name = fa.value
                     break
             p.text = (
-                f"{i + 1}. {d.filename} — {a.document_type_label or 'Unknown'}"
+                f"{i + 1}. {d.filename} â€” {a.document_type_label or 'Unknown'}"
                 f" | Holder: {name or 'N/A'}"
                 f" | Completeness: {a.completeness.completeness_pct:.0f}%"
                 f" | Verification: {a.verification_status}"

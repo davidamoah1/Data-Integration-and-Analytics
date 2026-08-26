@@ -1,4 +1,4 @@
-"""Quality Check Engine — automated data quality checks.
+﻿"""Quality Check Engine â€” automated data quality checks.
 
 Detects:
   - Missing values (nulls, blanks, empty strings)
@@ -148,7 +148,7 @@ class QualityCheckEngine:
 
         return findings
 
-    # ── Completeness Checks ──────────────────────────────
+    # â”€â”€ Completeness Checks â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     @staticmethod
     def _check_missing_values(df: pd.DataFrame) -> list[QualityFinding]:
@@ -244,7 +244,7 @@ class QualityCheckEngine:
                 )
         return findings
 
-    # ── Uniqueness Checks ────────────────────────────────
+    # â”€â”€ Uniqueness Checks â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     @staticmethod
     def _check_duplicate_rows(df: pd.DataFrame) -> list[QualityFinding]:
@@ -295,7 +295,7 @@ class QualityCheckEngine:
                 )
         return findings
 
-    # ── Validity Checks ──────────────────────────────────
+    # â”€â”€ Validity Checks â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     @staticmethod
     def _check_sentinel_values(df: pd.DataFrame) -> list[QualityFinding]:
@@ -333,7 +333,7 @@ class QualityCheckEngine:
                                         column=col,
                                         affected_rows=count,
                                         affected_pct=pct,
-                                        message=f"Column '{col}' contains {count} zero values — possible placeholder for missing data.",
+                                        message=f"Column '{col}' contains {count} zero values â€” possible placeholder for missing data.",
                                         suggested_fix=f"Verify if 0 in '{col}' is a valid value or should be treated as missing.",
                                         business_impact="Sentinel values like 0 can skew averages and totals.",
                                         sample_values=[0],
@@ -352,7 +352,7 @@ class QualityCheckEngine:
                                     column=col,
                                     affected_rows=count,
                                     affected_pct=pct,
-                                    message=f"Column '{col}' contains {count} sentinel value(s) of {sentinel} — likely placeholder for missing data.",
+                                    message=f"Column '{col}' contains {count} sentinel value(s) of {sentinel} â€” likely placeholder for missing data.",
                                     suggested_fix=f"Replace {sentinel} in '{col}' with null or the actual missing value representation.",
                                     business_impact=f"Sentinel value {sentinel} can skew statistics and is often mistaken for real data.",
                                     sample_values=[sentinel],
@@ -373,7 +373,7 @@ class QualityCheckEngine:
                                 column=col,
                                 affected_rows=count,
                                 affected_pct=pct,
-                                message=f"Column '{col}' contains {count} placeholder value(s) '{sentinel}' — likely indicates missing data.",
+                                message=f"Column '{col}' contains {count} placeholder value(s) '{sentinel}' â€” likely indicates missing data.",
                                 suggested_fix=f"Replace '{sentinel}' in '{col}' with null or a proper value.",
                                 business_impact="Placeholder text values are often missed by null checks and can skew category counts.",
                                 sample_values=[sentinel],
@@ -638,7 +638,7 @@ class QualityCheckEngine:
 
         return findings
 
-    # ── Date Validity Checks ────────────────────────────
+    # â”€â”€ Date Validity Checks â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     @staticmethod
     def _check_invalid_dates(df: pd.DataFrame) -> list[QualityFinding]:
@@ -693,7 +693,7 @@ class QualityCheckEngine:
 
         return findings
 
-    # ── Numeric Validity Checks ─────────────────────────
+    # â”€â”€ Numeric Validity Checks â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     @staticmethod
     def _check_invalid_numeric(df: pd.DataFrame) -> list[QualityFinding]:

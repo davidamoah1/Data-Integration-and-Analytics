@@ -1,4 +1,4 @@
-"""Audit service and routes — log retrieval and security event tracking."""
+﻿"""Audit service and routes â€” log retrieval and security event tracking."""
 
 # ruff: noqa: B008  # FastAPI Depends() calls in default arguments are intentional
 

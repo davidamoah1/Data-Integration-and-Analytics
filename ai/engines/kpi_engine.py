@@ -1,4 +1,4 @@
-"""AI KPI Engine — recommends, explains, monitors, and alerts on KPIs."""
+﻿"""AI KPI Engine â€” recommends, explains, monitors, and alerts on KPIs."""
 
 import json
 

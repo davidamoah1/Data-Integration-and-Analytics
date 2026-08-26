@@ -1,4 +1,4 @@
-"""AI Assistants — specialized AI personalities with distinct capabilities.
+﻿"""AI Assistants â€” specialized AI personalities with distinct capabilities.
 
 Each assistant has:
 - A unique system prompt (managed by PromptManager)
@@ -59,7 +59,7 @@ class BaseAssistant:
 
 
 class DataCopilot(BaseAssistant):
-    """General data assistant — understands datasets, KPIs, and platform data."""
+    """General data assistant â€” understands datasets, KPIs, and platform data."""
 
     assistant_type = "data_copilot"
     display_name = "Data Copilot"
@@ -67,7 +67,7 @@ class DataCopilot(BaseAssistant):
 
 
 class ETLCopilot(BaseAssistant):
-    """ETL assistant — builds pipelines from natural language."""
+    """ETL assistant â€” builds pipelines from natural language."""
 
     assistant_type = "etl_copilot"
     display_name = "ETL Copilot"
@@ -75,7 +75,7 @@ class ETLCopilot(BaseAssistant):
 
 
 class DashboardCopilot(BaseAssistant):
-    """Dashboard assistant — generates dashboards from descriptions."""
+    """Dashboard assistant â€” generates dashboards from descriptions."""
 
     assistant_type = "dashboard_copilot"
     display_name = "Dashboard Copilot"
@@ -83,7 +83,7 @@ class DashboardCopilot(BaseAssistant):
 
 
 class ReportCopilot(BaseAssistant):
-    """Report assistant — generates professional reports."""
+    """Report assistant â€” generates professional reports."""
 
     assistant_type = "report_copilot"
     display_name = "Report Copilot"
@@ -91,7 +91,7 @@ class ReportCopilot(BaseAssistant):
 
 
 class DecisionCopilot(BaseAssistant):
-    """Decision assistant — the flagship decision intelligence feature."""
+    """Decision assistant â€” the flagship decision intelligence feature."""
 
     assistant_type = "decision_copilot"
     display_name = "Decision Copilot"
@@ -99,7 +99,7 @@ class DecisionCopilot(BaseAssistant):
 
 
 class ForecastCopilot(BaseAssistant):
-    """Forecast assistant — helps with forecasting and trend analysis."""
+    """Forecast assistant â€” helps with forecasting and trend analysis."""
 
     assistant_type = "forecast_copilot"
     display_name = "Forecast Copilot"
@@ -107,7 +107,7 @@ class ForecastCopilot(BaseAssistant):
 
 
 class QualityCopilot(BaseAssistant):
-    """Data quality assistant — analyzes and improves data quality."""
+    """Data quality assistant â€” analyzes and improves data quality."""
 
     assistant_type = "quality_copilot"
     display_name = "Data Quality Copilot"
@@ -115,7 +115,7 @@ class QualityCopilot(BaseAssistant):
 
 
 class SQLCopilot(BaseAssistant):
-    """SQL assistant — translates natural language to safe SQL."""
+    """SQL assistant â€” translates natural language to safe SQL."""
 
     assistant_type = "sql_copilot"
     display_name = "SQL Copilot"

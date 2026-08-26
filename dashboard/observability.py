@@ -1,4 +1,4 @@
-"""Observability module — admin dashboards for system monitoring.
+﻿"""Observability module â€” admin dashboards for system monitoring.
 
 Tracks:
   - Login activity
@@ -48,7 +48,7 @@ def render_observability_page():
 
     headers = {"Authorization": f"Bearer {token}"} if token else {}
 
-    # ── KPI Overview ──
+    # â”€â”€ KPI Overview â”€â”€
     col1, col2, col3, col4 = st.columns(4)
 
     try:
@@ -64,38 +64,38 @@ def render_observability_page():
 
         with col1:
             status = health.get("status", "unknown")
-            icon = "✅" if status == "healthy" else "⚠️"
+            icon = "âœ…" if status == "healthy" else "âš ï¸"
             _kpi_card(status.title(), "API Status", icon, "kpi-card-sales")
 
         with col2:
             count = health.get("record_count", 0)
-            _kpi_card(f"{count:,}", "Records in DB", "📦", "kpi-card-orders")
+            _kpi_card(f"{count:,}", "Records in DB", "ðŸ“¦", "kpi-card-orders")
 
         with col3:
             checks = readiness.get("checks", {})
             all_ok = all(c.get("status") == "ok" for c in checks.values()) if checks else False
             _kpi_card(
-                "All Operational" if all_ok else "Degraded", "Subsystems", "🔧", "kpi-card-profit"
+                "All Operational" if all_ok else "Degraded", "Subsystems", "ðŸ”§", "kpi-card-profit"
             )
 
         with col4:
             now = datetime.now(timezone.utc).strftime("%H:%M UTC")
-            _kpi_card(now, "Last Checked", "🕐", "kpi-card-avg")
+            _kpi_card(now, "Last Checked", "ðŸ•", "kpi-card-avg")
 
     except Exception as e:
         st.warning(f"Cannot connect to API for live metrics: {e}")
         with col1:
-            _kpi_card("Offline", "API Status", "❌", "kpi-card-sales")
+            _kpi_card("Offline", "API Status", "âŒ", "kpi-card-sales")
         with col2:
-            _kpi_card("—", "Records in DB", "📦", "kpi-card-orders")
+            _kpi_card("â€”", "Records in DB", "ðŸ“¦", "kpi-card-orders")
         with col3:
-            _kpi_card("—", "Subsystems", "🔧", "kpi-card-profit")
+            _kpi_card("â€”", "Subsystems", "ðŸ”§", "kpi-card-profit")
         with col4:
-            _kpi_card("—", "Last Checked", "🕐", "kpi-card-avg")
+            _kpi_card("â€”", "Last Checked", "ðŸ•", "kpi-card-avg")
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # ── Subsystem Health ──
+    # â”€â”€ Subsystem Health â”€â”€
     _section_header("Subsystem Health")
     try:
         if readiness.get("checks"):
@@ -116,7 +116,7 @@ def render_observability_page():
     except Exception:
         st.info("Subsystem health data unavailable.")
 
-    # ── Login Activity ──
+    # â”€â”€ Login Activity â”€â”€
     _section_header("Login Activity")
     try:
         import requests
@@ -153,7 +153,7 @@ def render_observability_page():
     except Exception as e:
         st.info(f"Login activity monitoring unavailable: {e}")
 
-    # ── Audit Logs ──
+    # â”€â”€ Audit Logs â”€â”€
     _section_header("Recent Audit Activity")
     try:
         import requests
@@ -177,7 +177,7 @@ def render_observability_page():
     except Exception as e:
         st.info(f"Audit log monitoring unavailable: {e}")
 
-    # ── Security Events ──
+    # â”€â”€ Security Events â”€â”€
     _section_header("Security Events")
     try:
         import requests
@@ -203,7 +203,7 @@ def render_observability_page():
     except Exception as e:
         st.info(f"Security event monitoring unavailable: {e}")
 
-    # ── System Logs ──
+    # â”€â”€ System Logs â”€â”€
     _section_header("System Logs")
     try:
         import requests

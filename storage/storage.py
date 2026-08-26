@@ -1,10 +1,10 @@
-"""Storage backend abstraction layer.
+﻿"""Storage backend abstraction layer.
 
 Provides a unified interface for file operations across multiple backends:
-  - LocalFileBackend   — Local filesystem (dev / single-server)
-  - R2Backend          — Cloudflare R2 (S3-compatible API)
-  - S3Backend          — AWS S3
-  - SupabaseBackend    — Supabase Storage
+  - LocalFileBackend   â€” Local filesystem (dev / single-server)
+  - R2Backend          â€” Cloudflare R2 (S3-compatible API)
+  - S3Backend          â€” AWS S3
+  - SupabaseBackend    â€” Supabase Storage
 
 All backends implement the StorageBackend protocol:
   upload(key, data, content_type) -> StorageUploadResult
@@ -80,7 +80,7 @@ class StorageBackend(ABC):
         ...
 
 
-# ── Local File Backend ────────────────────────────────────────────────────
+# â”€â”€ Local File Backend â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class LocalFileBackend(StorageBackend):
@@ -150,7 +150,7 @@ class LocalFileBackend(StorageBackend):
         return os.path.exists(self._full_path(key))
 
 
-# ── S3-Compatible Backend (R2 + S3) ───────────────────────────────────────
+# â”€â”€ S3-Compatible Backend (R2 + S3) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class S3CompatibleBackend(StorageBackend):
@@ -202,7 +202,7 @@ class S3CompatibleBackend(StorageBackend):
                 "S3-compatible backend initialized: %s (bucket=%s)", self._backend_name, self.bucket
             )
         except ImportError:
-            logger.warning("boto3 not installed — S3 backend unavailable")
+            logger.warning("boto3 not installed â€” S3 backend unavailable")
             raise
 
     @property
@@ -306,7 +306,7 @@ class S3Backend(S3CompatibleBackend):
         )
 
 
-# ── Supabase Storage Backend ──────────────────────────────────────────────
+# â”€â”€ Supabase Storage Backend â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class SupabaseBackend(StorageBackend):
@@ -339,7 +339,7 @@ class SupabaseBackend(StorageBackend):
             self._client = create_client(self.url, self.service_key)
             logger.info("Supabase storage backend initialized (bucket=%s)", self.bucket)
         except ImportError:
-            logger.warning("supabase-py not installed — Supabase backend unavailable")
+            logger.warning("supabase-py not installed â€” Supabase backend unavailable")
             raise
 
     @property
@@ -391,7 +391,7 @@ class SupabaseBackend(StorageBackend):
             return False
 
 
-# ── Backend Factory ───────────────────────────────────────────────────────
+# â”€â”€ Backend Factory â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 _backend: StorageBackend | None = None
@@ -401,10 +401,10 @@ def get_storage_backend() -> StorageBackend:
     """Get the singleton storage backend based on STORAGE_BACKEND env var.
 
     Configuration:
-      STORAGE_BACKEND  — local | r2 | s3 | supabase (default: local)
+      STORAGE_BACKEND  â€” local | r2 | s3 | supabase (default: local)
 
     Local:
-      STORAGE_LOCAL_DIR  — Base directory for file storage
+      STORAGE_LOCAL_DIR  â€” Base directory for file storage
 
     R2:
       R2_BUCKET, R2_ACCOUNT_ID, R2_ACCESS_KEY, R2_SECRET_KEY, R2_PUBLIC_URL

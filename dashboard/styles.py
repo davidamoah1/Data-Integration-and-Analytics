@@ -1,4 +1,4 @@
-"""CSS styles for the Streamlit dashboard.
+﻿"""CSS styles for the Streamlit dashboard.
 
 Extracted from app.py for maintainability.
 """
@@ -175,7 +175,7 @@ header {visibility: hidden;}
 ::-webkit-scrollbar { width:6px; }
 ::-webkit-scrollbar-thumb { background:rgba(102,126,234,0.4); border-radius:4px; }
 
-/* Accessibility — keyboard focus indicators */
+/* Accessibility â€” keyboard focus indicators */
 *:focus-visible {
     outline: 2px solid #a78bfa !important;
     outline-offset: 2px !important;
@@ -189,7 +189,7 @@ header {visibility: hidden;}
     outline: 2px solid #a78bfa !important;
 }
 
-/* Accessibility — respect reduced motion */
+/* Accessibility â€” respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
         animation-duration: 0.01ms !important;
@@ -197,7 +197,7 @@ header {visibility: hidden;}
     }
 }
 
-/* Accessibility — high contrast for KPI labels */
+/* Accessibility â€” high contrast for KPI labels */
 .kpi-label { color: rgba(255,255,255,0.65); }
 .empty-state-desc { color: rgba(255,255,255,0.55); }
 """

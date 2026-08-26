@@ -1,4 +1,4 @@
-"""Retail / SME Intelligence — Sales, inventory, customer analytics.
+﻿"""Retail / SME Intelligence â€” Sales, inventory, customer analytics.
 
 Specialized analytics for retail, SME, and commerce:
   - Sales performance and revenue trends
@@ -45,7 +45,7 @@ class RetailAnalytics(IndustryAnalytics):
         region_col = cls._find_col(df, col_mapping, ["region"])
         category_col = cls._find_col(df, col_mapping, ["category", "product"])
 
-        # ── Sales Performance ────────────────────────────
+        # â”€â”€ Sales Performance â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if revenue_col and revenue_col in df.columns:
             total_sales = float(df[revenue_col].sum())
             insights.append(
@@ -77,7 +77,7 @@ class RetailAnalytics(IndustryAnalytics):
                     sales_trend.metric = "sales"
                     trends.append(sales_trend)
 
-        # ── Profitability ────────────────────────────────
+        # â”€â”€ Profitability â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if profit_col and profit_col in df.columns:
             total_profit = float(df[profit_col].sum())
             insights.append(
@@ -105,7 +105,7 @@ class RetailAnalytics(IndustryAnalytics):
                         )
                     )
 
-        # ── Customer Analytics ───────────────────────────
+        # â”€â”€ Customer Analytics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if customer_col and customer_col in df.columns:
             customer_count = int(df[customer_col].nunique())
             insights.append(
@@ -130,7 +130,7 @@ class RetailAnalytics(IndustryAnalytics):
                     )
                 )
 
-        # ── Product / Category Analysis ──────────────────
+        # â”€â”€ Product / Category Analysis â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if product_col and product_col in df.columns:
             product_count = int(df[product_col].nunique())
             insights.append(
@@ -169,7 +169,7 @@ class RetailAnalytics(IndustryAnalytics):
                     cat_bd.metric = "sales"
                     breakdowns.append(cat_bd)
 
-        # ── Order Analytics ──────────────────────────────
+        # â”€â”€ Order Analytics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if order_col and order_col in df.columns:
             order_count = int(df[order_col].nunique())
             insights.append(
@@ -182,7 +182,7 @@ class RetailAnalytics(IndustryAnalytics):
                 )
             )
 
-        # ── Inventory ────────────────────────────────────
+        # â”€â”€ Inventory â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if inventory_col and inventory_col in df.columns:
             inventory_count = int(df[inventory_col].nunique())
             insights.append(
@@ -195,7 +195,7 @@ class RetailAnalytics(IndustryAnalytics):
                 )
             )
 
-        # ── Supplier ─────────────────────────────────────
+        # â”€â”€ Supplier â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if supplier_col and supplier_col in df.columns:
             supplier_count = int(df[supplier_col].nunique())
             insights.append(
@@ -208,7 +208,7 @@ class RetailAnalytics(IndustryAnalytics):
                 )
             )
 
-        # ── Regional Analytics ───────────────────────────
+        # â”€â”€ Regional Analytics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if region_col and region_col in df.columns:
             region_count = int(df[region_col].nunique())
             insights.append(
@@ -239,7 +239,7 @@ class RetailAnalytics(IndustryAnalytics):
 
         for insight in insights:
             if insight.alert == "warning":
-                alerts.append(f"{insight.title}: {insight.formatted} — below target.")
+                alerts.append(f"{insight.title}: {insight.formatted} â€” below target.")
 
         return AnalyticsResult(
             industry="retail",

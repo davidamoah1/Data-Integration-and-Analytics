@@ -1,4 +1,4 @@
-"""Chart Validation & Fallback Engine.
+﻿"""Chart Validation & Fallback Engine.
 
 Validates chart specifications before rendering and provides fallback
 selection when a chart fails validation.
@@ -43,7 +43,7 @@ class ValidationResult:
 class ChartValidator:
     """Validates chart specifications against the source DataFrame."""
 
-    # Chart type → required axis count
+    # Chart type â†’ required axis count
     REQUIRED_AXES: dict[str, int] = {
         "bar_chart": 2,
         "horizontal_bar": 2,
@@ -121,13 +121,13 @@ class ChartValidator:
             n_cats = len(chart.data)
             if n_cats > 6:
                 warnings.append(
-                    f"Pie chart has {n_cats} segments — consider a bar chart for readability"
+                    f"Pie chart has {n_cats} segments â€” consider a bar chart for readability"
                 )
 
         if chart.chart_type in ("bar_chart", "horizontal_bar"):
             n_cats = len(chart.data)
             if n_cats > 15:
-                warnings.append(f"Bar chart has {n_cats} categories — showing top {n_cats} only")
+                warnings.append(f"Bar chart has {n_cats} categories â€” showing top {n_cats} only")
 
         return ValidationResult(valid=True, warnings=warnings)
 
@@ -224,7 +224,7 @@ class ChartValidator:
             if len(chart.data) < 4:
                 return ValidationResult(
                     valid=False,
-                    reason="Heatmap needs at least a 2×2 grid",
+                    reason="Heatmap needs at least a 2Ã—2 grid",
                 )
 
         # Geo map: need at least 2 regions

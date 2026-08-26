@@ -1,4 +1,4 @@
-"""add_file_checksum_to_capture_documents
+﻿"""add_file_checksum_to_capture_documents
 
 Revision ID: f1a2b3c4d5e6
 Revises: eb32b7fc465a

@@ -1,4 +1,4 @@
-"""add file_records table for Phase 12 file storage architecture
+﻿"""add file_records table for Phase 12 file storage architecture
 
 Creates the file_records table for storing file metadata separately
 from file content. File content is stored in object storage (R2/S3/Supabase)

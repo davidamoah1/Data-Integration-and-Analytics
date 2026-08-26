@@ -1,4 +1,4 @@
-"""Smart Validation Engine for the Smart Data Capture platform.
+﻿"""Smart Validation Engine for the Smart Data Capture platform.
 
 Validates extracted field values per data type, suggests standardized
 spellings for known vocabularies (drug names, common diagnoses) via fuzzy
@@ -127,7 +127,7 @@ def suggest_standard_spelling(
     value: str, master_list: list[str], cutoff: float = 0.72
 ) -> str | None:
     """Return the closest master-list match if similarity is high enough,
-    else None (never silently overwrite — this is a suggestion only)."""
+    else None (never silently overwrite â€” this is a suggestion only)."""
     if not value:
         return None
     matches = difflib.get_close_matches(value.strip(), master_list, n=1, cutoff=cutoff)

@@ -1,4 +1,4 @@
-"""AI Provider Manager — registry, routing, and lifecycle management for all AI providers.
+﻿"""AI Provider Manager â€” registry, routing, and lifecycle management for all AI providers.
 
 Administrators can configure providers via System Settings or the API.
 The manager loads provider configs from the database and environment,

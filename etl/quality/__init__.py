@@ -1,4 +1,4 @@
-"""Data quality engine — detects issues and generates quality reports with recommendations."""
+﻿"""Data quality engine â€” detects issues and generates quality reports with recommendations."""
 
 import re
 
@@ -89,11 +89,11 @@ class DataQualityEngine:
             if not r["passed"]:
                 if r["fixable"]:
                     recs.append(
-                        f"[{r['severity'].upper()}] {r['check']}: {r['message']} — Auto-fix available."
+                        f"[{r['severity'].upper()}] {r['check']}: {r['message']} â€” Auto-fix available."
                     )
                 else:
                     recs.append(
-                        f"[{r['severity'].upper()}] {r['check']}: {r['message']} — Manual review required."
+                        f"[{r['severity'].upper()}] {r['check']}: {r['message']} â€” Manual review required."
                     )
         return recs
 

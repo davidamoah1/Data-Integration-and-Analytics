@@ -1,4 +1,4 @@
-"""Onboarding module for first-time user experience.
+﻿"""Onboarding module for first-time user experience.
 
 Provides:
   - Welcome screen
@@ -12,35 +12,35 @@ import streamlit as st
 from enterprise.industry_packs import get_all_packs, get_pack, get_pack_names
 
 ONBOARDING_STEPS = [
-    {"key": "welcome", "title": "Welcome", "icon": "👋", "desc": "Get started with DataFlow"},
+    {"key": "welcome", "title": "Welcome", "icon": "ðŸ‘‹", "desc": "Get started with DataFlow"},
     {
         "key": "org_profile",
         "title": "Organization Profile",
-        "icon": "🏢",
+        "icon": "ðŸ¢",
         "desc": "Set up your organization",
     },
     {
         "key": "user_profile",
         "title": "Your Profile",
-        "icon": "👤",
+        "icon": "ðŸ‘¤",
         "desc": "Personalize your account",
     },
-    {"key": "team_invite", "title": "Invite Your Team", "icon": "👥", "desc": "Add team members"},
+    {"key": "team_invite", "title": "Invite Your Team", "icon": "ðŸ‘¥", "desc": "Add team members"},
     {
         "key": "data_import",
         "title": "Import Data",
-        "icon": "�",
+        "icon": "ï¿½",
         "desc": "Upload your first dataset",
     },
     {
         "key": "etl_pipeline",
         "title": "ETL Pipeline",
-        "icon": "🔄",
+        "icon": "ðŸ”„",
         "desc": "Set up data transformation",
     },
-    {"key": "dashboard", "title": "First Dashboard", "icon": "📊", "desc": "View your analytics"},
-    {"key": "ai_copilot", "title": "AI Copilot", "icon": "🤖", "desc": "Chat with your data"},
-    {"key": "report", "title": "First Report", "icon": "�", "desc": "Generate insights"},
+    {"key": "dashboard", "title": "First Dashboard", "icon": "ðŸ“Š", "desc": "View your analytics"},
+    {"key": "ai_copilot", "title": "AI Copilot", "icon": "ðŸ¤–", "desc": "Chat with your data"},
+    {"key": "report", "title": "First Report", "icon": "ï¿½", "desc": "Generate insights"},
 ]
 
 QUICK_START_CHECKLIST = [
@@ -63,7 +63,7 @@ def render_welcome_screen():
     st.markdown(
         """
     <div style="text-align:center;padding:40px 20px;">
-        <div style="font-size:3rem;margin-bottom:16px;">📊</div>
+        <div style="font-size:3rem;margin-bottom:16px;">ðŸ“Š</div>
         <h1 style="color:#a78bfa;margin-bottom:8px;">Welcome to DataFlow</h1>
         <p style="color:rgba(255,255,255,0.6);font-size:1.1rem;max-width:500px;margin:0 auto 24px;">
             Your Enterprise Data Intelligence Platform. Turn raw data into clear business insights
@@ -79,7 +79,7 @@ def render_welcome_screen():
         st.markdown(
             """
         <div style="text-align:center;padding:20px;border:1px solid rgba(255,255,255,0.1);border-radius:12px;">
-            <div style="font-size:2rem;">🔄</div>
+            <div style="font-size:2rem;">ðŸ”„</div>
             <h4>ETL Pipelines</h4>
             <p style="color:rgba(255,255,255,0.5);font-size:0.85rem;">Extract, transform, and load data automatically</p>
         </div>
@@ -90,7 +90,7 @@ def render_welcome_screen():
         st.markdown(
             """
         <div style="text-align:center;padding:20px;border:1px solid rgba(255,255,255,0.1);border-radius:12px;">
-            <div style="font-size:2rem;">📈</div>
+            <div style="font-size:2rem;">ðŸ“ˆ</div>
             <h4>Live Dashboards</h4>
             <p style="color:rgba(255,255,255,0.5);font-size:0.85rem;">Interactive charts and real-time KPIs</p>
         </div>
@@ -101,7 +101,7 @@ def render_welcome_screen():
         st.markdown(
             """
         <div style="text-align:center;padding:20px;border:1px solid rgba(255,255,255,0.1);border-radius:12px;">
-            <div style="font-size:2rem;">🤖</div>
+            <div style="font-size:2rem;">ðŸ¤–</div>
             <h4>AI Copilot</h4>
             <p style="color:rgba(255,255,255,0.5);font-size:0.85rem;">Ask questions in plain English</p>
         </div>
@@ -113,12 +113,12 @@ def render_welcome_screen():
 
     col_a, col_b = st.columns(2)
     with col_a:
-        if st.button("🚀 Get Started (Guided Tour)", use_container_width=True, type="primary"):
+        if st.button("ðŸš€ Get Started (Guided Tour)", use_container_width=True, type="primary"):
             st.session_state["onboarding_step"] = 0
             st.session_state["onboarding_active"] = True
             st.rerun()
     with col_b:
-        if st.button("⏭️ Skip — I'll explore on my own", use_container_width=True):
+        if st.button("â­ï¸ Skip â€” I'll explore on my own", use_container_width=True):
             st.session_state["onboarding_complete"] = True
             st.rerun()
 
@@ -156,34 +156,34 @@ def render_setup_wizard():
     elif step["key"] == "org_profile":
         st.info(
             "Your organization profile defines how DataFlow appears to your team.\n\n"
-            "1. **Organization Name** — Shown in headers and reports\n"
-            "2. **Industry** — Select from SME, Healthcare, Education, Government, Church, NGO\n"
-            "3. **Timezone & Currency** — Used for date formatting and financial displays\n"
-            "4. **Logo & Branding** — Customize colors and upload your logo\n\n"
-            "Configure this in **Settings → Organization** after setup."
+            "1. **Organization Name** â€” Shown in headers and reports\n"
+            "2. **Industry** â€” Select from SME, Healthcare, Education, Government, Church, NGO\n"
+            "3. **Timezone & Currency** â€” Used for date formatting and financial displays\n"
+            "4. **Logo & Branding** â€” Customize colors and upload your logo\n\n"
+            "Configure this in **Settings â†’ Organization** after setup."
         )
 
     elif step["key"] == "user_profile":
         st.info(
             "Personalize your account:\n\n"
-            "1. **Full Name** — Displayed to team members\n"
-            "2. **Role** — Admin, Analyst, or Viewer\n"
-            "3. **Profile Picture** — Upload or use initials\n"
-            "4. **Language & Timezone** — For localized experience\n\n"
-            "Update this in **Settings → Profile** after setup."
+            "1. **Full Name** â€” Displayed to team members\n"
+            "2. **Role** â€” Admin, Analyst, or Viewer\n"
+            "3. **Profile Picture** â€” Upload or use initials\n"
+            "4. **Language & Timezone** â€” For localized experience\n\n"
+            "Update this in **Settings â†’ Profile** after setup."
         )
 
     elif step["key"] == "team_invite":
         st.info(
             "Invite team members to collaborate:\n\n"
-            "1. Go to **Settings → Users**\n"
+            "1. Go to **Settings â†’ Users**\n"
             "2. Click **Invite User**\n"
             "3. Enter their email and assign a role\n"
             "4. They'll receive an invitation to join your organization\n\n"
             "Roles available:\n"
-            "- **Admin** — Full access to all settings and data\n"
-            "- **Analyst** — Create dashboards, run ETL, use AI Copilot\n"
-            "- **Viewer** — View dashboards and export data (read-only)"
+            "- **Admin** â€” Full access to all settings and data\n"
+            "- **Analyst** â€” Create dashboards, run ETL, use AI Copilot\n"
+            "- **Viewer** â€” View dashboards and export data (read-only)"
         )
 
     elif step["key"] == "data_import":
@@ -199,7 +199,7 @@ def render_setup_wizard():
     elif step["key"] == "etl_pipeline":
         st.info(
             "Set up an ETL pipeline for automated data processing:\n\n"
-            "1. Go to **ETL → Pipelines**\n"
+            "1. Go to **ETL â†’ Pipelines**\n"
             "2. Click **Create Pipeline**\n"
             "3. Define your data source (CSV, database, API)\n"
             "4. Configure transformation rules\n"
@@ -210,10 +210,10 @@ def render_setup_wizard():
     elif step["key"] == "dashboard":
         st.info(
             "Once your data is loaded, you'll see:\n\n"
-            "- **KPI Cards** — Key metrics at a glance\n"
-            "- **Charts** — Sector-specific visualizations (different per industry!)\n"
-            "- **Data Table** — Browse your records\n"
-            "- **Filters** — Narrow down by region, category, or date range\n\n"
+            "- **KPI Cards** â€” Key metrics at a glance\n"
+            "- **Charts** â€” Sector-specific visualizations (different per industry!)\n"
+            "- **Data Table** â€” Browse your records\n"
+            "- **Filters** â€” Narrow down by region, category, or date range\n\n"
             "Select an industry pack in the sidebar to see sector-specific dashboards."
         )
 
@@ -231,7 +231,7 @@ def render_setup_wizard():
         st.info(
             "Generate your first report:\n\n"
             "1. Use the AI Copilot to ask for a report\n"
-            "2. Or go to **Reports → Generate**\n"
+            "2. Or go to **Reports â†’ Generate**\n"
             "3. Choose report type: Executive, Monthly, Department, Custom\n"
             "4. Download as Markdown, HTML, or PDF\n\n"
             "Reports include charts, KPIs, and AI-generated insights automatically."
@@ -239,17 +239,17 @@ def render_setup_wizard():
 
     col_prev, col_next = st.columns([1, 2])
     with col_prev:
-        if step_idx > 0 and st.button("← Previous", use_container_width=True):
+        if step_idx > 0 and st.button("â† Previous", use_container_width=True):
             st.session_state["onboarding_step"] = step_idx - 1
             st.rerun()
     with col_next:
         if step_idx < len(ONBOARDING_STEPS) - 1 and st.button(
-            "Next →", use_container_width=True, type="primary"
+            "Next â†’", use_container_width=True, type="primary"
         ):
             st.session_state["onboarding_step"] = step_idx + 1
             st.rerun()
         elif step_idx == len(ONBOARDING_STEPS) - 1 and st.button(
-            "✓ Finish Setup", use_container_width=True, type="primary"
+            "âœ“ Finish Setup", use_container_width=True, type="primary"
         ):
             st.session_state["onboarding_complete"] = True
             st.session_state["onboarding_active"] = False
@@ -280,7 +280,7 @@ def render_quick_start_checklist():
             st.session_state["checklist"][key] = False
 
     if completed == total:
-        st.success("🎉 All done! You're ready to explore.")
+        st.success("ðŸŽ‰ All done! You're ready to explore.")
 
 
 def render_industry_pack_selector():
@@ -442,7 +442,7 @@ def get_industry_labels() -> dict:
 
 
 def render_onboarding():
-    """Main entry point — renders welcome or setup wizard for new users."""
+    """Main entry point â€” renders welcome or setup wizard for new users."""
     if is_onboarding_complete():
         return
 

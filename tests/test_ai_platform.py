@@ -1,4 +1,4 @@
-"""Tests for the Phase 6 AI Intelligence Platform.
+﻿"""Tests for the Phase 6 AI Intelligence Platform.
 
 These tests cover:
 - AI providers and provider manager

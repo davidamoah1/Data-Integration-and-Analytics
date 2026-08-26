@@ -1,4 +1,4 @@
-"""Main Validation Engine — orchestrates the full validation pipeline."""
+﻿"""Main Validation Engine â€” orchestrates the full validation pipeline."""
 
 from __future__ import annotations
 
@@ -205,7 +205,7 @@ class ValidationEngine:
         )
 
         logger.info(
-            f"ValidationEngine: Completed — status={status.value}, "
+            f"ValidationEngine: Completed â€” status={status.value}, "
             f"errors={total_errors}, warnings={total_warnings}, "
             f"score={quality_score.overall:.1f} ({quality_score.traffic_light})"
         )

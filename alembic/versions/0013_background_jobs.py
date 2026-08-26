@@ -1,4 +1,4 @@
-"""add background_jobs table for Phase 11 background processing
+﻿"""add background_jobs table for Phase 11 background processing
 
 Creates the unified background_jobs table for tracking all long-running
 tasks across the platform (ETL, OCR, reports, large imports).

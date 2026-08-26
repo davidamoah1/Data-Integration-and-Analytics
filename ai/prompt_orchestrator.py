@@ -1,4 +1,4 @@
-"""Enterprise Prompt Orchestration.
+﻿"""Enterprise Prompt Orchestration.
 
 Modular, composable prompt pipelines for specialized AI tasks.
 
@@ -117,7 +117,7 @@ class PromptPipeline:
         return messages
 
 
-# ── Prompt Templates ───────────────────────────────────
+# â”€â”€ Prompt Templates â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 _BASE_SYSTEM = (
@@ -132,49 +132,49 @@ _BASE_SYSTEM = (
     "- Distinguish between data-backed analysis and assumptions\n"
     "- Provide confidence levels for all predictions\n"
     "- Prioritize recommendations by impact and feasibility\n"
-    "- Respect user permissions — never expose unauthorized data\n"
-    "- Be concise but thorough — executives need clarity, not verbosity"
+    "- Respect user permissions â€” never expose unauthorized data\n"
+    "- Be concise but thorough â€” executives need clarity, not verbosity"
 )
 
 
 _EXECUTIVE_SUMMARY_SCHEMA = {
-    "title": "string — Brief title for the summary",
-    "executive_summary": "string — 2-3 sentence overview of the most important finding",
+    "title": "string â€” Brief title for the summary",
+    "executive_summary": "string â€” 2-3 sentence overview of the most important finding",
     "kpi_highlights": [
         {
-            "metric": "string — KPI name",
-            "value": "string — Current value",
-            "change": "string — Period-over-period change (e.g., '+8.7%')",
+            "metric": "string â€” KPI name",
+            "value": "string â€” Current value",
+            "change": "string â€” Period-over-period change (e.g., '+8.7%')",
             "direction": "up|down|stable",
         }
     ],
-    "main_drivers": ["string — Factors contributing to the observed changes"],
+    "main_drivers": ["string â€” Factors contributing to the observed changes"],
     "risks": [
         {
-            "risk": "string — Description of the risk",
+            "risk": "string â€” Description of the risk",
             "severity": "low|medium|high",
-            "evidence": "string — Data supporting this risk",
+            "evidence": "string â€” Data supporting this risk",
         }
     ],
-    "opportunities": ["string — Actionable opportunities identified"],
+    "opportunities": ["string â€” Actionable opportunities identified"],
     "forecast": {
         "direction": "up|down|stable",
-        "expected_range": "string — e.g., '6-9% growth'",
-        "horizon": "string — e.g., 'next month'",
-        "assumptions": ["string — Key assumptions"],
+        "expected_range": "string â€” e.g., '6-9% growth'",
+        "horizon": "string â€” e.g., 'next month'",
+        "assumptions": ["string â€” Key assumptions"],
     },
     "recommended_actions": [
         {
-            "action": "string — Specific recommended action",
+            "action": "string â€” Specific recommended action",
             "priority": "high|medium|low",
-            "expected_impact": "string — Expected outcome",
+            "expected_impact": "string â€” Expected outcome",
             "feasibility": "easy|medium|hard",
         }
     ],
     "confidence": {
         "score": 0.0,
-        "methodology": "string — Brief explanation of how confidence was determined",
-        "data_limitations": ["string — Known limitations"],
+        "methodology": "string â€” Brief explanation of how confidence was determined",
+        "data_limitations": ["string â€” Known limitations"],
     },
 }
 
@@ -182,73 +182,73 @@ _EXECUTIVE_SUMMARY_SCHEMA = {
 _KPI_EXPLANATION_SCHEMA = {
     "kpi_name": "string",
     "current_value": "string",
-    "formula": "string — How the KPI is calculated",
-    "interpretation": "string — What this value means in business terms",
+    "formula": "string â€” How the KPI is calculated",
+    "interpretation": "string â€” What this value means in business terms",
     "drivers": [
         {
-            "factor": "string — What contributed to this value",
-            "contribution": "string — Quantified contribution (e.g., '42% of growth')",
+            "factor": "string â€” What contributed to this value",
+            "contribution": "string â€” Quantified contribution (e.g., '42% of growth')",
         }
     ],
-    "benchmark": "string — Industry benchmark or target if known",
+    "benchmark": "string â€” Industry benchmark or target if known",
     "status": "healthy|warning|critical",
-    "recommendation": "string — What to do about this KPI",
+    "recommendation": "string â€” What to do about this KPI",
     "confidence": 0.0,
 }
 
 
 _TREND_ANALYSIS_SCHEMA = {
-    "metric": "string — Metric being analyzed",
+    "metric": "string â€” Metric being analyzed",
     "trend_direction": "increasing|decreasing|stable|volatile",
-    "rate_of_change": "string — e.g., '+8.7% month-over-month'",
+    "rate_of_change": "string â€” e.g., '+8.7% month-over-month'",
     "period_comparison": {
-        "current_period": "string — e.g., 'July 2024'",
-        "previous_period": "string — e.g., 'June 2024'",
+        "current_period": "string â€” e.g., 'July 2024'",
+        "previous_period": "string â€” e.g., 'June 2024'",
         "current_value": "string",
         "previous_value": "string",
         "absolute_change": "string",
         "percentage_change": "string",
     },
-    "significance": "string — Statistical significance if determinable",
-    "contributing_factors": ["string — Factors driving the trend"],
-    "projection": "string — Expected continuation of the trend",
+    "significance": "string â€” Statistical significance if determinable",
+    "contributing_factors": ["string â€” Factors driving the trend"],
+    "projection": "string â€” Expected continuation of the trend",
     "confidence": 0.0,
 }
 
 
 _ROOT_CAUSE_SCHEMA = {
-    "observation": "string — What was observed (the change or issue)",
-    "magnitude": "string — Quantified change (e.g., 'Revenue decreased by 11%')",
+    "observation": "string â€” What was observed (the change or issue)",
+    "magnitude": "string â€” Quantified change (e.g., 'Revenue decreased by 11%')",
     "root_causes": [
         {
-            "cause": "string — Identified root cause",
-            "evidence": "string — Data supporting this cause",
-            "contribution": "string — How much this cause contributed",
+            "cause": "string â€” Identified root cause",
+            "evidence": "string â€” Data supporting this cause",
+            "contribution": "string â€” How much this cause contributed",
             "confidence": 0.0,
         }
     ],
-    "ruled_out": ["string — Alternative explanations that were ruled out and why"],
-    "conclusion": "string — Summary of the root cause analysis",
-    "recommended_actions": ["string — Actions to address the root cause"],
+    "ruled_out": ["string â€” Alternative explanations that were ruled out and why"],
+    "conclusion": "string â€” Summary of the root cause analysis",
+    "recommended_actions": ["string â€” Actions to address the root cause"],
     "overall_confidence": 0.0,
 }
 
 
 _FORECAST_SCHEMA = {
-    "metric": "string — Metric being forecasted",
-    "method": "string — Forecasting method used",
-    "horizon": "string — Forecast time horizon",
+    "metric": "string â€” Metric being forecasted",
+    "method": "string â€” Forecasting method used",
+    "horizon": "string â€” Forecast time horizon",
     "predictions": [
         {
             "period": "string",
             "value": "string",
-            "lower_ci": "string — Lower confidence interval",
-            "upper_ci": "string — Upper confidence interval",
+            "lower_ci": "string â€” Lower confidence interval",
+            "upper_ci": "string â€” Upper confidence interval",
         }
     ],
-    "assumptions": ["string — Key assumptions for the forecast"],
-    "model_limitations": ["string — Limitations of the forecasting approach"],
-    "interpretation": "string — What the forecast means for the business",
+    "assumptions": ["string â€” Key assumptions for the forecast"],
+    "model_limitations": ["string â€” Limitations of the forecasting approach"],
+    "interpretation": "string â€” What the forecast means for the business",
     "confidence": 0.0,
 }
 
@@ -256,13 +256,13 @@ _FORECAST_SCHEMA = {
 _RISK_SCHEMA = {
     "risks": [
         {
-            "risk": "string — Description of the risk",
+            "risk": "string â€” Description of the risk",
             "category": "financial|operational|compliance|strategic|market",
             "severity": "low|medium|high|critical",
-            "probability": "string — Likelihood of occurrence",
-            "potential_impact": "string — Quantified impact if it occurs",
-            "evidence": "string — Data supporting this risk assessment",
-            "mitigation": "string — Recommended mitigation strategy",
+            "probability": "string â€” Likelihood of occurrence",
+            "potential_impact": "string â€” Quantified impact if it occurs",
+            "evidence": "string â€” Data supporting this risk assessment",
+            "mitigation": "string â€” Recommended mitigation strategy",
         }
     ],
     "overall_risk_level": "low|medium|high|critical",
@@ -275,34 +275,34 @@ _DATA_QUALITY_SCHEMA = {
     "quality_grade": "A|B|C|D|F",
     "issues": [
         {
-            "issue": "string — Description of the quality issue",
-            "column": "string — Affected column",
+            "issue": "string â€” Description of the quality issue",
+            "column": "string â€” Affected column",
             "severity": "low|medium|high",
-            "affected_rows": "string — Number or percentage of affected rows",
-            "root_cause": "string — Likely cause of the issue",
-            "fix_recommendation": "string — How to fix it",
-            "prevention": "string — How to prevent it in the future",
+            "affected_rows": "string â€” Number or percentage of affected rows",
+            "root_cause": "string â€” Likely cause of the issue",
+            "fix_recommendation": "string â€” How to fix it",
+            "prevention": "string â€” How to prevent it in the future",
         }
     ],
-    "recommendations": ["string — Prioritized recommendations"],
+    "recommendations": ["string â€” Prioritized recommendations"],
     "confidence": 0.0,
 }
 
 
 _NL_ANALYTICS_SCHEMA = {
     "intent": "compare|rank|trend|explain|summarize|filter",
-    "query_interpretation": "string — How the AI interpreted the user's question",
+    "query_interpretation": "string â€” How the AI interpreted the user's question",
     "analysis": {
-        "method": "string — Analytical approach used",
-        "results": "string — Summary of findings",
-        "data_points": ["string — Key data points supporting the analysis"],
+        "method": "string â€” Analytical approach used",
+        "results": "string â€” Summary of findings",
+        "data_points": ["string â€” Key data points supporting the analysis"],
     },
-    "explanation": "string — Plain-language explanation of the results",
+    "explanation": "string â€” Plain-language explanation of the results",
     "visualizations": [
         {
-            "type": "string — Recommended chart type",
-            "config": "string — Chart configuration",
-            "rationale": "string — Why this visualization is appropriate",
+            "type": "string â€” Recommended chart type",
+            "config": "string â€” Chart configuration",
+            "rationale": "string â€” Why this visualization is appropriate",
         }
     ],
     "confidence": 0.0,
@@ -312,23 +312,23 @@ _NL_ANALYTICS_SCHEMA = {
 _REPORT_SCHEMA = {
     "title": "string",
     "report_type": "string",
-    "executive_summary": "string — 1-2 paragraph summary",
+    "executive_summary": "string â€” 1-2 paragraph summary",
     "sections": [
         {
             "title": "string",
-            "content": "string — Markdown content for this section",
-            "charts": ["string — Chart references or descriptions"],
-            "tables": ["string — Table data in markdown format"],
+            "content": "string â€” Markdown content for this section",
+            "charts": ["string â€” Chart references or descriptions"],
+            "tables": ["string â€” Table data in markdown format"],
         }
     ],
-    "methodology": "string — Data sources and analysis methods used",
-    "recommendations": ["string — Actionable recommendations"],
-    "appendix": "string — Additional data or detailed tables",
+    "methodology": "string â€” Data sources and analysis methods used",
+    "recommendations": ["string â€” Actionable recommendations"],
+    "appendix": "string â€” Additional data or detailed tables",
     "confidence": 0.0,
 }
 
 
-# ── Task-Specific Prompt Templates ─────────────────────
+# â”€â”€ Task-Specific Prompt Templates â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 _TASK_PROMPTS = {
@@ -336,14 +336,14 @@ _TASK_PROMPTS = {
         "Generate an executive summary based on the provided data.\n"
         "The summary should be concise, evidence-based, and suitable for C-level executives.\n\n"
         "Structure:\n"
-        "1. Executive Summary — 2-3 sentence overview of the most important finding\n"
-        "2. KPI Highlights — Key metrics with period-over-period changes\n"
-        "3. Main Drivers — What contributed to the observed changes\n"
-        "4. Risks — Identified risks with severity and evidence\n"
-        "5. Opportunities — Actionable opportunities\n"
-        "6. Forecast — Expected direction and range for next period\n"
-        "7. Recommended Actions — Prioritized by impact and feasibility\n"
-        "8. Confidence — Score (0-1) with methodology and limitations"
+        "1. Executive Summary â€” 2-3 sentence overview of the most important finding\n"
+        "2. KPI Highlights â€” Key metrics with period-over-period changes\n"
+        "3. Main Drivers â€” What contributed to the observed changes\n"
+        "4. Risks â€” Identified risks with severity and evidence\n"
+        "5. Opportunities â€” Actionable opportunities\n"
+        "6. Forecast â€” Expected direction and range for next period\n"
+        "7. Recommended Actions â€” Prioritized by impact and feasibility\n"
+        "8. Confidence â€” Score (0-1) with methodology and limitations"
     ),
     PromptTaskType.KPI_EXPLANATION: (
         "Explain the specified KPI in business terms.\n"
@@ -416,7 +416,7 @@ _TASK_PROMPTS = {
 }
 
 
-# ── Output Schemas ─────────────────────────────────────
+# â”€â”€ Output Schemas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 _OUTPUT_SCHEMAS = {
@@ -430,26 +430,26 @@ _OUTPUT_SCHEMAS = {
     PromptTaskType.NL_ANALYTICS: _NL_ANALYTICS_SCHEMA,
     PromptTaskType.REPORT_GENERATION: _REPORT_SCHEMA,
     PromptTaskType.DASHBOARD_ASSISTANCE: {
-        "action_type": "string — create_chart|replace_chart|add_filter|resize|export|etc.",
-        "parameters": "dict — Action-specific parameters",
-        "explanation": "string — Why this action was chosen",
+        "action_type": "string â€” create_chart|replace_chart|add_filter|resize|export|etc.",
+        "parameters": "dict â€” Action-specific parameters",
+        "explanation": "string â€” Why this action was chosen",
         "confidence": 0.0,
     },
     PromptTaskType.ETL_ASSISTANCE: {
-        "pipeline_steps": [{"type": "string — extract|transform|load", "config": "dict"}],
-        "explanation": "string — Explanation of the pipeline",
-        "quality_checks": ["string — Recommended quality checks"],
+        "pipeline_steps": [{"type": "string â€” extract|transform|load", "config": "dict"}],
+        "explanation": "string â€” Explanation of the pipeline",
+        "quality_checks": ["string â€” Recommended quality checks"],
         "confidence": 0.0,
     },
     PromptTaskType.GENERAL_CHAT: {
-        "response": "string — The response to the user's question",
-        "suggested_followups": ["string — Suggested follow-up questions"],
+        "response": "string â€” The response to the user's question",
+        "suggested_followups": ["string â€” Suggested follow-up questions"],
         "confidence": 0.0,
     },
 }
 
 
-# ── Pipeline Registry ──────────────────────────────────
+# â”€â”€ Pipeline Registry â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class PromptOrchestrator:
@@ -631,7 +631,7 @@ class PromptOrchestrator:
         ]
 
 
-# ── Global instance ────────────────────────────────────
+# â”€â”€ Global instance â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 _orchestrator: PromptOrchestrator | None = None
 

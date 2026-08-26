@@ -1,4 +1,4 @@
-"""Admin management service.
+﻿"""Admin management service.
 
 Provides organization and user administration operations used by the
 enterprise admin panel. All operations are scoped by the caller's role:

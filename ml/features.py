@@ -1,4 +1,4 @@
-"""Automated feature engineering.
+﻿"""Automated feature engineering.
 
 Provides a scikit-learn-compatible pipeline builder that handles missing values,
 encoders, scalers, date extraction, rolling/lag statistics, polynomial features,

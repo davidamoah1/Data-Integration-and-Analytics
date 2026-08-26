@@ -1,4 +1,4 @@
-"""Dashboard Layout Engine.
+﻿"""Dashboard Layout Engine.
 
 Generates responsive dashboard layouts automatically.
 

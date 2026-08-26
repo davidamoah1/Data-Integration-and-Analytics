@@ -1,7 +1,7 @@
-"""AI Copilot surface for the Streamlit dashboard.
+﻿"""AI Copilot surface for the Streamlit dashboard.
 
 Provides an inline chat panel that lets users ask questions about their data,
-dashboards, ETL pipelines, and more — directly from the dashboard UI.
+dashboards, ETL pipelines, and more â€” directly from the dashboard UI.
 
 The copilot calls the AIGateway directly via a DB session, avoiding the need
 to bridge the dashboard's session-based auth with the API's JWT auth.

@@ -1,12 +1,12 @@
-"""AI Dashboard Assistant.
+﻿"""AI Dashboard Assistant.
 
 Translates natural language requests into dashboard actions.
 
 Supported actions:
-  - "Show revenue by region" → Create/update chart
-  - "Replace this chart with a heatmap" → Change chart type
-  - "Highlight the top five products" → Add filter/ranking
-  - "Compare this month with last month" → Add comparison
+  - "Show revenue by region" â†’ Create/update chart
+  - "Replace this chart with a heatmap" â†’ Change chart type
+  - "Highlight the top five products" â†’ Add filter/ranking
+  - "Compare this month with last month" â†’ Add comparison
 
 The assistant uses intent detection and entity extraction to map
 natural language to structured dashboard operations.
@@ -343,7 +343,7 @@ class AIDashboardAssistant:
 
         return suggestions[:6]
 
-    # ── Private: Action builders ───────────────────────
+    # â”€â”€ Private: Action builders â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def _build_action(
         self, action_type: str, match: re.Match, query: str, confidence: float
@@ -438,7 +438,7 @@ class AIDashboardAssistant:
             original_query=query,
         )
 
-    # ── Private: Action executors ──────────────────────
+    # â”€â”€ Private: Action executors â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def _execute_create_chart(self, action: DashboardAction, df_columns: list[str]) -> dict:
         params = action.parameters

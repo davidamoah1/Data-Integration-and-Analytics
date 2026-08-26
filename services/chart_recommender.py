@@ -1,4 +1,4 @@
-"""Chart Recommendation Engine [DEPRECATED].
+﻿"""Chart Recommendation Engine [DEPRECATED].
 
 .. deprecated::
     Use ``services.auto.engine.VisualizationIntelligenceEngine`` instead.
@@ -16,13 +16,13 @@ and industry knowledge. The engine analyzes:
   - Industry-specific chart preferences
 
 Chart type selection logic:
-  - Time series → Line chart
-  - Category comparison → Bar chart
-  - Composition → Pie/Donut
-  - Distribution → Histogram
-  - Correlation → Scatter plot
-  - Geographic data → Map
-  - Ranking → Horizontal bar chart
+  - Time series â†’ Line chart
+  - Category comparison â†’ Bar chart
+  - Composition â†’ Pie/Donut
+  - Distribution â†’ Histogram
+  - Correlation â†’ Scatter plot
+  - Geographic data â†’ Map
+  - Ranking â†’ Horizontal bar chart
 """
 
 from __future__ import annotations
@@ -215,7 +215,7 @@ class ChartRecommendationEngine:
             charts.append(
                 self._make_chart(
                     chart_type="heatmap",
-                    title=f"{self._label(metric_cols[0])} Heatmap: {self._label(dimension_cols[0])} × {self._label(dimension_cols[1])}",
+                    title=f"{self._label(metric_cols[0])} Heatmap: {self._label(dimension_cols[0])} Ã— {self._label(dimension_cols[1])}",
                     section=LayoutSection.SUPPORTING_CHARTS.value,
                     x_axis=dimension_cols[0],
                     y_axis=dimension_cols[1],
@@ -295,7 +295,7 @@ class ChartRecommendationEngine:
                 return candidate
         return None
 
-    # ── Helpers ─────────────────────────────────────────
+    # â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     @staticmethod
     def _make_chart(

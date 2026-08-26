@@ -1,4 +1,4 @@
-"""add analytics domain
+﻿"""add analytics domain
 
 Revision ID: 3ab0de986206
 Revises: 84a96d4ff144

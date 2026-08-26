@@ -1,4 +1,4 @@
-"""Worker entry point for background task processing.
+﻿"""Worker entry point for background task processing.
 
 Run as: python -m performance.worker_entry
 

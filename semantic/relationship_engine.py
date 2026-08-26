@@ -1,4 +1,4 @@
-"""MODULE 5 — Relationship Engine.
+﻿"""MODULE 5 â€” Relationship Engine.
 
 Automatically identifies relationships between detected business entities
 based on column names, foreign key detection, and entity library definitions.

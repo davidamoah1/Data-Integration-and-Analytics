@@ -1,4 +1,4 @@
-"""FastAPI routes for the AI Intelligence Platform — all AI endpoints.
+﻿"""FastAPI routes for the AI Intelligence Platform â€” all AI endpoints.
 
 Endpoints:
   - AI Chat (streaming + non-streaming)

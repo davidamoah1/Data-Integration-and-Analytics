@@ -1,4 +1,4 @@
-"""Nigeria Country Profile.
+﻿"""Nigeria Country Profile.
 
 Nigeria-specific data including:
   - 36 states + FCT
@@ -28,7 +28,7 @@ NIGERIA_PROFILE = CountryProfile(
     currency=CurrencyInfo(
         code="NGN",
         name="Naira",
-        symbol="₦",
+        symbol="â‚¦",
         subunit="Kobo",
         subunit_symbol="k",
         decimal_places=2,

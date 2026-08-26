@@ -1,4 +1,4 @@
-"""Natural Language to ETL Engine — translates instructions into ETL pipeline steps.
+﻿"""Natural Language to ETL Engine â€” translates instructions into ETL pipeline steps.
 
 Translates natural language instructions like:
   "Import the Excel file, remove duplicates, convert dates, load into Sales"

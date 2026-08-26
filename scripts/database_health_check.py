@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """Database health check script for AEDIP.
 
 Verifies database connectivity, connection pool status, table integrity,
@@ -25,10 +25,10 @@ def main() -> int:
 
     status = report.get("overall_status", "degraded")
     if status == "healthy":
-        print("\n✅ Database health: HEALTHY")
+        print("\nâœ… Database health: HEALTHY")
         return 0
     else:
-        print("\n⚠️  Database health: DEGRADED")
+        print("\nâš ï¸  Database health: DEGRADED")
         return 1
 
 

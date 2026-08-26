@@ -1,4 +1,4 @@
-"""Tests for organization and department management."""
+﻿"""Tests for organization and department management."""
 
 
 class TestOrganizationManagement:

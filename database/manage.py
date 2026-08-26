@@ -1,4 +1,4 @@
-"""Database management CLI — init, migrate, backup, restore, status.
+﻿"""Database management CLI â€” init, migrate, backup, restore, status.
 
 Usage:
     python -m database.manage init          # Create tables + seed data
@@ -34,7 +34,7 @@ def cmd_init():
     try:
         ensure_default_data(db)
         db.commit()
-        print("✓ Database initialized — tables created and default data seeded.")
+        print("âœ“ Database initialized â€” tables created and default data seeded.")
     finally:
         db.close()
 
@@ -48,7 +48,7 @@ def cmd_migrate():
 
     alembic_cfg = Config("alembic.ini")
     command.upgrade(alembic_cfg, "head")
-    print("✓ Migrations applied to head.")
+    print("âœ“ Migrations applied to head.")
 
 
 def cmd_backup(label: str = ""):
@@ -59,12 +59,12 @@ def cmd_backup(label: str = ""):
     mgr = BackupManager()
     result = mgr.create_backup(label=label)
     if result.success:
-        print(f"✓ Backup created: {result.path}")
+        print(f"âœ“ Backup created: {result.path}")
         print(f"  Size: {result.size_mb:.2f} MB")
         print(f"  Compressed: {result.compressed}")
         print(f"  Duration: {result.duration_seconds:.2f}s")
     else:
-        print(f"✗ Backup failed: {result.error}")
+        print(f"âœ— Backup failed: {result.error}")
         sys.exit(1)
 
 
@@ -76,11 +76,11 @@ def cmd_restore(filename: str):
     mgr = BackupManager()
     result = mgr.restore_backup(filename)
     if result.success:
-        print(f"✓ Restore completed in {result.duration_seconds:.2f}s")
+        print(f"âœ“ Restore completed in {result.duration_seconds:.2f}s")
         reset_engine()
-        print("  Engine cache cleared — restart the application to use the restored data.")
+        print("  Engine cache cleared â€” restart the application to use the restored data.")
     else:
-        print(f"✗ Restore failed: {result.error}")
+        print(f"âœ— Restore failed: {result.error}")
         sys.exit(1)
 
 
@@ -95,38 +95,42 @@ def cmd_status():
     total_indexes = sum(len(inspector.get_indexes(t)) for t in tables)
     total_cols = sum(len(inspector.get_columns(t)) for t in tables)
 
-    print("┌─ Database Status ─────────────────────────────")
-    print(f"│ Environment:  {getattr(__import__('config'), 'APP_ENV', 'unknown')}")
-    print(f"│ DB Type:      {getattr(__import__('config'), 'DB_TYPE', 'unknown')}")
-    print(f"│ Tables:       {len(tables)}")
-    print(f"│ Columns:      {total_cols}")
-    print(f"│ Indexes:      {total_indexes}")
-    print(f"│ Pool Size:    {getattr(__import__('config'), 'POOL_SIZE', 'N/A')}")
-    print(f"│ Max Overflow: {getattr(__import__('config'), 'MAX_OVERFLOW', 'N/A')}")
     print(
-        f"│ Slow Query:   {getattr(__import__('config'), 'SLOW_QUERY_THRESHOLD_MS', 'N/A')}ms threshold"
+        "â”Œâ”€ Database Status â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€"
+    )
+    print(f"â”‚ Environment:  {getattr(__import__('config'), 'APP_ENV', 'unknown')}")
+    print(f"â”‚ DB Type:      {getattr(__import__('config'), 'DB_TYPE', 'unknown')}")
+    print(f"â”‚ Tables:       {len(tables)}")
+    print(f"â”‚ Columns:      {total_cols}")
+    print(f"â”‚ Indexes:      {total_indexes}")
+    print(f"â”‚ Pool Size:    {getattr(__import__('config'), 'POOL_SIZE', 'N/A')}")
+    print(f"â”‚ Max Overflow: {getattr(__import__('config'), 'MAX_OVERFLOW', 'N/A')}")
+    print(
+        f"â”‚ Slow Query:   {getattr(__import__('config'), 'SLOW_QUERY_THRESHOLD_MS', 'N/A')}ms threshold"
     )
     print(
-        f"│ Backup:       {'enabled' if getattr(__import__('config'), 'BACKUP_ENABLED', False) else 'disabled'}"
+        f"â”‚ Backup:       {'enabled' if getattr(__import__('config'), 'BACKUP_ENABLED', False) else 'disabled'}"
     )
 
     # Table details
     if tables:
-        print("│")
-        print("│ Table Details:")
+        print("â”‚")
+        print("â”‚ Table Details:")
         with engine.connect() as conn:
             for table in sorted(tables):
                 try:
                     count = conn.execute(
                         text(f"SELECT COUNT(*) FROM {table}")
-                    ).scalar()  # nosec B608 — table from inspector.get_table_names(), not user input
+                    ).scalar()  # nosec B608 â€” table from inspector.get_table_names(), not user input
                     idx_count = len(inspector.get_indexes(table))
-                    print(f"│   {table:40s} {count:>10} rows  {idx_count:>3} indexes")
+                    print(f"â”‚   {table:40s} {count:>10} rows  {idx_count:>3} indexes")
                 except Exception:
                     print(
-                        f"│   {table:40s} {'?':>10} rows  {len(inspector.get_indexes(table)):>3} indexes"
+                        f"â”‚   {table:40s} {'?':>10} rows  {len(inspector.get_indexes(table)):>3} indexes"
                     )
-    print("└─────────────────────────────────────────────────")
+    print(
+        "â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€"
+    )
 
 
 def cmd_indexes():
@@ -140,8 +144,8 @@ def cmd_indexes():
     try:
         mgr = IndexManager(db)
         result = mgr.ensure_critical_indexes()
-        print("✓ Index check complete:")
-        print(f"  Created: {len(result['created'])} — {result['created']}")
+        print("âœ“ Index check complete:")
+        print(f"  Created: {len(result['created'])} â€” {result['created']}")
         print(f"  Skipped: {len(result['skipped'])} (already exist)")
         print(f"  Failed:  {len(result['failed'])}")
     finally:
@@ -156,7 +160,7 @@ def cmd_cleanup():
     print(f"Cleaning up backups older than {config.BACKUP_RETENTION_DAYS} days...")
     mgr = BackupManager()
     result = mgr.cleanup_old_backups()
-    print(f"✓ Cleanup complete: deleted {len(result['deleted'])}, kept {len(result['kept'])}")
+    print(f"âœ“ Cleanup complete: deleted {len(result['deleted'])}, kept {len(result['kept'])}")
     if result["deleted"]:
         for name in result["deleted"]:
             print(f"  Deleted: {name}")
@@ -173,7 +177,7 @@ def cmd_list_backups():
         return
 
     print(f"{'Filename':50s} {'Size (MB)':>10s} {'Created':25s} {'Compressed':>10s}")
-    print("─" * 100)
+    print("â”€" * 100)
     for b in backups:
         print(
             f"{b.filename:50s} {b.size_mb:>10.2f} {b.created_at.strftime('%Y-%m-%d %H:%M:%S UTC'):25s} {'yes' if b.compressed else 'no':>10s}"

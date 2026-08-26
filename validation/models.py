@@ -1,4 +1,4 @@
-"""SQLAlchemy models for the Hospital Data Validation Engine."""
+﻿"""SQLAlchemy models for the Hospital Data Validation Engine."""
 
 from __future__ import annotations
 

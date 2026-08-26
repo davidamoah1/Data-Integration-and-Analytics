@@ -1,4 +1,4 @@
-"""Prometheus-compatible metrics endpoint.
+﻿"""Prometheus-compatible metrics endpoint.
 
 Provides a /metrics endpoint in Prometheus text exposition format
 without requiring the prometheus_client library. All metrics are
@@ -70,7 +70,7 @@ class HistogramMetric:
                 self.counts[key][i] += 1
                 break
         else:
-            # Value exceeds all buckets — increment last bucket
+            # Value exceeds all buckets â€” increment last bucket
             if self.counts[key]:
                 self.counts[key][-1] += 1
         self.sums[key] += value

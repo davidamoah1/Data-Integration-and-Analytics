@@ -1,4 +1,4 @@
-"""Extended business-entity definitions for additional AEDIP industries.
+﻿"""Extended business-entity definitions for additional AEDIP industries.
 
 These entities are loaded into the ENTITY_LIBRARY so the semantic engine can
 classify datasets from banking, insurance, hospitality, and telecommunications.
@@ -7,7 +7,7 @@ classify datasets from banking, insurance, hospitality, and telecommunications.
 from __future__ import annotations
 
 EXTRA_ENTITIES: dict[str, dict] = {
-    # ── Banking ──
+    # â”€â”€ Banking â”€â”€
     "account": {
         "display_name": "Account",
         "industry": "banking",
@@ -79,7 +79,7 @@ EXTRA_ENTITIES: dict[str, dict] = {
             {"target": "account", "type": "linked_to", "label": "account"},
         ],
     },
-    # ── Insurance ──
+    # â”€â”€ Insurance â”€â”€
     "policy": {
         "display_name": "Policy",
         "industry": "insurance",
@@ -121,7 +121,7 @@ EXTRA_ENTITIES: dict[str, dict] = {
             {"target": "policy", "type": "sells", "label": "policies"},
         ],
     },
-    # ── Hospitality ──
+    # â”€â”€ Hospitality â”€â”€
     "reservation": {
         "display_name": "Reservation",
         "industry": "hospitality",
@@ -175,7 +175,7 @@ EXTRA_ENTITIES: dict[str, dict] = {
             {"target": "reservation", "type": "charges_to", "label": "reservation"},
         ],
     },
-    # ── Telecommunications ──
+    # â”€â”€ Telecommunications â”€â”€
     "subscriber": {
         "display_name": "Subscriber",
         "industry": "telecommunications",

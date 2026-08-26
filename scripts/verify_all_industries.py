@@ -1,4 +1,4 @@
-"""Verify all 12 industry datasets detect correctly and produce industry-appropriate dashboards."""
+﻿"""Verify all 12 industry datasets detect correctly and produce industry-appropriate dashboards."""
 
 import os
 

@@ -1,4 +1,4 @@
-"""Model drift detection utilities.
+﻿"""Model drift detection utilities.
 
 Supports data drift (feature distribution shift) and prediction drift.
 """

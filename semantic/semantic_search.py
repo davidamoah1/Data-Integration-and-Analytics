@@ -1,4 +1,4 @@
-"""MODULE 12 — Semantic Search.
+﻿"""MODULE 12 â€” Semantic Search.
 
 Allows searching for business concepts across datasets even when
 table or column names differ. E.g., searching "patients" finds

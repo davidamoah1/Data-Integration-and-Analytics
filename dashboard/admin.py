@@ -1,4 +1,4 @@
-"""Administration module — organization profile, branding, user management.
+﻿"""Administration module â€” organization profile, branding, user management.
 
 Provides admin interface for:
   - Organization profile (name, description, contact, timezone, currency)
@@ -59,10 +59,10 @@ def render_admin_page():
         return
 
     tab1, tab2, tab3, tab4, tab5 = st.tabs(
-        ["🏢 Organization", "🎨 Branding", "👥 Users", "🎭 Roles", "📋 Audit Logs"]
+        ["ðŸ¢ Organization", "ðŸŽ¨ Branding", "ðŸ‘¥ Users", "ðŸŽ­ Roles", "ðŸ“‹ Audit Logs"]
     )
 
-    # ── Tab 1: Organization Profile ──
+    # â”€â”€ Tab 1: Organization Profile â”€â”€
     with tab1:
         st.markdown("### Organization Profile")
 
@@ -126,15 +126,15 @@ def render_admin_page():
         if "error" not in sub_data:
             col1, col2, col3 = st.columns(3)
             with col1:
-                st.metric("Plan", sub_data.get("plan", "—").title())
+                st.metric("Plan", sub_data.get("plan", "â€”").title())
             with col2:
-                st.metric("Status", sub_data.get("status", "—").title())
+                st.metric("Status", sub_data.get("status", "â€”").title())
             with col3:
                 trial_end = sub_data.get("trial_ends_at")
                 if trial_end:
                     st.metric("Trial Ends", trial_end[:10])
                 else:
-                    st.metric("Max Users", sub_data.get("max_users", "—"))
+                    st.metric("Max Users", sub_data.get("max_users", "â€”"))
 
             st.markdown("**Features Enabled:**")
             features = sub_data.get("features", [])
@@ -145,7 +145,7 @@ def render_admin_page():
         else:
             st.info("Subscription data unavailable.")
 
-    # ── Tab 2: Branding ──
+    # â”€â”€ Tab 2: Branding â”€â”€
     with tab2:
         st.markdown("### Branding & Theme")
         st.info("Customize how DataFlow looks for your organization.")
@@ -179,9 +179,9 @@ def render_admin_page():
         )
         if uploaded:
             st.image(uploaded, width=200)
-            st.caption(f"Logo preview — {uploaded.name} ({uploaded.size // 1024}KB)")
+            st.caption(f"Logo preview â€” {uploaded.name} ({uploaded.size // 1024}KB)")
 
-    # ── Tab 3: User Management ──
+    # â”€â”€ Tab 3: User Management â”€â”€
     with tab3:
         st.markdown("### User Management")
 
@@ -220,7 +220,7 @@ def render_admin_page():
                         f"Invitation would be sent to {invite_email} with role: {invite_role}"
                     )
 
-    # ── Tab 4: Role Management ──
+    # â”€â”€ Tab 4: Role Management â”€â”€
     with tab4:
         st.markdown("### Role Management")
         st.info("Roles control what users can do within the platform.")
@@ -246,7 +246,7 @@ def render_admin_page():
                     },
                     {
                         "Role": "admin",
-                        "Description": "Organization admin — manage users, settings, all data",
+                        "Description": "Organization admin â€” manage users, settings, all data",
                         "System": True,
                     },
                     {
@@ -263,7 +263,7 @@ def render_admin_page():
             )
             st.dataframe(roles_info, use_container_width=True, hide_index=True)
 
-    # ── Tab 5: Audit Logs ──
+    # â”€â”€ Tab 5: Audit Logs â”€â”€
     with tab5:
         st.markdown("### Audit Logs")
         st.info("Track all user actions and system events for compliance.")

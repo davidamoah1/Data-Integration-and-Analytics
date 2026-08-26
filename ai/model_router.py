@@ -1,4 +1,4 @@
-"""AI Model Router — routes requests to the best provider/model based on task type.
+﻿"""AI Model Router â€” routes requests to the best provider/model based on task type.
 
 Considers:
 - Task complexity (simple chat vs. code generation vs. reasoning)

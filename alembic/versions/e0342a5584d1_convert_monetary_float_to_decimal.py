@@ -1,4 +1,4 @@
-"""convert_monetary_float_to_decimal
+﻿"""convert_monetary_float_to_decimal
 
 Revision ID: e0342a5584d1
 Revises: eb32b7fc465a

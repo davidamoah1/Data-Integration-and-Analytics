@@ -1,4 +1,4 @@
-"""OpenAI provider — supports GPT-4o, GPT-4, GPT-3.5-turbo and compatible APIs."""
+﻿"""OpenAI provider â€” supports GPT-4o, GPT-4, GPT-3.5-turbo and compatible APIs."""
 
 import json
 from collections.abc import Generator

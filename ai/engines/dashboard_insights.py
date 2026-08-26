@@ -1,4 +1,4 @@
-"""AI Dashboard Insights Engine — generates insights for dashboards.
+﻿"""AI Dashboard Insights Engine â€” generates insights for dashboards.
 
 Every dashboard should include:
 - Key Findings

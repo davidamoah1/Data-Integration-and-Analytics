@@ -1,4 +1,4 @@
-"""Seed data for Data Intelligence Studios."""
+﻿"""Seed data for Data Intelligence Studios."""
 
 from __future__ import annotations
 

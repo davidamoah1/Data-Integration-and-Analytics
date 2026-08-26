@@ -1,4 +1,4 @@
-"""Field normalization for certificate intelligence.
+﻿"""Field normalization for certificate intelligence.
 
 Normalizes extracted field values (names, dates, GPAs, certificate numbers)
 without fabricating data.  The original OCR value is always preserved in
@@ -15,7 +15,7 @@ from __future__ import annotations
 import re
 from datetime import datetime
 
-# ── Name normalization ───────────────────────────────────────────────
+# â”€â”€ Name normalization â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def normalize_name(raw: str | None) -> str | None:
@@ -37,7 +37,7 @@ def normalize_name(raw: str | None) -> str | None:
     return value
 
 
-# ── Date normalization ───────────────────────────────────────────────
+# â”€â”€ Date normalization â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 _DATE_FORMATS = [
@@ -58,7 +58,7 @@ _DATE_FORMATS = [
 def normalize_date(raw: str | None) -> str | None:
     """Normalize a date string to ISO 8601 (YYYY-MM-DD).
 
-    Returns the original string if parsing fails — never fabricates a date.
+    Returns the original string if parsing fails â€” never fabricates a date.
     """
     if not raw:
         return raw
@@ -83,7 +83,7 @@ def normalize_date(raw: str | None) -> str | None:
     return cleaned  # return original if we cannot parse
 
 
-# ── GPA / CGPA normalization ─────────────────────────────────────────
+# â”€â”€ GPA / CGPA normalization â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def normalize_gpa(raw: str | None) -> str | None:
@@ -105,7 +105,7 @@ def normalize_gpa(raw: str | None) -> str | None:
     return cleaned
 
 
-# ── Certificate / license number normalization ───────────────────────
+# â”€â”€ Certificate / license number normalization â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def normalize_certificate_number(raw: str | None) -> str | None:
@@ -122,7 +122,7 @@ def normalize_certificate_number(raw: str | None) -> str | None:
     return value if value else raw
 
 
-# ── Grade / class normalization ──────────────────────────────────────
+# â”€â”€ Grade / class normalization â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 _GRADE_MAP = {
@@ -155,7 +155,7 @@ def normalize_grade(raw: str | None) -> str | None:
     return _GRADE_MAP.get(key, raw.strip())
 
 
-# ── Dispatch table ───────────────────────────────────────────────────
+# â”€â”€ Dispatch table â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 _NORMALIZERS: dict[str, callable] = {

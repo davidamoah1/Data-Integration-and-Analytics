@@ -1,4 +1,4 @@
-"""Enterprise Anomaly Detection Engine.
+﻿"""Enterprise Anomaly Detection Engine.
 
 Enhances the existing AnomalyDetectionEngine with:
   - Semantic-aware column detection
@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 INDUSTRY_SENSITIVITY = {
     "healthcare": 1.5,  # More sensitive for patient safety
     "finance": 2.0,  # Standard for financial data
-    "retail": 2.5,  # Less sensitive — sales fluctuate
+    "retail": 2.5,  # Less sensitive â€” sales fluctuate
     "education": 2.0,  # Standard
     "government": 1.8,  # More sensitive for public funds
     "manufacturing": 2.0,
@@ -330,7 +330,7 @@ class EnterpriseAnomalyEngine:
                             "z_score": round(float(z), 2),
                         },
                         "explanation": (
-                            f"This value ({value:.2f}) is an outlier — {z:.1f} standard deviations "
+                            f"This value ({value:.2f}) is an outlier â€” {z:.1f} standard deviations "
                             f"from the average of {mean:.2f}. It may represent a data entry error, "
                             f"an exceptional case, or a genuine anomaly worth investigating."
                         ),

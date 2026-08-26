@@ -1,4 +1,4 @@
-"""Ecosystem monitoring routes — track connectors, plugins, API usage, and webhook health."""
+﻿"""Ecosystem monitoring routes â€” track connectors, plugins, API usage, and webhook health."""
 
 from __future__ import annotations
 

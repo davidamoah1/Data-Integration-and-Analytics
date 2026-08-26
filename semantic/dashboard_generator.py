@@ -1,4 +1,4 @@
-"""MODULE 10 — Dashboard Generator.
+﻿"""MODULE 10 â€” Dashboard Generator.
 
 Generates dashboard configurations from semantic entities.
 Never generates Retail dashboards for Healthcare data.

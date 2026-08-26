@@ -1,4 +1,4 @@
-"""Data access layer for authentication domain.
+﻿"""Data access layer for authentication domain.
 
 Repository pattern abstracting all database operations for
 users, roles, permissions, sessions, and related entities.

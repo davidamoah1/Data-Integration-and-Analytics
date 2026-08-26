@@ -1,4 +1,4 @@
-"""Smart Data Capture & Intelligent Document Processing Platform.
+﻿"""Smart Data Capture & Intelligent Document Processing Platform.
 
 Transforms paper-based records (photos, scans, PDFs) into structured,
 validated digital data with minimal manual effort.

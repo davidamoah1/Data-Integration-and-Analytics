@@ -1,4 +1,4 @@
-"""Predictive Analytics Engine.
+﻿"""Predictive Analytics Engine.
 
 Moves from analytics to intelligence with:
   - Time series forecasting (sales, admissions, demand)
@@ -11,14 +11,14 @@ Industry-specific modules:
   - Education: student risk prediction
   - Agriculture: yield prediction
 
-Works directly on DataFrames — no database or external service required.
+Works directly on DataFrames â€” no database or external service required.
 
 Usage:
     from predictive_analytics import PredictiveAnalyticsEngine
 
     result = PredictiveAnalyticsEngine.analyze("retail", df, col_mapping)
-    # result.forecasts → [ForecastResult(...), ...]
-    # result.predictions → [PredictionResult(...), ...]
+    # result.forecasts â†’ [ForecastResult(...), ...]
+    # result.predictions â†’ [PredictionResult(...), ...]
 """
 
 from __future__ import annotations

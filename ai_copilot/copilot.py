@@ -1,4 +1,4 @@
-"""Data Analyst Copilot — the main entry point.
+﻿"""Data Analyst Copilot â€” the main entry point.
 
 Combines the query engine, root cause analyzer, insight generator,
 and report generator into a single conversational interface.
@@ -8,7 +8,7 @@ Usage:
 
     copilot = DataAnalystCopilot(df, mapping_result)
     answer = copilot.ask("Why did sales drop?")
-    # → "Sales dropped 15%. Main reasons: 1. Product A declined..."
+    # â†’ "Sales dropped 15%. Main reasons: 1. Product A declined..."
 
     insights = copilot.auto_insights()
     report = copilot.generate_report()
@@ -47,7 +47,7 @@ class CopilotResponse:
 
 
 class DataAnalystCopilot:
-    """AI Data Analyst Copilot — answers natural language questions about data.
+    """AI Data Analyst Copilot â€” answers natural language questions about data.
 
     Works locally using statistical analysis. No LLM required.
     Can optionally enhance answers with LLM calls via the ai/gateway.
@@ -116,7 +116,7 @@ class DataAnalystCopilot:
             title=title,
         )
 
-    # ── Intent Handlers ────────────────────────────────────
+    # â”€â”€ Intent Handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def _answer_why_change(self, parsed: ParsedQuery) -> CopilotResponse:
         """Answer 'Why did X change?' questions with root cause analysis."""
@@ -146,7 +146,7 @@ class DataAnalystCopilot:
             return CopilotResponse(
                 question=parsed.raw_text,
                 intent=parsed.intent.value,
-                answer="I couldn't perform root cause analysis — insufficient data or no detectable change.",
+                answer="I couldn't perform root cause analysis â€” insufficient data or no detectable change.",
                 follow_ups=["Give me a summary", "Any anomalies?"],
             )
 
@@ -279,7 +279,7 @@ class DataAnalystCopilot:
             return CopilotResponse(
                 question=parsed.raw_text,
                 intent=parsed.intent.value,
-                answer="No date column found — trend analysis requires a time-based column.",
+                answer="No date column found â€” trend analysis requires a time-based column.",
                 follow_ups=["Give me a summary"],
             )
 
@@ -429,7 +429,7 @@ class DataAnalystCopilot:
 
         lines = ["**Detected Anomalies:**\n"]
         for i, insight in enumerate(anomaly_insights, 1):
-            icon = "🔴" if insight.severity.value == "critical" else "⚠️"
+            icon = "ðŸ”´" if insight.severity.value == "critical" else "âš ï¸"
             lines.append(f"{i}. {icon} **{insight.title}**: {insight.description}")
 
         answer = "\n".join(lines)
@@ -476,7 +476,7 @@ class DataAnalystCopilot:
             return CopilotResponse(
                 question=parsed.raw_text,
                 intent=parsed.intent.value,
-                answer="No significant correlations (|r| ≥ 0.3) found between numeric columns.",
+                answer="No significant correlations (|r| â‰¥ 0.3) found between numeric columns.",
                 follow_ups=["Give me a summary", "Any anomalies?"],
             )
 
@@ -484,7 +484,7 @@ class DataAnalystCopilot:
         for c1, c2, val in pairs[:10]:
             direction = "positive" if val > 0 else "negative"
             strength = "strong" if abs(val) >= 0.7 else "moderate" if abs(val) >= 0.5 else "weak"
-            lines.append(f"- **{c1} ↔ {c2}**: r={val:.2f} ({strength} {direction})")
+            lines.append(f"- **{c1} â†” {c2}**: r={val:.2f} ({strength} {direction})")
 
         answer = "\n".join(lines)
 
@@ -511,13 +511,13 @@ class DataAnalystCopilot:
             intent=parsed.intent.value,
             answer=(
                 "I can help you understand your data. Try asking:\n"
-                "- **'Why did sales drop?'** — Root cause analysis\n"
-                "- **'Top 5 products by revenue'** — Rankings\n"
-                "- **'Give me a summary'** — Dataset overview\n"
-                "- **'What's the trend in billing?'** — Time analysis\n"
-                "- **'Compare regions'** — Dimension comparison\n"
-                "- **'Any anomalies?'** — Outlier detection\n"
-                "- **'Correlation between sales and profit'** — Relationships"
+                "- **'Why did sales drop?'** â€” Root cause analysis\n"
+                "- **'Top 5 products by revenue'** â€” Rankings\n"
+                "- **'Give me a summary'** â€” Dataset overview\n"
+                "- **'What's the trend in billing?'** â€” Time analysis\n"
+                "- **'Compare regions'** â€” Dimension comparison\n"
+                "- **'Any anomalies?'** â€” Outlier detection\n"
+                "- **'Correlation between sales and profit'** â€” Relationships"
             ),
             follow_ups=[
                 "Give me a summary",
@@ -526,7 +526,7 @@ class DataAnalystCopilot:
             ],
         )
 
-    # ── Column Resolution Helpers ──────────────────────────
+    # â”€â”€ Column Resolution Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def _resolve_metric_column(self, metric: str | None) -> str | None:
         """Resolve a metric entity key to an actual DataFrame column."""

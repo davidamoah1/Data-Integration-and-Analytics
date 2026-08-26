@@ -1,4 +1,4 @@
-"""Plugin system and marketplace models."""
+﻿"""Plugin system and marketplace models."""
 
 from __future__ import annotations
 
@@ -56,7 +56,7 @@ class PluginInstallation(Base):
 
 
 class IndustryPackage(Base):
-    """Industry solution package — pre-built templates for specific industries."""
+    """Industry solution package â€” pre-built templates for specific industries."""
 
     __tablename__ = "ecosystem_industry_packages"
 

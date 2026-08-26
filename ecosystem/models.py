@@ -1,4 +1,4 @@
-"""Public API Platform — API key management, usage tracking, and developer access."""
+﻿"""Public API Platform â€” API key management, usage tracking, and developer access."""
 
 from __future__ import annotations
 

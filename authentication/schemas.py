@@ -1,4 +1,4 @@
-"""Pydantic schemas for authentication endpoints."""
+﻿"""Pydantic schemas for authentication endpoints."""
 
 from datetime import datetime
 
@@ -47,7 +47,7 @@ class SignupRequest(BaseModel):
     password: str = Field(..., min_length=8)
     full_name: str = Field(..., min_length=1, max_length=255)
     organization_name: str | None = Field(
-        None, max_length=200, description="Optional — creates a new org for this user"
+        None, max_length=200, description="Optional â€” creates a new org for this user"
     )
     country: str | None = Field(None, max_length=100)
     industry: str | None = Field(None, max_length=100)

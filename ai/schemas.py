@@ -1,4 +1,4 @@
-"""Pydantic schemas for Phase 6 AI Intelligence Platform API endpoints."""
+﻿"""Pydantic schemas for Phase 6 AI Intelligence Platform API endpoints."""
 
 from pydantic import BaseModel, Field
 

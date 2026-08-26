@@ -1,4 +1,4 @@
-"""Base connector interface for all data source connectors.
+﻿"""Base connector interface for all data source connectors.
 
 Every connector implements the same interface so new connectors can be
 plugged in without modifying the core ETL engine.

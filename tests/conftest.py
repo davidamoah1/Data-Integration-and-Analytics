@@ -1,4 +1,4 @@
-"""Test fixtures for authentication and authorization tests.
+﻿"""Test fixtures for authentication and authorization tests.
 
 Provides a fresh in-memory SQLite database with seeded roles, permissions,
 and a super admin user for each test.
@@ -54,7 +54,7 @@ def db_engine():
         poolclass=StaticPool,
     )
     Base.metadata.create_all(engine)
-    # Also create existing tables (sales, pipeline_runs) — they use a different Base
+    # Also create existing tables (sales, pipeline_runs) â€” they use a different Base
     from database.db_setup import Base as OldBase
 
     OldBase.metadata.create_all(engine)

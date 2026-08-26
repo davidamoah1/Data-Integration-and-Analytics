@@ -1,4 +1,4 @@
-"""Outlier Detector — detects statistical anomalies and impossible values."""
+﻿"""Outlier Detector â€” detects statistical anomalies and impossible values."""
 
 from __future__ import annotations
 
@@ -49,7 +49,7 @@ class OutlierDetector:
                         column=col,
                         affected_rows=count,
                         message=f"Column '{col}': {count} statistical outliers (IQR method, 3x IQR).",
-                        suggested_fix=f"Review outliers in '{col}' — values outside [{lower:.2f}, {upper:.2f}].",
+                        suggested_fix=f"Review outliers in '{col}' â€” values outside [{lower:.2f}, {upper:.2f}].",
                         business_impact="Outliers may indicate data entry errors or genuine extreme cases.",
                     )
                 )
@@ -88,7 +88,7 @@ class OutlierDetector:
                     column=f"{patient_col} / {adm_col}",
                     affected_rows=count,
                     message=f"{count} duplicate admissions (same patient, same admission date).",
-                    suggested_fix="Review duplicate admissions — may be readmissions or data entry errors.",
+                    suggested_fix="Review duplicate admissions â€” may be readmissions or data entry errors.",
                     business_impact="Duplicate admissions inflate admission counts.",
                 )
             )
@@ -134,7 +134,7 @@ class OutlierDetector:
                         column=col,
                         affected_rows=past_count,
                         message=f"Column '{col}': {past_count} dates before 1900.",
-                        suggested_fix="Review dates before 1900 — likely data entry errors.",
+                        suggested_fix="Review dates before 1900 â€” likely data entry errors.",
                     )
                 )
         return findings

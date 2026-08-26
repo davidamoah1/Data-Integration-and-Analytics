@@ -1,4 +1,4 @@
-"""Tenant isolation tests for the SaaS platform.
+﻿"""Tenant isolation tests for the SaaS platform.
 
 Verifies that:
   - Users can only access their own organization's data
@@ -47,7 +47,7 @@ class TestTenantIsolation:
     """Test that tenant isolation is enforced across the platform."""
 
     def test_saas_plans_accessible_by_any_user(self, client, admin_headers):
-        """Plans are public — any authenticated user can see them."""
+        """Plans are public â€” any authenticated user can see them."""
         resp = client.get("/saas/plans", headers=admin_headers)
         assert resp.status_code == 200
         assert len(resp.json()["data"]) >= 5

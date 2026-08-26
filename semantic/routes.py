@@ -1,4 +1,4 @@
-"""API routes for the Semantic Intelligence Engine."""
+﻿"""API routes for the Semantic Intelligence Engine."""
 
 from __future__ import annotations
 
@@ -434,7 +434,7 @@ async def persist_analysis(
     report_content_parts = []
 
     industry_label = body.industry or "Unknown"
-    report_title = f"{industry_label.capitalize()} Analysis Report — {body.table_name}"
+    report_title = f"{industry_label.capitalize()} Analysis Report â€” {body.table_name}"
 
     # Summary
     summary_parts = []

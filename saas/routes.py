@@ -1,4 +1,4 @@
-"""FastAPI routes for SaaS Platform — subscriptions, billing, feature flags, onboarding."""
+﻿"""FastAPI routes for SaaS Platform â€” subscriptions, billing, feature flags, onboarding."""
 
 from __future__ import annotations
 
@@ -28,7 +28,7 @@ from shared.tenant import get_current_organization_id, require_super_admin
 saas_router = APIRouter(prefix="/saas", tags=["SaaS Platform"])
 
 
-# ─── Schemas ───────────────────────────────────────────────
+# â”€â”€â”€ Schemas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class SubscribeRequest(BaseModel):
@@ -80,7 +80,7 @@ class NotificationPrefUpdate(BaseModel):
     event_system_maintenance: bool | None = None
 
 
-# ─── Subscription Plans ────────────────────────────────────
+# â”€â”€â”€ Subscription Plans â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @saas_router.get("/plans")
@@ -165,7 +165,7 @@ async def cancel_subscription(
     return success_response({"id": sub.id, "status": sub.status}, "Subscription cancelled")
 
 
-# ─── Usage & Invoices ──────────────────────────────────────
+# â”€â”€â”€ Usage & Invoices â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @saas_router.get("/usage")
@@ -209,7 +209,7 @@ async def list_invoices(
     )
 
 
-# ─── Feature Flags ─────────────────────────────────────────
+# â”€â”€â”€ Feature Flags â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @saas_router.get("/features")
@@ -265,7 +265,7 @@ async def set_feature_override(
     return success_response({"id": override.id}, "Feature override set")
 
 
-# ─── Onboarding ────────────────────────────────────────────
+# â”€â”€â”€ Onboarding â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @saas_router.get("/onboarding")
@@ -301,7 +301,7 @@ async def complete_onboarding_step(
     )
 
 
-# ─── Customer Success ──────────────────────────────────────
+# â”€â”€â”€ Customer Success â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @saas_router.get("/health-score")
@@ -368,7 +368,7 @@ async def list_support_tickets(
     )
 
 
-# ─── Notification Preferences ──────────────────────────────
+# â”€â”€â”€ Notification Preferences â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @saas_router.get("/notification-preferences")
@@ -440,7 +440,7 @@ async def update_notification_preferences(
     return success_response(None, "Notification preferences updated")
 
 
-# ─── Super Admin: System Announcements ─────────────────────
+# â”€â”€â”€ Super Admin: System Announcements â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @saas_router.get("/announcements")

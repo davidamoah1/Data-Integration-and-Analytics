@@ -1,4 +1,4 @@
-"""AI Data Quality Engine — AI-powered data quality analysis.
+﻿"""AI Data Quality Engine â€” AI-powered data quality analysis.
 
 Uses the existing ETL quality engine for detection, then applies AI
 to generate recommendations, risk assessments, and fix suggestions.

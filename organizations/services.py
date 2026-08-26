@@ -1,4 +1,4 @@
-"""Services and routes for organization management."""
+﻿"""Services and routes for organization management."""
 
 # ruff: noqa: B008  # FastAPI Depends() calls in default arguments are intentional
 

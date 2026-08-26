@@ -1,4 +1,4 @@
-"""Workflow lineage graph builder.
+﻿"""Workflow lineage graph builder.
 
 Builds a chain of provenance edges during workflow execution. Each step that
 touches a dataset becomes a vertex; data flowing between steps becomes edges.

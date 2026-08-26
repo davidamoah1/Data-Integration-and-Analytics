@@ -1,4 +1,4 @@
-"""Data lineage tracking — records data flow from source through transformations to destination."""
+﻿"""Data lineage tracking â€” records data flow from source through transformations to destination."""
 
 from sqlalchemy.orm import Session as DbSession
 

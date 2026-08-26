@@ -1,4 +1,4 @@
-"""Enterprise Report Generation Engine.
+﻿"""Enterprise Report Generation Engine.
 
 Generates professional reports with executive summaries, KPI tables,
 insights, recommendations, methodology, and appendix.

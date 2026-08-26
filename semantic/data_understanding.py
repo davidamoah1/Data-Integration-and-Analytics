@@ -1,4 +1,4 @@
-"""Data Understanding Engine — value-based semantic signals.
+﻿"""Data Understanding Engine â€” value-based semantic signals.
 
 Analyzes column VALUES (not just names) to detect industry signals.
 Complements the column-name-based SemanticEngine with a second signal layer.
@@ -50,7 +50,7 @@ class DataUnderstandingResult:
         }
 
 
-# ── Regex patterns for value-based detection ──
+# â”€â”€ Regex patterns for value-based detection â”€â”€
 
 _DIAGNOSIS_RE = re.compile(r"^[A-TV-Z]\d{2}(\.\d{1,4})?$")
 _CPT_RE = re.compile(r"^\d{5}$")
@@ -182,7 +182,7 @@ class DataUnderstandingEngine:
 
         return signals
 
-    # ── Healthcare ──
+    # â”€â”€ Healthcare â”€â”€
     @staticmethod
     def _det_healthcare(col, cl, s, n, nn):
         out = []
@@ -224,7 +224,7 @@ class DataUnderstandingEngine:
             )
         return out
 
-    # ── Banking ──
+    # â”€â”€ Banking â”€â”€
     @staticmethod
     def _det_banking(col, cl, s, n, nn):
         out = []
@@ -261,13 +261,13 @@ class DataUnderstandingEngine:
                         "account_number",
                         "banking",
                         min(m / n * 0.7, 1.0),
-                        f"{m}/{n} values match bank account number (8–17 digits)",
+                        f"{m}/{n} values match bank account number (8â€“17 digits)",
                         "account",
                     )
                 )
         return out
 
-    # ── Education ──
+    # â”€â”€ Education â”€â”€
     @staticmethod
     def _det_education(col, cl, s, n, nn):
         out = []
@@ -279,7 +279,7 @@ class DataUnderstandingEngine:
                     "grade",
                     "education",
                     min(m / n, 1.0),
-                    f"{m}/{n} values are letter grades (A–F)",
+                    f"{m}/{n} values are letter grades (Aâ€“F)",
                     "grade",
                 )
             )
@@ -295,13 +295,13 @@ class DataUnderstandingEngine:
                                 "gpa",
                                 "education",
                                 0.85,
-                                "Numeric 0.0–4.0 range with GPA-like column name",
+                                "Numeric 0.0â€“4.0 range with GPA-like column name",
                                 "grade",
                             )
                         )
         return out
 
-    # ── Insurance ──
+    # â”€â”€ Insurance â”€â”€
     @staticmethod
     def _det_insurance(col, cl, s, n, nn):
         out = []
@@ -331,7 +331,7 @@ class DataUnderstandingEngine:
             )
         return out
 
-    # ── Church ──
+    # â”€â”€ Church â”€â”€
     @staticmethod
     def _det_church(col, cl, s, n, nn):
         out = []
@@ -349,7 +349,7 @@ class DataUnderstandingEngine:
             )
         return out
 
-    # ── Government ──
+    # â”€â”€ Government â”€â”€
     @staticmethod
     def _det_government(col, cl, s, n, nn):
         out = []
@@ -367,7 +367,7 @@ class DataUnderstandingEngine:
             )
         return out
 
-    # ── Telecom ──
+    # â”€â”€ Telecom â”€â”€
     @staticmethod
     def _det_telecom(col, cl, s, n, nn):
         out = []
@@ -397,7 +397,7 @@ class DataUnderstandingEngine:
             )
         return out
 
-    # ── Retail ──
+    # â”€â”€ Retail â”€â”€
     @staticmethod
     def _det_retail(col, cl, s, n, nn):
         out = []
@@ -421,13 +421,13 @@ class DataUnderstandingEngine:
                     "barcode",
                     "retail",
                     min(m / n, 1.0),
-                    f"{m}/{n} values match UPC/EAN barcode (12–13 digits)",
+                    f"{m}/{n} values match UPC/EAN barcode (12â€“13 digits)",
                     "product",
                 )
             )
         return out
 
-    # ── Manufacturing ──
+    # â”€â”€ Manufacturing â”€â”€
     @staticmethod
     def _det_manufacturing(col, cl, s, n, nn):
         out = []
@@ -445,7 +445,7 @@ class DataUnderstandingEngine:
             )
         return out
 
-    # ── Agriculture ──
+    # â”€â”€ Agriculture â”€â”€
     @staticmethod
     def _det_agriculture(col, cl, s, n, nn):
         out = []
@@ -463,7 +463,7 @@ class DataUnderstandingEngine:
             )
         return out
 
-    # ── NGO ──
+    # â”€â”€ NGO â”€â”€
     @staticmethod
     def _det_ngo(col, cl, s, n, nn):
         out = []
@@ -481,7 +481,7 @@ class DataUnderstandingEngine:
             )
         return out
 
-    # ── Hospitality ──
+    # â”€â”€ Hospitality â”€â”€
     @staticmethod
     def _det_hospitality(col, cl, s, n, nn):
         out = []
@@ -499,7 +499,7 @@ class DataUnderstandingEngine:
             )
         return out
 
-    # ── Universal (currency, monetary) ──
+    # â”€â”€ Universal (currency, monetary) â”€â”€
     @staticmethod
     def _det_universal(col, cl, s, n, nn):
         out = []
@@ -519,7 +519,7 @@ class DataUnderstandingEngine:
             )
         return out
 
-    # ── Statistical patterns ──
+    # â”€â”€ Statistical patterns â”€â”€
     @staticmethod
     def _analyze_statistics(df: pd.DataFrame, col_name: str) -> dict | None:
         series = df[col_name]
@@ -542,7 +542,7 @@ class DataUnderstandingEngine:
             if result["min"] >= 0 and result["max"] > 100:
                 result["likely_monetary"] = True
 
-            # Detect percentage: 0–100 or 0–1 range
+            # Detect percentage: 0â€“100 or 0â€“1 range
             if (
                 result["min"] >= 0
                 and result["max"] <= 1.0
@@ -565,7 +565,7 @@ class DataUnderstandingEngine:
             vc = non_null.value_counts().head(5)
             result["top_values"] = {str(k): int(v) for k, v in vc.items()}
 
-            # Low cardinality → likely dimension/category
+            # Low cardinality â†’ likely dimension/category
             if result["unique_pct"] < 5:
                 result["likely_dimension"] = True
             elif result["unique_pct"] > 90:

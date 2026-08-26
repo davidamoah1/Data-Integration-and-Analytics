@@ -1,4 +1,4 @@
-"""Sector-specific dashboard rendering.
+﻿"""Sector-specific dashboard rendering.
 
 Each sector gets a completely different dashboard with:
 - Different KPI metrics (calculated differently per sector)
@@ -7,12 +7,12 @@ Each sector gets a completely different dashboard with:
 - Different layout structures per sector
 
 Sectors:
-  SME         — Sales, profit, products, regions
-  Education   — Enrollment, tuition collection, department performance, payment methods
-  Healthcare  — Patient billing, insurance claims, service mix, department efficiency
-  Government  — Project spending, contractor performance, budget allocation, regional projects
-  Church      — Offerings by event, member giving patterns, payment channels, ministry performance
-  NGO         — Donations by program, funding source diversity, donor engagement, regional impact
+  SME         â€” Sales, profit, products, regions
+  Education   â€” Enrollment, tuition collection, department performance, payment methods
+  Healthcare  â€” Patient billing, insurance claims, service mix, department efficiency
+  Government  â€” Project spending, contractor performance, budget allocation, regional projects
+  Church      â€” Offerings by event, member giving patterns, payment channels, ministry performance
+  NGO         â€” Donations by program, funding source diversity, donor engagement, regional impact
 """
 
 import pandas as pd
@@ -24,9 +24,9 @@ from dashboard.styles import CHART_LAYOUT, COLORS
 from dashboard.utils import fmt_currency, fmt_number
 
 
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Shared helpers
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def _kpi_card(value: str, label: str, icon: str, css_class: str):
     st.markdown(
         f'<div class="kpi-card {css_class}"><span class="kpi-icon">{icon}</span>'
@@ -63,9 +63,9 @@ def _safe_col(df: pd.DataFrame, *candidates: str) -> str | None:
     return None
 
 
-# ──────────────────────────────────────────────
-# SME Dashboard — Sales & Profit Analytics
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# SME Dashboard â€” Sales & Profit Analytics
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def render_sme_dashboard(df: pd.DataFrame, kpis: dict):
     from dashboard.charts import (
         render_heatmap_sales_region_category,
@@ -128,9 +128,9 @@ def render_sme_dashboard(df: pd.DataFrame, kpis: dict):
         render_heatmap_sales_region_category(df, labels=labels)
 
 
-# ──────────────────────────────────────────────
-# Education Dashboard — Enrollment & Tuition Analytics
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# Education Dashboard â€” Enrollment & Tuition Analytics
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def render_education_dashboard(df: pd.DataFrame, kpis: dict):
     sales_col = _safe_col(df, "sales") or "sales"
     cat_col = _safe_col(df, "category", "program_type") or "category"
@@ -152,13 +152,13 @@ def render_education_dashboard(df: pd.DataFrame, kpis: dict):
 
     k1, k2, k3, k4 = st.columns(4)
     with k1:
-        _kpi_card(fmt_currency(total_tuition), "Total Tuition Billed", "🎓", "kpi-card-sales")
+        _kpi_card(fmt_currency(total_tuition), "Total Tuition Billed", "ðŸŽ“", "kpi-card-sales")
     with k2:
-        _kpi_card(fmt_number(total_students), "Enrolled Students", "👨‍🎓", "kpi-card-orders")
+        _kpi_card(fmt_number(total_students), "Enrolled Students", "ðŸ‘¨â€ðŸŽ“", "kpi-card-orders")
     with k3:
-        _kpi_card(f"{collection_rate:.1f}%", "Collection Rate", "📊", "kpi-card-profit")
+        _kpi_card(f"{collection_rate:.1f}%", "Collection Rate", "ðŸ“Š", "kpi-card-profit")
     with k4:
-        _kpi_card(fmt_number(int(total_enrollments)), "Total Enrollments", "📚", "kpi-card-avg")
+        _kpi_card(fmt_number(int(total_enrollments)), "Total Enrollments", "ðŸ“š", "kpi-card-avg")
 
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -314,9 +314,9 @@ def render_education_dashboard(df: pd.DataFrame, kpis: dict):
         _close_container()
 
 
-# ──────────────────────────────────────────────
-# Healthcare Dashboard — Patient Billing & Insurance Analytics
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# Healthcare Dashboard â€” Patient Billing & Insurance Analytics
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def render_healthcare_dashboard(df: pd.DataFrame, kpis: dict):
     sales_col = _safe_col(df, "sales") or "sales"
     cat_col = _safe_col(df, "category", "service_type") or "category"
@@ -336,13 +336,13 @@ def render_healthcare_dashboard(df: pd.DataFrame, kpis: dict):
 
     k1, k2, k3, k4 = st.columns(4)
     with k1:
-        _kpi_card(fmt_currency(total_billing), "Total Billing", "🏥", "kpi-card-sales")
+        _kpi_card(fmt_currency(total_billing), "Total Billing", "ðŸ¥", "kpi-card-sales")
     with k2:
-        _kpi_card(fmt_number(total_patients), "Unique Patients", "👤", "kpi-card-orders")
+        _kpi_card(fmt_number(total_patients), "Unique Patients", "ðŸ‘¤", "kpi-card-orders")
     with k3:
-        _kpi_card(fmt_currency(avg_bill_per_patient), "Avg Bill / Patient", "💊", "kpi-card-avg")
+        _kpi_card(fmt_currency(avg_bill_per_patient), "Avg Bill / Patient", "ðŸ’Š", "kpi-card-avg")
     with k4:
-        _kpi_card(f"{insurance_coverage:.1f}%", "Insurance Coverage", "🛡️", "kpi-card-profit")
+        _kpi_card(f"{insurance_coverage:.1f}%", "Insurance Coverage", "ðŸ›¡ï¸", "kpi-card-profit")
 
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -485,9 +485,9 @@ def render_healthcare_dashboard(df: pd.DataFrame, kpis: dict):
         _close_container()
 
 
-# ──────────────────────────────────────────────
-# Government Dashboard — Project Spending & Contractor Analytics
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# Government Dashboard â€” Project Spending & Contractor Analytics
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def render_government_dashboard(df: pd.DataFrame, kpis: dict):
     sales_col = _safe_col(df, "sales") or "sales"
     cat_col = _safe_col(df, "category", "project_type") or "category"
@@ -504,13 +504,13 @@ def render_government_dashboard(df: pd.DataFrame, kpis: dict):
 
     k1, k2, k3, k4 = st.columns(4)
     with k1:
-        _kpi_card(fmt_currency(total_spending), "Total Spending", "🏛️", "kpi-card-sales")
+        _kpi_card(fmt_currency(total_spending), "Total Spending", "ðŸ›ï¸", "kpi-card-sales")
     with k2:
-        _kpi_card(fmt_number(total_projects), "Total Projects", "🏗️", "kpi-card-orders")
+        _kpi_card(fmt_number(total_projects), "Total Projects", "ðŸ—ï¸", "kpi-card-orders")
     with k3:
-        _kpi_card(fmt_currency(avg_project_cost), "Avg Project Cost", "📐", "kpi-card-avg")
+        _kpi_card(fmt_currency(avg_project_cost), "Avg Project Cost", "ðŸ“", "kpi-card-avg")
     with k4:
-        _kpi_card(fmt_number(total_contractors), "Active Contractors", "👷", "kpi-card-profit")
+        _kpi_card(fmt_number(total_contractors), "Active Contractors", "ðŸ‘·", "kpi-card-profit")
 
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -661,9 +661,9 @@ def render_government_dashboard(df: pd.DataFrame, kpis: dict):
         _close_container()
 
 
-# ──────────────────────────────────────────────
-# Church Dashboard — Offerings & Giving Analytics
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# Church Dashboard â€” Offerings & Giving Analytics
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def render_church_dashboard(df: pd.DataFrame, kpis: dict):
     sales_col = _safe_col(df, "sales") or "sales"
     cat_col = _safe_col(df, "category", "event_type") or "category"
@@ -680,13 +680,13 @@ def render_church_dashboard(df: pd.DataFrame, kpis: dict):
 
     k1, k2, k3, k4 = st.columns(4)
     with k1:
-        _kpi_card(fmt_currency(total_offering), "Total Offerings", "⛪", "kpi-card-sales")
+        _kpi_card(fmt_currency(total_offering), "Total Offerings", "â›ª", "kpi-card-sales")
     with k2:
-        _kpi_card(fmt_number(total_members), "Active Members", "🤝", "kpi-card-orders")
+        _kpi_card(fmt_number(total_members), "Active Members", "ðŸ¤", "kpi-card-orders")
     with k3:
-        _kpi_card(fmt_currency(avg_offering), "Avg Offering", "🙏", "kpi-card-avg")
+        _kpi_card(fmt_currency(avg_offering), "Avg Offering", "ðŸ™", "kpi-card-avg")
     with k4:
-        _kpi_card(f"{giving_rate:.0f}%", "Member Giving Rate", "💝", "kpi-card-profit")
+        _kpi_card(f"{giving_rate:.0f}%", "Member Giving Rate", "ðŸ’", "kpi-card-profit")
 
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -827,9 +827,9 @@ def render_church_dashboard(df: pd.DataFrame, kpis: dict):
         _close_container()
 
 
-# ──────────────────────────────────────────────
-# NGO Dashboard — Donations & Program Impact Analytics
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# NGO Dashboard â€” Donations & Program Impact Analytics
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def render_ngo_dashboard(df: pd.DataFrame, kpis: dict):
     sales_col = _safe_col(df, "sales") or "sales"
     cat_col = _safe_col(df, "category", "program_type") or "category"
@@ -847,13 +847,15 @@ def render_ngo_dashboard(df: pd.DataFrame, kpis: dict):
 
     k1, k2, k3, k4 = st.columns(4)
     with k1:
-        _kpi_card(fmt_currency(total_donations), "Total Donations", "🌍", "kpi-card-sales")
+        _kpi_card(fmt_currency(total_donations), "Total Donations", "ðŸŒ", "kpi-card-sales")
     with k2:
-        _kpi_card(fmt_number(total_donors), "Active Donors", "🤲", "kpi-card-orders")
+        _kpi_card(fmt_number(total_donors), "Active Donors", "ðŸ¤²", "kpi-card-orders")
     with k3:
-        _kpi_card(fmt_currency(avg_donation), "Avg Donation Size", "💝", "kpi-card-avg")
+        _kpi_card(fmt_currency(avg_donation), "Avg Donation Size", "ðŸ’", "kpi-card-avg")
     with k4:
-        _kpi_card(fmt_number(int(beneficiaries)), "Beneficiaries Reached", "👥", "kpi-card-profit")
+        _kpi_card(
+            fmt_number(int(beneficiaries)), "Beneficiaries Reached", "ðŸ‘¥", "kpi-card-profit"
+        )
 
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -1017,9 +1019,9 @@ def render_ngo_dashboard(df: pd.DataFrame, kpis: dict):
         _close_container()
 
 
-# ──────────────────────────────────────────────
-# Manufacturing Dashboard — Production & Utilization
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# Manufacturing Dashboard â€” Production & Utilization
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def render_manufacturing_dashboard(df: pd.DataFrame, kpis: dict):
     """Render manufacturing-specific analytics."""
     labels = {
@@ -1192,9 +1194,9 @@ def render_manufacturing_dashboard(df: pd.DataFrame, kpis: dict):
         _close_container()
 
 
-# ──────────────────────────────────────────────
-# Agriculture Dashboard — Yield, Harvest & Livestock
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# Agriculture Dashboard â€” Yield, Harvest & Livestock
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def render_agriculture_dashboard(df: pd.DataFrame, kpis: dict):
     """Render agriculture-specific analytics."""
     labels = {
@@ -1346,9 +1348,9 @@ def render_agriculture_dashboard(df: pd.DataFrame, kpis: dict):
         _close_container()
 
 
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Dispatcher
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 SECTOR_RENDERERS = {
     "sme": render_sme_dashboard,
     "retail": render_sme_dashboard,
@@ -1375,16 +1377,16 @@ def render_generic_sector_dashboard(df: pd.DataFrame, kpis: dict):
     # Dataset overview cards
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-        _kpi_card(fmt_number(len(df)), "Total Records", "📋", "kpi-purple")
+        _kpi_card(fmt_number(len(df)), "Total Records", "ðŸ“‹", "kpi-purple")
     with col2:
         numeric_cols = [c for c in df.columns if pd.api.types.is_numeric_dtype(df[c])]
-        _kpi_card(str(len(numeric_cols)), "Numeric Columns", "🔢", "kpi-blue")
+        _kpi_card(str(len(numeric_cols)), "Numeric Columns", "ðŸ”¢", "kpi-blue")
     with col3:
         text_cols = [c for c in df.columns if df[c].dtype == "object"]
-        _kpi_card(str(len(text_cols)), "Text Columns", "📝", "kpi-green")
+        _kpi_card(str(len(text_cols)), "Text Columns", "ðŸ“", "kpi-green")
     with col4:
         date_cols = [c for c in df.columns if pd.api.types.is_datetime64_any_dtype(df[c])]
-        _kpi_card(str(len(date_cols)), "Date Columns", "📅", "kpi-orange")
+        _kpi_card(str(len(date_cols)), "Date Columns", "ðŸ“…", "kpi-orange")
 
     # Statistical summary
     _section_header("Statistical Summary")
@@ -1441,7 +1443,7 @@ def render_generic_sector_dashboard(df: pd.DataFrame, kpis: dict):
     # Industry selection prompt
     st.markdown("---")
     st.info(
-        "💡 **Industry not detected.** Select an industry pack from the sidebar "
+        "ðŸ’¡ **Industry not detected.** Select an industry pack from the sidebar "
         "to see sector-specific dashboards with tailored KPIs and charts, "
         "or continue with this generic analytics view."
     )

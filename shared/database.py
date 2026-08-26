@@ -1,4 +1,4 @@
-"""Shared database infrastructure — Base, engine, session factory.
+﻿"""Shared database infrastructure â€” Base, engine, session factory.
 
 All ORM models across the platform import Base from here to ensure
 a single metadata registry for create_all and Alembic autogenerate.
@@ -49,7 +49,7 @@ def ensure_tables(engine):
     """Create all tables if they do not exist. Idempotent via module flag.
 
     Runs for both SQLite and MySQL. For MySQL, create_all() only creates
-    tables that don't exist — it won't modify existing tables. Missing
+    tables that don't exist â€” it won't modify existing tables. Missing
     columns on existing tables are added explicitly below.
     """
     global _tables_initialized

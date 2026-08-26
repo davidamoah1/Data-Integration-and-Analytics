@@ -1,4 +1,4 @@
-"""Clinical Validation Engine — checks clinical consistency, vital signs, and clinical outliers."""
+﻿"""Clinical Validation Engine â€” checks clinical consistency, vital signs, and clinical outliers."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""FastAPI dependencies for authentication and authorization.
+﻿"""FastAPI dependencies for authentication and authorization.
 
 Provides:
 - get_current_user: Extract and verify JWT from request
@@ -95,7 +95,7 @@ async def get_current_user_optional(
     credentials: HTTPAuthorizationCredentials | None = Depends(security_scheme),
     db: DbSession = Depends(get_db),
 ) -> dict | None:
-    """Optional auth — returns None if no token provided (for public endpoints)."""
+    """Optional auth â€” returns None if no token provided (for public endpoints)."""
     if not credentials:
         return None
     try:

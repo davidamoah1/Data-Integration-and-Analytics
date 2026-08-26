@@ -1,4 +1,4 @@
-"""Tests for user management and RBAC — roles, permissions, authorization checks."""
+﻿"""Tests for user management and RBAC â€” roles, permissions, authorization checks."""
 
 
 class TestUserManagement:
@@ -299,7 +299,7 @@ class TestAuthorization:
         viewer_token = login_resp.json()["data"]["access_token"]
         viewer_headers = {"Authorization": f"Bearer {viewer_token}"}
 
-        # Try to create a user — should be forbidden
+        # Try to create a user â€” should be forbidden
         response = client.post(
             "/api/users",
             json={

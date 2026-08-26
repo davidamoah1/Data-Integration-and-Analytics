@@ -1,4 +1,4 @@
-"""AI Document Chat Engine — chat with uploaded documents.
+﻿"""AI Document Chat Engine â€” chat with uploaded documents.
 
 Supports PDF, Word, Excel, CSV, PowerPoint, and text files.
 The AI answers using only the uploaded document unless explicitly instructed otherwise.

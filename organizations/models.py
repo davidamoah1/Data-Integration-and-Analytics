@@ -1,4 +1,4 @@
-"""SQLAlchemy ORM models for the Organization domain."""
+﻿"""SQLAlchemy ORM models for the Organization domain."""
 
 from sqlalchemy import JSON, TIMESTAMP, BigInteger, Column, Integer, String, Text, func
 

@@ -1,4 +1,4 @@
-"""FastAPI application for the DataFlow Enterprise Data Intelligence Platform.
+﻿"""FastAPI application for the DataFlow Enterprise Data Intelligence Platform.
 
 Provides REST API endpoints for:
   - Authentication & Authorization (JWT-based IAM)
@@ -68,17 +68,17 @@ from audit.routes import router as audit_enterprise_router
 from audit.services import audit_router
 from authentication.routes import mfa_router, roles_router, sso_router, users_router
 
-# Phase 4 — Enterprise IAM
+# Phase 4 â€” Enterprise IAM
 from authentication.routes import router as auth_router
 from authentication.services import seed_default_data
 
-# Phase 16 — Smart Data Capture & Intelligent Document Processing
+# Phase 16 â€” Smart Data Capture & Intelligent Document Processing
 from capture.routes import router as capture_router
 
 # Certificate Intelligence module
 from certificates.routes import router as certificates_router
 
-# Phase 12.9 — Enterprise Integration Ecosystem
+# Phase 12.9 â€” Enterprise Integration Ecosystem
 from connectors.routes import router as connectors_router
 from database.repositories import PipelineRunRepository, SalesRepository
 from database.routes import router as database_router
@@ -93,11 +93,11 @@ from etl.logging_config import logger
 from etl.routes import router as etl_router
 from jobs.handlers import register_builtin_handlers
 
-# Phase 11 — Background Processing & Job Queue
+# Phase 11 â€” Background Processing & Job Queue
 from jobs.routes import router as jobs_router
 from ml.routes import router as ml_router
 
-# Phase 18 — Production Monitoring
+# Phase 18 â€” Production Monitoring
 from monitoring.routes import router as phase18_monitoring_router
 from notifications.routes import router as notifications_router
 from organizations.invitation_routes import invitation_router, registration_router
@@ -106,7 +106,7 @@ from performance.routes import performance_router
 from platform_features.routes import platform_router as platform_features_router
 from saas.admin_routes import admin_router as saas_admin_router
 
-# Phase 13 — Commercial SaaS Platform
+# Phase 13 â€” Commercial SaaS Platform
 from saas.routes import saas_router
 from scheduler.report_scheduler import ReportScheduler
 from scheduler.routes import router as scheduler_router
@@ -119,15 +119,15 @@ from services.onboarding_routes import router as onboarding_router
 from services.report_engine_routes import router as report_engine_router
 from shared.database import Base, get_engine
 
-# Phase 12 — File Storage Architecture
+# Phase 12 â€” File Storage Architecture
 from storage.routes import router as storage_router
 
-# Phase 15 — AI Data Intelligence Operating System (Studios)
+# Phase 15 â€” AI Data Intelligence Operating System (Studios)
 from studios.routes import router as studios_router
 from validation.routes import router as validation_router
 from workflows.routes import router as workflow_router
 
-# ── Deployment / cold-start helpers ────────────────────
+# â”€â”€ Deployment / cold-start helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def _is_serverless() -> bool:
@@ -175,7 +175,7 @@ async def lifespan(app: FastAPI):
         engine = None
 
     # Import all models so they register with Base.metadata.
-    # This must happen even in serverless mode — otherwise Base.metadata is
+    # This must happen even in serverless mode â€” otherwise Base.metadata is
     # empty and ensure_tables()/create_all() creates zero tables, causing 500
     # errors on every database operation.
     import ai.models  # noqa: F401
@@ -185,7 +185,7 @@ async def lifespan(app: FastAPI):
     import authentication.models  # noqa: F401
     import authentication.sso_models  # noqa: F401
 
-    # Phase 16 — Smart Data Capture models
+    # Phase 16 â€” Smart Data Capture models
     import capture.models  # noqa: F401
 
     # Production MySQL schema is owned exclusively by Alembic migrations
@@ -193,7 +193,7 @@ async def lifespan(app: FastAPI):
     # doesn't drift from migration history in production.
     import config as _config
 
-    # Phase 12.9 — Ecosystem models
+    # Phase 12.9 â€” Ecosystem models
     import connectors.models  # noqa: F401
     import database.db_setup  # noqa: F401
     import ecosystem.models  # noqa: F401
@@ -203,23 +203,23 @@ async def lifespan(app: FastAPI):
     import enterprise.subscription  # noqa: F401
     import etl.models  # noqa: F401
 
-    # Phase 11 — Background Jobs
+    # Phase 11 â€” Background Jobs
     import jobs.models  # noqa: F401
 
-    # Phase 14 — ML platform models
+    # Phase 14 â€” ML platform models
     import ml.models  # noqa: F401
     import notifications.models  # noqa: F401
     import organizations.models  # noqa: F401
     import organizations.workspace_models  # noqa: F401
 
-    # Phase 13 — SaaS models
+    # Phase 13 â€” SaaS models
     import saas.models  # noqa: F401
     import scheduler.models  # noqa: F401
 
-    # Phase 12 — File Storage
+    # Phase 12 â€” File Storage
     import storage.models  # noqa: F401
 
-    # Phase 15 — Studios models
+    # Phase 15 â€” Studios models
     import studios.models  # noqa: F401
     import validation.models  # noqa: F401
 
@@ -347,7 +347,7 @@ async def lifespan(app: FastAPI):
         queue = get_task_queue()
 
         async def _job_worker():
-            """Background worker loop — dequeues and executes jobs."""
+            """Background worker loop â€” dequeues and executes jobs."""
             logger.info("Background job worker started.")
             while True:
                 try:
@@ -398,7 +398,7 @@ class RequestContextMiddleware(BaseHTTPMiddleware):
 _is_vercel = os.getenv("VERCEL", "").lower() in ("1", "true", "yes")
 
 app = FastAPI(
-    title="DataFlow — Enterprise Data Intelligence API",
+    title="DataFlow â€” Enterprise Data Intelligence API",
     description="Enterprise REST API for ETL, analytics, IAM, and pipeline management.",
     version="1.0.0",
     lifespan=lifespan,
@@ -425,7 +425,7 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 app.add_middleware(MonitoringMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(TenantIsolationMiddleware)
-# Phase 13 — Enterprise audit middleware (auto-logs mutating requests)
+# Phase 13 â€” Enterprise audit middleware (auto-logs mutating requests)
 app.add_middleware(AuditMiddleware)
 _is_test_env = os.getenv("PYTEST_RUNNING", "").lower() in ("1", "true", "yes")
 if not _is_test_env:
@@ -546,7 +546,7 @@ app.include_router(report_engine_router)
 app.include_router(workflow_router)
 app.include_router(ml_router)
 
-# Phase 12.9 — Enterprise Integration Ecosystem
+# Phase 12.9 â€” Enterprise Integration Ecosystem
 app.include_router(connectors_router)
 app.include_router(platform_router)
 app.include_router(webhook_router)
@@ -554,31 +554,31 @@ app.include_router(plugin_router)
 app.include_router(public_router)
 app.include_router(monitoring_router)
 
-# Phase 13 — Commercial SaaS Platform
+# Phase 13 â€” Commercial SaaS Platform
 app.include_router(saas_router)
 app.include_router(saas_admin_router)
 
-# Phase 15 — AI Data Intelligence Operating System (Studios)
+# Phase 15 â€” AI Data Intelligence Operating System (Studios)
 app.include_router(studios_router)
 
-# Phase 16 — Smart Data Capture & Intelligent Document Processing
+# Phase 16 â€” Smart Data Capture & Intelligent Document Processing
 app.include_router(capture_router)
 app.include_router(certificates_router)
 
-# Phase 11 — Background Processing & Job Queue
+# Phase 11 â€” Background Processing & Job Queue
 app.include_router(jobs_router)
 register_builtin_handlers()
 
-# Phase 12 — File Storage Architecture
+# Phase 12 â€” File Storage Architecture
 app.include_router(storage_router)
 
-# Phase 18 — Production Monitoring
+# Phase 18 â€” Production Monitoring
 app.include_router(phase18_monitoring_router)
 
 
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Landing Page
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @app.get("/", include_in_schema=False)
 async def landing_page():
     """Serve the DataFlow landing page."""
@@ -587,13 +587,13 @@ async def landing_page():
     if os.path.exists(index_path):
         return FileResponse(index_path)
     return JSONResponse(
-        {"message": "DataFlow API — visit /docs for API documentation"}, status_code=200
+        {"message": "DataFlow API â€” visit /docs for API documentation"}, status_code=200
     )
 
 
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Dependencies
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def get_sales_repo() -> SalesRepository:
     """FastAPI dependency for SalesRepository."""
     return SalesRepository()
@@ -604,9 +604,9 @@ def get_run_repo() -> PipelineRunRepository:
     return PipelineRunRepository()
 
 
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Health
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @app.get("/health", response_model=HealthResponse, tags=["System"])
 async def health_check():
     """Lightweight health check.
@@ -819,9 +819,9 @@ async def prometheus_metrics():
     )
 
 
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Sales Data
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @app.get("/api/v1/sales", response_model=SalesListResponse, tags=["Sales"])
 async def get_sales(
     region: str | None = Query(None, description="Filter by region"),
@@ -877,9 +877,9 @@ async def get_sales(
     return SalesListResponse(records=records, total=total, page=page, page_size=page_size)
 
 
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # KPIs
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @app.get("/api/v1/kpis", response_model=KPIResponse, tags=["Analytics"])
 async def get_kpis(
     region: str | None = Query(None, description="Filter by region"),
@@ -897,9 +897,9 @@ async def get_kpis(
     return KPIResponse(**kpis)
 
 
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Filter Options
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @app.get("/api/v1/filters", response_model=FilterOptionsResponse, tags=["Analytics"])
 async def get_filter_options(
     repo: SalesRepository = Depends(get_sales_repo),
@@ -919,9 +919,9 @@ async def get_filter_options(
     )
 
 
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Pipeline
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @app.post("/api/v1/pipeline/trigger", response_model=PipelineTriggerResponse, tags=["Pipeline"])
 async def trigger_pipeline(
     background_tasks: BackgroundTasks,
@@ -964,12 +964,12 @@ async def get_pipeline_runs(
     return df.to_dict(orient="records")
 
 
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Root
-# ──────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @app.get("/", tags=["System"])
 async def root():
-    """API root — basic info."""
+    """API root â€” basic info."""
     return {
         "name": "AEDIP Enterprise Data Intelligence API",
         "version": "1.0.0",
@@ -982,7 +982,7 @@ if __name__ == "__main__":
     import uvicorn
 
     _default_host = (
-        "0.0.0.0"  # nosec B104 — production containers and Vercel require 0.0.0.0 binding; dev default is 127.0.0.1; API_HOST env var always takes precedence
+        "0.0.0.0"  # nosec B104 â€” production containers and Vercel require 0.0.0.0 binding; dev default is 127.0.0.1; API_HOST env var always takes precedence
         if _is_vercel or os.getenv("APP_ENV", "").lower() == "production"
         else "127.0.0.1"
     )

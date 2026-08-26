@@ -1,4 +1,4 @@
-"""Tests for the Data Understanding Engine — value-based industry classification.
+﻿"""Tests for the Data Understanding Engine â€” value-based industry classification.
 
 Verifies that the semantic engine correctly classifies datasets using
 both column names AND actual data values, not just keyword matching.
@@ -58,7 +58,7 @@ class TestDataUnderstandingEngine:
         assert any(s.signal_type == "iban" for s in banking_signals)
 
     def test_letter_grades_detected(self):
-        """Letter grades (A–F) in values should signal education."""
+        """Letter grades (Aâ€“F) in values should signal education."""
         df = pd.DataFrame(
             {
                 "score": ["A", "B+", "C", "A-", "F", "B", "C+", "D", "A", "B-"],

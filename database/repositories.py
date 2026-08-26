@@ -1,4 +1,4 @@
-"""Repository pattern for database access.
+﻿"""Repository pattern for database access.
 
 Provides a clean abstraction over SQLAlchemy operations, separating
 data access logic from business logic.
@@ -119,10 +119,10 @@ class SalesRepository:
         params["limit"] = page_size
         params["offset"] = offset
 
-        count_query = f"SELECT COUNT(*) as total FROM sales{where}"  # nosec B608 — where clause uses parameterized values, table name is hardcoded
+        count_query = f"SELECT COUNT(*) as total FROM sales{where}"  # nosec B608 â€” where clause uses parameterized values, table name is hardcoded
         data_query = (
             f"SELECT * FROM sales{where} ORDER BY order_date DESC "
-            f"LIMIT :limit OFFSET :offset"  # nosec B608 — where clause uses parameterized values, table name is hardcoded
+            f"LIMIT :limit OFFSET :offset"  # nosec B608 â€” where clause uses parameterized values, table name is hardcoded
         )
 
         with self.engine.connect() as conn:
@@ -232,7 +232,7 @@ class SalesRepository:
         allowed = {"region", "category", "segment", "sub_category"}
         if column not in allowed:
             raise ValueError(f"Column '{column}' not allowed for distinct query.")
-        query = f"SELECT DISTINCT {column} FROM sales WHERE {column} IS NOT NULL ORDER BY {column}"  # nosec B608 — column validated against allowlist above
+        query = f"SELECT DISTINCT {column} FROM sales WHERE {column} IS NOT NULL ORDER BY {column}"  # nosec B608 â€” column validated against allowlist above
         with self.engine.connect() as conn:
             result = pd.read_sql(text(query), conn)
             return result[column].tolist()

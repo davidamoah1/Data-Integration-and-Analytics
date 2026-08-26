@@ -1,4 +1,4 @@
-"""Transformation engine — applies reusable transformations to DataFrames.
+﻿"""Transformation engine â€” applies reusable transformations to DataFrames.
 
 Supports: rename, drop, filter, fill, convert, calculate, join, split, merge, sort, deduplicate, standardize.
 Each transformation is defined by a config dict with 'type' and type-specific parameters.

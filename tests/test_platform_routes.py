@@ -1,4 +1,4 @@
-"""Tests for enterprise platform routes — templates, comments, search, branding, industry packs."""
+﻿"""Tests for enterprise platform routes â€” templates, comments, search, branding, industry packs."""
 
 import os
 import sys

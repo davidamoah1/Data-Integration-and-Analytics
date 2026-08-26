@@ -1,4 +1,4 @@
-"""Schema Change Monitor.
+﻿"""Schema Change Monitor.
 
 Detects schema changes between dataset runs:
   - Added columns (new fields appearing)
@@ -198,7 +198,7 @@ class SchemaMonitor:
                 renames.append(
                     SchemaChange(
                         change_type="renamed",
-                        column=f"{old_col} → {best_match}",
+                        column=f"{old_col} â†’ {best_match}",
                         old_value=str(old_col),
                         new_value=str(best_match),
                         severity="info",

@@ -1,4 +1,4 @@
-"""reconcile schema drift with current models
+﻿"""reconcile schema drift with current models
 
 Revision ID: ab3669d60d26
 Revises: 0017_ml_and_workflow_tables

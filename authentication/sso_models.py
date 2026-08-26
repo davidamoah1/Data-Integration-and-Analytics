@@ -1,4 +1,4 @@
-"""SSO (Single Sign-On) domain models.
+﻿"""SSO (Single Sign-On) domain models.
 
 Future-ready architecture for OAuth2 / SAML enterprise identity providers.
 Supports Google, Microsoft, and SAML-based SSO.

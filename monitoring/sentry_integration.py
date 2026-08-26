@@ -1,4 +1,4 @@
-"""Sentry error tracking integration.
+﻿"""Sentry error tracking integration.
 
 Initialises the Sentry SDK when SENTRY_DSN is configured and provides
 helpers for capturing exceptions, setting user context, and adding breadcrumbs.

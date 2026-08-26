@@ -1,4 +1,4 @@
-"""ML readiness assessment.
+﻿"""ML readiness assessment.
 
 Analyzes a pandas DataFrame and produces a structured report covering data
 quality, missing values, outliers, class imbalance, feature completeness, and

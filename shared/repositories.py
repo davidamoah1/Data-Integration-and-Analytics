@@ -1,11 +1,11 @@
-"""Base repository layer — generic CRUD operations for SQLAlchemy models.
+﻿"""Base repository layer â€” generic CRUD operations for SQLAlchemy models.
 
 All domain repositories inherit from BaseRepository to get standard
 create, read, update, delete, and list operations for free. Domain-
 specific queries are added in subclasses.
 
 Architecture layer:
-    API Routes → Service Layer → Repository Layer → Database
+    API Routes â†’ Service Layer â†’ Repository Layer â†’ Database
 
 The repository layer is the ONLY place that touches SQLAlchemy session
 objects directly. Services receive repositories via dependency injection
@@ -41,7 +41,7 @@ class BaseRepository(Generic[T]):
     def __init__(self, db: DbSession):
         self.db = db
 
-    # ── Read ────────────────────────────────────────────────────────────
+    # â”€â”€ Read â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def get_by_id(self, id: int) -> T | None:
         return self.db.execute(select(self.model).where(self.model.id == id)).scalar_one_or_none()
@@ -106,7 +106,7 @@ class BaseRepository(Generic[T]):
     def exists(self, id: int) -> bool:
         return self.get_by_id(id) is not None
 
-    # ── Create ──────────────────────────────────────────────────────────
+    # â”€â”€ Create â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def create(self, **kwargs) -> T:
         instance = self.model(**kwargs)
@@ -119,7 +119,7 @@ class BaseRepository(Generic[T]):
         self.db.flush()
         return instance
 
-    # ── Update ──────────────────────────────────────────────────────────
+    # â”€â”€ Update â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def update(self, id: int, **kwargs) -> T | None:
         # Not every model has an updated_at column (e.g. jobs.models.Job) -
@@ -137,7 +137,7 @@ class BaseRepository(Generic[T]):
         self.db.flush()
         return instance
 
-    # ── Delete ──────────────────────────────────────────────────────────
+    # â”€â”€ Delete â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def delete(self, id: int) -> bool:
         instance = self.get_by_id(id)
@@ -151,7 +151,7 @@ class BaseRepository(Generic[T]):
         self.db.delete(instance)
         self.db.flush()
 
-    # ── Bulk ────────────────────────────────────────────────────────────
+    # â”€â”€ Bulk â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def bulk_create(self, instances: list[T]) -> list[T]:
         self.db.add_all(instances)
@@ -165,7 +165,7 @@ class BaseRepository(Generic[T]):
         self.db.flush()
         return result.rowcount
 
-    # ── Session ─────────────────────────────────────────────────────────
+    # â”€â”€ Session â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def commit(self) -> None:
         self.db.commit()

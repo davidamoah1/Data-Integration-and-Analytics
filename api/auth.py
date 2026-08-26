@@ -1,4 +1,4 @@
-"""API key authentication for FastAPI endpoints.
+﻿"""API key authentication for FastAPI endpoints.
 
 Supports API key passed via X-API-Key header or ?api_key query parameter.
 The valid API key is loaded from the API_KEY environment variable.

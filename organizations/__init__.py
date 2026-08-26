@@ -1,1 +1,1 @@
-"""Organizations module — models, schemas, services, routes."""
+﻿"""Organizations module â€” models, schemas, services, routes."""

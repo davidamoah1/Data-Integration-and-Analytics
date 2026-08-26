@@ -1,4 +1,4 @@
-"""ORM model for durable dataset workflow state.
+﻿"""ORM model for durable dataset workflow state.
 
 `DatasetWorkflowOrchestrator` (services/dataset_workflow.py) keeps live
 workflow state in an in-process dict for fast synchronous execution and easy
@@ -9,7 +9,7 @@ visible to any process other than the one that ran the workflow.
 current stage, completion flags) after every stage transition, via a
 progress callback registered in `services/dataset_workflow_routes.py`. It is
 intentionally a plain key/value snapshot rather than a foreign-keyed,
-normalized schema — the workflow orchestrator's stage results are the
+normalized schema â€” the workflow orchestrator's stage results are the
 source of truth and this table exists purely so that status/result reads
 survive a restart or land on a different worker process.
 """
@@ -34,7 +34,7 @@ class DatasetWorkflowRun(Base):
     created_by = Column(BigInt, nullable=True, index=True)
     organization_id = Column(BigInt, nullable=True, index=True)
     current_stage = Column(String(64), nullable=False)
-    # Mirrors WorkflowState.to_dict()["stages"] — keyed by stage value, each
+    # Mirrors WorkflowState.to_dict()["stages"] â€” keyed by stage value, each
     # entry has status/started_at/completed_at/duration_seconds/result/error.
     stages = Column(JSON, nullable=False, default=dict)
     is_complete = Column(Boolean, nullable=False, default=False, server_default=false())

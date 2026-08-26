@@ -1,4 +1,4 @@
-"""Add workspaces and invitations tables.
+﻿"""Add workspaces and invitations tables.
 
 These tables were defined as ORM models in organizations/workspace_models.py
 but were never included in an Alembic migration. On Vercel serverless with

@@ -1,4 +1,4 @@
-"""Automatic KPI Selection.
+﻿"""Automatic KPI Selection.
 
 Identifies meaningful KPIs from the dataset and computes their values.
 KPIs are selected based on:
@@ -7,7 +7,7 @@ KPIs are selected based on:
   - Time-based growth rates
   - Completion/achievement rates
 
-Never fabricates KPIs — all values come from actual data.
+Never fabricates KPIs â€” all values come from actual data.
 """
 
 from __future__ import annotations
@@ -34,7 +34,7 @@ class KPICandidate:
     column: str = ""
     aggregation: str = "sum"
     comparison: str = ""  # e.g., "up 18% from last period"
-    context: str = ""  # e.g., "Jan 2024 – Dec 2024"
+    context: str = ""  # e.g., "Jan 2024 â€“ Dec 2024"
     importance: float = 0.0
 
     def to_dict(self) -> dict:
@@ -111,7 +111,7 @@ class KPISelector:
                     )
                 )
 
-            # Percentage → average
+            # Percentage â†’ average
             elif col_u.role == ColumnSemanticRole.PERCENTAGE:
                 avg = df[measure].mean()
                 kpis.append(
@@ -188,7 +188,7 @@ class KPISelector:
                 column=measure,
                 aggregation="growth",
                 comparison=comparison,
-                context=f"{monthly.index[0]} – {monthly.index[-1]}",
+                context=f"{monthly.index[0]} â€“ {monthly.index[-1]}",
                 importance=90.0,
             )
         except Exception:

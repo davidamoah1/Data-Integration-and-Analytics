@@ -1,4 +1,4 @@
-"""Integration tests for notification REST endpoints."""
+﻿"""Integration tests for notification REST endpoints."""
 
 import pytest
 

@@ -1,4 +1,4 @@
-"""Integration tests for the Enterprise Data Intelligence Ecosystem.
+﻿"""Integration tests for the Enterprise Data Intelligence Ecosystem.
 
 Tests cover:
   - Connector framework (registry, CRUD, test, extract)
@@ -27,7 +27,7 @@ from sqlalchemy.orm import Session
 from api.main import app
 from shared.database import Base
 
-# ─── Fixtures ──────────────────────────────────────────────
+# â”€â”€â”€ Fixtures â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @pytest.fixture(scope="module")
@@ -60,7 +60,7 @@ def auth_token(client):
     )
     if resp.status_code == 200 and "data" in resp.json():
         return resp.json()["data"]["access_token"]
-    # If login fails, return a dummy token — tests may skip
+    # If login fails, return a dummy token â€” tests may skip
     return ""
 
 
@@ -69,7 +69,7 @@ def auth_headers(auth_token):
     return {"Authorization": f"Bearer {auth_token}"}
 
 
-# ─── Connector Tests ───────────────────────────────────────
+# â”€â”€â”€ Connector Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestConnectorFramework:
@@ -104,7 +104,7 @@ class TestConnectorFramework:
         assert len(types) >= 5  # postgresql, mysql, sqlserver, oracle, mongodb
 
 
-# ─── Marketplace Tests ─────────────────────────────────────
+# â”€â”€â”€ Marketplace Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestMarketplace:
@@ -134,7 +134,7 @@ class TestMarketplace:
         assert all(p["category"] == "connector" for p in plugins)
 
 
-# ─── Industry Package Tests ────────────────────────────────
+# â”€â”€â”€ Industry Package Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestIndustryPackages:
@@ -165,7 +165,7 @@ class TestIndustryPackages:
         assert len(pkg["kpi_templates"]) >= 1
 
 
-# ─── Webhook Tests ─────────────────────────────────────────
+# â”€â”€â”€ Webhook Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestWebhooks:
@@ -214,7 +214,7 @@ class TestWebhooks:
         assert resp.status_code == 400
 
 
-# ─── API Key Tests ─────────────────────────────────────────
+# â”€â”€â”€ API Key Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestAPIKeys:
@@ -259,7 +259,7 @@ class TestAPIKeys:
         assert resp.status_code == 200
 
 
-# ─── Public API Tests ──────────────────────────────────────
+# â”€â”€â”€ Public API Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestPublicAPI:
@@ -300,7 +300,7 @@ class TestPublicAPI:
         assert resp.status_code == 403
 
 
-# ─── Monitoring Tests ──────────────────────────────────────
+# â”€â”€â”€ Monitoring Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestEcosystemMonitoring:

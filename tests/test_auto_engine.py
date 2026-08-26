@@ -1,4 +1,4 @@
-"""Comprehensive tests for the Intelligent Automatic Analysis, Chart Selection
+﻿"""Comprehensive tests for the Intelligent Automatic Analysis, Chart Selection
 & Dashboard/Presentation Layout Engine.
 
 Tests cover:
@@ -40,7 +40,7 @@ from services.auto.kpi_engine import AutomaticKPIEngine
 from services.auto.orchestrator import AutoEngineOrchestrator
 from services.auto.presentation_layout_engine import PresentationLayoutEngine
 
-# ── Fixtures ──
+# â”€â”€ Fixtures â”€â”€
 
 
 @pytest.fixture
@@ -115,7 +115,7 @@ def orchestrator() -> AutoEngineOrchestrator:
     return AutoEngineOrchestrator()
 
 
-# ── 1. Column Semantic Role Detection ──
+# â”€â”€ 1. Column Semantic Role Detection â”€â”€
 
 
 class TestColumnDetection:
@@ -206,7 +206,7 @@ class TestColumnDetection:
         assert "correlation_analysis" in understanding.recommended_analyses
 
 
-# ── 2. Chart Selection Rules ──
+# â”€â”€ 2. Chart Selection Rules â”€â”€
 
 
 class TestChartSelection:
@@ -357,12 +357,12 @@ class TestChartSelection:
         engine = IntelligentChartSelectionEngine()
         charts = engine.select_charts(df, understanding)
         line_charts = [c for c in charts if c.chart_type == "line_chart"]
-        # product_name is a category, not a date — no line chart
+        # product_name is a category, not a date â€” no line chart
         for lc in line_charts:
             assert lc.x_axis != "product_name"
 
 
-# ── 3. Chart Importance Scoring ──
+# â”€â”€ 3. Chart Importance Scoring â”€â”€
 
 
 class TestChartScoring:
@@ -399,7 +399,7 @@ class TestChartScoring:
         assert scores == sorted(scores, reverse=True)
 
 
-# ── 4. Chart Deduplication ──
+# â”€â”€ 4. Chart Deduplication â”€â”€
 
 
 class TestChartDeduplication:
@@ -433,7 +433,7 @@ class TestChartDeduplication:
             seen.add(key)
 
 
-# ── 5. KPI Detection ──
+# â”€â”€ 5. KPI Detection â”€â”€
 
 
 class TestKPIEngine:
@@ -485,7 +485,7 @@ class TestKPIEngine:
             assert kpi.value != 0 or kpi.key == "total_records"  # Allow 0 records
 
 
-# ── 6. Insight Generation ──
+# â”€â”€ 6. Insight Generation â”€â”€
 
 
 class TestInsightEngine:
@@ -511,7 +511,7 @@ class TestInsightEngine:
     def test_no_fabricated_insights(
         self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding
     ):
-        """Insights should reference real data — check that values are numeric."""
+        """Insights should reference real data â€” check that values are numeric."""
         engine = AutomaticInsightEngine()
         insights = engine.generate_insights(sales_df, understanding)
         for insight in insights:
@@ -527,7 +527,7 @@ class TestInsightEngine:
     def test_outlier_detection(self):
         """Outlier insights should be generated for columns with outliers."""
         engine = AutomaticInsightEngine()
-        # Create data with clear outliers — use non-sequential values to avoid IDENTIFIER classification
+        # Create data with clear outliers â€” use non-sequential values to avoid IDENTIFIER classification
         np.random.seed(42)
         normal_values = np.random.uniform(10, 100, 60).round(2)
         df = pd.DataFrame(
@@ -541,7 +541,7 @@ class TestInsightEngine:
         assert len(outlier_insights) > 0
 
 
-# ── 7. Filter Selection ──
+# â”€â”€ 7. Filter Selection â”€â”€
 
 
 class TestFilterEngine:
@@ -579,7 +579,7 @@ class TestFilterEngine:
         assert len(filters) <= engine.MAX_FILTERS
 
 
-# ── 8. Dashboard Layout ──
+# â”€â”€ 8. Dashboard Layout â”€â”€
 
 
 class TestDashboardLayout:
@@ -667,7 +667,7 @@ class TestDashboardLayout:
         assert kpi_ids_in_layout == kpi_ids_in_specs
 
 
-# ── 9. Presentation Layout ──
+# â”€â”€ 9. Presentation Layout â”€â”€
 
 
 class TestPresentationLayout:
@@ -705,7 +705,7 @@ class TestPresentationLayout:
         assert len(presentation.slides) >= 4
 
     def test_no_empty_slides(self, sales_df: pd.DataFrame, understanding: DatasetUnderstanding):
-        """No slide should be empty — each should have content or chart data."""
+        """No slide should be empty â€” each should have content or chart data."""
         chart_engine = IntelligentChartSelectionEngine()
         layout_engine = IntelligentDashboardLayoutEngine()
         pres_engine = PresentationLayoutEngine()
@@ -845,7 +845,7 @@ class TestPresentationLayout:
         assert len(presentation.validation["errors"]) == 0
 
 
-# ── 10. End-to-End: Same Chart Specs in Dashboard and Presentation ──
+# â”€â”€ 10. End-to-End: Same Chart Specs in Dashboard and Presentation â”€â”€
 
 
 class TestEndToEnd:
@@ -918,7 +918,7 @@ class TestEndToEnd:
             assert "Empty" in str(e) or "no data" in str(e).lower() or True
 
 
-# ── 11. PPTX Chart Presence (Critical Regression Test) ──
+# â”€â”€ 11. PPTX Chart Presence (Critical Regression Test) â”€â”€
 
 
 class TestPPTXChartPresence:
@@ -1019,10 +1019,10 @@ class TestPPTXChartPresence:
                 chart = charts_by_id[chart_id]
                 assert (
                     len(chart.data) > 0
-                ), f"Chart {chart_id} has no data — would be silently omitted"
+                ), f"Chart {chart_id} has no data â€” would be silently omitted"
 
 
-# ── 12. Canonical Specification Consistency ──
+# â”€â”€ 12. Canonical Specification Consistency â”€â”€
 
 
 class TestCanonicalSpec:

@@ -1,4 +1,4 @@
-"""Regression tests for audit log access-control fixes.
+﻿"""Regression tests for audit log access-control fixes.
 
 Covers:
   - `/api/audit/logs` (and sibling endpoints) require the `audit.view`

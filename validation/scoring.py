@@ -1,4 +1,4 @@
-"""Quality Score Engine — computes multi-dimensional data quality scores with traffic lights."""
+﻿"""Quality Score Engine â€” computes multi-dimensional data quality scores with traffic lights."""
 
 from __future__ import annotations
 

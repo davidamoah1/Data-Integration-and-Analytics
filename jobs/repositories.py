@@ -1,4 +1,4 @@
-"""Repository layer for background jobs.
+﻿"""Repository layer for background jobs.
 
 All database access for the Job model goes through here.
 """

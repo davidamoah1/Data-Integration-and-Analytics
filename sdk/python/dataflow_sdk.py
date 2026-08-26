@@ -1,5 +1,5 @@
-"""
-DataFlow Python SDK — Client library for the DataFlow Enterprise Data Intelligence Platform.
+﻿"""
+DataFlow Python SDK â€” Client library for the DataFlow Enterprise Data Intelligence Platform.
 
 Installation:
     pip install dataflow-sdk

@@ -1,8 +1,8 @@
-"""Regression tests for cross-process task execution via the Redis-backed queue.
+﻿"""Regression tests for cross-process task execution via the Redis-backed queue.
 
 Background: `Task.func` is a Python callable and cannot be JSON-serialized.
 Before the fix, `TaskQueue.dequeue()` on the Redis backend looked up the
-task by ID in a process-local `_tasks` dict — which is always empty in a
+task by ID in a process-local `_tasks` dict â€” which is always empty in a
 separate worker process, silently dropping every job. The fix serializes a
 "module:qualname" `func_path` and reconstructs the Task (re-importing the
 function) when it isn't found locally.
@@ -19,7 +19,7 @@ import asyncio
 
 from performance.queue import Task, TaskPriority, TaskQueue, _resolve_func_path
 
-# ── A real, importable module-level function to use as a job "handler" ────
+# â”€â”€ A real, importable module-level function to use as a job "handler" â”€â”€â”€â”€
 
 
 def _sample_job_handler(a: int, b: int) -> int:
@@ -50,7 +50,7 @@ class FakeRedis:
 
 def _make_queue_with_shared_fake_redis(shared: FakeRedis) -> TaskQueue:
     """Create a TaskQueue wired to the given fake Redis instance."""
-    queue = TaskQueue()  # no real redis_url — avoids a real connection attempt
+    queue = TaskQueue()  # no real redis_url â€” avoids a real connection attempt
     queue._redis = shared
     return queue
 
@@ -95,7 +95,7 @@ def test_task_dequeued_by_separate_queue_instance_is_reconstructed():
 
 
 def test_task_with_unresolvable_func_is_dropped_not_crashed():
-    """A lambda-based task can't survive cross-process — dequeue must not raise."""
+    """A lambda-based task can't survive cross-process â€” dequeue must not raise."""
     shared_redis = FakeRedis()
     api_process_queue = _make_queue_with_shared_fake_redis(shared_redis)
     worker_process_queue = _make_queue_with_shared_fake_redis(shared_redis)

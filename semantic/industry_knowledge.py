@@ -1,4 +1,4 @@
-"""MODULE 6 — Industry Knowledge Base.
+﻿"""MODULE 6 â€” Industry Knowledge Base.
 
 Knowledge libraries for every supported industry containing:
   - Business entities
@@ -32,7 +32,7 @@ INDUSTRY_KNOWLEDGE: dict[str, dict] = {
             "billing",
         ],
         "key_relationships": [
-            "Patient → Admission → Doctor → Ward → Treatment → Billing",
+            "Patient â†’ Admission â†’ Doctor â†’ Ward â†’ Treatment â†’ Billing",
         ],
         "kpis": {
             "operational": [
@@ -64,7 +64,7 @@ INDUSTRY_KNOWLEDGE: dict[str, dict] = {
         ],
         "recommended_charts": ["treemap", "sunburst", "funnel", "bar", "line"],
         "report_templates": [
-            "Executive Summary — Hospital Performance",
+            "Executive Summary â€” Hospital Performance",
             "Department Efficiency Report",
             "Insurance & Billing Analysis",
             "Patient Demographics Report",
@@ -115,7 +115,7 @@ INDUSTRY_KNOWLEDGE: dict[str, dict] = {
             "grade",
         ],
         "key_relationships": [
-            "Student → Course → Department → Grades → Attendance",
+            "Student â†’ Course â†’ Department â†’ Grades â†’ Attendance",
         ],
         "kpis": {
             "operational": [
@@ -197,7 +197,7 @@ INDUSTRY_KNOWLEDGE: dict[str, dict] = {
             "event",
         ],
         "key_relationships": [
-            "Member → Branch → Ministry → Giving → Attendance",
+            "Member â†’ Branch â†’ Ministry â†’ Giving â†’ Attendance",
         ],
         "kpis": {
             "operational": [
@@ -274,7 +274,7 @@ INDUSTRY_KNOWLEDGE: dict[str, dict] = {
             "inventory",
         ],
         "key_relationships": [
-            "Customer → Order → Product → Supplier → Inventory",
+            "Customer â†’ Order â†’ Product â†’ Supplier â†’ Inventory",
         ],
         "kpis": {
             "operational": ["total_orders", "avg_order_value", "conversion_rate", "order_growth"],
@@ -339,7 +339,7 @@ INDUSTRY_KNOWLEDGE: dict[str, dict] = {
             "revenue_gov",
         ],
         "key_relationships": [
-            "Department → Project → Contractor → Procurement → Budget",
+            "Department â†’ Project â†’ Contractor â†’ Procurement â†’ Budget",
         ],
         "kpis": {
             "operational": [
@@ -407,7 +407,7 @@ INDUSTRY_KNOWLEDGE: dict[str, dict] = {
         "description": "NGO analytics: donors, grants, programs, beneficiaries, impact",
         "entities": ["beneficiary", "grant", "donor", "program", "project_ngo", "donation"],
         "key_relationships": [
-            "Donor → Grant → Program → Project → Beneficiary",
+            "Donor â†’ Grant â†’ Program â†’ Project â†’ Beneficiary",
         ],
         "kpis": {
             "operational": [
@@ -480,7 +480,7 @@ INDUSTRY_KNOWLEDGE: dict[str, dict] = {
         "description": "Banking analytics: accounts, transactions, loans, cards, deposits",
         "entities": ["account", "transaction", "loan", "card", "customer"],
         "key_relationships": [
-            "Customer → Account → Transaction → Card → Loan",
+            "Customer â†’ Account â†’ Transaction â†’ Card â†’ Loan",
         ],
         "kpis": {
             "operational": [
@@ -553,7 +553,7 @@ INDUSTRY_KNOWLEDGE: dict[str, dict] = {
         "description": "Manufacturing analytics: production, machines, downtime, yield, quality",
         "entities": ["machine", "production", "downtime", "product_manufacturing"],
         "key_relationships": [
-            "Machine → Production → Product → Downtime → Quality",
+            "Machine â†’ Production â†’ Product â†’ Downtime â†’ Quality",
         ],
         "kpis": {
             "operational": [
@@ -625,7 +625,7 @@ INDUSTRY_KNOWLEDGE: dict[str, dict] = {
         "description": "Agriculture analytics: farms, crops, harvest, livestock, weather",
         "entities": ["farm", "crop", "livestock", "weather"],
         "key_relationships": [
-            "Farm → Crop → Harvest → Weather → Livestock",
+            "Farm â†’ Crop â†’ Harvest â†’ Weather â†’ Livestock",
         ],
         "kpis": {
             "operational": [
@@ -671,7 +671,7 @@ INDUSTRY_KNOWLEDGE: dict[str, dict] = {
                 "metric": "rainfall",
                 "threshold": "<500",
                 "severity": "warning",
-                "message": "Low rainfall — irrigation needed",
+                "message": "Low rainfall â€” irrigation needed",
             },
             {
                 "metric": "yield_decline",
@@ -697,7 +697,7 @@ INDUSTRY_KNOWLEDGE: dict[str, dict] = {
         "description": "Insurance analytics: policies, claims, premiums, agents, coverage",
         "entities": ["policy", "claim", "agent"],
         "key_relationships": [
-            "Agent → Policy → Claim → Settlement → Customer",
+            "Agent â†’ Policy â†’ Claim â†’ Settlement â†’ Customer",
         ],
         "kpis": {
             "operational": [
@@ -769,7 +769,7 @@ INDUSTRY_KNOWLEDGE: dict[str, dict] = {
         "description": "Hospitality analytics: reservations, guests, rooms, revenue, services",
         "entities": ["reservation", "guest", "room", "service"],
         "key_relationships": [
-            "Guest → Reservation → Room → Service → Revenue",
+            "Guest â†’ Reservation â†’ Room â†’ Service â†’ Revenue",
         ],
         "kpis": {
             "operational": [
@@ -841,7 +841,7 @@ INDUSTRY_KNOWLEDGE: dict[str, dict] = {
         "description": "Telecommunications analytics: subscribers, calls, data usage, plans, revenue",
         "entities": ["subscriber", "call", "data_usage", "plan"],
         "key_relationships": [
-            "Subscriber → Plan → Call → Data Usage → Revenue",
+            "Subscriber â†’ Plan â†’ Call â†’ Data Usage â†’ Revenue",
         ],
         "kpis": {
             "operational": [

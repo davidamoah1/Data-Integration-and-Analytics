@@ -1,4 +1,4 @@
-"""Orchestration service for the Smart Data Capture platform.
+﻿"""Orchestration service for the Smart Data Capture platform.
 
 Implements the full pipeline:
     Upload -> Preprocess -> Classify -> Extract -> Validate ->
@@ -95,7 +95,7 @@ class CaptureError(ValueError):
 class CaptureService:
     def __init__(self, db: DbSession):
         self.db = db
-        # Repository layer — all DB access goes through these
+        # Repository layer â€” all DB access goes through these
         self.doc_repo = CaptureDocumentRepository(db)
         self.field_repo = CaptureFieldRepository(db)
         self.batch_repo = CaptureBatchRepository(db)
@@ -106,7 +106,7 @@ class CaptureService:
 
         self.file_service = FileService(db)
 
-    # ── storage helpers ──────────────────────────────────────────────────
+    # â”€â”€ storage helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def _doc_storage_dir(self, organization_id: int, token: str) -> str:
         return os.path.join(config.CAPTURE_STORAGE_DIR, str(organization_id), token)
@@ -120,9 +120,9 @@ class CaptureService:
         """
         backend = self.file_service.backend
         if backend.name == "local":
-            # Local backend — key is relative to base_dir
+            # Local backend â€” key is relative to base_dir
             return os.path.join(backend.base_dir, storage_key)
-        # Cloud backend — download to temp file
+        # Cloud backend â€” download to temp file
         import tempfile
 
         ext = os.path.splitext(storage_key)[1]
@@ -166,7 +166,7 @@ class CaptureService:
             details=details,
         )
 
-    # ── upload ───────────────────────────────────────────────────────────
+    # â”€â”€ upload â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def upload_document(
         self,
@@ -217,7 +217,7 @@ class CaptureService:
             self.db.commit()
             return existing
 
-        # Upload to storage layer (Phase 12 — abstract object storage)
+        # Upload to storage layer (Phase 12 â€” abstract object storage)
         key_prefix = f"capture/{organization_id}/"
         file_record = self.file_service.upload(
             organization_id=organization_id,
@@ -312,7 +312,7 @@ class CaptureService:
 
         return batch, documents
 
-    # ── batches ──────────────────────────────────────────────────────────
+    # â”€â”€ batches â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def create_batch(
         self, organization_id: int, user_id: int, name: str, industry: str | None = None
@@ -363,7 +363,7 @@ class CaptureService:
         batch.completed_at = datetime.now(timezone.utc)
         self.db.commit()
 
-    # ── pipeline ─────────────────────────────────────────────────────────
+    # â”€â”€ pipeline â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def _extract_pdf_text(self, doc: CaptureDocument) -> str | None:
         """Extract text directly from a PDF using PyMuPDF (no OCR needed)."""
@@ -669,7 +669,7 @@ class CaptureService:
 
         self.db.commit()
 
-    # ── review ───────────────────────────────────────────────────────────
+    # â”€â”€ review â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def get_document(self, document_id: int, organization_id: int) -> CaptureDocument | None:
         return self.doc_repo.get_by_org(document_id, organization_id)
@@ -808,7 +808,7 @@ class CaptureService:
         self.db.commit()
         return doc
 
-    # ── database entry (export approved data to dataset) ────────────────
+    # â”€â”€ database entry (export approved data to dataset) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def export_to_dataset(
         self,
@@ -820,7 +820,7 @@ class CaptureService:
         """Export an approved document's extracted fields as a dataset CSV.
 
         This is the final 'Database entry' step in the capture pipeline:
-        Upload → OCR → Field detection → Validation → Review → Approval → Database entry
+        Upload â†’ OCR â†’ Field detection â†’ Validation â†’ Review â†’ Approval â†’ Database entry
         """
         doc = self.get_document(document_id, organization_id)
         if not doc:
@@ -870,7 +870,7 @@ class CaptureService:
                 entry = DatasetEntry(
                     id=ds_id,
                     name=dataset_name
-                    or f"Capture Export — {doc.document_type_label or doc.document_type or 'Unknown'}",
+                    or f"Capture Export â€” {doc.document_type_label or doc.document_type or 'Unknown'}",
                     tier=DataTier.PRODUCTION,
                     file_path=csv_path,
                     metadata={
@@ -1067,10 +1067,10 @@ class CaptureService:
         self.db.delete(doc)
         self.db.commit()
 
-    # ── analytics / dashboard integration ───────────────────────────────
+    # â”€â”€ analytics / dashboard integration â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def get_analytics_summary(self, organization_id: int) -> dict:
-        """Live summary for dashboards — computed from repository queries."""
+        """Live summary for dashboards â€” computed from repository queries."""
         by_status = self.doc_repo.count_by_status(organization_id)
         by_type = self.doc_repo.count_by_type(organization_id)
         by_industry = self.doc_repo.count_by_industry(organization_id)

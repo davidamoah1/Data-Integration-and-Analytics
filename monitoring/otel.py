@@ -1,4 +1,4 @@
-"""OpenTelemetry tracing and metrics integration.
+﻿"""OpenTelemetry tracing and metrics integration.
 
 Sets up distributed tracing, metrics collection, and auto-instrumentation
 for FastAPI, SQLAlchemy, and Redis when OTEL_EXPORTER_OTLP_ENDPOINT is configured.

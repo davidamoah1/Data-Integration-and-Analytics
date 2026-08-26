@@ -1,8 +1,8 @@
-"""Africa Column Recognizer.
+﻿"""Africa Column Recognizer.
 
 Recognizes African data patterns in DataFrames:
   - Region names (Ghana: Greater Accra, Ashanti; Nigeria: Lagos, Kano; etc.)
-  - Currency symbols and codes (₵, GHS, ₦, NGN, KSh, KES, R, ZAR)
+  - Currency symbols and codes (â‚µ, GHS, â‚¦, NGN, KSh, KES, R, ZAR)
   - Phone numbers with African dialing codes (+233, +234, +254, +27)
   - Education terms (SHS, JHS, BECE, WASSCE, KCSE, NHIF)
   - Healthcare terms (NHIS, CHPS, NHIF, clinic, hospital)

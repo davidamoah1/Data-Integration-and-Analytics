@@ -1,4 +1,4 @@
-"""Industry Intelligence Platform.
+﻿"""Industry Intelligence Platform.
 
 Specialized analytics engines for each business sector. Each sector gets
 its own analytics module that understands the domain-specific metrics,

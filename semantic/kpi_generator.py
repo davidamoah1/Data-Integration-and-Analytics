@@ -1,4 +1,4 @@
-"""MODULE 9 — KPI Generator.
+﻿"""MODULE 9 â€” KPI Generator.
 
 Generates KPIs from business entities instead of SQL tables.
 Uses semantic mappings to compute industry-appropriate KPIs.
@@ -24,7 +24,7 @@ class KPI:
     formatted: str
     entity: str
     category: str  # operational, financial, clinical, academic, etc.
-    icon: str = "📊"
+    icon: str = "ðŸ“Š"
 
 
 @dataclass
@@ -158,7 +158,7 @@ class KPIGenerator:
                     formatted=_fmt_currency(total_revenue),
                     entity="revenue",
                     category="financial",
-                    icon="💰",
+                    icon="ðŸ’°",
                 )
             )
 
@@ -176,7 +176,7 @@ class KPIGenerator:
                     formatted=_fmt_currency(avg_value),
                     entity="revenue",
                     category="financial",
-                    icon="✨",
+                    icon="âœ¨",
                 )
             )
 
@@ -193,7 +193,7 @@ class KPIGenerator:
                 formatted=_fmt_number(tx_count),
                 entity="order",
                 category="operational",
-                icon="🛒",
+                icon="ðŸ›’",
             )
         )
 
@@ -209,7 +209,7 @@ class KPIGenerator:
                     formatted=_fmt_number(entity_count),
                     entity=customer_col,
                     category="operational",
-                    icon="👥",
+                    icon="ðŸ‘¥",
                 )
             )
 
@@ -241,7 +241,7 @@ class KPIGenerator:
                     formatted=_fmt_currency(total_profit),
                     entity="revenue",
                     category="financial",
-                    icon="📈",
+                    icon="ðŸ“ˆ",
                 )
             )
             kpis.append(
@@ -252,7 +252,7 @@ class KPIGenerator:
                     formatted=_fmt_pct(margin),
                     entity="revenue",
                     category="financial",
-                    icon="📊",
+                    icon="ðŸ“Š",
                 )
             )
 
@@ -266,7 +266,7 @@ class KPIGenerator:
                 formatted=_fmt_pct(quality),
                 entity="universal",
                 category="quality",
-                icon="✅",
+                icon="âœ…",
             )
         )
 

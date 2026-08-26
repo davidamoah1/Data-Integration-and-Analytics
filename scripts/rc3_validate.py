@@ -1,4 +1,4 @@
-"""RC3 real-world validation runner.
+﻿"""RC3 real-world validation runner.
 
 Loads synthetic industry datasets, runs the semantic pipeline, checks industry
 detection, KPI/dashboard relevance, and report export. Writes a JSON report.

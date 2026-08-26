@@ -1,4 +1,4 @@
-"""Report Generator.
+﻿"""Report Generator.
 
 Generates structured narrative reports from the semantic model,
 industry intelligence, and automated insights. Reports include:
@@ -220,12 +220,12 @@ class ReportGenerator:
         for insight in insights_list[:10]:
             line = f"**{insight.title}**: {insight.formatted}"
             if insight.alert and insight.alert != "ok":
-                line += f" ⚠️ ({insight.alert})"
+                line += f" âš ï¸ ({insight.alert})"
             bullets.append(line)
 
         # Add alerts
         alerts = getattr(intelligence, "alerts", [])
-        alert_bullets = [f"⚠️ {a}" for a in alerts] if alerts else []
+        alert_bullets = [f"âš ï¸ {a}" for a in alerts] if alerts else []
 
         return ReportSection(
             title="Industry-Specific Insights",
@@ -282,7 +282,7 @@ class ReportGenerator:
                                 f"from {first_val:,.0f} to {last_val:,.0f}"
                             )
         else:
-            bullets.append("No date column found — trend analysis not available.")
+            bullets.append("No date column found â€” trend analysis not available.")
 
         return ReportSection(
             title="Trend Analysis",
@@ -295,12 +295,12 @@ class ReportGenerator:
         bullets = []
         for insight in insights[:10]:
             icon = (
-                "⚠️"
+                "âš ï¸"
                 if insight.severity.value == "warning"
                 else (
-                    "🔴"
+                    "ðŸ”´"
                     if insight.severity.value == "critical"
-                    else "✅" if insight.severity.value == "positive" else "ℹ️"
+                    else "âœ…" if insight.severity.value == "positive" else "â„¹ï¸"
                 )
             )
             bullets.append(f"{icon} **{insight.title}**: {insight.description}")

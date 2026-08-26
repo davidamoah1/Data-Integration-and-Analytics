@@ -1,4 +1,4 @@
-"""Image preprocessing pipeline for the Smart Data Capture platform.
+﻿"""Image preprocessing pipeline for the Smart Data Capture platform.
 
 Uses Pillow only (no system binaries required beyond Python packages) to
 improve OCR accuracy: grayscale conversion, auto-contrast, noise reduction,

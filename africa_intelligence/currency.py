@@ -1,4 +1,4 @@
-"""Africa Currency Converter.
+﻿"""Africa Currency Converter.
 
 Converts between African currencies and USD.
 Supports GHS, NGN, KES, ZAR with exchange rates.
@@ -45,13 +45,13 @@ class AfricaCurrencyConverter:
 
     # Currency symbols
     SYMBOLS: dict[str, str] = {
-        "GHS": "₵",
-        "NGN": "₦",
+        "GHS": "â‚µ",
+        "NGN": "â‚¦",
         "KES": "KSh",
         "ZAR": "R",
         "USD": "$",
-        "EUR": "€",
-        "GBP": "£",
+        "EUR": "â‚¬",
+        "GBP": "Â£",
     }
 
     # Currency names
@@ -132,7 +132,7 @@ class AfricaCurrencyConverter:
         """Parse a currency string and return a float.
 
         Handles formats like:
-          - "₵1,500.00"
+          - "â‚µ1,500.00"
           - "GHS 1500"
           - "1,500.00"
           - "KSh 25,000"
@@ -146,7 +146,7 @@ class AfricaCurrencyConverter:
             cleaned = cleaned.replace(cls.SYMBOLS.get(currency_code, ""), "")
             cleaned = cleaned.replace(currency_code, "")
         # Remove common currency indicators
-        for sym in ["$", "€", "£", "₵", "₦", "R", "KSh"]:
+        for sym in ["$", "â‚¬", "Â£", "â‚µ", "â‚¦", "R", "KSh"]:
             cleaned = cleaned.replace(sym, "")
         # Remove commas and spaces
         cleaned = cleaned.replace(",", "").strip()

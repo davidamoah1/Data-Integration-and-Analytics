@@ -1,4 +1,4 @@
-"""add dataset_workflow_runs table for durable workflow state (C3)
+﻿"""add dataset_workflow_runs table for durable workflow state (C3)
 
 Persists a snapshot of DatasetWorkflowOrchestrator state (services/
 dataset_workflow.py) so workflow status/results survive a process restart
@@ -47,7 +47,7 @@ def upgrade() -> None:
         ),
         sa.Column("current_stage", sa.String(64), nullable=False),
         # JSON columns must not carry a literal server_default on MySQL
-        # (BLOB/TEXT/JSON columns can't have a DEFAULT value) — Python-side
+        # (BLOB/TEXT/JSON columns can't have a DEFAULT value) â€” Python-side
         # default=dict on the ORM model supplies the value on insert instead.
         sa.Column("stages", sa.JSON(), nullable=False),
         sa.Column("is_complete", sa.Boolean(), nullable=False, server_default=sa.false()),

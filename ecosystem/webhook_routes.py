@@ -1,4 +1,4 @@
-"""FastAPI routes for the Webhook Event System."""
+﻿"""FastAPI routes for the Webhook Event System."""
 
 from __future__ import annotations
 
@@ -75,7 +75,7 @@ async def create_webhook(
             "secret": secret,  # only shown once
             "is_active": sub.is_active,
         },
-        "Webhook created — save the secret for signature verification",
+        "Webhook created â€” save the secret for signature verification",
     )
 
 

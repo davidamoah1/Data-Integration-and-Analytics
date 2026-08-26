@@ -1,4 +1,4 @@
-"""Tests for the FastAPI endpoints."""
+﻿"""Tests for the FastAPI endpoints."""
 
 import os
 import sys

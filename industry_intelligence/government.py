@@ -1,4 +1,4 @@
-"""Government Intelligence — Budget, projects, regional analytics.
+﻿"""Government Intelligence â€” Budget, projects, regional analytics.
 
 Specialized analytics for government and public sector:
   - Budget allocation and utilization
@@ -43,7 +43,7 @@ class GovernmentAnalytics(IndustryAnalytics):
         date_col = cls._find_date_col(df, col_mapping)
         region_col = cls._find_col(df, col_mapping, ["region"])
 
-        # ── Budget Analytics ─────────────────────────────
+        # â”€â”€ Budget Analytics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if budget_col and budget_col in df.columns:
             total_budget = float(df[budget_col].sum())
             insights.append(
@@ -63,7 +63,7 @@ class GovernmentAnalytics(IndustryAnalytics):
                     dept_bd.metric = "budget"
                     breakdowns.append(dept_bd)
 
-        # ── Revenue ──────────────────────────────────────
+        # â”€â”€ Revenue â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if revenue_col and revenue_col in df.columns:
             total_revenue = float(df[revenue_col].sum())
             insights.append(
@@ -94,7 +94,7 @@ class GovernmentAnalytics(IndustryAnalytics):
                     )
                 )
 
-        # ── Project Analytics ────────────────────────────
+        # â”€â”€ Project Analytics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if project_col and project_col in df.columns:
             project_count = int(df[project_col].nunique())
             insights.append(
@@ -114,7 +114,7 @@ class GovernmentAnalytics(IndustryAnalytics):
                     proj_bd.metric = "projects"
                     breakdowns.append(proj_bd)
 
-        # ── Procurement ──────────────────────────────────
+        # â”€â”€ Procurement â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if procurement_col and procurement_col in df.columns:
             proc_count = int(df[procurement_col].nunique())
             insights.append(
@@ -127,7 +127,7 @@ class GovernmentAnalytics(IndustryAnalytics):
                 )
             )
 
-        # ── Contractor Performance ───────────────────────
+        # â”€â”€ Contractor Performance â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if contractor_col and contractor_col in df.columns:
             contractor_count = int(df[contractor_col].nunique())
             insights.append(
@@ -147,7 +147,7 @@ class GovernmentAnalytics(IndustryAnalytics):
                     con_bd.metric = "projects"
                     breakdowns.append(con_bd)
 
-        # ── Regional Analytics ───────────────────────────
+        # â”€â”€ Regional Analytics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if region_col and region_col in df.columns:
             region_count = int(df[region_col].nunique())
             insights.append(
@@ -167,7 +167,7 @@ class GovernmentAnalytics(IndustryAnalytics):
                     region_bd.metric = "budget"
                     breakdowns.append(region_bd)
 
-        # ── Department Analytics ─────────────────────────
+        # â”€â”€ Department Analytics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if dept_col and dept_col in df.columns:
             dept_count = int(df[dept_col].nunique())
             insights.append(
@@ -180,7 +180,7 @@ class GovernmentAnalytics(IndustryAnalytics):
                 )
             )
 
-        # ── Trends ───────────────────────────────────────
+        # â”€â”€ Trends â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if date_col and budget_col and budget_col in df.columns:
             budget_trend = cls._compute_trend(df, date_col, budget_col, "sum")
             if budget_trend:
@@ -199,10 +199,10 @@ class GovernmentAnalytics(IndustryAnalytics):
         for insight in insights:
             if insight.alert == "critical":
                 alerts.append(
-                    f"CRITICAL: {insight.title}: {insight.formatted} — immediate fiscal review needed."
+                    f"CRITICAL: {insight.title}: {insight.formatted} â€” immediate fiscal review needed."
                 )
             elif insight.alert == "warning":
-                alerts.append(f"{insight.title}: {insight.formatted} — requires monitoring.")
+                alerts.append(f"{insight.title}: {insight.formatted} â€” requires monitoring.")
 
         return AnalyticsResult(
             industry="government",

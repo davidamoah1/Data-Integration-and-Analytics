@@ -1,4 +1,4 @@
-"""FastAPI routes for invitation and registration v2 endpoints."""
+﻿"""FastAPI routes for invitation and registration v2 endpoints."""
 
 import logging
 
@@ -61,7 +61,7 @@ async def signup_v2(request: SignupV2Request, db: DbSession = Depends(get_db)):
 
 @invitation_router.get("/info/{token}")
 async def get_invitation_info(token: str, db: DbSession = Depends(get_db)):
-    """Get invitation details by token (public — used by invitation landing page)."""
+    """Get invitation details by token (public â€” used by invitation landing page)."""
     service = InvitationService(db)
     info = service.get_invitation_by_token(token)
     return success_response(info)

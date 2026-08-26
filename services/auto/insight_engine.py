@@ -1,6 +1,6 @@
-"""Automatic Insight Engine.
+﻿"""Automatic Insight Engine.
 
-Generates insights from computed results — not fabricated by AI.
+Generates insights from computed results â€” not fabricated by AI.
 Every insight references real computed data.
 
 Priorities:
@@ -66,7 +66,7 @@ class AutomaticInsightEngine:
 
         return insights[: self.MAX_INSIGHTS]
 
-    # ── Detectors ──
+    # â”€â”€ Detectors â”€â”€
 
     def _detect_trends(
         self,
@@ -171,7 +171,7 @@ class AutomaticInsightEngine:
             insights.append(
                 InsightSpecification(
                     title=f"{outlier_count} outliers detected in {self._label(col_u.name)}",
-                    description=f"{outlier_pct:.1f}% of {self._label(col_u.name)} values are statistical outliers (beyond 1.5×IQR). Values range from {stats.get('min', 0):,.2f} to {stats.get('max', 0):,.2f}.",
+                    description=f"{outlier_pct:.1f}% of {self._label(col_u.name)} values are statistical outliers (beyond 1.5Ã—IQR). Values range from {stats.get('min', 0):,.2f} to {stats.get('max', 0):,.2f}.",
                     severity=severity,
                     insight_type="anomaly",
                     metric=col_u.name,
@@ -317,7 +317,7 @@ class AutomaticInsightEngine:
 
         return insights
 
-    # ── Helpers ──
+    # â”€â”€ Helpers â”€â”€
 
     @staticmethod
     def _label(col: str) -> str:

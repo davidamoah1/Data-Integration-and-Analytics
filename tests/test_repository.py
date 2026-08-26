@@ -1,4 +1,4 @@
-"""Tests for the SalesRepository."""
+﻿"""Tests for the SalesRepository."""
 
 import os
 import sys

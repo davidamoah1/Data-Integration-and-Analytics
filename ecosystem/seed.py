@@ -1,4 +1,4 @@
-"""Seed industry solution packages into the marketplace.
+﻿"""Seed industry solution packages into the marketplace.
 
 Creates pre-built packages for:
   - Healthcare

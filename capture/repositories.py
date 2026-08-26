@@ -1,12 +1,12 @@
-"""Repository layer for the Smart Data Capture module.
+﻿"""Repository layer for the Smart Data Capture module.
 
 All database access for capture documents, fields, batches, templates,
 corrections, and audit logs goes through these repositories. The
-service layer calls these — it never touches the SQLAlchemy session
+service layer calls these â€” it never touches the SQLAlchemy session
 directly.
 
 Architecture:
-    routes.py (API) → service.py (Business) → repositories.py (Data) → models.py (ORM)
+    routes.py (API) â†’ service.py (Business) â†’ repositories.py (Data) â†’ models.py (ORM)
 """
 
 from __future__ import annotations

@@ -1,4 +1,4 @@
-"""Enterprise admin panel package."""
+﻿"""Enterprise admin panel package."""
 
 from admin.routes import router
 

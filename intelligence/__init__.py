@@ -1,4 +1,4 @@
-"""Intelligent Analysis Engine — automatic column understanding,
+﻿"""Intelligent Analysis Engine â€” automatic column understanding,
 chart selection, scoring, and canonical chart specification generation.
 
 This module sits between the existing semantic/profiling pipeline and
@@ -7,8 +7,8 @@ ChartSpecification that becomes the single source of truth for all
 visualization subsystems.
 
 Pipeline:
-    DataFrame → ColumnAnalyzer → ChartSelector → ChartSpecification[]
-                    ↓                ↓
+    DataFrame â†’ ColumnAnalyzer â†’ ChartSelector â†’ ChartSpecification[]
+                    â†“                â†“
               semantic roles     importance scores
               KPI candidates     deduplication
               insights           "why this chart" explanations

@@ -1,4 +1,4 @@
-"""Enterprise admin panel API routes.
+﻿"""Enterprise admin panel API routes.
 
 Provides organization management, user management, and system monitoring
 endpoints for platform and organization administrators.

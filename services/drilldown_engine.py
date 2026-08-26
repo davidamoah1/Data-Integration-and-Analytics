@@ -1,7 +1,7 @@
-"""Drilldown Engine.
+﻿"""Drilldown Engine.
 
 Enables hierarchical navigation:
-  KPI → Chart → Detail Table → Record View
+  KPI â†’ Chart â†’ Detail Table â†’ Record View
 
 Supports breadcrumb navigation and drill-through.
 """

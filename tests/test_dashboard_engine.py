@@ -1,4 +1,4 @@
-"""Tests for the Enterprise Dashboard Intelligence Engine.
+﻿"""Tests for the Enterprise Dashboard Intelligence Engine.
 
 Tests cover:
   - Dashboard metadata model (CRUD, customization, sharing)
@@ -35,7 +35,7 @@ from services.drilldown_engine import DrilldownEngine
 from services.filter_engine import GlobalFilterEngine
 from services.kpi_intelligence import KPIIntelligenceEngine
 
-# ── Fixtures ───────────────────────────────────────────
+# â”€â”€ Fixtures â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @pytest.fixture
@@ -254,7 +254,7 @@ def perf():
     return DashboardPerformanceLayer()
 
 
-# ── Dashboard Engine Tests ─────────────────────────────
+# â”€â”€ Dashboard Engine Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestDashboardEngine:
@@ -472,7 +472,7 @@ class TestDashboardEngine:
         assert len(restored.charts) == 1
 
 
-# ── KPI Intelligence Engine Tests ──────────────────────
+# â”€â”€ KPI Intelligence Engine Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestKPIIntelligenceEngine:
@@ -524,7 +524,7 @@ class TestKPIIntelligenceEngine:
         assert len(keys) == len(set(keys))
 
 
-# ── Chart Recommendation Engine Tests ──────────────────
+# â”€â”€ Chart Recommendation Engine Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestChartRecommendationEngine:
@@ -574,7 +574,7 @@ class TestChartRecommendationEngine:
             assert chart.id != ""
 
 
-# ── Layout Engine Tests ────────────────────────────────
+# â”€â”€ Layout Engine Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestDashboardLayoutEngine:
@@ -638,7 +638,7 @@ class TestDashboardLayoutEngine:
         assert layout is not None
 
 
-# ── Filter Engine Tests ────────────────────────────────
+# â”€â”€ Filter Engine Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestGlobalFilterEngine:
@@ -689,7 +689,7 @@ class TestGlobalFilterEngine:
             assert isinstance(affected, list)
 
 
-# ── Drilldown Engine Tests ─────────────────────────────
+# â”€â”€ Drilldown Engine Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestDrilldownEngine:
@@ -747,7 +747,7 @@ class TestDrilldownEngine:
         assert result["pages"] == 2
 
 
-# ── AI Dashboard Assistant Tests ───────────────────────
+# â”€â”€ AI Dashboard Assistant Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestAIDashboardAssistant:
@@ -809,7 +809,7 @@ class TestAIDashboardAssistant:
         assert len(suggestions) > 0
 
 
-# ── Export Service Tests ───────────────────────────────
+# â”€â”€ Export Service Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestDashboardExportService:
@@ -882,7 +882,7 @@ class TestDashboardExportService:
             export_service.export(sample_dashboard, fmt="docx")
 
 
-# ── Performance Layer Tests ────────────────────────────
+# â”€â”€ Performance Layer Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestDashboardPerformanceLayer:

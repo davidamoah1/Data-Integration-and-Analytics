@@ -1,17 +1,17 @@
-"""Intelligent Chart Selection Engine.
+﻿"""Intelligent Chart Selection Engine.
 
 Determines which visualizations are appropriate for a dataset using
 deterministic rules first, then AI/semantic reasoning where appropriate.
 
 Rules:
-  TIME + NUMERIC       → line chart
-  CATEGORY + NUMERIC   → bar chart
-  CATEGORY + PROPORTION→ pie/donut (small category count only)
-  TWO NUMERIC          → scatter plot
-  DISTRIBUTION         → histogram, box plot
-  CORRELATION          → heatmap
-  RANKING              → sorted bar chart
-  GEOGRAPHIC           → map (only when confidently detected)
+  TIME + NUMERIC       â†’ line chart
+  CATEGORY + NUMERIC   â†’ bar chart
+  CATEGORY + PROPORTIONâ†’ pie/donut (small category count only)
+  TWO NUMERIC          â†’ scatter plot
+  DISTRIBUTION         â†’ histogram, box plot
+  CORRELATION          â†’ heatmap
+  RANKING              â†’ sorted bar chart
+  GEOGRAPHIC           â†’ map (only when confidently detected)
 
 Every chart receives an importance score.  Poor chart choices are
 actively rejected.  Duplicate charts are detected and removed.
@@ -79,7 +79,7 @@ class IntelligentChartSelectionEngine:
         good_measures = self._filter_by_quality(df, measures, understanding)
         good_dimensions = self._filter_by_quality(df, dimensions, understanding)
 
-        # ── 1. TIME + NUMERIC → Line chart ──
+        # â”€â”€ 1. TIME + NUMERIC â†’ Line chart â”€â”€
         for time_col in time_cols[:2]:
             for metric_col in good_measures[:3]:
                 chart = self._make_line_chart(df, time_col, metric_col, understanding, order)
@@ -87,7 +87,7 @@ class IntelligentChartSelectionEngine:
                     candidates.append(chart)
                     order += 1
 
-        # ── 2. CATEGORY + NUMERIC → Bar chart ──
+        # â”€â”€ 2. CATEGORY + NUMERIC â†’ Bar chart â”€â”€
         for dim_col in good_dimensions[:4]:
             for metric_col in good_measures[:3]:
                 if dim_col == metric_col:
@@ -97,14 +97,14 @@ class IntelligentChartSelectionEngine:
                     candidates.append(chart)
                     order += 1
 
-        # ── 3. CATEGORY + PROPORTION → Pie/donut (small categories only) ──
+        # â”€â”€ 3. CATEGORY + PROPORTION â†’ Pie/donut (small categories only) â”€â”€
         for dim_col in good_dimensions[:3]:
             chart = self._make_pie_chart(df, dim_col, understanding, order)
             if chart:
                 candidates.append(chart)
                 order += 1
 
-        # ── 4. TWO NUMERIC → Scatter plot ──
+        # â”€â”€ 4. TWO NUMERIC â†’ Scatter plot â”€â”€
         if len(good_measures) >= 2:
             for i in range(min(len(good_measures) - 1, 3)):
                 chart = self._make_scatter_plot(
@@ -114,21 +114,21 @@ class IntelligentChartSelectionEngine:
                     candidates.append(chart)
                     order += 1
 
-        # ── 5. DISTRIBUTION → Histogram ──
+        # â”€â”€ 5. DISTRIBUTION â†’ Histogram â”€â”€
         for metric_col in good_measures[:3]:
             chart = self._make_histogram(df, metric_col, understanding, order)
             if chart:
                 candidates.append(chart)
                 order += 1
 
-        # ── 6. CORRELATION → Heatmap (3+ numeric variables) ──
+        # â”€â”€ 6. CORRELATION â†’ Heatmap (3+ numeric variables) â”€â”€
         if len(good_measures) >= 3:
             chart = self._make_correlation_heatmap(df, good_measures, understanding, order)
             if chart:
                 candidates.append(chart)
                 order += 1
 
-        # ── 7. RANKING → Sorted bar chart ──
+        # â”€â”€ 7. RANKING â†’ Sorted bar chart â”€â”€
         for dim_col in good_dimensions[:2]:
             for metric_col in good_measures[:2]:
                 chart = self._make_ranking_chart(df, dim_col, metric_col, understanding, order)
@@ -136,7 +136,7 @@ class IntelligentChartSelectionEngine:
                     candidates.append(chart)
                     order += 1
 
-        # ── 8. GEOGRAPHIC → Map (only when confidently detected) ──
+        # â”€â”€ 8. GEOGRAPHIC â†’ Map (only when confidently detected) â”€â”€
         if geo_cols:
             for geo_col in geo_cols[:1]:
                 for metric_col in good_measures[:1]:
@@ -145,7 +145,7 @@ class IntelligentChartSelectionEngine:
                         candidates.append(chart)
                         order += 1
 
-        # ── 9. AREA CHART (time + numeric, emphasizing volume) ──
+        # â”€â”€ 9. AREA CHART (time + numeric, emphasizing volume) â”€â”€
         for time_col in time_cols[:1]:
             for metric_col in good_measures[:2]:
                 chart = self._make_area_chart(df, time_col, metric_col, understanding, order)
@@ -153,7 +153,7 @@ class IntelligentChartSelectionEngine:
                     candidates.append(chart)
                     order += 1
 
-        # ── 10. BOX PLOT (distribution + group comparison) ──
+        # â”€â”€ 10. BOX PLOT (distribution + group comparison) â”€â”€
         for metric_col in good_measures[:2]:
             # Grouped box plot if a dimension exists
             if good_dimensions:
@@ -166,7 +166,7 @@ class IntelligentChartSelectionEngine:
                 candidates.append(chart)
                 order += 1
 
-        # ── 11. TREEMAP (many categories + measure) ──
+        # â”€â”€ 11. TREEMAP (many categories + measure) â”€â”€
         for dim_col in good_dimensions[:2]:
             for metric_col in good_measures[:1]:
                 chart = self._make_treemap(df, dim_col, metric_col, understanding, order)
@@ -187,7 +187,7 @@ class IntelligentChartSelectionEngine:
         # Sort by importance score (descending)
         candidates.sort(key=lambda c: c.importance_score, reverse=True)
 
-        # Ensure chart type diversity — reserve slots for underrepresented types
+        # Ensure chart type diversity â€” reserve slots for underrepresented types
         candidates = self._ensure_diversity(candidates, max_charts)
 
         # Re-order after filtering
@@ -196,7 +196,7 @@ class IntelligentChartSelectionEngine:
 
         return candidates
 
-    # ── Chart factories ──
+    # â”€â”€ Chart factories â”€â”€
 
     def _make_line_chart(
         self,
@@ -234,7 +234,7 @@ class IntelligentChartSelectionEngine:
         date_range = f"{x_labels[0]} to {x_labels[-1]}" if len(x_labels) >= 2 else ""
         title = f"{self._label(metric_col)} Over Time"
         if date_range:
-            title += f" — {date_range}"
+            title += f" â€” {date_range}"
 
         return ChartSpecification(
             chart_type="line_chart",
@@ -505,7 +505,7 @@ class IntelligentChartSelectionEngine:
         return ChartSpecification(
             chart_type="horizontal_bar",
             title=title,
-            description=f"Ranked {self._label(dim_col)} by {self._label(metric_col)} — top {top_n}",
+            description=f"Ranked {self._label(dim_col)} by {self._label(metric_col)} â€” top {top_n}",
             x_axis=dim_col,
             y_axis=metric_col,
             aggregation="sum",
@@ -738,12 +738,12 @@ class IntelligentChartSelectionEngine:
             height=350,
             order=order,
             confidence=0.72,
-            reason=f"We selected a treemap because {self._label(dim_col)} has {cardinality} categories — too many for a pie chart but ideal for a treemap, which shows part-to-whole relationships at scale.",
+            reason=f"We selected a treemap because {self._label(dim_col)} has {cardinality} categories â€” too many for a pie chart but ideal for a treemap, which shows part-to-whole relationships at scale.",
             source_analysis="composition_hierarchical",
             dataset_hash=understanding.dataset_hash,
         )
 
-    # ── Scoring ──
+    # â”€â”€ Scoring â”€â”€
 
     def _ensure_diversity(
         self,
@@ -753,7 +753,7 @@ class IntelligentChartSelectionEngine:
         """Ensure chart type diversity by reserving slots for underrepresented types.
 
         Without this, bar charts and line charts (which score higher) would
-        crowd out scatter plots, histograms, and heatmaps — even when those
+        crowd out scatter plots, histograms, and heatmaps â€” even when those
         chart types provide unique analytical value.
         """
         if len(charts) <= max_charts:
@@ -817,7 +817,7 @@ class IntelligentChartSelectionEngine:
         # 1. Analytical relevance (max 25)
         score += chart.confidence * 25
 
-        # 2. Data quality (max 20) — penalize charts using low-quality columns
+        # 2. Data quality (max 20) â€” penalize charts using low-quality columns
         quality_penalty = 0.0
         for col_name in chart.source_columns:
             for col_u in understanding.columns:
@@ -847,7 +847,7 @@ class IntelligentChartSelectionEngine:
         elif chart.chart_type == "treemap":
             score += 10
 
-        # 4. Business value (max 15) — charts with measures in name
+        # 4. Business value (max 15) â€” charts with measures in name
         y_axis_lower = (chart.y_axis or "").lower()
         if any(
             kw in y_axis_lower
@@ -885,7 +885,7 @@ class IntelligentChartSelectionEngine:
         else:
             score += 4
 
-        # 6. Uniqueness (max 10) — will be adjusted during dedup
+        # 6. Uniqueness (max 10) â€” will be adjusted during dedup
         score += 10
 
         # 7. Readability (max 5)
@@ -903,7 +903,7 @@ class IntelligentChartSelectionEngine:
 
         return min(100, max(0, score))
 
-    # ── Deduplication ──
+    # â”€â”€ Deduplication â”€â”€
 
     def _deduplicate(self, charts: list[ChartSpecification]) -> list[ChartSpecification]:
         """Detect and remove charts that communicate nearly identical information."""
@@ -927,7 +927,7 @@ class IntelligentChartSelectionEngine:
             sig2 = f"axes:{type_group}:{chart.x_axis}:{chart.y_axis}"
 
             if sig1 in seen_signatures or sig2 in seen_signatures:
-                # Duplicate — skip if the existing one has higher score
+                # Duplicate â€” skip if the existing one has higher score
                 continue
 
             seen_signatures.add(sig1)
@@ -947,7 +947,7 @@ class IntelligentChartSelectionEngine:
             return "pie"
         return chart_type
 
-    # ── Quality filtering ──
+    # â”€â”€ Quality filtering â”€â”€
 
     @staticmethod
     def _filter_by_quality(
@@ -965,7 +965,7 @@ class IntelligentChartSelectionEngine:
                 good.append(col)
         return good
 
-    # ── Helpers ──
+    # â”€â”€ Helpers â”€â”€
 
     @staticmethod
     def _label(col: str) -> str:

@@ -1,4 +1,4 @@
-"""AI Cache — response caching to reduce redundant API calls.
+﻿"""AI Cache â€” response caching to reduce redundant API calls.
 
 Uses an in-memory LRU cache with TTL for AI responses.
 Can be extended to use Redis or database-backed caching.

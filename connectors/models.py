@@ -1,4 +1,4 @@
-"""SQLAlchemy models for the Enterprise Connector Framework."""
+﻿"""SQLAlchemy models for the Enterprise Connector Framework."""
 
 from sqlalchemy import JSON, TIMESTAMP, Boolean, Column, Integer, String, Text, func
 

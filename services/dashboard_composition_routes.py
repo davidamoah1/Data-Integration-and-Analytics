@@ -1,16 +1,16 @@
-"""FastAPI routes for the Dashboard Composition Engine — Phase 6.
+﻿"""FastAPI routes for the Dashboard Composition Engine â€” Phase 6.
 
 Endpoints:
-  - GET    /api/dashboards/widgets              — List all available widgets
-  - GET    /api/dashboards/widgets/types         — List supported widget types
-  - GET    /api/dashboards/widgets/industry/{industry} — Widgets by industry
-  - GET    /api/dashboards/templates             — List industry dashboard templates
-  - POST   /api/dashboards/compose               — Compose a dashboard from widgets
-  - GET    /api/dashboards/{dashboard_id}        — Get a composed dashboard
-  - GET    /api/dashboards                       — List composed dashboards
-  - POST   /api/dashboards/{dashboard_id}/widgets — Add widget to dashboard
-  - DELETE /api/dashboards/{dashboard_id}/widgets/{widget_key} — Remove widget
-  - GET    /api/dashboards/{dashboard_id}/data/{widget_key} — Get widget data
+  - GET    /api/dashboards/widgets              â€” List all available widgets
+  - GET    /api/dashboards/widgets/types         â€” List supported widget types
+  - GET    /api/dashboards/widgets/industry/{industry} â€” Widgets by industry
+  - GET    /api/dashboards/templates             â€” List industry dashboard templates
+  - POST   /api/dashboards/compose               â€” Compose a dashboard from widgets
+  - GET    /api/dashboards/{dashboard_id}        â€” Get a composed dashboard
+  - GET    /api/dashboards                       â€” List composed dashboards
+  - POST   /api/dashboards/{dashboard_id}/widgets â€” Add widget to dashboard
+  - DELETE /api/dashboards/{dashboard_id}/widgets/{widget_key} â€” Remove widget
+  - GET    /api/dashboards/{dashboard_id}/data/{widget_key} â€” Get widget data
 """
 
 from __future__ import annotations
@@ -41,7 +41,7 @@ router = APIRouter(prefix="/api/dashboards", tags=["Dashboard Composition"])
 _composition_service = DashboardCompositionService()
 
 
-# ── Request/Response Models ───────────────────────────
+# â”€â”€ Request/Response Models â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class ComposeDashboardRequest(BaseModel):
@@ -55,7 +55,7 @@ class AddWidgetRequest(BaseModel):
     widget_key: str
 
 
-# ── Widget Endpoints ──────────────────────────────────
+# â”€â”€ Widget Endpoints â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @router.get("/widgets")
@@ -130,7 +130,7 @@ async def list_widgets_by_industry(
     )
 
 
-# ── Template Endpoints ────────────────────────────────
+# â”€â”€ Template Endpoints â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @router.get("/templates")
@@ -153,7 +153,7 @@ async def list_templates(
     return success_response(templates)
 
 
-# ── Dashboard Composition Endpoints ───────────────────
+# â”€â”€ Dashboard Composition Endpoints â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @router.post("/compose")
@@ -398,7 +398,7 @@ def _resolve_dataset_widget(widget, wt: str, ds, db: DbSession) -> dict:
     if agg not in _ALLOWED_AGGS:
         return _empty_widget_data(widget, wt, reason=f"invalid_aggregation:{agg}")
 
-    query = f"SELECT * FROM {table_name}"  # nosec B608 — table_name validated by validate_sql_identifier above
+    query = f"SELECT * FROM {table_name}"  # nosec B608 â€” table_name validated by validate_sql_identifier above
     conditions = []
     params: dict = {}
     for key, val in ds.filters.items():
@@ -412,7 +412,7 @@ def _resolve_dataset_widget(widget, wt: str, ds, db: DbSession) -> dict:
         query += " WHERE " + " AND ".join(conditions)
     if ds.group_by:
         agg = ds.aggregation or "sum"
-        query = f"SELECT {ds.group_by}, {agg}(*) as value FROM {table_name}"  # nosec B608 — group_by and table_name validated by validate_sql_identifier above
+        query = f"SELECT {ds.group_by}, {agg}(*) as value FROM {table_name}"  # nosec B608 â€” group_by and table_name validated by validate_sql_identifier above
         if conditions:
             query += " WHERE " + " AND ".join(conditions)
         query += f" GROUP BY {ds.group_by} ORDER BY value DESC"
@@ -469,7 +469,7 @@ def _resolve_aggregate_widget(widget, wt: str, ds, db: DbSession) -> dict:
         validate_sql_identifier(metric)
     except ValueError:
         return _empty_widget_data(widget, wt, reason="invalid_metric")
-    query = f"SELECT {ds.group_by}, {agg}({metric}) as value FROM {table_name}"  # nosec B608 — group_by, metric, and table_name all validated by validate_sql_identifier above
+    query = f"SELECT {ds.group_by}, {agg}({metric}) as value FROM {table_name}"  # nosec B608 â€” group_by, metric, and table_name all validated by validate_sql_identifier above
     conditions = []
     params: dict = {}
     for key, val in ds.filters.items():
@@ -558,7 +558,7 @@ def _resolve_alert_widget(widget, wt: str, ds, db: DbSession) -> dict:
 
 
 def _resolve_report_widget(widget, wt: str, ds) -> dict:
-    """Resolve report widget — returns metadata about the referenced report."""
+    """Resolve report widget â€” returns metadata about the referenced report."""
     return {
         "widget_key": widget.key,
         "widget_type": wt,

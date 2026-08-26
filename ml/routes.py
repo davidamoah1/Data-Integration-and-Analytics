@@ -1,4 +1,4 @@
-"""ML platform REST API routes."""
+﻿"""ML platform REST API routes."""
 
 from __future__ import annotations
 

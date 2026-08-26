@@ -1,4 +1,4 @@
-"""Workflow execution engine.
+﻿"""Workflow execution engine.
 
 The engine takes a `WorkflowVersion` (a DAG of nodes and edges) and executes
 it respecting dependencies, retries, timeouts, and conditional branching.

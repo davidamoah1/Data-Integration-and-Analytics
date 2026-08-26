@@ -1,4 +1,4 @@
-"""FastAPI routes for Plugin System, Marketplace, and Industry Packages."""
+﻿"""FastAPI routes for Plugin System, Marketplace, and Industry Packages."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ from shared.tenant import get_current_organization_id
 plugin_router = APIRouter(prefix="/marketplace", tags=["Platform / Marketplace"])
 
 
-# ─── Schemas ───────────────────────────────────────────────
+# â”€â”€â”€ Schemas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class PluginPublish(BaseModel):
@@ -37,7 +37,7 @@ class PluginInstall(BaseModel):
     configuration: dict | None = None
 
 
-# ─── Marketplace Browsing ──────────────────────────────────
+# â”€â”€â”€ Marketplace Browsing â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @plugin_router.get("/plugins")
@@ -149,7 +149,7 @@ async def publish_plugin(
     return success_response({"id": plugin.id, "plugin_id": plugin.plugin_id}, "Plugin published")
 
 
-# ─── Installation Management ───────────────────────────────
+# â”€â”€â”€ Installation Management â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @plugin_router.post("/plugins/{plugin_id_str}/install")
@@ -303,7 +303,7 @@ async def uninstall_plugin(
     return success_response(None, "Plugin uninstalled")
 
 
-# ─── Industry Solution Packages ────────────────────────────
+# â”€â”€â”€ Industry Solution Packages â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @plugin_router.get("/industry-packages")
@@ -369,7 +369,7 @@ async def install_industry_package(
     current_user: dict = Depends(get_current_user),
     db: DbSession = Depends(get_db),
 ):
-    """Install an industry package — creates dashboards, KPIs, and templates for the organization."""
+    """Install an industry package â€” creates dashboards, KPIs, and templates for the organization."""
     org_id = get_current_organization_id(current_user, db)
     pkg = db.execute(
         select(IndustryPackage).where(IndustryPackage.package_id == package_id_str)

@@ -1,20 +1,20 @@
-"""RBAC Enhancements — Role Hierarchy and Permission Matrix.
+﻿"""RBAC Enhancements â€” Role Hierarchy and Permission Matrix.
 
 Enterprise roles (9 total):
   Platform level:
-    - super_admin (level 100) — full system access (backward compat)
-    - platform_owner (level 100) — owns the platform
-    - platform_admin (level 90) — manages platform operations
+    - super_admin (level 100) â€” full system access (backward compat)
+    - platform_owner (level 100) â€” owns the platform
+    - platform_admin (level 90) â€” manages platform operations
   Organization level:
-    - org_admin (level 80) — manages an organization
-    - analyst (level 50) — analyzes data, creates dashboards/reports
-    - researcher (level 45) — uploads research datasets, statistical analysis
-    - viewer (level 20) — read-only access
+    - org_admin (level 80) â€” manages an organization
+    - analyst (level 50) â€” analyzes data, creates dashboards/reports
+    - researcher (level 45) â€” uploads research datasets, statistical analysis
+    - viewer (level 20) â€” read-only access
   Department level:
-    - dept_manager (level 60) — manages a department
-    - data_entry_officer (level 30) — uploads documents, smart data capture
+    - dept_manager (level 60) â€” manages a department
+    - data_entry_officer (level 30) â€” uploads documents, smart data capture
   Personal level:
-    - personal_user (level 10) — personal workspace only
+    - personal_user (level 10) â€” personal workspace only
 
 Provides:
   - RoleHierarchy: Role levels and inheritance
@@ -56,7 +56,7 @@ ROLE_HIERARCHY: dict[str, int] = {
 }
 
 
-# Permission matrix: role → set of permission strings
+# Permission matrix: role â†’ set of permission strings
 PERMISSION_MATRIX: dict[str, set[str]] = {
     "super_admin": {"*"},
     "platform_owner": {"*"},

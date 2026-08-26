@@ -1,4 +1,4 @@
-"""Africa Industry Mapper.
+﻿"""Africa Industry Mapper.
 
 Maps local African industry terms to standard industry classifications.
 Provides sector mapping for Ghana, Nigeria, Kenya, and South Africa.
@@ -10,7 +10,7 @@ from __future__ import annotations
 class AfricaIndustryMapper:
     """Maps local industry terms to standard sectors."""
 
-    # Local term → standard sector mapping (Africa-wide)
+    # Local term â†’ standard sector mapping (Africa-wide)
     LOCAL_TO_SECTOR: dict[str, str] = {
         # Agriculture
         "cocoa": "Agriculture - Cocoa",

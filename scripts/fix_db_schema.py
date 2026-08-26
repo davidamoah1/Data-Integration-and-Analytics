@@ -1,4 +1,4 @@
-"""Add missing columns to the organizations table."""
+﻿"""Add missing columns to the organizations table."""
 
 import sqlite3
 

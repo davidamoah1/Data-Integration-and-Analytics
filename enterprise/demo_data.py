@@ -1,9 +1,9 @@
-"""DEMO DATA MODULE — For pilot/onboarding only. NOT for production use.
+﻿"""DEMO DATA MODULE â€” For pilot/onboarding only. NOT for production use.
 
 Creates a demo organization, demo users (admin, analyst, manager, data engineer, viewer),
 sample dashboards, KPIs, ETL pipelines, AI conversations, and AI reports.
 
-⚠️  This module is only invoked when SEED_DEMO_DATA=true is set in the environment.
+âš ï¸  This module is only invoked when SEED_DEMO_DATA=true is set in the environment.
     Production deployments MUST keep SEED_DEMO_DATA=false.
 """
 
@@ -38,7 +38,7 @@ def seed_demo_data(db: DbSession) -> dict:
         org = Organization(
             name="Demo Corporation",
             slug="demo-corporation",
-            description="Pilot demonstration organization — explore all platform features with sample data.",
+            description="Pilot demonstration organization â€” explore all platform features with sample data.",
             contact_email="info@democorp.com",
             timezone="UTC",
             is_active=1,
@@ -51,7 +51,7 @@ def seed_demo_data(db: DbSession) -> dict:
     else:
         org_id = existing_org.id
 
-    # 2. Demo users — all pilot roles
+    # 2. Demo users â€” all pilot roles
     from authentication.models import User
     from authentication.repositories import RoleRepository, UserRoleRepository
     from shared.security import hash_password
@@ -102,7 +102,7 @@ def seed_demo_data(db: DbSession) -> dict:
 
     admin_id = user_id_map.get("demo.admin@democorp.com", 1)
 
-    # 3. Demo dashboards — one per sector
+    # 3. Demo dashboards â€” one per sector
     demo_dashboards = [
         (
             "Sales Performance Demo",
@@ -168,7 +168,7 @@ def seed_demo_data(db: DbSession) -> dict:
             db.commit()
             created["dashboards"].append(dashboard.name)
 
-    # 4. Demo KPIs — broader set
+    # 4. Demo KPIs â€” broader set
     demo_kpis = [
         ("Monthly Revenue", "SUM(sales)", "Sales", 100000.0, "USD"),
         ("Profit Margin", "SUM(profit) / SUM(sales) * 100", "Profitability", 25.0, "%"),
@@ -193,7 +193,7 @@ def seed_demo_data(db: DbSession) -> dict:
             created["kpis"].append(name)
     db.commit()
 
-    # 5. Demo ETL pipelines — multiple
+    # 5. Demo ETL pipelines â€” multiple
     demo_pipelines = [
         (
             "Demo Sales Import",
@@ -241,7 +241,7 @@ def seed_demo_data(db: DbSession) -> dict:
                 ("user", "What are the top selling product categories?"),
                 (
                     "assistant",
-                    "Based on the sales data, the top 3 product categories by revenue are:\n1. **Technology** — $827,955 (36.3% of total)\n2. **Furniture** — $742,312 (32.5%)\n3. **Office Supplies** — $718,617 (31.2%)\n\nTechnology leads primarily due to strong phone and copier sales in the Consumer segment.",
+                    "Based on the sales data, the top 3 product categories by revenue are:\n1. **Technology** â€” $827,955 (36.3% of total)\n2. **Furniture** â€” $742,312 (32.5%)\n3. **Office Supplies** â€” $718,617 (31.2%)\n\nTechnology leads primarily due to strong phone and copier sales in the Consumer segment.",
                 ),
                 ("user", "Which region has the highest profit margin?"),
                 (
@@ -258,7 +258,7 @@ def seed_demo_data(db: DbSession) -> dict:
                 ("user", "Check the data quality of the latest upload"),
                 (
                     "assistant",
-                    "Data quality analysis complete:\n\n- **Total records**: 856\n- **Duplicates removed**: 55 (6.4%)\n- **Missing values filled**: 23 records\n- **Date format inconsistencies**: 127 records normalized\n- **Currency strings parsed**: 18 records (e.g., '$2,068.74' → 2068.74)\n- **Negative values corrected**: 8 records\n\n**Overall quality score**: 91.2%\n\nRecommendation: Enable automatic deduplication on import to prevent future duplicate entries.",
+                    "Data quality analysis complete:\n\n- **Total records**: 856\n- **Duplicates removed**: 55 (6.4%)\n- **Missing values filled**: 23 records\n- **Date format inconsistencies**: 127 records normalized\n- **Currency strings parsed**: 18 records (e.g., '$2,068.74' â†’ 2068.74)\n- **Negative values corrected**: 8 records\n\n**Overall quality score**: 91.2%\n\nRecommendation: Enable automatic deduplication on import to prevent future duplicate entries.",
                 ),
             ],
         ),
@@ -300,13 +300,13 @@ def seed_demo_data(db: DbSession) -> dict:
         (
             "Executive Summary Report",
             "executive",
-            "## Executive Summary\n\n**Q4 2024 Performance Overview**\n\nTotal revenue reached $2.3M, a 15.2% increase year-over-year. Profit margins improved to 22.8%, driven by operational efficiencies and reduced discount rates in the West region.\n\n### Key Highlights\n- Revenue: $2,297,200 (↑15.2% YoY)\n- Profit: $523,456 (↑18.7% YoY)\n- Orders: 5,004 (↑8.3% YoY)\n- Avg Order Value: $459 (↑6.4%)\n\n### Regional Performance\nThe West region continues to be the strongest performer, contributing 38% of total revenue with the highest profit margin at 24.5%.",
+            "## Executive Summary\n\n**Q4 2024 Performance Overview**\n\nTotal revenue reached $2.3M, a 15.2% increase year-over-year. Profit margins improved to 22.8%, driven by operational efficiencies and reduced discount rates in the West region.\n\n### Key Highlights\n- Revenue: $2,297,200 (â†‘15.2% YoY)\n- Profit: $523,456 (â†‘18.7% YoY)\n- Orders: 5,004 (â†‘8.3% YoY)\n- Avg Order Value: $459 (â†‘6.4%)\n\n### Regional Performance\nThe West region continues to be the strongest performer, contributing 38% of total revenue with the highest profit margin at 24.5%.",
             "Monthly revenue, profit, and order trends for Q4 2024",
         ),
         (
             "Monthly Operations Report",
             "monthly",
-            "## Monthly Operations Report — December 2024\n\n### Data Pipeline Status\n- All 4 ETL pipelines completed successfully\n- Data freshness: 2.1 hours (target: <24h)\n- Data quality score: 94.7%\n\n### User Activity\n- 142 active users\n- 1,847 dashboard views\n- 326 AI Copilot queries\n- 89 reports generated\n\n### System Health\n- API uptime: 99.97%\n- Avg response time: 142ms\n- No critical incidents",
+            "## Monthly Operations Report â€” December 2024\n\n### Data Pipeline Status\n- All 4 ETL pipelines completed successfully\n- Data freshness: 2.1 hours (target: <24h)\n- Data quality score: 94.7%\n\n### User Activity\n- 142 active users\n- 1,847 dashboard views\n- 326 AI Copilot queries\n- 89 reports generated\n\n### System Health\n- API uptime: 99.97%\n- Avg response time: 142ms\n- No critical incidents",
             "Platform usage metrics and system health for December 2024",
         ),
     ]

@@ -1,4 +1,4 @@
-"""Repository for audit log data access with rich filtering."""
+﻿"""Repository for audit log data access with rich filtering."""
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ class AuditRepository:
     def __init__(self, db: DbSession):
         self.db = db
 
-    # ── Audit Logs ──────────────────────────────────────────────────────
+    # â”€â”€ Audit Logs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def list_logs(
         self,
@@ -97,7 +97,7 @@ class AuditRepository:
             q = q.where(AuditLog.organization_id == organization_id)
         return [r[0] for r in self.db.execute(q).all()]
 
-    # ── Stats / Aggregations ────────────────────────────────────────────
+    # â”€â”€ Stats / Aggregations â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def action_counts(
         self,
@@ -156,7 +156,7 @@ class AuditRepository:
             q = q.where(AuditLog.organization_id == organization_id)
         return [{"user_id": row[0], "count": row[1]} for row in self.db.execute(q).all()]
 
-    # ── Security Logs ───────────────────────────────────────────────────
+    # â”€â”€ Security Logs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def list_security_logs(
         self,
@@ -192,7 +192,7 @@ class AuditRepository:
             q = q.where(SecurityLog.event_type == event_type)
         return int(self.db.execute(q).scalar() or 0)
 
-    # ── User Activity ───────────────────────────────────────────────────
+    # â”€â”€ User Activity â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def list_user_activity(
         self,
@@ -208,7 +208,7 @@ class AuditRepository:
         )
         return list(self.db.execute(q.offset(offset).limit(limit)).scalars().all())
 
-    # ── Helpers ─────────────────────────────────────────────────────────
+    # â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     @staticmethod
     def _apply_filters(

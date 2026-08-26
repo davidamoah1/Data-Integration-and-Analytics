@@ -1,4 +1,4 @@
-"""Enterprise middleware for security, rate limiting, and observability.
+﻿"""Enterprise middleware for security, rate limiting, and observability.
 
 Provides:
 - SecurityHeadersMiddleware: Adds standard security headers to every response.
@@ -101,7 +101,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
     When ``REDIS_URL`` is set and reachable, uses a Redis fixed-window
     counter (``INCR`` + ``EXPIRE``) so the limit is enforced consistently
-    across multiple worker processes/instances — required for correctness
+    across multiple worker processes/instances â€” required for correctness
     once the app runs behind more than a single uvicorn worker (e.g. behind
     gunicorn/uvicorn workers, multiple containers, or serverless
     invocations sharing the same Redis).

@@ -1,4 +1,4 @@
-"""MODULE 2 — Data Profiling.
+﻿"""MODULE 2 â€” Data Profiling.
 
 Calculates data quality metrics: completeness, consistency, uniqueness,
 validity, accuracy, duplicates, missing values, outliers, patterns.

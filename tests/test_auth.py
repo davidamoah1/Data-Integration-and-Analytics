@@ -1,4 +1,4 @@
-"""Tests for authentication endpoints — login, logout, refresh, password management."""
+﻿"""Tests for authentication endpoints â€” login, logout, refresh, password management."""
 
 
 class TestLogin:

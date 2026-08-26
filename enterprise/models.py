@@ -1,4 +1,4 @@
-"""Platform domain models — templates, collaboration, and branding.
+﻿"""Platform domain models â€” templates, collaboration, and branding.
 
 These models extend AEDIP with product-level features:
   - Template marketplace (dashboard, KPI, ETL, report, AI prompt, industry packs)

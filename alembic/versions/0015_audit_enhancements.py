@@ -1,4 +1,4 @@
-"""add metadata column and indexes to audit_logs for Phase 13
+﻿"""add metadata column and indexes to audit_logs for Phase 13
 
 Adds a `metadata` JSON column to the audit_logs table for tracking
 extra context (file size, export format, role names, etc.). Also adds

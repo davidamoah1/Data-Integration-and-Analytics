@@ -1,4 +1,4 @@
-"""AI Data Analyst Copilot.
+﻿"""AI Data Analyst Copilot.
 
 Turns dashboards into an intelligent assistant that can:
   - Answer natural language questions about the data

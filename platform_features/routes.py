@@ -1,10 +1,10 @@
-"""Platform Features Routes.
+﻿"""Platform Features Routes.
 
 Endpoints for:
   - Audit summary and category stats
   - Role hierarchy and permission matrix
   - Tenant context info
-  - Enterprise seed data (demo only — blocked in production)
+  - Enterprise seed data (demo only â€” blocked in production)
 """
 
 from __future__ import annotations

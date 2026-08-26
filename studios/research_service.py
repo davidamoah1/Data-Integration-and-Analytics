@@ -1,4 +1,4 @@
-"""Research Studio service — research projects, hypotheses, and publication-ready reports."""
+﻿"""Research Studio service â€” research projects, hypotheses, and publication-ready reports."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ class ResearchStudioService:
     def __init__(self, db: DbSession):
         self.db = db
 
-    # ─── Projects ────────────────────────────────────────────
+    # â”€â”€â”€ Projects â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def create_project(
         self,
@@ -66,7 +66,7 @@ class ResearchStudioService:
         self.db.commit()
         return project
 
-    # ─── Hypotheses ──────────────────────────────────────────
+    # â”€â”€â”€ Hypotheses â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def create_hypothesis(
         self,
@@ -120,7 +120,7 @@ class ResearchStudioService:
         self.db.commit()
         return hyp
 
-    # ─── AI Research Assistant ───────────────────────────────
+    # â”€â”€â”€ AI Research Assistant â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     @staticmethod
     def suggest_research_design(research_question: str, industry: str | None = None) -> dict:
@@ -145,7 +145,9 @@ class ResearchStudioService:
                 "ANOVA (3+ groups)",
                 "Mann-Whitney U (non-parametric)",
             ]
-            design["sample_size_consideration"] = "Ensure adequate power (typically n≥30 per group)"
+            design["sample_size_consideration"] = (
+                "Ensure adequate power (typically nâ‰¥30 per group)"
+            )
 
         # Detect relationship questions
         elif any(w in question for w in ["relationship", "correlation", "associate", "predict"]):
@@ -233,7 +235,7 @@ class ResearchStudioService:
 
         return hypotheses[:5]  # Limit to top 5
 
-    # ─── Reports ─────────────────────────────────────────────
+    # â”€â”€â”€ Reports â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def create_report(
         self,

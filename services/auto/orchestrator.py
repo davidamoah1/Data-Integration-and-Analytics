@@ -1,32 +1,32 @@
-"""Auto Engine Orchestrator.
+﻿"""Auto Engine Orchestrator.
 
 Ties all automatic engines together into a single pipeline:
 
   DataFrame + metadata
-       │
-       ▼
-  AutomaticAnalysisEngine  → DatasetUnderstanding
-       │
-       ▼
-  IntelligentChartSelectionEngine → list[ChartSpecification]
-       │
-       ▼
-  AutomaticKPIEngine → list[KPISpecification]
-       │
-       ▼
-  AutomaticInsightEngine → list[InsightSpecification]
-       │
-       ▼
-  AutomaticFilterEngine → list[FilterSpecification]
-       │
-       ▼
-  IntelligentDashboardLayoutEngine → DashboardSpecification
-       │
-       ▼
-  PresentationLayoutEngine → PresentationSpecification
+       â”‚
+       â–¼
+  AutomaticAnalysisEngine  â†’ DatasetUnderstanding
+       â”‚
+       â–¼
+  IntelligentChartSelectionEngine â†’ list[ChartSpecification]
+       â”‚
+       â–¼
+  AutomaticKPIEngine â†’ list[KPISpecification]
+       â”‚
+       â–¼
+  AutomaticInsightEngine â†’ list[InsightSpecification]
+       â”‚
+       â–¼
+  AutomaticFilterEngine â†’ list[FilterSpecification]
+       â”‚
+       â–¼
+  IntelligentDashboardLayoutEngine â†’ DashboardSpecification
+       â”‚
+       â–¼
+  PresentationLayoutEngine â†’ PresentationSpecification
 
 The DashboardSpecification and PresentationSpecification share the
-SAME ChartSpecification objects — they are the single source of truth.
+SAME ChartSpecification objects â€” they are the single source of truth.
 """
 
 from __future__ import annotations
@@ -48,7 +48,7 @@ logger = logging.getLogger(__name__)
 
 
 class AutoEngineOrchestrator:
-    """Orchestrates the full automatic analysis → visualization → layout pipeline.
+    """Orchestrates the full automatic analysis â†’ visualization â†’ layout pipeline.
 
     This is a thin wrapper around VisualizationIntelligenceEngine that
     preserves the existing API. New code should use

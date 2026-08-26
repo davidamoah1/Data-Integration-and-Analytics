@@ -1,4 +1,4 @@
-"""Chart components for the dashboard.
+﻿"""Chart components for the dashboard.
 
 Extracted from app.py for maintainability. Each function renders
 a specific chart inside a styled container.
@@ -299,28 +299,28 @@ def render_kpi_cards(
     k1, k2, k3, k4 = st.columns(4)
     with k1:
         st.markdown(
-            f'<div class="kpi-card kpi-card-sales"><span class="kpi-icon">💰</span>'
+            f'<div class="kpi-card kpi-card-sales"><span class="kpi-icon">ðŸ’°</span>'
             f'<div class="kpi-value">{fmt_currency(total_sales)}</div>'
             f'<div class="kpi-label">{revenue_label}</div></div>',
             unsafe_allow_html=True,
         )
     with k2:
         st.markdown(
-            f'<div class="kpi-card kpi-card-profit"><span class="kpi-icon">📈</span>'
+            f'<div class="kpi-card kpi-card-profit"><span class="kpi-icon">ðŸ“ˆ</span>'
             f'<div class="kpi-value">{fmt_currency(total_profit)}</div>'
             f'<div class="kpi-label">{profit_label} ({margin_pct:.1f}% margin)</div></div>',
             unsafe_allow_html=True,
         )
     with k3:
         st.markdown(
-            f'<div class="kpi-card kpi-card-orders"><span class="kpi-icon">🛒</span>'
+            f'<div class="kpi-card kpi-card-orders"><span class="kpi-icon">ðŸ›’</span>'
             f'<div class="kpi-value">{fmt_number(total_orders)}</div>'
             f'<div class="kpi-label">{orders_label}</div></div>',
             unsafe_allow_html=True,
         )
     with k4:
         st.markdown(
-            f'<div class="kpi-card kpi-card-avg"><span class="kpi-icon">✨</span>'
+            f'<div class="kpi-card kpi-card-avg"><span class="kpi-icon">âœ¨</span>'
             f'<div class="kpi-value">{fmt_currency(avg_order)}</div>'
             f'<div class="kpi-label">{avg_label}</div></div>',
             unsafe_allow_html=True,

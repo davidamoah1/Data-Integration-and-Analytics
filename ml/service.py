@@ -1,4 +1,4 @@
-"""ML platform service layer.
+﻿"""ML platform service layer.
 
 Orchestrates readiness, feature engineering, AutoML, forecasting, anomaly
 detection, recommendations, what-if analysis, drift monitoring, and model

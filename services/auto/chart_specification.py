@@ -1,4 +1,4 @@
-"""Canonical Chart Specification — the single source of truth.
+﻿"""Canonical Chart Specification â€” the single source of truth.
 
 Every visualization in the platform (dashboard, report, PPTX) derives
 from the same ChartSpecification object.  This prevents the
@@ -9,16 +9,16 @@ its own chart representation.
 Architecture:
 
                     ANALYSIS
-                       │
-                       ▼
-              CHART SPECIFICATIONS   ← this file
-                       │
-          ┌────────────┼────────────┐
-          ▼            ▼            ▼
+                       â”‚
+                       â–¼
+              CHART SPECIFICATIONS   â† this file
+                       â”‚
+          â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+          â–¼            â–¼            â–¼
       DASHBOARD      REPORT        PPTX
-          │            │            │
-          └────────────┼────────────┘
-                       ▼
+          â”‚            â”‚            â”‚
+          â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                       â–¼
                   SAME DATA
 """
 
@@ -34,7 +34,7 @@ from typing import Any
 
 @dataclass
 class ChartSpecification:
-    """Canonical chart specification — the single source of truth.
+    """Canonical chart specification â€” the single source of truth.
 
     This object is produced once by the IntelligentChartSelectionEngine
     and consumed by the dashboard layout engine, the report engine, and
@@ -42,15 +42,15 @@ class ChartSpecification:
     their own independent chart representations.
     """
 
-    # ── Identity ──
+    # â”€â”€ Identity â”€â”€
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
 
-    # ── Chart type & metadata ──
+    # â”€â”€ Chart type & metadata â”€â”€
     chart_type: str = ""  # bar_chart, line_chart, pie_chart, scatter_plot, histogram, heatmap, etc.
     title: str = ""
     description: str = ""
 
-    # ── Data bindings ──
+    # â”€â”€ Data bindings â”€â”€
     x_axis: str | None = None
     y_axis: str | None = None
     z_axis: str | None = None  # for heatmaps
@@ -58,33 +58,33 @@ class ChartSpecification:
     aggregation: str = "sum"  # sum, count, avg, min, max, median
     source_columns: list[str] = field(default_factory=list)
 
-    # ── Pre-computed chart data (the actual numbers to plot) ──
+    # â”€â”€ Pre-computed chart data (the actual numbers to plot) â”€â”€
     # This is populated by the deterministic statistical engine,
     # never by AI.  AI may explain the data but never invent it.
     data: list[dict[str, Any]] = field(default_factory=list)
     series: list[dict[str, Any]] = field(default_factory=list)
 
-    # ── Scoring & reasoning ──
+    # â”€â”€ Scoring & reasoning â”€â”€
     importance_score: float = 0.0  # 0-100
     confidence: float = 0.0  # 0-1
     reason: str = ""  # "Why this chart?" explanation
     source_analysis: str = ""  # what analysis produced this chart
 
-    # ── Layout hints (consumed by dashboard & presentation engines) ──
+    # â”€â”€ Layout hints (consumed by dashboard & presentation engines) â”€â”€
     section: str = ""  # primary_charts, supporting_charts, kpi_row
     width: int = 6  # grid columns (1-12)
     height: int = 300  # pixels for dashboard
     order: int = 0  # display order
 
-    # ── Filters applicable to this chart ──
+    # â”€â”€ Filters applicable to this chart â”€â”€
     filters: list[str] = field(default_factory=list)
 
-    # ── Versioning ──
+    # â”€â”€ Versioning â”€â”€
     version: int = 1
     dataset_hash: str = ""  # hash of the source dataset for invalidation
     created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
-    # ── PPTX-specific placement (populated by PresentationLayoutEngine) ──
+    # â”€â”€ PPTX-specific placement (populated by PresentationLayoutEngine) â”€â”€
     pptx_placement: dict[str, float] | None = None  # {x, y, width, height} in inches
 
     def to_dict(self) -> dict[str, Any]:
@@ -176,7 +176,7 @@ class KPISpecification:
     source_columns: list[str] = field(default_factory=list)
     aggregation: str = "sum"
     confidence: float = 1.0
-    icon: str = "📊"
+    icon: str = "ðŸ“Š"
     description: str = ""
     time_context: str = ""
     comparison_value: float | int | None = None
@@ -287,7 +287,7 @@ class DashboardSpecification:
     insights: list[InsightSpecification] = field(default_factory=list)
     recommendations: list[str] = field(default_factory=list)
 
-    # Layout: sections → list of component IDs
+    # Layout: sections â†’ list of component IDs
     layout: dict[str, list[str]] = field(default_factory=dict)
     grid_columns: int = 12
     responsive: bool = True
@@ -333,7 +333,7 @@ class PresentationSpecification:
     """Complete auto-generated presentation specification.
 
     Produced by the PresentationLayoutEngine.  Uses the SAME chart
-    specifications as the dashboard — never creates independent charts.
+    specifications as the dashboard â€” never creates independent charts.
     """
 
     presentation_id: str = field(default_factory=lambda: str(uuid.uuid4()))

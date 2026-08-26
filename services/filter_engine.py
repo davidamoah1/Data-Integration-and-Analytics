@@ -1,4 +1,4 @@
-"""Global Filter Engine.
+﻿"""Global Filter Engine.
 
 Implements reusable, cross-chart filters that update all relevant
 visualizations when changed.
@@ -155,7 +155,7 @@ class GlobalFilterEngine:
 
         Args:
             df: The DataFrame to filter.
-            filter_values: Dict of filter_id → selected value(s).
+            filter_values: Dict of filter_id â†’ selected value(s).
             filters: List of filter definitions.
 
         Returns:
@@ -250,7 +250,7 @@ class GlobalFilterEngine:
             current_values: Current filter values.
 
         Returns:
-            Dict of filter_id → updated options for dependent filters.
+            Dict of filter_id â†’ updated options for dependent filters.
         """
         filter_def = next((f for f in filters if f.id == filter_id), None)
         if not filter_def:
@@ -269,7 +269,7 @@ class GlobalFilterEngine:
 
         return result
 
-    # ── Helpers ─────────────────────────────────────────
+    # â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     @staticmethod
     def _find_column_for_entity(col_mapping: dict, entity: str) -> str | None:

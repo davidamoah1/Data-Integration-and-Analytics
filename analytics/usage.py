@@ -1,4 +1,4 @@
-"""Usage analytics aggregation service.
+﻿"""Usage analytics aggregation service.
 
 Aggregates counts of platform resources for billing, monitoring, and
 admin dashboards. All queries are scoped by organization unless the caller

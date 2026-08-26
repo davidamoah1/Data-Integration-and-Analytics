@@ -1,4 +1,4 @@
-"""AI Security Layer — enforces permissions, validates input, and ensures responsible AI.
+﻿"""AI Security Layer â€” enforces permissions, validates input, and ensures responsible AI.
 
 Features:
 - Input validation (length, injection prevention)

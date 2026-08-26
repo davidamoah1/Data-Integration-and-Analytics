@@ -1,4 +1,4 @@
-"""Database models for the Smart Data Capture platform."""
+﻿"""Database models for the Smart Data Capture platform."""
 
 from __future__ import annotations
 
@@ -87,7 +87,7 @@ class CaptureDocument(Base):
     retention_expires_at = Column(TIMESTAMP, nullable=True)
 
     # Certificate-specific: verification status distinguishes extraction from
-    # authoritative verification. Never auto-set to "verified" — only an
+    # authoritative verification. Never auto-set to "verified" â€” only an
     # external verification source can do that.
     # NOT_VERIFIED -> EXTRACTION_COMPLETE -> VERIFICATION_PENDING -> VERIFIED | VERIFICATION_FAILED
     verification_status = Column(
@@ -185,7 +185,7 @@ class CaptureTemplate(Base):
 
 
 class CaptureCorrection(Base):
-    """Log of individual user corrections — the raw learning signal."""
+    """Log of individual user corrections â€” the raw learning signal."""
 
     __tablename__ = "capture_corrections"
 

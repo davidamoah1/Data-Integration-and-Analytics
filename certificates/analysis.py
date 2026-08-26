@@ -1,4 +1,4 @@
-"""Certificate analysis engine.
+﻿"""Certificate analysis engine.
 
 Analyzes extracted certificate fields to produce:
   - Completeness assessment (required vs. optional fields filled)
@@ -8,7 +8,7 @@ Analyzes extracted certificate fields to produce:
   - Anomaly detection (suspicious dates, low-confidence fields, duplicates)
   - Actionable recommendations
 
-This module is **read-only** — it never modifies documents or fields.
+This module is **read-only** â€” it never modifies documents or fields.
 It operates on data passed to it and returns a structured analysis result.
 No data is fabricated; if a field is missing, it is reported as missing.
 """
@@ -21,7 +21,7 @@ from datetime import date, datetime
 
 from capture.document_types import get_document_type
 
-# ── Data classes ─────────────────────────────────────────────────────
+# â”€â”€ Data classes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @dataclass
@@ -46,8 +46,8 @@ class CompletenessResult:
     required_filled: int
     optional_fields: int
     optional_filled: int
-    completeness_pct: float  # 0..100 — required fields filled
-    overall_pct: float  # 0..100 — all fields filled
+    completeness_pct: float  # 0..100 â€” required fields filled
+    overall_pct: float  # 0..100 â€” all fields filled
     missing_required: list[str]  # field labels
     missing_optional: list[str]  # field labels
 
@@ -104,7 +104,7 @@ class CertificateAnalysis:
     duplicate_of_id: int | None
 
 
-# ── Helpers ──────────────────────────────────────────────────────────
+# â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def _parse_date(value: str | None) -> date | None:
@@ -123,7 +123,7 @@ def _field_dict(fields: list[dict]) -> dict[str, dict]:
     return {f["field_name"]: f for f in fields}
 
 
-# ── Completeness ─────────────────────────────────────────────────────
+# â”€â”€ Completeness â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def assess_completeness(
@@ -133,7 +133,7 @@ def assess_completeness(
     """Assess how complete the certificate data is against the type spec."""
     spec = get_document_type(doc_type_key) if doc_type_key else None
     if not spec:
-        # No spec — treat all provided fields as optional
+        # No spec â€” treat all provided fields as optional
         total = len(field_values)
         filled = sum(1 for f in field_values.values() if f.get("value"))
         return CompletenessResult(
@@ -188,7 +188,7 @@ def assess_completeness(
     )
 
 
-# ── Consistency checks ───────────────────────────────────────────────
+# â”€â”€ Consistency checks â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def check_consistency(
@@ -202,7 +202,7 @@ def check_consistency(
         fdata = field_values.get(name)
         return fdata.get("value") if fdata else None
 
-    # 1. date_awarded vs. graduation_date — should be close or identical
+    # 1. date_awarded vs. graduation_date â€” should be close or identical
     date_awarded = _get("date_awarded")
     graduation_date = _get("graduation_date")
     if date_awarded and graduation_date:
@@ -231,7 +231,7 @@ def check_consistency(
                     )
                 )
 
-    # 2. date_issued vs. expiry_date — expiry must be after issue
+    # 2. date_issued vs. expiry_date â€” expiry must be after issue
     date_issued = _get("date_issued")
     expiry_date = _get("expiry_date")
     if date_issued and expiry_date:
@@ -320,14 +320,14 @@ def check_consistency(
                 )
             )
 
-    # 5. Full name format — should not contain digits
+    # 5. Full name format â€” should not contain digits
     full_name = _get("full_name")
     if full_name:
         if re.search(r"\d", full_name):
             checks.append(
                 ConsistencyCheck(
                     check_name="name_format",
-                    description="Full name contains numeric characters — possible OCR error",
+                    description="Full name contains numeric characters â€” possible OCR error",
                     passed=False,
                     severity="warning",
                     detail=f"Name value: '{full_name}'",
@@ -347,7 +347,7 @@ def check_consistency(
     return checks
 
 
-# ── Academic performance ─────────────────────────────────────────────
+# â”€â”€ Academic performance â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def summarize_academic_performance(
@@ -388,7 +388,7 @@ def summarize_academic_performance(
     )
 
 
-# ── Anomaly detection ────────────────────────────────────────────────
+# â”€â”€ Anomaly detection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def detect_anomalies(
@@ -476,7 +476,7 @@ def detect_anomalies(
     return anomalies
 
 
-# ── Recommendations ──────────────────────────────────────────────────
+# â”€â”€ Recommendations â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def generate_recommendations(
@@ -504,7 +504,7 @@ def generate_recommendations(
         recs.append(
             Recommendation(
                 action="verify_low_confidence_fields",
-                description=f"{low_conf_count} field(s) have low extraction confidence — verify against the source document",
+                description=f"{low_conf_count} field(s) have low extraction confidence â€” verify against the source document",
                 priority="high",
             )
         )
@@ -515,7 +515,7 @@ def generate_recommendations(
         recs.append(
             Recommendation(
                 action="fix_validation_errors",
-                description=f"{val_fail_count} field(s) failed validation — correct the values or confirm they are accurate",
+                description=f"{val_fail_count} field(s) failed validation â€” correct the values or confirm they are accurate",
                 priority="medium",
             )
         )
@@ -526,7 +526,7 @@ def generate_recommendations(
         recs.append(
             Recommendation(
                 action="resolve_consistency_errors",
-                description=f"{len(consistency_errors)} consistency error(s) detected — review date and value relationships",
+                description=f"{len(consistency_errors)} consistency error(s) detected â€” review date and value relationships",
                 priority="high",
             )
         )
@@ -536,7 +536,7 @@ def generate_recommendations(
         recs.append(
             Recommendation(
                 action="initiate_verification",
-                description="Certificate has not been verified — initiate verification through an authoritative source",
+                description="Certificate has not been verified â€” initiate verification through an authoritative source",
                 priority="medium",
             )
         )
@@ -544,7 +544,7 @@ def generate_recommendations(
         recs.append(
             Recommendation(
                 action="follow_up_verification",
-                description="Verification is pending — follow up with the verification source",
+                description="Verification is pending â€” follow up with the verification source",
                 priority="medium",
             )
         )
@@ -552,7 +552,7 @@ def generate_recommendations(
         recs.append(
             Recommendation(
                 action="reverify_certificate",
-                description="Previous verification attempt failed — consider re-verifying with a different method",
+                description="Previous verification attempt failed â€” consider re-verifying with a different method",
                 priority="high",
             )
         )
@@ -563,7 +563,7 @@ def generate_recommendations(
         recs.append(
             Recommendation(
                 action="review_duplicate",
-                description="This certificate may be a duplicate — compare with the linked document before approving",
+                description="This certificate may be a duplicate â€” compare with the linked document before approving",
                 priority="high",
             )
         )
@@ -579,7 +579,7 @@ def generate_recommendations(
         recs.append(
             Recommendation(
                 action="approve_certificate",
-                description="All required fields are present, confidence is acceptable, and no anomalies detected — ready for approval",
+                description="All required fields are present, confidence is acceptable, and no anomalies detected â€” ready for approval",
                 priority="low",
             )
         )
@@ -587,7 +587,7 @@ def generate_recommendations(
     return recs
 
 
-# ── Main analysis function ───────────────────────────────────────────
+# â”€â”€ Main analysis function â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def analyze_certificate(
@@ -717,7 +717,7 @@ def analyze_batch(
     return results
 
 
-# ── Batch-level analytics ────────────────────────────────────────────
+# â”€â”€ Batch-level analytics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @dataclass

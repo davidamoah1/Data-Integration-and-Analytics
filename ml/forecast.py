@@ -1,4 +1,4 @@
-"""Time-series forecasting engine.
+﻿"""Time-series forecasting engine.
 
 Provides ARIMA, Exponential Smoothing, and optional Prophet support. Forecasts
 include confidence intervals where applicable.

@@ -1,4 +1,4 @@
-"""NGO Intelligence — Donors, programs, beneficiaries, impact analytics.
+﻿"""NGO Intelligence â€” Donors, programs, beneficiaries, impact analytics.
 
 Specialized analytics for non-governmental organizations:
   - Donor engagement and retention
@@ -43,7 +43,7 @@ class NGOAnalytics(IndustryAnalytics):
         date_col = cls._find_date_col(df, col_mapping)
         region_col = cls._find_col(df, col_mapping, ["region"])
 
-        # ── Donor Analytics ──────────────────────────────
+        # â”€â”€ Donor Analytics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if donor_col and donor_col in df.columns:
             donor_count = int(df[donor_col].nunique())
             insights.append(
@@ -56,7 +56,7 @@ class NGOAnalytics(IndustryAnalytics):
                 )
             )
 
-        # ── Funding / Donations ──────────────────────────
+        # â”€â”€ Funding / Donations â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if donation_col and donation_col in df.columns:
             total_donations = float(df[donation_col].sum())
             insights.append(
@@ -87,7 +87,7 @@ class NGOAnalytics(IndustryAnalytics):
                     funding_trend.metric = "funding"
                     trends.append(funding_trend)
 
-        # ── Beneficiary Analytics ────────────────────────
+        # â”€â”€ Beneficiary Analytics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if beneficiary_col and beneficiary_col in df.columns:
             beneficiary_count = int(df[beneficiary_col].nunique())
             insights.append(
@@ -107,7 +107,7 @@ class NGOAnalytics(IndustryAnalytics):
                     ben_region_bd.metric = "beneficiaries"
                     breakdowns.append(ben_region_bd)
 
-        # ── Program Analytics ────────────────────────────
+        # â”€â”€ Program Analytics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if program_col and program_col in df.columns:
             program_count = int(df[program_col].nunique())
             insights.append(
@@ -134,7 +134,7 @@ class NGOAnalytics(IndustryAnalytics):
                     prog_fund_bd.metric = "funding"
                     breakdowns.append(prog_fund_bd)
 
-        # ── Project Analytics ────────────────────────────
+        # â”€â”€ Project Analytics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if project_col and project_col in df.columns:
             project_count = int(df[project_col].nunique())
             insights.append(
@@ -147,7 +147,7 @@ class NGOAnalytics(IndustryAnalytics):
                 )
             )
 
-        # ── Grant Analytics ──────────────────────────────
+        # â”€â”€ Grant Analytics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if grant_col and grant_col in df.columns:
             grant_count = int(df[grant_col].nunique())
             insights.append(
@@ -160,7 +160,7 @@ class NGOAnalytics(IndustryAnalytics):
                 )
             )
 
-        # ── Regional Coverage ─────────────────────────────
+        # â”€â”€ Regional Coverage â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if region_col and region_col in df.columns:
             region_count = int(df[region_col].nunique())
             insights.append(
@@ -173,7 +173,7 @@ class NGOAnalytics(IndustryAnalytics):
                 )
             )
 
-        # ── Impact Metrics ───────────────────────────────
+        # â”€â”€ Impact Metrics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if (
             donation_col
             and donation_col in df.columns
@@ -203,7 +203,7 @@ class NGOAnalytics(IndustryAnalytics):
 
         for insight in insights:
             if insight.alert == "warning":
-                alerts.append(f"{insight.title}: {insight.formatted} — review needed.")
+                alerts.append(f"{insight.title}: {insight.formatted} â€” review needed.")
 
         return AnalyticsResult(
             industry="ngo",

@@ -1,4 +1,4 @@
-"""Pydantic schemas for API request/response validation."""
+﻿"""Pydantic schemas for API request/response validation."""
 
 from datetime import date, datetime
 

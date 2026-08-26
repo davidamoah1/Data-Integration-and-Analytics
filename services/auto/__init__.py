@@ -1,4 +1,4 @@
-"""Intelligent Automatic Analysis, Chart Selection & Layout Engine.
+﻿"""Intelligent Automatic Analysis, Chart Selection & Layout Engine.
 
 This package implements the automatic analysis pipeline:
   - Column semantic role detection
@@ -10,7 +10,7 @@ This package implements the automatic analysis pipeline:
   - Canonical chart specifications (single source of truth)
   - Chart validation with fallback selection
 
-All engines are deterministic — AI may explain results but never
+All engines are deterministic â€” AI may explain results but never
 invent statistical calculations or chart data.
 
 The single entry point is VisualizationIntelligenceEngine:

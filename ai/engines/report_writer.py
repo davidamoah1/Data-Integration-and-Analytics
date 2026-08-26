@@ -1,4 +1,4 @@
-"""AI Report Writer — generates professional reports from platform data.
+﻿"""AI Report Writer â€” generates professional reports from platform data.
 
 Generates:
 - Executive summaries

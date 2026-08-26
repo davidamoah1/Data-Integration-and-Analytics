@@ -1,4 +1,4 @@
-"""Banking Intelligence — Accounts, transactions, loans, risk analytics.
+﻿"""Banking Intelligence â€” Accounts, transactions, loans, risk analytics.
 
 Specialized analytics for banks and financial institutions:
   - Account analytics (volume, balances, types)
@@ -41,7 +41,7 @@ class BankingAnalytics(IndustryAnalytics):
         date_col = cls._find_date_col(df, col_mapping)
         customer_col = cls._find_col(df, col_mapping, ["customer"])
 
-        # ── Account Analytics ────────────────────────────
+        # â”€â”€ Account Analytics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if account_col and account_col in df.columns:
             account_count = int(df[account_col].nunique())
             insights.append(
@@ -54,7 +54,7 @@ class BankingAnalytics(IndustryAnalytics):
                 )
             )
 
-        # ── Transaction Analytics ────────────────────────
+        # â”€â”€ Transaction Analytics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if txn_col and txn_col in df.columns:
             txn_count = int(df[txn_col].nunique())
             insights.append(
@@ -79,7 +79,7 @@ class BankingAnalytics(IndustryAnalytics):
                     )
                 )
 
-        # ── Volume / Amount ──────────────────────────────
+        # â”€â”€ Volume / Amount â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if amount_col and amount_col in df.columns:
             total_volume = float(df[amount_col].sum())
             insights.append(
@@ -109,7 +109,7 @@ class BankingAnalytics(IndustryAnalytics):
                     vol_trend.metric = "volume"
                     trends.append(vol_trend)
 
-        # ── Loan Portfolio ───────────────────────────────
+        # â”€â”€ Loan Portfolio â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if loan_col and loan_col in df.columns:
             loan_count = int(df[loan_col].nunique())
             insights.append(
@@ -134,7 +134,7 @@ class BankingAnalytics(IndustryAnalytics):
                     )
                 )
 
-        # ── Card Analytics ───────────────────────────────
+        # â”€â”€ Card Analytics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if card_col and card_col in df.columns:
             card_count = int(df[card_col].nunique())
             insights.append(
@@ -147,7 +147,7 @@ class BankingAnalytics(IndustryAnalytics):
                 )
             )
 
-        # ── Customer Analytics ───────────────────────────
+        # â”€â”€ Customer Analytics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if customer_col and customer_col in df.columns:
             customer_count = int(df[customer_col].nunique())
             insights.append(
@@ -160,7 +160,7 @@ class BankingAnalytics(IndustryAnalytics):
                 )
             )
 
-        # ── Breakdowns ───────────────────────────────────
+        # â”€â”€ Breakdowns â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if account_col and account_col in df.columns and amount_col and amount_col in df.columns:
             acct_bd = cls._compute_breakdown(df, account_col, amount_col, "sum")
             if acct_bd:
@@ -168,7 +168,7 @@ class BankingAnalytics(IndustryAnalytics):
                 acct_bd.metric = "volume"
                 breakdowns.append(acct_bd)
 
-        # ── Risk Indicators ──────────────────────────────
+        # â”€â”€ Risk Indicators â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if amount_col and amount_col in df.columns:
             # Large transaction detection
             large_txns = df[df[amount_col] > df[amount_col].quantile(0.95)]
@@ -179,7 +179,7 @@ class BankingAnalytics(IndustryAnalytics):
                         value=len(large_txns),
                         formatted=cls._fmt_number(len(large_txns)),
                         category="risk",
-                        description="Transactions above the 95th percentile — potential flag for review.",
+                        description="Transactions above the 95th percentile â€” potential flag for review.",
                         alert="warning" if len(large_txns) > 10 else "ok",
                     )
                 )
@@ -195,7 +195,7 @@ class BankingAnalytics(IndustryAnalytics):
 
         for insight in insights:
             if insight.alert == "warning":
-                alerts.append(f"{insight.title}: {insight.formatted} — monitor closely.")
+                alerts.append(f"{insight.title}: {insight.formatted} â€” monitor closely.")
 
         return AnalyticsResult(
             industry="banking",

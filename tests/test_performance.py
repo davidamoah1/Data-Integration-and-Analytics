@@ -1,4 +1,4 @@
-"""Tests for Performance & Global Scale infrastructure.
+﻿"""Tests for Performance & Global Scale infrastructure.
 
 Tests cover:
   - Task queue: enqueue, dequeue, execute, retry, dead letter, stats
@@ -37,7 +37,7 @@ from performance.workers import (
     WorkerStats,
 )
 
-# ── Task Queue Tests ──────────────────────────────────────
+# â”€â”€ Task Queue Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestTask:
@@ -252,7 +252,7 @@ class TestTaskQueue:
         asyncio.run(run())
 
 
-# ── Worker Pool Tests ─────────────────────────────────────
+# â”€â”€ Worker Pool Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestWorkerStats:
@@ -311,7 +311,7 @@ class TestWorkerPool:
         asyncio.run(run())
 
 
-# ── Cache Manager Tests ───────────────────────────────────
+# â”€â”€ Cache Manager Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestCacheManager:
@@ -498,7 +498,7 @@ class TestCachedDecorator:
         asyncio.run(run())
 
 
-# ── DB Optimization Tests ─────────────────────────────────
+# â”€â”€ DB Optimization Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestIndexManager:
@@ -624,7 +624,7 @@ class TestDBStats:
         assert d["index_count"] == 10
 
 
-# ── API Endpoint Tests ────────────────────────────────────
+# â”€â”€ API Endpoint Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestPerformanceAPI:

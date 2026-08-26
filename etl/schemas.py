@@ -1,4 +1,4 @@
-"""Pydantic schemas for Phase 5 ETL Engine API endpoints."""
+﻿"""Pydantic schemas for Phase 5 ETL Engine API endpoints."""
 
 from pydantic import BaseModel, Field
 

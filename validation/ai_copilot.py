@@ -1,4 +1,4 @@
-"""AI Copilot integration for the Hospital Data Validation Engine.
+﻿"""AI Copilot integration for the Hospital Data Validation Engine.
 
 Allows the AI Copilot to answer questions about validation results,
 findings, quality scores, and suggest corrections.
@@ -84,7 +84,7 @@ class ValidationAICopilot:
         # Why did validation fail?
         if "why" in q_lower and ("fail" in q_lower or "failing" in q_lower):
             if result.status == ValidationStatus.PASSED:
-                return "Validation passed successfully — no errors were found."
+                return "Validation passed successfully â€” no errors were found."
             if result.status == ValidationStatus.PASSED_WITH_WARNINGS:
                 warnings = [f for f in findings if f.get("severity") == "warning"]
                 return (
@@ -106,7 +106,7 @@ class ValidationAICopilot:
             for f in error_findings[:10]:
                 lines.append(
                     f"  - {f.get('rule_name')} (column: {f.get('column', 'N/A')}): "
-                    f"{f.get('affected_rows', 0)} rows affected — {f.get('message', '')}"
+                    f"{f.get('affected_rows', 0)} rows affected â€” {f.get('message', '')}"
                 )
             return "Error findings:\n" + "\n".join(lines)
 
@@ -127,7 +127,7 @@ class ValidationAICopilot:
         if "correct" in q_lower or "fix" in q_lower or "should" in q_lower:
             fixable = [f for f in findings if f.get("suggested_fix")]
             if not fixable:
-                return "No specific corrections are suggested — all checks passed."
+                return "No specific corrections are suggested â€” all checks passed."
             lines = []
             for f in fixable[:10]:
                 lines.append(
@@ -143,7 +143,7 @@ class ValidationAICopilot:
                 rule_counts[rule] = rule_counts.get(rule, 0) + 1
             sorted_rules = sorted(rule_counts.items(), key=lambda x: -x[1])
             if not sorted_rules:
-                return "No rules failed — all checks passed."
+                return "No rules failed â€” all checks passed."
             lines = [f"  - {rule}: {count} findings" for rule, count in sorted_rules[:10]]
             return "Most failed rules:\n" + "\n".join(lines)
 

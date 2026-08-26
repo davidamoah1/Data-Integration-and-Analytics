@@ -1,4 +1,4 @@
-"""DEMO TOOLING — Generate demo datasets for onboarding and training. NOT for production.
+﻿"""DEMO TOOLING â€” Generate demo datasets for onboarding and training. NOT for production.
 
 Generates realistic demo datasets for all 12 supported industries.
 Each dataset contains 200 rows with industry-specific columns that will

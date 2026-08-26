@@ -1,4 +1,4 @@
-"""Centralized audit logging service.
+﻿"""Centralized audit logging service.
 
 This module provides a single helper to record security-relevant events across
 the platform. It writes to the existing `AuditLog` and `SecurityLog` models so

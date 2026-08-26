@@ -1,4 +1,4 @@
-"""add V3.1 audit and security log indexes
+﻿"""add V3.1 audit and security log indexes
 
 Revision ID: 0007_v31_audit_indexes
 Revises: 0006_platform_tables

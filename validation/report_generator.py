@@ -1,4 +1,4 @@
-"""Validation Report Generator — produces professional reports in PDF, Excel, and CSV."""
+﻿"""Validation Report Generator â€” produces professional reports in PDF, Excel, and CSV."""
 
 from __future__ import annotations
 

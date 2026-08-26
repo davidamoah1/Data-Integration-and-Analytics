@@ -1,4 +1,4 @@
-"""KPI Intelligence Engine.
+﻿"""KPI Intelligence Engine.
 
 Automatically detects business KPIs from semantic analysis, metadata,
 and industry knowledge. Each KPI includes:
@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 class KPIIntelligenceEngine:
     """Automatically detects and generates KPIs from data."""
 
-    # Universal KPI templates — applied to any dataset
+    # Universal KPI templates â€” applied to any dataset
     UNIVERSAL_KPI_TEMPLATES = [
         {
             "key": "total_records",
@@ -38,7 +38,7 @@ class KPIIntelligenceEngine:
             "category": "operational",
             "formula": "COUNT(*)",
             "aggregation": "count",
-            "icon": "📋",
+            "icon": "ðŸ“‹",
             "description": "Total number of records in the dataset",
         },
         {
@@ -49,7 +49,7 @@ class KPIIntelligenceEngine:
             "category": "quality",
             "formula": "Composite quality score (0-100)",
             "aggregation": "avg",
-            "icon": "✅",
+            "icon": "âœ…",
             "description": "Overall data quality score based on completeness, validity, uniqueness",
         },
     ]
@@ -64,7 +64,7 @@ class KPIIntelligenceEngine:
                 "metric": "count",
                 "category": "operational",
                 "formula": "COUNT(DISTINCT admission_id)",
-                "icon": "🏥",
+                "icon": "ðŸ¥",
                 "description": "Total number of patient admissions",
             },
             {
@@ -74,7 +74,7 @@ class KPIIntelligenceEngine:
                 "metric": "count",
                 "category": "operational",
                 "formula": "COUNT(DISTINCT patient_id)",
-                "icon": "👥",
+                "icon": "ðŸ‘¥",
                 "description": "Number of unique patients",
             },
             {
@@ -84,7 +84,7 @@ class KPIIntelligenceEngine:
                 "metric": "sum",
                 "category": "financial",
                 "formula": "SUM(billing_amount)",
-                "icon": "💰",
+                "icon": "ðŸ’°",
                 "description": "Total billing amount",
                 "unit": "currency",
             },
@@ -95,7 +95,7 @@ class KPIIntelligenceEngine:
                 "metric": "avg",
                 "category": "financial",
                 "formula": "SUM(billing_amount) / COUNT(DISTINCT patient_id)",
-                "icon": "💵",
+                "icon": "ðŸ’µ",
                 "description": "Average billing amount per patient",
                 "unit": "currency",
             },
@@ -106,7 +106,7 @@ class KPIIntelligenceEngine:
                 "metric": "custom",
                 "category": "operational",
                 "formula": "occupied_beds / total_beds * 100",
-                "icon": "🛏️",
+                "icon": "ðŸ›ï¸",
                 "description": "Percentage of beds occupied",
                 "unit": "%",
                 "threshold_warning": 85,
@@ -119,7 +119,7 @@ class KPIIntelligenceEngine:
                 "metric": "custom",
                 "category": "clinical",
                 "formula": "readmissions / total_admissions * 100",
-                "icon": "🔄",
+                "icon": "ðŸ”„",
                 "description": "Percentage of patients readmitted",
                 "unit": "%",
                 "threshold_warning": 10,
@@ -134,7 +134,7 @@ class KPIIntelligenceEngine:
                 "metric": "count",
                 "category": "operational",
                 "formula": "COUNT(DISTINCT student_id)",
-                "icon": "🎓",
+                "icon": "ðŸŽ“",
                 "description": "Total number of enrolled students",
             },
             {
@@ -144,7 +144,7 @@ class KPIIntelligenceEngine:
                 "metric": "custom",
                 "category": "academic",
                 "formula": "present_days / total_days * 100",
-                "icon": "📅",
+                "icon": "ðŸ“…",
                 "description": "Average attendance rate",
                 "unit": "%",
                 "threshold_warning": 75,
@@ -156,7 +156,7 @@ class KPIIntelligenceEngine:
                 "metric": "sum",
                 "category": "financial",
                 "formula": "SUM(tuition_amount)",
-                "icon": "💰",
+                "icon": "ðŸ’°",
                 "description": "Total tuition collected",
                 "unit": "currency",
             },
@@ -167,7 +167,7 @@ class KPIIntelligenceEngine:
                 "metric": "custom",
                 "category": "academic",
                 "formula": "passed_exams / total_exams * 100",
-                "icon": "✅",
+                "icon": "âœ…",
                 "description": "Percentage of exams passed",
                 "unit": "%",
             },
@@ -180,7 +180,7 @@ class KPIIntelligenceEngine:
                 "metric": "sum",
                 "category": "financial",
                 "formula": "SUM(sales)",
-                "icon": "💰",
+                "icon": "ðŸ’°",
                 "description": "Total sales revenue",
                 "unit": "currency",
             },
@@ -191,7 +191,7 @@ class KPIIntelligenceEngine:
                 "metric": "count",
                 "category": "operational",
                 "formula": "COUNT(DISTINCT order_id)",
-                "icon": "🛒",
+                "icon": "ðŸ›’",
                 "description": "Total number of orders",
             },
             {
@@ -201,7 +201,7 @@ class KPIIntelligenceEngine:
                 "metric": "count",
                 "category": "operational",
                 "formula": "COUNT(DISTINCT customer_id)",
-                "icon": "👥",
+                "icon": "ðŸ‘¥",
                 "description": "Number of unique customers",
             },
             {
@@ -211,7 +211,7 @@ class KPIIntelligenceEngine:
                 "metric": "avg",
                 "category": "financial",
                 "formula": "SUM(sales) / COUNT(DISTINCT order_id)",
-                "icon": "📦",
+                "icon": "ðŸ“¦",
                 "description": "Average value per order",
                 "unit": "currency",
             },
@@ -222,7 +222,7 @@ class KPIIntelligenceEngine:
                 "metric": "custom",
                 "category": "financial",
                 "formula": "SUM(profit) / SUM(sales) * 100",
-                "icon": "📈",
+                "icon": "ðŸ“ˆ",
                 "description": "Profit margin percentage",
                 "unit": "%",
             },
@@ -235,7 +235,7 @@ class KPIIntelligenceEngine:
                 "metric": "sum",
                 "category": "financial",
                 "formula": "SUM(balance)",
-                "icon": "💰",
+                "icon": "ðŸ’°",
                 "description": "Total account balance",
                 "unit": "currency",
             },
@@ -246,7 +246,7 @@ class KPIIntelligenceEngine:
                 "metric": "count",
                 "category": "operational",
                 "formula": "COUNT(DISTINCT account_id)",
-                "icon": "🏦",
+                "icon": "ðŸ¦",
                 "description": "Number of accounts",
             },
             {
@@ -256,7 +256,7 @@ class KPIIntelligenceEngine:
                 "metric": "count",
                 "category": "operational",
                 "formula": "COUNT(*)",
-                "icon": "🔄",
+                "icon": "ðŸ”„",
                 "description": "Total transactions",
             },
             {
@@ -266,7 +266,7 @@ class KPIIntelligenceEngine:
                 "metric": "count",
                 "category": "financial",
                 "formula": "COUNT(DISTINCT loan_id)",
-                "icon": "📋",
+                "icon": "ðŸ“‹",
                 "description": "Number of loans",
             },
         ],
@@ -278,7 +278,7 @@ class KPIIntelligenceEngine:
                 "metric": "sum",
                 "category": "financial",
                 "formula": "SUM(budget_amount)",
-                "icon": "💰",
+                "icon": "ðŸ’°",
                 "description": "Total budget allocation",
                 "unit": "currency",
             },
@@ -289,7 +289,7 @@ class KPIIntelligenceEngine:
                 "metric": "count",
                 "category": "operational",
                 "formula": "COUNT(DISTINCT project_id)",
-                "icon": "🏗️",
+                "icon": "ðŸ—ï¸",
                 "description": "Number of projects",
             },
             {
@@ -299,7 +299,7 @@ class KPIIntelligenceEngine:
                 "metric": "custom",
                 "category": "financial",
                 "formula": "spent / budget * 100",
-                "icon": "📊",
+                "icon": "ðŸ“Š",
                 "description": "Budget utilization percentage",
                 "unit": "%",
             },
@@ -312,7 +312,7 @@ class KPIIntelligenceEngine:
                 "metric": "sum",
                 "category": "operational",
                 "formula": "SUM(production_volume)",
-                "icon": "🏭",
+                "icon": "ðŸ­",
                 "description": "Total production volume",
             },
             {
@@ -322,7 +322,7 @@ class KPIIntelligenceEngine:
                 "metric": "count",
                 "category": "operational",
                 "formula": "COUNT(DISTINCT machine_id)",
-                "icon": "⚙️",
+                "icon": "âš™ï¸",
                 "description": "Number of active machines",
             },
             {
@@ -332,7 +332,7 @@ class KPIIntelligenceEngine:
                 "metric": "sum",
                 "category": "operational",
                 "formula": "SUM(downtime_hours)",
-                "icon": "⏰",
+                "icon": "â°",
                 "description": "Total downtime hours",
             },
         ],
@@ -344,7 +344,7 @@ class KPIIntelligenceEngine:
                 "metric": "sum",
                 "category": "operational",
                 "formula": "SUM(harvest_amount)",
-                "icon": "🌾",
+                "icon": "ðŸŒ¾",
                 "description": "Total harvest amount",
             },
             {
@@ -354,7 +354,7 @@ class KPIIntelligenceEngine:
                 "metric": "count",
                 "category": "operational",
                 "formula": "COUNT(DISTINCT farm_id)",
-                "icon": "🚜",
+                "icon": "ðŸšœ",
                 "description": "Number of farms",
             },
             {
@@ -364,7 +364,7 @@ class KPIIntelligenceEngine:
                 "metric": "avg",
                 "category": "operational",
                 "formula": "SUM(yield) / SUM(hectares)",
-                "icon": "📈",
+                "icon": "ðŸ“ˆ",
                 "description": "Average yield per hectare",
             },
         ],
@@ -376,7 +376,7 @@ class KPIIntelligenceEngine:
                 "metric": "count",
                 "category": "operational",
                 "formula": "COUNT(DISTINCT member_id)",
-                "icon": "👥",
+                "icon": "ðŸ‘¥",
                 "description": "Number of members",
             },
             {
@@ -386,7 +386,7 @@ class KPIIntelligenceEngine:
                 "metric": "sum",
                 "category": "financial",
                 "formula": "SUM(tithe_amount)",
-                "icon": "💰",
+                "icon": "ðŸ’°",
                 "description": "Total tithe collected",
                 "unit": "currency",
             },
@@ -397,7 +397,7 @@ class KPIIntelligenceEngine:
                 "metric": "sum",
                 "category": "financial",
                 "formula": "SUM(offering_amount)",
-                "icon": "🎁",
+                "icon": "ðŸŽ",
                 "description": "Total offerings",
                 "unit": "currency",
             },
@@ -410,7 +410,7 @@ class KPIIntelligenceEngine:
                 "metric": "sum",
                 "category": "financial",
                 "formula": "SUM(donation_amount)",
-                "icon": "💰",
+                "icon": "ðŸ’°",
                 "description": "Total donations received",
                 "unit": "currency",
             },
@@ -421,7 +421,7 @@ class KPIIntelligenceEngine:
                 "metric": "count",
                 "category": "impact",
                 "formula": "COUNT(DISTINCT beneficiary_id)",
-                "icon": "🤝",
+                "icon": "ðŸ¤",
                 "description": "Number of beneficiaries",
             },
             {
@@ -431,7 +431,7 @@ class KPIIntelligenceEngine:
                 "metric": "count",
                 "category": "financial",
                 "formula": "COUNT(DISTINCT donor_id)",
-                "icon": "❤️",
+                "icon": "â¤ï¸",
                 "description": "Number of unique donors",
             },
         ],
@@ -443,7 +443,7 @@ class KPIIntelligenceEngine:
                 "metric": "sum",
                 "category": "financial",
                 "formula": "SUM(premium_amount)",
-                "icon": "💰",
+                "icon": "ðŸ’°",
                 "description": "Total premium income",
                 "unit": "currency",
             },
@@ -454,7 +454,7 @@ class KPIIntelligenceEngine:
                 "metric": "count",
                 "category": "operational",
                 "formula": "COUNT(DISTINCT policy_id)",
-                "icon": "📄",
+                "icon": "ðŸ“„",
                 "description": "Number of active policies",
             },
             {
@@ -464,7 +464,7 @@ class KPIIntelligenceEngine:
                 "metric": "count",
                 "category": "operational",
                 "formula": "COUNT(DISTINCT claim_id)",
-                "icon": "📋",
+                "icon": "ðŸ“‹",
                 "description": "Number of claims",
             },
         ],
@@ -476,7 +476,7 @@ class KPIIntelligenceEngine:
                 "metric": "count",
                 "category": "operational",
                 "formula": "COUNT(DISTINCT reservation_id)",
-                "icon": "🏨",
+                "icon": "ðŸ¨",
                 "description": "Number of reservations",
             },
             {
@@ -486,7 +486,7 @@ class KPIIntelligenceEngine:
                 "metric": "count",
                 "category": "operational",
                 "formula": "COUNT(DISTINCT guest_id)",
-                "icon": "👥",
+                "icon": "ðŸ‘¥",
                 "description": "Number of unique guests",
             },
             {
@@ -496,7 +496,7 @@ class KPIIntelligenceEngine:
                 "metric": "sum",
                 "category": "financial",
                 "formula": "SUM(revenue)",
-                "icon": "💰",
+                "icon": "ðŸ’°",
                 "description": "Total revenue",
                 "unit": "currency",
             },
@@ -509,7 +509,7 @@ class KPIIntelligenceEngine:
                 "metric": "count",
                 "category": "operational",
                 "formula": "COUNT(DISTINCT subscriber_id)",
-                "icon": "📱",
+                "icon": "ðŸ“±",
                 "description": "Number of subscribers",
             },
             {
@@ -519,7 +519,7 @@ class KPIIntelligenceEngine:
                 "metric": "count",
                 "category": "operational",
                 "formula": "COUNT(*)",
-                "icon": "📞",
+                "icon": "ðŸ“ž",
                 "description": "Total number of calls",
             },
             {
@@ -529,7 +529,7 @@ class KPIIntelligenceEngine:
                 "metric": "sum",
                 "category": "operational",
                 "formula": "SUM(data_bytes)",
-                "icon": "📶",
+                "icon": "ðŸ“¶",
                 "description": "Total data usage",
             },
         ],
@@ -595,7 +595,7 @@ class KPIIntelligenceEngine:
                         source_columns=[],
                         aggregation="count",
                         confidence=1.0,
-                        icon="📋",
+                        icon="ðŸ“‹",
                         description="Total number of records",
                     )
                 )
@@ -611,7 +611,7 @@ class KPIIntelligenceEngine:
                         source_columns=[],
                         aggregation="avg",
                         confidence=1.0,
-                        icon="✅",
+                        icon="âœ…",
                         unit="%",
                         description="Overall data quality score",
                     )
@@ -647,7 +647,7 @@ class KPIIntelligenceEngine:
                 source_columns=source_cols,
                 aggregation=template.get("aggregation", "sum"),
                 confidence=confidence,
-                icon=template.get("icon", "📊"),
+                icon=template.get("icon", "ðŸ“Š"),
                 unit=template.get("unit", ""),
                 threshold_warning=template.get("threshold_warning"),
                 threshold_critical=template.get("threshold_critical"),
@@ -690,7 +690,7 @@ class KPIIntelligenceEngine:
                         source_columns=[col],
                         aggregation="sum",
                         confidence=0.6,
-                        icon="💰" if self._looks_monetary(col) else "📊",
+                        icon="ðŸ’°" if self._looks_monetary(col) else "ðŸ“Š",
                         unit="currency" if self._looks_monetary(col) else "",
                         description=f"Sum of {col}",
                     )
@@ -710,7 +710,7 @@ class KPIIntelligenceEngine:
                         source_columns=[col],
                         aggregation="avg",
                         confidence=0.5,
-                        icon="📊",
+                        icon="ðŸ“Š",
                         description=f"Average of {col}",
                     )
                 )
@@ -750,7 +750,7 @@ class KPIIntelligenceEngine:
                     source_columns=source_cols,
                     aggregation=definition.metric,
                     confidence=0.8 if source_cols else 0.3,
-                    icon="📊",
+                    icon="ðŸ“Š",
                     threshold_warning=(
                         definition.threshold.get("warning") if definition.threshold else None
                     ),
@@ -762,7 +762,7 @@ class KPIIntelligenceEngine:
             )
         return kpis
 
-    # ── Helpers ─────────────────────────────────────────
+    # â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     @staticmethod
     def _find_columns_for_entity(col_mapping: dict, entity: str | None) -> list[str]:

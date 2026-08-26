@@ -1,4 +1,4 @@
-"""Base classes for industry-specific analytics.
+﻿"""Base classes for industry-specific analytics.
 
 Every sector analytics module inherits from IndustryAnalytics and implements
 analyze() to produce an AnalyticsResult with sector-specific insights.
@@ -124,7 +124,7 @@ class IndustryAnalytics:
         """
         raise NotImplementedError
 
-    # ── Helpers ──────────────────────────────────────────
+    # â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     @staticmethod
     def _find_col(df: pd.DataFrame, col_mapping: dict | None, entity_keys: list[str]) -> str | None:

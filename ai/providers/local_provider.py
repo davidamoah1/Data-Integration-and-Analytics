@@ -1,4 +1,4 @@
-"""Local LLM provider — supports Ollama, LM Studio, vLLM, and other OpenAI-compatible local servers."""
+﻿"""Local LLM provider â€” supports Ollama, LM Studio, vLLM, and other OpenAI-compatible local servers."""
 
 import json
 from collections.abc import Generator

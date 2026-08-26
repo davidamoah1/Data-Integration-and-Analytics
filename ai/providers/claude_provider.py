@@ -1,4 +1,4 @@
-"""Claude (Anthropic) provider — supports Claude 3.5 Sonnet, Claude 3 Haiku."""
+﻿"""Claude (Anthropic) provider â€” supports Claude 3.5 Sonnet, Claude 3 Haiku."""
 
 import json
 from collections.abc import Generator

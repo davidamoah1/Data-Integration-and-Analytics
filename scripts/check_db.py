@@ -1,4 +1,4 @@
-"""Check existing tables in the SQLite database."""
+﻿"""Check existing tables in the SQLite database."""
 
 import sqlite3
 

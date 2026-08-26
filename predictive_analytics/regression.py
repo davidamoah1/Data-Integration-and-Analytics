@@ -1,4 +1,4 @@
-"""Regression Predictor.
+﻿"""Regression Predictor.
 
 Predicts continuous values using linear regression.
 Used for:
@@ -35,7 +35,7 @@ class RegressionPredictor:
             name: Display name.
 
         Returns:
-            PredictionResult with R², feature importance, and sample predictions.
+            PredictionResult with RÂ², feature importance, and sample predictions.
         """
         if target_col not in df.columns:
             return None
@@ -71,7 +71,7 @@ class RegressionPredictor:
         except Exception:
             return None
 
-        # R²
+        # RÂ²
         y_pred = X_with_intercept @ coeffs
         ss_res = float(np.sum((y - y_pred) ** 2))
         ss_tot = float(np.sum((y - np.mean(y)) ** 2))
@@ -111,7 +111,7 @@ class RegressionPredictor:
         top_features = sorted(importance.items(), key=lambda x: x[1], reverse=True)[:3]
         feature_str = ", ".join(f"{k} ({v:.1%})" for k, v in top_features)
         summary = (
-            f"{name}: R²={r_squared:.2f} ({accuracy_label} accuracy). "
+            f"{name}: RÂ²={r_squared:.2f} ({accuracy_label} accuracy). "
             f"Key factors: {feature_str}."
         )
 

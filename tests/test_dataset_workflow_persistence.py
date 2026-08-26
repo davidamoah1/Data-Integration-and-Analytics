@@ -1,4 +1,4 @@
-"""Tests for durable dataset workflow state persistence (C3).
+﻿"""Tests for durable dataset workflow state persistence (C3).
 
 Covers the `_persist_workflow_state` progress callback registered on the
 routes-module `_orchestrator` singleton in

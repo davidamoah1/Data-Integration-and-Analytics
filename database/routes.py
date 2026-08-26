@@ -1,4 +1,4 @@
-"""Database management API routes — admin-only endpoints for backup, status, and optimization.
+﻿"""Database management API routes â€” admin-only endpoints for backup, status, and optimization.
 
 All endpoints require the 'system.manage' permission.
 """
@@ -20,7 +20,7 @@ async def database_status(
     current_user: dict = Depends(require_permissions("system.manage")),
     db: DbSession = Depends(get_db),
 ):
-    """Get database status — table counts, index counts, sizes."""
+    """Get database status â€” table counts, index counts, sizes."""
     from sqlalchemy import inspect, text
 
     engine = db.bind
@@ -35,7 +35,7 @@ async def database_status(
         try:
             count = db.execute(
                 text(f"SELECT COUNT(*) FROM {table}")
-            ).scalar()  # nosec B608 — table from inspector.get_table_names()
+            ).scalar()  # nosec B608 â€” table from inspector.get_table_names()
         except Exception:
             count = 0
         idx_count = len(inspector.get_indexes(table))

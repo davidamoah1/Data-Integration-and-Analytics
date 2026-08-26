@@ -1,4 +1,4 @@
-"""Built-in job handlers for ETL, OCR, Reports, and large imports.
+﻿"""Built-in job handlers for ETL, OCR, Reports, and large imports.
 
 Each handler receives (job_id, payload, db) and returns a result dict.
 Handlers are registered at import time so the JobService can dispatch
@@ -17,7 +17,7 @@ from performance.queue import TaskPriority
 logger = logging.getLogger(__name__)
 
 
-# ── ETL Pipeline Handler ──────────────────────────────────────────────────
+# â”€â”€ ETL Pipeline Handler â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def _handle_etl_run(job_id: int, payload: dict, db: DbSession) -> dict:
@@ -36,7 +36,7 @@ def _handle_etl_run(job_id: int, payload: dict, db: DbSession) -> dict:
     return {"metrics": metrics}
 
 
-# ── OCR / Capture Batch Handler ───────────────────────────────────────────
+# â”€â”€ OCR / Capture Batch Handler â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def _handle_ocr_document(job_id: int, payload: dict, db: DbSession) -> dict:
@@ -100,7 +100,7 @@ def _handle_ocr_batch(job_id: int, payload: dict, db: DbSession) -> dict:
     }
 
 
-# ── Report Generation Handler ─────────────────────────────────────────────
+# â”€â”€ Report Generation Handler â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def _handle_report_gen(job_id: int, payload: dict, db: DbSession) -> dict:
@@ -128,7 +128,7 @@ def _handle_report_gen(job_id: int, payload: dict, db: DbSession) -> dict:
     return {"report": result}
 
 
-# ── Large Data Import Handler ─────────────────────────────────────────────
+# â”€â”€ Large Data Import Handler â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def _handle_data_import(job_id: int, payload: dict, db: DbSession) -> dict:
@@ -193,7 +193,7 @@ def _handle_data_import(job_id: int, payload: dict, db: DbSession) -> dict:
     }
 
 
-# ── Dataset Workflow Handler ──────────────────────────────────────────────
+# â”€â”€ Dataset Workflow Handler â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def _handle_dataset_workflow(job_id: int, payload: dict, db: DbSession) -> dict:
@@ -261,7 +261,7 @@ def _handle_dataset_workflow(job_id: int, payload: dict, db: DbSession) -> dict:
     }
 
 
-# ── Export Handler ────────────────────────────────────────────────────────
+# â”€â”€ Export Handler â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def _handle_export(job_id: int, payload: dict, db: DbSession) -> dict:
@@ -289,7 +289,7 @@ def _handle_export(job_id: int, payload: dict, db: DbSession) -> dict:
     raise ValueError(f"Unknown export type: {export_type}")
 
 
-# ── Register all handlers ─────────────────────────────────────────────────
+# â”€â”€ Register all handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def register_builtin_handlers() -> None:

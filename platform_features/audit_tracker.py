@@ -1,4 +1,4 @@
-"""Audit Tracker — Automatic Audit Logging.
+﻿"""Audit Tracker â€” Automatic Audit Logging.
 
 Tracks all user actions across 4 categories:
   - USER_ACTION: login, logout, profile updates, user management
@@ -214,7 +214,7 @@ class AuditTracker:
 
         query = select(ActivityLog).where(ActivityLog.created_at >= since)
         if organization_id is not None:
-            # Filter by user's org — would need a join in production
+            # Filter by user's org â€” would need a join in production
             pass
 
         logs = self.db.execute(query).scalars().all()

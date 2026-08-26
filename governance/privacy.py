@@ -1,4 +1,4 @@
-"""Data privacy detection for tabular datasets.
+﻿"""Data privacy detection for tabular datasets.
 
 Provides regex and heuristic-based detection of common personally identifiable
 information (PII) and sensitive data categories. The results are used to assign
@@ -34,7 +34,7 @@ _PATTERNS = {
         r"(?:\+?\d{1,3}[-.\s]?)?\(?\d{2,4}\)?[-.\s]?\d{3,4}[-.\s]?\d{3,4}",
         re.IGNORECASE,
     ),
-    # Very loose numeric ID pattern — catches passport, national ID, SSN-like values
+    # Very loose numeric ID pattern â€” catches passport, national ID, SSN-like values
     SensitivityCategory.GOVERNMENT_ID: re.compile(
         r"\b\d{6,}\b",
         re.IGNORECASE,

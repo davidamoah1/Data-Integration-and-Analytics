@@ -1,4 +1,4 @@
-"""Natural Language Analytics Engine.
+﻿"""Natural Language Analytics Engine.
 
 Translates natural language questions into structured analytical operations:
   - Intent detection (compare, rank, trend, explain, summarize, filter)
@@ -295,9 +295,9 @@ class NLAnalyticsEngine:
                 if cv > 0.5:
                     highlights.append(f"{col}: High variability (CV={cv:.2f})")
                 if max_val > mean + 3 * std:
-                    highlights.append(f"{col}: Maximum value {max_val:.2f} is >3σ above mean")
+                    highlights.append(f"{col}: Maximum value {max_val:.2f} is >3Ïƒ above mean")
                 if min_val < mean - 3 * std:
-                    highlights.append(f"{col}: Minimum value {min_val:.2f} is >3σ below mean")
+                    highlights.append(f"{col}: Minimum value {min_val:.2f} is >3Ïƒ below mean")
 
         return {
             "method": "highlight",

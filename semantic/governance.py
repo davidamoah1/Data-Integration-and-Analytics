@@ -1,4 +1,4 @@
-"""MODULE 13 — Governance.
+﻿"""MODULE 13 â€” Governance.
 
 Tracks business glossary, data dictionary, lineage, metadata versioning,
 ownership, classification, sensitivity, and retention policies.

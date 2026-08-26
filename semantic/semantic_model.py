@@ -1,11 +1,11 @@
-"""Semantic Model — the brain of the platform.
+﻿"""Semantic Model â€” the brain of the platform.
 
 Every dataset gets a metadata model that captures:
   - dataset identity (name, domain)
   - business entities (patient, doctor, department, ...)
   - metrics (patient_count, revenue, avg_stay, ...)
   - dimensions (region, gender, date, ...)
-  - relationships (patient → admission → doctor)
+  - relationships (patient â†’ admission â†’ doctor)
   - business definitions (human-readable)
   - KPI dictionary (queryable, with computed values)
   - statistical patterns
@@ -476,11 +476,11 @@ class BusinessDefinitions:
     }
 
     _dimension_definitions: dict[str, str] = {
-        "date": "Time dimension — used for trend analysis, period comparisons, and seasonality detection.",
-        "region": "Geographic dimension — used for spatial analysis and regional comparisons.",
-        "gender": "Demographic dimension — used for gender-based segmentation.",
-        "category": "Classification dimension — used for grouping data by category.",
-        "department": "Organizational dimension — used for departmental analysis.",
+        "date": "Time dimension â€” used for trend analysis, period comparisons, and seasonality detection.",
+        "region": "Geographic dimension â€” used for spatial analysis and regional comparisons.",
+        "gender": "Demographic dimension â€” used for gender-based segmentation.",
+        "category": "Classification dimension â€” used for grouping data by category.",
+        "department": "Organizational dimension â€” used for departmental analysis.",
     }
 
     _metric_definitions: dict[str, str] = {

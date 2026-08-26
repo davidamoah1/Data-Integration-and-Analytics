@@ -1,4 +1,4 @@
-"""add dashboard widget data source tables for Phase 6 composition engine
+﻿"""add dashboard widget data source tables for Phase 6 composition engine
 
 Creates tables for composed dashboards and widget data source bindings.
 

@@ -1,4 +1,4 @@
-"""Database backup and recovery utilities.
+﻿"""Database backup and recovery utilities.
 
 Provides:
   - BackupManager: Create, list, verify, and restore database backups

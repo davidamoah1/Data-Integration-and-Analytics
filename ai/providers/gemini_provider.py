@@ -1,4 +1,4 @@
-"""Google Gemini provider — supports Gemini 1.5 Pro and Flash."""
+﻿"""Google Gemini provider â€” supports Gemini 1.5 Pro and Flash."""
 
 from collections.abc import Generator
 

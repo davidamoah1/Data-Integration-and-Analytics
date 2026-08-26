@@ -1,4 +1,4 @@
-"""Enterprise AI Context Engine.
+﻿"""Enterprise AI Context Engine.
 
 Aggregates all relevant context for AI requests into a single, structured object:
   - Organization & user context (role, permissions, org)
@@ -165,7 +165,7 @@ class ConversationContext:
 
 @dataclass
 class EnterpriseAIContext:
-    """Unified AI context — the single source of truth for all AI requests."""
+    """Unified AI context â€” the single source of truth for all AI requests."""
 
     user: UserContext = field(default_factory=UserContext)
     dataset: DatasetContext = field(default_factory=DatasetContext)
@@ -387,7 +387,7 @@ class EnterpriseContextEngine:
 
         return ctx
 
-    # ── Context Builders ─────────────────────────────────
+    # â”€â”€ Context Builders â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def _build_user_context(
         self,
@@ -615,7 +615,7 @@ class EnterpriseContextEngine:
         return result
 
 
-# ── Global instance ────────────────────────────────────
+# â”€â”€ Global instance â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 _context_engine: EnterpriseContextEngine | None = None
 

@@ -1,4 +1,4 @@
-"""GLM (Zhipu BigModel) provider — supports GLM-4 series."""
+﻿"""GLM (Zhipu BigModel) provider â€” supports GLM-4 series."""
 
 import json
 from collections.abc import Generator
@@ -10,7 +10,7 @@ from ai.providers.base import BaseProvider, LLMResponse
 
 
 class GLMProvider(BaseProvider):
-    """GLM (Zhipu BigModel) AI provider — OpenAI-compatible API."""
+    """GLM (Zhipu BigModel) AI provider â€” OpenAI-compatible API."""
 
     def __init__(self, api_key: str = "", base_url: str = "", model: str = "glm-4-flash", **kwargs):
         super().__init__(

@@ -1,1 +1,1 @@
-"""Shared infrastructure for cross-cutting concerns."""
+﻿"""Shared infrastructure for cross-cutting concerns."""

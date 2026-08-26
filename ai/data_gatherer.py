@@ -1,4 +1,4 @@
-"""Shared Data Gatherer — semantic-aware data gathering for AI engines.
+﻿"""Shared Data Gatherer â€” semantic-aware data gathering for AI engines.
 
 Replaces the hardcoded sales queries in decision_center.py, report_writer.py,
 dashboard_insights.py, and kpi_engine.py with a unified, dataset-agnostic
@@ -257,7 +257,7 @@ class DataGatherer:
 
         return data
 
-    # ── Private helpers ─────────────────────────────────
+    # â”€â”€ Private helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def _find_metric_column(self, metric: str) -> str | None:
         """Find the column name for a given metric."""

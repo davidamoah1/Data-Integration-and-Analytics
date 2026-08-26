@@ -1,6 +1,6 @@
-"""ORM model for file metadata.
+﻿"""ORM model for file metadata.
 
-The database stores only metadata — the actual file content lives in
+The database stores only metadata â€” the actual file content lives in
 object storage (R2, S3, Supabase, or local disk). This separation
 keeps the database lean and enables CDN delivery, multipart uploads,
 and storage-tier migration without touching the DB schema.
@@ -25,22 +25,22 @@ class FileRecord(Base):
     """Metadata for a file stored in object storage.
 
     Fields:
-      file_id        — UUID-based public identifier (used in URLs/API)
-      organization_id — Tenant scope
-      filename       — Original filename from upload
-      storage_backend — Which backend stored the file (local, r2, s3, supabase)
-      storage_bucket — Bucket/container name
-      storage_key    — Object key/path within the bucket
-      storage_url    — Full URL or path to retrieve the file
-      mime_type      — MIME type (e.g., image/png, application/pdf)
-      file_size      — Size in bytes
-      checksum       — SHA-256 hash for integrity verification
-      metadata       — JSON string for extra info (page count, dimensions, etc.)
-      uploaded_by    — User ID who uploaded the file
-      is_public      — Whether the file is publicly accessible
-      created_at     — Upload timestamp
-      accessed_at    — Last download timestamp
-      deleted_at     — Soft-delete timestamp (file removed from storage)
+      file_id        â€” UUID-based public identifier (used in URLs/API)
+      organization_id â€” Tenant scope
+      filename       â€” Original filename from upload
+      storage_backend â€” Which backend stored the file (local, r2, s3, supabase)
+      storage_bucket â€” Bucket/container name
+      storage_key    â€” Object key/path within the bucket
+      storage_url    â€” Full URL or path to retrieve the file
+      mime_type      â€” MIME type (e.g., image/png, application/pdf)
+      file_size      â€” Size in bytes
+      checksum       â€” SHA-256 hash for integrity verification
+      metadata       â€” JSON string for extra info (page count, dimensions, etc.)
+      uploaded_by    â€” User ID who uploaded the file
+      is_public      â€” Whether the file is publicly accessible
+      created_at     â€” Upload timestamp
+      accessed_at    â€” Last download timestamp
+      deleted_at     â€” Soft-delete timestamp (file removed from storage)
     """
 
     __tablename__ = "file_records"

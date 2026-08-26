@@ -1,4 +1,4 @@
-"""Dashboard Recommendation Engine.
+﻿"""Dashboard Recommendation Engine.
 
 Recommends dashboards based on:
   - Industry
@@ -237,9 +237,9 @@ class DashboardRecommendationEngine:
                 f"Industry detected as '{industry.title()}' with {confidence:.0f}% confidence."
             )
             if confidence < 70:
-                parts.append("Confidence is below threshold — user confirmation is required.")
+                parts.append("Confidence is below threshold â€” user confirmation is required.")
             elif confidence < 85:
-                parts.append("Confidence is moderate — recommendation shown for review.")
+                parts.append("Confidence is moderate â€” recommendation shown for review.")
 
         parts.append(f"Found {len(measures)} measure(s) and {len(dimensions)} dimension(s).")
         if time_fields:

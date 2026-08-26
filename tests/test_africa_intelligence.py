@@ -1,4 +1,4 @@
-"""Tests for Africa Intelligence Layer.
+﻿"""Tests for Africa Intelligence Layer.
 
 Tests cover:
   - Country profiles (Ghana, Nigeria, Kenya, South Africa)
@@ -27,7 +27,7 @@ from africa_intelligence import (
     AfricaIntelligenceRegistry,
 )
 
-# ── Ghana Profile Tests ──────────────────────────────────
+# â”€â”€ Ghana Profile Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestGhanaProfile:
@@ -44,7 +44,7 @@ class TestGhanaProfile:
     def test_currency(self):
         assert GHANA_PROFILE.currency.code == "GHS"
         assert GHANA_PROFILE.currency.name == "Ghana Cedi"
-        assert GHANA_PROFILE.currency.symbol == "₵"
+        assert GHANA_PROFILE.currency.symbol == "â‚µ"
         assert GHANA_PROFILE.currency.subunit == "Pesewa"
 
     def test_get_region_by_name(self):
@@ -154,7 +154,7 @@ class TestGhanaProfile:
         assert "agriculture" in d
 
 
-# ── Nigeria Profile Tests ────────────────────────────────
+# â”€â”€ Nigeria Profile Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestNigeriaProfile:
@@ -166,7 +166,7 @@ class TestNigeriaProfile:
 
     def test_currency(self):
         assert NIGERIA_PROFILE.currency.code == "NGN"
-        assert NIGERIA_PROFILE.currency.symbol == "₦"
+        assert NIGERIA_PROFILE.currency.symbol == "â‚¦"
 
     def test_has_36_states_plus_fct(self):
         assert len(NIGERIA_PROFILE.regions) == 37  # 36 states + FCT
@@ -186,7 +186,7 @@ class TestNigeriaProfile:
         assert any("WAEC" in b for b in NIGERIA_PROFILE.education.examination_bodies)
 
 
-# ── Kenya Profile Tests ──────────────────────────────────
+# â”€â”€ Kenya Profile Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestKenyaProfile:
@@ -216,7 +216,7 @@ class TestKenyaProfile:
         assert "A" in grades
 
 
-# ── South Africa Profile Tests ───────────────────────────
+# â”€â”€ South Africa Profile Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestSouthAfricaProfile:
@@ -243,7 +243,7 @@ class TestSouthAfricaProfile:
         assert "Financial Services" in names
 
 
-# ── Registry Tests ────────────────────────────────────────
+# â”€â”€ Registry Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestAfricaIntelligenceRegistry:
@@ -270,7 +270,7 @@ class TestAfricaIntelligenceRegistry:
         df = pd.DataFrame(
             {
                 "region": ["Greater Accra", "Ashanti", "Western"],
-                "amount_ghs": ["₵1000", "₵2000", "₵3000"],
+                "amount_ghs": ["â‚µ1000", "â‚µ2000", "â‚µ3000"],
             }
         )
         code = AfricaIntelligenceRegistry.detect_country(df)
@@ -280,7 +280,7 @@ class TestAfricaIntelligenceRegistry:
         df = pd.DataFrame(
             {
                 "state": ["Lagos", "Kano", "Rivers"],
-                "amount_ngn": ["₦50000", "₦100000", "₦75000"],
+                "amount_ngn": ["â‚¦50000", "â‚¦100000", "â‚¦75000"],
             }
         )
         code = AfricaIntelligenceRegistry.detect_country(df)
@@ -315,7 +315,7 @@ class TestAfricaIntelligenceRegistry:
         df = pd.DataFrame(
             {
                 "region": ["Greater Accra", "Ashanti", "Western", "Central"],
-                "revenue_ghs": ["₵1000", "₵2000", "₵3000", "₵1500"],
+                "revenue_ghs": ["â‚µ1000", "â‚µ2000", "â‚µ3000", "â‚µ1500"],
                 "crop": ["cocoa", "maize", "cocoa", "cassava"],
             }
         )
@@ -336,7 +336,7 @@ class TestAfricaIntelligenceRegistry:
         df = pd.DataFrame(
             {
                 "region": ["Greater Accra", "Ashanti"],
-                "amount": ["₵1000", "₵2000"],
+                "amount": ["â‚µ1000", "â‚µ2000"],
             }
         )
         result = AfricaIntelligenceRegistry.analyze(df)
@@ -346,7 +346,7 @@ class TestAfricaIntelligenceRegistry:
         assert "insights" in d
 
 
-# ── Column Recognizer Tests ──────────────────────────────
+# â”€â”€ Column Recognizer Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestAfricaColumnRecognizer:
@@ -364,7 +364,7 @@ class TestAfricaColumnRecognizer:
     def test_recognize_currency(self):
         df = pd.DataFrame(
             {
-                "revenue": ["₵1000", "₵2000", "₵3000"],
+                "revenue": ["â‚µ1000", "â‚µ2000", "â‚µ3000"],
             }
         )
         recognizer = AfricaColumnRecognizer(GHANA_PROFILE)
@@ -417,7 +417,7 @@ class TestAfricaColumnRecognizer:
         df = pd.DataFrame(
             {
                 "region": ["Greater Accra", "Ashanti"],
-                "revenue": ["₵1000", "₵2000"],
+                "revenue": ["â‚µ1000", "â‚µ2000"],
                 "crop": ["cocoa", "maize"],
             }
         )
@@ -433,7 +433,7 @@ class TestAfricaColumnRecognizer:
         assert len(result["detected_regions"]) == 0
 
 
-# ── Currency Converter Tests ─────────────────────────────
+# â”€â”€ Currency Converter Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestAfricaCurrencyConverter:
@@ -455,8 +455,8 @@ class TestAfricaCurrencyConverter:
         assert result.to_currency == "ZAR"
 
     def test_get_symbol(self):
-        assert AfricaCurrencyConverter.get_symbol("GHS") == "₵"
-        assert AfricaCurrencyConverter.get_symbol("NGN") == "₦"
+        assert AfricaCurrencyConverter.get_symbol("GHS") == "â‚µ"
+        assert AfricaCurrencyConverter.get_symbol("NGN") == "â‚¦"
         assert AfricaCurrencyConverter.get_symbol("KES") == "KSh"
         assert AfricaCurrencyConverter.get_symbol("ZAR") == "R"
 
@@ -473,11 +473,11 @@ class TestAfricaCurrencyConverter:
         assert "ZAR" in codes
 
     def test_detect_currency_in_text(self):
-        assert AfricaCurrencyConverter.detect_currency_in_text("Amount: ₵1500") == "GHS"
+        assert AfricaCurrencyConverter.detect_currency_in_text("Amount: â‚µ1500") == "GHS"
         assert AfricaCurrencyConverter.detect_currency_in_text("NGN 50000") == "NGN"
 
     def test_normalize_amount(self):
-        assert AfricaCurrencyConverter.normalize_amount("₵1,500.00", "GHS") == 1500.0
+        assert AfricaCurrencyConverter.normalize_amount("â‚µ1,500.00", "GHS") == 1500.0
         assert AfricaCurrencyConverter.normalize_amount("GHS 2000") == 2000.0
         assert AfricaCurrencyConverter.normalize_amount("1,000.50") == 1000.50
 
@@ -493,7 +493,7 @@ class TestAfricaCurrencyConverter:
         assert "rate" in d
 
 
-# ── Industry Mapper Tests ────────────────────────────────
+# â”€â”€ Industry Mapper Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestAfricaIndustryMapper:
@@ -544,7 +544,7 @@ class TestAfricaIndustryMapper:
         assert "Mining - Gold" in detected
 
 
-# ── Pipeline Integration Tests ───────────────────────────
+# â”€â”€ Pipeline Integration Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 class TestPipelineIntegration:

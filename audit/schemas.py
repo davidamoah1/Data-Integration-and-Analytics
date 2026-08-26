@@ -1,4 +1,4 @@
-"""Pydantic schemas for audit endpoints."""
+﻿"""Pydantic schemas for audit endpoints."""
 
 from datetime import datetime
 

@@ -1,4 +1,4 @@
-"""add ML platform and workflow engine tables
+﻿"""add ML platform and workflow engine tables
 
 Creates tables for the ML platform (model registry, training runs,
 predictions, forecasts, anomaly jobs, drift records) and the workflow
