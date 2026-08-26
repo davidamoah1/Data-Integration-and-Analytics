@@ -47,7 +47,7 @@ class TestHealthAndReadiness:
 
     def test_metrics_endpoint(self, client):
         """Metrics endpoint should return Prometheus-format text."""
-        response = client.get("/metrics")
+        response = client.get("/api/monitoring/metrics")
         assert response.status_code == 200
         assert "text/plain" in response.headers.get("content-type", "")
         body = response.text

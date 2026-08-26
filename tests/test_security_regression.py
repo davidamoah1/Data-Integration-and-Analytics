@@ -214,7 +214,7 @@ class TestTempStorage:
                 if not fname.endswith(".py"):
                     continue
                 fpath = os.path.join(root, fname)
-                with open(fpath, encoding="utf-8", errors="ignore") as f:
+                with open(fpath, encoding="utf-8-sig", errors="ignore") as f:
                     tree = ast.parse(f.read(), filename=fpath)
                 for node in ast.walk(tree):
                     if isinstance(node, ast.Constant) and isinstance(node.value, str):
@@ -231,7 +231,7 @@ class TestServerBinding:
     """Verify server binding defaults are secure."""
 
     def test_run_local_uses_localhost(self):
-        with open("run_local.py") as f:
+        with open("run_local.py", encoding="utf-8-sig") as f:
             content = f.read()
         assert 'host="127.0.0.1"' in content
         assert 'host="0.0.0.0"' not in content

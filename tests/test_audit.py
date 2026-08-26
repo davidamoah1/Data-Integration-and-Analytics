@@ -18,6 +18,7 @@ class TestAuditLogs:
         response = client.get("/api/audit/logs", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
+        data = data.get("data", data)
         assert "logs" in data
         assert "total" in data
         assert data["total"] >= 0
@@ -27,6 +28,7 @@ class TestAuditLogs:
         response = client.get("/api/audit/logs?limit=5&offset=0", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
+        data = data.get("data", data)
         assert data["limit"] == 5
         assert data["offset"] == 0
 
@@ -35,6 +37,7 @@ class TestAuditLogs:
         response = client.get("/api/audit/security", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
+        data = data.get("data", data)
         assert "logs" in data
 
     def test_get_audit_stats(self, client, auth_headers):
@@ -42,6 +45,7 @@ class TestAuditLogs:
         response = client.get("/api/audit/stats", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
+        data = data.get("data", data)
         assert "action_counts" in data
         assert "total" in data
 

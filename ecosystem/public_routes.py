@@ -42,25 +42,29 @@ def _log_usage(
     response_time_ms: int,
     error: str | None = None,
 ):
-    """Log API usage."""
-    log = APIUsageLog(
-        api_key_id=api_key_id,
-        organization_id=org_id,
-        endpoint=str(request.url.path),
-        method=request.method,
-        status_code=status_code,
-        response_time_ms=response_time_ms,
-        ip_address=request.client.host if request.client else None,
-        user_agent=request.headers.get("user-agent"),
-        error_message=error,
-    )
-    db.add(log)
-    db.execute(
-        update(APIKey)
-        .where(APIKey.id == api_key_id)
-        .values(last_used_at=datetime.now(timezone.utc))
-    )
-    db.commit()
+    """Log API usage. Best-effort — never raises."""
+    try:
+        log = APIUsageLog(
+            api_key_id=api_key_id,
+            organization_id=org_id,
+            endpoint=str(request.url.path),
+            method=request.method,
+            status_code=status_code,
+            response_time_ms=response_time_ms,
+            ip_address=request.client.host if request.client else None,
+            user_agent=request.headers.get("user-agent"),
+            error_message=error,
+        )
+        db.add(log)
+        if api_key_id is not None:
+            db.execute(
+                update(APIKey)
+                .where(APIKey.id == api_key_id)
+                .values(last_used_at=datetime.now(timezone.utc))
+            )
+        db.commit()
+    except Exception:
+        db.rollback()
 
 
 async def verify_api_key(request: Request, db: DbSession = Depends(get_db)) -> dict:

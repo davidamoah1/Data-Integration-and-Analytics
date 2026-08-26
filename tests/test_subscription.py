@@ -219,16 +219,17 @@ class TestPlanDefinitions:
 
 class TestSubscriptionAPI:
     def test_list_plans(self, client):
-        resp = client.get("/platform/subscription/plans")
+        resp = client.get("/api/saas/plans")
         assert resp.status_code == 200
         data = resp.json()
+        data = data.get("data", data)
         assert len(data) == 5
-        keys = [p["key"] for p in data]
+        keys = [p["plan_code"] for p in data]
         assert "free_trial" in keys
         assert "enterprise" in keys
 
     def test_list_plans_no_auth_required(self, client):
-        resp = client.get("/platform/subscription/plans")
+        resp = client.get("/api/saas/plans")
         assert resp.status_code == 200
 
     def test_get_current_subscription_no_org(self, client, auth_headers):
