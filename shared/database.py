@@ -64,22 +64,52 @@ def ensure_tables(engine):
     # from create_all if the table already exists)
     if config.DB_TYPE == "mysql":
         from sqlalchemy import inspect as _inspect, text as _text
+        from sqlalchemy.types import Integer, BigInteger, String, Text, JSON, TIMESTAMP, Boolean, Float, Numeric, DateTime
 
         insp = _inspect(engine)
+        existing_tables = set(insp.get_table_names())
 
-        # Check users table for missing columns
-        if "users" in insp.get_table_names():
-            existing_cols = {c["name"] for c in insp.get_columns("users")}
-            missing_cols = {
-                "onboarding_completed": "INTEGER NOT NULL DEFAULT 0",
-                "onboarding_data": "JSON NULL",
-            }
+        # Map SQLAlchemy column types to MySQL DDL
+        def _col_ddl(col):
+            col_type = col.type
+            if isinstance(col_type, (BigInteger, Integer)):
+                return "BIGINT" if isinstance(col_type, BigInteger) else "INTEGER"
+            elif isinstance(col_type, Boolean):
+                return "INTEGER"
+            elif isinstance(col_type, String):
+                length = col_type.length or 255
+                return f"VARCHAR({length})"
+            elif isinstance(col_type, Text):
+                return "TEXT"
+            elif isinstance(col_type, JSON):
+                return "JSON"
+            elif isinstance(col_type, (TIMESTAMP, DateTime)):
+                return "TIMESTAMP"
+            elif isinstance(col_type, (Float, Numeric)):
+                return "DECIMAL(20,4)"
+            else:
+                return "TEXT"
+
+        # Check every ORM model's table for missing columns
+        for table_name, table_obj in Base.metadata.tables.items():
+            if table_name not in existing_tables:
+                continue
+            existing_cols = {c["name"] for c in insp.get_columns(table_name)}
             with engine.begin() as conn:
-                for col_name, col_def in missing_cols.items():
-                    if col_name not in existing_cols:
-                        logger.info("Adding missing column users.%s", col_name)
+                for col in table_obj.columns:
+                    if col.name not in existing_cols:
+                        ddl_type = _col_ddl(col)
+                        nullable = "" if col.nullable else " NOT NULL"
+                        default = ""
+                        if col.default is not None and hasattr(col.default, "arg") and col.default.arg is not None:
+                            default_val = col.default.arg
+                            if isinstance(default_val, (int, float)):
+                                default = f" DEFAULT {default_val}"
+                            elif isinstance(default_val, bool):
+                                default = f" DEFAULT {1 if default_val else 0}"
+                        logger.info("Adding missing column %s.%s", table_name, col.name)
                         conn.execute(
-                            _text(f"ALTER TABLE users ADD COLUMN {col_name} {col_def}")
+                            _text(f"ALTER TABLE {table_name} ADD COLUMN {col.name} {ddl_type}{nullable}{default}")
                         )
 
     _tables_initialized = True
