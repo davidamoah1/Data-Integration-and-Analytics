@@ -72,11 +72,6 @@ const nextConfig = {
     const rootPaths = ['/docs', '/openapi.json', '/health', '/ready'];
 
     const beforeFileRewrites = [
-      // Non-/api prefixed backend paths
-      ...apiPaths.map(source => ({
-        source,
-        destination: backendUrl ? `${backendUrl}${source}` : pyFn,
-      })),
       // General /api/ prefix (backend routes that already use /api/)
       { source: '/api/:path*', destination: backendUrl ? `${backendUrl}/api/:path*` : pyFn },
       // Root-level endpoints
@@ -86,7 +81,15 @@ const nextConfig = {
       })),
     ];
 
-    const afterFileRewrites = [];
+    // Non-/api prefixed backend paths go in afterFiles so that Next.js
+    // page routes (e.g. /studios/workspace, /capture/upload, /analytics)
+    // are served by the frontend. Only paths that don't match a page
+    // (e.g. /analytics/dashboards, /studios/workspaces) fall through to
+    // the Python backend.
+    const afterFileRewrites = apiPaths.map(source => ({
+      source,
+      destination: backendUrl ? `${backendUrl}${source}` : pyFn,
+    }));
 
     return {
       beforeFiles: beforeFileRewrites,
