@@ -73,6 +73,11 @@ async def app(scope, receive, send):
         from sqlalchemy import create_engine as _ce
         from sqlalchemy.orm import sessionmaker as _sm
         eng = _ce(config.DB_URL)
+
+        # Run ensure_tables to add missing columns/tables
+        from shared.database import ensure_tables, ensure_default_data
+        ensure_tables(eng)
+
         SessionLocal = _sm(bind=eng, expire_on_commit=False)
         db = SessionLocal()
 
@@ -86,6 +91,14 @@ async def app(scope, receive, send):
         insp = _insp(eng)
         user_cols = [c["name"] for c in insp.get_columns("users")]
         info["db_user_columns"] = user_cols
+
+        # Seed default data (roles, permissions)
+        ensure_default_data(db)
+        db.commit()
+
+        # Re-check roles after seeding
+        roles = db.execute(_text("SELECT id, name FROM roles")).fetchall()
+        info["db_roles_after_seed"] = [{"id": r[0], "name": r[1]} for r in roles]
 
         # Try the actual registration service
         from organizations.invitation_schemas import SignupV2Request
