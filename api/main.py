@@ -227,116 +227,143 @@ async def lifespan(app: FastAPI):
     # Workflow engine models
     import workflows.models  # noqa: F401
 
-    if engine is not None and not serverless:
-        if _config.DB_TYPE == "mysql":
+    if engine is not None:
+        if not serverless and _config.DB_TYPE == "mysql":
             logger.info("DB_TYPE=mysql; skipping create_all(), relying on Alembic migrations.")
+        elif serverless:
+            # Safety net: create any missing tables even in serverless mode.
+            # create_all() with checkfirst=True (default) only creates tables
+            # that don't already exist, so it won't conflict with Alembic-managed schema.
+            try:
+                Base.metadata.create_all(engine)
+                logger.info("Serverless create_all() completed — missing tables created if any.")
+            except Exception as e:
+                logger.error(f"Serverless table creation failed: {e}")
+
+            # Ensure critical seed data (roles, permissions) exists.
+            # On a fresh database, seed_default_data hasn't been run, so
+            # signup would fail because roles like "org_admin" / "viewer" are missing.
+            try:
+                from sqlalchemy.orm import Session as SeedDbSession
+
+                from authentication.services import seed_default_data
+
+                seed_db = SeedDbSession(engine)
+                try:
+                    seed_default_data(seed_db)
+                finally:
+                    seed_db.close()
+                logger.info("Serverless seed_default_data completed.")
+            except Exception as e:
+                logger.error(f"Serverless seed_default_data failed: {e}")
         else:
             try:
                 Base.metadata.create_all(engine)
             except Exception as e:
                 logger.error(f"Database table creation failed: {e}")
 
-        # Seed ecosystem marketplace data
-        try:
-            from sqlalchemy.orm import Session as EcoDbSession
-
-            from ecosystem.seed import seed_ecosystem_data
-
-            eco_db = EcoDbSession(engine)
-            seed_ecosystem_data(eco_db)
-            eco_db.close()
-        except Exception as e:
-            logger.error(f"Ecosystem seed failed: {e}")
-
-        # Seed SaaS plans and feature flags
-        try:
-            from saas.services import seed_saas_data
-
-            saas_db = EcoDbSession(engine)
-            seed_saas_data(saas_db)
-            saas_db.close()
-        except Exception as e:
-            logger.error(f"SaaS seed failed: {e}")
-
-        # Seed Studios industry data
-        try:
-            from studios.seed import seed_studios_data
-
-            studios_db = EcoDbSession(engine)
-            seed_studios_data(studios_db)
-            studios_db.close()
-        except Exception as e:
-            logger.error(f"Studios seed failed: {e}")
-
-        # Register system AI plugins
-        from sqlalchemy.orm import Session as AIDbSession
-
-        ai_db = AIDbSession(engine)
-        try:
-            from ai.plugins import register_system_plugins
-
-            register_system_plugins(ai_db)
-        except Exception as e:
-            logger.error(f"AI plugin registration failed: {e}")
-        finally:
-            ai_db.close()
-
-        # Seed default data
-        from sqlalchemy.orm import Session as DbSession
-
-        db = DbSession(engine)
-        try:
-            seed_default_data(db)
-            # Seed demo data only when explicitly enabled (opt-in for pilot/onboarding)
-            from config import SEED_DEMO_DATA
-
-            if SEED_DEMO_DATA:
-                from enterprise.demo_data import is_demo_seeded, seed_demo_data
-
-                if not is_demo_seeded(db):
-                    seed_demo_data(db)
-                    logger.info(
-                        "Pilot demo data seeded (org, users, dashboards, KPIs, pipelines, AI conversations, reports). "
-                        "Set SEED_DEMO_DATA=false for production."
-                    )
-            # Create trial subscriptions for all orgs without one
-            from enterprise.subscription import SubscriptionService
-            from organizations.models import Organization
-
-            sub_svc = SubscriptionService(db)
+        if not serverless:
+            # Seed ecosystem marketplace data
             try:
-                for org in db.query(Organization).filter(Organization.is_active == 1).all():
-                    if not sub_svc.get_subscription(org.id):
-                        sub_svc.create_trial(org.id)
+                from sqlalchemy.orm import Session as EcoDbSession
+
+                from ecosystem.seed import seed_ecosystem_data
+
+                eco_db = EcoDbSession(engine)
+                seed_ecosystem_data(eco_db)
+                eco_db.close()
             except Exception as e:
-                logger.error(f"Subscription initialization failed: {e}")
+                logger.error(f"Ecosystem seed failed: {e}")
 
-            # Start background report scheduler (disabled during tests and serverless)
+            # Seed SaaS plans and feature flags
             try:
-                report_scheduler = ReportScheduler()
-                report_scheduler.start()
-                app.state.report_scheduler = report_scheduler
+                from saas.services import seed_saas_data
 
-                # Schedule daily database/config backups at 02:00 UTC
+                saas_db = EcoDbSession(engine)
+                seed_saas_data(saas_db)
+                saas_db.close()
+            except Exception as e:
+                logger.error(f"SaaS seed failed: {e}")
+
+            # Seed Studios industry data
+            try:
+                from studios.seed import seed_studios_data
+
+                studios_db = EcoDbSession(engine)
+                seed_studios_data(studios_db)
+                studios_db.close()
+            except Exception as e:
+                logger.error(f"Studios seed failed: {e}")
+
+            # Register system AI plugins
+            from sqlalchemy.orm import Session as AIDbSession
+
+            ai_db = AIDbSession(engine)
+            try:
+                from ai.plugins import register_system_plugins
+
+                register_system_plugins(ai_db)
+            except Exception as e:
+                logger.error(f"AI plugin registration failed: {e}")
+            finally:
+                ai_db.close()
+
+            # Seed default data
+            from sqlalchemy.orm import Session as DbSession
+
+            db = DbSession(engine)
+            try:
+                seed_default_data(db)
+                # Seed demo data only when explicitly enabled (opt-in for pilot/onboarding)
+                from config import SEED_DEMO_DATA
+
+                if SEED_DEMO_DATA:
+                    from enterprise.demo_data import is_demo_seeded, seed_demo_data
+
+                    if not is_demo_seeded(db):
+                        seed_demo_data(db)
+                        logger.info(
+                            "Pilot demo data seeded (org, users, dashboards, KPIs, pipelines, AI conversations, reports). "
+                            "Set SEED_DEMO_DATA=false for production."
+                        )
+                # Create trial subscriptions for all orgs without one
+                from enterprise.subscription import SubscriptionService
+                from organizations.models import Organization
+
+                sub_svc = SubscriptionService(db)
                 try:
-                    from apscheduler.triggers.cron import CronTrigger
-
-                    from services.backup_service import BackupService
-
-                    report_scheduler.scheduler.add_job(
-                        BackupService().create_backup,
-                        trigger=CronTrigger(hour=2, minute=0),
-                        id="daily_backup",
-                        replace_existing=True,
-                    )
-                    logger.info("Daily backup scheduled for 02:00 UTC")
+                    for org in db.query(Organization).filter(Organization.is_active == 1).all():
+                        if not sub_svc.get_subscription(org.id):
+                            sub_svc.create_trial(org.id)
                 except Exception as e:
-                    logger.error(f"Backup scheduler setup failed: {e}")
-            except Exception as e:
-                logger.error(f"Report scheduler failed to start: {e}")
-        finally:
-            db.close()
-        logger.info("Auth tables created, default data seeded, subscriptions initialized.")
+                    logger.error(f"Subscription initialization failed: {e}")
+
+                # Start background report scheduler (disabled during tests and serverless)
+                try:
+                    report_scheduler = ReportScheduler()
+                    report_scheduler.start()
+                    app.state.report_scheduler = report_scheduler
+
+                    # Schedule daily database/config backups at 02:00 UTC
+                    try:
+                        from apscheduler.triggers.cron import CronTrigger
+
+                        from services.backup_service import BackupService
+
+                        report_scheduler.scheduler.add_job(
+                            BackupService().create_backup,
+                            trigger=CronTrigger(hour=2, minute=0),
+                            id="daily_backup",
+                            replace_existing=True,
+                        )
+                        logger.info("Daily backup scheduled for 02:00 UTC")
+                    except Exception as e:
+                        logger.error(f"Backup scheduler setup failed: {e}")
+                except Exception as e:
+                    logger.error(f"Report scheduler failed to start: {e}")
+            finally:
+                db.close()
+            logger.info("Auth tables created, default data seeded, subscriptions initialized.")
     elif serverless:
         logger.info("Running in serverless mode; skipped heavy startup tasks.")
 
