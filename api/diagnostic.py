@@ -53,15 +53,23 @@ async def app(scope, receive, send):
     try:
         from sqlalchemy import create_engine
         from sqlalchemy import inspect as sa_inspect
+
         db_url = config.DB_URL
         eng = create_engine(db_url)
         inspector = sa_inspect(eng)
         all_tables = sorted(inspector.get_table_names())
         info["db_tables"] = all_tables
         required = [
-            "users", "roles", "user_roles", "organizations",
-            "workspaces", "invitations", "audit_logs", "sessions",
-            "departments", "role_permissions",
+            "users",
+            "roles",
+            "user_roles",
+            "organizations",
+            "workspaces",
+            "invitations",
+            "audit_logs",
+            "sessions",
+            "departments",
+            "role_permissions",
         ]
         info["db_missing_tables"] = [t for t in required if t not in all_tables]
         eng.dispose()
@@ -73,10 +81,12 @@ async def app(scope, receive, send):
     try:
         from sqlalchemy import create_engine as _ce
         from sqlalchemy.orm import sessionmaker as _sm
+
         eng = _ce(config.DB_URL)
 
         # Run ensure_tables to add missing columns/tables
         from shared.database import ensure_default_data, ensure_tables
+
         ensure_tables(eng)
 
         SessionLocal = _sm(bind=eng, expire_on_commit=False)
@@ -84,11 +94,13 @@ async def app(scope, receive, send):
 
         # Check if default roles exist
         from sqlalchemy import text as _text
+
         roles = db.execute(_text("SELECT id, name FROM roles")).fetchall()
         info["db_roles"] = [{"id": r[0], "name": r[1]} for r in roles]
 
         # Check users table columns
         from sqlalchemy import inspect as _insp
+
         insp = _insp(eng)
         user_cols = [c["name"] for c in insp.get_columns("users")]
         info["db_user_columns"] = user_cols
@@ -104,6 +116,7 @@ async def app(scope, receive, send):
         # Try the actual registration service
         from organizations.invitation_schemas import SignupV2Request
         from organizations.invitation_service import RegistrationService
+
         test_req = SignupV2Request(
             email="diag_test@test.com",
             password="TestPass123!",
@@ -117,7 +130,9 @@ async def app(scope, receive, send):
         svc = RegistrationService(db)
         result = svc.register(test_req)
         info["signup_test"] = "success"
-        info["signup_result"] = {k: v for k, v in result.items() if k != "access_token" and k != "refresh_token"}
+        info["signup_result"] = {
+            k: v for k, v in result.items() if k != "access_token" and k != "refresh_token"
+        }
         # Clean up test data
         db.rollback()
         db.close()

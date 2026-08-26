@@ -113,7 +113,11 @@ def ensure_tables(engine):
                         ddl_type = _col_ddl(col)
                         nullable = "" if col.nullable else " NOT NULL"
                         default = ""
-                        if col.default is not None and hasattr(col.default, "arg") and col.default.arg is not None:
+                        if (
+                            col.default is not None
+                            and hasattr(col.default, "arg")
+                            and col.default.arg is not None
+                        ):
                             default_val = col.default.arg
                             if isinstance(default_val, (int, float)):
                                 default = f" DEFAULT {default_val}"
@@ -121,7 +125,9 @@ def ensure_tables(engine):
                                 default = f" DEFAULT {1 if default_val else 0}"
                         logger.info("Adding missing column %s.%s", table_name, col.name)
                         conn.execute(
-                            _text(f"ALTER TABLE {table_name} ADD COLUMN {col.name} {ddl_type}{nullable}{default}")
+                            _text(
+                                f"ALTER TABLE {table_name} ADD COLUMN {col.name} {ddl_type}{nullable}{default}"
+                            )
                         )
 
     _tables_initialized = True

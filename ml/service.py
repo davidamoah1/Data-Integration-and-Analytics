@@ -258,6 +258,7 @@ class MLService:
                     os.makedirs(artifact_dir, exist_ok=True)
                     artifact_path = os.path.join(artifact_dir, f"{model.id}.joblib")
                     import joblib
+
                     joblib.dump(
                         {
                             "model": automl.best_model,
@@ -309,6 +310,7 @@ class MLService:
         os.makedirs(artifact_dir, exist_ok=True)
         artifact_path = os.path.join(artifact_dir, f"{model.id}.joblib")
         import joblib
+
         joblib.dump({"engine": engine}, artifact_path)
         run.artifact_path = artifact_path
         model.artifact_path = artifact_path

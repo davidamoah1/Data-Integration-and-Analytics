@@ -38,6 +38,7 @@ class AnomalyDetectionEngine:
         )
         params = {**defaults, **self.kwargs}
         import importlib
+
         estimator_path = self.ALGORITHMS[self.algorithm]
         module_name, class_name = estimator_path.rsplit(".", 1)
         estimator_class = getattr(importlib.import_module(module_name), class_name)
