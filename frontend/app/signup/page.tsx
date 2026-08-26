@@ -168,7 +168,7 @@ export default function SignUpPage() {
       } else if (apiErr?.status === 0 || apiErr?.message?.includes('Unable to connect')) {
         toast.error('We couldn\'t reach the server. Check your connection and try again.');
       } else if (apiErr?.status && apiErr.status >= 500) {
-        toast.error('We couldn\'t create your account right now. Please try again in a moment.');
+        toast.error(apiErr?.message || 'We couldn\'t create your account right now. Please try again in a moment.');
       } else {
         toast.error(apiErr?.message || 'We couldn\'t create your account. Please try again.');
       }

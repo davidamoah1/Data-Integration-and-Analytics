@@ -52,7 +52,7 @@ async def signup_v2(request: SignupV2Request, db: DbSession = Depends(get_db)):
         db.rollback()
         raise HTTPException(
             status_code=500,
-            detail="An unexpected error occurred during account creation.",
+            detail=f"Signup error: {type(exc).__name__}: {exc}",
         ) from exc
     return success_response(result, "Account created successfully")
 
