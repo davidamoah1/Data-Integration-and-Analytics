@@ -68,9 +68,8 @@ from audit.routes import router as audit_enterprise_router
 from audit.services import audit_router
 from authentication.routes import mfa_router, roles_router, sso_router, users_router
 
-# Phase 4 â€” Enterprise IAM
+# Phase 4 — Enterprise IAM
 from authentication.routes import router as auth_router
-from authentication.services import seed_default_data
 
 # Phase 16 â€” Smart Data Capture & Intelligent Document Processing
 from capture.routes import router as capture_router
