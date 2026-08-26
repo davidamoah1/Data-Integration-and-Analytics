@@ -9,7 +9,7 @@ from scheduler.report_scheduler import ReportScheduler
 from shared.database import get_db
 from shared.dependencies import get_current_user
 
-router = APIRouter(prefix="/scheduler/reports", tags=["Scheduled Reports"])
+router = APIRouter(prefix="/api/scheduler/reports", tags=["Scheduled Reports"])
 
 
 class ScheduledReportCreate(BaseModel):

@@ -19,7 +19,7 @@ from shared.database import get_db
 from shared.dependencies import require_permissions
 from shared.response import success_response
 
-performance_router = APIRouter(prefix="/performance", tags=["Performance"])
+performance_router = APIRouter(prefix="/api/performance", tags=["Performance"])
 
 
 @performance_router.get("/overview")

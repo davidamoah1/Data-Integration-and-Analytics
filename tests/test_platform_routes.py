@@ -13,7 +13,7 @@ class TestIndustryPacks:
     """Test industry solution pack endpoints."""
 
     def test_list_industry_packs(self, client, auth_headers):
-        resp = client.get("/platform/industry-packs", headers=auth_headers)
+        resp = client.get("/api/platform/industry-packs", headers=auth_headers)
         assert resp.status_code == 200
         data = resp.json()
         assert isinstance(data, list)
@@ -25,7 +25,7 @@ class TestIndustryPacks:
         assert "kpi_count" in pack
 
     def test_get_specific_pack(self, client, auth_headers):
-        resp = client.get("/platform/industry-packs/sme", headers=auth_headers)
+        resp = client.get("/api/platform/industry-packs/sme", headers=auth_headers)
         assert resp.status_code == 200
         data = resp.json()
         assert "SME" in data["name"]
@@ -33,7 +33,7 @@ class TestIndustryPacks:
         assert "kpis" in data
 
     def test_get_nonexistent_pack(self, client, auth_headers):
-        resp = client.get("/platform/industry-packs/nonexistent", headers=auth_headers)
+        resp = client.get("/api/platform/industry-packs/nonexistent", headers=auth_headers)
         assert resp.status_code == 404
 
 
@@ -41,13 +41,13 @@ class TestTemplates:
     """Test template marketplace endpoints."""
 
     def test_list_templates_empty(self, client, auth_headers):
-        resp = client.get("/platform/templates", headers=auth_headers)
+        resp = client.get("/api/platform/templates", headers=auth_headers)
         assert resp.status_code == 200
         assert isinstance(resp.json(), list)
 
     def test_create_template_as_admin(self, client, auth_headers):
         resp = client.post(
-            "/platform/templates",
+            "/api/platform/templates",
             headers=auth_headers,
             json={
                 "template_type": "dashboard",
@@ -65,7 +65,7 @@ class TestTemplates:
 
     def test_get_template(self, client, auth_headers):
         create = client.post(
-            "/platform/templates",
+            "/api/platform/templates",
             headers=auth_headers,
             json={
                 "template_type": "kpi",
@@ -75,17 +75,17 @@ class TestTemplates:
             },
         )
         tid = create.json()["id"]
-        resp = client.get(f"/platform/templates/{tid}", headers=auth_headers)
+        resp = client.get(f"/api/platform/templates/{tid}", headers=auth_headers)
         assert resp.status_code == 200
         assert resp.json()["name"] == "Test KPI Template"
 
     def test_get_nonexistent_template(self, client, auth_headers):
-        resp = client.get("/platform/templates/99999", headers=auth_headers)
+        resp = client.get("/api/platform/templates/99999", headers=auth_headers)
         assert resp.status_code == 404
 
     def test_install_template(self, client, auth_headers):
         create = client.post(
-            "/platform/templates",
+            "/api/platform/templates",
             headers=auth_headers,
             json={
                 "template_type": "report",
@@ -95,13 +95,13 @@ class TestTemplates:
             },
         )
         tid = create.json()["id"]
-        resp = client.post(f"/platform/templates/{tid}/install", headers=auth_headers)
+        resp = client.post(f"/api/platform/templates/{tid}/install", headers=auth_headers)
         assert resp.status_code == 200
         assert "installed" in resp.json()["message"] or "already" in resp.json()["message"]
 
     def test_rate_template(self, client, auth_headers):
         create = client.post(
-            "/platform/templates",
+            "/api/platform/templates",
             headers=auth_headers,
             json={
                 "template_type": "dashboard",
@@ -111,7 +111,7 @@ class TestTemplates:
             },
         )
         tid = create.json()["id"]
-        resp = client.post(f"/platform/templates/{tid}/rate?rating=5", headers=auth_headers)
+        resp = client.post(f"/api/platform/templates/{tid}/rate?rating=5", headers=auth_headers)
         assert resp.status_code == 200
         data = resp.json()
         assert data["average"] == 5.0
@@ -123,7 +123,7 @@ class TestComments:
 
     def test_create_and_list_comment(self, client, auth_headers):
         create = client.post(
-            "/platform/comments",
+            "/api/platform/comments",
             headers=auth_headers,
             json={
                 "resource_type": "dashboard",
@@ -136,7 +136,7 @@ class TestComments:
         assert create.json()["body"] == "This dashboard needs improvement"
 
         resp = client.get(
-            "/platform/comments?resource_type=dashboard&resource_id=1",
+            "/api/platform/comments?resource_type=dashboard&resource_id=1",
             headers=auth_headers,
         )
         assert resp.status_code == 200
@@ -145,7 +145,7 @@ class TestComments:
 
     def test_resolve_comment(self, client, auth_headers):
         create = client.post(
-            "/platform/comments",
+            "/api/platform/comments",
             headers=auth_headers,
             json={
                 "resource_type": "kpi",
@@ -154,12 +154,12 @@ class TestComments:
             },
         )
         cid = create.json()["id"]
-        resp = client.post(f"/platform/comments/{cid}/resolve", headers=auth_headers)
+        resp = client.post(f"/api/platform/comments/{cid}/resolve", headers=auth_headers)
         assert resp.status_code == 200
         assert resp.json()["message"] == "Comment resolved"
 
     def test_resolve_nonexistent_comment(self, client, auth_headers):
-        resp = client.post("/platform/comments/99999/resolve", headers=auth_headers)
+        resp = client.post("/api/platform/comments/99999/resolve", headers=auth_headers)
         assert resp.status_code == 404
 
 
@@ -168,7 +168,7 @@ class TestSearch:
 
     def test_search_returns_results(self, client, auth_headers):
         resp = client.post(
-            "/platform/search",
+            "/api/platform/search",
             headers=auth_headers,
             json={"query": "test"},
         )
@@ -179,7 +179,7 @@ class TestSearch:
 
     def test_search_with_resource_types(self, client, auth_headers):
         resp = client.post(
-            "/platform/search",
+            "/api/platform/search",
             headers=auth_headers,
             json={"query": "sales", "resource_types": ["dashboard", "kpi"]},
         )
@@ -190,7 +190,7 @@ class TestSearch:
 
     def test_search_empty_query_rejected(self, client, auth_headers):
         resp = client.post(
-            "/platform/search",
+            "/api/platform/search",
             headers=auth_headers,
             json={"query": ""},
         )
@@ -201,14 +201,14 @@ class TestBranding:
     """Test organization branding endpoints."""
 
     def test_get_branding_no_org(self, client, auth_headers):
-        resp = client.get("/platform/branding", headers=auth_headers)
+        resp = client.get("/api/platform/branding", headers=auth_headers)
         assert resp.status_code == 200
         data = resp.json()
         assert "branding" in data
 
     def test_update_branding_requires_org(self, client, auth_headers):
         resp = client.put(
-            "/platform/branding",
+            "/api/platform/branding",
             headers=auth_headers,
             json={
                 "primary_color": "#FF0000",
@@ -222,12 +222,12 @@ class TestDemoData:
     """Test demo data seeding endpoints."""
 
     def test_demo_status(self, client, auth_headers):
-        resp = client.get("/platform/demo/status", headers=auth_headers)
+        resp = client.get("/api/platform/demo/status", headers=auth_headers)
         assert resp.status_code == 200
         assert "is_seeded" in resp.json()
 
     def test_seed_demo_data(self, client, auth_headers):
-        resp = client.post("/platform/demo/seed", headers=auth_headers)
+        resp = client.post("/api/platform/demo/seed", headers=auth_headers)
         assert resp.status_code == 200
         data = resp.json()
         assert "message" in data

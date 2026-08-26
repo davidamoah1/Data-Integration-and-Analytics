@@ -23,7 +23,7 @@ from validation.report_generator import ValidationReportGenerator
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/validation", tags=["validation"])
+router = APIRouter(prefix="/api/validation", tags=["validation"])
 
 # In-memory store for validation sessions (production would use DB)
 _sessions: dict[int, dict] = {}

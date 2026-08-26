@@ -157,7 +157,7 @@ class AuditService:
 
 # --- Routers ----------------------------------------------------------------
 
-audit_router = APIRouter(prefix="/audit", tags=["Audit"])
+audit_router = APIRouter(prefix="/api/audit", tags=["Audit"])
 
 
 @audit_router.get("/logs")

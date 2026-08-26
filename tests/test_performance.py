@@ -629,14 +629,14 @@ class TestDBStats:
 
 class TestPerformanceAPI:
     def test_overview(self, auth_headers, client):
-        response = client.get("/performance/overview", headers=auth_headers)
+        response = client.get("/api/performance/overview", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()["data"]
         assert "cache" in data
         assert "database" in data
 
     def test_cache_stats(self, auth_headers, client):
-        response = client.get("/performance/cache/stats", headers=auth_headers)
+        response = client.get("/api/performance/cache/stats", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()["data"]
         assert "hits" in data
@@ -644,27 +644,27 @@ class TestPerformanceAPI:
         assert "backend" in data
 
     def test_cache_clear(self, auth_headers, client):
-        response = client.delete("/performance/cache/clear", headers=auth_headers)
+        response = client.delete("/api/performance/cache/clear", headers=auth_headers)
         assert response.status_code == 200
 
     def test_db_stats(self, auth_headers, client):
-        response = client.get("/performance/db/stats", headers=auth_headers)
+        response = client.get("/api/performance/db/stats", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()["data"]
         assert "table_count" in data
         assert "total_rows" in data
 
     def test_ensure_indexes(self, auth_headers, client):
-        response = client.post("/performance/db/ensure-indexes", headers=auth_headers)
+        response = client.post("/api/performance/db/ensure-indexes", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()["data"]
         assert "created" in data
         assert "total" in data
 
     def test_unauthorized(self, client):
-        response = client.get("/performance/overview")
+        response = client.get("/api/performance/overview")
         assert response.status_code == 401
 
     def test_cache_stats_unauthorized(self, client):
-        response = client.get("/performance/cache/stats")
+        response = client.get("/api/performance/cache/stats")
         assert response.status_code == 401

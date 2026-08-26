@@ -249,7 +249,7 @@ export default function DataToDecisionPage() {
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
       const response = await fetch(
-        `${apiUrl}/dataset-workflow/${workflowState.workflow_id}/presentation`,
+        `${apiUrl}/api/dataset-workflow/${workflowState.workflow_id}/presentation`,
         {
           method: 'POST',
           headers,

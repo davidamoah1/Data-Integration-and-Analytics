@@ -17,7 +17,7 @@ from shared.tenant import get_current_organization_id
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/semantic", tags=["semantic"])
+router = APIRouter(prefix="/api/semantic", tags=["semantic"])
 
 
 class AnalyzeRequest(BaseModel):

@@ -46,7 +46,7 @@ from services.kpi_intelligence import KPIIntelligenceEngine
 from shared.dependencies import get_current_user, require_permissions
 
 logger = logging.getLogger(__name__)
-router = APIRouter(prefix="/dashboard-engine", tags=["Dashboard Intelligence Engine"])
+router = APIRouter(prefix="/api/dashboard-engine", tags=["Dashboard Intelligence Engine"])
 
 # â”€â”€ Engine instances â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 

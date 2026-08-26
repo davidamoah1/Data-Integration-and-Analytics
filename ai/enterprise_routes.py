@@ -29,7 +29,7 @@ from shared.database import get_db
 from shared.dependencies import get_current_user
 from shared.tenant import get_current_organization_id
 
-router = APIRouter(prefix="/ai/enterprise", tags=["Enterprise AI Decision Support"])
+router = APIRouter(prefix="/api/ai/enterprise", tags=["Enterprise AI Decision Support"])
 
 
 # â”€â”€ Request/Response Schemas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

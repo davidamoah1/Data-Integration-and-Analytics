@@ -20,7 +20,7 @@ from shared.dependencies import get_current_user
 from shared.response import success_response
 from shared.tenant import get_current_organization_id
 
-webhook_router = APIRouter(prefix="/webhooks", tags=["Platform / Webhooks"])
+webhook_router = APIRouter(prefix="/api/webhooks", tags=["Platform / Webhooks"])
 
 
 class WebhookCreate(BaseModel):

@@ -7,7 +7,7 @@ class TestOrganizationManagement:
     def test_create_organization(self, client, auth_headers):
         """Test creating an organization."""
         response = client.post(
-            "/organizations",
+            "/api/organizations",
             json={
                 "name": "Test Corp",
                 "slug": "test-corp",
@@ -24,7 +24,7 @@ class TestOrganizationManagement:
     def test_list_organizations(self, client, auth_headers):
         """Test listing organizations."""
         client.post(
-            "/organizations",
+            "/api/organizations",
             json={
                 "name": "List Corp",
                 "slug": "list-corp",
@@ -32,7 +32,7 @@ class TestOrganizationManagement:
             headers=auth_headers,
         )
 
-        response = client.get("/organizations", headers=auth_headers)
+        response = client.get("/api/organizations", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()["data"]
         assert isinstance(data, list)
@@ -41,7 +41,7 @@ class TestOrganizationManagement:
     def test_get_organization(self, client, auth_headers):
         """Test getting a specific organization."""
         create_resp = client.post(
-            "/organizations",
+            "/api/organizations",
             json={
                 "name": "Get Corp",
                 "slug": "get-corp",
@@ -50,14 +50,14 @@ class TestOrganizationManagement:
         )
         org_id = create_resp.json()["data"]["id"]
 
-        response = client.get(f"/organizations/{org_id}", headers=auth_headers)
+        response = client.get(f"/api/organizations/{org_id}", headers=auth_headers)
         assert response.status_code == 200
         assert response.json()["data"]["name"] == "Get Corp"
 
     def test_update_organization(self, client, auth_headers):
         """Test updating an organization."""
         create_resp = client.post(
-            "/organizations",
+            "/api/organizations",
             json={
                 "name": "Update Corp",
                 "slug": "update-corp",
@@ -67,7 +67,7 @@ class TestOrganizationManagement:
         org_id = create_resp.json()["data"]["id"]
 
         response = client.put(
-            f"/organizations/{org_id}",
+            f"/api/organizations/{org_id}",
             json={
                 "name": "Updated Corp Name",
                 "description": "Updated description",
@@ -80,7 +80,7 @@ class TestOrganizationManagement:
     def test_delete_organization(self, client, auth_headers):
         """Test deleting an organization."""
         create_resp = client.post(
-            "/organizations",
+            "/api/organizations",
             json={
                 "name": "Delete Corp",
                 "slug": "delete-corp",
@@ -89,17 +89,17 @@ class TestOrganizationManagement:
         )
         org_id = create_resp.json()["data"]["id"]
 
-        response = client.delete(f"/organizations/{org_id}", headers=auth_headers)
+        response = client.delete(f"/api/organizations/{org_id}", headers=auth_headers)
         assert response.status_code == 200
 
         # Verify it's gone
-        get_resp = client.get(f"/organizations/{org_id}", headers=auth_headers)
+        get_resp = client.get(f"/api/organizations/{org_id}", headers=auth_headers)
         assert get_resp.status_code == 404
 
     def test_duplicate_slug(self, client, auth_headers):
         """Test creating an org with a duplicate slug."""
         client.post(
-            "/organizations",
+            "/api/organizations",
             json={
                 "name": "First Corp",
                 "slug": "dup-slug",
@@ -108,7 +108,7 @@ class TestOrganizationManagement:
         )
 
         response = client.post(
-            "/organizations",
+            "/api/organizations",
             json={
                 "name": "Second Corp",
                 "slug": "dup-slug",
@@ -125,7 +125,7 @@ class TestDepartmentManagement:
         """Test creating a department."""
         # First create an org
         org_resp = client.post(
-            "/organizations",
+            "/api/organizations",
             json={
                 "name": "Dept Org",
                 "slug": "dept-org",
@@ -135,7 +135,7 @@ class TestDepartmentManagement:
         org_id = org_resp.json()["data"]["id"]
 
         response = client.post(
-            "/departments",
+            "/api/departments",
             json={
                 "organization_id": org_id,
                 "name": "Engineering",
@@ -151,7 +151,7 @@ class TestDepartmentManagement:
     def test_list_departments(self, client, auth_headers):
         """Test listing departments."""
         org_resp = client.post(
-            "/organizations",
+            "/api/organizations",
             json={
                 "name": "List Dept Org",
                 "slug": "list-dept-org",
@@ -161,7 +161,7 @@ class TestDepartmentManagement:
         org_id = org_resp.json()["data"]["id"]
 
         client.post(
-            "/departments",
+            "/api/departments",
             json={
                 "organization_id": org_id,
                 "name": "Sales Dept",
@@ -169,7 +169,7 @@ class TestDepartmentManagement:
             headers=auth_headers,
         )
 
-        response = client.get("/departments", headers=auth_headers)
+        response = client.get("/api/departments", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()["data"]
         assert isinstance(data, list)
@@ -178,7 +178,7 @@ class TestDepartmentManagement:
     def test_list_departments_by_org(self, client, auth_headers):
         """Test listing departments filtered by organization."""
         org_resp = client.post(
-            "/organizations",
+            "/api/organizations",
             json={
                 "name": "Filter Org",
                 "slug": "filter-org",
@@ -188,7 +188,7 @@ class TestDepartmentManagement:
         org_id = org_resp.json()["data"]["id"]
 
         client.post(
-            "/departments",
+            "/api/departments",
             json={
                 "organization_id": org_id,
                 "name": "Marketing",
@@ -196,7 +196,7 @@ class TestDepartmentManagement:
             headers=auth_headers,
         )
 
-        response = client.get(f"/departments?organization_id={org_id}", headers=auth_headers)
+        response = client.get(f"/api/departments?organization_id={org_id}", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()["data"]
         assert all(d["organization_id"] == org_id for d in data)
@@ -204,7 +204,7 @@ class TestDepartmentManagement:
     def test_update_department(self, client, auth_headers):
         """Test updating a department."""
         org_resp = client.post(
-            "/organizations",
+            "/api/organizations",
             json={
                 "name": "Update Dept Org",
                 "slug": "update-dept-org",
@@ -214,7 +214,7 @@ class TestDepartmentManagement:
         org_id = org_resp.json()["data"]["id"]
 
         create_resp = client.post(
-            "/departments",
+            "/api/departments",
             json={
                 "organization_id": org_id,
                 "name": "Old Name",
@@ -224,7 +224,7 @@ class TestDepartmentManagement:
         dept_id = create_resp.json()["data"]["id"]
 
         response = client.put(
-            f"/departments/{dept_id}",
+            f"/api/departments/{dept_id}",
             json={
                 "name": "New Name",
                 "code": "NEW",
@@ -237,7 +237,7 @@ class TestDepartmentManagement:
     def test_delete_department(self, client, auth_headers):
         """Test deleting a department."""
         org_resp = client.post(
-            "/organizations",
+            "/api/organizations",
             json={
                 "name": "Delete Dept Org",
                 "slug": "delete-dept-org",
@@ -247,7 +247,7 @@ class TestDepartmentManagement:
         org_id = org_resp.json()["data"]["id"]
 
         create_resp = client.post(
-            "/departments",
+            "/api/departments",
             json={
                 "organization_id": org_id,
                 "name": "Delete Me",
@@ -256,5 +256,5 @@ class TestDepartmentManagement:
         )
         dept_id = create_resp.json()["data"]["id"]
 
-        response = client.delete(f"/departments/{dept_id}", headers=auth_headers)
+        response = client.delete(f"/api/departments/{dept_id}", headers=auth_headers)
         assert response.status_code == 200

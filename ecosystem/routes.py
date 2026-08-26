@@ -16,7 +16,7 @@ from shared.dependencies import get_current_user
 from shared.response import success_response
 from shared.tenant import get_current_organization_id
 
-router = APIRouter(prefix="/platform", tags=["Platform / API Keys"])
+router = APIRouter(prefix="/api/platform", tags=["Platform / API Keys"])
 
 
 # â”€â”€â”€ Schemas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

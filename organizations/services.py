@@ -165,7 +165,7 @@ class DepartmentService:
 
 # --- Routers ----------------------------------------------------------------
 
-org_router = APIRouter(prefix="/organizations", tags=["Organizations"])
+org_router = APIRouter(prefix="/api/organizations", tags=["Organizations"])
 
 
 @org_router.get("")
@@ -252,7 +252,7 @@ async def delete_organization(
     return success_response(None, "Organization deleted")
 
 
-dept_router = APIRouter(prefix="/departments", tags=["Departments"])
+dept_router = APIRouter(prefix="/api/departments", tags=["Departments"])
 
 
 @dept_router.get("")

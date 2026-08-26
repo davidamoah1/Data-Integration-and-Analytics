@@ -681,58 +681,58 @@ class TestFullPipeline:
 
 class TestSemanticAPI:
     def test_health(self, client):
-        resp = client.get("/semantic/health")
+        resp = client.get("/api/semantic/health")
         assert resp.status_code == 200
         data = resp.json()
         assert data["status"] == "healthy"
         assert len(data["modules"]) == 12
 
     def test_list_entities(self, client):
-        resp = client.get("/semantic/entities")
+        resp = client.get("/api/semantic/entities")
         assert resp.status_code == 200
         data = resp.json()
         assert data["total"] >= 40
 
     def test_list_entities_by_industry(self, client):
-        resp = client.get("/semantic/entities/healthcare")
+        resp = client.get("/api/semantic/entities/healthcare")
         assert resp.status_code == 200
         data = resp.json()
         assert data["industry"] == "healthcare"
         assert data["total"] > 0
 
     def test_list_industries(self, client):
-        resp = client.get("/semantic/industries")
+        resp = client.get("/api/semantic/industries")
         assert resp.status_code == 200
         data = resp.json()
         assert data["total"] == 12
 
     def test_industry_detail(self, client):
-        resp = client.get("/semantic/industries/healthcare")
+        resp = client.get("/api/semantic/industries/healthcare")
         assert resp.status_code == 200
         data = resp.json()
         assert data["display_name"] == "Healthcare"
 
     def test_semantic_search(self, client):
-        resp = client.post("/semantic/search", json={"query": "patient"})
+        resp = client.post("/api/semantic/search", json={"query": "patient"})
         assert resp.status_code == 200
         data = resp.json()
         assert len(data["matched_entities"]) > 0
 
     def test_glossary(self, client):
-        resp = client.get("/semantic/glossary")
+        resp = client.get("/api/semantic/glossary")
         assert resp.status_code == 200
         data = resp.json()
         assert data["total"] > 0
 
     def test_knowledge_graph_stats(self, client):
-        resp = client.get("/semantic/knowledge-graph/stats")
+        resp = client.get("/api/semantic/knowledge-graph/stats")
         assert resp.status_code == 200
         data = resp.json()
         assert data["total_entities"] >= 40
         assert data["total_industries"] == 12
 
     def test_dashboard_registry(self, client):
-        resp = client.get("/semantic/dashboard-registry/healthcare")
+        resp = client.get("/api/semantic/dashboard-registry/healthcare")
         assert resp.status_code == 200
         data = resp.json()
         assert data["template"] == "healthcare_executive"
@@ -740,18 +740,18 @@ class TestSemanticAPI:
         assert not any(widget["key"] == "sales" for widget in data["widgets"])
 
     def test_kpi_registry(self, client):
-        resp = client.get("/semantic/kpi-registry/education")
+        resp = client.get("/api/semantic/kpi-registry/education")
         assert resp.status_code == 200
         data = resp.json()
         assert any(kpi["key"] == "enrollment" for kpi in data["kpis"])
 
     def test_widget_registry(self, client):
-        resp = client.get("/semantic/widget-registry")
+        resp = client.get("/api/semantic/widget-registry")
         assert resp.status_code == 200
         assert "kpi_card" in resp.json()["widget_types"]
 
     def test_report_registry(self, client):
-        resp = client.get("/semantic/report-registry/church")
+        resp = client.get("/api/semantic/report-registry/church")
         assert resp.status_code == 200
         assert "giving" in resp.json()["reports"]
         assert "sales" not in resp.json()["reports"]

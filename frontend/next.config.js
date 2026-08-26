@@ -37,42 +37,14 @@ const nextConfig = {
     // original request path so the ASGI app sees e.g. /analytics/dashboards.
     const pyFn = '/api/index.py';
 
-    // Build rewrite entries for a given destination prefix
-    const apiPaths = [
-      '/analytics/:path*',
-      '/datasets/:path*',
-      '/datasets',
-      '/notifications/:path*',
-      '/notifications',
-      '/admin/:path*',
-      '/ai/:path*',
-      '/etl/:path*',
-      '/ml/:path*',
-      '/monitoring/:path*',
-      '/performance/:path*',
-      '/platform/:path*',
-      '/saas/:path*',
-      '/scheduler/:path*',
-      '/semantic/:path*',
-      '/validation/:path*',
-      '/workflows/:path*',
-      '/connectors/:path*',
-      '/dashboard-engine/:path*',
-      '/dataset-workflow/:path*',
-      '/departments/:path*',
-      '/organizations/:path*',
-      '/ecosystem/:path*',
-      '/marketplace/:path*',
-      '/public/:path*',
-      '/webhooks/:path*',
-      '/studios/:path*',
-      '/capture/:path*',
-      '/certificates/:path*',
-    ];
     const rootPaths = ['/docs', '/openapi.json', '/health', '/ready'];
 
+    // All API calls are prefixed with /api/ by the client, so we only need
+    // a single rewrite to route them to the Python serverless function.
+    // Non-/api/ prefixed paths (e.g. /studios, /datasets, /analytics) are
+    // served by Next.js page routes without conflict.
     const beforeFileRewrites = [
-      // General /api/ prefix (backend routes that already use /api/)
+      // General /api/ prefix (all backend routes)
       { source: '/api/:path*', destination: backendUrl ? `${backendUrl}/api/:path*` : pyFn },
       // Root-level endpoints
       ...rootPaths.map(source => ({
@@ -81,15 +53,7 @@ const nextConfig = {
       })),
     ];
 
-    // Non-/api prefixed backend paths go in afterFiles so that Next.js
-    // page routes (e.g. /studios/workspace, /capture/upload, /analytics)
-    // are served by the frontend. Only paths that don't match a page
-    // (e.g. /analytics/dashboards, /studios/workspaces) fall through to
-    // the Python backend.
-    const afterFileRewrites = apiPaths.map(source => ({
-      source,
-      destination: backendUrl ? `${backendUrl}${source}` : pyFn,
-    }));
+    const afterFileRewrites = [];
 
     return {
       beforeFiles: beforeFileRewrites,

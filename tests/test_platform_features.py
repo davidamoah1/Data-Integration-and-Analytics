@@ -285,7 +285,7 @@ class TestSeedData:
 class TestPlatformIntegration:
     def test_tenant_context_from_real_user(self, auth_headers, client):
         """Test that tenant context endpoint works."""
-        response = client.get("/platform/tenant/context", headers=auth_headers)
+        response = client.get("/api/platform/tenant/context", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()["data"]
         assert "organization_id" in data
@@ -294,7 +294,7 @@ class TestPlatformIntegration:
 
     def test_role_hierarchy_endpoint(self, auth_headers, client):
         """Test role hierarchy endpoint."""
-        response = client.get("/platform/roles/hierarchy", headers=auth_headers)
+        response = client.get("/api/platform/roles/hierarchy", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()["data"]
         assert isinstance(data, list)
@@ -305,7 +305,7 @@ class TestPlatformIntegration:
 
     def test_audit_summary_endpoint(self, auth_headers, client):
         """Test audit summary endpoint."""
-        response = client.get("/platform/audit/summary", headers=auth_headers)
+        response = client.get("/api/platform/audit/summary", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()["data"]
         assert "total_events" in data
@@ -313,12 +313,12 @@ class TestPlatformIntegration:
 
     def test_audit_categories_endpoint(self, auth_headers, client):
         """Test audit category stats endpoint."""
-        response = client.get("/platform/audit/categories", headers=auth_headers)
+        response = client.get("/api/platform/audit/categories", headers=auth_headers)
         assert response.status_code == 200
 
     def test_permissions_matrix_endpoint(self, auth_headers, client):
         """Test permissions matrix endpoint."""
-        response = client.get("/platform/roles/permissions-matrix", headers=auth_headers)
+        response = client.get("/api/platform/roles/permissions-matrix", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()["data"]
         assert "super_admin" in data
@@ -326,17 +326,17 @@ class TestPlatformIntegration:
 
     def test_seed_endpoint_requires_admin(self, auth_headers, client):
         """Test that seed endpoint is accessible to admin."""
-        response = client.post("/platform/seed", headers=auth_headers)
+        response = client.post("/api/platform/seed", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()["data"]
         assert "summary" in data
 
     def test_tenant_context_unauthorized(self, client):
         """Test that tenant context requires auth."""
-        response = client.get("/platform/tenant/context")
+        response = client.get("/api/platform/tenant/context")
         assert response.status_code == 401
 
     def test_audit_summary_unauthorized(self, client):
         """Test that audit summary requires auth."""
-        response = client.get("/platform/audit/summary")
+        response = client.get("/api/platform/audit/summary")
         assert response.status_code == 401

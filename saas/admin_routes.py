@@ -23,7 +23,7 @@ from shared.dependencies import get_current_user
 from shared.response import success_response
 from shared.tenant import require_super_admin
 
-admin_router = APIRouter(prefix="/admin-portal", tags=["Super Admin Portal"])
+admin_router = APIRouter(prefix="/api/admin-portal", tags=["Super Admin Portal"])
 
 
 @admin_router.get("/overview")

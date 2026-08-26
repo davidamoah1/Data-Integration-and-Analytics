@@ -121,7 +121,7 @@ from shared.dependencies import get_current_user, require_permissions
 from shared.security import encrypt_secret
 from shared.tenant import get_tenant_context, verify_resource_ownership
 
-router = APIRouter(prefix="/ai", tags=["AI Intelligence Platform"])
+router = APIRouter(prefix="/api/ai", tags=["AI Intelligence Platform"])
 
 
 # --- AI Chat ----------------------------------------------------------------

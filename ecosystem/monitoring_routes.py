@@ -18,7 +18,7 @@ from shared.dependencies import get_current_user
 from shared.response import success_response
 from shared.tenant import get_current_organization_id
 
-monitoring_router = APIRouter(prefix="/ecosystem/monitoring", tags=["Ecosystem Monitoring"])
+monitoring_router = APIRouter(prefix="/api/ecosystem/monitoring", tags=["Ecosystem Monitoring"])
 
 
 @monitoring_router.get("/overview")

@@ -195,7 +195,7 @@ class TestWorkflowVersioning:
 class TestWorkflowAPI:
     def test_create_and_execute_workflow(self, client, auth_headers):
         create_resp = client.post(
-            "/workflows",
+            "/api/workflows",
             json={
                 "name": "Test Workflow",
                 "description": "A simple workflow",
@@ -219,16 +219,16 @@ class TestWorkflowAPI:
         wf_id = create_resp.json()["id"]
 
         # Publish first version
-        versions = client.get(f"/workflows/{wf_id}/versions", headers=auth_headers).json()
+        versions = client.get(f"/api/workflows/{wf_id}/versions", headers=auth_headers).json()
         version_id = versions[0]["id"]
         pub_resp = client.post(
-            f"/workflows/{wf_id}/versions/{version_id}/publish",
+            f"/api/workflows/{wf_id}/versions/{version_id}/publish",
             headers=auth_headers,
         )
         assert pub_resp.status_code == 200
 
         exec_resp = client.post(
-            f"/workflows/{wf_id}/execute",
+            f"/api/workflows/{wf_id}/execute",
             json={"trigger_type": "manual", "inputs": {}},
             headers=auth_headers,
         )
@@ -239,12 +239,12 @@ class TestWorkflowAPI:
         assert "meta" in data["node_results"]
 
     def test_list_workflows(self, client, auth_headers):
-        list_resp = client.get("/workflows", headers=auth_headers)
+        list_resp = client.get("/api/workflows", headers=auth_headers)
         assert list_resp.status_code == 200
         assert isinstance(list_resp.json(), list)
 
     def test_node_types_endpoint(self, client, auth_headers):
-        resp = client.get("/workflows/node-types", headers=auth_headers)
+        resp = client.get("/api/workflows/node-types", headers=auth_headers)
         assert resp.status_code == 200
         assert isinstance(resp.json()["data"], list)
         types = {n["type"] for n in resp.json()["data"]}

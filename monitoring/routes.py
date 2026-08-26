@@ -16,7 +16,7 @@ from monitoring.otel import is_initialised as otel_ready
 from monitoring.prometheus import metrics_registry
 from monitoring.sentry_integration import is_initialised as sentry_ready
 
-router = APIRouter(prefix="/monitoring", tags=["Monitoring"])
+router = APIRouter(prefix="/api/monitoring", tags=["Monitoring"])
 
 
 @router.get("/metrics")

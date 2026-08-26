@@ -27,7 +27,7 @@ from shared.database import get_db
 from shared.dependencies import get_current_user
 from shared.tenant import get_current_organization_id, is_super_admin
 
-router = APIRouter(prefix="/analytics", tags=["Analytics"])
+router = APIRouter(prefix="/api/analytics", tags=["Analytics"])
 
 
 # --- Dashboards --------------------------------------------------------------

@@ -16,7 +16,7 @@ from ecosystem.models import APIKey, APIKeyService, APIUsageLog
 from shared.database import get_db
 from shared.response import success_response
 
-public_router = APIRouter(prefix="/public", tags=["Public API"])
+public_router = APIRouter(prefix="/api/public", tags=["Public API"])
 
 
 # â”€â”€â”€ API Key Authentication â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

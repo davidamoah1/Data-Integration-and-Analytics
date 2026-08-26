@@ -28,6 +28,6 @@ export const reportService = {
 
   async exportReportUrl(reportId: number, format = 'pdf'): Promise<string> {
     const baseUrl = apiClient.getApiUrl();
-    return `${baseUrl}/ai/reports/${reportId}/export?format=${format}`;
+    return `${baseUrl}/api/ai/reports/${reportId}/export?format=${format}`;
   },
 };

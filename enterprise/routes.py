@@ -38,7 +38,7 @@ from shared.dependencies import get_current_user
 from shared.response import success_response
 from shared.tenant import get_current_organization_id
 
-router = APIRouter(prefix="/platform", tags=["Platform"])
+router = APIRouter(prefix="/api/platform", tags=["Platform"])
 
 
 # --- Template Marketplace ----------------------------------------------------

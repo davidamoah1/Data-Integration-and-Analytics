@@ -12,7 +12,7 @@ import type {
   ChartExplanation,
 } from "@/types/workflow";
 
-const BASE = "/dataset-workflow";
+const BASE = "/api/dataset-workflow";
 
 export const workflowService = {
   async runWorkflow(file: File, adminConfirmed = false): Promise<WorkflowState> {

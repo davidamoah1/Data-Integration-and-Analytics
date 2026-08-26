@@ -630,7 +630,7 @@ class TestValidationAPI:
     def test_run_validation_endpoint(self, client, auth_headers):
         csv_content = "patient_id,age,gender,amount\nP001,45,Male,5000\nP002,32,Female,3200\nP003,67,Male,12000\n"
         response = client.post(
-            "/validation/run",
+            "/api/validation/run",
             files={"file": ("test.csv", csv_content, "text/csv")},
             headers=auth_headers,
         )
@@ -643,43 +643,43 @@ class TestValidationAPI:
     def test_validation_status_endpoint(self, client, auth_headers):
         csv_content = "patient_id,age,gender,amount\nP001,45,Male,5000\nP002,32,Female,3200\n"
         run_response = client.post(
-            "/validation/run",
+            "/api/validation/run",
             files={"file": ("test.csv", csv_content, "text/csv")},
             headers=auth_headers,
         )
         session_id = run_response.json()["session_id"]
 
-        response = client.get(f"/validation/status/{session_id}", headers=auth_headers)
+        response = client.get(f"/api/validation/status/{session_id}", headers=auth_headers)
         assert response.status_code == 200
         assert "status" in response.json()
 
     def test_validation_report_endpoint(self, client, auth_headers):
         csv_content = "patient_id,age,gender,amount\nP001,45,Male,5000\nP002,32,Female,3200\n"
         run_response = client.post(
-            "/validation/run",
+            "/api/validation/run",
             files={"file": ("test.csv", csv_content, "text/csv")},
             headers=auth_headers,
         )
         session_id = run_response.json()["session_id"]
 
-        response = client.get(f"/validation/report/{session_id}", headers=auth_headers)
+        response = client.get(f"/api/validation/report/{session_id}", headers=auth_headers)
         assert response.status_code == 200
         assert "dataset_name" in response.json()
 
     def test_list_rules_endpoint(self, client, auth_headers):
-        response = client.get("/validation/rules", headers=auth_headers)
+        response = client.get("/api/validation/rules", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert "rules" in data
         assert len(data["rules"]) > 0
 
     def test_history_endpoint(self, client, auth_headers):
-        response = client.get("/validation/history", headers=auth_headers)
+        response = client.get("/api/validation/history", headers=auth_headers)
         assert response.status_code == 200
         assert "history" in response.json()
 
     def test_audit_endpoint(self, client, auth_headers):
-        response = client.get("/validation/audit", headers=auth_headers)
+        response = client.get("/api/validation/audit", headers=auth_headers)
         assert response.status_code == 200
         assert "entries" in response.json()
 
@@ -687,14 +687,14 @@ class TestValidationAPI:
         # Create a session with dirty data that will fail validation
         csv_content = "patient_id,age,gender,amount\nP001,45,Male,5000\nP001,32,Female,3200\nP003,-5,Male,-100\n"
         run_response = client.post(
-            "/validation/run",
+            "/api/validation/run",
             files={"file": ("dirty.csv", csv_content, "text/csv")},
             headers=auth_headers,
         )
         session_id = run_response.json()["session_id"]
 
         response = client.post(
-            f"/validation/approve/{session_id}",
+            f"/api/validation/approve/{session_id}",
             json={"approver": "admin", "role": "administrator", "comments": "OK"},
             headers=auth_headers,
         )

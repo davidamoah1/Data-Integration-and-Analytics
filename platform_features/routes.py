@@ -21,7 +21,7 @@ from shared.database import get_db
 from shared.dependencies import get_current_user, require_any_role, require_permissions
 from shared.response import success_response
 
-platform_router = APIRouter(prefix="/platform", tags=["Platform"])
+platform_router = APIRouter(prefix="/api/platform", tags=["Platform"])
 
 
 # --- Audit Summary --------------------------------------------------------

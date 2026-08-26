@@ -42,7 +42,7 @@ from shared.dependencies import get_current_user
 from shared.tenant import get_current_organization_id
 
 logger = logging.getLogger(__name__)
-router = APIRouter(prefix="/dataset-workflow", tags=["Dataset Workflow"])
+router = APIRouter(prefix="/api/dataset-workflow", tags=["Dataset Workflow"])
 
 # Global orchestrator instance. Live state lives in this in-process dict for
 # the lifetime of the run, but every stage transition is also persisted to

@@ -16,7 +16,7 @@ from shared.database import get_db
 from shared.dependencies import require_permissions
 from shared.response import success_response
 
-router = APIRouter(prefix="/admin", tags=["Admin Panel"])
+router = APIRouter(prefix="/api/admin", tags=["Admin Panel"])
 
 
 class AssignRolesRequest(BaseModel):

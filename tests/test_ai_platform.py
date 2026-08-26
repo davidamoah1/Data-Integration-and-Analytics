@@ -607,13 +607,13 @@ class TestWorkflow:
 class TestAIAPI:
 
     def test_list_assistants(self, ai_client, auth_headers):
-        response = ai_client.get("/ai/assistants", headers=auth_headers)
+        response = ai_client.get("/api/ai/assistants", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert len(data) == 8
 
     def test_list_providers(self, ai_client, auth_headers):
-        response = ai_client.get("/ai/providers", headers=auth_headers)
+        response = ai_client.get("/api/ai/providers", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert len(data) >= 6
@@ -627,7 +627,7 @@ class TestAIAPI:
             "available_models": ["gpt-4o-mini"],
             "is_active": True,
         }
-        response = ai_client.post("/ai/providers", json=payload, headers=auth_headers)
+        response = ai_client.post("/api/ai/providers", json=payload, headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert data["provider_name"] == "test_provider"
@@ -639,12 +639,12 @@ class TestAIAPI:
             "display_name": "Duplicate Provider",
             "is_active": True,
         }
-        ai_client.post("/ai/providers", json=payload, headers=auth_headers)
-        response = ai_client.post("/ai/providers", json=payload, headers=auth_headers)
+        ai_client.post("/api/ai/providers", json=payload, headers=auth_headers)
+        response = ai_client.post("/api/ai/providers", json=payload, headers=auth_headers)
         assert response.status_code == 400
 
     def test_prompt_templates_list(self, ai_client, auth_headers):
-        response = ai_client.get("/ai/prompts", headers=auth_headers)
+        response = ai_client.get("/api/ai/prompts", headers=auth_headers)
         assert response.status_code == 200
 
     def test_create_prompt_template(self, ai_client, auth_headers):
@@ -654,30 +654,30 @@ class TestAIAPI:
             "system_prompt": "You are a strict SQL generator.",
             "description": "Test prompt",
         }
-        response = ai_client.post("/ai/prompts", json=payload, headers=auth_headers)
+        response = ai_client.post("/api/ai/prompts", json=payload, headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert data["name"] == "test_prompt"
 
     def test_dashboard(self, ai_client, auth_headers):
-        response = ai_client.get("/ai/dashboard", headers=auth_headers)
+        response = ai_client.get("/api/ai/dashboard", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert "total_conversations" in data
         assert "provider_status" in data
 
     def test_usage_stats(self, ai_client, auth_headers):
-        response = ai_client.get("/ai/usage/stats", headers=auth_headers)
+        response = ai_client.get("/api/ai/usage/stats", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert "total_requests" in data
 
     def test_audit_logs(self, ai_client, auth_headers):
-        response = ai_client.get("/ai/audit/logs", headers=auth_headers)
+        response = ai_client.get("/api/ai/audit/logs", headers=auth_headers)
         assert response.status_code == 200
 
     def test_sql_generate_unauthorized_without_auth(self, ai_client):
-        response = ai_client.post("/ai/sql/generate", json={"question": "What is revenue?"})
+        response = ai_client.post("/api/ai/sql/generate", json={"question": "What is revenue?"})
         assert response.status_code == 401
 
     def test_workflow_create_and_execute(self, ai_client, auth_headers):
@@ -689,25 +689,25 @@ class TestAIAPI:
                 {"type": "notify", "config": {"message": "API step"}},
             ],
         }
-        response = ai_client.post("/ai/workflows", json=payload, headers=auth_headers)
+        response = ai_client.post("/api/ai/workflows", json=payload, headers=auth_headers)
         assert response.status_code == 200
         workflow_id = response.json()["id"]
 
-        response = ai_client.post(f"/ai/workflows/{workflow_id}/execute", headers=auth_headers)
+        response = ai_client.post(f"/api/ai/workflows/{workflow_id}/execute", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert data["status"] == "completed"
 
     def test_kpi_recommend(self, ai_client, auth_headers):
         response = ai_client.post(
-            "/ai/kpi/recommend", json={"domain": "sales"}, headers=auth_headers
+            "/api/ai/kpi/recommend", json={"domain": "sales"}, headers=auth_headers
         )
         assert response.status_code == 200
         data = response.json()
         assert "recommendations" in data
 
     def test_kpi_monitor(self, ai_client, auth_headers):
-        response = ai_client.get("/ai/kpi/monitor", headers=auth_headers)
+        response = ai_client.get("/api/ai/kpi/monitor", headers=auth_headers)
         assert response.status_code == 200
 
     def test_document_upload_csv(self, ai_client, auth_headers, tmp_path):
@@ -715,7 +715,7 @@ class TestAIAPI:
         csv_path.write_text("a,b,c\n1,2,3\n4,5,6")
         with open(csv_path, "rb") as f:
             response = ai_client.post(
-                "/ai/documents/upload",
+                "/api/ai/documents/upload",
                 files={"file": ("test.csv", f, "text/csv")},
                 headers=auth_headers,
             )
@@ -727,7 +727,7 @@ class TestAIAPI:
         # Chat with document
         doc_id = data["document_id"]
         response = ai_client.post(
-            f"/ai/documents/{doc_id}/chat",
+            f"/api/ai/documents/{doc_id}/chat",
             json={"document_id": doc_id, "question": "What are the columns?"},
             headers=auth_headers,
         )
@@ -736,7 +736,7 @@ class TestAIAPI:
 
     def test_ai_search(self, ai_client, auth_headers):
         response = ai_client.post(
-            "/ai/search",
+            "/api/ai/search",
             json={"query": "sales", "search_type": "data"},
             headers=auth_headers,
         )

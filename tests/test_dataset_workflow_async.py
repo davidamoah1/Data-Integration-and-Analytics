@@ -155,7 +155,7 @@ class TestRunWorkflowRouteAsyncBranch:
         monkeypatch.delenv("DISABLE_STARTUP_TASKS", raising=False)
 
         response = client.post(
-            "/dataset-workflow/run",
+            "/api/dataset-workflow/run",
             files={"file": ("widgets.csv", sample_csv_bytes, "text/csv")},
             headers=auth_headers,
         )

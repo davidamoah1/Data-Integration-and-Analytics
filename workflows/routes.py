@@ -24,7 +24,7 @@ from workflows.schemas import (
 )
 from workflows.service import WorkflowService
 
-router = APIRouter(prefix="/workflows", tags=["Workflows"])
+router = APIRouter(prefix="/api/workflows", tags=["Workflows"])
 
 
 class CloneWorkflowRequest(BaseModel):

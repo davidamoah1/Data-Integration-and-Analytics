@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from dataset_library import DataTier, get_dataset_library
 from shared.dependencies import get_current_user, require_permissions
 
-router = APIRouter(prefix="/datasets", tags=["Dataset Library"])
+router = APIRouter(prefix="/api/datasets", tags=["Dataset Library"])
 
 
 class ProductionDatasetCreate(BaseModel):

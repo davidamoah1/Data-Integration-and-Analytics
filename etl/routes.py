@@ -58,7 +58,7 @@ from shared.database import get_db
 from shared.dependencies import get_current_user
 from shared.tenant import get_current_organization_id, get_tenant_context, verify_resource_ownership
 
-router = APIRouter(prefix="/etl", tags=["ETL Engine"])
+router = APIRouter(prefix="/api/etl", tags=["ETL Engine"])
 
 # --- File Upload Security ---------------------------------------------------
 _validator = FileValidator()

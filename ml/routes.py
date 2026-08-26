@@ -32,7 +32,7 @@ from ml.service import MLService
 from shared.database import get_db
 from shared.dependencies import DbSession, require_permissions
 
-router = APIRouter(prefix="/ml", tags=["Machine Learning"])
+router = APIRouter(prefix="/api/ml", tags=["Machine Learning"])
 
 
 def get_ml_service(

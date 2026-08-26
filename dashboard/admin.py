@@ -268,7 +268,7 @@ def render_admin_page():
         st.markdown("### Audit Logs")
         st.info("Track all user actions and system events for compliance.")
 
-        audit_data = _api_call("get", "/audit/logs?pageSize=50", token=token)
+        audit_data = _api_call("get", "/api/ai/audit/logs?pageSize=50", token=token)
         if "error" not in audit_data:
             logs = audit_data.get("data", {}).get("logs", [])
             if logs:

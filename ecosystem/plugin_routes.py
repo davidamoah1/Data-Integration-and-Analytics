@@ -13,7 +13,7 @@ from shared.dependencies import get_current_user
 from shared.response import success_response
 from shared.tenant import get_current_organization_id
 
-plugin_router = APIRouter(prefix="/marketplace", tags=["Platform / Marketplace"])
+plugin_router = APIRouter(prefix="/api/marketplace", tags=["Platform / Marketplace"])
 
 
 # â”€â”€â”€ Schemas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

@@ -19,7 +19,7 @@ from shared.dependencies import get_current_user
 from shared.response import success_response
 from shared.tenant import get_current_organization_id
 
-router = APIRouter(prefix="/connectors", tags=["Connectors"])
+router = APIRouter(prefix="/api/connectors", tags=["Connectors"])
 
 # Ensure built-in connectors are registered
 import connectors.builtin  # noqa: F401, E402

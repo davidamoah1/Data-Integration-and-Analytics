@@ -112,14 +112,11 @@ async function request<T = unknown>(
     params,
   } = options;
 
-  // In development, prefix non-/api/ paths with /api to avoid conflicts with
+  // Always prefix non-/api/ paths with /api to avoid conflicts with
   // Next.js page routes (e.g. /datasets page vs /datasets API).
-  // In production (Vercel), vercel.json rewrites handle routing directly.
   let normalizedPath = path;
-  if (process.env.NODE_ENV !== 'production') {
-    if (!normalizedPath.startsWith('/api/') && !normalizedPath.startsWith('/api?')) {
-      normalizedPath = '/api' + (normalizedPath.startsWith('/') ? '' : '/') + normalizedPath;
-    }
+  if (!normalizedPath.startsWith('/api/') && !normalizedPath.startsWith('/api?')) {
+    normalizedPath = '/api' + (normalizedPath.startsWith('/') ? '' : '/') + normalizedPath;
   }
 
   let url = normalizedPath;

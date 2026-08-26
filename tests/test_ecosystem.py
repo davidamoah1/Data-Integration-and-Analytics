@@ -74,13 +74,13 @@ def auth_headers(auth_token):
 
 class TestConnectorFramework:
     def test_list_connector_types(self, client, auth_headers):
-        resp = client.get("/connectors/types", headers=auth_headers)
+        resp = client.get("/api/connectors/types", headers=auth_headers)
         assert resp.status_code == 200
         types = resp.json()["data"]
         assert len(types) >= 20  # at least 20 connector types
 
     def test_list_africa_connectors(self, client, auth_headers):
-        resp = client.get("/connectors/types/africa", headers=auth_headers)
+        resp = client.get("/api/connectors/types/africa", headers=auth_headers)
         assert resp.status_code == 200
         types = resp.json()["data"]
         assert all(t["is_africa_first"] for t in types)
@@ -89,7 +89,7 @@ class TestConnectorFramework:
         )  # mobile_money, bank_api, gov_open_data, hospital_system, student_info_system
 
     def test_connector_types_have_required_fields(self, client, auth_headers):
-        resp = client.get("/connectors/types", headers=auth_headers)
+        resp = client.get("/api/connectors/types", headers=auth_headers)
         types = resp.json()["data"]
         for t in types:
             assert "type_code" in t
@@ -97,7 +97,7 @@ class TestConnectorFramework:
             assert "category" in t
 
     def test_filter_by_category(self, client, auth_headers):
-        resp = client.get("/connectors/types?category=database", headers=auth_headers)
+        resp = client.get("/api/connectors/types?category=database", headers=auth_headers)
         assert resp.status_code == 200
         types = resp.json()["data"]
         assert all(t["category"] == "database" for t in types)
@@ -109,26 +109,26 @@ class TestConnectorFramework:
 
 class TestMarketplace:
     def test_list_plugins(self, client, auth_headers):
-        resp = client.get("/marketplace/plugins", headers=auth_headers)
+        resp = client.get("/api/marketplace/plugins", headers=auth_headers)
         assert resp.status_code == 200
         plugins = resp.json()["data"]
         assert len(plugins) >= 10
 
     def test_get_plugin_detail(self, client, auth_headers):
-        resp = client.get("/marketplace/plugins/mobile-money-connector", headers=auth_headers)
+        resp = client.get("/api/marketplace/plugins/mobile-money-connector", headers=auth_headers)
         assert resp.status_code == 200
         plugin = resp.json()["data"]
         assert plugin["plugin_id"] == "mobile-money-connector"
         assert plugin["name"] == "Mobile Money Connector"
 
     def test_search_plugins(self, client, auth_headers):
-        resp = client.get("/marketplace/plugins?search=healthcare", headers=auth_headers)
+        resp = client.get("/api/marketplace/plugins?search=healthcare", headers=auth_headers)
         assert resp.status_code == 200
         plugins = resp.json()["data"]
         assert any("healthcare" in p["name"].lower() for p in plugins)
 
     def test_filter_by_category(self, client, auth_headers):
-        resp = client.get("/marketplace/plugins?category=connector", headers=auth_headers)
+        resp = client.get("/api/marketplace/plugins?category=connector", headers=auth_headers)
         assert resp.status_code == 200
         plugins = resp.json()["data"]
         assert all(p["category"] == "connector" for p in plugins)
@@ -139,14 +139,14 @@ class TestMarketplace:
 
 class TestIndustryPackages:
     def test_list_packages(self, client, auth_headers):
-        resp = client.get("/marketplace/industry-packages", headers=auth_headers)
+        resp = client.get("/api/marketplace/industry-packages", headers=auth_headers)
         assert resp.status_code == 200
         packages = resp.json()["data"]
         assert len(packages) >= 5
 
     def test_filter_by_industry(self, client, auth_headers):
         resp = client.get(
-            "/marketplace/industry-packages?industry=healthcare", headers=auth_headers
+            "/api/marketplace/industry-packages?industry=healthcare", headers=auth_headers
         )
         assert resp.status_code == 200
         packages = resp.json()["data"]
@@ -154,7 +154,7 @@ class TestIndustryPackages:
 
     def test_get_package_detail(self, client, auth_headers):
         resp = client.get(
-            "/marketplace/industry-packages/healthcare-analytics", headers=auth_headers
+            "/api/marketplace/industry-packages/healthcare-analytics", headers=auth_headers
         )
         assert resp.status_code == 200
         pkg = resp.json()["data"]
@@ -170,7 +170,7 @@ class TestIndustryPackages:
 
 class TestWebhooks:
     def test_list_supported_events(self, client, auth_headers):
-        resp = client.get("/webhooks/events", headers=auth_headers)
+        resp = client.get("/api/webhooks/events", headers=auth_headers)
         assert resp.status_code == 200
         events = resp.json()["data"]
         assert len(events) >= 10
@@ -180,7 +180,7 @@ class TestWebhooks:
     def test_create_and_delete_webhook(self, client, auth_headers):
         # Create
         resp = client.post(
-            "/webhooks",
+            "/api/webhooks",
             json={
                 "url": "https://example.com/webhook",
                 "events": ["dataset.uploaded", "pipeline.completed"],
@@ -194,17 +194,17 @@ class TestWebhooks:
         wh_id = data["id"]
 
         # List
-        resp = client.get("/webhooks", headers=auth_headers)
+        resp = client.get("/api/webhooks", headers=auth_headers)
         assert resp.status_code == 200
         assert any(w["id"] == wh_id for w in resp.json()["data"])
 
         # Delete
-        resp = client.delete(f"/webhooks/{wh_id}", headers=auth_headers)
+        resp = client.delete(f"/api/webhooks/{wh_id}", headers=auth_headers)
         assert resp.status_code == 200
 
     def test_invalid_event_rejected(self, client, auth_headers):
         resp = client.post(
-            "/webhooks",
+            "/api/webhooks",
             json={
                 "url": "https://example.com/webhook",
                 "events": ["invalid.event"],
@@ -221,7 +221,7 @@ class TestAPIKeys:
     def test_create_and_list_api_key(self, client, auth_headers):
         # Create
         resp = client.post(
-            "/platform/api-keys",
+            "/api/platform/api-keys",
             json={
                 "name": "Test Key",
                 "scopes": ["datasets", "analytics"],
@@ -237,7 +237,7 @@ class TestAPIKeys:
         key_id = data["id"]
 
         # List
-        resp = client.get("/platform/api-keys", headers=auth_headers)
+        resp = client.get("/api/platform/api-keys", headers=auth_headers)
         assert resp.status_code == 200
         keys = resp.json()["data"]
         assert any(k["id"] == key_id for k in keys)
@@ -245,7 +245,7 @@ class TestAPIKeys:
     def test_revoke_api_key(self, client, auth_headers):
         # Create
         resp = client.post(
-            "/platform/api-keys",
+            "/api/platform/api-keys",
             json={
                 "name": "Revoke Test",
                 "scopes": ["datasets"],
@@ -255,7 +255,7 @@ class TestAPIKeys:
         key_id = resp.json()["data"]["id"]
 
         # Revoke
-        resp = client.delete(f"/platform/api-keys/{key_id}", headers=auth_headers)
+        resp = client.delete(f"/api/platform/api-keys/{key_id}", headers=auth_headers)
         assert resp.status_code == 200
 
 
@@ -264,13 +264,13 @@ class TestAPIKeys:
 
 class TestPublicAPI:
     def test_public_api_requires_key(self, client):
-        resp = client.get("/public/analytics/dashboards")
+        resp = client.get("/api/public/analytics/dashboards")
         assert resp.status_code == 401
 
     def test_public_api_with_valid_key(self, client, auth_headers):
         # Create API key
         resp = client.post(
-            "/platform/api-keys",
+            "/api/platform/api-keys",
             json={
                 "name": "Public API Test",
                 "scopes": ["datasets", "analytics", "ai", "workflows"],
@@ -280,13 +280,13 @@ class TestPublicAPI:
         api_key = resp.json()["data"]["api_key"]
 
         # Use public API
-        resp = client.get("/public/analytics/dashboards", headers={"X-API-Key": api_key})
+        resp = client.get("/api/public/analytics/dashboards", headers={"X-API-Key": api_key})
         assert resp.status_code == 200
 
     def test_public_api_scope_enforcement(self, client, auth_headers):
         # Create API key with limited scope
         resp = client.post(
-            "/platform/api-keys",
+            "/api/platform/api-keys",
             json={
                 "name": "Limited Scope",
                 "scopes": ["datasets"],
@@ -296,7 +296,7 @@ class TestPublicAPI:
         api_key = resp.json()["data"]["api_key"]
 
         # Try to access analytics (should fail)
-        resp = client.get("/public/analytics/dashboards", headers={"X-API-Key": api_key})
+        resp = client.get("/api/public/analytics/dashboards", headers={"X-API-Key": api_key})
         assert resp.status_code == 403
 
 
@@ -305,7 +305,7 @@ class TestPublicAPI:
 
 class TestEcosystemMonitoring:
     def test_overview(self, client, auth_headers):
-        resp = client.get("/ecosystem/monitoring/overview", headers=auth_headers)
+        resp = client.get("/api/ecosystem/monitoring/overview", headers=auth_headers)
         assert resp.status_code == 200
         data = resp.json()["data"]
         assert "connectors" in data
@@ -315,9 +315,9 @@ class TestEcosystemMonitoring:
         assert "api_calls_24h" in data
 
     def test_connector_health(self, client, auth_headers):
-        resp = client.get("/ecosystem/monitoring/connectors", headers=auth_headers)
+        resp = client.get("/api/ecosystem/monitoring/connectors", headers=auth_headers)
         assert resp.status_code == 200
 
     def test_webhook_health(self, client, auth_headers):
-        resp = client.get("/ecosystem/monitoring/webhooks", headers=auth_headers)
+        resp = client.get("/api/ecosystem/monitoring/webhooks", headers=auth_headers)
         assert resp.status_code == 200

@@ -7,7 +7,7 @@ from notifications.models import Notification
 from shared.database import get_db
 from shared.dependencies import get_current_user
 
-router = APIRouter(prefix="/notifications", tags=["Notifications"])
+router = APIRouter(prefix="/api/notifications", tags=["Notifications"])
 
 
 def _serialize(n: Notification) -> dict:
