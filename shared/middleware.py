@@ -48,7 +48,9 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             f"connect-src {_connect_src}; "
             "frame-ancestors 'none'; "
             "base-uri 'self'; "
-            "form-action 'self';"
+            "form-action 'self'; "
+            "object-src 'none'; "
+            "upgrade-insecure-requests;"
         ),
         "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
         "Cross-Origin-Resource-Policy": _corp,

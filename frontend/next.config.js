@@ -61,6 +61,13 @@ const nextConfig = {
       '/dataset-workflow/:path*',
       '/departments/:path*',
       '/organizations/:path*',
+      '/ecosystem/:path*',
+      '/marketplace/:path*',
+      '/public/:path*',
+      '/webhooks/:path*',
+      '/studios/:path*',
+      '/capture/:path*',
+      '/certificates/:path*',
     ];
     const rootPaths = ['/docs', '/openapi.json', '/health', '/ready'];
 

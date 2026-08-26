@@ -156,8 +156,24 @@ class XMLConnector(BaseConnector):
         record_tag = self.config.get("record_tag", "record")
         encoding = self.config.get("encoding", "utf-8")
 
+        # Protect against XML bombs — limit file size to 25MB
+        file_size = os.path.getsize(path)
+        max_xml_size = int(os.getenv("MAX_XML_FILE_SIZE_MB", "25")) * 1024 * 1024
+        if file_size > max_xml_size:
+            raise ValueError(
+                f"XML file exceeds maximum allowed size ({max_xml_size // 1024 // 1024}MB): {file_size} bytes"
+            )
+
         with open(path, encoding=encoding) as f:
-            data = xmltodict.parse(f.read())
+            content = f.read()
+
+        # Check for entity declarations (XXE / billion laughs protection)
+        if "<!ENTITY" in content or "<!DOCTYPE" in content:
+            raise ValueError(
+                "XML file contains DOCTYPE or ENTITY declarations which are not allowed for security reasons."
+            )
+
+        data = xmltodict.parse(content)
 
         # Navigate to the record list
         root = data

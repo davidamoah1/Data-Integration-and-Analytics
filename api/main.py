@@ -118,6 +118,7 @@ from services.etl_service import ETLService
 from services.onboarding_routes import router as onboarding_router
 from services.report_engine_routes import router as report_engine_router
 from shared.database import Base, get_engine
+from shared.dependencies import require_permissions
 
 # Phase 12 â€” File Storage Architecture
 from storage.routes import router as storage_router
@@ -667,11 +668,14 @@ async def readiness_check():
 
 
 @app.get("/health/detailed", tags=["System"])
-async def detailed_health_check():
+async def detailed_health_check(
+    _current_user: dict = Depends(require_permissions("system.admin")),
+):
     """Return detailed health status for all subsystems.
 
-    Exposes readiness for database, ETL, AI, scheduler, email, SMS, WhatsApp,
-    push notifications, storage, and internal monitoring.
+    Requires system.admin permission. Exposes readiness for database, ETL,
+    AI, scheduler, email, SMS, WhatsApp, push notifications, storage, and
+    internal monitoring.
     """
     from monitoring.health_check import run_full_health_check
 
@@ -679,8 +683,13 @@ async def detailed_health_check():
 
 
 @app.get("/health/db", tags=["System"])
-async def db_health_check():
-    """Check database connectivity, migration version, and pool status."""
+async def db_health_check(
+    _current_user: dict = Depends(require_permissions("system.admin")),
+):
+    """Check database connectivity, migration version, and pool status.
+
+    Requires system.admin permission.
+    """
     try:
         from sqlalchemy import text
 
@@ -712,7 +721,9 @@ async def db_health_check():
 
 
 @app.get("/health/ocr", tags=["System"])
-async def ocr_health_check():
+async def ocr_health_check(
+    _current_user: dict = Depends(require_permissions("system.admin")),
+):
     """Check OCR (Tesseract) availability and version."""
     try:
         from capture.ocr_engine import is_ocr_available
@@ -743,7 +754,9 @@ async def ocr_health_check():
 
 
 @app.get("/health/storage", tags=["System"])
-async def storage_health_check():
+async def storage_health_check(
+    _current_user: dict = Depends(require_permissions("system.admin")),
+):
     """Check file storage availability."""
     try:
         from monitoring.health_check import check_storage_health
@@ -758,7 +771,9 @@ async def storage_health_check():
 
 
 @app.get("/health/ai", tags=["System"])
-async def ai_health_check():
+async def ai_health_check(
+    _current_user: dict = Depends(require_permissions("system.admin")),
+):
     """Check AI provider availability."""
     try:
         ai_provider = os.getenv("AI_PROVIDER", "").lower()
@@ -779,7 +794,9 @@ async def ai_health_check():
 
 
 @app.get("/health/workers", tags=["System"])
-async def workers_health_check():
+async def workers_health_check(
+    _current_user: dict = Depends(require_permissions("system.admin")),
+):
     """Check background job worker status."""
     try:
         from jobs.service import get_task_queue
@@ -804,7 +821,9 @@ async def workers_health_check():
 
 
 @app.get("/metrics", tags=["System"])
-async def prometheus_metrics():
+async def prometheus_metrics(
+    _current_user: dict = Depends(require_permissions("system.admin")),
+):
     """Expose Prometheus-compatible metrics for scraping.
 
     Returns metrics in text exposition format with counters, histograms,

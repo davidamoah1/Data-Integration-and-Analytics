@@ -48,9 +48,10 @@ def _attach_slow_query_listener(engine, threshold_ms: int):
 def ensure_tables(engine):
     """Create all tables if they do not exist. Idempotent via module flag.
 
-    Runs for both SQLite and MySQL. For MySQL, create_all() only creates
-    tables that don't exist â€” it won't modify existing tables. Missing
-    columns on existing tables are added explicitly below.
+    For SQLite (dev/test), create_all() is used to auto-create tables.
+    For MySQL (production), schema is managed exclusively by Alembic
+    migrations — create_all() and ALTER TABLE are skipped to prevent
+    schema drift from migration history.
     """
     global _tables_initialized
     if _tables_initialized:
@@ -58,11 +59,18 @@ def ensure_tables(engine):
 
     import config
 
+    if config.DB_TYPE == "mysql":
+        # Production MySQL schema is owned by Alembic migrations only.
+        # Do NOT call create_all() or ALTER TABLE — that would bypass
+        # migration history and cause schema drift.
+        _tables_initialized = True
+        return
+
+    # SQLite: auto-create tables for dev/test convenience
     Base.metadata.create_all(engine)
 
-    # Add missing columns to existing tables (MySQL doesn't get these
-    # from create_all if the table already exists)
-    if config.DB_TYPE == "mysql":
+    # Add missing columns to existing SQLite tables
+    if config.DB_TYPE == "sqlite":
         from sqlalchemy import inspect as _inspect
         from sqlalchemy import text as _text
         from sqlalchemy.types import (
