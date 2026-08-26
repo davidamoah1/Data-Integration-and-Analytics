@@ -310,6 +310,8 @@ async def lifespan(app: FastAPI):
             # Seed default data
             from sqlalchemy.orm import Session as DbSession
 
+            from authentication.services import seed_default_data
+
             db = DbSession(engine)
             try:
                 seed_default_data(db)
