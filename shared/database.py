@@ -66,16 +66,16 @@ def ensure_tables(engine):
         from sqlalchemy import inspect as _inspect
         from sqlalchemy import text as _text
         from sqlalchemy.types import (
+            JSON,
+            TIMESTAMP,
             BigInteger,
             Boolean,
             DateTime,
             Float,
             Integer,
-            JSON,
             Numeric,
             String,
             Text,
-            TIMESTAMP,
         )
 
         insp = _inspect(engine)
