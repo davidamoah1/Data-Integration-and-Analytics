@@ -211,13 +211,26 @@ def get_db():
     process. This is especially important on serverless platforms where startup
     tasks are skipped.
     """
-    engine = get_engine()
-    ensure_tables(engine)
-    factory = get_session_factory(engine)
-    db = factory()
     try:
-        ensure_default_data(db)
-        db.commit()
-        yield db
-    finally:
-        db.close()
+        engine = get_engine()
+        ensure_tables(engine)
+        factory = get_session_factory(engine)
+        db = factory()
+        try:
+            ensure_default_data(db)
+            db.commit()
+            yield db
+        finally:
+            db.close()
+    except Exception as e:
+        import logging
+
+        logging.getLogger("database").error(
+            "get_db() failed: %s: %s", type(e).__name__, e, exc_info=True
+        )
+        from fastapi import HTTPException
+
+        raise HTTPException(
+            status_code=500,
+            detail=f"Database initialization error: {type(e).__name__}: {e}",
+        ) from e
