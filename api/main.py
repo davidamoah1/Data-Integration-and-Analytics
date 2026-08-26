@@ -407,22 +407,14 @@ app = FastAPI(
 
 @app.middleware("http")
 async def path_root_middleware(request: Request, call_next):
-    """Restore /api prefix if the ASGI runtime stripped it.
+    """Pass through requests without modifying the path.
 
-    On Vercel, the Python serverless runtime may strip the mount-point
-    prefix (``/api``) from ``scope["path"]`` before the ASGI app sees it.
-    All routes are defined with an explicit ``/api/`` prefix, so a stripped
-    path (e.g. ``/auth/signup-v2``) won't match any route and returns 404.
-
-    This middleware prepends ``/api`` to ``scope["path"]`` when:
-      - running on Vercel
-      - the incoming path does NOT already start with /api
-      - the path is not a known root-level endpoint (e.g. /docs, /health)
+    Vercel rewrites route API paths to the Python serverless function.
+    The ASGI app receives the original path (e.g. /analytics/dashboards)
+    which matches the router prefixes directly. Routers that include /api
+    in their prefix (e.g. /api/auth) are matched when the frontend sends
+    the full /api/auth/... path.
     """
-    path = request.scope.get("path", "")
-    non_api = ("/docs", "/openapi.json", "/health", "/ready", "/metrics", "/redoc")
-    if _is_vercel and not path.startswith("/api") and not path.startswith(non_api):
-        request.scope["path"] = "/api" + path
     return await call_next(request)
 
 
