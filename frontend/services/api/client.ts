@@ -112,14 +112,12 @@ async function request<T = unknown>(
     params,
   } = options;
 
-  // In development, prefix non-/api/ paths with /api to avoid conflicts with
-  // Next.js page routes (e.g. /datasets page vs /datasets API).
-  // In production (Vercel), vercel.json rewrites handle routing directly.
+  // Always prefix non-/api/ paths with /api so requests hit the /api/:path*
+  // rewrite in vercel.json. Without this, paths like /analytics/dashboards
+  // may be intercepted by Next.js page routes instead of the Python backend.
   let normalizedPath = path;
-  if (process.env.NODE_ENV !== 'production') {
-    if (!normalizedPath.startsWith('/api/') && !normalizedPath.startsWith('/api?')) {
-      normalizedPath = '/api' + (normalizedPath.startsWith('/') ? '' : '/') + normalizedPath;
-    }
+  if (!normalizedPath.startsWith('/api/') && !normalizedPath.startsWith('/api?')) {
+    normalizedPath = '/api' + (normalizedPath.startsWith('/') ? '' : '/') + normalizedPath;
   }
 
   let url = normalizedPath;
@@ -318,10 +316,8 @@ export const apiClient = {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       let normalizedPath = path;
-      if (process.env.NODE_ENV !== 'production') {
-        if (!normalizedPath.startsWith('/api/') && !normalizedPath.startsWith('/api?')) {
-          normalizedPath = '/api' + (normalizedPath.startsWith('/') ? '' : '/') + normalizedPath;
-        }
+      if (!normalizedPath.startsWith('/api/') && !normalizedPath.startsWith('/api?')) {
+        normalizedPath = '/api' + (normalizedPath.startsWith('/') ? '' : '/') + normalizedPath;
       }
       const url = `${API_URL}${normalizedPath}`;
       xhr.open('POST', url);
