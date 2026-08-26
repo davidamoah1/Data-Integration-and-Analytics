@@ -63,8 +63,20 @@ def ensure_tables(engine):
     # Add missing columns to existing tables (MySQL doesn't get these
     # from create_all if the table already exists)
     if config.DB_TYPE == "mysql":
-        from sqlalchemy import inspect as _inspect, text as _text
-        from sqlalchemy.types import Integer, BigInteger, String, Text, JSON, TIMESTAMP, Boolean, Float, Numeric, DateTime
+        from sqlalchemy import inspect as _inspect
+        from sqlalchemy import text as _text
+        from sqlalchemy.types import (
+            BigInteger,
+            Boolean,
+            DateTime,
+            Float,
+            Integer,
+            JSON,
+            Numeric,
+            String,
+            Text,
+            TIMESTAMP,
+        )
 
         insp = _inspect(engine)
         existing_tables = set(insp.get_table_names())

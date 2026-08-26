@@ -41,7 +41,7 @@ async def app(scope, receive, send):
 
     # Try importing the main app
     try:
-        from api.main import app as main_app
+        from api.main import app  # noqa: F401
 
         info["app_import"] = "success"
     except Exception as e:
@@ -51,7 +51,8 @@ async def app(scope, receive, send):
 
     # Try database connection and check tables
     try:
-        from sqlalchemy import create_engine, inspect as sa_inspect
+        from sqlalchemy import create_engine
+        from sqlalchemy import inspect as sa_inspect
         db_url = config.DB_URL
         eng = create_engine(db_url)
         inspector = sa_inspect(eng)
@@ -75,7 +76,7 @@ async def app(scope, receive, send):
         eng = _ce(config.DB_URL)
 
         # Run ensure_tables to add missing columns/tables
-        from shared.database import ensure_tables, ensure_default_data
+        from shared.database import ensure_default_data, ensure_tables
         ensure_tables(eng)
 
         SessionLocal = _sm(bind=eng, expire_on_commit=False)

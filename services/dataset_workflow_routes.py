@@ -1033,7 +1033,7 @@ def _generate_auto_pptx(
         from pptx import Presentation as PptxPresentation
         from pptx.util import Inches, Pt
     except ImportError:
-        raise HTTPException(status_code=503, detail="Presentation generation is not available (python-pptx not installed).")
+        raise HTTPException(status_code=503, detail="Presentation generation is not available (python-pptx not installed).") from None
 
     # Build a lookup of chart specs by ID from the dashboard
     charts_by_id = {c["id"]: c for c in auto_dashboard.get("charts", [])}
@@ -1193,7 +1193,7 @@ async def generate_presentation(
         from pptx import Presentation as PptxPresentation
         from pptx.util import Inches
     except ImportError:
-        raise HTTPException(status_code=503, detail="Presentation generation is not available (python-pptx not installed).")
+        raise HTTPException(status_code=503, detail="Presentation generation is not available (python-pptx not installed).") from None
 
     state_dict = _get_workflow_state_dict(workflow_id, current_user, db)
     org_id = get_current_organization_id(current_user, db)
