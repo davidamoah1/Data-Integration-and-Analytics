@@ -25,7 +25,7 @@ from shared.dependencies import get_current_user
 from shared.response import success_response
 from shared.tenant import get_current_organization_id, require_super_admin
 
-router = APIRouter(prefix="/api/saas", tags=["SaaS Platform"])
+saas_router = APIRouter(prefix="/api/saas", tags=["SaaS Platform"])
 
 
 # â”€â”€â”€ Schemas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
