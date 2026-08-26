@@ -32,43 +32,51 @@ const nextConfig = {
         ? 'http://127.0.0.1:8000'
         : '';
 
-    // When backendUrl is empty (same-origin Vercel), we still need rewrites
-    // to route API paths to the Python serverless function via vercel.json.
-    // Use empty string as destination prefix so paths stay the same.
-    const dest = backendUrl || '';
+    // When backendUrl is empty (same-origin Vercel), route directly to the
+    // Python serverless function at /api/index.py. Vercel preserves the
+    // original request path so the ASGI app sees e.g. /analytics/dashboards.
+    const pyFn = '/api/index.py';
+
+    // Build rewrite entries for a given destination prefix
+    const apiPaths = [
+      '/analytics/:path*',
+      '/datasets/:path*',
+      '/datasets',
+      '/notifications/:path*',
+      '/notifications',
+      '/admin/:path*',
+      '/ai/:path*',
+      '/etl/:path*',
+      '/ml/:path*',
+      '/monitoring/:path*',
+      '/performance/:path*',
+      '/platform/:path*',
+      '/saas/:path*',
+      '/scheduler/:path*',
+      '/semantic/:path*',
+      '/validation/:path*',
+      '/workflows/:path*',
+      '/connectors/:path*',
+      '/dashboard-engine/:path*',
+      '/dataset-workflow/:path*',
+      '/departments/:path*',
+      '/organizations/:path*',
+    ];
+    const rootPaths = ['/docs', '/openapi.json', '/health', '/ready'];
 
     const beforeFileRewrites = [
-      // Non-/api prefixed backend paths — must be in beforeFiles so Next.js
-      // page routes don't intercept them and return HTML.
-      { source: '/analytics/:path*', destination: `${dest}/analytics/:path*` },
-      { source: '/datasets/:path*', destination: `${dest}/datasets/:path*` },
-      { source: '/datasets', destination: `${dest}/datasets/` },
-      { source: '/notifications/:path*', destination: `${dest}/notifications/:path*` },
-      { source: '/notifications', destination: `${dest}/notifications` },
-      { source: '/admin/:path*', destination: `${dest}/admin/:path*` },
-      { source: '/ai/:path*', destination: `${dest}/ai/:path*` },
-      { source: '/etl/:path*', destination: `${dest}/etl/:path*` },
-      { source: '/ml/:path*', destination: `${dest}/ml/:path*` },
-      { source: '/monitoring/:path*', destination: `${dest}/monitoring/:path*` },
-      { source: '/performance/:path*', destination: `${dest}/performance/:path*` },
-      { source: '/platform/:path*', destination: `${dest}/platform/:path*` },
-      { source: '/saas/:path*', destination: `${dest}/saas/:path*` },
-      { source: '/scheduler/:path*', destination: `${dest}/scheduler/:path*` },
-      { source: '/semantic/:path*', destination: `${dest}/semantic/:path*` },
-      { source: '/validation/:path*', destination: `${dest}/validation/:path*` },
-      { source: '/workflows/:path*', destination: `${dest}/workflows/:path*` },
-      { source: '/connectors/:path*', destination: `${dest}/connectors/:path*` },
-      { source: '/dashboard-engine/:path*', destination: `${dest}/dashboard-engine/:path*` },
-      { source: '/dataset-workflow/:path*', destination: `${dest}/dataset-workflow/:path*` },
-      { source: '/departments/:path*', destination: `${dest}/departments/:path*` },
-      { source: '/organizations/:path*', destination: `${dest}/organizations/:path*` },
+      // Non-/api prefixed backend paths
+      ...apiPaths.map(source => ({
+        source,
+        destination: backendUrl ? `${backendUrl}${source}` : pyFn,
+      })),
       // General /api/ prefix (backend routes that already use /api/)
-      { source: '/api/:path*', destination: `${dest}/api/:path*` },
+      { source: '/api/:path*', destination: backendUrl ? `${backendUrl}/api/:path*` : pyFn },
       // Root-level endpoints
-      { source: '/docs', destination: `${dest}/docs` },
-      { source: '/openapi.json', destination: `${dest}/openapi.json` },
-      { source: '/health', destination: `${dest}/health` },
-      { source: '/ready', destination: `${dest}/ready` },
+      ...rootPaths.map(source => ({
+        source,
+        destination: backendUrl ? `${backendUrl}${source}` : pyFn,
+      })),
     ];
 
     const afterFileRewrites = [];
