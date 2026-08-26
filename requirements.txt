@@ -45,4 +45,4 @@ opentelemetry-instrumentation-fastapi==0.49b0
 opentelemetry-instrumentation-sqlalchemy==0.49b0
 opentelemetry-instrumentation-redis==0.49b0
 opentelemetry-instrumentation-logging==0.49b0
-redis==5.2.1
+redis==8.1.0
