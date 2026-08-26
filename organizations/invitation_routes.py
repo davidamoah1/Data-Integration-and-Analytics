@@ -47,6 +47,7 @@ async def signup_v2(request: SignupV2Request, db: DbSession = Depends(get_db)):
             request.registration_mode,
             type(exc).__name__,
             exc,
+            exc_info=True,
         )
         db.rollback()
         raise HTTPException(
