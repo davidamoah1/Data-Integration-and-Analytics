@@ -14,7 +14,7 @@
 #   - streamlit / plotly: only used by dashboard/ (standalone Streamlit app)
 #   - PyMuPDF / pytesseract: OCR requires system Tesseract binary
 #   - pypdf: lazy-imported with ImportError fallback
-#   - python-pptx: lazy-imported with JSON-export fallback
+#   - python-pptx: needed for PPTX presentation generation
 #   - python-docx: not imported anywhere in the codebase
 
 SQLAlchemy==2.0.36
@@ -50,5 +50,6 @@ opentelemetry-exporter-otlp==1.28.0
 opentelemetry-instrumentation-fastapi==0.49b0
 opentelemetry-instrumentation-sqlalchemy==0.49b0
 opentelemetry-instrumentation-redis==0.49b0
+python-pptx==1.0.2
 opentelemetry-instrumentation-logging==0.49b0
 redis==5.2.1
