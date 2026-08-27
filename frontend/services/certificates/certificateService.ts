@@ -122,11 +122,16 @@ export const certificateService = {
   }) =>
     apiClient.get<CertificateSearchResult>(`${BASE}/search`, { params }),
 
-  upload: (files: File[], batchName?: string) => {
+  upload: (files: File[], batchName?: string, onProgress?: (percent: number) => void) => {
     const formData = new FormData();
     files.forEach((file) => formData.append("files", file));
     if (batchName) formData.append("batch_name", batchName);
-    return apiClient.upload<CertificateUploadResult>(`${BASE}/upload`, formData);
+    return apiClient.uploadWithProgress<CertificateUploadResult>(
+      `${BASE}/upload`,
+      formData,
+      onProgress,
+      { timeout: 120000 },
+    );
   },
 
   exportCsv: async (params?: {

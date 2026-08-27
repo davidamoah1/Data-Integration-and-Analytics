@@ -315,10 +315,8 @@ export const apiClient = {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       let normalizedPath = path;
-      if (process.env.NODE_ENV !== 'production') {
-        if (!normalizedPath.startsWith('/api/') && !normalizedPath.startsWith('/api?')) {
-          normalizedPath = '/api' + (normalizedPath.startsWith('/') ? '' : '/') + normalizedPath;
-        }
+      if (!normalizedPath.startsWith('/api/') && !normalizedPath.startsWith('/api?')) {
+        normalizedPath = '/api' + (normalizedPath.startsWith('/') ? '' : '/') + normalizedPath;
       }
       const url = `${API_URL}${normalizedPath}`;
       xhr.open('POST', url);

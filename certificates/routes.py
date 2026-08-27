@@ -247,6 +247,16 @@ async def upload_certificates(
                 }
             )
             logger.warning("Certificate upload failed for %s: %s", file.filename, e)
+        except OSError as e:
+            failed += 1
+            results.append(
+                {
+                    "filename": file.filename,
+                    "status": "failed",
+                    "error_message": f"Storage error: {e}",
+                }
+            )
+            logger.exception("Storage error for %s", file.filename)
         except Exception as e:
             failed += 1
             results.append(
