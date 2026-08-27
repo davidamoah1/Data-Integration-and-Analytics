@@ -450,7 +450,7 @@ def get_storage_backend() -> StorageBackend:
         # On Vercel (serverless), the filesystem is read-only except /tmp.
         # Use /tmp/storage as the base directory for local file storage.
         if os.getenv("VERCEL", "").lower() in ("1", "true", "yes"):
-            base_dir = os.path.join("/tmp", "storage", "files")
+            base_dir = os.path.join("/tmp", "storage", "files")  # nosec B108
         if not os.path.isabs(base_dir):
             base_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), base_dir)
         _backend = LocalFileBackend(
