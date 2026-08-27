@@ -19,54 +19,11 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import pytest
-from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session
-
-from api.main import app
-from shared.database import Base
-
 # â”€â”€â”€ Fixtures â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
-@pytest.fixture(scope="module")
-def db_session():
-    """Create an in-memory SQLite database for testing."""
-    engine = create_engine("sqlite:///:memory:", echo=False)
-    Base.metadata.create_all(engine)
-    session = Session(engine)
-    yield session
-    session.close()
-    engine.dispose()
-
-
-@pytest.fixture(scope="module")
-def client():
-    """Test client for the FastAPI app."""
-    with TestClient(app) as c:
-        yield c
-
-
-@pytest.fixture(scope="module")
-def auth_token(client):
-    """Get an auth token for testing."""
-    resp = client.post(
-        "/api/auth/login",
-        json={
-            "email": "admin@dataflow.io",
-            "password": "Admin@12345",
-        },
-    )
-    if resp.status_code == 200 and "data" in resp.json():
-        return resp.json()["data"]["access_token"]
-    # If login fails, return a dummy token â€” tests may skip
-    return ""
-
-
-@pytest.fixture(scope="module")
-def auth_headers(auth_token):
-    return {"Authorization": f"Bearer {auth_token}"}
+# The client and auth_headers fixtures are provided by conftest.py.
+# They use an in-memory SQLite DB with seeded roles and admin user.
 
 
 # â”€â”€â”€ Connector Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

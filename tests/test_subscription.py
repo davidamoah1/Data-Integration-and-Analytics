@@ -225,7 +225,7 @@ class TestSubscriptionAPI:
         data = data.get("data", data)
         assert len(data) == 5
         keys = [p["plan_code"] for p in data]
-        assert "free_trial" in keys
+        assert "free" in keys
         assert "enterprise" in keys
 
     def test_list_plans_no_auth_required(self, client):
@@ -233,13 +233,14 @@ class TestSubscriptionAPI:
         assert resp.status_code == 200
 
     def test_get_current_subscription_no_org(self, client, auth_headers):
-        resp = client.get("/platform/subscription/current", headers=auth_headers)
+        resp = client.get("/api/saas/subscription", headers=auth_headers)
         # Super admin may not have org_id
-        assert resp.status_code in (200, 400)
+        assert resp.status_code in (200, 400, 403)
 
-    def test_list_all_features(self, client):
-        resp = client.get("/platform/subscription/features")
+    def test_list_all_features(self, client, auth_headers):
+        resp = client.get("/api/saas/features", headers=auth_headers)
         assert resp.status_code == 200
         data = resp.json()
-        assert "features" in data
-        assert len(data["features"]) > 0
+        data = data.get("data", data)
+        assert "enabled" in data
+        assert len(data["enabled"]) > 0

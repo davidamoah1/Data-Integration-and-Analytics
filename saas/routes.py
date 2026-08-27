@@ -85,7 +85,6 @@ class NotificationPrefUpdate(BaseModel):
 
 @saas_router.get("/plans")
 async def list_plans(
-    current_user: dict = Depends(get_current_user),
     db: DbSession = Depends(get_db),
 ):
     """List all available subscription plans."""

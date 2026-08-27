@@ -25,12 +25,12 @@ class TestAuditLogs:
 
     def test_list_audit_logs_pagination(self, client, auth_headers):
         """Test audit log pagination."""
-        response = client.get("/api/audit/logs?limit=5&offset=0", headers=auth_headers)
+        response = client.get("/api/audit/logs?page=1&page_size=5", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         data = data.get("data", data)
-        assert data["limit"] == 5
-        assert data["offset"] == 0
+        assert data["page"] == 1
+        assert data["page_size"] == 5
 
     def test_list_security_logs(self, client, auth_headers):
         """Test listing security logs."""
