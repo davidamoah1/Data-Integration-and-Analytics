@@ -115,8 +115,13 @@ function validateFile(file: File): string | null {
 }
 
 function getErrorMessage(err: unknown): string {
-  const e = err as { status?: number; message?: string };
+  const e = err as { status?: number; message?: string; data?: any };
   if (e?.status) {
+    // For 500 errors, prefer the actual server message if available
+    if (e.status === 500) {
+      const detail = e?.data?.detail || e?.data?.message;
+      return detail || "Server error — please try again later.";
+    }
     switch (e.status) {
       case 400: return "Bad request — the server could not process the file.";
       case 401: return "Authentication required — please log in again.";
@@ -125,7 +130,6 @@ function getErrorMessage(err: unknown): string {
       case 413: return "File is too large — please upload a smaller file.";
       case 422: return "Validation error — the file format is not supported.";
       case 429: return "Too many requests — please wait and try again.";
-      case 500: return "Server error — please try again later.";
       case 502:
       case 503:
       case 504: return "Backend service unavailable — please try again later.";
