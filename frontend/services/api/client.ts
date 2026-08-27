@@ -336,7 +336,33 @@ export const apiClient = {
         }
       };
 
-      xhr.onload = () => {
+      xhr.onload = async () => {
+        // Handle 401 — try token refresh and retry once (only if retries > 0)
+        if (xhr.status === 401 && !options?.skipAuth && (options?.retries ?? MAX_RETRIES) > 0) {
+          const refreshed = await refreshAccessToken();
+          if (refreshed) {
+            // Retry the upload with the new token
+            try {
+              const result = await apiClient.uploadWithProgress<T>(path, formData, onProgress, {
+                ...options,
+                retries: 0,
+              });
+              resolve(result);
+              return;
+            } catch (retryErr) {
+              reject(retryErr);
+              return;
+            }
+          }
+          // Refresh failed — clear tokens and redirect to login
+          clearTokens();
+          if (typeof window !== 'undefined') {
+            window.location.href = '/login';
+          }
+          reject(new ApiError(401, 'Session expired. Please log in again.'));
+          return;
+        }
+
         try {
           const json = JSON.parse(xhr.responseText);
           if (json && typeof json === 'object' && 'success' in json) {
