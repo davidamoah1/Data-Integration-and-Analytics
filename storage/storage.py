@@ -422,28 +422,61 @@ def get_storage_backend() -> StorageBackend:
     backend_name = os.getenv("STORAGE_BACKEND", "local").lower()
 
     if backend_name == "r2":
-        _backend = R2Backend(
-            bucket=os.getenv("R2_BUCKET", ""),
-            account_id=os.getenv("R2_ACCOUNT_ID", ""),
-            access_key=os.getenv("R2_ACCESS_KEY", ""),
-            secret_key=os.getenv("R2_SECRET_KEY", ""),
-            public_base_url=os.getenv("R2_PUBLIC_URL"),
-        )
+        r2_bucket = os.getenv("R2_BUCKET", "")
+        r2_account_id = os.getenv("R2_ACCOUNT_ID", "")
+        r2_access_key = os.getenv("R2_ACCESS_KEY", "")
+        r2_secret_key = os.getenv("R2_SECRET_KEY", "")
+        if not all([r2_bucket, r2_account_id, r2_access_key, r2_secret_key]):
+            logger.warning(
+                "STORAGE_BACKEND=r2 but R2 credentials are incomplete "
+                "(R2_BUCKET, R2_ACCOUNT_ID, R2_ACCESS_KEY, R2_SECRET_KEY required). "
+                "Falling back to local storage."
+            )
+            backend_name = "local"
+        else:
+            _backend = R2Backend(
+                bucket=r2_bucket,
+                account_id=r2_account_id,
+                access_key=r2_access_key,
+                secret_key=r2_secret_key,
+                public_base_url=os.getenv("R2_PUBLIC_URL"),
+            )
     elif backend_name == "s3":
-        _backend = S3Backend(
-            bucket=os.getenv("S3_BUCKET", ""),
-            region=os.getenv("S3_REGION", "us-east-1"),
-            access_key=os.getenv("S3_ACCESS_KEY", ""),
-            secret_key=os.getenv("S3_SECRET_KEY", ""),
-            public_base_url=os.getenv("S3_PUBLIC_URL"),
-        )
+        s3_bucket = os.getenv("S3_BUCKET", "")
+        s3_access_key = os.getenv("S3_ACCESS_KEY", "")
+        s3_secret_key = os.getenv("S3_SECRET_KEY", "")
+        if not all([s3_bucket, s3_access_key, s3_secret_key]):
+            logger.warning(
+                "STORAGE_BACKEND=s3 but S3 credentials are incomplete "
+                "(S3_BUCKET, S3_ACCESS_KEY, S3_SECRET_KEY required). "
+                "Falling back to local storage."
+            )
+            backend_name = "local"
+        else:
+            _backend = S3Backend(
+                bucket=s3_bucket,
+                region=os.getenv("S3_REGION", "us-east-1"),
+                access_key=s3_access_key,
+                secret_key=s3_secret_key,
+                public_base_url=os.getenv("S3_PUBLIC_URL"),
+            )
     elif backend_name == "supabase":
-        _backend = SupabaseBackend(
-            bucket=os.getenv("SUPABASE_STORAGE_BUCKET", "files"),
-            url=os.getenv("SUPABASE_URL", ""),
-            service_key=os.getenv("SUPABASE_SERVICE_KEY", ""),
-            public_base_url=os.getenv("SUPABASE_STORAGE_PUBLIC_URL"),
-        )
+        sb_url = os.getenv("SUPABASE_URL", "")
+        sb_key = os.getenv("SUPABASE_SERVICE_KEY", "")
+        if not all([sb_url, sb_key]):
+            logger.warning(
+                "STORAGE_BACKEND=supabase but Supabase credentials are incomplete "
+                "(SUPABASE_URL, SUPABASE_SERVICE_KEY required). "
+                "Falling back to local storage."
+            )
+            backend_name = "local"
+        else:
+            _backend = SupabaseBackend(
+                bucket=os.getenv("SUPABASE_STORAGE_BUCKET", "files"),
+                url=sb_url,
+                service_key=sb_key,
+                public_base_url=os.getenv("SUPABASE_STORAGE_PUBLIC_URL"),
+            )
     else:
         # Default: local filesystem
         base_dir = os.getenv("STORAGE_LOCAL_DIR", "storage/files")
