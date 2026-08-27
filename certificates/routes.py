@@ -132,7 +132,14 @@ async def upload_certificates(
     Each file is processed through the existing capture pipeline:
     upload â†’ preprocess â†’ OCR â†’ classify â†’ extract â†’ validate.
     """
-    org_id = get_current_organization_id(current_user, db)
+    try:
+        org_id = get_current_organization_id(current_user, db)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception("Failed to resolve organization for user_id=%s", current_user["id"])
+        raise HTTPException(status_code=500, detail=f"Organization lookup failed: {e}") from e
+
     max_batch = _get_max_batch_size()
 
     logger.info(
@@ -156,11 +163,16 @@ async def upload_certificates(
             f"Received {len(files)}.",
         )
 
-    svc = CaptureService(db)
-    batch = svc.create_batch(
-        org_id, current_user["id"], batch_name or "Certificate Batch", "certificates"
-    )
-    logger.info("Batch created: batch_id=%s org_id=%s", batch.id, org_id)
+    try:
+        svc = CaptureService(db)
+        batch = svc.create_batch(
+            org_id, current_user["id"], batch_name or "Certificate Batch", "certificates"
+        )
+        logger.info("Batch created: batch_id=%s org_id=%s", batch.id, org_id)
+    except Exception as e:
+        logger.exception("Failed to create certificate batch: org_id=%s", org_id)
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Batch creation failed: {e}") from e
 
     results: list[dict] = []
     succeeded = 0
@@ -268,27 +280,35 @@ async def upload_certificates(
             )
             logger.exception("Certificate processing failed for %s", file.filename)
 
-    batch.total_documents = len(files)
-    batch.processed_documents = succeeded
-    batch.failed_documents = failed
-    db.commit()
+    try:
+        batch.total_documents = len(files)
+        batch.processed_documents = succeeded
+        batch.failed_documents = failed
+        db.commit()
+    except Exception:
+        logger.exception("Failed to update batch counters: batch_id=%s", batch.id)
+        db.rollback()
 
-    log_audit_event(
-        db=db,
-        action="certificate.batch_upload",
-        user_id=current_user["id"],
-        organization_id=org_id,
-        resource_type="certificate_batch",
-        resource_id=batch.id,
-        new_values={
-            "batch_name": batch.name,
-            "total": len(files),
-            "succeeded": succeeded,
-            "failed": failed,
-            "review_required": review_required,
-        },
-    )
-    db.commit()
+    try:
+        log_audit_event(
+            db=db,
+            action="certificate.batch_upload",
+            user_id=current_user["id"],
+            organization_id=org_id,
+            resource_type="certificate_batch",
+            resource_id=batch.id,
+            new_values={
+                "batch_name": batch.name,
+                "total": len(files),
+                "succeeded": succeeded,
+                "failed": failed,
+                "review_required": review_required,
+            },
+        )
+        db.commit()
+    except Exception:
+        logger.exception("Failed to log audit event for batch_id=%s", batch.id)
+        db.rollback()
 
     logger.info(
         "Certificate upload complete: batch_id=%s org_id=%s total=%d succeeded=%d failed=%d",

@@ -122,7 +122,14 @@ async def upload_document(
     db: DbSession = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
-    org_id = get_current_organization_id(current_user, db)
+    try:
+        org_id = get_current_organization_id(current_user, db)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception("Failed to resolve organization for user_id=%s", current_user["id"])
+        raise HTTPException(status_code=500, detail=f"Organization lookup failed: {e}") from e
+
     svc = CaptureService(db)
     content = await file.read()
 
@@ -130,6 +137,10 @@ async def upload_document(
         doc = svc.upload_document(org_id, current_user["id"], file.filename or "upload", content)
     except CaptureError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
+    except Exception as e:
+        logger.exception("Failed to upload document: org_id=%s filename=%s", org_id, file.filename)
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Upload failed: {e}") from e
 
     # Try to create a background job for processing
     job_id = None

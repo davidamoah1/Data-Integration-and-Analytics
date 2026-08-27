@@ -347,7 +347,12 @@ export const apiClient = {
             resolve(json.data as T);
             return;
           }
-          resolve(json as T);
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve(json as T);
+          } else {
+            const msg = (json && typeof json === 'object' && 'detail' in json) ? json.detail : `Upload failed with status ${xhr.status}`;
+            reject(new ApiError(xhr.status, msg, json));
+          }
         } catch {
           if (xhr.status >= 200 && xhr.status < 300) {
             resolve(null as T);
