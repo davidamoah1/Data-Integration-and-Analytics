@@ -17,14 +17,13 @@ const API_URL = (() => {
     return process.env.API_BACKEND_URL.replace(/\/$/, '');
   }
   if (process.env.NODE_ENV === 'production') {
-    // Same-origin fallback — rewrites in next.config.js proxy /api/* to the backend.
-    return '';
+    return 'https://data-integration-and-analytics.onrender.com';
   }
   return 'http://localhost:8000';
 })();
 
-// In production, API_URL is empty (same-origin). Rewrites in next.config.js
-// proxy /api/* to the Render backend. In development, API_URL is localhost:8000.
+// In production, API_URL points directly to the Render backend.
+// In development, API_URL is localhost:8000.
 const REQUEST_TIMEOUT = 30000;
 const MAX_RETRIES = 2;
 
