@@ -146,9 +146,9 @@ def _is_serverless() -> bool:
 async def lifespan(app: FastAPI):
     """Validate configuration, create tables, and seed data at startup.
 
-    On serverless platforms (Vercel) or when DISABLE_STARTUP_TASKS is set, skip
-    heavy initialization such as database migrations, seeding, and background
-    scheduler startup. These should be handled by deployment hooks or cron jobs.
+    Heavy DB operations (seeding, scheduler) are deferred to a background
+    task so uvicorn binds to the port immediately — preventing Render's
+    port scan timeout when the remote MySQL is slow to connect.
     """
     serverless = _is_serverless()
 
@@ -164,41 +164,15 @@ async def lifespan(app: FastAPI):
             "Monitoring integrations not configured (set SENTRY_DSN / OTEL_EXPORTER_OTLP_ENDPOINT to enable)."
         )
 
-    if not serverless:
-        try:
-            validate_config()
-        except Exception as e:
-            logger.error(f"Configuration validation failed: {e}")
-            if os.getenv("APP_ENV", "development").lower() == "production":
-                raise
-            # In non-production, continue with degraded config for dev convenience.
-
-    try:
-        engine = get_engine()
-    except Exception as e:
-        logger.error(f"Database engine creation failed: {e}")
-        engine = None
-
     # Import all models so they register with Base.metadata.
-    # This must happen even in serverless mode â€” otherwise Base.metadata is
-    # empty and ensure_tables()/create_all() creates zero tables, causing 500
-    # errors on every database operation.
+    # This is lightweight (no DB calls) and must happen before any DB work.
     import ai.models  # noqa: F401
     import analytics.models  # noqa: F401
     import audit.models  # noqa: F401
     import authentication.mfa_models  # noqa: F401
     import authentication.models  # noqa: F401
     import authentication.sso_models  # noqa: F401
-
-    # Phase 16 â€” Smart Data Capture models
     import capture.models  # noqa: F401
-
-    # Production MySQL schema is owned exclusively by Alembic migrations
-    # (`alembic upgrade head`). create_all() only runs for SQLite so it
-    # doesn't drift from migration history in production.
-    import config as _config
-
-    # Phase 12.9 â€” Ecosystem models
     import connectors.models  # noqa: F401
     import database.db_setup  # noqa: F401
     import ecosystem.models  # noqa: F401
@@ -207,46 +181,209 @@ async def lifespan(app: FastAPI):
     import enterprise.models  # noqa: F401
     import enterprise.subscription  # noqa: F401
     import etl.models  # noqa: F401
-
-    # Phase 11 â€” Background Jobs
     import jobs.models  # noqa: F401
-
-    # Phase 14 â€” ML platform models
     import ml.models  # noqa: F401
     import notifications.models  # noqa: F401
     import organizations.models  # noqa: F401
     import organizations.workspace_models  # noqa: F401
-
-    # Phase 13 â€” SaaS models
     import saas.models  # noqa: F401
     import scheduler.models  # noqa: F401
-
-    # Phase 12 â€” File Storage
     import storage.models  # noqa: F401
-
-    # Phase 15 â€” Studios models
     import studios.models  # noqa: F401
     import validation.models  # noqa: F401
-
-    # Workflow engine models
     import workflows.models  # noqa: F401
 
-    if engine is not None:
-        if not serverless and _config.DB_TYPE == "mysql":
-            logger.info("DB_TYPE=mysql; skipping create_all(), relying on Alembic migrations.")
-        elif serverless:
-            # Safety net: create any missing tables even in serverless mode.
-            # create_all() with checkfirst=True (default) only creates tables
-            # that don't already exist, so it won't conflict with Alembic-managed schema.
+    # Start background job worker (skip in serverless/test mode)
+    job_worker_task = None
+    startup_task = None
+
+    if not serverless and not _is_test_env:
+        # Defer heavy DB startup to a background task so the port binds immediately
+        async def _deferred_startup():
+            try:
+                validate_config()
+            except Exception as e:
+                logger.error(f"Configuration validation failed: {e}")
+                if os.getenv("APP_ENV", "development").lower() == "production":
+                    raise
+            try:
+                engine = get_engine()
+            except Exception as e:
+                logger.error(f"Database engine creation failed: {e}")
+                engine = None
+
+            if engine is not None:
+                import config as _config
+
+                if _config.DB_TYPE == "mysql":
+                    logger.info(
+                        "DB_TYPE=mysql; skipping create_all(), relying on Alembic migrations."
+                    )
+                else:
+                    try:
+                        Base.metadata.create_all(engine)
+                    except Exception as e:
+                        logger.error(f"Database table creation failed: {e}")
+
+                # Seed ecosystem marketplace data
+                try:
+                    from sqlalchemy.orm import Session as EcoDbSession
+
+                    from ecosystem.seed import seed_ecosystem_data
+
+                    eco_db = EcoDbSession(engine)
+                    seed_ecosystem_data(eco_db)
+                    eco_db.close()
+                except Exception as e:
+                    logger.error(f"Ecosystem seed failed: {e}")
+
+                # Seed SaaS plans and feature flags
+                try:
+                    from saas.services import seed_saas_data
+
+                    saas_db = EcoDbSession(engine)
+                    seed_saas_data(saas_db)
+                    saas_db.close()
+                except Exception as e:
+                    logger.error(f"SaaS seed failed: {e}")
+
+                # Seed Studios industry data
+                try:
+                    from studios.seed import seed_studios_data
+
+                    studios_db = EcoDbSession(engine)
+                    seed_studios_data(studios_db)
+                    studios_db.close()
+                except Exception as e:
+                    logger.error(f"Studios seed failed: {e}")
+
+                # Register system AI plugins
+                from sqlalchemy.orm import Session as AIDbSession
+
+                ai_db = AIDbSession(engine)
+                try:
+                    from ai.plugins import register_system_plugins
+
+                    register_system_plugins(ai_db)
+                except Exception as e:
+                    logger.error(f"AI plugin registration failed: {e}")
+                finally:
+                    ai_db.close()
+
+                # Seed default data
+                from sqlalchemy.orm import Session as DbSession
+
+                from authentication.services import seed_default_data
+
+                db = DbSession(engine)
+                try:
+                    seed_default_data(db)
+                    from config import SEED_DEMO_DATA
+
+                    if SEED_DEMO_DATA:
+                        from enterprise.demo_data import is_demo_seeded, seed_demo_data
+
+                        if not is_demo_seeded(db):
+                            seed_demo_data(db)
+                            logger.info(
+                                "Pilot demo data seeded (org, users, dashboards, KPIs, pipelines, AI conversations, reports). "
+                                "Set SEED_DEMO_DATA=false for production."
+                            )
+                    # Create trial subscriptions for all orgs without one
+                    from enterprise.subscription import SubscriptionService
+                    from organizations.models import Organization
+
+                    sub_svc = SubscriptionService(db)
+                    try:
+                        for org in db.query(Organization).filter(Organization.is_active == 1).all():
+                            if not sub_svc.get_subscription(org.id):
+                                sub_svc.create_trial(org.id)
+                    except Exception as e:
+                        logger.error(f"Subscription initialization failed: {e}")
+
+                    # Start background report scheduler
+                    try:
+                        report_scheduler = ReportScheduler()
+                        report_scheduler.start()
+                        app.state.report_scheduler = report_scheduler
+
+                        try:
+                            from apscheduler.triggers.cron import CronTrigger
+
+                            from services.backup_service import BackupService
+
+                            report_scheduler.scheduler.add_job(
+                                BackupService().create_backup,
+                                trigger=CronTrigger(hour=2, minute=0),
+                                id="daily_backup",
+                                replace_existing=True,
+                            )
+                            logger.info("Daily backup scheduled for 02:00 UTC")
+                        except Exception as e:
+                            logger.error(f"Backup scheduler setup failed: {e}")
+                    except Exception as e:
+                        logger.error(f"Report scheduler failed to start: {e}")
+                finally:
+                    db.close()
+                logger.info("Deferred startup tasks completed: seeding, scheduler, subscriptions.")
+            logger.info("Deferred startup finished.")
+
+        startup_task = asyncio.create_task(_deferred_startup())
+        logger.info("Deferred startup task created — heavy DB operations will run in background.")
+
+    elif _is_test_env:
+        # Test mode: run seeding synchronously (no scheduler, no job worker)
+        try:
+            engine = get_engine()
+        except Exception as e:
+            logger.error(f"Database engine creation failed: {e}")
+            engine = None
+
+        if engine is not None:
+            try:
+                Base.metadata.create_all(engine)
+            except Exception as e:
+                logger.error(f"Database table creation failed: {e}")
+
+            from sqlalchemy.orm import Session as TestDbSession
+
+            from authentication.services import seed_default_data
+
+            test_db = TestDbSession(engine)
+            try:
+                seed_default_data(test_db)
+
+                from ecosystem.seed import seed_ecosystem_data
+
+                seed_ecosystem_data(test_db)
+
+                from saas.services import seed_saas_data
+
+                seed_saas_data(test_db)
+
+                from studios.seed import seed_studios_data
+
+                seed_studios_data(test_db)
+            except Exception as e:
+                logger.error(f"Test seeding failed: {e}")
+            finally:
+                test_db.close()
+            logger.info("Test mode seeding completed.")
+
+    elif serverless:
+        # Serverless mode: run create_all and seed synchronously (needed for cold starts)
+        try:
+            engine = get_engine()
+        except Exception as e:
+            logger.error(f"Database engine creation failed: {e}")
+            engine = None
+
+        if engine is not None:
             try:
                 Base.metadata.create_all(engine)
                 logger.info("Serverless create_all() completed — missing tables created if any.")
             except Exception as e:
                 logger.error(f"Serverless table creation failed: {e}")
-
-            # Ensure critical seed data (roles, permissions) exists.
-            # On a fresh database, seed_default_data hasn't been run, so
-            # signup would fail because roles like "org_admin" / "viewer" are missing.
             try:
                 from sqlalchemy.orm import Session as SeedDbSession
 
@@ -260,121 +397,9 @@ async def lifespan(app: FastAPI):
                 logger.info("Serverless seed_default_data completed.")
             except Exception as e:
                 logger.error(f"Serverless seed_default_data failed: {e}")
-        else:
-            try:
-                Base.metadata.create_all(engine)
-            except Exception as e:
-                logger.error(f"Database table creation failed: {e}")
-
-        if not serverless:
-            # Seed ecosystem marketplace data
-            try:
-                from sqlalchemy.orm import Session as EcoDbSession
-
-                from ecosystem.seed import seed_ecosystem_data
-
-                eco_db = EcoDbSession(engine)
-                seed_ecosystem_data(eco_db)
-                eco_db.close()
-            except Exception as e:
-                logger.error(f"Ecosystem seed failed: {e}")
-
-            # Seed SaaS plans and feature flags
-            try:
-                from saas.services import seed_saas_data
-
-                saas_db = EcoDbSession(engine)
-                seed_saas_data(saas_db)
-                saas_db.close()
-            except Exception as e:
-                logger.error(f"SaaS seed failed: {e}")
-
-            # Seed Studios industry data
-            try:
-                from studios.seed import seed_studios_data
-
-                studios_db = EcoDbSession(engine)
-                seed_studios_data(studios_db)
-                studios_db.close()
-            except Exception as e:
-                logger.error(f"Studios seed failed: {e}")
-
-            # Register system AI plugins
-            from sqlalchemy.orm import Session as AIDbSession
-
-            ai_db = AIDbSession(engine)
-            try:
-                from ai.plugins import register_system_plugins
-
-                register_system_plugins(ai_db)
-            except Exception as e:
-                logger.error(f"AI plugin registration failed: {e}")
-            finally:
-                ai_db.close()
-
-            # Seed default data
-            from sqlalchemy.orm import Session as DbSession
-
-            from authentication.services import seed_default_data
-
-            db = DbSession(engine)
-            try:
-                seed_default_data(db)
-                # Seed demo data only when explicitly enabled (opt-in for pilot/onboarding)
-                from config import SEED_DEMO_DATA
-
-                if SEED_DEMO_DATA:
-                    from enterprise.demo_data import is_demo_seeded, seed_demo_data
-
-                    if not is_demo_seeded(db):
-                        seed_demo_data(db)
-                        logger.info(
-                            "Pilot demo data seeded (org, users, dashboards, KPIs, pipelines, AI conversations, reports). "
-                            "Set SEED_DEMO_DATA=false for production."
-                        )
-                # Create trial subscriptions for all orgs without one
-                from enterprise.subscription import SubscriptionService
-                from organizations.models import Organization
-
-                sub_svc = SubscriptionService(db)
-                try:
-                    for org in db.query(Organization).filter(Organization.is_active == 1).all():
-                        if not sub_svc.get_subscription(org.id):
-                            sub_svc.create_trial(org.id)
-                except Exception as e:
-                    logger.error(f"Subscription initialization failed: {e}")
-
-                # Start background report scheduler (disabled during tests and serverless)
-                try:
-                    report_scheduler = ReportScheduler()
-                    report_scheduler.start()
-                    app.state.report_scheduler = report_scheduler
-
-                    # Schedule daily database/config backups at 02:00 UTC
-                    try:
-                        from apscheduler.triggers.cron import CronTrigger
-
-                        from services.backup_service import BackupService
-
-                        report_scheduler.scheduler.add_job(
-                            BackupService().create_backup,
-                            trigger=CronTrigger(hour=2, minute=0),
-                            id="daily_backup",
-                            replace_existing=True,
-                        )
-                        logger.info("Daily backup scheduled for 02:00 UTC")
-                    except Exception as e:
-                        logger.error(f"Backup scheduler setup failed: {e}")
-                except Exception as e:
-                    logger.error(f"Report scheduler failed to start: {e}")
-            finally:
-                db.close()
-            logger.info("Auth tables created, default data seeded, subscriptions initialized.")
-    elif serverless:
         logger.info("Running in serverless mode; skipped heavy startup tasks.")
 
     # Start background job worker (skip in serverless/test mode)
-    job_worker_task = None
     if not serverless and not _is_test_env:
         from jobs.service import get_task_queue
 
@@ -400,6 +425,15 @@ async def lifespan(app: FastAPI):
         logger.info("Background job worker task created.")
 
     yield
+
+    # Cancel deferred startup if still running
+    if startup_task is not None and not startup_task.done():
+        startup_task.cancel()
+        try:
+            await startup_task
+        except asyncio.CancelledError:
+            pass
+        logger.info("Deferred startup task cancelled.")
 
     # Stop background job worker
     if job_worker_task is not None:
