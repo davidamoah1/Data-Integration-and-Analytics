@@ -144,30 +144,42 @@ async def upload_document(
 
     # Try to create a background job for processing
     job_id = None
-    try:
-        from jobs.handlers import register_builtin_handlers
-        from jobs.service import JobService, get_registered_types
+    # When using local storage, the worker (separate container) can't
+    # access files uploaded to the web service's filesystem. Process
+    # synchronously instead.
+    from storage.storage import get_storage_backend
 
-        # Ensure handlers are registered (idempotent)
-        if "ocr_document" not in get_registered_types():
-            register_builtin_handlers()
+    storage_backend = get_storage_backend()
+    if storage_backend.name == "local":
+        try:
+            svc.process_document(doc.id)
+        except Exception as e:
+            logger.warning("Synchronous processing failed for doc_id=%s: %s", doc.id, e)
+    else:
+        try:
+            from jobs.handlers import register_builtin_handlers
+            from jobs.service import JobService, get_registered_types
 
-        job_svc = JobService(db)
-        job = job_svc.create_job(
-            organization_id=org_id,
-            user_id=current_user["id"],
-            job_type="ocr_document",
-            name=f"OCR: {doc.filename}",
-            description=f"Processing document '{doc.filename}'",
-            payload={"document_id": doc.id, "organization_id": org_id},
-        )
-        job_id = job.id
-        db.commit()
-    except Exception as e:
-        logger.warning("Job system unavailable, using thread for processing: %s", e)
-        import threading
+            # Ensure handlers are registered (idempotent)
+            if "ocr_document" not in get_registered_types():
+                register_builtin_handlers()
 
-        threading.Thread(target=_process_document_task, args=(doc.id,), daemon=True).start()
+            job_svc = JobService(db)
+            job = job_svc.create_job(
+                organization_id=org_id,
+                user_id=current_user["id"],
+                job_type="ocr_document",
+                name=f"OCR: {doc.filename}",
+                description=f"Processing document '{doc.filename}'",
+                payload={"document_id": doc.id, "organization_id": org_id},
+            )
+            job_id = job.id
+            db.commit()
+        except Exception as e:
+            logger.warning("Job system unavailable, using thread for processing: %s", e)
+            import threading
+
+            threading.Thread(target=_process_document_task, args=(doc.id,), daemon=True).start()
 
     # Re-fetch the doc to get fresh state
     db.refresh(doc)
@@ -446,30 +458,41 @@ async def retry_document(
 
     # Try job system first, fall back to thread
     job_id = None
-    try:
-        from jobs.handlers import register_builtin_handlers
-        from jobs.service import JobService, get_registered_types
+    from storage.storage import get_storage_backend
 
-        # Ensure handlers are registered (idempotent)
-        if "ocr_document" not in get_registered_types():
-            register_builtin_handlers()
+    storage_backend = get_storage_backend()
+    if storage_backend.name == "local":
+        try:
+            svc.process_document(document_id)
+        except Exception as e:
+            logger.warning("Synchronous processing failed for doc_id=%s: %s", document_id, e)
+    else:
+        try:
+            from jobs.handlers import register_builtin_handlers
+            from jobs.service import JobService, get_registered_types
 
-        job_svc = JobService(db)
-        job = job_svc.create_job(
-            organization_id=org_id,
-            user_id=current_user["id"],
-            job_type="ocr_document",
-            name=f"Retry OCR: {doc.filename}",
-            description=f"Reprocessing document '{doc.filename}'",
-            payload={"document_id": document_id, "organization_id": org_id, "retry": True},
-        )
-        job_id = job.id
-        db.commit()
-    except Exception as e:
-        logger.warning("Job system unavailable, using thread for retry: %s", e)
-        import threading
+            # Ensure handlers are registered (idempotent)
+            if "ocr_document" not in get_registered_types():
+                register_builtin_handlers()
 
-        threading.Thread(target=_process_document_task, args=(document_id,), daemon=True).start()
+            job_svc = JobService(db)
+            job = job_svc.create_job(
+                organization_id=org_id,
+                user_id=current_user["id"],
+                job_type="ocr_document",
+                name=f"Retry OCR: {doc.filename}",
+                description=f"Reprocessing document '{doc.filename}'",
+                payload={"document_id": document_id, "organization_id": org_id, "retry": True},
+            )
+            job_id = job.id
+            db.commit()
+        except Exception as e:
+            logger.warning("Job system unavailable, using thread for retry: %s", e)
+            import threading
+
+            threading.Thread(
+                target=_process_document_task, args=(document_id,), daemon=True
+            ).start()
 
     db.refresh(doc)
     result = _serialize_document(doc)

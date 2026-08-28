@@ -200,50 +200,71 @@ async def upload_certificates(
             )
             # Enqueue background job for processing instead of synchronous
             job_id = None
-            try:
-                from jobs.handlers import register_builtin_handlers
-                from jobs.service import JobService, get_registered_types
+            # When using local storage, the worker (separate container) can't
+            # access files uploaded to the web service's filesystem. Process
+            # synchronously instead.
+            from storage.storage import get_storage_backend
 
-                if "ocr_document" not in get_registered_types():
-                    register_builtin_handlers()
+            storage_backend = get_storage_backend()
+            if storage_backend.name == "local":
+                try:
+                    svc.process_document(doc.id)
+                    logger.info(
+                        "Document processed synchronously (local storage): doc_id=%s status=%s",
+                        doc.id,
+                        doc.status,
+                    )
+                except Exception as e:
+                    logger.warning(
+                        "Synchronous processing failed for doc_id=%s: %s",
+                        doc.id,
+                        e,
+                    )
+            else:
+                try:
+                    from jobs.handlers import register_builtin_handlers
+                    from jobs.service import JobService, get_registered_types
 
-                job_svc = JobService(db)
-                job = job_svc.create_job(
-                    organization_id=org_id,
-                    user_id=current_user["id"],
-                    job_type="ocr_document",
-                    name=f"Certificate OCR: {doc.filename}",
-                    description=f"Processing certificate '{doc.filename}'",
-                    payload={"document_id": doc.id, "organization_id": org_id},
-                )
-                job_id = job.id
-                db.commit()
-                logger.info(
-                    "Job enqueued: job_id=%s doc_id=%s type=ocr_document org_id=%s",
-                    job_id,
-                    doc.id,
-                    org_id,
-                )
-            except Exception as e:
-                logger.warning(
-                    "Job system unavailable for doc_id=%s, using thread fallback: %s",
-                    doc.id,
-                    e,
-                )
-                import threading
+                    if "ocr_document" not in get_registered_types():
+                        register_builtin_handlers()
 
-                def _process_doc(doc_id: int) -> None:
-                    from shared.database import get_engine, get_session_factory
+                    job_svc = JobService(db)
+                    job = job_svc.create_job(
+                        organization_id=org_id,
+                        user_id=current_user["id"],
+                        job_type="ocr_document",
+                        name=f"Certificate OCR: {doc.filename}",
+                        description=f"Processing certificate '{doc.filename}'",
+                        payload={"document_id": doc.id, "organization_id": org_id},
+                    )
+                    job_id = job.id
+                    db.commit()
+                    logger.info(
+                        "Job enqueued: job_id=%s doc_id=%s type=ocr_document org_id=%s",
+                        job_id,
+                        doc.id,
+                        org_id,
+                    )
+                except Exception as e:
+                    logger.warning(
+                        "Job system unavailable for doc_id=%s, using thread fallback: %s",
+                        doc.id,
+                        e,
+                    )
+                    import threading
 
-                    engine = get_engine()
-                    factory = get_session_factory(engine)
-                    session = factory()
-                    try:
-                        CaptureService(session).process_document(doc_id)
-                    finally:
-                        session.close()
+                    def _process_doc(doc_id: int) -> None:
+                        from shared.database import get_engine, get_session_factory
 
-                threading.Thread(target=_process_doc, args=(doc.id,), daemon=True).start()
+                        engine = get_engine()
+                        factory = get_session_factory(engine)
+                        session = factory()
+                        try:
+                            CaptureService(session).process_document(doc_id)
+                        finally:
+                            session.close()
+
+                    threading.Thread(target=_process_doc, args=(doc.id,), daemon=True).start()
 
             succeeded += 1
             result = _serialize_certificate(doc)
