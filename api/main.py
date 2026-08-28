@@ -131,10 +131,15 @@ from workflows.routes import router as workflow_router
 
 
 def _is_serverless() -> bool:
-    """Return True when running in a serverless/readonly environment."""
-    return os.getenv("VERCEL", "").lower() in ("1", "true", "yes") or os.getenv(
-        "DISABLE_STARTUP_TASKS", ""
-    ).lower() in ("1", "true", "yes")
+    """Return True when running in a serverless/readonly environment.
+
+    On Render (persistent process) this is False unless DISABLE_STARTUP_TASKS
+    is explicitly set. On Vercel it is True because VERCEL=1 is set by the
+    platform (or by api/index.py).
+    """
+    import config
+
+    return getattr(config, "IS_SERVERLESS", False)
 
 
 @asynccontextmanager
@@ -424,7 +429,10 @@ class RequestContextMiddleware(BaseHTTPMiddleware):
             correlation_id.reset(corr_token)
 
 
+_is_test_env = os.getenv("PYTEST_RUNNING", "").lower() in ("1", "true", "yes")
 _is_vercel = os.getenv("VERCEL", "").lower() in ("1", "true", "yes")
+# On Render (persistent process) this is False; on Vercel it is True.
+_is_render = not _is_vercel and not _is_test_env
 
 app = FastAPI(
     title="DataFlow â€” Enterprise Data Intelligence API",
@@ -456,7 +464,6 @@ app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(TenantIsolationMiddleware)
 # Phase 13 â€” Enterprise audit middleware (auto-logs mutating requests)
 app.add_middleware(AuditMiddleware)
-_is_test_env = os.getenv("PYTEST_RUNNING", "").lower() in ("1", "true", "yes")
 if not _is_test_env:
     app.add_middleware(
         RateLimitMiddleware,
@@ -1029,7 +1036,7 @@ if __name__ == "__main__":
     import uvicorn
 
     _default_host = (
-        "0.0.0.0"  # nosec B104 â€” production containers and Vercel require 0.0.0.0 binding; dev default is 127.0.0.1; API_HOST env var always takes precedence
+        "0.0.0.0"  # nosec B104 â€” production containers and serverless platforms require 0.0.0.0 binding; dev default is 127.0.0.1; API_HOST env var always takes precedence
         if _is_vercel or os.getenv("APP_ENV", "").lower() == "production"
         else "127.0.0.1"
     )

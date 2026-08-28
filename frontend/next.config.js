@@ -35,6 +35,8 @@ const nextConfig = {
     // When backendUrl is empty (same-origin Vercel), route directly to the
     // Python serverless function at /api/index.py. Vercel preserves the
     // original request path so the ASGI app sees e.g. /analytics/dashboards.
+    // When NEXT_PUBLIC_API_URL is set to a Render URL (e.g. https://dataflow-api.onrender.com),
+    // all API requests proxy to the Render backend instead.
     const pyFn = '/api/index.py';
 
     const rootPaths = ['/docs', '/openapi.json', '/health', '/ready'];

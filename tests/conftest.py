@@ -17,6 +17,7 @@ from sqlalchemy.pool import StaticPool
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # Set env to use sqlite for tests
+os.environ["APP_ENV"] = "testing"
 os.environ["DB_TYPE"] = "sqlite"
 os.environ["SQLITE_DB_PATH"] = "test_auth.db"
 os.environ["PYTEST_RUNNING"] = "1"

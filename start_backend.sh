@@ -1,28 +1,34 @@
 #!/bin/bash
-# Start the production backend and wait for it
-source /opt/df_venv/bin/activate
+# Start the production backend locally for validation.
+# All secrets must come from environment variables or .env — never hardcoded.
+source /opt/df_venv/bin/activate 2>/dev/null || true
 cd /mnt/d/Dataflow
 
 service mysql start 2>/dev/null || true
 service redis-server start 2>/dev/null || true
 sleep 3
 
-export APP_ENV=production
-export DATABASE_URL="mysql+pymysql://dataflow:DataflowProd2026!@127.0.0.1:3306/dataflow_prod?charset=utf8mb4"
-export JWT_SECRET_KEY="production-validation-secret-key-32chars-min"
-export ENCRYPTION_KEY="dGVzdC1lbmNyeXB0aW9uLWtleS1mb3ItdmFsaWRhdGlvbjEyMzQ="
-export CORS_ORIGINS="https://app.example.com"
-export STORAGE_BACKEND="local"
-export ALLOW_LOCAL_STORAGE_IN_PRODUCTION=1
-export SEED_DEMO_DATA=false
-export DISABLE_CONFIG_VALIDATION=1
-export PYTEST_RUNNING=1
-# Don't set REDIS_URL so workflow runs synchronously (no background worker)
-# export REDIS_URL="redis://127.0.0.1:6379/0"
-export API_HOST=127.0.0.1
-export API_PORT=18000
-export SUPER_ADMIN_EMAIL="admin@dataflow.io"
-export SUPER_ADMIN_PASSWORD="AdminPass2026!"
+# Require environment variables to be set externally (e.g. via .env)
+export APP_ENV="${APP_ENV:-production}"
+export DB_TYPE="${DB_TYPE:-mysql}"
+export CORS_ORIGINS="${CORS_ORIGINS:-http://localhost:3000}"
+export STORAGE_BACKEND="${STORAGE_BACKEND:-local}"
+export ALLOW_LOCAL_STORAGE_IN_PRODUCTION="${ALLOW_LOCAL_STORAGE_IN_PRODUCTION:-1}"
+export SEED_DEMO_DATA="${SEED_DEMO_DATA:-false}"
+export DISABLE_CONFIG_VALIDATION="${DISABLE_CONFIG_VALIDATION:-1}"
+export PYTEST_RUNNING="${PYTEST_RUNNING:-1}"
+export API_HOST="${API_HOST:-127.0.0.1}"
+export API_PORT="${API_PORT:-18000}"
+
+# Verify required secrets are set
+if [ -z "$DATABASE_URL" ] && [ -z "$MYSQL_HOST" ]; then
+    echo "ERROR: DATABASE_URL or MYSQL_HOST must be set in environment."
+    exit 1
+fi
+if [ -z "$JWT_SECRET_KEY" ]; then
+    echo "ERROR: JWT_SECRET_KEY must be set in environment."
+    exit 1
+fi
 
 pkill -f "uvicorn.*18000" 2>/dev/null || true
 sleep 2

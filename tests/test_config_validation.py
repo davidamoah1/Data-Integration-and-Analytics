@@ -18,6 +18,7 @@ class TestValidateConfig:
         monkeypatch.setattr(config, "DB_TYPE", "sqlite")
         monkeypatch.setattr(config, "JWT_SECRET_KEY", "dummy-secret-for-tests")
         monkeypatch.setattr(config, "CORS_ORIGINS", "http://localhost:3000")
+        monkeypatch.setattr(config, "IS_PRODUCTION", False)
 
     def test_sqlite_config_is_allowed(self):
         config.validate_config()

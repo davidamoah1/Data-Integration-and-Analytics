@@ -70,8 +70,10 @@ class LoadEngine:
         validate_sql_identifier(table)
         with self._engine.begin() as conn:
             conn.execute(
-                text(f"DELETE FROM {table}")
-            )  # nosec B608 â€” table validated by validate_sql_identifier above
+                text(
+                    f"DELETE FROM {table}"
+                )  # nosec B608 - table validated by validate_sql_identifier above
+            )
         result = self._load_batch(df, table)
         result["mode"] = "full"
         return result
@@ -95,8 +97,9 @@ class LoadEngine:
         with self._engine.connect() as conn:
             try:
                 existing = pd.read_sql(
-                    f"SELECT {', '.join(conflict_columns)} FROM {table}", conn
-                )  # nosec B608 â€” table and columns validated by validate_sql_identifier above
+                    f"SELECT {', '.join(conflict_columns)} FROM {table}",
+                    conn,  # nosec B608 - table/cols validated by validate_sql_identifier above
+                )
                 existing_keys = (
                     existing[conflict_columns].astype(str).agg("|".join, axis=1).tolist()
                 )
@@ -127,8 +130,8 @@ class LoadEngine:
                     set_clause = ", ".join(f"{c} = :{c}" for c in update_cols)
                     where_clause = " AND ".join(f"{c} = :{c}" for c in conflict_columns)
                     sql = text(
-                        f"UPDATE {table} SET {set_clause} WHERE {where_clause}"
-                    )  # nosec B608 â€” table and columns validated by validate_sql_identifier, values parameterized
+                        f"UPDATE {table} SET {set_clause} WHERE {where_clause}"  # nosec B608 - table/cols validated by validate_sql_identifier, values parameterized
+                    )
                     params = {c: row[c] for c in df.columns}
                     with self._engine.begin() as conn:
                         result = conn.execute(sql, params)
@@ -142,8 +145,8 @@ class LoadEngine:
                     if not set_clause:
                         continue
                     sql = text(
-                        f"UPDATE {table} SET {set_clause} WHERE {where_clause}"
-                    )  # nosec B608 â€” table and columns validated by validate_sql_identifier, values parameterized
+                        f"UPDATE {table} SET {set_clause} WHERE {where_clause}"  # nosec B608 - table/cols validated by validate_sql_identifier, values parameterized
+                    )
                     params = {c: row[c] for c in df.columns}
                     with self._engine.begin() as conn:
                         conn.execute(sql, params)
@@ -190,8 +193,8 @@ class LoadEngine:
             set_clause = ", ".join(f"{c} = :{c}" for c in update_cols)
             where_clause = " AND ".join(f"{c} = :{c}" for c in conflict_columns)
             sql = text(
-                f"UPDATE {table} SET {set_clause} WHERE {where_clause}"
-            )  # nosec B608 â€” table and columns validated by validate_sql_identifier, values parameterized
+                f"UPDATE {table} SET {set_clause} WHERE {where_clause}"  # nosec B608 - table/cols validated by validate_sql_identifier, values parameterized
+            )
             params = {c: row[c] for c in df.columns}
             with self._engine.begin() as conn:
                 result = conn.execute(sql, params)
@@ -206,13 +209,19 @@ class LoadEngine:
         with self._engine.begin() as conn:
             if backup_table:
                 conn.execute(
-                    text(f"DELETE FROM {table}")
-                )  # nosec B608 â€” table validated by validate_sql_identifier
+                    text(
+                        f"DELETE FROM {table}"
+                    )  # nosec B608 - table validated by validate_sql_identifier
+                )
                 conn.execute(
-                    text(f"INSERT INTO {table} SELECT * FROM {backup_table}")
-                )  # nosec B608 â€” table and backup_table validated by validate_sql_identifier
+                    text(
+                        f"INSERT INTO {table} SELECT * FROM {backup_table}"
+                    )  # nosec B608 - table/backup_table validated by validate_sql_identifier
+                )
             else:
                 conn.execute(
-                    text(f"DELETE FROM {table}")
-                )  # nosec B608 â€” table validated by validate_sql_identifier
+                    text(
+                        f"DELETE FROM {table}"
+                    )  # nosec B608 - table validated by validate_sql_identifier
+                )
         logger.info(f"Load: Rolled back table {table}")

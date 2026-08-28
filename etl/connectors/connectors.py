@@ -246,8 +246,9 @@ class MySQLConnector(BaseConnector):
         else:
             validate_sql_identifier(table)
             df = pd.read_sql(
-                f"SELECT * FROM `{table}` LIMIT 100", self._engine
-            )  # nosec B608 â€” table validated by validate_sql_identifier above
+                f"SELECT * FROM `{table}` LIMIT 100",
+                self._engine,  # nosec B608 - table validated by validate_sql_identifier above
+            )
         schema = []
         for col in df.columns:
             dtype = str(df[col].dtype)

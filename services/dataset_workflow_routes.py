@@ -268,9 +268,7 @@ def _async_workflow_execution_available() -> bool:
     """
     import config
 
-    is_serverless = os.getenv("VERCEL", "").lower() in ("1", "true", "yes") or os.getenv(
-        "DISABLE_STARTUP_TASKS", ""
-    ).lower() in ("1", "true", "yes")
+    is_serverless = getattr(config, "IS_SERVERLESS", False)
     return bool(getattr(config, "REDIS_URL", "")) and not is_serverless
 
 

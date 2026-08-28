@@ -133,6 +133,7 @@ jobs:
         env:
           DB_TYPE: sqlite
           SQLITE_DB_PATH: test_unit.db
+          APP_ENV: testing
           PYTEST_RUNNING: "1"
           SUPER_ADMIN_PASSWORD: Admin@12345
           SUPER_ADMIN_EMAIL: admin@dataflow.io
@@ -246,6 +247,7 @@ jobs:
           MYSQL_USER: aedip_test
           MYSQL_PASSWORD: test_password
           REDIS_URL: redis://127.0.0.1:6379/0
+          APP_ENV: testing
           JWT_SECRET_KEY: test-secret-key-for-ci-not-for-production-32chars
           PYTEST_RUNNING: "1"
           SUPER_ADMIN_PASSWORD: Admin@12345

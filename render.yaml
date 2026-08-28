@@ -1,0 +1,128 @@
+# Render Blueprint — DataFlow Backend Migration from Vercel
+# https://render.com/docs/blueprint-spec
+# Deploys: 1 web service (FastAPI), 1 worker service (background jobs), 1 Redis
+
+services:
+  # ── FastAPI Web Service ──────────────────────────────────────────
+  - type: web
+    name: dataflow-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    region: oregon
+    plan: starter
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      # ── Application ──
+      - key: APP_ENV
+        value: production
+      - key: API_HOST
+        value: 0.0.0.0
+      - key: LOG_LEVEL
+        value: INFO
+      - key: LOG_FORMAT
+        value: json
+      # ── Database (Hostinger MySQL) ──
+      - key: DB_TYPE
+        value: mysql
+      - key: DATABASE_URL
+        sync: false  # Set in Render dashboard: mysql+pymysql://user:pass@host:3306/db?charset=utf8mb4
+      # ── Connection Pool ──
+      - key: POOL_SIZE
+        value: 10
+      - key: MAX_OVERFLOW
+        value: 20
+      - key: POOL_RECYCLE
+        value: 3600
+      - key: POOL_TIMEOUT
+        value: 30
+      # ── Redis (Render Key/Value) ──
+      - key: REDIS_URL
+        fromService:
+          type: keyval
+          name: dataflow-redis
+          property: connectionString
+      # ── Security ──
+      - key: JWT_SECRET_KEY
+        sync: false  # Set in Render dashboard: min 32-char random secret
+      - key: JWT_ALGORITHM
+        value: HS256
+      - key: JWT_ACCESS_EXPIRE_MINUTES
+        value: 30
+      - key: JWT_REFRESH_EXPIRE_DAYS
+        value: 7
+      - key: ENCRYPTION_KEY
+        sync: false  # Set in Render dashboard: Fernet key (base64, 44 chars)
+      # ── CORS ──
+      - key: CORS_ORIGINS
+        sync: false  # Set to your Vercel frontend URL, e.g. https://your-app.vercel.app
+      - key: CSP_CONNECT_SRC
+        sync: false  # Set to your frontend URL for CSP connect-src
+      # ── Storage Backend ──
+      - key: STORAGE_BACKEND
+        sync: false  # Set to r2, s3, supabase, or local
+      - key: ALLOW_LOCAL_STORAGE_IN_PRODUCTION
+        sync: false  # Set to 1 only if using local storage
+      # ── Rate Limiting ──
+      - key: RATE_LIMIT_RPM
+        value: 120
+      # ── Background Worker ──
+      - key: WORKER_MIN_WORKERS
+        value: 2
+      - key: WORKER_MAX_WORKERS
+        value: 10
+      # ── Monitoring (optional) ──
+      - key: SENTRY_DSN
+        sync: false
+      - key: PROMETHEUS_ENABLED
+        value: true
+      - key: MONITORING_ENABLED
+        value: true
+
+  # ── Background Worker Service ────────────────────────────────────
+  - type: worker
+    name: dataflow-worker
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    dockerCommand: python -m performance.worker_entry
+    region: oregon
+    plan: starter
+    autoDeploy: true
+    envVars:
+      # ── Database ──
+      - key: DB_TYPE
+        value: mysql
+      - key: DATABASE_URL
+        sync: false  # Same as web service
+      # ── Redis ──
+      - key: REDIS_URL
+        fromService:
+          type: keyval
+          name: dataflow-redis
+          property: connectionString
+      # ── Security ──
+      - key: JWT_SECRET_KEY
+        sync: false  # Same as web service
+      - key: ENCRYPTION_KEY
+        sync: false  # Same as web service
+      # ── Worker Config ──
+      - key: WORKER_MIN_WORKERS
+        value: 2
+      - key: WORKER_MAX_WORKERS
+        value: 10
+      - key: LOG_LEVEL
+        value: INFO
+      - key: LOG_FORMAT
+        value: json
+
+  # ── Redis (Render Key/Value) ─────────────────────────────────────
+  - type: keyval
+    name: dataflow-redis
+    region: oregon
+    plan: starter
+    maxmemoryPolicy: allkeys-lru
+    ipAllowList:  # Only allow internal services
+      - source: 0.0.0.0/0
+        description: Allow internal Render services (tightened via private network)

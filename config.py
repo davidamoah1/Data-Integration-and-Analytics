@@ -31,11 +31,16 @@ PROCESSED_DATA_PATH = _resolve_path(
 DEMO_DATASETS_DIR = _resolve_path(os.getenv("DEMO_DATASETS_DIR", "demo_datasets"))
 SEED_DEMO_DATA = os.getenv("SEED_DEMO_DATA", "false").lower() in ("true", "1", "yes")
 
+# Serverless detection (Vercel or any platform where the filesystem is read-only
+# and startup tasks are skipped). Render runs a persistent process, so this is
+# False on Render unless explicitly set via DISABLE_STARTUP_TASKS.
+IS_SERVERLESS = os.getenv("VERCEL", "").lower() in ("1", "true", "yes") or os.getenv(
+    "DISABLE_STARTUP_TASKS", ""
+).lower() in ("1", "true", "yes")
+
 # Smart Data Capture â€” original + enhanced uploaded document storage
 CAPTURE_STORAGE_DIR = _resolve_path(os.getenv("CAPTURE_STORAGE_DIR", "storage/capture"))
-if os.getenv("VERCEL", "").lower() in ("1", "true", "yes") and not os.path.isabs(
-    os.getenv("CAPTURE_STORAGE_DIR", "")
-):
+if IS_SERVERLESS and not os.path.isabs(os.getenv("CAPTURE_STORAGE_DIR", "")):
     CAPTURE_STORAGE_DIR = os.path.join(tempfile.gettempdir(), "capture")
 CAPTURE_MAX_FILE_SIZE_MB = int(os.getenv("CAPTURE_MAX_FILE_SIZE_MB") or "25")
 CAPTURE_LOW_CONFIDENCE_THRESHOLD = float(os.getenv("CAPTURE_LOW_CONFIDENCE_THRESHOLD") or "0.75")
@@ -68,14 +73,16 @@ elif DB_TYPE == "mysql":
     _mysql_db = os.getenv("MYSQL_DATABASE", "")
     _mysql_user = os.getenv("MYSQL_USER", "")
     _mysql_pass = os.getenv("MYSQL_PASSWORD", "")
+    _mysql_connect_timeout = os.getenv("MYSQL_CONNECT_TIMEOUT", "10")
     DB_URL = (
         f"mysql+pymysql://{quote_plus(_mysql_user)}:{quote_plus(_mysql_pass)}"
-        f"@{_mysql_host}:{_mysql_port}/{quote_plus(_mysql_db)}?charset=utf8mb4"
+        f"@{_mysql_host}:{_mysql_port}/{quote_plus(_mysql_db)}"
+        f"?charset=utf8mb4&connect_timeout={_mysql_connect_timeout}"
     )
 elif DB_TYPE == "sqlite":
     _sqlite_path = _resolve_path(os.getenv("SQLITE_DB_PATH", "database/etl_database.db"))
-    # Vercel's filesystem is read-only; use tempfile.gettempdir() for SQLite so tables can be created.
-    if os.getenv("VERCEL", "").lower() in ("1", "true", "yes") and not os.path.isabs(_sqlite_path):
+    # Serverless platforms have a read-only filesystem; use tempfile for SQLite.
+    if IS_SERVERLESS and not os.path.isabs(_sqlite_path):
         _sqlite_path = os.path.join(tempfile.gettempdir(), _sqlite_path)
     DB_URL = f"sqlite:///{_sqlite_path}"
 
@@ -89,7 +96,7 @@ else:
     # Production deployments should explicitly set DB_TYPE=mysql.
     DB_TYPE = "sqlite"
     _sqlite_path = _resolve_path(os.getenv("SQLITE_DB_PATH", "database/etl_database.db"))
-    if os.getenv("VERCEL", "").lower() in ("1", "true", "yes") and not os.path.isabs(_sqlite_path):
+    if IS_SERVERLESS and not os.path.isabs(_sqlite_path):
         _sqlite_path = os.path.join(tempfile.gettempdir(), _sqlite_path)
     DB_URL = f"sqlite:///{_sqlite_path}"
 

@@ -73,22 +73,21 @@ class TestAsyncExecutionAvailability:
         import config
 
         monkeypatch.setattr(config, "REDIS_URL", "", raising=False)
-        monkeypatch.delenv("VERCEL", raising=False)
+        monkeypatch.setattr(config, "IS_SERVERLESS", False)
         assert routes_module._async_workflow_execution_available() is False
 
     def test_unavailable_on_vercel_even_with_redis(self, monkeypatch):
         import config
 
         monkeypatch.setattr(config, "REDIS_URL", "redis://localhost:6379/0", raising=False)
-        monkeypatch.setenv("VERCEL", "1")
+        monkeypatch.setattr(config, "IS_SERVERLESS", True)
         assert routes_module._async_workflow_execution_available() is False
 
     def test_available_with_redis_and_not_serverless(self, monkeypatch):
         import config
 
         monkeypatch.setattr(config, "REDIS_URL", "redis://localhost:6379/0", raising=False)
-        monkeypatch.delenv("VERCEL", raising=False)
-        monkeypatch.delenv("DISABLE_STARTUP_TASKS", raising=False)
+        monkeypatch.setattr(config, "IS_SERVERLESS", False)
         assert routes_module._async_workflow_execution_available() is True
 
 
@@ -151,8 +150,7 @@ class TestRunWorkflowRouteAsyncBranch:
         import config
 
         monkeypatch.setattr(config, "REDIS_URL", "redis://localhost:6379/0", raising=False)
-        monkeypatch.delenv("VERCEL", raising=False)
-        monkeypatch.delenv("DISABLE_STARTUP_TASKS", raising=False)
+        monkeypatch.setattr(config, "IS_SERVERLESS", False)
 
         response = client.post(
             "/api/dataset-workflow/run",
