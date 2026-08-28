@@ -481,6 +481,9 @@ class CaptureService:
             doc.raw_ocr_text = ocr_result.full_text
             doc.page_count = ocr_result.page_count or 1
 
+            # Clean up temp preprocessing files now that OCR is done
+            self._cleanup_work_dir()
+
             doc.status = "classifying"
             self.db.commit()
 
@@ -516,18 +519,32 @@ class CaptureService:
             return doc
 
         except OcrUnavailableError as e:
+            self._cleanup_work_dir()
             doc.status = "failed"
             doc.error_message = str(e)
             self._log(doc.organization_id, "failed", document_id=doc.id, details={"error": str(e)})
             self.db.commit()
             return doc
         except Exception as e:
+            self._cleanup_work_dir()
             logger.exception("Processing failed for document %s: %s", document_id, e)
             doc.status = "failed"
             doc.error_message = f"Processing error: {e}"
             self._log(doc.organization_id, "failed", document_id=doc.id, details={"error": str(e)})
             self.db.commit()
             return doc
+
+    def _cleanup_work_dir(self) -> None:
+        """Clean up the temp work directory from preprocessing."""
+        work_dir = getattr(self, "_current_work_dir", None)
+        if work_dir:
+            try:
+                import shutil
+
+                shutil.rmtree(work_dir, ignore_errors=True)
+            except Exception:
+                pass
+            self._current_work_dir = None
 
     def _preprocess(self, doc: CaptureDocument) -> list[str]:
         import tempfile
@@ -576,18 +593,15 @@ class CaptureService:
         except Exception as e:
             logger.warning("Thumbnail generation failed for document %s: %s", doc.id, e)
 
-        # Clean up temp files
-        try:
-            import shutil
-
-            shutil.rmtree(work_dir, ignore_errors=True)
-            if (
-                self.file_service.backend.name != "local"
-                and local_original != doc.original_file_path
-            ):
+        # Clean up temp files — deferred until after OCR is complete
+        # (enhanced page images are needed by run_ocr_on_document).
+        # Store work_dir for later cleanup.
+        self._current_work_dir = work_dir
+        if self.file_service.backend.name != "local" and local_original != doc.original_file_path:
+            try:
                 os.remove(local_original)
-        except Exception:
-            pass
+            except Exception:
+                pass
 
         self._log(
             doc.organization_id,
