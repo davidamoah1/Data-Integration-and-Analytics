@@ -40,7 +40,7 @@ services:
       # ── Redis (Render Key/Value) ──
       - key: REDIS_URL
         fromService:
-          type: keyval
+          type: redis
           name: dataflow-redis
           property: connectionString
       # ── Security ──
@@ -99,7 +99,7 @@ services:
       # ── Redis ──
       - key: REDIS_URL
         fromService:
-          type: keyval
+          type: redis
           name: dataflow-redis
           property: connectionString
       # ── Security ──
@@ -117,11 +117,11 @@ services:
       - key: LOG_FORMAT
         value: json
 
-  # ── Redis (Render Key/Value) ─────────────────────────────────────
-  - type: keyval
+  # ── Redis (Render Redis) ─────────────────────────────────────
+  - type: redis
     name: dataflow-redis
     region: oregon
-    plan: starter
+    plan: free
     maxmemoryPolicy: allkeys-lru
     ipAllowList:  # Only allow internal services
       - source: 0.0.0.0/0
