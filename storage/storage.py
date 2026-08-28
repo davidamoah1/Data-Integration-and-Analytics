@@ -477,8 +477,10 @@ def get_storage_backend() -> StorageBackend:
                 service_key=sb_key,
                 public_base_url=os.getenv("SUPABASE_STORAGE_PUBLIC_URL"),
             )
-    else:
-        # Default: local filesystem
+
+    if _backend is None:
+        # Default: local filesystem (also used as fallback when cloud
+        # backend credentials are incomplete).
         base_dir = os.getenv("STORAGE_LOCAL_DIR", "storage/files")
         # On serverless platforms (Vercel), the filesystem is read-only except /tmp.
         # Use /tmp/storage as the base directory for local file storage.
