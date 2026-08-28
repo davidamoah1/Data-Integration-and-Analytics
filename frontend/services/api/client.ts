@@ -357,6 +357,7 @@ export const apiClient = {
           // Refresh failed — clear tokens and redirect to login
           clearTokens();
           if (typeof window !== 'undefined') {
+            // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- plain service module (no router access); hard navigation intentionally resets all in-memory state on session expiry
             window.location.href = '/login';
           }
           reject(new ApiError(401, 'Session expired. Please log in again.'));
