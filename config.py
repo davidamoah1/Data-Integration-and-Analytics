@@ -315,7 +315,7 @@ def validate_config() -> None:
     if DB_TYPE not in {"mysql", "sqlite"}:
         raise ValueError("DB_TYPE must be set to 'mysql' (production) or 'sqlite' (dev/test).")
 
-    if DB_TYPE == "mysql":
+    if DB_TYPE == "mysql" and not DATABASE_URL:
         required = {
             "MYSQL_HOST": os.getenv("MYSQL_HOST", ""),
             "MYSQL_DATABASE": os.getenv("MYSQL_DATABASE", ""),
