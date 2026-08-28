@@ -13,8 +13,11 @@ const API_URL = (() => {
   if (process.env.NEXT_PUBLIC_API_URL !== undefined) {
     return process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, '');
   }
+  if (process.env.API_BACKEND_URL !== undefined) {
+    return process.env.API_BACKEND_URL.replace(/\/$/, '');
+  }
   if (process.env.NODE_ENV === 'production') {
-    // Same-origin fallback — works behind reverse proxy / Vercel rewrite.
+    // Same-origin fallback — rewrites in next.config.js proxy /api/* to the backend.
     return '';
   }
   return 'http://localhost:8000';
