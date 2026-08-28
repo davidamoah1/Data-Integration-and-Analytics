@@ -25,7 +25,7 @@ const nextConfig = {
     cpus: 1,
   },
   async rewrites() {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || process.env.API_BACKEND_URL || '';
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || process.env.API_BACKEND_URL || 'https://data-integration-and-analytics.onrender.com';
     const backendUrl = apiUrl && apiUrl.startsWith('http')
       ? apiUrl.replace(/\/$/, '')
       : process.env.NODE_ENV === 'development'

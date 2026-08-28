@@ -22,6 +22,9 @@ const API_URL = (() => {
   }
   return 'http://localhost:8000';
 })();
+
+// In production, API_URL is empty (same-origin). Rewrites in next.config.js
+// proxy /api/* to the Render backend. In development, API_URL is localhost:8000.
 const REQUEST_TIMEOUT = 30000;
 const MAX_RETRIES = 2;
 
