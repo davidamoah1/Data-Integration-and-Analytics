@@ -128,6 +128,49 @@ class JobRepository(BaseRepository[Job]):
         self.db.execute(update(Job).where(Job.id == job_id).values(**values))
         self.db.flush()
 
+    def update_heartbeat(self, job_id: int) -> None:
+        """Update the heartbeat timestamp for a running job."""
+        self.db.execute(
+            update(Job)
+            .where(Job.id == job_id)
+            .values(last_heartbeat_at=datetime.now(timezone.utc))
+        )
+        self.db.flush()
+
+    def find_stale_pending(self, threshold: datetime) -> list[Job]:
+        """Find pending jobs older than the given threshold (created before it)."""
+        return list(
+            self.db.execute(
+                select(Job)
+                .where(Job.status == "pending", Job.created_at < threshold)
+                .order_by(Job.id.asc())
+            )
+            .scalars()
+            .all()
+        )
+
+    def find_stale_running(self, heartbeat_threshold: datetime) -> list[Job]:
+        """Find running jobs whose heartbeat is older than the threshold.
+
+        Jobs with no heartbeat at all are included if they have been running
+        longer than the threshold since ``started_at``.
+        """
+        return list(
+            self.db.execute(
+                select(Job)
+                .where(
+                    Job.status == "running",
+                    (
+                        (Job.last_heartbeat_at.isnot(None) & (Job.last_heartbeat_at < heartbeat_threshold))
+                        | (Job.last_heartbeat_at.is_(None) & (Job.started_at < heartbeat_threshold))
+                    ),
+                )
+                .order_by(Job.id.asc())
+            )
+            .scalars()
+            .all()
+        )
+
     def increment_retries(self, job_id: int) -> int:
         job = self.get_by_id(job_id)
         if job:

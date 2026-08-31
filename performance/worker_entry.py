@@ -10,11 +10,13 @@ otherwise falls back to in-memory queue.
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import logging
 import os
 import signal
 
 from jobs.handlers import register_builtin_handlers
+from jobs.watchdog import run_watchdog
 from performance.queue import TaskQueue
 from performance.workers import WorkerPool
 
@@ -61,8 +63,17 @@ async def run_workers():
         f"backend: {'redis' if queue.is_redis_backend else 'memory'}"
     )
 
+    # Start the stale-job watchdog alongside the worker pool so stuck
+    # jobs are automatically detected and marked as failed.
+    watchdog_task = asyncio.create_task(run_watchdog(stop_event))
+    logger.info("Stale-job watchdog task created.")
+
     # Wait for shutdown signal
     await stop_event.wait()
+
+    watchdog_task.cancel()
+    with contextlib.suppress(asyncio.CancelledError):
+        await watchdog_task
 
     await pool.stop()
     logger.info("Workers stopped, exiting.")

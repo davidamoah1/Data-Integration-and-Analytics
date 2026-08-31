@@ -67,6 +67,10 @@ class Job(Base):
     started_at = Column(DateTime, nullable=True)
     completed_at = Column(DateTime, nullable=True)
 
+    # Worker heartbeat — updated periodically while a job is running.
+    # Used by the stale-job watchdog to detect crashed workers.
+    last_heartbeat_at = Column(DateTime, nullable=True)
+
     # Idempotency key — prevents duplicate job submission.
     # Composed from tenant + operation + target (e.g. "org_5:ocr_document:doc_42").
     # If a job with the same key is already pending/running/completed, the
@@ -105,5 +109,6 @@ class Job(Base):
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "started_at": self.started_at.isoformat() if self.started_at else None,
             "completed_at": self.completed_at.isoformat() if self.completed_at else None,
+            "last_heartbeat_at": self.last_heartbeat_at.isoformat() if self.last_heartbeat_at else None,
             "duration_seconds": self.duration_seconds,
         }

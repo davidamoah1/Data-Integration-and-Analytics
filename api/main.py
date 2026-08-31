@@ -400,6 +400,7 @@ async def lifespan(app: FastAPI):
     # When Redis is present, the dedicated worker container handles jobs.
     # Running a worker on the web service too would compete for the same
     # Redis queue, causing double-processing and wasted resources.
+    watchdog_task = None
     if not serverless and not _is_test_env:
         from jobs.service import get_task_queue
 
@@ -407,7 +408,7 @@ async def lifespan(app: FastAPI):
         if not queue.is_redis_backend:
 
             async def _job_worker():
-                """Background worker loop â€” dequeues and executes jobs."""
+                """Background worker loop — dequeues and executes jobs."""
                 logger.info("Background job worker started (in-memory mode).")
                 while True:
                     try:
@@ -425,9 +426,31 @@ async def lifespan(app: FastAPI):
             job_worker_task = asyncio.create_task(_job_worker())
             logger.info("Background job worker task created (in-memory mode).")
         else:
-            logger.info("Redis detected â€” job processing handled by dedicated worker container.")
+            logger.info("Redis detected — job processing handled by dedicated worker container.")
+
+        # Always run the stale-job watchdog so stuck jobs are detected even
+        # if the dedicated worker is down or has crashed.
+        from jobs.watchdog import run_watchdog
+
+        async def _watchdog_wrapper():
+            try:
+                await run_watchdog()
+            except asyncio.CancelledError:
+                logger.info("Stale-job watchdog stopping.")
+                raise
+
+        watchdog_task = asyncio.create_task(_watchdog_wrapper())
+        logger.info("Stale-job watchdog task created on web service.")
 
     yield
+
+    # Cancel watchdog
+    if watchdog_task is not None and not watchdog_task.done():
+        watchdog_task.cancel()
+        try:
+            await watchdog_task
+        except asyncio.CancelledError:
+            pass
 
     # Cancel deferred startup if still running
     if startup_task is not None and not startup_task.done():
@@ -871,6 +894,50 @@ async def workers_health_check(
         return JSONResponse(
             status_code=503,
             content={"status": "not_ready", "error": str(e)},
+        )
+
+
+@app.get("/health/queue", tags=["System"])
+async def queue_health_check():
+    """Safe, unauthenticated queue/Redis health check.
+
+    Returns only safe information — no passwords, connection strings, or
+    secrets. Used by monitoring and the frontend to determine if background
+    processing is available.
+    """
+    try:
+        from jobs.service import get_task_queue
+
+        queue = get_task_queue()
+        redis_connected = queue.is_redis_backend
+        pending = queue.pending_count
+
+        if redis_connected:
+            return JSONResponse(
+                content={
+                    "status": "healthy",
+                    "redis": "connected",
+                    "queue": "available",
+                    "pending_tasks": pending,
+                }
+            )
+        else:
+            return JSONResponse(
+                content={
+                    "status": "degraded",
+                    "redis": "not_configured",
+                    "queue": "in_memory",
+                    "pending_tasks": pending,
+                }
+            )
+    except Exception:
+        return JSONResponse(
+            status_code=503,
+            content={
+                "status": "unhealthy",
+                "redis": "disconnected",
+                "queue": "unavailable",
+            },
         )
 
 

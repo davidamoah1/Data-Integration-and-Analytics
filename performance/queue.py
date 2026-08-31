@@ -226,20 +226,26 @@ class TaskQueue:
         return task.id
 
     async def dequeue(self, timeout: float = 1.0) -> Task | None:
-        """Get the next task from the highest-priority non-empty queue."""
+        """Get the next task from the highest-priority non-empty queue.
+
+        Uses ``asyncio.to_thread`` for the synchronous Redis ``brpop`` call
+        so the event loop is not blocked while waiting for a task to arrive.
+        """
+        per_priority_timeout = max(1, int(timeout))
         for priority in self.PRIORITY_ORDER:
             try:
                 if self._redis:
-                    raw = self._redis.brpop(f"queue:{priority.value}", timeout=int(timeout))
+                    raw = await asyncio.to_thread(
+                        self._redis.brpop,
+                        f"queue:{priority.value}",
+                        per_priority_timeout,
+                    )
                     if raw:
                         _, data = raw
                         task_dict = json.loads(data)
                         task = self._tasks.get(task_dict["id"])
                         if task:
                             return task
-                        # Not in this process's local cache â€” likely dequeued
-                        # by a separate worker process. Reconstruct the task
-                        # from the serialized payload so it can still run.
                         task = self._reconstruct_task(task_dict)
                         if task:
                             self._tasks[task.id] = task
@@ -255,7 +261,10 @@ class TaskQueue:
                         timeout=timeout / len(self.PRIORITY_ORDER),
                     )
                     return task
-            except (asyncio.TimeoutError, Exception):
+            except asyncio.TimeoutError:
+                continue
+            except Exception:
+                logger.exception("Error during dequeue from priority %s", priority.value)
                 continue
         return None
 
@@ -325,11 +334,16 @@ class TaskQueue:
         return None
 
     async def _call_func(self, task: Task) -> Any:
-        """Call the task function (sync or async)."""
+        """Call the task function (sync or async).
+
+        Sync functions are run in a thread via ``asyncio.to_thread`` so the
+        event loop stays responsive for heartbeat updates and graceful
+        shutdown signals during long-running jobs.
+        """
         if asyncio.iscoroutinefunction(task.func):
             return await task.func(*task.args, **task.kwargs)
         else:
-            return task.func(*task.args, **task.kwargs)
+            return await asyncio.to_thread(task.func, *task.args, **task.kwargs)
 
     async def _handle_failure(self, task: Task) -> None:
         """Handle task failure with retry logic."""

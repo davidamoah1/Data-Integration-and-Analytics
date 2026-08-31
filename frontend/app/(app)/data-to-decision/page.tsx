@@ -25,7 +25,8 @@ import { workflowService } from '@/services/workflow/workflowService';
 import { datasetService } from '@/services/datasets/datasetService';
 import { apiClient, getAccessToken } from '@/services/api/client';
 import { toast } from '@/components/ui/Toaster';
-import { Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
+import { Loader2, Upload } from 'lucide-react';
 
 interface TransformationRecord {
   id: string;
@@ -46,6 +47,7 @@ export default function DataToDecisionPage() {
   // File & workflow
   const [file, setFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [hasError, setHasError] = useState(false);
   const [processingMessage, setProcessingMessage] = useState<string>('');
   const [workflowState, setWorkflowState] = useState<WorkflowState | null>(null);
 
@@ -76,11 +78,13 @@ export default function DataToDecisionPage() {
   // === Upload Step ===
   const handleFileSelected = useCallback((f: File) => {
     setFile(f);
+    setHasError(false);
   }, []);
 
   const handleStartProcessing = useCallback(async () => {
     if (!file) return;
     setIsProcessing(true);
+    setHasError(false);
     setProcessingMessage('Uploading and analyzing dataset...');
     setStepStatuses((prev) => ({ ...prev, upload: 'active' }));
 
@@ -118,6 +122,7 @@ export default function DataToDecisionPage() {
       toast.success('Dataset uploaded and analyzed successfully!');
     } catch (err) {
       setStepStatuses((prev) => ({ ...prev, upload: 'error' }));
+      setHasError(true);
       setProcessingMessage('');
       toast.error(err instanceof Error ? err.message : 'Failed to process dataset');
     } finally {
@@ -332,16 +337,32 @@ export default function DataToDecisionPage() {
         <div className="flex items-center justify-center gap-3 py-8">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
           <div>
-            <p className="font-medium">{processingMessage || 'Processing your dataset...'}</p>
+            <p className="font-medium">{processingMessage || 'Preparing your dataset...'}</p>
             <p className="text-sm text-muted-foreground">
-              Profiling, validating, detecting patterns, and generating insights
+              This may take a few minutes for large datasets
             </p>
           </div>
         </div>
       )}
 
+      {/* Error state with Try Again */}
+      {hasError && !isProcessing && currentStep === 'upload' && file && (
+        <div className="flex flex-col items-center gap-4 py-8">
+          <div className="text-center">
+            <p className="font-medium text-red-600">We couldn't process this dataset. Please try again.</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              If the problem persists, try a smaller file or contact your administrator.
+            </p>
+          </div>
+          <Button onClick={handleStartProcessing} size="lg">
+            <Upload className="mr-2 h-4 w-4" />
+            Try Again
+          </Button>
+        </div>
+      )}
+
       {/* Step Content */}
-      {!isProcessing && currentStep === 'upload' && (
+      {!isProcessing && !hasError && currentStep === 'upload' && (
         <UploadStep
           file={file}
           onFileSelected={handleFileSelected}

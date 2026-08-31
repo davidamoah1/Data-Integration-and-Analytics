@@ -1,4 +1,4 @@
-import { apiClient } from "@/services/api/client";
+import { apiClient, ApiError } from "@/services/api/client";
 import type {
   WorkflowState,
   DatasetProfile,
@@ -15,7 +15,8 @@ import type {
 const BASE = "/api/dataset-workflow";
 const JOBS_BASE = "/api/jobs";
 const POLL_INTERVAL_MS = 2000;
-const MAX_POLL_ATTEMPTS = 60; // 60 * 2s = 120s max
+const MAX_POLL_ATTEMPTS = 450; // 450 * 2s = 15 min max — enough for large datasets
+const MAX_CONSECUTIVE_ERRORS = 5; // Stop after 5 consecutive network errors
 
 interface AsyncJobResponse {
   job_id: number;
@@ -49,6 +50,37 @@ function isAsyncJobResponse(data: unknown): data is AsyncJobResponse {
   );
 }
 
+const _INTERNAL_ERROR_PATTERNS = [
+  /OperationalError/i,
+  /SQLAlchemy/i,
+  /PyMySQL/i,
+  /psycopg2/i,
+  /sqlite3/i,
+  /IntegrityError/i,
+  /ProgrammingError/i,
+  /DBAPIError/i,
+  /Traceback/i,
+  /File "[^"]+"/i,
+  /line \d+/i,
+];
+
+function _sanitizeErrorMessage(raw: string | null | undefined): string {
+  if (!raw) return "Workflow processing failed. Please try again.";
+
+  // Check if the error contains internal details
+  const hasInternalDetails = _INTERNAL_ERROR_PATTERNS.some((p) => p.test(raw));
+  if (hasInternalDetails) {
+    return "We couldn't process this dataset. Please try again or contact your administrator.";
+  }
+
+  // Truncate very long errors
+  if (raw.length > 200) {
+    return raw.substring(0, 200) + "...";
+  }
+
+  return raw;
+}
+
 export const workflowService = {
   async runWorkflow(
     file: File,
@@ -70,9 +102,12 @@ export const workflowService = {
     // Async mode — poll the job until it completes, then extract the workflow state
     const jobId = result.job_id;
     let attempts = 0;
+    let consecutiveErrors = 0;
+    let lastProgress = 0;
+    let lastProgressMessage = '';
 
     if (onProgress) {
-      onProgress("Workflow queued for background processing...", 0);
+      onProgress("Your dataset is waiting for a background worker.", 0);
     }
 
     while (attempts < MAX_POLL_ATTEMPTS) {
@@ -82,8 +117,40 @@ export const workflowService = {
       let job: JobDetailResponse;
       try {
         job = await apiClient.get<JobDetailResponse>(`${JOBS_BASE}/${jobId}`);
-      } catch {
-        // Network error — keep polling
+        consecutiveErrors = 0; // Reset on successful response
+      } catch (err) {
+        consecutiveErrors++;
+
+        // If we get too many consecutive errors, show a useful message
+        if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+          if (onProgress) {
+            onProgress(
+              "Unable to check processing status. Please try again.",
+              lastProgress,
+            );
+          }
+          throw new Error(
+            "Unable to check processing status after multiple attempts. The server may be unreachable. Please try again.",
+          );
+        }
+
+        // For auth errors (401/403), stop immediately — don't keep polling
+        if (err instanceof ApiError && (err.status === 401 || err.status === 403)) {
+          throw new Error("Your session has expired. Please log in again.");
+        }
+
+        // For 404, the job doesn't exist — stop polling
+        if (err instanceof ApiError && err.status === 404) {
+          throw new Error("The processing job could not be found. Please try uploading again.");
+        }
+
+        // For server errors (500/502/503), continue polling but warn
+        if (consecutiveErrors === 1 && onProgress) {
+          onProgress(
+            "Checking processing status... (experiencing connectivity issues)",
+            lastProgress,
+          );
+        }
         continue;
       }
 
@@ -100,7 +167,8 @@ export const workflowService = {
       }
 
       if (job.status === "failed") {
-        throw new Error(job.error || job.progress_message || "Workflow processing failed");
+        const userError = _sanitizeErrorMessage(job.error || job.progress_message);
+        throw new Error(userError);
       }
 
       if (job.status === "cancelled") {
@@ -108,8 +176,27 @@ export const workflowService = {
       }
 
       // Still pending or running — report progress and continue polling
-      if (onProgress && job.progress_message) {
-        onProgress(job.progress_message, job.progress);
+      if (job.progress > lastProgress || job.progress_message !== lastProgressMessage) {
+        lastProgress = job.progress;
+        lastProgressMessage = job.progress_message || '';
+      }
+      if (onProgress) {
+        const message = job.progress_message || (
+          job.status === "pending"
+            ? "Your dataset is waiting for a background worker."
+            : "Processing your dataset..."
+        );
+        onProgress(message, job.progress);
+      }
+
+      // If pending for more than 5 minutes (150 attempts), warn the user
+      if (job.status === "pending" && attempts === 150) {
+        if (onProgress) {
+          onProgress(
+            "Processing is taking longer than expected. We are checking the background processing service.",
+            job.progress,
+          );
+        }
       }
     }
 

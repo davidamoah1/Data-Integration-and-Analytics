@@ -156,13 +156,53 @@ class JobService:
         # Enqueue asynchronously
         try:
             loop = asyncio.get_running_loop()
-            loop.create_task(queue.enqueue(task))
+
+            async def _safe_enqueue():
+                try:
+                    await queue.enqueue(task)
+                except Exception as e:
+                    logger.error("Failed to enqueue job %d: %s", job.id, e)
+                    try:
+                        engine = shared.database.get_engine()
+                        factory = shared.database.get_session_factory(engine)
+                        err_db = factory()
+                        try:
+                            err_repo = JobRepository(err_db)
+                            err_repo.mark_failed(
+                                job.id,
+                                f"Failed to enqueue job for background processing: {e}",
+                            )
+                            err_db.commit()
+                        finally:
+                            err_db.close()
+                    except Exception:
+                        logger.exception("Failed to mark job %d as failed after enqueue error", job.id)
+
+            loop.create_task(_safe_enqueue())
         except RuntimeError:
-            # No running event loop â€” enqueue in a thread
-            threading.Thread(
-                target=lambda: asyncio.run(queue.enqueue(task)),
-                daemon=True,
-            ).start()
+            # No running event loop — enqueue in a thread
+            def _thread_enqueue():
+                try:
+                    asyncio.run(queue.enqueue(task))
+                except Exception as e:
+                    logger.error("Failed to enqueue job %d (thread): %s", job.id, e)
+                    try:
+                        engine = shared.database.get_engine()
+                        factory = shared.database.get_session_factory(engine)
+                        err_db = factory()
+                        try:
+                            err_repo = JobRepository(err_db)
+                            err_repo.mark_failed(
+                                job.id,
+                                f"Failed to enqueue job for background processing: {e}",
+                            )
+                            err_db.commit()
+                        finally:
+                            err_db.close()
+                    except Exception:
+                        logger.exception("Failed to mark job %d as failed after enqueue error (thread)", job.id)
+
+            threading.Thread(target=_thread_enqueue, daemon=True).start()
 
         logger.info("Job %d created and enqueued: %s '%s'", job.id, job_type, name)
         return job
@@ -261,12 +301,36 @@ class JobService:
             self.db.commit()
             try:
                 loop = asyncio.get_running_loop()
-                loop.create_task(queue.enqueue(task))
+
+                async def _safe_retry_enqueue():
+                    try:
+                        await queue.enqueue(task)
+                    except Exception as e:
+                        logger.error("Failed to re-enqueue job %d: %s", job.id, e)
+                        try:
+                            engine = shared.database.get_engine()
+                            factory = shared.database.get_session_factory(engine)
+                            err_db = factory()
+                            try:
+                                err_repo = JobRepository(err_db)
+                                err_repo.mark_failed(
+                                    job.id,
+                                    f"Failed to re-enqueue job for background processing: {e}",
+                                )
+                                err_db.commit()
+                            finally:
+                                err_db.close()
+                        except Exception:
+                            logger.exception("Failed to mark job %d as failed after retry enqueue error", job.id)
+
+                loop.create_task(_safe_retry_enqueue())
             except RuntimeError:
-                threading.Thread(
-                    target=lambda: asyncio.run(queue.enqueue(task)),
-                    daemon=True,
-                ).start()
+                def _thread_retry_enqueue():
+                    try:
+                        asyncio.run(queue.enqueue(task))
+                    except Exception as e:
+                        logger.error("Failed to re-enqueue job %d (thread): %s", job.id, e)
+                threading.Thread(target=_thread_retry_enqueue, daemon=True).start()
 
         logger.info("Job %d retried", job_id)
         return self.repo.get_by_id(job_id)
@@ -302,7 +366,12 @@ def _run_job_wrapper(job_id: int, job_type: str) -> dict:
 
         # Mark running
         repo.mark_running(job_id)
+        repo.update_heartbeat(job_id)
         db.commit()
+        logger.info(
+            "JOB_STARTED job_id=%d job_type=%s name='%s'",
+            job_id, job_type, job.name,
+        )
 
         # Get handler
         handler_entry = _HANDLERS.get(job_type)
@@ -310,6 +379,7 @@ def _run_job_wrapper(job_id: int, job_type: str) -> dict:
             error_msg = f"No handler for job type '{job_type}'"
             repo.mark_failed(job_id, error_msg)
             db.commit()
+            logger.error("JOB_FAILED job_id=%d error='%s'", job_id, error_msg)
             return {"error": error_msg}
 
         handler, _ = handler_entry
@@ -318,7 +388,7 @@ def _run_job_wrapper(job_id: int, job_type: str) -> dict:
         payload = json.loads(job.payload) if job.payload else {}
 
         # Execute
-        logger.info("Executing job %d: %s '%s'", job_id, job_type, job.name)
+        logger.info("JOB_PROGRESS job_id=%d status=running progress=0 message='Executing handler'", job_id)
         result = handler(job_id, payload, db)
 
         # Mark completed. default=str guards against handlers returning
@@ -328,6 +398,10 @@ def _run_job_wrapper(job_id: int, job_type: str) -> dict:
         result_json = json.dumps(result, default=str) if result else None
         repo.mark_completed(job_id, result=result_json)
         db.commit()
+        logger.info(
+            "JOB_COMPLETED job_id=%d job_type=%s name='%s'",
+            job_id, job_type, job.name,
+        )
 
         # Notify user
         if job.user_id:
@@ -345,8 +419,9 @@ def _run_job_wrapper(job_id: int, job_type: str) -> dict:
         return result or {}
 
     except Exception as e:
-        logger.exception("Job %d failed: %s", job_id, e)
+        logger.exception("JOB_FAILED job_id=%d error='%s'", job_id, e)
         try:
+            db.rollback()
             repo = JobRepository(db)
             repo.mark_failed(job_id, str(e))
             db.commit()
@@ -375,6 +450,8 @@ def update_job_progress(job_id: int, progress: float, message: str | None = None
     """Update job progress from within a handler.
 
     Uses a short-lived session so it doesn't interfere with the handler's session.
+    Also updates the heartbeat timestamp so the stale-job watchdog knows the
+    worker is still alive.
     """
     engine = shared.database.get_engine()
     factory = shared.database.get_session_factory(engine)
@@ -382,6 +459,24 @@ def update_job_progress(job_id: int, progress: float, message: str | None = None
     try:
         repo = JobRepository(db)
         repo.update_progress(job_id, progress, message)
+        repo.update_heartbeat(job_id)
+        db.commit()
+    finally:
+        db.close()
+
+
+def update_heartbeat(job_id: int) -> None:
+    """Update the heartbeat timestamp for a running job.
+
+    Can be called periodically from long-running handlers that don't update
+    progress on every iteration.
+    """
+    engine = shared.database.get_engine()
+    factory = shared.database.get_session_factory(engine)
+    db = factory()
+    try:
+        repo = JobRepository(db)
+        repo.update_heartbeat(job_id)
         db.commit()
     finally:
         db.close()

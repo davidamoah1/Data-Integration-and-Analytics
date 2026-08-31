@@ -79,6 +79,13 @@ services:
         value: true
       - key: MONITORING_ENABLED
         value: true
+      # ── Stale Job Watchdog (runs on web service too) ──
+      - key: JOB_WATCHDOG_INTERVAL_SECONDS
+        value: 60
+      - key: JOB_PENDING_TIMEOUT_SECONDS
+        value: 300
+      - key: JOB_RUNNING_TIMEOUT_SECONDS
+        value: 1800
 
   # ── Background Worker Service ────────────────────────────────────
   - type: worker
@@ -124,6 +131,13 @@ services:
         value: INFO
       - key: LOG_FORMAT
         value: json
+      # ── Stale Job Watchdog ──
+      - key: JOB_WATCHDOG_INTERVAL_SECONDS
+        value: 60
+      - key: JOB_PENDING_TIMEOUT_SECONDS
+        value: 300
+      - key: JOB_RUNNING_TIMEOUT_SECONDS
+        value: 1800
 
   # ── Redis (Render Redis) ─────────────────────────────────────
   - type: redis

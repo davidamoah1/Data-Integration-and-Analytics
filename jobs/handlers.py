@@ -222,14 +222,15 @@ def _handle_dataset_workflow(job_id: int, payload: dict, db: DbSession) -> dict:
     update_job_progress(job_id, 0.05, "Loading uploaded file")
     content, _record = FileService(db).download(file_id, organization_id)
 
+    update_job_progress(job_id, 0.10, "Validating uploaded file")
     df = _parse_upload_bytes(content, filename)
     if df.empty:
         raise ValueError("Uploaded file is empty")
 
-    update_job_progress(job_id, 0.1, "Running governance classification")
+    update_job_progress(job_id, 0.15, "Running governance classification")
     governance = classify_dataset(df)
 
-    update_job_progress(job_id, 0.15, "Running dataset intelligence workflow")
+    update_job_progress(job_id, 0.20, "Profiling dataset")
     state = _orchestrator.start(
         df,
         dataset_name=filename,
@@ -237,6 +238,12 @@ def _handle_dataset_workflow(job_id: int, payload: dict, db: DbSession) -> dict:
         created_by=created_by,
         organization_id=organization_id,
     )
+
+    update_job_progress(job_id, 0.50, "Detecting patterns and running analysis")
+
+    update_job_progress(job_id, 0.80, "Generating insights")
+
+    update_job_progress(job_id, 0.90, "Preparing visualizations and report")
 
     log_audit_event(
         db=db,
@@ -254,7 +261,7 @@ def _handle_dataset_workflow(job_id: int, payload: dict, db: DbSession) -> dict:
     )
     db.commit()
 
-    update_job_progress(job_id, 1.0, "Workflow complete")
+    update_job_progress(job_id, 1.0, "Processing complete")
     return {
         **state.to_dict(),
         "governance": governance.to_dict(),
