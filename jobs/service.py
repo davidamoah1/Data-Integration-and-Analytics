@@ -96,8 +96,14 @@ class JobService:
         description: str | None = None,
         payload: dict | None = None,
         max_retries: int = 3,
+        idempotency_key: str | None = None,
     ) -> Job:
         """Create a job record and enqueue it for processing.
+
+        If *idempotency_key* is provided and a pending/running/completed job
+        with the same key already exists for this organization, that existing
+        job is returned instead of creating a duplicate. Failed/cancelled jobs
+        with the same key are allowed to be re-created (i.e. retried).
 
         Returns the persisted Job instance (with id).
         """
@@ -106,6 +112,17 @@ class JobService:
                 f"No handler registered for job type '{job_type}'. "
                 f"Available: {', '.join(get_registered_types())}"
             )
+
+        # Idempotency check — return existing active/completed job if present
+        if idempotency_key:
+            existing = self.repo.find_by_idempotency_key(organization_id, idempotency_key)
+            if existing:
+                logger.info(
+                    "Job %d returned (idempotency key '%s' already active/completed)",
+                    existing.id,
+                    idempotency_key,
+                )
+                return existing
 
         job = self.repo.create(
             organization_id=organization_id,
@@ -117,6 +134,7 @@ class JobService:
             progress=0.0,
             payload=json.dumps(payload) if payload else None,
             max_retries=max_retries,
+            idempotency_key=idempotency_key,
         )
         self.db.commit()
 

@@ -65,9 +65,89 @@ def _find_word_confidence(value: str, words: list[OcrWord]) -> float:
     return sum(matched_confidences) / len(matched_confidences)
 
 
+_LABEL_INDICATORS = {
+    "name",
+    "date",
+    "number",
+    "id",
+    "institution",
+    "university",
+    "college",
+    "degree",
+    "diploma",
+    "certificate",
+    "grade",
+    "gpa",
+    "department",
+    "faculty",
+    "school",
+    "programme",
+    "program",
+    "course",
+    "signature",
+    "signed",
+    "seal",
+    "issued",
+    "awarded",
+    "conferred",
+    "address",
+    "phone",
+    "email",
+    "location",
+    "country",
+    "expiry",
+    "valid",
+    "license",
+    "licence",
+    "registration",
+}
+
+_LABEL_FIELD_NAMES = {
+    "full_name",
+    "student_name",
+    "applicant_name",
+    "mother_name",
+    "patient_name",
+    "taxpayer_name",
+    "household_head",
+    "vendor_name",
+    "customer_name",
+    "recipient_name",
+    "respondent_name",
+    "member_name",
+}
+
+
+def _looks_like_label(value: str, spec: FieldSpec) -> bool:
+    """Check if an extracted value looks like another field label rather than
+    an actual value.
+
+    For name fields, a value like "Institution Name" or "Date of Birth" is
+    clearly another label, not a person's name. For non-name fields, this
+    check is skipped.
+    """
+    if spec.name not in _LABEL_FIELD_NAMES:
+        return False
+    v = value.lower().strip()
+    if not v:
+        return False
+    # If the value is short (<= 3 words) and contains multiple label indicator
+    # words, it's likely another field label, not a value.
+    words_in_value = v.split()
+    if len(words_in_value) <= 5:
+        label_word_count = sum(1 for w in words_in_value if w in _LABEL_INDICATORS)
+        if label_word_count >= 2:
+            return True
+    return False
+
+
 def _extract_label_anchored(text: str, spec: FieldSpec, words: list[OcrWord]) -> ExtractedField:
     best_value = None
-    for kw in spec.keywords:
+    # Sort keywords by length (longest first) so more specific labels like
+    # "Student Name" are tried before generic ones like "Name". This prevents
+    # "Institution Name: ..." from matching when "Student Name: ..." is present.
+    sorted_keywords = sorted(spec.keywords, key=len, reverse=True)
+    for kw in sorted_keywords:
         # Match "<label> : value" or "<label> - value" or "<label> value" up to line end.
         pattern = re.compile(rf"{re.escape(kw)}\s*[:\-]?\s*([^\n]{{1,80}})", re.IGNORECASE)
         m = pattern.search(text)
@@ -75,7 +155,10 @@ def _extract_label_anchored(text: str, spec: FieldSpec, words: list[OcrWord]) ->
             candidate = m.group(1).strip()
             # Trim trailing text that looks like the start of the next field label.
             candidate = re.split(r"\s{2,}|\t", candidate)[0].strip(" .:-\t")
-            if candidate:
+            # Skip values that look like they belong to another field label
+            # (e.g. "Name: Institution Name" would capture "Institution Name"
+            # which is clearly not a person's name).
+            if candidate and not _looks_like_label(candidate, spec):
                 best_value = candidate
                 break
 

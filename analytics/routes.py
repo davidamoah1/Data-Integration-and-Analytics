@@ -52,19 +52,34 @@ async def list_dashboards(
             )
         )
     dashboards = query.order_by(Dashboard.updated_at.desc()).all()
+    if not dashboards:
+        return []
+
+    dashboard_ids = [d.id for d in dashboards]
+
+    # Batch query: widget counts per dashboard (1 query instead of N)
+    from sqlalchemy import func as sa_func
+
+    widget_counts = dict(
+        db.query(DashboardWidget.dashboard_id, sa_func.count(DashboardWidget.id))
+        .filter(DashboardWidget.dashboard_id.in_(dashboard_ids))
+        .group_by(DashboardWidget.dashboard_id)
+        .all()
+    )
+
+    # Batch query: favorites for this user (1 query instead of N)
+    fav_ids = set(
+        row[0]
+        for row in db.query(DashboardFavorite.dashboard_id)
+        .filter(
+            DashboardFavorite.dashboard_id.in_(dashboard_ids),
+            DashboardFavorite.user_id == current_user["id"],
+        )
+        .all()
+    )
+
     result = []
     for d in dashboards:
-        widget_count = (
-            db.query(DashboardWidget).filter(DashboardWidget.dashboard_id == d.id).count()
-        )
-        is_fav = (
-            db.query(DashboardFavorite)
-            .filter(
-                DashboardFavorite.dashboard_id == d.id,
-                DashboardFavorite.user_id == current_user["id"],
-            )
-            .first()
-        )
         result.append(
             {
                 "id": d.id,
@@ -72,11 +87,11 @@ async def list_dashboards(
                 "description": d.description,
                 "theme": d.theme,
                 "is_public": d.is_public,
-                "is_favorite": is_fav is not None,
+                "is_favorite": d.id in fav_ids,
                 "version": d.version,
                 "owner_id": d.owner_id,
                 "widgets": [],
-                "widget_count": widget_count,
+                "widget_count": widget_counts.get(d.id, 0),
                 "created_at": str(d.created_at) if d.created_at else None,
                 "updated_at": str(d.updated_at) if d.updated_at else None,
             }

@@ -324,6 +324,7 @@ async def run_workflow(
                     "organization_id": org_id,
                     "created_by": current_user["id"],
                 },
+                idempotency_key=f"org_{org_id}:dataset_workflow:file_{record.file_id}",
             )
         except ValueError as e:
             # No handler registered for "dataset_workflow" in this process

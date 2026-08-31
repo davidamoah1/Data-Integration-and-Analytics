@@ -46,6 +46,7 @@ export default function DataToDecisionPage() {
   // File & workflow
   const [file, setFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [processingMessage, setProcessingMessage] = useState<string>('');
   const [workflowState, setWorkflowState] = useState<WorkflowState | null>(null);
 
   // Data from workflow stages
@@ -80,15 +81,19 @@ export default function DataToDecisionPage() {
   const handleStartProcessing = useCallback(async () => {
     if (!file) return;
     setIsProcessing(true);
+    setProcessingMessage('Uploading and analyzing dataset...');
     setStepStatuses((prev) => ({ ...prev, upload: 'active' }));
 
     try {
-      // Run the full workflow
-      const result = await workflowService.runWorkflow(file);
+      // Run the full workflow (handles both sync and async backend modes)
+      const result = await workflowService.runWorkflow(file, false, (message, progress) => {
+        setProcessingMessage(`${message} (${Math.round(progress * 100)}%)`);
+      });
       setWorkflowState(result);
 
       // Mark upload complete, move to understand
       setStepStatuses((prev) => ({ ...prev, upload: 'completed', understand: 'active' }));
+      setProcessingMessage('Loading analysis results...');
 
       // Load the detail data
       if (result.workflow_id) {
@@ -109,9 +114,11 @@ export default function DataToDecisionPage() {
       }
 
       setCurrentStep('understand');
+      setProcessingMessage('');
       toast.success('Dataset uploaded and analyzed successfully!');
     } catch (err) {
       setStepStatuses((prev) => ({ ...prev, upload: 'error' }));
+      setProcessingMessage('');
       toast.error(err instanceof Error ? err.message : 'Failed to process dataset');
     } finally {
       setIsProcessing(false);
@@ -325,7 +332,7 @@ export default function DataToDecisionPage() {
         <div className="flex items-center justify-center gap-3 py-8">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
           <div>
-            <p className="font-medium">Processing your dataset...</p>
+            <p className="font-medium">{processingMessage || 'Processing your dataset...'}</p>
             <p className="text-sm text-muted-foreground">
               Profiling, validating, detecting patterns, and generating insights
             </p>

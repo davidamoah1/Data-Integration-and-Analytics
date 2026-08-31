@@ -14,6 +14,7 @@ Excluded paths:
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import time
 
@@ -142,35 +143,55 @@ class AuditMiddleware(BaseHTTPMiddleware):
 
         user_agent = request.headers.get("user-agent", "")[:500] or None
 
-        # Asynchronously log to DB (non-blocking â€” failures don't affect the response)
-        try:
-            factory = get_session_factory()
-            db: DbSession = factory()
-            entry = AuditLog(
-                user_id=user_id,
-                organization_id=organization_id,
-                action=action,
-                resource_type=resource_type,
-                resource_id=resource_id,
-                ip_address=ip_address,
-                user_agent=user_agent,
-                audit_metadata={
-                    "method": request.method,
-                    "path": path,
-                    "status_code": response.status_code,
-                    "duration_ms": duration_ms,
-                    "auto_logged": True,
-                },
-            )
-            db.add(entry)
-            db.commit()
-            db.close()
-        except Exception as e:
-            logger.debug("Auto-audit log failed for %s %s: %s", request.method, path, e)
+        # Offload audit DB write to a background thread so the response
+        # is returned immediately without waiting for the DB round-trip.
+        audit_payload = {
+            "user_id": user_id,
+            "organization_id": organization_id,
+            "action": action,
+            "resource_type": resource_type,
+            "resource_id": resource_id,
+            "ip_address": ip_address,
+            "user_agent": user_agent,
+            "audit_metadata": {
+                "method": request.method,
+                "path": path,
+                "status_code": response.status_code,
+                "duration_ms": duration_ms,
+                "auto_logged": True,
+            },
+        }
+
+        async def _write_audit():
             try:
-                db.rollback()
-                db.close()
-            except Exception:
-                pass
+                await asyncio.to_thread(_persist_audit, audit_payload)
+            except Exception as e:
+                logger.debug("Auto-audit log failed for %s %s: %s", request.method, path, e)
+
+        asyncio.create_task(_write_audit())
 
         return response
+
+
+def _persist_audit(payload: dict) -> None:
+    """Write an audit log entry in a synchronous context (called via to_thread)."""
+    factory = get_session_factory()
+    db: DbSession = factory()
+    try:
+        entry = AuditLog(
+            user_id=payload["user_id"],
+            organization_id=payload["organization_id"],
+            action=payload["action"],
+            resource_type=payload["resource_type"],
+            resource_id=payload["resource_id"],
+            ip_address=payload["ip_address"],
+            user_agent=payload["user_agent"],
+            audit_metadata=payload["audit_metadata"],
+        )
+        db.add(entry)
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    finally:
+        db.close()

@@ -67,6 +67,12 @@ class Job(Base):
     started_at = Column(DateTime, nullable=True)
     completed_at = Column(DateTime, nullable=True)
 
+    # Idempotency key — prevents duplicate job submission.
+    # Composed from tenant + operation + target (e.g. "org_5:ocr_document:doc_42").
+    # If a job with the same key is already pending/running/completed, the
+    # existing job is returned instead of creating a duplicate.
+    idempotency_key = Column(String(255), nullable=True, index=True)
+
     # Internal queue task ID (for linking to TaskQueue)
     queue_task_id = Column(String(64), nullable=True, index=True)
 
@@ -94,6 +100,7 @@ class Job(Base):
             "error": self.error,
             "retries": self.retries,
             "max_retries": self.max_retries,
+            "idempotency_key": self.idempotency_key,
             "queue_task_id": self.queue_task_id,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "started_at": self.started_at.isoformat() if self.started_at else None,

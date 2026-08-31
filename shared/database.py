@@ -185,23 +185,33 @@ def get_engine(**kwargs):
 
 def reset_engine():
     """Dispose and clear the cached engine. Useful for tests."""
-    global _engine, _tables_initialized, _default_data_initialized
+    global _engine, _tables_initialized, _default_data_initialized, _session_factory
     if _engine is not None:
         _engine.dispose()
         _engine = None
     _tables_initialized = False
     _default_data_initialized = False
+    _session_factory = None
+
+
+_session_factory: sessionmaker | None = None
 
 
 def get_session_factory(engine=None) -> sessionmaker:
     """Create a sessionmaker bound to the given engine (or default).
 
+    The sessionmaker is cached per process to avoid repeated construction.
+
     Returns:
         sessionmaker instance.
     """
+    global _session_factory
+    if _session_factory is not None and engine is None:
+        return _session_factory
     if engine is None:
         engine = get_engine()
-    return sessionmaker(bind=engine, expire_on_commit=False)
+    _session_factory = sessionmaker(bind=engine, expire_on_commit=False)
+    return _session_factory
 
 
 def get_db():

@@ -135,3 +135,23 @@ class JobRepository(BaseRepository[Job]):
             self.db.flush()
             return job.retries
         return 0
+
+    def find_by_idempotency_key(
+        self, organization_id: int, idempotency_key: str
+    ) -> Job | None:
+        """Find an existing job by idempotency key.
+
+        Returns the most recent job with this key if it is pending, running,
+        or completed (i.e. an active or successful duplicate). Failed or
+        cancelled jobs are NOT returned — they should be retried.
+        """
+        return self.db.execute(
+            select(Job)
+            .where(
+                Job.organization_id == organization_id,
+                Job.idempotency_key == idempotency_key,
+                Job.status.in_(["pending", "running", "completed"]),
+            )
+            .order_by(Job.id.desc())
+            .limit(1)
+        ).scalar_one_or_none()

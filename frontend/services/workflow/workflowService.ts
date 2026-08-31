@@ -13,15 +13,113 @@ import type {
 } from "@/types/workflow";
 
 const BASE = "/api/dataset-workflow";
+const JOBS_BASE = "/api/jobs";
+const POLL_INTERVAL_MS = 2000;
+const MAX_POLL_ATTEMPTS = 60; // 60 * 2s = 120s max
+
+interface AsyncJobResponse {
+  job_id: number;
+  status: string;
+  status_url: string;
+}
+
+interface JobPollResponse {
+  id: number;
+  status: string;
+  progress: number;
+  progress_message: string | null;
+  error: string | null;
+}
+
+interface JobDetailResponse {
+  id: number;
+  status: string;
+  progress: number;
+  progress_message: string | null;
+  error: string | null;
+  result: Record<string, unknown> | null;
+}
+
+function isAsyncJobResponse(data: unknown): data is AsyncJobResponse {
+  return (
+    typeof data === "object" &&
+    data !== null &&
+    "job_id" in data &&
+    !("workflow_id" in data)
+  );
+}
 
 export const workflowService = {
-  async runWorkflow(file: File, adminConfirmed = false): Promise<WorkflowState> {
+  async runWorkflow(
+    file: File,
+    adminConfirmed = false,
+    onProgress?: (message: string, progress: number) => void,
+  ): Promise<WorkflowState> {
     const formData = new FormData();
     formData.append("file", file);
-    return await apiClient.upload<WorkflowState>(
+    const result = await apiClient.upload<WorkflowState | AsyncJobResponse>(
       `${BASE}/run?admin_confirmed=${adminConfirmed}`,
       formData,
     );
+
+    // If the backend returned a full workflow state (synchronous mode), use it directly
+    if (!isAsyncJobResponse(result)) {
+      return result;
+    }
+
+    // Async mode — poll the job until it completes, then extract the workflow state
+    const jobId = result.job_id;
+    let attempts = 0;
+
+    if (onProgress) {
+      onProgress("Workflow queued for background processing...", 0);
+    }
+
+    while (attempts < MAX_POLL_ATTEMPTS) {
+      attempts++;
+      await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
+
+      let job: JobDetailResponse;
+      try {
+        job = await apiClient.get<JobDetailResponse>(`${JOBS_BASE}/${jobId}`);
+      } catch {
+        // Network error — keep polling
+        continue;
+      }
+
+      if (job.status === "completed" && job.result) {
+        if (onProgress) {
+          onProgress("Workflow completed, loading results...", 1.0);
+        }
+        // The job result contains the full workflow state dict
+        const workflowState = job.result as unknown as WorkflowState;
+        if (workflowState.workflow_id) {
+          return workflowState;
+        }
+        throw new Error("Workflow completed but no workflow_id was returned");
+      }
+
+      if (job.status === "failed") {
+        throw new Error(job.error || job.progress_message || "Workflow processing failed");
+      }
+
+      if (job.status === "cancelled") {
+        throw new Error("Workflow was cancelled");
+      }
+
+      // Still pending or running — report progress and continue polling
+      if (onProgress && job.progress_message) {
+        onProgress(job.progress_message, job.progress);
+      }
+    }
+
+    throw new Error(
+      `Workflow processing timed out after ${Math.round(MAX_POLL_ATTEMPTS * POLL_INTERVAL_MS / 1000)}s. The dataset may be too large or the server is overloaded.`,
+    );
+  },
+
+  async getJobStatus(jobId: number): Promise<JobPollResponse> {
+    return await apiClient.get<JobPollResponse>(`${JOBS_BASE}/${jobId}/poll`);
   },
 
   async getStatus(workflowId: string): Promise<WorkflowState> {

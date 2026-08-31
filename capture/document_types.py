@@ -553,11 +553,22 @@ CERTIFICATE_TYPES: list[DocumentTypeSpec] = [
         ],
         fields=[
             FieldSpec(
-                "full_name",
-                "Full Name",
+                "student_name",
+                "Student Name",
                 "text",
                 True,
-                ["name", "full name", "this is to certify", "awarded to", "conferred upon"],
+                [
+                    "student name",
+                    "name of student",
+                    "candidate name",
+                    "name of candidate",
+                    "learner name",
+                    "full name",
+                    "awarded to",
+                    "conferred upon",
+                    "this is to certify that",
+                    "this is to certify",
+                ],
             ),
             FieldSpec(
                 "qualification",
@@ -629,11 +640,22 @@ CERTIFICATE_TYPES: list[DocumentTypeSpec] = [
         ],
         fields=[
             FieldSpec(
-                "full_name",
-                "Full Name",
+                "student_name",
+                "Student Name",
                 "text",
                 True,
-                ["name", "awarded to", "conferred upon", "this is to certify"],
+                [
+                    "student name",
+                    "name of student",
+                    "candidate name",
+                    "name of candidate",
+                    "learner name",
+                    "full name",
+                    "awarded to",
+                    "conferred upon",
+                    "this is to certify that",
+                    "this is to certify",
+                ],
             ),
             FieldSpec(
                 "degree",
@@ -688,7 +710,21 @@ CERTIFICATE_TYPES: list[DocumentTypeSpec] = [
         ],
         fields=[
             FieldSpec(
-                "full_name", "Full Name", "text", True, ["name", "awarded to", "this is to certify"]
+                "student_name",
+                "Student Name",
+                "text",
+                True,
+                [
+                    "student name",
+                    "name of student",
+                    "candidate name",
+                    "name of candidate",
+                    "learner name",
+                    "full name",
+                    "awarded to",
+                    "this is to certify that",
+                    "this is to certify",
+                ],
             ),
             FieldSpec("qualification", "Qualification", "text", True, ["diploma", "qualification"]),
             FieldSpec("programme", "Programme", "text", False, ["programme", "program", "course"]),
@@ -733,11 +769,22 @@ CERTIFICATE_TYPES: list[DocumentTypeSpec] = [
         ],
         fields=[
             FieldSpec(
-                "full_name",
-                "Full Name",
+                "student_name",
+                "Student Name",
                 "text",
                 True,
-                ["name", "certified", "awarded to", "this is to certify"],
+                [
+                    "student name",
+                    "name of student",
+                    "candidate name",
+                    "name of candidate",
+                    "learner name",
+                    "full name",
+                    "certified",
+                    "awarded to",
+                    "this is to certify that",
+                    "this is to certify",
+                ],
             ),
             FieldSpec(
                 "qualification",
@@ -804,7 +851,21 @@ CERTIFICATE_TYPES: list[DocumentTypeSpec] = [
         ],
         fields=[
             FieldSpec(
-                "full_name", "Full Name", "text", True, ["name", "awarded to", "this is to certify"]
+                "student_name",
+                "Student Name",
+                "text",
+                True,
+                [
+                    "student name",
+                    "name of student",
+                    "candidate name",
+                    "name of candidate",
+                    "learner name",
+                    "full name",
+                    "awarded to",
+                    "this is to certify that",
+                    "this is to certify",
+                ],
             ),
             FieldSpec(
                 "course",
@@ -852,7 +913,21 @@ CERTIFICATE_TYPES: list[DocumentTypeSpec] = [
         ],
         fields=[
             FieldSpec(
-                "full_name", "Full Name", "text", True, ["name", "awarded to", "this is to certify"]
+                "student_name",
+                "Student Name",
+                "text",
+                True,
+                [
+                    "student name",
+                    "name of student",
+                    "candidate name",
+                    "name of candidate",
+                    "learner name",
+                    "full name",
+                    "awarded to",
+                    "this is to certify that",
+                    "this is to certify",
+                ],
             ),
             FieldSpec(
                 "course",
@@ -900,7 +975,21 @@ CERTIFICATE_TYPES: list[DocumentTypeSpec] = [
         ],
         fields=[
             FieldSpec(
-                "full_name", "Full Name", "text", True, ["name", "attended", "this is to certify"]
+                "student_name",
+                "Student Name",
+                "text",
+                True,
+                [
+                    "student name",
+                    "name of student",
+                    "candidate name",
+                    "name of candidate",
+                    "learner name",
+                    "full name",
+                    "attended",
+                    "this is to certify that",
+                    "this is to certify",
+                ],
             ),
             FieldSpec(
                 "event",
@@ -943,7 +1032,21 @@ CERTIFICATE_TYPES: list[DocumentTypeSpec] = [
         ],
         fields=[
             FieldSpec(
-                "full_name", "Full Name", "text", True, ["name", "member", "this is to certify"]
+                "student_name",
+                "Student Name",
+                "text",
+                True,
+                [
+                    "student name",
+                    "name of student",
+                    "candidate name",
+                    "name of candidate",
+                    "learner name",
+                    "full name",
+                    "member",
+                    "this is to certify that",
+                    "this is to certify",
+                ],
             ),
             FieldSpec(
                 "membership_type",
@@ -1001,11 +1104,21 @@ CERTIFICATE_TYPES: list[DocumentTypeSpec] = [
         ],
         fields=[
             FieldSpec(
-                "full_name",
-                "Full Name",
+                "student_name",
+                "Student Name",
                 "text",
                 True,
-                ["name", "licensed", "certified", "registered"],
+                [
+                    "student name",
+                    "name of student",
+                    "candidate name",
+                    "name of candidate",
+                    "learner name",
+                    "full name",
+                    "licensed",
+                    "certified",
+                    "registered",
+                ],
             ),
             FieldSpec(
                 "license_type",
@@ -1084,7 +1197,13 @@ def list_document_types(industry: str | None = None) -> list[DocumentTypeSpec]:
 # fallback / supplement when the classified type has no matching field or
 # when classification confidence is too low to select a specific type.
 GENERIC_FIELDS: list[FieldSpec] = [
-    FieldSpec("full_name", "Name", "text", False, ["name"]),
+    FieldSpec(
+        "student_name",
+        "Name",
+        "text",
+        False,
+        ["student name", "name of student", "candidate name", "name", "full name"],
+    ),
     FieldSpec("date", "Date", "date", False, ["date"]),
     FieldSpec("phone", "Phone", "phone", False, ["phone", "tel", "mobile", "contact"]),
     FieldSpec("email", "Email", "email", False, ["email", "e-mail"]),

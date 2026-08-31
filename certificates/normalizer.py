@@ -160,6 +160,7 @@ def normalize_grade(raw: str | None) -> str | None:
 
 _NORMALIZERS: dict[str, callable] = {
     "full_name": normalize_name,
+    "student_name": normalize_name,
     "institution": normalize_name,
     "date_awarded": normalize_date,
     "graduation_date": normalize_date,

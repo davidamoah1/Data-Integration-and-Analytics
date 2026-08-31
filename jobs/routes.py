@@ -37,6 +37,11 @@ class CreateJobRequest(BaseModel):
     description: str | None = None
     payload: dict = Field(default_factory=dict, description="Job-specific parameters")
     max_retries: int = Field(default=3, ge=0, le=10)
+    idempotency_key: str | None = Field(
+        default=None,
+        description="Optional deduplication key. If a pending/running/completed job "
+        "with the same key exists for this org, it is returned instead of creating a duplicate.",
+    )
 
 
 # â”€â”€ Routes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -68,6 +73,7 @@ async def create_job(
             description=request.description,
             payload=request.payload,
             max_retries=request.max_retries,
+            idempotency_key=request.idempotency_key,
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e

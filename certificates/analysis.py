@@ -320,8 +320,8 @@ def check_consistency(
                 )
             )
 
-    # 5. Full name format â€” should not contain digits
-    full_name = _get("full_name")
+    # 5. Student/full name format â€” should not contain digits
+    full_name = _get("student_name") or _get("full_name")
     if full_name:
         if re.search(r"\d", full_name):
             checks.append(
@@ -669,7 +669,9 @@ def analyze_certificate(
         summary_parts.append(doc_type_label)
     if academic_perf.qualification:
         summary_parts.append(academic_perf.qualification)
-    full_name = field_values.get("full_name", {}).get("value")
+    full_name = field_values.get("student_name", {}).get("value") or field_values.get(
+        "full_name", {}
+    ).get("value")
     if full_name:
         summary_parts.append(f"Holder: {full_name}")
     institution = field_values.get("institution", {}).get("value")

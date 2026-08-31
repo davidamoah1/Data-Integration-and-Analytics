@@ -206,9 +206,13 @@ async def upload_certificates(
             from storage.storage import get_storage_backend
 
             storage_backend = get_storage_backend()
+            processing_status = "uploaded"
             if storage_backend.name == "local":
                 try:
                     svc.process_document(doc.id)
+                    # Refresh to get the actual post-processing status
+                    db.refresh(doc)
+                    processing_status = doc.status
                     logger.info(
                         "Document processed synchronously (local storage): doc_id=%s status=%s",
                         doc.id,
@@ -220,6 +224,7 @@ async def upload_certificates(
                         doc.id,
                         e,
                     )
+                    processing_status = "failed"
             else:
                 try:
                     from jobs.handlers import register_builtin_handlers
@@ -236,6 +241,7 @@ async def upload_certificates(
                         name=f"Certificate OCR: {doc.filename}",
                         description=f"Processing certificate '{doc.filename}'",
                         payload={"document_id": doc.id, "organization_id": org_id},
+                        idempotency_key=f"org_{org_id}:ocr_document:doc_{doc.id}",
                     )
                     job_id = job.id
                     db.commit()
@@ -266,10 +272,20 @@ async def upload_certificates(
 
                     threading.Thread(target=_process_doc, args=(doc.id,), daemon=True).start()
 
-            succeeded += 1
-            result = _serialize_certificate(doc)
-            result["job_id"] = job_id
-            results.append(result)
+            if processing_status == "failed":
+                failed += 1
+                result = _serialize_certificate(doc)
+                result["job_id"] = job_id
+                result["status"] = "failed"
+                result["error_message"] = "Processing failed during synchronous execution"
+                results.append(result)
+            else:
+                succeeded += 1
+                if processing_status == "ready_for_review":
+                    review_required += 1
+                result = _serialize_certificate(doc)
+                result["job_id"] = job_id
+                results.append(result)
         except CaptureError as e:
             failed += 1
             results.append(
@@ -400,8 +416,10 @@ async def search_certificates(
             )
         )
 
-    # Total count
-    total_query = select(CaptureDocument.id).where(
+    # Total count — use scalar subquery instead of loading all IDs
+    from sqlalchemy import func as sa_func
+
+    total_query = select(sa_func.count(CaptureDocument.id)).where(
         CaptureDocument.organization_id == org_id,
         CaptureDocument.document_type.in_(CERTIFICATE_DOC_TYPES),
     )
@@ -418,20 +436,31 @@ async def search_certificates(
                 CaptureDocument.raw_ocr_text.ilike(pattern),
             )
         )
-    total = len(list(db.execute(total_query).scalars()))
+    total = db.execute(total_query).scalar() or 0
 
     # Pagination
     query = query.limit(limit).offset(offset)
     docs = list(db.execute(query).scalars().all())
 
-    # Filter by institution/year if specified (requires field lookup)
-    certificates = []
-    for doc in docs:
-        fields = (
-            db.execute(select(CaptureField).where(CaptureField.document_id == doc.id))
+    # Batch-load fields for all documents in a single query (avoids N+1)
+    doc_ids = [d.id for d in docs]
+    all_fields = (
+        (
+            db.execute(select(CaptureField).where(CaptureField.document_id.in_(doc_ids)))
             .scalars()
             .all()
         )
+        if doc_ids
+        else []
+    )
+    fields_by_doc: dict[int, list[CaptureField]] = {}
+    for f in all_fields:
+        fields_by_doc.setdefault(f.document_id, []).append(f)
+
+    # Filter by institution/year if specified (requires field lookup)
+    certificates = []
+    for doc in docs:
+        fields = fields_by_doc.get(doc.id, [])
         field_dict = {f.field_name: f.value for f in fields}
 
         # Institution filter
@@ -490,6 +519,7 @@ async def certificate_dashboard(
     by_type: dict[str, int] = {}
     by_verification: dict[str, int] = {}
     by_institution: dict[str, int] = {}
+    by_year: dict[str, int] = {}
 
     for doc in docs:
         by_status[doc.status] = by_status.get(doc.status, 0) + 1
@@ -499,37 +529,36 @@ async def certificate_dashboard(
             by_verification.get(doc.verification_status, 0) + 1
         )
 
-    # Get institution distribution from fields
-    for doc in docs:
-        fields = (
+    # Batch-load institution fields for all documents (avoids N+1)
+    doc_ids = [d.id for d in docs]
+    if doc_ids:
+        inst_fields = (
             db.execute(
                 select(CaptureField).where(
-                    CaptureField.document_id == doc.id,
+                    CaptureField.document_id.in_(doc_ids),
                     CaptureField.field_name == "institution",
                 )
             )
             .scalars()
             .all()
         )
-        for f in fields:
+        for f in inst_fields:
             if f.value:
                 inst = f.value.strip()
                 by_institution[inst] = by_institution.get(inst, 0) + 1
 
-    # Get year distribution from date fields
-    by_year: dict[str, int] = {}
-    for doc in docs:
-        fields = (
+        # Batch-load date fields for year distribution
+        date_fields = (
             db.execute(
                 select(CaptureField).where(
-                    CaptureField.document_id == doc.id,
+                    CaptureField.document_id.in_(doc_ids),
                     CaptureField.field_name.in_(["date_awarded", "date_issued", "graduation_date"]),
                 )
             )
             .scalars()
             .all()
         )
-        for f in fields:
+        for f in date_fields:
             if f.value and len(f.value) >= 4:
                 # Extract year from date string
                 year_str = f.value[-4:] if f.value[-4:].isdigit() else None
@@ -583,6 +612,7 @@ def _get_certificate_field_dict(db: DbSession, doc_ids: list[int]) -> dict[int, 
 
 
 EXPORT_COLUMNS = [
+    "student_name",
     "full_name",
     "certificate_type",
     "qualification",

@@ -167,8 +167,8 @@ export default function CertificateIntelligencePage() {
       ]);
       setDashboard(dash);
       setCertificates(search.certificates);
-    } catch {
-      // silent
+    } catch (err) {
+      setCertificates([]);
     } finally {
       setLoading(false);
     }
@@ -281,8 +281,9 @@ export default function CertificateIntelligencePage() {
         limit: 100,
       });
       setCertificates(result.certificates);
-    } catch {
-      // silent
+    } catch (err) {
+      setCertificates([]);
+      toast.error(getErrorMessage(err));
     } finally {
       setLoading(false);
     }

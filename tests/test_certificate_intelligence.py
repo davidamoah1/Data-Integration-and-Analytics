@@ -126,6 +126,9 @@ class TestNormalizeFieldDispatch:
     def test_name_field_dispatches_to_name_normalizer(self):
         assert normalize_field("full_name", "JOHN DOE") == "John Doe"
 
+    def test_student_name_field_dispatches_to_name_normalizer(self):
+        assert normalize_field("student_name", "JOHN DOE") == "John Doe"
+
     def test_date_field_dispatches_to_date_normalizer(self):
         assert normalize_field("date_awarded", "15/01/2024") == "2024-01-15"
 
@@ -147,7 +150,7 @@ class TestNormalizeFieldDispatch:
 class TestCompleteness:
     def test_all_required_filled(self):
         fields = {
-            "full_name": {"value": "John Doe"},
+            "student_name": {"value": "John Doe"},
             "qualification": {"value": "Bachelor of Science"},
             "institution": {"value": "University of Ghana"},
             "date_awarded": {"value": "2024-01-15"},
@@ -159,7 +162,7 @@ class TestCompleteness:
 
     def test_missing_required_fields(self):
         fields = {
-            "full_name": {"value": "John Doe"},
+            "student_name": {"value": "John Doe"},
         }
         result = assess_completeness("academic_certificate", fields)
         assert result.completeness_pct < 100.0
@@ -232,7 +235,7 @@ class TestConsistencyChecks:
 
     def test_name_with_digits_flagged(self):
         fields = {
-            "full_name": {"value": "John D0e"},
+            "student_name": {"value": "John D0e"},
         }
         checks = check_consistency("academic_certificate", fields)
         name_check = [c for c in checks if c.check_name == "name_format"]
@@ -241,7 +244,7 @@ class TestConsistencyChecks:
 
     def test_missing_certificate_number_for_academic(self):
         fields = {
-            "full_name": {"value": "John Doe"},
+            "student_name": {"value": "John Doe"},
         }
         checks = check_consistency("academic_certificate", fields)
         cert_check = [c for c in checks if c.check_name == "certificate_number_present"]
@@ -293,11 +296,11 @@ class TestAcademicPerformance:
 class TestAnomalyDetection:
     def test_low_confidence_field_flagged(self):
         fields = {
-            "full_name": {
+            "student_name": {
                 "value": "John",
                 "confidence_score": 0.3,
                 "is_low_confidence": True,
-                "field_label": "Full Name",
+                "field_label": "Student Name",
             },
         }
         completeness = assess_completeness("academic_certificate", fields)
@@ -360,7 +363,7 @@ class TestRecommendations:
         completeness = assess_completeness(
             "academic_certificate",
             {
-                "full_name": {"value": "John"},
+                "student_name": {"value": "John"},
                 "institution": {"value": "Univ"},
                 "date_awarded": {"value": "2024-01-01"},
                 "certificate_number": {"value": "CERT-001"},
@@ -372,12 +375,12 @@ class TestRecommendations:
 
     def test_all_good_generates_approve_rec(self):
         fields = {
-            "full_name": {
+            "student_name": {
                 "value": "John Doe",
                 "confidence_score": 0.9,
                 "is_low_confidence": False,
                 "is_valid": True,
-                "field_label": "Full Name",
+                "field_label": "Student Name",
             },
             "qualification": {
                 "value": "Bachelor of Science",
@@ -433,8 +436,8 @@ class TestAnalyzeCertificate:
         }
         fields = [
             {
-                "field_name": "full_name",
-                "field_label": "Full Name",
+                "field_name": "student_name",
+                "field_label": "Student Name",
                 "value": "John Doe",
                 "raw_value": "JOHN DOE",
                 "confidence_score": 0.95,
@@ -562,8 +565,8 @@ class TestBatchAnalytics:
         fields_by_doc = {
             1: [
                 {
-                    "field_name": "full_name",
-                    "field_label": "Full Name",
+                    "field_name": "student_name",
+                    "field_label": "Student Name",
                     "value": "John Doe",
                     "raw_value": "John Doe",
                     "confidence_score": 0.9,
@@ -619,8 +622,8 @@ class TestBatchAnalytics:
             ],
             2: [
                 {
-                    "field_name": "full_name",
-                    "field_label": "Full Name",
+                    "field_name": "student_name",
+                    "field_label": "Student Name",
                     "value": "Jane Smith",
                     "raw_value": "JANE SMITH",
                     "confidence_score": 0.3,

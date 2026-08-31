@@ -45,7 +45,7 @@ class TestCertificateDocumentTypes:
         t = get_document_type("academic_certificate")
         assert t is not None
         field_names = {f.name for f in t.fields}
-        assert "full_name" in field_names
+        assert "student_name" in field_names
         assert "qualification" in field_names
         assert "institution" in field_names
         assert "date_awarded" in field_names
@@ -62,10 +62,10 @@ class TestCertificateDocumentTypes:
         assert "verification_code" in field_names
 
     def test_all_certificate_types_have_required_fields(self):
-        """Every certificate type has at least full_name and institution as required fields."""
+        """Every certificate type has at least student_name and institution as required fields."""
         for t in CERTIFICATE_TYPES:
             required_names = {f.name for f in t.fields if f.required}
-            assert "full_name" in required_names, f"{t.key} missing required full_name"
+            assert "student_name" in required_names, f"{t.key} missing required student_name"
             assert any(
                 "institution" in f.name or "organization" in f.name for f in t.fields if f.required
             ), f"{t.key} missing required institution/organization field"

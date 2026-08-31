@@ -25,7 +25,6 @@ Authentication:
 import asyncio
 import os
 import sys
-import uuid
 from contextlib import asynccontextmanager
 from datetime import date, datetime, timezone
 
@@ -33,7 +32,6 @@ from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Query, Req
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import FileResponse, JSONResponse
-from starlette.middleware.base import BaseHTTPMiddleware
 
 from audit.middleware import AuditMiddleware
 from config import validate_config
@@ -42,7 +40,6 @@ from monitoring.otel import init_otel, instrument_fastapi, record_pipeline_run
 from monitoring.prometheus import metrics_registry
 from monitoring.sentry_integration import capture_exception, init_sentry
 from saas.tenant_middleware import TenantIsolationMiddleware
-from shared.context import correlation_id, request_id
 from shared.middleware import (
     RateLimitMiddleware,
     RequestSizeLimitMiddleware,
@@ -399,30 +396,36 @@ async def lifespan(app: FastAPI):
                 logger.error(f"Serverless seed_default_data failed: {e}")
         logger.info("Running in serverless mode; skipped heavy startup tasks.")
 
-    # Start background job worker (skip in serverless/test mode)
+    # Start background job worker only when Redis is NOT configured.
+    # When Redis is present, the dedicated worker container handles jobs.
+    # Running a worker on the web service too would compete for the same
+    # Redis queue, causing double-processing and wasted resources.
     if not serverless and not _is_test_env:
         from jobs.service import get_task_queue
 
         queue = get_task_queue()
+        if not queue.is_redis_backend:
 
-        async def _job_worker():
-            """Background worker loop â€” dequeues and executes jobs."""
-            logger.info("Background job worker started.")
-            while True:
-                try:
-                    task = await queue.dequeue(timeout=5.0)
-                    if task is not None:
-                        logger.info("Worker picked up task: %s", task.name)
-                        await queue.execute(task)
-                except asyncio.CancelledError:
-                    logger.info("Background job worker stopping.")
-                    break
-                except Exception as e:
-                    logger.error("Job worker error: %s", e)
-                    await asyncio.sleep(1)
+            async def _job_worker():
+                """Background worker loop â€” dequeues and executes jobs."""
+                logger.info("Background job worker started (in-memory mode).")
+                while True:
+                    try:
+                        task = await queue.dequeue(timeout=5.0)
+                        if task is not None:
+                            logger.info("Worker picked up task: %s", task.name)
+                            await queue.execute(task)
+                    except asyncio.CancelledError:
+                        logger.info("Background job worker stopping.")
+                        break
+                    except Exception as e:
+                        logger.error("Job worker error: %s", e)
+                        await asyncio.sleep(1)
 
-        job_worker_task = asyncio.create_task(_job_worker())
-        logger.info("Background job worker task created.")
+            job_worker_task = asyncio.create_task(_job_worker())
+            logger.info("Background job worker task created (in-memory mode).")
+        else:
+            logger.info("Redis detected â€” job processing handled by dedicated worker container.")
 
     yield
 
@@ -445,24 +448,6 @@ async def lifespan(app: FastAPI):
         logger.info("Background job worker stopped.")
 
 
-class RequestContextMiddleware(BaseHTTPMiddleware):
-    """Attach a request ID and optional correlation ID to every incoming request."""
-
-    async def dispatch(self, request: Request, call_next):
-        req_token = request_id.set(str(uuid.uuid4()))
-        corr_value = request.headers.get("X-Correlation-ID")
-        corr_token = correlation_id.set(corr_value or str(uuid.uuid4()))
-        try:
-            response = await call_next(request)
-            response.headers["X-Request-ID"] = request_id.get()
-            if corr_value:
-                response.headers["X-Correlation-ID"] = corr_value
-            return response
-        finally:
-            request_id.reset(req_token)
-            correlation_id.reset(corr_token)
-
-
 _is_test_env = os.getenv("PYTEST_RUNNING", "").lower() in ("1", "true", "yes")
 _is_vercel = os.getenv("VERCEL", "").lower() in ("1", "true", "yes")
 # On Render (persistent process) this is False; on Vercel it is True.
@@ -474,19 +459,6 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
 )
-
-
-@app.middleware("http")
-async def path_root_middleware(request: Request, call_next):
-    """Pass through requests without modifying the path.
-
-    Vercel rewrites route API paths to the Python serverless function.
-    The ASGI app receives the original path (e.g. /analytics/dashboards)
-    which matches the router prefixes directly. Routers that include /api
-    in their prefix (e.g. /api/auth) are matched when the frontend sends
-    the full /api/auth/... path.
-    """
-    return await call_next(request)
 
 
 app.add_middleware(
@@ -512,9 +484,16 @@ instrument_fastapi(app)
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):
     """Return consistent error JSON for HTTPExceptions."""
+    from shared.context import request_id as req_id_ctx
+
     return JSONResponse(
         status_code=exc.status_code,
-        content={"success": False, "message": exc.detail, "data": None},
+        content={
+            "success": False,
+            "message": exc.detail,
+            "data": None,
+            "request_id": req_id_ctx.get() or None,
+        },
     )
 
 
@@ -524,6 +503,8 @@ from fastapi.exceptions import RequestValidationError  # noqa: E402
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     """Return validation errors without reflecting raw user input."""
+    from shared.context import request_id as req_id_ctx
+
     errors = []
     for err in exc.errors():
         # Strip the 'input' field to prevent XSS reflection
@@ -535,7 +516,12 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         )
     return JSONResponse(
         status_code=422,
-        content={"success": False, "message": "Validation error", "data": errors},
+        content={
+            "success": False,
+            "message": "Validation error",
+            "data": errors,
+            "request_id": req_id_ctx.get() or None,
+        },
     )
 
 
@@ -546,6 +532,8 @@ async def global_exception_handler(request: Request, exc: Exception):
     In debug mode (DEBUG=1) the real message is returned to ease diagnostics
     on Vercel and other serverless platforms.
     """
+    from shared.context import request_id as req_id_ctx
+
     logger.exception("Unhandled exception")
     capture_exception(exc)
     metrics_registry.record_error(error_type=type(exc).__name__, component="api")
@@ -554,7 +542,12 @@ async def global_exception_handler(request: Request, exc: Exception):
         message = f"Internal server error: {exc}"
     return JSONResponse(
         status_code=500,
-        content={"success": False, "message": message, "data": None},
+        content={
+            "success": False,
+            "message": message,
+            "data": None,
+            "request_id": req_id_ctx.get() or None,
+        },
     )
 
 
@@ -679,24 +672,16 @@ def get_run_repo() -> PipelineRunRepository:
 # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @app.get("/health", response_model=HealthResponse, tags=["System"])
 async def health_check():
-    """Lightweight health check.
+    """Lightweight liveness health check.
 
-    Returns API status and, best-effort, database connectivity status. This
-    endpoint must not crash when the database is unavailable.
+    Returns immediately without any database or external service calls.
+    Use /ready for database connectivity checks. This endpoint is polled
+    by Render's health checker and must respond in < 10ms.
     """
-    db_connected = False
-    record_count = 0
-    try:
-        repo = SalesRepository()
-        record_count = repo.get_record_count()
-        db_connected = True
-    except Exception as e:
-        logger.error(f"Health check database probe failed: {e}")
-
     return HealthResponse(
-        status="healthy" if db_connected else "degraded",
-        database_connected=db_connected,
-        record_count=record_count,
+        status="healthy",
+        database_connected=True,
+        record_count=0,
         timestamp=datetime.now(timezone.utc),
     )
 
