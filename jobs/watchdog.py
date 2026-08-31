@@ -108,7 +108,11 @@ async def _sweep_once() -> dict:
             logger.warning(
                 "JOB_TIMEOUT job_id=%d status=running heartbeat_age=%ss error='%s'",
                 job.id,
-                int((now - (job.last_heartbeat_at or job.started_at).replace(tzinfo=timezone.utc)).total_seconds()),
+                int(
+                    (
+                        now - (job.last_heartbeat_at or job.started_at).replace(tzinfo=timezone.utc)
+                    ).total_seconds()
+                ),
                 error_msg,
             )
             swept["running"] += 1

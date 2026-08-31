@@ -176,7 +176,9 @@ class JobService:
                         finally:
                             err_db.close()
                     except Exception:
-                        logger.exception("Failed to mark job %d as failed after enqueue error", job.id)
+                        logger.exception(
+                            "Failed to mark job %d as failed after enqueue error", job.id
+                        )
 
             loop.create_task(_safe_enqueue())
         except RuntimeError:
@@ -200,7 +202,9 @@ class JobService:
                         finally:
                             err_db.close()
                     except Exception:
-                        logger.exception("Failed to mark job %d as failed after enqueue error (thread)", job.id)
+                        logger.exception(
+                            "Failed to mark job %d as failed after enqueue error (thread)", job.id
+                        )
 
             threading.Thread(target=_thread_enqueue, daemon=True).start()
 
@@ -321,15 +325,19 @@ class JobService:
                             finally:
                                 err_db.close()
                         except Exception:
-                            logger.exception("Failed to mark job %d as failed after retry enqueue error", job.id)
+                            logger.exception(
+                                "Failed to mark job %d as failed after retry enqueue error", job.id
+                            )
 
                 loop.create_task(_safe_retry_enqueue())
             except RuntimeError:
+
                 def _thread_retry_enqueue():
                     try:
                         asyncio.run(queue.enqueue(task))
                     except Exception as e:
                         logger.error("Failed to re-enqueue job %d (thread): %s", job.id, e)
+
                 threading.Thread(target=_thread_retry_enqueue, daemon=True).start()
 
         logger.info("Job %d retried", job_id)
@@ -370,7 +378,9 @@ def _run_job_wrapper(job_id: int, job_type: str) -> dict:
         db.commit()
         logger.info(
             "JOB_STARTED job_id=%d job_type=%s name='%s'",
-            job_id, job_type, job.name,
+            job_id,
+            job_type,
+            job.name,
         )
 
         # Get handler
@@ -388,7 +398,9 @@ def _run_job_wrapper(job_id: int, job_type: str) -> dict:
         payload = json.loads(job.payload) if job.payload else {}
 
         # Execute
-        logger.info("JOB_PROGRESS job_id=%d status=running progress=0 message='Executing handler'", job_id)
+        logger.info(
+            "JOB_PROGRESS job_id=%d status=running progress=0 message='Executing handler'", job_id
+        )
         result = handler(job_id, payload, db)
 
         # Mark completed. default=str guards against handlers returning
@@ -400,7 +412,9 @@ def _run_job_wrapper(job_id: int, job_type: str) -> dict:
         db.commit()
         logger.info(
             "JOB_COMPLETED job_id=%d job_type=%s name='%s'",
-            job_id, job_type, job.name,
+            job_id,
+            job_type,
+            job.name,
         )
 
         # Notify user

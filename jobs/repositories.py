@@ -131,9 +131,7 @@ class JobRepository(BaseRepository[Job]):
     def update_heartbeat(self, job_id: int) -> None:
         """Update the heartbeat timestamp for a running job."""
         self.db.execute(
-            update(Job)
-            .where(Job.id == job_id)
-            .values(last_heartbeat_at=datetime.now(timezone.utc))
+            update(Job).where(Job.id == job_id).values(last_heartbeat_at=datetime.now(timezone.utc))
         )
         self.db.flush()
 
@@ -161,7 +159,10 @@ class JobRepository(BaseRepository[Job]):
                 .where(
                     Job.status == "running",
                     (
-                        (Job.last_heartbeat_at.isnot(None) & (Job.last_heartbeat_at < heartbeat_threshold))
+                        (
+                            Job.last_heartbeat_at.isnot(None)
+                            & (Job.last_heartbeat_at < heartbeat_threshold)
+                        )
                         | (Job.last_heartbeat_at.is_(None) & (Job.started_at < heartbeat_threshold))
                     ),
                 )
