@@ -8,6 +8,7 @@ from sqlalchemy import (
     Boolean,
     Column,
     Float,
+    Index,
     Integer,
     String,
     Text,
@@ -42,6 +43,10 @@ class CaptureDocument(Base):
     """A single uploaded document moving through the capture pipeline."""
 
     __tablename__ = "capture_documents"
+    __table_args__ = (
+        Index("ix_capture_documents_org_type", "organization_id", "document_type"),
+        Index("ix_capture_documents_org_status", "organization_id", "status"),
+    )
 
     id = Column(BigInt, primary_key=True, autoincrement=True)
     organization_id = Column(BigInt, nullable=False, index=True)
