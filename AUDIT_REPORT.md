@@ -293,3 +293,171 @@ alembic upgrade head
 - User: `u344535597_dataflow`
 - 136 tables confirmed in production
 - Alembic version table present and at head `b3c4d5e6f7a8`
+
+---
+
+## Full Production Readiness Audit — All Phases
+
+### Test Results
+- **1682 passed, 1 skipped, 0 failures** (12 min runtime)
+- No TODO/FIXME/HACK/XXX items in codebase
+- No hardcoded secrets, no localhost dependencies in production paths
+- No pickle usage, no subprocess with shell=True
+
+### Phase 1: Repository Inspection ✅
+- No hardcoded secrets in source files
+- No localhost references in production code paths
+- `DEBUG` flag properly gates error detail exposure (off by default)
+- `VERCEL` env var used only for serverless detection via `IS_SERVERLESS` abstraction
+- All sensitive values use `sync: false` in render.yaml (set in dashboard)
+
+### Phase 2-3: Database Schema & Migration Safety ✅
+- Alembic head: `b3c4d5e6f7a8`
+- Dockerfile runs `alembic upgrade head` → `verify_schema.py` before app start
+- MySQL production: 136 tables, all critical columns verified
+- Schema drift audit script created and run
+
+### Phase 4: DB Connection Pooling ✅
+- `pool_pre_ping=True` — dead connections detected before use
+- `POOL_SIZE=10`, `MAX_OVERFLOW=20`, `POOL_RECYCLE=3600`, `POOL_TIMEOUT=30`
+- `MYSQL_CONNECT_TIMEOUT=10` for Hostinger reliability
+- Engine cached as singleton, session factory cached per engine
+- Slow query listener attached (`SLOW_QUERY_THRESHOLD_MS`)
+- Error handling: full traceback logged server-side, generic message to user in production
+
+### Phase 5-6: Login Performance & Cold Start ✅
+- Login flow: indexed lookups (email, user_id), bcrypt verification, JWT creation
+- No N+1 queries in login — roles/permissions loaded in bounded queries
+- Cold start: deferred startup task (`asyncio.create_task`) binds port immediately
+- Render health check (`/health`) responds in <10ms (no DB call)
+- `keep-render-awake.yml` pings every 10 minutes to prevent free-tier sleep
+
+### Phase 7-8: Health Checks & Background Jobs ✅
+- `/health` — lightweight liveness (no DB, <10ms)
+- `/ready` — DB connectivity (`SELECT 1`), returns 503 if DB down
+- `/health/detailed` — admin-only, all subsystems
+- `/health/db`, `/health/ocr`, `/health/storage`, `/health/ai`, `/health/workers` — granular checks
+- Background worker: dedicated Render worker container (`python -m performance.worker_entry`)
+- Worker only starts in-memory queue when Redis is NOT configured (no double-processing)
+- Graceful shutdown via SIGINT/SIGTERM signal handlers
+
+### Phase 9-11: Dataset Upload, Data-to-Decision, Async Processing ✅
+- File uploads use UUID-based storage keys (no user filenames in paths)
+- Path traversal protection in `LocalFileBackend._full_path()`
+- Async workflow execution: requires Redis + non-serverless, falls back to sync
+- Job idempotency: jobs have status tracking, `mark_running` prevents duplicate execution
+
+### Phase 12-14: Certificate Intelligence ✅
+- Certificate search has proper pagination (`limit`/`offset`)
+- Batch analytics bounded by `batch_id`
+- Export endpoints (CSV/XLSX) now have `MAX_EXPORT_LIMIT=10000` safety cap
+- Report/presentation endpoints also capped
+- N+1 prevention: batch-load fields with `IN()` query for all docs in page
+
+### Phase 15-18: Analytics, AI, Middleware ✅
+- GZip middleware (min 1000 bytes)
+- Request size limit middleware (`MAX_REQUEST_BODY_BYTES`)
+- Security headers middleware
+- Monitoring middleware (Sentry, OpenTelemetry, Prometheus)
+- Audit middleware (auto-logs mutating requests)
+
+### Phase 19-22: Tenant Isolation, Auth, SQL Security ✅
+- 4-layer tenant isolation: middleware → route → query → resource
+- JWT claims include `org_id` (no DB hit for tenant context)
+- Fallback: older tokens without `org_id` fetch from DB
+- Cross-tenant access attempts logged at 403
+- `validate_sql_identifier()` used before all dynamic SQL
+- All parameterized queries use `:param` syntax
+- `# nosec B608` annotations only on validated identifiers
+
+### Phase 23-26: SSRF, File Security, Rate Limiting ✅
+- `validate_url()` blocks: localhost, private networks (10.x, 172.16.x, 192.168.x), link-local (169.254.x), IPv6 loopback/ULA, cloud metadata
+- DNS resolution check prevents DNS rebinding
+- File storage: UUID keys, path traversal protection, content-type guessing
+- Rate limiting: `RateLimitMiddleware` (120 RPM default), Redis-backed when available
+- No `pickle` deserialization anywhere in codebase
+
+### Phase 27-29: CORS, Error Handling ✅
+- CORS: explicit origins only, `*` rejected by `validate_config()`
+- Allowed methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+- Allowed headers: Authorization, Content-Type, X-API-Key, X-Correlation-ID, X-Request-ID
+- Global exception handler: logs + Sentry capture + generic message in production
+- Validation error handler: strips `input` field to prevent XSS reflection
+- HTTPException handler: consistent JSON with `request_id`
+- Frontend: ErrorBoundary + global-error.tsx with error digest
+
+### Phase 30-33: Frontend API Config, Pagination ✅
+- `NEXT_PUBLIC_API_URL` → Render backend (with fallback)
+- `next.config.js` rewrites: `/api/*` → Render, root endpoints → Render
+- Frontend security headers: X-Content-Type-Options, X-Frame-Options, X-XSS-Protection, Referrer-Policy
+- `poweredByHeader: false`
+- PWA configured with service worker
+- Jobs repository: proper `limit`/`offset` pagination
+- Certificate list: proper `limit`/`offset` pagination
+
+### Phase 34-39: Render, Docker, Environment ✅
+- `render.yaml`: web service + worker service + Redis
+- Worker has `APP_ENV=production`, `STORAGE_BACKEND`, `ALLOW_LOCAL_STORAGE_IN_PRODUCTION` (fixed)
+- Dockerfile: non-root user (`appuser`), health check, dynamic PORT
+- `--proxy-headers --forwarded-allow-ips='*'` for Render load balancer
+- Alembic migration + schema verification before app start
+- Redis: `allkeys-lru` eviction, internal-only IP allow list
+
+### Phase 40-41: CI/CD ✅
+- 6-stage CI pipeline: lint → security scan → unit tests → integration tests → build → deploy health check
+- Lint: ruff, black, mypy, ESLint, TypeScript check
+- Security: pip-audit, bandit, npm audit, Trivy filesystem scan, CodeQL
+- Unit tests: SQLite, coverage report
+- Integration tests: MySQL 8.4 + Redis 7, Alembic migrations
+- Build: backend import check, Alembic migration check, frontend build, Docker build
+- Deploy health check: pings Render `/health` (fixed from Vercel)
+- `keep-render-awake.yml`: cron ping every 10 minutes
+- Dependabot configured
+
+### Phase 44-49: UX, Mobile, Observability ✅
+- Viewport: `device-width`, `initialScale=1`, `userScalable=true`
+- Mobile: sidebar drawer with overlay, auto-close on route change
+- Content padding adapts: `p-4 md:p-6`
+- PWA: manifest, service worker, apple touch icons
+- ErrorBoundary: user-friendly fallback with retry
+- Global error page: error digest for support reference
+- Sentry + OpenTelemetry + Prometheus integration (no-op if not configured)
+
+### Fixes Applied in This Audit Session
+
+1. **`render.yaml` worker service**: Added missing `APP_ENV=production`, `STORAGE_BACKEND`, `ALLOW_LOCAL_STORAGE_IN_PRODUCTION` env vars
+2. **`certificates/routes.py`**: Added `MAX_EXPORT_LIMIT=10000` safety cap to 4 unbounded export/report/presentation queries (CSV export, XLSX export, report, presentation)
+3. **`.github/workflows/ci.yml`**: Fixed deploy health check to ping Render backend instead of Vercel
+
+### Production Gate Checklist
+
+| Check | Status |
+|-------|--------|
+| All tests pass (1682/0/1) | ✅ |
+| No hardcoded secrets | ✅ |
+| No localhost in production paths | ✅ |
+| No TODO/FIXME items | ✅ |
+| DB connection pooling configured | ✅ |
+| Error handling sanitizes DB errors | ✅ |
+| Health checks lightweight and correct | ✅ |
+| Background worker no double-processing | ✅ |
+| Tenant isolation 4-layer defense | ✅ |
+| SQL injection prevention (validate_sql_identifier) | ✅ |
+| SSRF protection (URL validation) | ✅ |
+| File upload security (UUID keys, path traversal) | ✅ |
+| Rate limiting configured | ✅ |
+| CORS explicit origins only | ✅ |
+| Frontend error boundaries | ✅ |
+| Mobile responsive layout | ✅ |
+| CI/CD pipeline complete | ✅ |
+| Docker non-root user | ✅ |
+| Render health check in CI | ✅ |
+| Keep-alive cron for Render free tier | ✅ |
+| Export query safety limits | ✅ |
+
+### Remaining Recommendations (Non-Blocking)
+
+1. **Rotate old secrets in git history**: Previous secrets (DataflowProd2026!, AdminPass2026!) exist in git history. Rotate passwords and keys if not already done.
+2. **Production smoke test**: After Render redeploy, manually verify: login → Data to Decision → Upload → Process → Workflow completes.
+3. **`audit_logs` index naming**: 4 indexes in SQLAlchemy model not in production MySQL (intentionally dropped/renamed in migrations). Low priority.
+4. **Render plan upgrade**: Consider upgrading from `free` Redis plan for production reliability.

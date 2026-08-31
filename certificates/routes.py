@@ -61,6 +61,8 @@ CERTIFICATE_DOC_TYPES = {
     "license_certification",
 }
 
+MAX_EXPORT_LIMIT = 10000  # Safety limit for export/report queries
+
 
 def _get_max_batch_size() -> int:
     """Return the configured maximum batch size for certificate uploads."""
@@ -663,7 +665,7 @@ async def export_certificates_csv(
     if verification_status:
         query = query.where(CaptureDocument.verification_status == verification_status)
 
-    docs = list(db.execute(query).scalars().all())
+    docs = list(db.execute(query.limit(MAX_EXPORT_LIMIT)).scalars().all())
     field_dicts = _get_certificate_field_dict(db, [d.id for d in docs])
 
     output = io.StringIO()
@@ -742,7 +744,7 @@ async def export_certificates_xlsx(
     if verification_status:
         query = query.where(CaptureDocument.verification_status == verification_status)
 
-    docs = list(db.execute(query).scalars().all())
+    docs = list(db.execute(query.limit(MAX_EXPORT_LIMIT)).scalars().all())
     field_dicts = _get_certificate_field_dict(db, [d.id for d in docs])
 
     wb = openpyxl.Workbook()
@@ -1506,7 +1508,7 @@ async def generate_certificate_report(
     if review_status:
         query = query.where(CaptureDocument.status == review_status)
 
-    docs = list(db.execute(query).scalars().all())
+    docs = list(db.execute(query.limit(MAX_EXPORT_LIMIT)).scalars().all())
     if not docs:
         raise HTTPException(status_code=422, detail="No certificates found matching the criteria")
 
@@ -1607,7 +1609,7 @@ async def generate_certificate_report(
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # Certificate PowerPoint generation
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/presentation")
@@ -1648,7 +1650,7 @@ async def generate_certificate_presentation(
     if review_status:
         query = query.where(CaptureDocument.status == review_status)
 
-    docs = list(db.execute(query).scalars().all())
+    docs = list(db.execute(query.limit(MAX_EXPORT_LIMIT)).scalars().all())
     if not docs:
         raise HTTPException(status_code=422, detail="No certificates found matching the criteria")
 

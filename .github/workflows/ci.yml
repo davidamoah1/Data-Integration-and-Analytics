@@ -332,29 +332,29 @@ jobs:
           cache-to: type=gha,mode=max,scope=aedip-build
 
   # ── Stage 6: Post-deploy health check ──────────────────────
-  # Vercel auto-deploys from GitHub pushes, so no CLI deploy step is needed.
+  # Render auto-deploys from GitHub pushes on main branch.
   deploy:
     name: Health Check
     runs-on: ubuntu-latest
     needs: [build, security-scan]
     if: github.ref == 'refs/heads/main'
     steps:
-      - name: Wait for Vercel auto-deploy
-        run: sleep 60
+      - name: Wait for Render auto-deploy
+        run: sleep 90
 
-      - name: Run health check
+      - name: Run Render backend health check
         run: |
-          URL="https://data-integration-and-analytics.vercel.app"
-          echo "Checking health at $URL/health"
+          URL="https://data-integration-and-analytics.onrender.com"
+          echo "Checking backend health at $URL/health"
           for i in $(seq 1 10); do
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL/health" || echo "000")
             if [ "$STATUS" = "200" ]; then
-              echo "Health check passed"
+              echo "Backend health check passed"
               exit 0
             fi
             echo "Health check attempt $i: status $STATUS, retrying..."
             sleep 15
           done
-          echo "Health check failed after 10 attempts (Vercel may still be deploying)"
+          echo "Health check failed after 10 attempts (Render may still be deploying)"
           exit 1
 

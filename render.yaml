@@ -91,6 +91,9 @@ services:
     plan: starter
     autoDeploy: true
     envVars:
+      # ── Application ──
+      - key: APP_ENV
+        value: production
       # ── Database ──
       - key: DB_TYPE
         value: mysql
@@ -106,6 +109,11 @@ services:
       - key: JWT_SECRET_KEY
         sync: false  # Same as web service
       - key: ENCRYPTION_KEY
+        sync: false  # Same as web service
+      # ── Storage (needed for file processing jobs) ──
+      - key: STORAGE_BACKEND
+        sync: false  # Same as web service
+      - key: ALLOW_LOCAL_STORAGE_IN_PRODUCTION
         sync: false  # Same as web service
       # ── Worker Config ──
       - key: WORKER_MIN_WORKERS
