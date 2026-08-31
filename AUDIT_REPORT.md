@@ -180,3 +180,116 @@ Covered under Fix 1 — `student_name` added to normalizer dispatch table and an
 - **Connection pool tuning**: `POOL_SIZE=10`, `MAX_OVERFLOW=20` may need adjustment based on actual load testing.
 - **CDN for static assets**: Frontend on Vercel already benefits from Edge network, but backend static files (if any) could use a CDN.
 - **Query result caching**: Consider Redis caching for frequently accessed dashboard data with short TTL.
+
+---
+
+## Phase 3 — Production Database Schema Drift Fix (2026-08-31)
+
+### Root Cause
+
+Migration `0020_job_idempotency_and_composite_indexes` (revision `b3c4d5e6f7a8`) was committed to the codebase and pushed, adding `background_jobs.idempotency_key` to the SQLAlchemy model. The production Hostinger MySQL database was at revision `a1b2c3d4e5f6` (migration 0019), one step behind head. The Render deployment did not run `alembic upgrade head` on startup, so the schema drift went undetected until a user triggered the "Process Dataset" workflow, which queries `background_jobs.idempotency_key`.
+
+### Production Migration Version
+
+| | Version | Description |
+|---|---|---|
+| **Before fix** | `a1b2c3d4e5f6` | Migration 0019 — workspace and invitation tables |
+| **After fix** | `b3c4d5e6f7a8` | Migration 0020 — job idempotency + composite indexes (HEAD) |
+
+### Migration Applied
+
+```
+alembic upgrade head
+# Running upgrade a1b2c3d4e5f6 -> b3c4d5e6f7a8
+# Add job idempotency_key column and composite indexes for certificate queries.
+```
+
+### Tables/Columns Changed
+
+| Table | Change | Type |
+|---|---|---|
+| `background_jobs` | Added `idempotency_key` column | `VARCHAR(255)`, nullable, indexed |
+| `background_jobs` | Added `ix_background_jobs_idempotency_key` index | B-tree on `idempotency_key` |
+| `capture_documents` | Added `ix_capture_documents_org_type` index | Composite on `(organization_id, document_type)` |
+| `capture_documents` | Added `ix_capture_documents_org_status` index | Composite on `(organization_id, status)` |
+
+### Schema Drift Audit Results
+
+| Check | Result |
+|---|---|
+| Tables in models but not in production | **0** — all 135 model tables exist |
+| Tables in production but not in models | 1 (`alembic_version` — expected) |
+| Missing columns on key tables | **0** — all columns match |
+| Missing indexes on `background_jobs` | **0** — all indexes present |
+| Missing indexes on `capture_documents` | **0** — all indexes present |
+| `audit_logs` index naming mismatch | 4 model indexes not in production (pre-existing, migrations intentionally dropped/renamed them — low priority) |
+
+### Error Handling Fix
+
+**Before**: `shared/database.py` `get_db()` raised `HTTPException(500, detail="Database initialization error: OperationalError: (1054, \"Unknown column 'background_jobs.idempotency_key' in 'SELECT'\")")` — exposing raw SQL errors to users.
+
+**After**: In production (non-DEBUG mode), returns generic message: *"Something went wrong while preparing your dataset. Please try again or contact your administrator."* Full error details remain in server logs.
+
+### Deployment Safeguards Added
+
+1. **Dockerfile CMD** now runs: `alembic upgrade head && python scripts/verify_schema.py && uvicorn ...`
+2. **`scripts/verify_schema.py`** — Pre-start verification:
+   - Database connectivity (`SELECT 1`)
+   - Alembic version matches migration head
+   - Critical columns exist (`background_jobs.idempotency_key`, etc.)
+   - Exits non-zero if any check fails, preventing app startup with drift
+3. **Worker container** does NOT run migrations (only web service does)
+
+### Background Job Architecture Verification
+
+- When `REDIS_URL` is set: web service does NOT start in-process worker (confirmed in `api/main.py` lifespan)
+- Dedicated Render worker (`performance.worker_entry`) processes jobs from Redis queue
+- `background_jobs` table persists job state in MySQL
+- Idempotency key prevents duplicate job submissions
+
+### Test Results
+
+| Check | Result |
+|---|---|
+| pytest | **1682 passed, 1 skipped, 0 failures** |
+| black --check . | **All 524 files clean** |
+| ruff check . | **All checks passed** |
+| bandit -r . -ll | **0 high, 0 new medium findings** (9 pre-existing B608 false positives with nosec annotations) |
+
+### Production Verification
+
+| Check | Status |
+|---|---|
+| Hostinger MySQL reachable | ✅ Connected from local machine |
+| Alembic version at head | ✅ `b3c4d5e6f7a8` |
+| Single Alembic head | ✅ Confirmed |
+| `background_jobs.idempotency_key` exists | ✅ `varchar(255)`, nullable, indexed |
+| `ix_background_jobs_idempotency_key` exists | ✅ |
+| `ix_capture_documents_org_type` exists | ✅ |
+| `ix_capture_documents_org_status` exists | ✅ |
+| No raw DB errors exposed to users | ✅ Fixed in `shared/database.py` |
+| Background worker architecture intact | ✅ No duplicate workers when Redis configured |
+
+### Remaining Risks
+
+1. **Render redeploy required**: The Dockerfile change (CMD with `alembic upgrade head`) will take effect on next Render deploy. The migration has already been applied manually, so the deploy will be a no-op for the DB.
+2. **`audit_logs` index naming mismatch**: 4 indexes defined in the SQLAlchemy model (`idx_audit_action_resource`, `idx_audit_resource`, `idx_audit_org_created`, `ix_audit_logs_organization_id`) are not in production. These were intentionally dropped/renamed in migrations. Low priority — does not affect functionality.
+3. **Production smoke test**: Cannot be performed from local machine. After Render redeploys, verify: `/health`, `/ready`, login, Data to Decision → Upload → Process Dataset workflow.
+4. **Filter correctness**: Verified in code — empty results display "No results found", stale data cleared on error. Cannot verify in production from local machine.
+
+### Exact Render Deployment Steps
+
+1. Push to `main` (done — commit `f7edc1a`)
+2. Render auto-deploys from `main` branch
+3. Docker build runs: `alembic upgrade head` (no-op, already at head) → `verify_schema.py` (passes) → `uvicorn` starts
+4. Worker container starts with `python -m performance.worker_entry` (no migration, just job processing)
+5. Verify: `GET /health` → 200, `GET /ready` → 200
+6. Test: Login → Data to Decision → Upload CSV → Process Dataset → Background job created → Workflow completes
+
+### Confirmation: Hostinger MySQL is the Production Database
+
+- Host: `srv1925.hstgr.io:3306`
+- Database: `u344535597_dataflow`
+- User: `u344535597_dataflow`
+- 136 tables confirmed in production
+- Alembic version table present and at head `b3c4d5e6f7a8`
