@@ -63,7 +63,15 @@ def ensure_tables(engine):
 
     # Create any missing tables (checkfirst=True is the default, so
     # existing tables are never modified or recreated).
-    Base.metadata.create_all(engine)
+    try:
+        Base.metadata.create_all(engine)
+    except Exception as e:
+        # create_all can fail if the DB user lacks DDL permissions or if
+        # there's a model/schema mismatch. Log but don't crash — existing
+        # tables are still usable, and Alembic is the primary schema tool.
+        logger.warning("ensure_tables: create_all() failed (non-fatal): %s: %s", type(e).__name__, e)
+        _tables_initialized = True
+        return
 
     # Add missing columns to existing SQLite tables
     if config.DB_TYPE == "sqlite":
@@ -228,18 +236,36 @@ def get_db():
         factory = get_session_factory(engine)
         db = factory()
         try:
-            ensure_default_data(db)
-            db.commit()
+            try:
+                ensure_default_data(db)
+                db.commit()
+            except Exception as seed_err:
+                # Seeding failure (e.g. schema drift on a lookup table)
+                # should NOT block all API requests. Log it, rollback, and
+                # continue — the endpoint itself may still succeed.
+                db.rollback()
+                logging.getLogger("database").warning(
+                    "ensure_default_data() failed (non-fatal): %s: %s",
+                    type(seed_err).__name__,
+                    seed_err,
+                )
             yield db
         finally:
             db.close()
     except Exception as e:
+        # HTTPException (e.g. 401 from get_current_user) is raised inside
+        # the yield block while other dependencies resolve. Re-raise it
+        # so FastAPI returns the correct status code instead of a 500.
+        from fastapi import HTTPException
+
+        if isinstance(e, HTTPException):
+            raise
+
         import logging
 
         logging.getLogger("database").error(
             "get_db() failed: %s: %s", type(e).__name__, e, exc_info=True
         )
-        from fastapi import HTTPException
 
         # In debug mode, include the error details for diagnostics.
         # In production, return a generic message to avoid leaking

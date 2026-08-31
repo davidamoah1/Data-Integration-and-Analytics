@@ -121,19 +121,6 @@ export const workflowService = {
       } catch (err) {
         consecutiveErrors++;
 
-        // If we get too many consecutive errors, show a useful message
-        if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
-          if (onProgress) {
-            onProgress(
-              "Unable to check processing status. Please try again.",
-              lastProgress,
-            );
-          }
-          throw new Error(
-            "Unable to check processing status after multiple attempts. The server may be unreachable. Please try again.",
-          );
-        }
-
         // For auth errors (401/403), stop immediately — don't keep polling
         if (err instanceof ApiError && (err.status === 401 || err.status === 403)) {
           throw new Error("Your session has expired. Please log in again.");
@@ -142,6 +129,24 @@ export const workflowService = {
         // For 404, the job doesn't exist — stop polling
         if (err instanceof ApiError && err.status === 404) {
           throw new Error("The processing job could not be found. Please try uploading again.");
+        }
+
+        // If we get too many consecutive errors, show a useful message
+        if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+          if (onProgress) {
+            onProgress(
+              "Unable to check processing status. Please try again.",
+              lastProgress,
+            );
+          }
+          const errDetail = err instanceof ApiError
+            ? ` (HTTP ${err.status})`
+            : err instanceof Error
+              ? ` (${err.message.slice(0, 80)})`
+              : "";
+          throw new Error(
+            `Unable to check processing status after ${consecutiveErrors} attempts${errDetail}. The server may be unreachable. Please try again.`,
+          );
         }
 
         // For server errors (500/502/503), continue polling but warn
