@@ -57,7 +57,7 @@ jobs:
 
       - name: Create issue if vulnerabilities found
         if: steps.audit-reqs.outputs.exit_code != '0' || steps.audit-project.outputs.exit_code != '0'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const fs = require('fs');
@@ -136,7 +136,7 @@ jobs:
 
       - name: Create issue if vulnerabilities found
         if: steps.npm-audit.outputs.exit_code != '0'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const fs = require('fs');
