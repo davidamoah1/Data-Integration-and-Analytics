@@ -87,7 +87,5 @@ def downgrade() -> None:
         op.drop_index("ix_capture_documents_org_type", table_name="capture_documents")
 
     if _column_exists(bind, "background_jobs", "idempotency_key"):
-        op.drop_index(
-            "ix_background_jobs_idempotency_key", table_name="background_jobs"
-        )
+        op.drop_index("ix_background_jobs_idempotency_key", table_name="background_jobs")
         op.drop_column("background_jobs", "idempotency_key")

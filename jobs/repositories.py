@@ -136,9 +136,7 @@ class JobRepository(BaseRepository[Job]):
             return job.retries
         return 0
 
-    def find_by_idempotency_key(
-        self, organization_id: int, idempotency_key: str
-    ) -> Job | None:
+    def find_by_idempotency_key(self, organization_id: int, idempotency_key: str) -> Job | None:
         """Find an existing job by idempotency key.
 
         Returns the most recent job with this key if it is pending, running,

@@ -5,6 +5,7 @@ a single metadata registry for create_all and Alembic autogenerate.
 """
 
 import logging
+import os
 import time
 
 from sqlalchemy import BigInteger, Integer, create_engine, event
@@ -240,7 +241,17 @@ def get_db():
         )
         from fastapi import HTTPException
 
+        # In debug mode, include the error details for diagnostics.
+        # In production, return a generic message to avoid leaking
+        # database internals (table names, column names, SQL, host, etc.)
+        if os.getenv("DEBUG", "").lower() in ("1", "true", "yes"):
+            detail = f"Database initialization error: {type(e).__name__}: {e}"
+        else:
+            detail = (
+                "Something went wrong while preparing your dataset. "
+                "Please try again or contact your administrator."
+            )
         raise HTTPException(
             status_code=500,
-            detail=f"Database initialization error: {type(e).__name__}: {e}",
+            detail=detail,
         ) from e
