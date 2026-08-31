@@ -10,6 +10,7 @@ Covers:
 
 from __future__ import annotations
 
+import asyncio
 from datetime import datetime, timedelta, timezone
 
 import pytest
@@ -19,6 +20,8 @@ from sqlalchemy.pool import StaticPool
 
 from jobs.models import Job
 from jobs.repositories import JobRepository
+from jobs.service import update_heartbeat, update_job_progress
+from jobs.watchdog import _sweep_once
 from shared.database import Base
 
 
@@ -163,9 +166,6 @@ class TestWatchdogSweep:
         finally:
             db.close()
 
-        import asyncio
-        from jobs.watchdog import _sweep_once
-
         result = asyncio.run(_sweep_once())
         assert result["pending"] == 1
         assert result["running"] == 0
@@ -195,9 +195,6 @@ class TestWatchdogSweep:
         finally:
             db.close()
 
-        import asyncio
-        from jobs.watchdog import _sweep_once
-
         result = asyncio.run(_sweep_once())
         assert result["pending"] == 0
         assert result["running"] == 1
@@ -226,9 +223,6 @@ class TestWatchdogSweep:
         finally:
             db.close()
 
-        import asyncio
-        from jobs.watchdog import _sweep_once
-
         result = asyncio.run(_sweep_once())
         assert result["pending"] == 0
         assert result["running"] == 0
@@ -251,8 +245,6 @@ class TestUpdateJobProgress:
         finally:
             db.close()
 
-        from jobs.service import update_job_progress
-
         update_job_progress(job_id, 0.5, "Processing...")
 
         db = sessionmaker(bind=isolated_engine)()
@@ -272,8 +264,6 @@ class TestUpdateJobProgress:
             job_id = job.id
         finally:
             db.close()
-
-        from jobs.service import update_heartbeat
 
         update_heartbeat(job_id)
 
