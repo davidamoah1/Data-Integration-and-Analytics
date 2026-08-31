@@ -48,6 +48,7 @@ export default function DataToDecisionPage() {
   const [file, setFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
   const [processingMessage, setProcessingMessage] = useState<string>('');
   const [workflowState, setWorkflowState] = useState<WorkflowState | null>(null);
 
@@ -79,6 +80,7 @@ export default function DataToDecisionPage() {
   const handleFileSelected = useCallback((f: File) => {
     setFile(f);
     setHasError(false);
+    setErrorMessage('');
   }, []);
 
   const handleStartProcessing = useCallback(async () => {
@@ -121,10 +123,12 @@ export default function DataToDecisionPage() {
       setProcessingMessage('');
       toast.success('Dataset uploaded and analyzed successfully!');
     } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to process dataset';
       setStepStatuses((prev) => ({ ...prev, upload: 'error' }));
       setHasError(true);
+      setErrorMessage(msg);
       setProcessingMessage('');
-      toast.error(err instanceof Error ? err.message : 'Failed to process dataset');
+      toast.error(msg);
     } finally {
       setIsProcessing(false);
     }
@@ -313,6 +317,7 @@ export default function DataToDecisionPage() {
     setReportId(null);
     setPresentationReady(false);
     setPresentationUrl(null);
+    setErrorMessage('');
   }, []);
 
   return (
@@ -349,7 +354,9 @@ export default function DataToDecisionPage() {
       {hasError && !isProcessing && currentStep === 'upload' && file && (
         <div className="flex flex-col items-center gap-4 py-8">
           <div className="text-center">
-            <p className="font-medium text-red-600">We couldn't process this dataset. Please try again.</p>
+            <p className="font-medium text-red-600">
+              {errorMessage || "We couldn't process this dataset. Please try again."}
+            </p>
             <p className="text-sm text-muted-foreground mt-1">
               If the problem persists, try a smaller file or contact your administrator.
             </p>

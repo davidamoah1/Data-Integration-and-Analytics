@@ -88,6 +88,16 @@ class TestAsyncExecutionAvailability:
 
         monkeypatch.setattr(config, "REDIS_URL", "redis://localhost:6379/0", raising=False)
         monkeypatch.setattr(config, "IS_SERVERLESS", False)
+
+        # Mock the task queue to report Redis backend is connected
+        from unittest.mock import MagicMock
+
+        mock_queue = MagicMock()
+        mock_queue.is_redis_backend = True
+        import jobs.service as jobs_svc
+
+        monkeypatch.setattr(jobs_svc, "get_task_queue", lambda: mock_queue)
+
         assert routes_module._async_workflow_execution_available() is True
 
 
@@ -151,6 +161,16 @@ class TestRunWorkflowRouteAsyncBranch:
 
         monkeypatch.setattr(config, "REDIS_URL", "redis://localhost:6379/0", raising=False)
         monkeypatch.setattr(config, "IS_SERVERLESS", False)
+
+        # Mock the task queue to simulate Redis backend without a real Redis
+        from unittest.mock import AsyncMock, MagicMock
+
+        mock_queue = MagicMock()
+        mock_queue.is_redis_backend = True
+        mock_queue.enqueue = AsyncMock()
+        import jobs.service as jobs_svc
+
+        monkeypatch.setattr(jobs_svc, "get_task_queue", lambda: mock_queue)
 
         response = client.post(
             "/api/dataset-workflow/run",

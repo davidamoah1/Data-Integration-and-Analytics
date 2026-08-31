@@ -261,15 +261,29 @@ def _async_workflow_execution_available() -> bool:
       1. `REDIS_URL` configured, so the job queue is the shared Redis-backed
          queue rather than an in-process-only in-memory one.
       2. Not running serverless (Vercel), since no persistent worker process
-         exists there to consume the queue - only `docker-compose.prod.yml`'s
-         dedicated `worker` service (`python -m performance.worker_entry`)
-         does. Enqueuing on Vercel would leave the job stuck "pending"
-         forever with nothing to run it.
+         exists there to consume the queue - only the dedicated worker
+         service (`python -m performance.worker_entry`) does.
+      3. Redis is actually reachable — if the URL is set but the connection
+         fails, enqueuing would leave the job stuck at "pending" forever.
     """
     import config
 
     is_serverless = getattr(config, "IS_SERVERLESS", False)
-    return bool(getattr(config, "REDIS_URL", "")) and not is_serverless
+    if is_serverless or not getattr(config, "REDIS_URL", ""):
+        return False
+
+    # Verify Redis is actually connected, not just configured
+    from jobs.service import get_task_queue
+
+    queue = get_task_queue()
+    if not queue.is_redis_backend:
+        logger.warning(
+            "REDIS_URL is set but Redis connection failed — "
+            "falling back to synchronous processing"
+        )
+        return False
+
+    return True
 
 
 @router.post("/run")
@@ -312,7 +326,7 @@ async def run_workflow(
         )
 
         try:
-            job = JobService(db).create_job(
+            job = await JobService(db).create_job(
                 organization_id=org_id,
                 user_id=current_user["id"],
                 job_type="dataset_workflow",
@@ -334,6 +348,19 @@ async def run_workflow(
             logger.warning(
                 "dataset_workflow job handler unavailable (%s); running synchronously", e
             )
+        except RuntimeError as e:
+            # Enqueue failed (e.g. Redis connection error). Don't leave the
+            # job stuck at pending — return a clear error to the user.
+            logger.error(
+                "DATASET_WORKFLOW_ENQUEUE_FAILED org_id=%d filename='%s' error='%s'",
+                org_id,
+                filename,
+                e,
+            )
+            raise HTTPException(
+                status_code=503,
+                detail="We couldn't start dataset processing. The background processing service may be unavailable. Please try again.",
+            ) from e
         else:
             return JSONResponse(
                 status_code=202,

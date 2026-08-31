@@ -165,7 +165,7 @@ async def upload_document(
                 register_builtin_handlers()
 
             job_svc = JobService(db)
-            job = job_svc.create_job(
+            job = await job_svc.create_job(
                 organization_id=org_id,
                 user_id=current_user["id"],
                 job_type="ocr_document",
@@ -215,7 +215,7 @@ async def upload_zip_batch(
         from jobs.service import JobService
 
         job_svc = JobService(db)
-        job = job_svc.create_job(
+        job = await job_svc.create_job(
             organization_id=org_id,
             user_id=current_user["id"],
             job_type="ocr_batch",
@@ -476,7 +476,7 @@ async def retry_document(
                 register_builtin_handlers()
 
             job_svc = JobService(db)
-            job = job_svc.create_job(
+            job = await job_svc.create_job(
                 organization_id=org_id,
                 user_id=current_user["id"],
                 job_type="ocr_document",

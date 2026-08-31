@@ -219,16 +219,32 @@ def _handle_dataset_workflow(job_id: int, payload: dict, db: DbSession) -> dict:
     organization_id = payload.get("organization_id")
     created_by = payload.get("created_by")
 
+    logger.info(
+        "DATASET_WORKFLOW_START job_id=%d file_id=%s filename='%s' org_id=%s",
+        job_id,
+        file_id,
+        filename,
+        organization_id,
+    )
+
     update_job_progress(job_id, 0.05, "Loading uploaded file")
     content, _record = FileService(db).download(file_id, organization_id)
+    logger.info("DATASET_WORKFLOW_FILE_LOADED job_id=%d bytes=%d", job_id, len(content))
 
     update_job_progress(job_id, 0.10, "Validating uploaded file")
     df = _parse_upload_bytes(content, filename)
     if df.empty:
         raise ValueError("Uploaded file is empty")
+    logger.info(
+        "DATASET_WORKFLOW_PARSED job_id=%d rows=%d cols=%d",
+        job_id,
+        len(df),
+        len(df.columns),
+    )
 
     update_job_progress(job_id, 0.15, "Running governance classification")
     governance = classify_dataset(df)
+    logger.info("DATASET_WORKFLOW_GOVERNANCE_DONE job_id=%d", job_id)
 
     update_job_progress(job_id, 0.20, "Profiling dataset")
     state = _orchestrator.start(
@@ -237,6 +253,11 @@ def _handle_dataset_workflow(job_id: int, payload: dict, db: DbSession) -> dict:
         admin_confirmed=admin_confirmed,
         created_by=created_by,
         organization_id=organization_id,
+    )
+    logger.info(
+        "DATASET_WORKFLOW_ORCHESTRATOR_DONE job_id=%d workflow_id=%s",
+        job_id,
+        state.workflow_id,
     )
 
     update_job_progress(job_id, 0.50, "Detecting patterns and running analysis")
@@ -262,6 +283,11 @@ def _handle_dataset_workflow(job_id: int, payload: dict, db: DbSession) -> dict:
     db.commit()
 
     update_job_progress(job_id, 1.0, "Processing complete")
+    logger.info(
+        "DATASET_WORKFLOW_COMPLETE job_id=%d workflow_id=%s",
+        job_id,
+        state.workflow_id,
+    )
     return {
         **state.to_dict(),
         "governance": governance.to_dict(),

@@ -86,7 +86,7 @@ class JobService:
 
     # â”€â”€ Create â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-    def create_job(
+    async def create_job(
         self,
         organization_id: int,
         user_id: int | None,
@@ -106,6 +106,11 @@ class JobService:
         with the same key are allowed to be re-created (i.e. retried).
 
         Returns the persisted Job instance (with id).
+
+        Raises ``RuntimeError`` if the job cannot be enqueued (e.g. Redis
+        connection failure). The caller should catch this and return an
+        appropriate error to the user instead of leaving the job stuck at
+        "pending".
         """
         if job_type not in _HANDLERS:
             raise ValueError(
@@ -137,6 +142,13 @@ class JobService:
             idempotency_key=idempotency_key,
         )
         self.db.commit()
+        logger.info(
+            "JOB_CREATED job_id=%d job_type=%s name='%s' org_id=%d",
+            job.id,
+            job_type,
+            name,
+            organization_id,
+        )
 
         # Enqueue in task queue
         queue = get_task_queue()
@@ -153,65 +165,78 @@ class JobService:
         self.repo.update(job.id, queue_task_id=task.id)
         self.db.commit()
 
-        # Enqueue asynchronously
+        # Enqueue synchronously — await the result before returning so
+        # enqueue failures are caught immediately and the caller can
+        # return an appropriate error to the user.
+        logger.info(
+            "JOB_ENQUEUE_STARTED job_id=%d queue_backend=%s",
+            job.id,
+            "redis" if queue.is_redis_backend else "memory",
+        )
         try:
-            loop = asyncio.get_running_loop()
+            await queue.enqueue(task)
+        except Exception as e:
+            logger.error("JOB_ENQUEUE_FAILED job_id=%d error='%s: %s'", job.id, type(e).__name__, e)
+            # Mark the job as failed so it doesn't stay stuck at pending
+            try:
+                self.repo.mark_failed(
+                    job.id,
+                    f"Failed to enqueue job for background processing: {e}",
+                )
+                self.db.commit()
+            except Exception:
+                logger.exception("Failed to mark job %d as failed after enqueue error", job.id)
+            raise RuntimeError(f"Failed to enqueue job: {e}") from e
 
-            async def _safe_enqueue():
-                try:
-                    await queue.enqueue(task)
-                except Exception as e:
-                    logger.error("Failed to enqueue job %d: %s", job.id, e)
-                    try:
-                        engine = shared.database.get_engine()
-                        factory = shared.database.get_session_factory(engine)
-                        err_db = factory()
-                        try:
-                            err_repo = JobRepository(err_db)
-                            err_repo.mark_failed(
-                                job.id,
-                                f"Failed to enqueue job for background processing: {e}",
-                            )
-                            err_db.commit()
-                        finally:
-                            err_db.close()
-                    except Exception:
-                        logger.exception(
-                            "Failed to mark job %d as failed after enqueue error", job.id
-                        )
-
-            loop.create_task(_safe_enqueue())
-        except RuntimeError:
-            # No running event loop — enqueue in a thread
-            def _thread_enqueue():
-                try:
-                    asyncio.run(queue.enqueue(task))
-                except Exception as e:
-                    logger.error("Failed to enqueue job %d (thread): %s", job.id, e)
-                    try:
-                        engine = shared.database.get_engine()
-                        factory = shared.database.get_session_factory(engine)
-                        err_db = factory()
-                        try:
-                            err_repo = JobRepository(err_db)
-                            err_repo.mark_failed(
-                                job.id,
-                                f"Failed to enqueue job for background processing: {e}",
-                            )
-                            err_db.commit()
-                        finally:
-                            err_db.close()
-                    except Exception:
-                        logger.exception(
-                            "Failed to mark job %d as failed after enqueue error (thread)", job.id
-                        )
-
-            threading.Thread(target=_thread_enqueue, daemon=True).start()
-
+        logger.info("JOB_ENQUEUE_SUCCESS job_id=%d", job.id)
         logger.info("Job %d created and enqueued: %s '%s'", job.id, job_type, name)
         return job
 
-    # â”€â”€ Read â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    def create_job_sync(
+        self,
+        organization_id: int,
+        user_id: int | None,
+        job_type: str,
+        name: str,
+        *,
+        description: str | None = None,
+        payload: dict | None = None,
+        max_retries: int = 3,
+        idempotency_key: str | None = None,
+    ) -> Job:
+        """Create a job record and enqueue it for processing (sync fallback).
+
+        If *idempotency_key* is provided and a pending/running/completed job
+        with the same key already exists for this organization, that existing
+        job is returned instead of creating a duplicate. Failed/cancelled jobs
+        with the same key are allowed to be re-created (i.e. retried).
+
+        Returns the persisted Job instance (with id).
+
+        Raises ``RuntimeError`` if the job cannot be enqueued (e.g. Redis
+        connection failure). The caller should catch this and return an
+        appropriate error to the user instead of leaving the job stuck at
+        "pending".
+        """
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            return loop.run_until_complete(
+                self.create_job(
+                    organization_id,
+                    user_id,
+                    job_type,
+                    name,
+                    description=description,
+                    payload=payload,
+                    max_retries=max_retries,
+                    idempotency_key=idempotency_key,
+                )
+            )
+        finally:
+            loop.close()
+
+    # â”€â”€ Read â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def get_job(self, job_id: int, organization_id: int) -> Job | None:
         return self.repo.get_by_org(job_id, organization_id)
@@ -271,7 +296,7 @@ class JobService:
 
     # â”€â”€ Retry â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-    def retry_job(self, job_id: int, organization_id: int) -> Job | None:
+    async def retry_job(self, job_id: int, organization_id: int) -> Job | None:
         job = self.get_job(job_id, organization_id)
         if not job:
             return None
@@ -303,42 +328,27 @@ class JobService:
             )
             self.repo.update(job_id, queue_task_id=task.id)
             self.db.commit()
+
+            logger.info("JOB_RETRY_ENQUEUE_STARTED job_id=%d", job_id)
             try:
-                loop = asyncio.get_running_loop()
+                await queue.enqueue(task)
+            except Exception as e:
+                logger.error(
+                    "JOB_RETRY_ENQUEUE_FAILED job_id=%d error='%s: %s'", job_id, type(e).__name__, e
+                )
+                try:
+                    self.repo.mark_failed(
+                        job_id,
+                        f"Failed to re-enqueue job for background processing: {e}",
+                    )
+                    self.db.commit()
+                except Exception:
+                    logger.exception(
+                        "Failed to mark job %d as failed after retry enqueue error", job_id
+                    )
+                raise RuntimeError(f"Failed to re-enqueue job: {e}") from e
 
-                async def _safe_retry_enqueue():
-                    try:
-                        await queue.enqueue(task)
-                    except Exception as e:
-                        logger.error("Failed to re-enqueue job %d: %s", job.id, e)
-                        try:
-                            engine = shared.database.get_engine()
-                            factory = shared.database.get_session_factory(engine)
-                            err_db = factory()
-                            try:
-                                err_repo = JobRepository(err_db)
-                                err_repo.mark_failed(
-                                    job.id,
-                                    f"Failed to re-enqueue job for background processing: {e}",
-                                )
-                                err_db.commit()
-                            finally:
-                                err_db.close()
-                        except Exception:
-                            logger.exception(
-                                "Failed to mark job %d as failed after retry enqueue error", job.id
-                            )
-
-                loop.create_task(_safe_retry_enqueue())
-            except RuntimeError:
-
-                def _thread_retry_enqueue():
-                    try:
-                        asyncio.run(queue.enqueue(task))
-                    except Exception as e:
-                        logger.error("Failed to re-enqueue job %d (thread): %s", job.id, e)
-
-                threading.Thread(target=_thread_retry_enqueue, daemon=True).start()
+            logger.info("JOB_RETRY_ENQUEUE_SUCCESS job_id=%d", job_id)
 
         logger.info("Job %d retried", job_id)
         return self.repo.get_by_id(job_id)
@@ -365,11 +375,11 @@ def _run_job_wrapper(job_id: int, job_type: str) -> dict:
         repo = JobRepository(db)
         job = repo.get_by_id(job_id)
         if not job:
-            logger.error("Job %d not found", job_id)
+            logger.error("JOB_NOT_FOUND job_id=%d", job_id)
             return {"error": "Job not found"}
 
         if job.status == "cancelled":
-            logger.info("Job %d was cancelled, skipping", job_id)
+            logger.info("JOB_SKIPPED job_id=%d reason=cancelled", job_id)
             return {"skipped": "cancelled"}
 
         # Mark running
@@ -377,10 +387,12 @@ def _run_job_wrapper(job_id: int, job_type: str) -> dict:
         repo.update_heartbeat(job_id)
         db.commit()
         logger.info(
-            "JOB_STARTED job_id=%d job_type=%s name='%s'",
+            "JOB_STARTED job_id=%d job_type=%s name='%s' org_id=%d user_id=%s",
             job_id,
             job_type,
             job.name,
+            job.organization_id,
+            job.user_id,
         )
 
         # Get handler
@@ -401,7 +413,19 @@ def _run_job_wrapper(job_id: int, job_type: str) -> dict:
         logger.info(
             "JOB_PROGRESS job_id=%d status=running progress=0 message='Executing handler'", job_id
         )
+        logger.info(
+            "JOB_HANDLER_START job_id=%d job_type=%s handler=%s",
+            job_id,
+            job_type,
+            f"{handler.__module__}.{handler.__qualname__}",
+        )
         result = handler(job_id, payload, db)
+        logger.info(
+            "JOB_HANDLER_DONE job_id=%d job_type=%s result_keys=%s",
+            job_id,
+            job_type,
+            list(result.keys()) if isinstance(result, dict) else type(result).__name__,
+        )
 
         # Mark completed. default=str guards against handlers returning
         # numpy scalar types (bool_, int64, float64, ...) from pandas/numpy
@@ -411,10 +435,11 @@ def _run_job_wrapper(job_id: int, job_type: str) -> dict:
         repo.mark_completed(job_id, result=result_json)
         db.commit()
         logger.info(
-            "JOB_COMPLETED job_id=%d job_type=%s name='%s'",
+            "JOB_COMPLETED job_id=%d job_type=%s name='%s' org_id=%d",
             job_id,
             job_type,
             job.name,
+            job.organization_id,
         )
 
         # Notify user
@@ -433,7 +458,13 @@ def _run_job_wrapper(job_id: int, job_type: str) -> dict:
         return result or {}
 
     except Exception as e:
-        logger.exception("JOB_FAILED job_id=%d error='%s'", job_id, e)
+        logger.exception(
+            "JOB_FAILED job_id=%d job_type=%s error_type=%s error='%s'",
+            job_id,
+            job_type,
+            type(e).__name__,
+            e,
+        )
         try:
             db.rollback()
             repo = JobRepository(db)
@@ -467,6 +498,12 @@ def update_job_progress(job_id: int, progress: float, message: str | None = None
     Also updates the heartbeat timestamp so the stale-job watchdog knows the
     worker is still alive.
     """
+    logger.info(
+        "JOB_PROGRESS_UPDATE job_id=%d progress=%.2f message='%s'",
+        job_id,
+        progress,
+        message or "",
+    )
     engine = shared.database.get_engine()
     factory = shared.database.get_session_factory(engine)
     db = factory()

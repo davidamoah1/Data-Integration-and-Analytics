@@ -236,7 +236,7 @@ async def upload_certificates(
                         register_builtin_handlers()
 
                     job_svc = JobService(db)
-                    job = job_svc.create_job(
+                    job = await job_svc.create_job(
                         organization_id=org_id,
                         user_id=current_user["id"],
                         job_type="ocr_document",

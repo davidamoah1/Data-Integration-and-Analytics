@@ -65,7 +65,7 @@ async def create_job(
     org_id = get_current_organization_id(current_user, db)
     svc = JobService(db)
     try:
-        job = svc.create_job(
+        job = await svc.create_job(
             organization_id=org_id,
             user_id=current_user["id"],
             job_type=request.job_type,
@@ -77,6 +77,8 @@ async def create_job(
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e)) from e
     return job.to_dict()
 
 
@@ -190,9 +192,11 @@ async def retry_job(
     org_id = get_current_organization_id(current_user, db)
     svc = JobService(db)
     try:
-        job = svc.retry_job(job_id, org_id)
+        job = await svc.retry_job(job_id, org_id)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e)) from e
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
     return job.to_dict()

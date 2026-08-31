@@ -29,13 +29,50 @@ logger = logging.getLogger("performance.worker_entry")
 
 async def run_workers():
     """Start the worker pool and keep it running."""
-    register_builtin_handlers()
+    logger.info("WORKER_STARTUP_BEGIN pid=%s", os.getpid())
 
+    # Register handlers
+    register_builtin_handlers()
+    from jobs.service import get_registered_types
+
+    registered = get_registered_types()
+    logger.info(
+        "WORKER_HANDLERS_REGISTERED count=%d types=%s", len(registered), ", ".join(registered)
+    )
+
+    # Check Redis connectivity
     redis_url = os.getenv("REDIS_URL", "")
+    if redis_url:
+        logger.info("WORKER_REDIS_CONFIGURED url_present=true")
+    else:
+        logger.warning(
+            "WORKER_REDIS_CONFIGURED url_present=false — using in-memory queue (jobs will not survive restart)"
+        )
+
+    # Check DB connectivity
+    try:
+        import shared.database
+
+        engine = shared.database.get_engine()
+        from sqlalchemy import text
+
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        logger.info("WORKER_DB_CONNECTED ok=true")
+    except Exception as e:
+        logger.error("WORKER_DB_CONNECTED ok=false error='%s: %s'", type(e).__name__, e)
+        raise
+
     min_workers = int(os.getenv("WORKER_MIN_WORKERS") or "2")
     max_workers = int(os.getenv("WORKER_MAX_WORKERS") or "20")
 
     queue = TaskQueue(redis_url=redis_url if redis_url else None)
+    logger.info(
+        "WORKER_QUEUE_INITIALIZED backend=%s redis_connected=%s",
+        "redis" if queue.is_redis_backend else "memory",
+        queue.is_redis_backend,
+    )
+
     pool = WorkerPool(
         task_queue=queue,
         min_workers=min_workers,
@@ -59,8 +96,10 @@ async def run_workers():
 
     await pool.start()
     logger.info(
-        f"Worker pool running: {min_workers}-{max_workers} workers, "
-        f"backend: {'redis' if queue.is_redis_backend else 'memory'}"
+        "WORKER_POOL_RUNNING min_workers=%d max_workers=%d backend=%s",
+        min_workers,
+        max_workers,
+        "redis" if queue.is_redis_backend else "memory",
     )
 
     # Start the stale-job watchdog alongside the worker pool so stuck
