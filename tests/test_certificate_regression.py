@@ -15,14 +15,8 @@ Covers:
 from __future__ import annotations
 
 import hashlib
-from datetime import datetime, timezone
 
-import pytest
-from fastapi.testclient import TestClient
-
-# Ensure capture models are registered with Base.metadata
-import capture.models  # noqa: F401
-
+import capture.models  # noqa: F401  – register models with Base.metadata
 
 # ── Helper to create a certificate document in DB ──────────────────
 
@@ -524,8 +518,8 @@ class TestSerializeCertificate:
 
     def test_serialize_duplicate_flag_true(self, db_session):
         """_serialize_certificate should show is_duplicate=True for duplicates."""
-        from certificates.routes import _serialize_certificate
         from capture.models import CaptureDocument
+        from certificates.routes import _serialize_certificate
 
         doc, batch_id = _create_cert_document(db_session)
         dup = CaptureDocument(

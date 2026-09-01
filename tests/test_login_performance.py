@@ -11,15 +11,11 @@ performance audit are functioning correctly:
 6. Failed login still increments failed_login_count and creates history
 """
 
-from datetime import datetime, timezone
-
+from authentication.models import LoginHistory
 from authentication.repositories import (
-    LoginHistoryRepository,
     UserRepository,
     UserRoleRepository,
 )
-from authentication.models import LoginHistory, User
-from notifications.models import Notification
 
 
 class TestCombinedRolesPermissionsQuery:
