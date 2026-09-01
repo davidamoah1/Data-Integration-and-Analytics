@@ -738,6 +738,8 @@ export default function CertificateIntelligencePage() {
                 <thead className="bg-slate-50 border-b border-slate-200">
                   <tr>
                     <th className="px-4 py-3 text-left font-medium text-slate-600">Filename</th>
+                    <th className="px-4 py-3 text-left font-medium text-slate-600 hidden md:table-cell">Student Name</th>
+                    <th className="px-4 py-3 text-left font-medium text-slate-600 hidden lg:table-cell">Course</th>
                     <th className="px-4 py-3 text-left font-medium text-slate-600 hidden sm:table-cell">Type</th>
                     <th className="px-4 py-3 text-left font-medium text-slate-600">Status</th>
                     <th className="px-4 py-3 text-left font-medium text-slate-600 hidden md:table-cell">Verification</th>
@@ -750,6 +752,12 @@ export default function CertificateIntelligencePage() {
                   {certificates.map((cert) => (
                     <tr key={cert.id} className="hover:bg-slate-50 cursor-pointer" onClick={() => loadDetail(cert.id)}>
                       <td className="px-4 py-3 text-slate-900 truncate max-w-[180px] sm:max-w-xs">{cert.filename}</td>
+                      <td className="px-4 py-3 text-slate-700 hidden md:table-cell truncate max-w-[150px]">
+                        {cert.student_name || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-slate-600 hidden lg:table-cell truncate max-w-[150px]">
+                        {cert.course || "—"}
+                      </td>
                       <td className="px-4 py-3 text-slate-600 hidden sm:table-cell">
                         {cert.document_type_label || cert.document_type || "—"}
                       </td>

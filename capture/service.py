@@ -625,6 +625,61 @@ class CaptureService:
 
         extracted = extractors.extract_fields(ocr_result, doc_type_spec, template_boost)
 
+        # Certificate-specific extraction: use semantic pattern matching for
+        # student name, course/programme, and institution — the generic
+        # label-anchored extractor fails on certificates because names and
+        # courses appear on separate lines, not after a label on the same line.
+        _CERT_DOC_TYPE_KEYS = {
+            "academic_certificate",
+            "degree_certificate",
+            "diploma",
+            "professional_certificate",
+            "training_certificate",
+            "certificate_of_completion",
+            "certificate_of_attendance",
+            "membership_certificate",
+            "license_certification",
+        }
+        if doc.document_type in _CERT_DOC_TYPE_KEYS:
+            try:
+                from certificates.extractor import extract_certificate_fields
+
+                cert_result = extract_certificate_fields(ocr_result, doc.document_type)
+
+                # Build a map of existing extracted fields by name for merging
+                extracted_by_name = {e.field_name: e for e in extracted}
+
+                # Merge certificate extraction results — certificate extractor
+                # takes priority for student_name, course/programme, institution
+                # when it found a value with confidence > 0.
+                cert_fields = []
+                if cert_result.student_name and cert_result.student_name.value:
+                    cert_fields.append(cert_result.student_name)
+                if cert_result.course and cert_result.course.value:
+                    cert_fields.append(cert_result.course)
+                if cert_result.institution and cert_result.institution.value:
+                    cert_fields.append(cert_result.institution)
+
+                for cert_field in cert_fields:
+                    existing = extracted_by_name.get(cert_field.field_name)
+                    if existing is None or not existing.value:
+                        # No existing value — add the certificate-extracted field
+                        if existing:
+                            extracted.remove(existing)
+                        extracted.append(cert_field)
+                        extracted_by_name[cert_field.field_name] = cert_field
+                    elif cert_field.confidence > existing.confidence:
+                        # Certificate extractor has higher confidence — replace
+                        extracted.remove(existing)
+                        extracted.append(cert_field)
+                        extracted_by_name[cert_field.field_name] = cert_field
+            except Exception as e:
+                logger.warning(
+                    "Certificate extraction failed for doc %s: %s — falling back to generic extraction",
+                    doc.id,
+                    e,
+                )
+
         confidences = []
         field_values: dict[str, str] = {}
 

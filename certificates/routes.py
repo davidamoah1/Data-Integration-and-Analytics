@@ -29,7 +29,7 @@ from fastapi import (
     status,
 )
 from fastapi.responses import StreamingResponse
-from sqlalchemy import or_, select
+from sqlalchemy import exists, or_, select
 from sqlalchemy.orm import Session as DbSession
 
 import config
@@ -92,6 +92,21 @@ def _serialize_certificate(doc: CaptureDocument, fields: list[CaptureField] | No
         "approved_at": doc.approved_at.isoformat() if doc.approved_at else None,
     }
     if fields is not None:
+        # Extract key fields for convenient frontend access
+        field_map = {f.field_name: f.value for f in fields if f.value}
+        result["student_name"] = field_map.get("student_name")
+        result["course"] = (
+            field_map.get("course") or field_map.get("programme") or field_map.get("qualification")
+        )
+        result["institution"] = field_map.get("institution")
+        result["date_awarded"] = (
+            field_map.get("date_awarded")
+            or field_map.get("date_issued")
+            or field_map.get("graduation_date")
+        )
+        result["certificate_number"] = field_map.get("certificate_number") or field_map.get(
+            "license_number"
+        )
         result["fields"] = [
             {
                 "id": f.id,
@@ -200,94 +215,62 @@ async def upload_certificates(
                 len(content),
                 org_id,
             )
-            # Enqueue background job for processing instead of synchronous
+            # Enqueue background job for processing instead of synchronous.
+            # Always use async processing (Redis job or thread fallback) to
+            # avoid request timeouts on multi-file batches. Even with local
+            # storage, the thread fallback uses the same process and can
+            # access the local filesystem.
             job_id = None
-            # When using local storage, the worker (separate container) can't
-            # access files uploaded to the web service's filesystem. Process
-            # synchronously instead.
-            from storage.storage import get_storage_backend
+            try:
+                from jobs.handlers import register_builtin_handlers
+                from jobs.service import JobService, get_registered_types
 
-            storage_backend = get_storage_backend()
-            processing_status = "uploaded"
-            if storage_backend.name == "local":
-                try:
-                    svc.process_document(doc.id)
-                    # Refresh to get the actual post-processing status
-                    db.refresh(doc)
-                    processing_status = doc.status
-                    logger.info(
-                        "Document processed synchronously (local storage): doc_id=%s status=%s",
-                        doc.id,
-                        doc.status,
-                    )
-                except Exception as e:
-                    logger.warning(
-                        "Synchronous processing failed for doc_id=%s: %s",
-                        doc.id,
-                        e,
-                    )
-                    processing_status = "failed"
-            else:
-                try:
-                    from jobs.handlers import register_builtin_handlers
-                    from jobs.service import JobService, get_registered_types
+                if "ocr_document" not in get_registered_types():
+                    register_builtin_handlers()
 
-                    if "ocr_document" not in get_registered_types():
-                        register_builtin_handlers()
+                job_svc = JobService(db)
+                job = await job_svc.create_job(
+                    organization_id=org_id,
+                    user_id=current_user["id"],
+                    job_type="ocr_document",
+                    name=f"Certificate OCR: {doc.filename}",
+                    description=f"Processing certificate '{doc.filename}'",
+                    payload={"document_id": doc.id, "organization_id": org_id},
+                    idempotency_key=f"org_{org_id}:ocr_document:doc_{doc.id}",
+                )
+                job_id = job.id
+                db.commit()
+                logger.info(
+                    "Job enqueued: job_id=%s doc_id=%s type=ocr_document org_id=%s",
+                    job_id,
+                    doc.id,
+                    org_id,
+                )
+            except Exception as e:
+                logger.warning(
+                    "Job system unavailable for doc_id=%s, using thread fallback: %s",
+                    doc.id,
+                    e,
+                )
+                import threading
 
-                    job_svc = JobService(db)
-                    job = await job_svc.create_job(
-                        organization_id=org_id,
-                        user_id=current_user["id"],
-                        job_type="ocr_document",
-                        name=f"Certificate OCR: {doc.filename}",
-                        description=f"Processing certificate '{doc.filename}'",
-                        payload={"document_id": doc.id, "organization_id": org_id},
-                        idempotency_key=f"org_{org_id}:ocr_document:doc_{doc.id}",
-                    )
-                    job_id = job.id
-                    db.commit()
-                    logger.info(
-                        "Job enqueued: job_id=%s doc_id=%s type=ocr_document org_id=%s",
-                        job_id,
-                        doc.id,
-                        org_id,
-                    )
-                except Exception as e:
-                    logger.warning(
-                        "Job system unavailable for doc_id=%s, using thread fallback: %s",
-                        doc.id,
-                        e,
-                    )
-                    import threading
+                def _process_doc(doc_id: int) -> None:
+                    from shared.database import get_engine, get_session_factory
 
-                    def _process_doc(doc_id: int) -> None:
-                        from shared.database import get_engine, get_session_factory
+                    engine = get_engine()
+                    factory = get_session_factory(engine)
+                    session = factory()
+                    try:
+                        CaptureService(session).process_document(doc_id)
+                    finally:
+                        session.close()
 
-                        engine = get_engine()
-                        factory = get_session_factory(engine)
-                        session = factory()
-                        try:
-                            CaptureService(session).process_document(doc_id)
-                        finally:
-                            session.close()
+                threading.Thread(target=_process_doc, args=(doc.id,), daemon=True).start()
 
-                    threading.Thread(target=_process_doc, args=(doc.id,), daemon=True).start()
-
-            if processing_status == "failed":
-                failed += 1
-                result = _serialize_certificate(doc)
-                result["job_id"] = job_id
-                result["status"] = "failed"
-                result["error_message"] = "Processing failed during synchronous execution"
-                results.append(result)
-            else:
-                succeeded += 1
-                if processing_status == "ready_for_review":
-                    review_required += 1
-                result = _serialize_certificate(doc)
-                result["job_id"] = job_id
-                results.append(result)
+            succeeded += 1
+            result = _serialize_certificate(doc)
+            result["job_id"] = job_id
+            results.append(result)
         except CaptureError as e:
             failed += 1
             results.append(
@@ -408,13 +391,38 @@ async def search_certificates(
     if review_status:
         query = query.where(CaptureDocument.status == review_status)
 
-    # Text search: match filename or OCR text
+    # Text search: match filename, OCR text, or extracted field values
+    # (student_name, course, programme, qualification, institution).
+    # Uses EXISTS subquery against capture_fields to avoid N+1 lookups.
     if q:
         pattern = f"%{q}%"
+        # Field names that represent searchable certificate content
+        searchable_field_names = [
+            "student_name",
+            "course",
+            "programme",
+            "program",
+            "qualification",
+            "institution",
+            "certificate_number",
+            "license_number",
+            "degree",
+            "membership_type",
+            "license_type",
+            "event",
+        ]
+        field_search = exists(
+            select(CaptureField.id).where(
+                CaptureField.document_id == CaptureDocument.id,
+                CaptureField.field_name.in_(searchable_field_names),
+                CaptureField.value.ilike(pattern),
+            )
+        )
         query = query.where(
             or_(
                 CaptureDocument.filename.ilike(pattern),
                 CaptureDocument.raw_ocr_text.ilike(pattern),
+                field_search,
             )
         )
 
@@ -436,6 +444,7 @@ async def search_certificates(
             or_(
                 CaptureDocument.filename.ilike(pattern),
                 CaptureDocument.raw_ocr_text.ilike(pattern),
+                field_search,
             )
         )
     total = db.execute(total_query).scalar() or 0

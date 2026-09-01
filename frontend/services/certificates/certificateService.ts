@@ -51,6 +51,11 @@ export interface Certificate {
   created_at: string | null;
   processed_at: string | null;
   approved_at: string | null;
+  student_name?: string | null;
+  course?: string | null;
+  institution?: string | null;
+  date_awarded?: string | null;
+  certificate_number?: string | null;
   fields?: CertificateField[];
 }
 
