@@ -60,6 +60,8 @@ const VERIFICATION_LABELS: Record<string, string> = {
   verification_pending: "Verification Pending",
   verified: "Verified",
   verification_failed: "Verification Failed",
+  unable_to_verify: "Unable to Verify",
+  suspicious: "Suspicious",
 };
 
 const VERIFICATION_COLORS: Record<string, string> = {
@@ -68,6 +70,8 @@ const VERIFICATION_COLORS: Record<string, string> = {
   verification_pending: "bg-amber-100 text-amber-700",
   verified: "bg-green-100 text-green-700",
   verification_failed: "bg-red-100 text-red-700",
+  unable_to_verify: "bg-slate-100 text-slate-600",
+  suspicious: "bg-orange-100 text-orange-700",
 };
 
 const PROCESSING_STATUSES = ["uploaded", "preprocessing", "extracting", "classifying", "validating"];
@@ -86,6 +90,9 @@ interface UploadResultItem {
   document_type?: string | null;
   document_type_label?: string | null;
   overall_confidence?: number | null;
+  is_duplicate?: boolean;
+  verification_status?: string;
+  verification_reason?: string | null;
 }
 
 function formatFileSize(bytes?: number): string {
@@ -149,8 +156,10 @@ export default function CertificateIntelligencePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
+  const [filterVerification, setFilterVerification] = useState("");
   const [uploadResults, setUploadResults] = useState<UploadResultItem[] | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [currentBatchId, setCurrentBatchId] = useState<number | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedCertId, setSelectedCertId] = useState<number | null>(null);
@@ -175,6 +184,10 @@ export default function CertificateIntelligencePage() {
   }, []);
 
   useEffect(() => {
+    // Reset current batch state on page load/refresh
+    setUploadResults(null);
+    setUploadError(null);
+    setCurrentBatchId(null);
     loadData();
   }, [loadData]);
 
@@ -278,6 +291,7 @@ export default function CertificateIntelligencePage() {
         q: searchQuery || undefined,
         certificate_type: filterType || undefined,
         review_status: filterStatus || undefined,
+        verification_status: filterVerification || undefined,
         limit: 100,
       });
       setCertificates(result.certificates);
@@ -287,7 +301,31 @@ export default function CertificateIntelligencePage() {
     } finally {
       setLoading(false);
     }
-  }, [searchQuery, filterType, filterStatus]);
+  }, [searchQuery, filterType, filterStatus, filterVerification]);
+
+  const handleClearFilters = useCallback(() => {
+    setSearchQuery("");
+    setFilterType("");
+    setFilterStatus("");
+    setFilterVerification("");
+    setLoading(true);
+    certificateService.search({ limit: 100 }).then((result) => {
+      setCertificates(result.certificates);
+    }).catch(() => {
+      setCertificates([]);
+    }).finally(() => {
+      setLoading(false);
+    });
+  }, []);
+
+  const handleNewBatch = useCallback(() => {
+    setUploadResults(null);
+    setUploadError(null);
+    setCurrentBatchId(null);
+    setPollingIds(new Set());
+    pollAttemptsRef.current.clear();
+    pollFailuresRef.current.clear();
+  }, []);
 
   const handleUpload = useCallback(async (files: File[]) => {
     if (files.length === 0) return;
@@ -313,11 +351,15 @@ export default function CertificateIntelligencePage() {
 
     setUploading(true);
     setUploadResults(null);
+    setUploadError(null);
+    setCurrentBatchId(null);
     try {
       const result = await certificateService.upload(
         validFiles,
         `Certificate Batch ${new Date().toLocaleDateString()}`
       );
+
+      setCurrentBatchId(result.batch_id);
 
       const results: UploadResultItem[] = result.certificates.map((c: any) => ({
         id: c.id,
@@ -329,6 +371,9 @@ export default function CertificateIntelligencePage() {
         document_type: c.document_type,
         document_type_label: c.document_type_label,
         overall_confidence: c.overall_confidence,
+        is_duplicate: c.is_duplicate || false,
+        verification_status: c.verification_status,
+        verification_reason: c.verification_reason,
       }));
 
       setUploadResults(results);
@@ -347,6 +392,7 @@ export default function CertificateIntelligencePage() {
         setPollingIds(idsToPoll);
       }
 
+      // Refresh dashboard + certificate list to include newly uploaded certs
       await loadData();
     } catch (err) {
       setUploadError(getErrorMessage(err));
@@ -386,6 +432,7 @@ export default function CertificateIntelligencePage() {
   const handleRetryUpload = () => {
     setUploadError(null);
     setUploadResults(null);
+    setCurrentBatchId(null);
     fileInputRef.current?.click();
   };
 
@@ -498,6 +545,19 @@ export default function CertificateIntelligencePage() {
             </div>
           )}
 
+          {/* New Batch Button */}
+          {uploadResults && !uploading && (
+            <div className="mt-3 flex items-center justify-between">
+              <div className="text-xs text-slate-500">
+                {currentBatchId && `Batch #${currentBatchId} — `}
+                {uploadResults.length} certificate{uploadResults.length !== 1 ? "s" : ""} in current batch
+              </div>
+              <Button onClick={handleNewBatch} variant="outline" size="sm">
+                <Upload size={14} className="mr-1.5" /> New Batch
+              </Button>
+            </div>
+          )}
+
           {/* Upload Results */}
           {uploadResults && (
             <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4">
@@ -542,12 +602,19 @@ export default function CertificateIntelligencePage() {
                       <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
                         <span>Type: {r.file_type || getFileExtension(r.filename)}</span>
                         <span>Size: {formatFileSize(r.file_size)}</span>
+                        {r.is_duplicate && <span className="text-purple-600 font-medium">Duplicate</span>}
                         {r.document_type_label && <span>Classified as: {r.document_type_label}</span>}
                         {r.overall_confidence != null && <span>Confidence: {(r.overall_confidence * 100).toFixed(0)}%</span>}
                       </div>
 
                       {r.error_message && (
                         <div className="mt-2 text-xs text-red-600 bg-red-50 rounded p-2">{r.error_message}</div>
+                      )}
+
+                      {r.verification_status && r.verification_reason && (
+                        <div className="mt-1 text-xs text-slate-500 bg-slate-50 rounded p-1.5">
+                          <span className="font-medium">{VERIFICATION_LABELS[r.verification_status] || r.verification_status}:</span> {r.verification_reason}
+                        </div>
                       )}
 
                       <div className="mt-3 flex flex-col sm:flex-row gap-2">
@@ -603,13 +670,13 @@ export default function CertificateIntelligencePage() {
               </div>
 
               {uploadResults.some((r) => r.status === "ready_for_review" || r.status === "approved") && (
-                <div className="mt-4 border-t border-slate-100 pt-3">
+                <div className="mt-4 border-t border-slate-100 pt-3 flex gap-2">
                   <Button
-                    onClick={() => { setUploadResults(null); fileInputRef.current?.click(); }}
+                    onClick={() => { handleNewBatch(); fileInputRef.current?.click(); }}
                     variant="outline"
                     size="sm"
                   >
-                    <Upload size={14} className="mr-2" /> Upload Another Certificate
+                    <Upload size={14} className="mr-2" /> Upload Another Batch
                   </Button>
                 </div>
               )}
@@ -702,9 +769,29 @@ export default function CertificateIntelligencePage() {
             <option value="rejected">Rejected</option>
             <option value="failed">Failed</option>
           </select>
+          <select
+            value={filterVerification}
+            onChange={(e) => setFilterVerification(e.target.value)}
+            className="px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            aria-label="Filter by verification"
+          >
+            <option value="">All Verifications</option>
+            <option value="not_verified">Not Verified</option>
+            <option value="extraction_complete">Extraction Complete</option>
+            <option value="verification_pending">Verification Pending</option>
+            <option value="verified">Verified</option>
+            <option value="verification_failed">Verification Failed</option>
+            <option value="unable_to_verify">Unable to Verify</option>
+            <option value="suspicious">Suspicious</option>
+          </select>
           <Button onClick={handleSearch} variant="secondary" size="sm">
             <Filter size={14} className="mr-1" /> Filter
           </Button>
+          {(searchQuery || filterType || filterStatus || filterVerification) && (
+            <Button onClick={handleClearFilters} variant="ghost" size="sm">
+              <X size={14} className="mr-1" /> Clear
+            </Button>
+          )}
           <div className="flex gap-2">
             <Button onClick={() => certificateService.exportCsv()} variant="secondary" size="sm" disabled={!dashboard || dashboard.total === 0}>
               <Download size={14} className="mr-1" /> CSV
@@ -728,12 +815,12 @@ export default function CertificateIntelligencePage() {
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <Award className="h-12 w-12 text-slate-300 mb-3" />
               <p className="text-sm font-medium text-slate-700">
-                {searchQuery || filterType || filterStatus
-                  ? "No certificates match your filters"
+                {searchQuery || filterType || filterStatus || filterVerification
+                  ? "No certificates found matching the selected filters."
                   : "No certificates yet"}
               </p>
               <p className="text-xs text-slate-500 mt-1">
-                {searchQuery || filterType || filterStatus
+                {searchQuery || filterType || filterStatus || filterVerification
                   ? "Try adjusting your search or filters."
                   : "Upload your first certificate to begin extracting and analyzing certificate data."}
               </p>

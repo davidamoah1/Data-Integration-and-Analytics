@@ -87,6 +87,7 @@ def _serialize_certificate(doc: CaptureDocument, fields: list[CaptureField] | No
         "verification_method": doc.verification_method,
         "verified_at": doc.verified_at.isoformat() if doc.verified_at else None,
         "duplicate_of_id": doc.duplicate_of_id,
+        "is_duplicate": doc.duplicate_of_id is not None,
         "created_at": doc.created_at.isoformat() if doc.created_at else None,
         "processed_at": doc.processed_at.isoformat() if doc.processed_at else None,
         "approved_at": doc.approved_at.isoformat() if doc.approved_at else None,
@@ -136,7 +137,7 @@ def _is_certificate_type(doc_type: str | None) -> bool:
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
-@router.post("/upload", status_code=status.HTTP_201_CREATED)
+@router.post("/upload", status_code=status.HTTP_202_ACCEPTED)
 async def upload_certificates(
     files: list[UploadFile] = File(...),
     batch_name: str | None = Form(None),
@@ -194,6 +195,7 @@ async def upload_certificates(
     results: list[dict] = []
     succeeded = 0
     failed = 0
+    duplicates = 0
     review_required = 0
 
     for file in files:
@@ -267,9 +269,13 @@ async def upload_certificates(
 
                 threading.Thread(target=_process_doc, args=(doc.id,), daemon=True).start()
 
+            is_dup = doc.duplicate_of_id is not None
+            if is_dup:
+                duplicates += 1
             succeeded += 1
             result = _serialize_certificate(doc)
             result["job_id"] = job_id
+            result["is_duplicate"] = is_dup
             results.append(result)
         except CaptureError as e:
             failed += 1
@@ -347,12 +353,13 @@ async def upload_certificates(
         "total": len(files),
         "succeeded": succeeded,
         "failed": failed,
+        "duplicates": duplicates,
         "review_required": review_required,
         "certificates": results,
     }
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # Search
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
@@ -850,10 +857,10 @@ async def verify_certificate(
     notes = payload.get("notes")
     verified_fields = payload.get("verified_fields")
 
-    if verify_status not in ("pending", "verified", "failed", "inconclusive"):
+    if verify_status not in ("pending", "verified", "failed", "inconclusive", "unable_to_verify", "suspicious"):
         raise HTTPException(
             status_code=422,
-            detail="Status must be one of: pending, verified, failed, inconclusive",
+            detail="Status must be one of: pending, verified, failed, inconclusive, unable_to_verify, suspicious",
         )
 
     # Record the verification attempt
@@ -878,6 +885,12 @@ async def verify_certificate(
         doc.verified_by = current_user["id"]
     elif verify_status == "failed":
         doc.verification_status = "verification_failed"
+        doc.verification_method = method
+    elif verify_status == "unable_to_verify":
+        doc.verification_status = "unable_to_verify"
+        doc.verification_method = method
+    elif verify_status == "suspicious":
+        doc.verification_status = "suspicious"
         doc.verification_method = method
     else:
         doc.verification_status = "verification_pending"
@@ -904,6 +917,7 @@ async def verify_certificate(
         "method": method,
         "status": verify_status,
         "verification_id": verification.id,
+        "notes": notes,
     }
 
 
@@ -1146,6 +1160,9 @@ async def get_certificate_status(
         "document_type_label": doc.document_type_label,
         "overall_confidence": doc.overall_confidence,
         "classification_confidence": doc.classification_confidence,
+        "verification_status": doc.verification_status,
+        "is_duplicate": doc.duplicate_of_id is not None,
+        "duplicate_of_id": doc.duplicate_of_id,
     }
 
 

@@ -216,18 +216,64 @@ class CaptureService:
             .first()
         )
         if existing:
-            # Return the existing document as a duplicate
-            existing.duplicate_of_id = existing.duplicate_of_id or existing.id
+            # Create a lightweight duplicate reference rather than corrupting
+            # the existing record. The original document keeps its state;
+            # the new row is a pointer that says "this file was already uploaded".
+            dup_doc = CaptureDocument(
+                organization_id=organization_id,
+                batch_id=batch_id,
+                filename=filename,
+                original_file_path=existing.original_file_path,
+                file_type=ext,
+                file_size_bytes=len(file_content),
+                file_checksum=checksum,
+                source=source,
+                status="ready_for_review",
+                uploaded_by=user_id,
+                retention_expires_at=datetime.now(timezone.utc) + timedelta(
+                    days=config.CAPTURE_RETENTION_DAYS
+                ),
+                document_type=existing.document_type,
+                document_type_label=existing.document_type_label,
+                classification_confidence=existing.classification_confidence,
+                overall_confidence=existing.overall_confidence,
+                duplicate_of_id=existing.id,
+                verification_status=existing.verification_status,
+            )
+            self.db.add(dup_doc)
+            self.db.commit()
+            self.db.refresh(dup_doc)
+
+            # Copy fields from the original document so the duplicate has
+            # the same extracted data available without reprocessing.
+            orig_fields = self.field_repo.list_by_document(existing.id)
+            for f in orig_fields:
+                self.db.add(CaptureField(
+                    document_id=dup_doc.id,
+                    field_name=f.field_name,
+                    field_label=f.field_label,
+                    data_type=f.data_type,
+                    raw_value=f.raw_value,
+                    value=f.value,
+                    confidence_score=f.confidence_score,
+                    is_low_confidence=f.is_low_confidence,
+                    was_corrected=f.was_corrected,
+                    is_valid=f.is_valid,
+                    validation_message=f.validation_message,
+                    page_number=f.page_number,
+                    bounding_box=f.bounding_box,
+                ))
+            self.db.commit()
+
             self._log(
                 organization_id,
                 "duplicate_detected",
-                document_id=existing.id,
+                document_id=dup_doc.id,
                 batch_id=batch_id,
                 actor_id=user_id,
                 details={"filename": filename, "checksum": checksum, "existing_id": existing.id},
             )
-            self.db.commit()
-            return existing
+            return dup_doc
 
         # Upload to storage layer (Phase 12 â€” abstract object storage)
         key_prefix = f"capture/{organization_id}/"

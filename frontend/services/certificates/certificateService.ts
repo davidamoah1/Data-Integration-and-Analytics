@@ -48,6 +48,7 @@ export interface Certificate {
   verification_method: string | null;
   verified_at: string | null;
   duplicate_of_id: number | null;
+  is_duplicate: boolean;
   created_at: string | null;
   processed_at: string | null;
   approved_at: string | null;
@@ -92,6 +93,7 @@ export interface CertificateUploadResult {
   total: number;
   succeeded: number;
   failed: number;
+  duplicates: number;
   review_required: number;
   certificates: Certificate[];
 }
@@ -102,6 +104,7 @@ export interface VerificationResult {
   method: string;
   status: string;
   verification_id: number;
+  notes: string | null;
 }
 
 // ─── Service ────────────────────────────────────────────────────

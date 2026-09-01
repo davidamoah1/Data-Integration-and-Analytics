@@ -175,10 +175,34 @@ _COURSE_PATTERNS: list[re.Pattern[str]] = [
 # ── Institution patterns ───────────────────────────────────────────
 
 _INSTITUTION_PATTERNS: list[re.Pattern[str]] = [
+    # "awarded by / issued by / from / at INSTITUTION"
     re.compile(
         r"(?:awarded\s+by|issued\s+by|\bfrom\b|\bat\b)\s*[:\-]?\s*"
         r"(.*?)(?:\s+date\s+[:\-]|\s+certificate\s+number|\s+serial\s+number|"
         r"\s+registration\s+number|\n\s*\n|$)",
+        re.IGNORECASE | re.DOTALL,
+    ),
+    # "Institution: NAME" / "Institution:\nNAME"
+    re.compile(
+        r"institution\s*[:\-]\s*(.*?)(?:\n\s*\n|\n\s*(?:date|certificate|serial|registration|awarded|issued|from|at|by|student|name|course|programme|program)|$)",
+        re.IGNORECASE | re.DOTALL,
+    ),
+    # "University: NAME" / "College: NAME" / "School: NAME"
+    re.compile(
+        r"(?:university|college|school|institute|academy|polytechnic)\s*[:\-]\s*"
+        r"(.*?)(?:\n\s*\n|\n\s*(?:date|certificate|serial|registration|awarded|issued|from|at|by|student|name|course|programme|program)|$)",
+        re.IGNORECASE | re.DOTALL,
+    ),
+    # "This certificate is awarded by INSTITUTION"
+    re.compile(
+        r"(?:this\s+certificate\s+is\s+)?(?:awarded|issued|granted|presented)\s+(?:by|from|at)\s+"
+        r"(.*?)(?:\s+(?:to|on|date|certificate|serial|registration)|\n\s*\n|$)",
+        re.IGNORECASE | re.DOTALL,
+    ),
+    # "Issuing Organization: NAME" / "Issuing Body: NAME"
+    re.compile(
+        r"issuing\s+(?:organization|organisation|body|authority|institution)\s*[:\-]\s*"
+        r"(.*?)(?:\n\s*\n|\n\s*(?:date|certificate|serial|registration|awarded|issued|from|at|by|student|name|course|programme|program)|$)",
         re.IGNORECASE | re.DOTALL,
     ),
 ]
@@ -717,6 +741,29 @@ def extract_certificate_fields(
                 best_institution = inst
                 institution_confidence = 0.75
                 word_conf = _find_word_confidence(inst, words)
+                institution_confidence = (institution_confidence + word_conf) / 2.0
+                break
+
+    # Header-based fallback: scan first 5 lines for institution names.
+    # Many certificates have the institution name prominently at the top
+    # without any "awarded by" or "issued by" label.
+    if not best_institution:
+        lines = [l.strip() for l in normalized.split("\n") if l.strip()]
+        for line in lines[:5]:
+            cleaned = _clean_extracted_value(line)
+            if not cleaned or len(cleaned) > 200:
+                continue
+            if _looks_like_institution(cleaned) and not _looks_like_signatory(cleaned):
+                # Avoid matching lines that are part of the certificate phrasing
+                lower = cleaned.lower()
+                if any(phrase in lower for phrase in [
+                    "this is to certify", "this certificate", "awarded to",
+                    "has successfully completed", "has completed",
+                ]):
+                    continue
+                best_institution = cleaned
+                institution_confidence = 0.65
+                word_conf = _find_word_confidence(cleaned, words)
                 institution_confidence = (institution_confidence + word_conf) / 2.0
                 break
 
