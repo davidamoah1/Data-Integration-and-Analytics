@@ -88,20 +88,15 @@ def main() -> int:
     try:
         engine = create_engine(db_url, pool_pre_ping=True, connect_args=connect_args)
         with engine.connect() as conn:
-            conn.execute(text("SELECT 1"))
-        logger.info("Database connectivity: OK")
+            # Combine connectivity check and alembic version check into a
+            # single round trip to reduce cold-start latency on remote MySQL.
+            result = conn.execute(text("SELECT 1, (SELECT version_num FROM alembic_version LIMIT 1) AS av"))
+            row = result.first()
+            logger.info("Database connectivity: OK")
+            current_version = row[1] if row else None
+            logger.info("Current Alembic version: %s", current_version)
     except Exception as e:
         logger.error("Database connectivity check FAILED: %s: %s", type(e).__name__, e)
-        return 1
-
-    # 2. Check Alembic version
-    try:
-        with engine.connect() as conn:
-            result = conn.execute(text("SELECT version_num FROM alembic_version"))
-            current_version = result.scalar()
-        logger.info("Current Alembic version: %s", current_version)
-    except Exception as e:
-        logger.error("Failed to read alembic_version table: %s", type(e).__name__)
         return 1
 
     # 3. Get expected head from Alembic
@@ -144,14 +139,19 @@ def main() -> int:
 
     inspector = inspect(engine)
 
+    # Cache table names and column lists to avoid redundant round trips
+    all_tables = set(inspector.get_table_names())
+    _table_columns: dict[str, set[str]] = {}
+
     all_ok = True
     for table, column in critical_checks:
-        if table not in inspector.get_table_names():
+        if table not in all_tables:
             logger.error("MISSING TABLE: %s", table)
             all_ok = False
             continue
-        columns = [c["name"] for c in inspector.get_columns(table)]
-        if column not in columns:
+        if table not in _table_columns:
+            _table_columns[table] = {c["name"] for c in inspector.get_columns(table)}
+        if column not in _table_columns[table]:
             logger.error("MISSING COLUMN: %s.%s", table, column)
             all_ok = False
         else:

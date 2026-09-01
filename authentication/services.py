@@ -86,38 +86,48 @@ class AuthService:
         """
         user = self.user_repo.get_by_email(request.email)
 
-        # Record login attempt
-        self.login_history_repo.create(
-            LoginHistory(
-                user_id=user.id if user else None,
-                email=request.email,
-                ip_address=ip,
-                user_agent=user_agent,
-                success=False,
-            )
-        )
-
         if not user:
+            # Record failed login attempt for unknown email
+            self.login_history_repo.create(
+                LoginHistory(
+                    user_id=None,
+                    email=request.email,
+                    ip_address=ip,
+                    user_agent=user_agent,
+                    success=False,
+                )
+            )
+            self.db.commit()
             raise AuthenticationError("Invalid email or password")
 
         if not user.is_active:
             raise AuthenticationError("Account is disabled")
 
-        if self.user_repo.is_locked(user.id):
+        # Check lock status using the already-fetched user object (avoids
+        # a redundant SELECT that is_locked() would perform via get_by_id).
+        if user.locked_until and user.locked_until > datetime.now(timezone.utc):
             raise AccountLockedError()
 
         if not verify_password(request.password, user.password_hash):
             count = self.user_repo.increment_failed_login(user.id)
+            self.login_history_repo.create(
+                LoginHistory(
+                    user_id=user.id,
+                    email=user.email,
+                    ip_address=ip,
+                    user_agent=user_agent,
+                    success=False,
+                )
+            )
             self.db.commit()
             if count >= ACCOUNT_LOCKOUT_THRESHOLD:
                 raise AccountLockedError()
             raise AuthenticationError("Invalid email or password")
 
-        # Success â€” reset failed logins
-        self.user_repo.reset_failed_logins(user.id)
-        self.user_repo.update_last_login(user.id)
+        # Success — reset failed logins and update last login in a single UPDATE
+        self.user_repo.reset_failed_logins_and_update_last_login(user.id)
 
-        # Update login history as success
+        # Record successful login history
         self.login_history_repo.create(
             LoginHistory(
                 user_id=user.id,
@@ -128,9 +138,8 @@ class AuthService:
             )
         )
 
-        # Get roles and permissions
-        role_names = self.user_role_repo.get_roles_for_user(user.id)
-        permission_names = self.user_role_repo.get_all_permissions_for_user(user.id)
+        # Get roles and permissions in a single DB round trip
+        role_names, permission_names = self.user_role_repo.get_roles_and_permissions_for_user(user.id)
 
         # Create tokens
         expire_days = 30 if request.remember_me else JWT_REFRESH_EXPIRE_DAYS
@@ -159,38 +168,10 @@ class AuthService:
         )
         self.session_repo.create(session)
 
-        # Log activity
-        self.activity_repo.create(
-            ActivityLog(
-                user_id=user.id,
-                action="login",
-                ip_address=ip,
-                user_agent=user_agent,
-            )
-        )
-
-        # Audit log
-        self.db.add(
-            AuditLog(
-                user_id=user.id,
-                organization_id=user.organization_id,
-                action="auth.login",
-                resource_type="user",
-                resource_id=user.id,
-                ip_address=ip,
-                new_values={"device": self._parse_device(user_agent)},
-            )
-        )
-
-        # Security notification for new login
-        self._create_security_notification(
-            user_id=user.id,
-            subject="New Login",
-            body=f"A successful login to your account was recorded from {ip or 'an unknown IP'} on {self._parse_device(user_agent)}. If this was not you, please change your password immediately.",
-        )
-
+        # Commit critical writes (session, login history, counters)
         self.db.commit()
 
+        # Return result plus context for background non-critical writes
         return {
             "access_token": access_token,
             "refresh_token": refresh_token,
@@ -202,6 +183,13 @@ class AuthService:
                 "full_name": user.full_name,
                 "roles": role_names,
                 "permissions": permission_names,
+            },
+            "_bg_context": {
+                "user_id": user.id,
+                "organization_id": user.organization_id,
+                "ip": ip,
+                "user_agent": user_agent,
+                "device": self._parse_device(user_agent),
             },
         }
 
@@ -240,7 +228,7 @@ class AuthService:
         if not user or not user.is_active:
             raise AuthenticationError("User not found or disabled")
 
-        if self.user_repo.is_locked(user.id):
+        if user.locked_until and user.locked_until > datetime.now(timezone.utc):
             raise AccountLockedError()
 
         role_names = self.user_role_repo.get_roles_for_user(user.id)

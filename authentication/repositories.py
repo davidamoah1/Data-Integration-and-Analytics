@@ -125,6 +125,19 @@ class UserRepository:
         )
         self.db.flush()
 
+    def reset_failed_logins_and_update_last_login(self, user_id: int):
+        """Combine reset_failed_logins and update_last_login into a single UPDATE."""
+        self.db.execute(
+            update(User)
+            .where(User.id == user_id)
+            .values(
+                failed_login_count=0,
+                locked_until=None,
+                last_login_at=datetime.now(timezone.utc),
+            )
+        )
+        self.db.flush()
+
     def is_locked(self, user_id: int) -> bool:
         user = self.get_by_id(user_id)
         if not user or not user.locked_until:
@@ -380,6 +393,33 @@ class UserRoleRepository:
             .all()
         )
         return list(set(results))
+
+    def get_roles_and_permissions_for_user(self, user_id: int) -> tuple[list[str], list[str]]:
+        """Get role names and permission names in a single DB round trip.
+
+        Uses UNION ALL to fetch both role names and permission names in one
+        query, reducing network latency for remote MySQL connections.
+        Returns (role_names, permission_names).
+        """
+        from sqlalchemy import literal_column, union_all
+
+        roles_q = (
+            select(literal_column("'role'").label("type"), Role.name.label("name"))
+            .join(UserRole, UserRole.role_id == Role.id)
+            .where(UserRole.user_id == user_id, Role.is_deleted == 0)
+        )
+        perms_q = (
+            select(literal_column("'permission'").label("type"), Permission.name.label("name"))
+            .join(RolePermission, RolePermission.permission_id == Permission.id)
+            .join(UserRole, UserRole.role_id == RolePermission.role_id)
+            .where(UserRole.user_id == user_id)
+        )
+        combined = union_all(roles_q, perms_q)
+        results = self.db.execute(combined).all()
+
+        role_names = list({r[1] for r in results if r[0] == "role"})
+        permission_names = list({r[1] for r in results if r[0] == "permission"})
+        return role_names, permission_names
 
     def get_scoped_roles_for_user(self, user_id: int) -> list[dict]:
         """Get all role assignments for a user including scope information."""

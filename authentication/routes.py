@@ -7,7 +7,7 @@ All endpoints use standard response format and proper permission checks.
 
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from sqlalchemy.orm import Session as DbSession
 
 from audit.models import AuditLog
@@ -63,16 +63,98 @@ mfa_router = APIRouter(prefix="/api/auth/mfa", tags=["MFA"])
 sso_router = APIRouter(prefix="/api/auth/sso", tags=["SSO"])
 
 
+# --- Background helpers ------------------------------------------------------
+
+
+def _post_login_async(ctx: dict) -> None:
+    """Write non-critical post-login records (activity, audit, notification).
+
+    Runs as a FastAPI BackgroundTask *after* the login response has been
+    sent.  Uses a fresh DB session so it does not interfere with the
+    request-scoped session.
+    """
+    from notifications.models import Notification
+    from shared.database import get_session_factory
+
+    try:
+        factory = get_session_factory()
+        db = factory()
+        try:
+            user_id = ctx["user_id"]
+            org_id = ctx["organization_id"]
+            ip = ctx.get("ip")
+            ua = ctx.get("user_agent")
+            device = ctx.get("device", "Unknown")
+
+            db.add(
+                ActivityLog(
+                    user_id=user_id,
+                    action="login",
+                    ip_address=ip,
+                    user_agent=ua,
+                )
+            )
+            db.add(
+                AuditLog(
+                    user_id=user_id,
+                    organization_id=org_id,
+                    action="auth.login",
+                    resource_type="user",
+                    resource_id=user_id,
+                    ip_address=ip,
+                    new_values={"device": device},
+                )
+            )
+            db.add(
+                Notification(
+                    user_id=user_id,
+                    channel="in_app",
+                    subject="New Login",
+                    body=(
+                        f"A successful login to your account was recorded from "
+                        f"{ip or 'an unknown IP'} on {device}. If this was not you, "
+                        f"please change your password immediately."
+                    ),
+                    status="sent",
+                    read=False,
+                    created_at=datetime.now(timezone.utc),
+                    sent_at=datetime.now(timezone.utc),
+                )
+            )
+            db.commit()
+        finally:
+            db.close()
+    except Exception:
+        import logging
+
+        logging.getLogger("auth.routes").debug(
+            "Post-login background write failed (non-fatal)", exc_info=True
+        )
+
+
 # --- Authentication endpoints ------------------------------------------------
 
 
 @router.post("/login")
-async def login(request: LoginRequest, req: Request, db: DbSession = Depends(get_db)):
+async def login(
+    request: LoginRequest,
+    req: Request,
+    background_tasks: BackgroundTasks,
+    db: DbSession = Depends(get_db),
+):
     """Authenticate user and return JWT tokens."""
     service = AuthService(db)
     ip = req.client.host if req.client else None
     ua = req.headers.get("user-agent")
     result = service.login(request, ip=ip, user_agent=ua)
+
+    # Schedule non-critical writes (activity log, audit log, security
+    # notification) to run after the response is sent.  These use a
+    # separate DB session so they don't block the response.
+    bg_ctx = result.pop("_bg_context", None)
+    if bg_ctx:
+        background_tasks.add_task(_post_login_async, bg_ctx)
+
     return success_response(result, "Login successful")
 
 

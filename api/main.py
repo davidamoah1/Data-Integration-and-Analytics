@@ -323,6 +323,15 @@ async def lifespan(app: FastAPI):
                 finally:
                     db.close()
                 logger.info("Deferred startup tasks completed: seeding, scheduler, subscriptions.")
+
+                # Mark module-level flags so get_db() skips redundant
+                # ensure_tables()/ensure_default_data() calls on the first
+                # request — those would otherwise add extra DB round trips
+                # to the remote MySQL on Hostinger.
+                import shared.database as _sd
+
+                _sd._tables_initialized = True
+                _sd._default_data_initialized = True
             logger.info("Deferred startup finished.")
 
         startup_task = asyncio.create_task(_deferred_startup())
@@ -367,6 +376,12 @@ async def lifespan(app: FastAPI):
                 test_db.close()
             logger.info("Test mode seeding completed.")
 
+            # Mark flags so get_db() skips redundant work
+            import shared.database as _sd
+
+            _sd._tables_initialized = True
+            _sd._default_data_initialized = True
+
     elif serverless:
         # Serverless mode: run create_all and seed synchronously (needed for cold starts)
         try:
@@ -394,6 +409,11 @@ async def lifespan(app: FastAPI):
                 logger.info("Serverless seed_default_data completed.")
             except Exception as e:
                 logger.error(f"Serverless seed_default_data failed: {e}")
+            # Mark flags so get_db() skips redundant work
+            import shared.database as _sd
+
+            _sd._tables_initialized = True
+            _sd._default_data_initialized = True
         logger.info("Running in serverless mode; skipped heavy startup tasks.")
 
     # Start background job worker only when Redis is NOT configured.
