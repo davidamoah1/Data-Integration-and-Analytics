@@ -29,7 +29,7 @@ USER appuser
 
 EXPOSE 8000 8501
 
-HEALTHCHECK --interval=30s --timeout=10s --retries=3 --start-period=30s \
-    CMD curl -f http://localhost:${PORT:-8000}/health || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 --start-period=40s \
+    CMD curl -f http://localhost:${API_PORT:-8000}/health || exit 1
 
-CMD sh -c "alembic upgrade head && python scripts/verify_schema.py && uvicorn api.main:app --host 0.0.0.0 --port ${PORT:-8000} --proxy-headers --forwarded-allow-ips='*'"
+CMD sh -c "alembic upgrade head && python scripts/verify_schema.py && uvicorn api.main:app --host 0.0.0.0 --port ${API_PORT:-8000} --proxy-headers --forwarded-allow-ips='*'"

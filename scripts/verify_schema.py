@@ -79,13 +79,19 @@ def main() -> int:
     db_type = db_url.split("://")[0]
     logger.info("Database type: %s", db_type)
 
+    connect_args = {}
+    if db_type == "mysql":
+        connect_args["connect_timeout"] = 10
+    elif db_type == "sqlite":
+        connect_args["timeout"] = 10
+
     try:
-        engine = create_engine(db_url, pool_pre_ping=True, connect_args={"connect_timeout": 10})
+        engine = create_engine(db_url, pool_pre_ping=True, connect_args=connect_args)
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))
         logger.info("Database connectivity: OK")
     except Exception as e:
-        logger.error("Database connectivity check FAILED: %s", type(e).__name__)
+        logger.error("Database connectivity check FAILED: %s: %s", type(e).__name__, e)
         return 1
 
     # 2. Check Alembic version
