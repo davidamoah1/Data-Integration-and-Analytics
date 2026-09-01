@@ -69,7 +69,9 @@ def ensure_tables(engine):
         # create_all can fail if the DB user lacks DDL permissions or if
         # there's a model/schema mismatch. Log but don't crash — existing
         # tables are still usable, and Alembic is the primary schema tool.
-        logger.warning("ensure_tables: create_all() failed (non-fatal): %s: %s", type(e).__name__, e)
+        logger.warning(
+            "ensure_tables: create_all() failed (non-fatal): %s: %s", type(e).__name__, e
+        )
         _tables_initialized = True
         return
 
@@ -260,8 +262,6 @@ def get_db():
 
         if isinstance(e, HTTPException):
             raise
-
-        import logging
 
         logging.getLogger("database").error(
             "get_db() failed: %s: %s", type(e).__name__, e, exc_info=True
