@@ -184,6 +184,77 @@ _INSTITUTION_PATTERNS: list[re.Pattern[str]] = [
 ]
 
 
+# ── Date patterns ──────────────────────────────────────────────────
+
+_DATE_PATTERNS: list[re.Pattern[str]] = [
+    # "Date: 15th January 2024" / "Date: 2024-01-15" / "Date: 15/01/2024"
+    re.compile(
+        r"\bdate\s+(?:of\s+(?:award|issue|completion|graduation)\s*[:\-]?\s*)?[:\-]?\s*"
+        r"(\d{1,2}(?:st|nd|rd|th)?\s+"
+        r"(?:January|February|March|April|May|June|July|August|September|October|November|December)"
+        r"\s+\d{4})",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"\bdate\s+(?:of\s+(?:award|issue|completion|graduation)\s*[:\-]?\s*)?[:\-]?\s*"
+        r"((?:January|February|March|April|May|June|July|August|September|October|November|December)"
+        r"\s+\d{1,2}(?:st|nd|rd|th)?,?\s+\d{4})",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"\bdate\s+(?:of\s+(?:award|issue|completion|graduation)\s*[:\-]?\s*)?[:\-]?\s*"
+        r"(\d{1,2}[/\-\.]\d{1,2}[/\-\.]\d{2,4})",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"\bdate\s+(?:of\s+(?:award|issue|completion|graduation)\s*[:\-]?\s*)?[:\-]?\s*"
+        r"(\d{4}[/\-\.]\d{1,2}[/\-\.]\d{1,2})",
+        re.IGNORECASE,
+    ),
+    # "Awarded on DATE" / "Issued on DATE" / "Completed on DATE"
+    re.compile(
+        r"(?:awarded|issued|completed|graduated)\s+on\s*[:\-]?\s*"
+        r"(\d{1,2}(?:st|nd|rd|th)?\s+"
+        r"(?:January|February|March|April|May|June|July|August|September|October|November|December)"
+        r"\s+\d{4})",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"(?:awarded|issued|completed|graduated)\s+on\s*[:\-]?\s*"
+        r"((?:January|February|March|April|May|June|July|August|September|October|November|December)"
+        r"\s+\d{1,2}(?:st|nd|rd|th)?,?\s+\d{4})",
+        re.IGNORECASE,
+    ),
+    # Bare date on a line labeled "Date"
+    re.compile(
+        r"^\s*date\s*[:\-]\s*(.+?)\s*$",
+        re.IGNORECASE | re.MULTILINE,
+    ),
+]
+
+
+# ── Certificate number patterns ────────────────────────────────────
+
+_CERT_NUMBER_PATTERNS: list[re.Pattern[str]] = [
+    re.compile(
+        r"\bcertificate\s+(?:no\.?|number|id|code)\s*[:\-]?\s*" r"([A-Z0-9][A-Z0-9\-/\.]{2,50})",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"\bserial\s+(?:no\.?|number)\s*[:\-]?\s*" r"([A-Z0-9][A-Z0-9\-/\.]{2,50})",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"\bregistration\s+(?:no\.?|number)\s*[:\-]?\s*" r"([A-Z0-9][A-Z0-9\-/\.]{2,50})",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"\bref(?:erence)?\s+(?:no\.?|number)\s*[:\-]?\s*" r"([A-Z0-9][A-Z0-9\-/\.]{2,50})",
+        re.IGNORECASE,
+    ),
+]
+
+
 # ── Signatory / non-student name indicators ─────────────────────────
 
 _SIGNATORY_LABELS = {
@@ -492,6 +563,8 @@ class CertificateExtractionResult:
     student_name: ExtractedField | None = None
     course: ExtractedField | None = None
     institution: ExtractedField | None = None
+    date_awarded: ExtractedField | None = None
+    certificate_number: ExtractedField | None = None
 
 
 def extract_certificate_fields(
@@ -661,12 +734,72 @@ def extract_certificate_fields(
             institution_confidence,
         )
 
+    # ── Date awarded ───────────────────────────────────────────────
+    best_date: str | None = None
+    date_confidence = 0.0
+
+    for pattern in _DATE_PATTERNS:
+        m = pattern.search(normalized)
+        if m:
+            date_val = _clean_extracted_value(m.group(1))
+            if date_val and len(date_val) >= 4:
+                best_date = date_val
+                date_confidence = 0.80
+                word_conf = _find_word_confidence(date_val, words)
+                date_confidence = (date_confidence + word_conf) / 2.0
+                break
+
+    if best_date:
+        result.date_awarded = ExtractedField(
+            field_name="date_awarded",
+            field_label="Date Awarded",
+            data_type="date",
+            value=best_date,
+            confidence=round(date_confidence, 3),
+        )
+        logger.debug(
+            "CERT_EXTRACT date_awarded=%s confidence=%.3f",
+            best_date,
+            date_confidence,
+        )
+
+    # ── Certificate number ────────────────────────────────────────
+    best_cert_num: str | None = None
+    cert_num_confidence = 0.0
+
+    for pattern in _CERT_NUMBER_PATTERNS:
+        m = pattern.search(normalized)
+        if m:
+            cert_num_val = _clean_extracted_value(m.group(1))
+            if cert_num_val and len(cert_num_val) >= 2:
+                best_cert_num = cert_num_val
+                cert_num_confidence = 0.85
+                word_conf = _find_word_confidence(cert_num_val, words)
+                cert_num_confidence = (cert_num_confidence + word_conf) / 2.0
+                break
+
+    if best_cert_num:
+        result.certificate_number = ExtractedField(
+            field_name="certificate_number",
+            field_label="Certificate Number",
+            data_type="text",
+            value=best_cert_num,
+            confidence=round(cert_num_confidence, 3),
+        )
+        logger.debug(
+            "CERT_EXTRACT certificate_number=%s confidence=%.3f",
+            best_cert_num,
+            cert_num_confidence,
+        )
+
     logger.info(
-        "CERT_EXTRACT_RESULT doc_type=%s name=%s course=%s institution=%s",
+        "CERT_EXTRACT_RESULT doc_type=%s name=%s course=%s institution=%s date=%s cert_num=%s",
         doc_type_key,
         bool(best_name),
         bool(best_course),
         bool(best_institution),
+        bool(best_date),
+        bool(best_cert_num),
     )
 
     return result

@@ -47,6 +47,18 @@ from certificates.normalizer import normalize_field
 
 logger = logging.getLogger(__name__)
 
+CERT_DOC_TYPE_KEYS = {
+    "academic_certificate",
+    "degree_certificate",
+    "diploma",
+    "professional_certificate",
+    "training_certificate",
+    "certificate_of_completion",
+    "certificate_of_attendance",
+    "membership_certificate",
+    "license_certification",
+}
+
 IMAGE_EXTENSIONS = {"jpg", "jpeg", "png", "tiff", "tif", "bmp"}
 PDF_EXTENSIONS = {"pdf"}
 SUPPORTED_EXTENSIONS = IMAGE_EXTENSIONS | PDF_EXTENSIONS
@@ -447,6 +459,8 @@ class CaptureService:
 
                         doc.status = "ready_for_review"
                         doc.processed_at = datetime.now(timezone.utc)
+                        if doc.document_type in CERT_DOC_TYPE_KEYS:
+                            doc.verification_status = "extraction_complete"
                         self._log(
                             doc.organization_id,
                             "extracted",
@@ -506,6 +520,8 @@ class CaptureService:
 
             doc.status = "ready_for_review"
             doc.processed_at = datetime.now(timezone.utc)
+            if doc.document_type in CERT_DOC_TYPE_KEYS:
+                doc.verification_status = "extraction_complete"
             self._log(
                 doc.organization_id,
                 "extracted",
@@ -629,18 +645,7 @@ class CaptureService:
         # student name, course/programme, and institution — the generic
         # label-anchored extractor fails on certificates because names and
         # courses appear on separate lines, not after a label on the same line.
-        _CERT_DOC_TYPE_KEYS = {
-            "academic_certificate",
-            "degree_certificate",
-            "diploma",
-            "professional_certificate",
-            "training_certificate",
-            "certificate_of_completion",
-            "certificate_of_attendance",
-            "membership_certificate",
-            "license_certification",
-        }
-        if doc.document_type in _CERT_DOC_TYPE_KEYS:
+        if doc.document_type in CERT_DOC_TYPE_KEYS:
             try:
                 from certificates.extractor import extract_certificate_fields
 
@@ -659,6 +664,10 @@ class CaptureService:
                     cert_fields.append(cert_result.course)
                 if cert_result.institution and cert_result.institution.value:
                     cert_fields.append(cert_result.institution)
+                if cert_result.date_awarded and cert_result.date_awarded.value:
+                    cert_fields.append(cert_result.date_awarded)
+                if cert_result.certificate_number and cert_result.certificate_number.value:
+                    cert_fields.append(cert_result.certificate_number)
 
                 for cert_field in cert_fields:
                     existing = extracted_by_name.get(cert_field.field_name)

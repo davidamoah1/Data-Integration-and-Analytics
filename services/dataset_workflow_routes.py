@@ -247,6 +247,96 @@ def _get_workflow_state_dict(
     return state_dict
 
 
+def _rehydrate_workflow_df(workflow_id: str, db: DbSession, org_id: int | None = None):
+    """Rehydrate the in-memory workflow state with DataFrame when missing.
+
+    When a workflow was processed asynchronously (background worker), the
+    DataFrame lives in the worker process, not the API process.  This helper
+    locates the original file via the job payload, re-downloads it, re-parses
+    it, and re-registers the state in the orchestrator so subsequent endpoints
+    (analyze, clean) can access `state.context["df"]`.
+
+    Returns the rehydrated WorkflowState, or None if rehydration is not
+    possible (file not found, parse error, etc.).
+    """
+    import json as _json
+
+    from jobs.models import Job
+
+    state = _orchestrator.get_state(workflow_id)
+    if state is not None and state.context.get("df") is not None:
+        return state
+
+    # Look for a completed dataset_workflow job whose result contains this workflow_id
+    job_query = select(Job).where(
+        Job.job_type == "dataset_workflow",
+        Job.status == "completed",
+    )
+    if org_id is not None:
+        job_query = job_query.where(Job.organization_id == org_id)
+    jobs = db.execute(job_query.order_by(Job.id.desc()).limit(50)).scalars().all()
+
+    target_job = None
+    for j in jobs:
+        if not j.result:
+            continue
+        try:
+            result = _json.loads(j.result)
+            if result.get("workflow_id") == workflow_id:
+                target_job = j
+                break
+        except Exception as e:
+            logger.debug("Skipping malformed job result for job %s: %s", j.id, e)
+            continue
+
+    if target_job is None:
+        return None
+
+    try:
+        payload = _json.loads(target_job.payload) if target_job.payload else {}
+    except Exception:
+        return None
+
+    file_id = payload.get("file_id")
+    filename = payload.get("filename", "uploaded_dataset")
+    org_id = payload.get("organization_id")
+    admin_confirmed = payload.get("admin_confirmed", False)
+    created_by = payload.get("created_by")
+
+    if not file_id:
+        return None
+
+    try:
+        from storage.service import FileService
+
+        content, _record = FileService(db).download(file_id, org_id)
+        df = _parse_upload_bytes(content, filename)
+        if df.empty:
+            return None
+
+        # Re-run the orchestrator to rebuild full in-memory state
+        state = _orchestrator.start(
+            df,
+            dataset_name=filename,
+            admin_confirmed=admin_confirmed,
+            created_by=created_by,
+            organization_id=org_id,
+        )
+        logger.info(
+            "Rehydrated workflow state for %s (new workflow_id=%s, original=%s)",
+            workflow_id,
+            state.workflow_id,
+            workflow_id,
+        )
+        # Register under the ORIGINAL workflow_id so callers can find it
+        state.workflow_id = workflow_id
+        _orchestrator._workflows[workflow_id] = state
+        return state
+    except Exception as e:
+        logger.warning("Failed to rehydrate workflow %s: %s", workflow_id, e)
+        return None
+
+
 def _stage_result(state_dict: dict, stage: WorkflowStage) -> dict | None:
     """Read a stage's result from a workflow state dict, or None if absent."""
     return state_dict["stages"].get(stage.value, {}).get("result")
@@ -626,17 +716,20 @@ async def apply_cleaning_transformation(
 
     # The in-memory orchestrator must still hold the DataFrame
     state = _orchestrator.get_state(workflow_id)
-    if state is None or not hasattr(state, "df") or state.df is None:
-        raise HTTPException(
-            status_code=409,
-            detail="Workflow data is not available for cleaning in this process.",
-        )
+    if state is None or state.context.get("df") is None:
+        # Try to rehydrate from stored file (async workflow case)
+        state = _rehydrate_workflow_df(workflow_id, db, org_id=org_id)
+        if state is None or state.context.get("df") is None:
+            raise HTTPException(
+                status_code=409,
+                detail="Workflow data is not available for cleaning in this process.",
+            )
 
     import uuid
     from datetime import datetime, timezone
 
     transformation_id = str(uuid.uuid4())
-    df = state.df
+    df = state.context["df"]
     affected_rows = 0
     description = ""
 
@@ -674,7 +767,7 @@ async def apply_cleaning_transformation(
     elif payload.action == "remove_duplicates":
         before_count = len(df)
         df = df.drop_duplicates()
-        state.df = df
+        state.context["df"] = df
         affected_rows = before_count - len(df)
         description = f"Removed {affected_rows} duplicate rows"
 
@@ -799,13 +892,17 @@ async def run_analysis(
     _get_workflow_state_dict(workflow_id, current_user, db)
 
     state = _orchestrator.get_state(workflow_id)
-    if state is None or not hasattr(state, "df") or state.df is None:
-        raise HTTPException(
-            status_code=409,
-            detail="Workflow data is not available for analysis in this process.",
-        )
+    if state is None or state.context.get("df") is None:
+        # Try to rehydrate from stored file (async workflow case)
+        org_id = get_current_organization_id(current_user, db)
+        state = _rehydrate_workflow_df(workflow_id, db, org_id=org_id)
+        if state is None or state.context.get("df") is None:
+            raise HTTPException(
+                status_code=409,
+                detail="Workflow data is not available for analysis in this process.",
+            )
 
-    df = state.df
+    df = state.context["df"]
 
     if payload.mode == "easy":
         # Easy mode: auto-generate insights using InsightGenerator

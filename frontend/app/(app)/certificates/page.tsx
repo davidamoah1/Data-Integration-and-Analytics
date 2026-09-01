@@ -727,9 +727,15 @@ export default function CertificateIntelligencePage() {
           ) : certificates.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <Award className="h-12 w-12 text-slate-300 mb-3" />
-              <p className="text-sm font-medium text-slate-700">No certificates yet</p>
+              <p className="text-sm font-medium text-slate-700">
+                {searchQuery || filterType || filterStatus
+                  ? "No certificates match your filters"
+                  : "No certificates yet"}
+              </p>
               <p className="text-xs text-slate-500 mt-1">
-                Upload your first certificate to begin extracting and analyzing certificate data.
+                {searchQuery || filterType || filterStatus
+                  ? "Try adjusting your search or filters."
+                  : "Upload your first certificate to begin extracting and analyzing certificate data."}
               </p>
             </div>
           ) : (

@@ -432,3 +432,180 @@ class TestOcrNoiseResilience:
         result = extract_certificate_fields(_make_ocr_result(text))
         assert result.student_name is not None
         assert "McDonald" in result.student_name.value
+
+
+# ── Date awarded extraction ─────────────────────────────────────────
+
+
+class TestDateAwardedExtraction:
+    """Test date_awarded extraction from various certificate formats."""
+
+    def test_date_label_day_month_year(self):
+        text = (
+            "This is to certify that\n"
+            "John Doe\n"
+            "has successfully completed\n"
+            "Certificate in Data Analytics\n"
+            "Date: 15th January 2024"
+        )
+        result = extract_certificate_fields(_make_ocr_result(text))
+        assert result.date_awarded is not None
+        assert "15" in result.date_awarded.value
+        assert "January" in result.date_awarded.value
+        assert "2024" in result.date_awarded.value
+
+    def test_date_label_month_day_year(self):
+        text = (
+            "This is to certify that\n"
+            "Jane Smith\n"
+            "has successfully completed\n"
+            "Diploma in Business Management\n"
+            "Date: January 15, 2024"
+        )
+        result = extract_certificate_fields(_make_ocr_result(text))
+        assert result.date_awarded is not None
+        assert "January" in result.date_awarded.value
+        assert "2024" in result.date_awarded.value
+
+    def test_date_label_numeric_format(self):
+        text = (
+            "This is to certify that\n"
+            "Bob Johnson\n"
+            "has successfully completed\n"
+            "Certificate in IT\n"
+            "Date: 15/01/2024"
+        )
+        result = extract_certificate_fields(_make_ocr_result(text))
+        assert result.date_awarded is not None
+        assert "15" in result.date_awarded.value
+        assert "2024" in result.date_awarded.value
+
+    def test_awarded_on_date(self):
+        text = (
+            "This is to certify that\n"
+            "Alice Brown\n"
+            "has successfully completed\n"
+            "Certificate in Python Programming\n"
+            "Awarded on 10th March 2024"
+        )
+        result = extract_certificate_fields(_make_ocr_result(text))
+        assert result.date_awarded is not None
+        assert "March" in result.date_awarded.value
+        assert "2024" in result.date_awarded.value
+
+    def test_date_of_award(self):
+        text = (
+            "This is to certify that\n"
+            "Charlie Wilson\n"
+            "has successfully completed\n"
+            "Certificate in Cloud Computing\n"
+            "Date of Award: 2024-03-15"
+        )
+        result = extract_certificate_fields(_make_ocr_result(text))
+        assert result.date_awarded is not None
+        assert "2024" in result.date_awarded.value
+
+    def test_no_date_returns_none(self):
+        text = (
+            "This is to certify that\n"
+            "John Doe\n"
+            "has successfully completed\n"
+            "Certificate in Data Analytics"
+        )
+        result = extract_certificate_fields(_make_ocr_result(text))
+        assert result.date_awarded is None
+
+
+# ── Certificate number extraction ───────────────────────────────────
+
+
+class TestCertificateNumberExtraction:
+    """Test certificate_number extraction from various formats."""
+
+    def test_certificate_no(self):
+        text = (
+            "This is to certify that\n"
+            "John Doe\n"
+            "has successfully completed\n"
+            "Certificate in Data Analytics\n"
+            "Certificate No: CERT-2024-001"
+        )
+        result = extract_certificate_fields(_make_ocr_result(text))
+        assert result.certificate_number is not None
+        assert "CERT-2024-001" in result.certificate_number.value
+
+    def test_serial_number(self):
+        text = (
+            "This is to certify that\n"
+            "Jane Smith\n"
+            "has successfully completed\n"
+            "Diploma in Business\n"
+            "Serial Number: SN-12345"
+        )
+        result = extract_certificate_fields(_make_ocr_result(text))
+        assert result.certificate_number is not None
+        assert "SN-12345" in result.certificate_number.value
+
+    def test_registration_number(self):
+        text = (
+            "This is to certify that\n"
+            "Bob Johnson\n"
+            "has successfully completed\n"
+            "Certificate in IT\n"
+            "Registration No: REG-2024-ABC"
+        )
+        result = extract_certificate_fields(_make_ocr_result(text))
+        assert result.certificate_number is not None
+        assert "REG-2024-ABC" in result.certificate_number.value
+
+    def test_reference_number(self):
+        text = (
+            "This is to certify that\n"
+            "Alice Brown\n"
+            "has successfully completed\n"
+            "Certificate in Python\n"
+            "Ref No: REF-2024-001"
+        )
+        result = extract_certificate_fields(_make_ocr_result(text))
+        assert result.certificate_number is not None
+        assert "REF-2024-001" in result.certificate_number.value
+
+    def test_no_cert_number_returns_none(self):
+        text = (
+            "This is to certify that\n"
+            "John Doe\n"
+            "has successfully completed\n"
+            "Certificate in Data Analytics"
+        )
+        result = extract_certificate_fields(_make_ocr_result(text))
+        assert result.certificate_number is None
+
+
+# ── Combined extraction ─────────────────────────────────────────────
+
+
+class TestAllFieldsExtraction:
+    """Test that all fields are extracted together from a full certificate."""
+
+    def test_full_certificate_all_fields(self):
+        text = (
+            "This is to certify that\n"
+            "JOHN DOE\n"
+            "has successfully completed\n"
+            "Certificate in Data Analytics\n"
+            "awarded by\n"
+            "Ghana Institute of Technology\n"
+            "Date: 15th January 2024\n"
+            "Certificate No: GIT-2024-001"
+        )
+        result = extract_certificate_fields(_make_ocr_result(text))
+        assert result.student_name is not None
+        assert "JOHN DOE" in result.student_name.value
+        assert result.course is not None
+        assert "Data Analytics" in result.course.value
+        assert result.institution is not None
+        assert "Ghana Institute" in result.institution.value
+        assert result.date_awarded is not None
+        assert "January" in result.date_awarded.value
+        assert result.certificate_number is not None
+        assert "GIT-2024-001" in result.certificate_number.value
