@@ -24,6 +24,7 @@ Workflow: Dataset â†’ Analysis â†’ Insights â†’ Report â†’ P
 from __future__ import annotations
 
 import io
+import json
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -31,6 +32,19 @@ from enum import Enum
 from typing import Any
 
 logger = logging.getLogger(__name__)
+
+
+def _get_db_session():
+    """Get a short-lived DB session. Returns None if DB is unavailable."""
+    try:
+        import shared.database as db_module
+
+        engine = db_module.get_engine()
+        db_module.ensure_tables(engine)
+        factory = db_module.get_session_factory(engine)
+        return factory()
+    except Exception:
+        return None
 
 
 # â”€â”€ Enums â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -507,9 +521,199 @@ class ReportTemplateFactory:
 
 
 class ReportCompositionService:
-    """Service for composing, managing, and exporting reports."""
+    """Service for composing, managing, and exporting reports.
+
+    Uses database persistence (report_compositions table) with an
+    in-memory cache for fast access. Falls back to in-memory only
+    when the database is unavailable (e.g. in unit tests).
+    """
 
     _store: dict[str, ReportComposition] = {}
+
+    # ── DB persistence helpers ──────────────────────────────────────
+
+    @classmethod
+    def _save_to_db(cls, report: ReportComposition) -> None:
+        """Persist a report to the database. Silently fails if DB unavailable."""
+        db = _get_db_session()
+        if db is None:
+            return
+        try:
+            from services.report_engine_models import ReportCompositionRecord
+            from sqlalchemy import select as sa_select
+
+            existing = db.execute(
+                sa_select(ReportCompositionRecord).where(
+                    ReportCompositionRecord.report_id == report.report_id
+                )
+            ).scalar_one_or_none()
+
+            report_dict = report.to_dict()
+            sections_json = report_dict["sections"]
+            exec_summary = cls.generate_executive_summary(report)
+
+            if existing:
+                existing.title = report.title
+                existing.subtitle = report.subtitle
+                existing.organization_name = report.organization_name
+                existing.author_name = report.author_name
+                existing.template = report.template.value
+                existing.industry = report.industry
+                existing.dataset_id = report.dataset_id
+                existing.analysis_id = report.analysis_id
+                existing.sections = sections_json
+                existing.executive_summary = exec_summary
+                existing.tags = report.tags
+            else:
+                record = ReportCompositionRecord(
+                    report_id=report.report_id,
+                    title=report.title,
+                    subtitle=report.subtitle,
+                    organization_name=report.organization_name,
+                    author_name=report.author_name,
+                    template=report.template.value,
+                    industry=report.industry,
+                    dataset_id=report.dataset_id,
+                    analysis_id=report.analysis_id,
+                    sections=sections_json,
+                    executive_summary=exec_summary,
+                    tags=report.tags,
+                    status="draft",
+                )
+                db.add(record)
+            db.commit()
+        except Exception as e:
+            logger.warning("Failed to persist report to DB: %s", e)
+            db.rollback()
+        finally:
+            db.close()
+
+    @classmethod
+    def _load_from_db(cls, report_id: str) -> ReportComposition | None:
+        """Load a report from the database. Returns None if not found or DB unavailable."""
+        db = _get_db_session()
+        if db is None:
+            return None
+        try:
+            from services.report_engine_models import ReportCompositionRecord
+            from sqlalchemy import select as sa_select
+
+            record = db.execute(
+                sa_select(ReportCompositionRecord).where(
+                    ReportCompositionRecord.report_id == report_id
+                )
+            ).scalar_one_or_none()
+            if not record:
+                return None
+            return cls._record_to_composition(record)
+        except Exception as e:
+            logger.warning("Failed to load report from DB: %s", e)
+            return None
+        finally:
+            db.close()
+
+    @classmethod
+    def _load_all_from_db(cls) -> list[ReportComposition]:
+        """Load all reports from the database."""
+        db = _get_db_session()
+        if db is None:
+            return []
+        try:
+            from services.report_engine_models import ReportCompositionRecord
+            from sqlalchemy import select as sa_select
+
+            records = db.execute(
+                sa_select(ReportCompositionRecord).order_by(
+                    ReportCompositionRecord.created_at.desc()
+                )
+            ).scalars().all()
+            return [cls._record_to_composition(r) for r in records]
+        except Exception as e:
+            logger.warning("Failed to load reports from DB: %s", e)
+            return []
+        finally:
+            db.close()
+
+    @classmethod
+    def _delete_from_db(cls, report_id: str) -> bool:
+        """Delete a report from the database."""
+        db = _get_db_session()
+        if db is None:
+            return False
+        try:
+            from services.report_engine_models import ReportCompositionRecord
+            from sqlalchemy import delete as sa_delete
+
+            result = db.execute(
+                sa_delete(ReportCompositionRecord).where(
+                    ReportCompositionRecord.report_id == report_id
+                )
+            )
+            db.commit()
+            return result.rowcount > 0
+        except Exception as e:
+            logger.warning("Failed to delete report from DB: %s", e)
+            db.rollback()
+            return False
+        finally:
+            db.close()
+
+    @classmethod
+    def _record_to_composition(cls, record: Any) -> ReportComposition:
+        """Convert a DB record to a ReportComposition object."""
+        sections_data = record.sections or []
+        sections: list[ReportSection] = []
+        for s in sections_data:
+            kpis = [KPIMetric(**k) for k in s.get("kpis", [])]
+            charts = [
+                ChartDefinition(
+                    title=c["title"],
+                    chart_type=ChartType(c["chart_type"]),
+                    data=c.get("data", []),
+                    x_axis=c.get("x_axis", ""),
+                    y_axis=c.get("y_axis", ""),
+                    series=c.get("series", []),
+                    config=c.get("config", {}),
+                )
+                for c in s.get("charts", [])
+            ]
+            tables = [TableDefinition(**t) for t in s.get("tables", [])]
+            insights = [Insight(**i) for i in s.get("insights", [])]
+            recs = [Recommendation(**r) for r in s.get("recommendations", [])]
+            sections.append(
+                ReportSection(
+                    section_type=ReportSectionType(s["section_type"]),
+                    title=s.get("title", ""),
+                    content=s.get("content", ""),
+                    kpis=kpis,
+                    charts=charts,
+                    tables=tables,
+                    insights=insights,
+                    recommendations=recs,
+                    order=s.get("order", 0),
+                    page_break=s.get("page_break", False),
+                )
+            )
+        try:
+            template = ReportTemplate(record.template)
+        except ValueError:
+            template = ReportTemplate.EXECUTIVE
+        return ReportComposition(
+            report_id=record.report_id,
+            title=record.title,
+            subtitle=record.subtitle or "",
+            organization_name=record.organization_name or "",
+            author_name=record.author_name or "",
+            template=template,
+            industry=record.industry or "",
+            dataset_id=record.dataset_id,
+            analysis_id=record.analysis_id,
+            sections=sections,
+            created_at=record.created_at.isoformat() if record.created_at else "",
+            tags=record.tags or [],
+        )
+
+    # ── Public API (with DB persistence) ────────────────────────────
 
     @classmethod
     def create_report(
@@ -526,60 +730,94 @@ class ReportCompositionService:
         report.dataset_id = dataset_id
         report.analysis_id = analysis_id
         cls._store[report.report_id] = report
+        cls._save_to_db(report)
         logger.info(f"Created report '{title}' with template {template.value}")
         return report
 
     @classmethod
     def get_report(cls, report_id: str) -> ReportComposition | None:
-        return cls._store.get(report_id)
+        # Check in-memory cache first
+        if report_id in cls._store:
+            return cls._store[report_id]
+        # Fall back to database
+        report = cls._load_from_db(report_id)
+        if report:
+            cls._store[report_id] = report
+            return report
+        return None
 
     @classmethod
     def list_reports(cls) -> list[dict[str, Any]]:
-        return [
-            {
-                "report_id": r.report_id,
-                "title": r.title,
-                "subtitle": r.subtitle,
-                "template": r.template.value,
-                "industry": r.industry,
-                "section_count": len(r.sections),
-                "created_at": r.created_at,
-                "tags": r.tags,
-            }
-            for r in cls._store.values()
-        ]
+        # Merge in-memory and DB reports (in-memory takes priority)
+        db_reports = cls._load_all_from_db()
+        db_ids = set()
+        result: list[dict[str, Any]] = []
+        for r in db_reports:
+            db_ids.add(r.report_id)
+            result.append(
+                {
+                    "report_id": r.report_id,
+                    "title": r.title,
+                    "subtitle": r.subtitle,
+                    "template": r.template.value,
+                    "industry": r.industry,
+                    "section_count": len(r.sections),
+                    "created_at": r.created_at,
+                    "tags": r.tags,
+                }
+            )
+        # Add any in-memory reports not in DB
+        for r in cls._store.values():
+            if r.report_id not in db_ids:
+                result.append(
+                    {
+                        "report_id": r.report_id,
+                        "title": r.title,
+                        "subtitle": r.subtitle,
+                        "template": r.template.value,
+                        "industry": r.industry,
+                        "section_count": len(r.sections),
+                        "created_at": r.created_at,
+                        "tags": r.tags,
+                    }
+                )
+        return result
 
     @classmethod
     def delete_report(cls, report_id: str) -> bool:
-        if report_id in cls._store:
+        in_memory = report_id in cls._store
+        if in_memory:
             del cls._store[report_id]
-            return True
-        return False
+        from_db = cls._delete_from_db(report_id)
+        return in_memory or from_db
 
     @classmethod
     def add_section(cls, report_id: str, section: ReportSection) -> ReportComposition | None:
-        report = cls._store.get(report_id)
+        report = cls.get_report(report_id)
         if not report:
             return None
         section.order = len(report.sections)
         report.sections.append(section)
+        cls._store[report_id] = report
+        cls._save_to_db(report)
         return report
 
     @classmethod
     def remove_section(cls, report_id: str, section_order: int) -> ReportComposition | None:
-        report = cls._store.get(report_id)
+        report = cls.get_report(report_id)
         if not report:
             return None
         report.sections = [s for s in report.sections if s.order != section_order]
         for i, s in enumerate(report.sections):
             s.order = i
+        cls._save_to_db(report)
         return report
 
     @classmethod
     def update_section(
         cls, report_id: str, section_order: int, updates: dict[str, Any]
     ) -> ReportComposition | None:
-        report = cls._store.get(report_id)
+        report = cls.get_report(report_id)
         if not report:
             return None
         for s in report.sections:
@@ -610,58 +848,63 @@ class ReportCompositionService:
                 if "recommendations" in updates:
                     s.recommendations = [Recommendation(**r) for r in updates["recommendations"]]
                 break
+        cls._save_to_db(report)
         return report
 
     @classmethod
     def add_kpis(
         cls, report_id: str, section_order: int, kpis: list[KPIMetric]
     ) -> ReportComposition | None:
-        report = cls._store.get(report_id)
+        report = cls.get_report(report_id)
         if not report:
             return None
         for s in report.sections:
             if s.order == section_order:
                 s.kpis.extend(kpis)
                 break
+        cls._save_to_db(report)
         return report
 
     @classmethod
     def add_chart(
         cls, report_id: str, section_order: int, chart: ChartDefinition
     ) -> ReportComposition | None:
-        report = cls._store.get(report_id)
+        report = cls.get_report(report_id)
         if not report:
             return None
         for s in report.sections:
             if s.order == section_order:
                 s.charts.append(chart)
                 break
+        cls._save_to_db(report)
         return report
 
     @classmethod
     def add_insights(
         cls, report_id: str, section_order: int, insights: list[Insight]
     ) -> ReportComposition | None:
-        report = cls._store.get(report_id)
+        report = cls.get_report(report_id)
         if not report:
             return None
         for s in report.sections:
             if s.order == section_order:
                 s.insights.extend(insights)
                 break
+        cls._save_to_db(report)
         return report
 
     @classmethod
     def add_recommendations(
         cls, report_id: str, section_order: int, recommendations: list[Recommendation]
     ) -> ReportComposition | None:
-        report = cls._store.get(report_id)
+        report = cls.get_report(report_id)
         if not report:
             return None
         for s in report.sections:
             if s.order == section_order:
                 s.recommendations.extend(recommendations)
                 break
+        cls._save_to_db(report)
         return report
 
     @classmethod
@@ -719,7 +962,7 @@ class ReportCompositionService:
             report_id: The report ID to populate.
             dashboard_spec: DashboardSpecification from the Visualization Intelligence Engine.
         """
-        report = cls._store.get(report_id)
+        report = cls.get_report(report_id)
         if not report:
             return None
 
@@ -781,6 +1024,7 @@ class ReportCompositionService:
                 for rec in dashboard_spec.recommendations
             ]
 
+        cls._save_to_db(report)
         return report
 
     @classmethod
@@ -1133,10 +1377,12 @@ class ReportCompositionService:
 
     @classmethod
     def export_to_pptx(cls, report: ReportComposition) -> bytes:
-        """Export report as a PowerPoint-style presentation."""
+        """Export report as a PowerPoint-style presentation with real charts."""
         try:
             from pptx import Presentation as PptxPresentation
+            from pptx.chart.data import CategoryChartData
             from pptx.dml.color import RGBColor
+            from pptx.enum.chart import XL_CHART_TYPE
             from pptx.util import Inches, Pt
         except ImportError:
             logger.warning("python-pptx not installed, generating JSON fallback")
@@ -1154,6 +1400,62 @@ class ReportCompositionService:
         GREEN = RGBColor(0x16, 0xA3, 0x4A)
         RED = RGBColor(0xDC, 0x26, 0x26)
         RGBColor(0xF5, 0x9E, 0x0B)
+
+        # Map report ChartType to XL_CHART_TYPE
+        _xl_chart_map = {
+            ChartType.BAR: XL_CHART_TYPE.COLUMN_CLUSTERED,
+            ChartType.LINE: XL_CHART_TYPE.LINE,
+            ChartType.PIE: XL_CHART_TYPE.PIE,
+            ChartType.DONUT: XL_CHART_TYPE.DOUGHNUT,
+            ChartType.AREA: XL_CHART_TYPE.AREA,
+            ChartType.SCATTER: XL_CHART_TYPE.XY_SCATTER,
+        }
+
+        def _add_chart_to_slide(slide: Any, chart: ChartDefinition):
+            """Add a real chart object to a slide using python-pptx."""
+            if not chart.data:
+                return
+
+            chart_data = CategoryChartData()
+            categories = [str(d.get("x", d.get(chart.x_axis, ""))) for d in chart.data[:20]]
+            chart_data.categories = categories
+
+            # Check for multiple series
+            if chart.series:
+                for s in chart.series[:5]:
+                    series_name = s.get("name", chart.y_axis or "Value")
+                    values = []
+                    for d in chart.data[:20]:
+                        val = d.get(s.get("field", "y"), d.get("y", 0))
+                        try:
+                            values.append(float(val))
+                        except (TypeError, ValueError):
+                            values.append(0.0)
+                    chart_data.add_series(series_name, values)
+            else:
+                values = []
+                for d in chart.data[:20]:
+                    val = d.get("y", 0)
+                    try:
+                        values.append(float(val))
+                    except (TypeError, ValueError):
+                        values.append(0.0)
+                chart_data.add_series(chart.y_axis or chart.title, values)
+
+            xl_type = _xl_chart_map.get(chart.chart_type, XL_CHART_TYPE.COLUMN_CLUSTERED)
+
+            graphic_frame = slide.shapes.add_chart(
+                xl_type,
+                Inches(0.75),
+                Inches(1.75),
+                Inches(11.8),
+                Inches(5.25),
+                chart_data,
+            )
+            chart_obj = graphic_frame.chart
+            if chart_obj.has_title:
+                chart_obj.chart_title.text_frame.text = chart.title
+                chart_obj.chart_title.text_frame.paragraphs[0].font.size = Pt(14)
 
         def add_title_slide(title: str, subtitle: str):
             slide = prs.slides.add_slide(prs.slide_layouts[6])  # blank
@@ -1282,10 +1584,20 @@ class ReportCompositionService:
                     )
 
             elif section.section_type == ReportSectionType.CHART:
-                chart_bullets = [f"{c.title} ({c.chart_type.value})" for c in section.charts]
-                if not chart_bullets:
-                    chart_bullets = ["Charts will appear here once data is loaded."]
-                add_content_slide(section.title, chart_bullets)
+                for chart in section.charts:
+                    slide = prs.slides.add_slide(prs.slide_layouts[6])
+                    txBox = slide.shapes.add_textbox(Inches(0.5), Inches(0.3), Inches(12), Inches(0.8))
+                    tf = txBox.text_frame
+                    p = tf.paragraphs[0]
+                    p.text = chart.title
+                    p.font.size = Pt(28)
+                    p.font.bold = True
+                    p.font.color.rgb = PRIMARY
+                    _add_chart_to_slide(slide, chart)
+                if not section.charts:
+                    add_content_slide(
+                        section.title, ["Charts will appear here once data is loaded."]
+                    )
 
             elif section.section_type == ReportSectionType.TABLE:
                 for table in section.tables:

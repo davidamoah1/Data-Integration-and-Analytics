@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import io
 import logging
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+import pandas as pd
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from fastapi.responses import Response
 from pydantic import BaseModel
 
@@ -389,7 +391,109 @@ async def export_presentation(
     )
 
 
-# â”€â”€ Templates â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# â”€â”€ Auto-Generate from Dataset â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+
+@router.post("/auto-generate")
+async def auto_generate_report(
+    file: UploadFile = File(...),
+    title: str = Query("Auto-Generated Report"),
+    template: str = Query("executive"),
+    industry: str = Query("unknown"),
+    organization_name: str = Query(""),
+    author_name: str = Query(""),
+    current_user: dict = Depends(require_permissions("reports.create")),
+):
+    """Auto-generate a report from an uploaded dataset.
+
+    Runs the full Visualization Intelligence Engine pipeline:
+    analysis → chart selection → KPI detection → insight generation
+    → dashboard layout → report population.
+
+    The report uses the SAME canonical ChartSpecification objects
+    as the dashboard and presentation — no independent chart regeneration.
+    """
+    # Parse uploaded file
+    content = await file.read()
+    filename = file.filename or "dataset.csv"
+
+    try:
+        if filename.endswith(".csv"):
+            try:
+                df = pd.read_csv(io.BytesIO(content), encoding="utf-8")
+            except UnicodeDecodeError:
+                df = pd.read_csv(io.BytesIO(content), encoding="latin-1")
+        elif filename.endswith((".xlsx", ".xls")):
+            df = pd.read_excel(io.BytesIO(content))
+        else:
+            df = pd.read_csv(io.BytesIO(content))
+    except Exception as e:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Failed to parse file '{filename}': {e}",
+        ) from e
+
+    if df.empty:
+        raise HTTPException(status_code=422, detail="Uploaded file contains no data rows.")
+
+    # Validate template
+    try:
+        tpl = ReportTemplate(template)
+    except ValueError:
+        raise HTTPException(status_code=400, detail=f"Invalid template: {template}") from None
+
+    # Run the auto engine pipeline
+    try:
+        from services.auto.orchestrator import AutoEngineOrchestrator
+
+        orchestrator = AutoEngineOrchestrator()
+        result = orchestrator.generate(
+            df,
+            dataset_name=filename,
+            industry=industry,
+            presentation_template=template,
+        )
+        dashboard_spec = result.get("dashboard")
+        if not dashboard_spec:
+            raise HTTPException(
+                status_code=500,
+                detail="Auto engine did not produce a dashboard specification.",
+            )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("Auto engine pipeline failed: %s", e, exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Auto-analysis pipeline failed: {e}",
+        ) from e
+
+    # Create the report
+    report = ReportCompositionService.create_report(
+        title=title,
+        template=tpl,
+        org_name=organization_name,
+        author=author_name,
+        industry=industry,
+    )
+
+    # Populate from the dashboard spec
+    ReportCompositionService.populate_from_dashboard_spec(report.report_id, dashboard_spec)
+
+    # Return the populated report
+    populated = ReportCompositionService.get_report(report.report_id)
+    if not populated:
+        raise HTTPException(status_code=500, detail="Failed to retrieve generated report.")
+
+    response = populated.to_dict()
+    response["auto_generated"] = True
+    response["chart_count"] = sum(len(s.charts) for s in populated.sections)
+    response["kpi_count"] = sum(len(s.kpis) for s in populated.sections)
+    response["insight_count"] = sum(len(s.insights) for s in populated.sections)
+    return response
+
+
+# â”€â”€ Templates â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @router.get("/templates/list")

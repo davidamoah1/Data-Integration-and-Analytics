@@ -93,6 +93,8 @@ export interface SlideData {
   kpis?: { label: string; value: string; trend?: string; trend_value?: string }[];
   chart_type?: string;
   chart_data?: Record<string, unknown>[];
+  x_axis?: string;
+  y_axis?: string;
   columns?: string[];
   rows?: unknown[][];
   speaker_notes?: string;
@@ -195,5 +197,25 @@ export const reportEngineService = {
 
   async listChartTypes(): Promise<{ chart_types: { key: string; name: string }[] }> {
     return apiClient.get('/api/reports/chart-types/list');
+  },
+
+  async autoGenerateReport(file: File, options?: {
+    title?: string;
+    template?: string;
+    industry?: string;
+    organization_name?: string;
+    author_name?: string;
+  }): Promise<ReportComposition & { auto_generated: boolean; chart_count: number; kpi_count: number; insight_count: number }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    const params = new URLSearchParams();
+    if (options?.title) params.set('title', options.title);
+    if (options?.template) params.set('template', options.template);
+    if (options?.industry) params.set('industry', options.industry);
+    if (options?.organization_name) params.set('organization_name', options.organization_name);
+    if (options?.author_name) params.set('author_name', options.author_name);
+    const queryString = params.toString();
+    const url = `/api/reports/auto-generate${queryString ? `?${queryString}` : ''}`;
+    return apiClient.post(url, formData);
   },
 };

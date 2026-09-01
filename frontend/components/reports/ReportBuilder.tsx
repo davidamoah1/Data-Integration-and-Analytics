@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import {
   Plus, Trash2, Download, FileText, Presentation as PresentationIcon,
   BarChart3, Table as TableIcon, Lightbulb, CheckSquare, Loader2,
-  ArrowRight, Sparkles, LayoutDashboard, GripVertical,
+  ArrowRight, Sparkles, LayoutDashboard, GripVertical, Upload, X,
 } from 'lucide-react';
 import {
   reportEngineService,
@@ -18,6 +18,7 @@ import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
 import { cn } from '@/lib/utils';
 import { PresentationViewer } from './PresentationViewer';
+import { SlideChart } from './SlideChart';
 import { useAuthStore } from '@/stores/authStore';
 import { toast } from '@/components/ui/Toaster';
 
@@ -60,6 +61,11 @@ export function ReportBuilder({ reportId: initialReportId, onSaved }: ReportBuil
   const [creating, setCreating] = useState(false);
   const [view, setView] = useState<'compose' | 'preview' | 'presentation'>('compose');
   const [reportId, setReportId] = useState(initialReportId || '');
+  const [showAddSection, setShowAddSection] = useState(false);
+  const [newSectionType, setNewSectionType] = useState('chart');
+  const [newSectionTitle, setNewSectionTitle] = useState('');
+  const [addingSection, setAddingSection] = useState(false);
+  const [autoGenerating, setAutoGenerating] = useState(false);
 
   const loadTemplates = useCallback(async () => {
     try {
@@ -118,6 +124,48 @@ export function ReportBuilder({ reportId: initialReportId, onSaved }: ReportBuil
     }
   };
 
+  const handleAddSection = async () => {
+    if (!reportId) return;
+    setAddingSection(true);
+    try {
+      const updated = await reportEngineService.addSection(reportId, {
+        section_type: newSectionType,
+        title: newSectionTitle || newSectionType.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+      });
+      setReport(updated);
+      setShowAddSection(false);
+      setNewSectionTitle('');
+      toast.success('Section added');
+    } catch {
+      toast.error('Failed to add section');
+    } finally {
+      setAddingSection(false);
+    }
+  };
+
+  const handleAutoGenerate = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setAutoGenerating(true);
+    try {
+      const result = await reportEngineService.autoGenerateReport(file, {
+        title: `Auto-Generated Report - ${file.name}`,
+        template: 'executive',
+        organization_name: (user as any)?.organization_name || '',
+        author_name: (user as any)?.full_name || (user as any)?.email || '',
+      });
+      setReport(result);
+      setReportId(result.report_id);
+      onSaved?.(result.report_id);
+      toast.success(`Report generated with ${result.chart_count} charts, ${result.kpi_count} KPIs, ${result.insight_count} insights`);
+    } catch {
+      toast.error('Failed to auto-generate report');
+    } finally {
+      setAutoGenerating(false);
+      e.target.value = '';
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16">
@@ -159,6 +207,35 @@ export function ReportBuilder({ reportId: initialReportId, onSaved }: ReportBuil
               </CardContent>
             </Card>
           ))}
+        </div>
+
+        {/* Auto-Generate from Dataset */}
+        <div className="mt-8 rounded-xl border-2 border-dashed border-primary/30 bg-primary/5 p-6">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <Sparkles size={20} />
+            </div>
+            <div>
+              <h3 className="font-semibold">Auto-Generate from Dataset</h3>
+              <p className="text-sm text-muted-foreground">Upload a CSV or Excel file to automatically generate a report with charts, KPIs, and insights</p>
+            </div>
+          </div>
+          <div className="mt-4">
+            <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+              {autoGenerating ? (
+                <><Loader2 size={16} className="animate-spin" /> Generating...</>
+              ) : (
+                <><Upload size={16} /> Upload Dataset</>
+              )}
+              <input
+                type="file"
+                accept=".csv,.xlsx,.xls"
+                className="hidden"
+                onChange={handleAutoGenerate}
+                disabled={autoGenerating}
+              />
+            </label>
+          </div>
         </div>
       </div>
     );
@@ -286,9 +363,20 @@ export function ReportBuilder({ reportId: initialReportId, onSaved }: ReportBuil
                     <div className="mb-4">
                       <p className="mb-2 text-xs font-semibold uppercase text-muted-foreground">Charts</p>
                       {section.charts.map((chart, i) => (
-                        <div key={i} className="mb-2 rounded-lg border-2 border-dashed p-4">
+                        <div key={i} className="mb-3 rounded-lg border-2 p-4">
                           <p className="text-sm font-medium">{chart.title}</p>
-                          <p className="text-xs text-muted-foreground">{chart.chart_type} · X: {chart.x_axis} · Y: {chart.y_axis}</p>
+                          <p className="mb-2 text-xs text-muted-foreground">{chart.chart_type} · X: {chart.x_axis} · Y: {chart.y_axis}</p>
+                          {chart.data && chart.data.length > 0 ? (
+                            <SlideChart
+                              chartType={chart.chart_type}
+                              data={chart.data}
+                              xAxis={chart.x_axis}
+                              yAxis={chart.y_axis}
+                              height={220}
+                            />
+                          ) : (
+                            <p className="py-8 text-center text-xs text-muted-foreground">No data — use Auto-Generate to populate</p>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -375,9 +463,56 @@ export function ReportBuilder({ reportId: initialReportId, onSaved }: ReportBuil
           })}
 
           {/* Add section button */}
-          <Button variant="outline" className="w-full gap-2 border-dashed">
-            <Plus size={16} /> Add Section
-          </Button>
+          {!showAddSection ? (
+            <Button
+              variant="outline"
+              className="w-full gap-2 border-dashed"
+              onClick={() => setShowAddSection(true)}
+            >
+              <Plus size={16} /> Add Section
+            </Button>
+          ) : (
+            <Card className="border-2 border-primary">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-semibold">New Section</h4>
+                  <Button size="sm" variant="ghost" onClick={() => setShowAddSection(false)}>
+                    <X size={14} />
+                  </Button>
+                </div>
+                <div className="mt-3 flex gap-2">
+                  <select
+                    value={newSectionType}
+                    onChange={(e) => setNewSectionType(e.target.value)}
+                    className="rounded-lg border bg-background px-3 py-2 text-sm"
+                  >
+                    <option value="chart">Chart</option>
+                    <option value="key_metrics">Key Metrics</option>
+                    <option value="table">Table</option>
+                    <option value="insights">Insights</option>
+                    <option value="recommendations">Recommendations</option>
+                    <option value="executive_summary">Executive Summary</option>
+                    <option value="custom">Custom</option>
+                  </select>
+                  <Input
+                    placeholder="Section title (optional)"
+                    value={newSectionTitle}
+                    onChange={(e) => setNewSectionTitle(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button
+                    size="sm"
+                    onClick={handleAddSection}
+                    disabled={addingSection}
+                    className="gap-1"
+                  >
+                    {addingSection ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
+                    Add
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       )}
 

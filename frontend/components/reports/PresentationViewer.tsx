@@ -6,6 +6,7 @@ import {
   Loader2, Presentation as PresentationIcon,
 } from 'lucide-react';
 import { reportEngineService, type SlideData } from '@/services/reports/reportEngineService';
+import { SlideChart } from '@/components/reports/SlideChart';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
 
@@ -134,14 +135,14 @@ export function PresentationViewer({ reportId, className }: PresentationViewerPr
         {slide.layout === 'chart' && (
           <div className="w-full px-12 py-8">
             <h2 className="mb-6 text-2xl font-bold text-slate-900 dark:text-slate-100">{slide.title}</h2>
-            <div className="flex h-64 items-center justify-center rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-700">
-              <div className="text-center">
-                <PresentationIcon className="mx-auto mb-2 h-10 w-10 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">
-                  {slide.chart_type?.toUpperCase()} Chart
-                </p>
-                <p className="text-xs text-muted-foreground">Rendered in full export</p>
-              </div>
+            <div className="rounded-xl border-2 border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
+              <SlideChart
+                chartType={slide.chart_type || 'bar'}
+                data={slide.chart_data || []}
+                xAxis={slide.x_axis}
+                yAxis={slide.y_axis}
+                height={fullscreen ? 400 : 280}
+              />
             </div>
           </div>
         )}
