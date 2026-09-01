@@ -857,7 +857,14 @@ async def verify_certificate(
     notes = payload.get("notes")
     verified_fields = payload.get("verified_fields")
 
-    if verify_status not in ("pending", "verified", "failed", "inconclusive", "unable_to_verify", "suspicious"):
+    if verify_status not in (
+        "pending",
+        "verified",
+        "failed",
+        "inconclusive",
+        "unable_to_verify",
+        "suspicious",
+    ):
         raise HTTPException(
             status_code=422,
             detail="Status must be one of: pending, verified, failed, inconclusive, unable_to_verify, suspicious",

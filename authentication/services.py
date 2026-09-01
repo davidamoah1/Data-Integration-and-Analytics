@@ -139,7 +139,9 @@ class AuthService:
         )
 
         # Get roles and permissions in a single DB round trip
-        role_names, permission_names = self.user_role_repo.get_roles_and_permissions_for_user(user.id)
+        role_names, permission_names = self.user_role_repo.get_roles_and_permissions_for_user(
+            user.id
+        )
 
         # Create tokens
         expire_days = 30 if request.remember_me else JWT_REFRESH_EXPIRE_DAYS

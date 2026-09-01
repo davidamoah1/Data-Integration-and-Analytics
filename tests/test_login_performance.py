@@ -196,9 +196,7 @@ class TestLoginSideEffects:
         """Verify no session is created on failed login."""
         from authentication.models import Session
 
-        count_before = len(
-            db_session.query(Session).filter(Session.user_id == 1).all()
-        )
+        count_before = len(db_session.query(Session).filter(Session.user_id == 1).all())
         client.post(
             "/api/auth/login",
             json={
@@ -206,7 +204,5 @@ class TestLoginSideEffects:
                 "password": "WrongPassword1!",
             },
         )
-        count_after = len(
-            db_session.query(Session).filter(Session.user_id == 1).all()
-        )
+        count_after = len(db_session.query(Session).filter(Session.user_id == 1).all())
         assert count_after == count_before

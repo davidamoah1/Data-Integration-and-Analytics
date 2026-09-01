@@ -90,7 +90,9 @@ def main() -> int:
         with engine.connect() as conn:
             # Combine connectivity check and alembic version check into a
             # single round trip to reduce cold-start latency on remote MySQL.
-            result = conn.execute(text("SELECT 1, (SELECT version_num FROM alembic_version LIMIT 1) AS av"))
+            result = conn.execute(
+                text("SELECT 1, (SELECT version_num FROM alembic_version LIMIT 1) AS av")
+            )
             row = result.first()
             logger.info("Database connectivity: OK")
             current_version = row[1] if row else None

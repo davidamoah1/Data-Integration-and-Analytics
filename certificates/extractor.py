@@ -756,10 +756,16 @@ def extract_certificate_fields(
             if _looks_like_institution(cleaned) and not _looks_like_signatory(cleaned):
                 # Avoid matching lines that are part of the certificate phrasing
                 lower = cleaned.lower()
-                if any(phrase in lower for phrase in [
-                    "this is to certify", "this certificate", "awarded to",
-                    "has successfully completed", "has completed",
-                ]):
+                if any(
+                    phrase in lower
+                    for phrase in [
+                        "this is to certify",
+                        "this certificate",
+                        "awarded to",
+                        "has successfully completed",
+                        "has completed",
+                    ]
+                ):
                     continue
                 best_institution = cleaned
                 institution_confidence = 0.65

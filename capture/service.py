@@ -230,9 +230,8 @@ class CaptureService:
                 source=source,
                 status="ready_for_review",
                 uploaded_by=user_id,
-                retention_expires_at=datetime.now(timezone.utc) + timedelta(
-                    days=config.CAPTURE_RETENTION_DAYS
-                ),
+                retention_expires_at=datetime.now(timezone.utc)
+                + timedelta(days=config.CAPTURE_RETENTION_DAYS),
                 document_type=existing.document_type,
                 document_type_label=existing.document_type_label,
                 classification_confidence=existing.classification_confidence,
@@ -248,21 +247,23 @@ class CaptureService:
             # the same extracted data available without reprocessing.
             orig_fields = self.field_repo.list_by_document(existing.id)
             for f in orig_fields:
-                self.db.add(CaptureField(
-                    document_id=dup_doc.id,
-                    field_name=f.field_name,
-                    field_label=f.field_label,
-                    data_type=f.data_type,
-                    raw_value=f.raw_value,
-                    value=f.value,
-                    confidence_score=f.confidence_score,
-                    is_low_confidence=f.is_low_confidence,
-                    was_corrected=f.was_corrected,
-                    is_valid=f.is_valid,
-                    validation_message=f.validation_message,
-                    page_number=f.page_number,
-                    bounding_box=f.bounding_box,
-                ))
+                self.db.add(
+                    CaptureField(
+                        document_id=dup_doc.id,
+                        field_name=f.field_name,
+                        field_label=f.field_label,
+                        data_type=f.data_type,
+                        raw_value=f.raw_value,
+                        value=f.value,
+                        confidence_score=f.confidence_score,
+                        is_low_confidence=f.is_low_confidence,
+                        was_corrected=f.was_corrected,
+                        is_valid=f.is_valid,
+                        validation_message=f.validation_message,
+                        page_number=f.page_number,
+                        bounding_box=f.bounding_box,
+                    )
+                )
             self.db.commit()
 
             self._log(

@@ -21,7 +21,9 @@ import capture.models  # noqa: F401  – register models with Base.metadata
 # ── Helper to create a certificate document in DB ──────────────────
 
 
-def _create_cert_document(db, org_id=1, batch_id=None, checksum=None, doc_type="academic_certificate"):
+def _create_cert_document(
+    db, org_id=1, batch_id=None, checksum=None, doc_type="academic_certificate"
+):
     """Create a minimal CaptureDocument for testing."""
     from capture.models import CaptureBatch, CaptureDocument
 
@@ -81,14 +83,16 @@ class TestDuplicateHandling:
         doc1, batch_id = _create_cert_document(db_session, checksum=checksum)
 
         # Manually add a field to the original
-        db_session.add(CaptureField(
-            document_id=doc1.id,
-            field_name="student_name",
-            field_label="Student Name",
-            data_type="text",
-            value="John Doe",
-            confidence_score=0.9,
-        ))
+        db_session.add(
+            CaptureField(
+                document_id=doc1.id,
+                field_name="student_name",
+                field_label="Student Name",
+                data_type="text",
+                value="John Doe",
+                confidence_score=0.9,
+            )
+        )
         db_session.commit()
 
         # Create a duplicate document directly (simulating what upload_document does)
@@ -131,14 +135,16 @@ class TestDuplicateHandling:
         checksum = hashlib.sha256(content).hexdigest()
         doc1, batch_id = _create_cert_document(db_session, checksum=checksum)
 
-        db_session.add(CaptureField(
-            document_id=doc1.id,
-            field_name="institution",
-            field_label="Institution",
-            data_type="text",
-            value="University of Ghana",
-            confidence_score=0.85,
-        ))
+        db_session.add(
+            CaptureField(
+                document_id=doc1.id,
+                field_name="institution",
+                field_label="Institution",
+                data_type="text",
+                value="University of Ghana",
+                confidence_score=0.85,
+            )
+        )
         db_session.commit()
 
         # Create duplicate directly
@@ -168,19 +174,21 @@ class TestDuplicateHandling:
         field_repo = CaptureFieldRepository(db_session)
         orig_fields = field_repo.list_by_document(doc1.id)
         for f in orig_fields:
-            db_session.add(CaptureField(
-                document_id=dup_doc.id,
-                field_name=f.field_name,
-                field_label=f.field_label,
-                data_type=f.data_type,
-                raw_value=f.raw_value,
-                value=f.value,
-                confidence_score=f.confidence_score,
-                is_low_confidence=f.is_low_confidence,
-                was_corrected=f.was_corrected,
-                is_valid=f.is_valid,
-                validation_message=f.validation_message,
-            ))
+            db_session.add(
+                CaptureField(
+                    document_id=dup_doc.id,
+                    field_name=f.field_name,
+                    field_label=f.field_label,
+                    data_type=f.data_type,
+                    raw_value=f.raw_value,
+                    value=f.value,
+                    confidence_score=f.confidence_score,
+                    is_low_confidence=f.is_low_confidence,
+                    was_corrected=f.was_corrected,
+                    is_valid=f.is_valid,
+                    validation_message=f.validation_message,
+                )
+            )
         db_session.commit()
 
         # Check that fields were copied
@@ -202,7 +210,11 @@ class TestVerificationStates:
         doc, _ = _create_cert_document(db_session)
         resp = client.post(
             f"/api/certificates/{doc.id}/verify",
-            json={"status": "unable_to_verify", "method": "manual_check", "notes": "No registry found"},
+            json={
+                "status": "unable_to_verify",
+                "method": "manual_check",
+                "notes": "No registry found",
+            },
             headers=auth_headers,
         )
         assert resp.status_code == 200
@@ -214,7 +226,11 @@ class TestVerificationStates:
         doc, _ = _create_cert_document(db_session)
         resp = client.post(
             f"/api/certificates/{doc.id}/verify",
-            json={"status": "suspicious", "method": "manual_check", "notes": "Font mismatch detected"},
+            json={
+                "status": "suspicious",
+                "method": "manual_check",
+                "notes": "Font mismatch detected",
+            },
             headers=auth_headers,
         )
         assert resp.status_code == 200
@@ -345,14 +361,16 @@ class TestSearchEndpoint:
         from capture.models import CaptureField
 
         doc, _ = _create_cert_document(db_session)
-        db_session.add(CaptureField(
-            document_id=doc.id,
-            field_name="institution",
-            field_label="Institution",
-            data_type="text",
-            value="University of Ghana",
-            confidence_score=0.9,
-        ))
+        db_session.add(
+            CaptureField(
+                document_id=doc.id,
+                field_name="institution",
+                field_label="Institution",
+                data_type="text",
+                value="University of Ghana",
+                confidence_score=0.9,
+            )
+        )
         db_session.commit()
 
         resp = client.get(
@@ -429,7 +447,9 @@ class TestInstitutionExtraction:
             "Date: 15th June 2024\n"
             "Certificate Number: UG/2024/00123"
         )
-        result = extract_certificate_fields(OcrResult(full_text=text, words=[], mean_confidence=0.8, page_count=1))
+        result = extract_certificate_fields(
+            OcrResult(full_text=text, words=[], mean_confidence=0.8, page_count=1)
+        )
         assert result.institution is not None
         assert "University of Ghana" in result.institution.value
         assert result.institution.confidence > 0.5
@@ -446,7 +466,9 @@ class TestInstitutionExtraction:
             "Institution: Accra Technical University\n"
             "Date: 20 May 2024"
         )
-        result = extract_certificate_fields(OcrResult(full_text=text, words=[], mean_confidence=0.8, page_count=1))
+        result = extract_certificate_fields(
+            OcrResult(full_text=text, words=[], mean_confidence=0.8, page_count=1)
+        )
         assert result.institution is not None
         assert "Accra Technical University" in result.institution.value
 
@@ -462,7 +484,9 @@ class TestInstitutionExtraction:
             "Issuing Organization: Project Management Institute\n"
             "Date of Issue: 10 March 2024"
         )
-        result = extract_certificate_fields(OcrResult(full_text=text, words=[], mean_confidence=0.8, page_count=1))
+        result = extract_certificate_fields(
+            OcrResult(full_text=text, words=[], mean_confidence=0.8, page_count=1)
+        )
         assert result.institution is not None
         assert "Project Management Institute" in result.institution.value
 
@@ -478,7 +502,9 @@ class TestInstitutionExtraction:
             "University: University of Cape Coast\n"
             "Date: 5 July 2024"
         )
-        result = extract_certificate_fields(OcrResult(full_text=text, words=[], mean_confidence=0.8, page_count=1))
+        result = extract_certificate_fields(
+            OcrResult(full_text=text, words=[], mean_confidence=0.8, page_count=1)
+        )
         assert result.institution is not None
         assert "University of Cape Coast" in result.institution.value
 
@@ -495,7 +521,9 @@ class TestInstitutionExtraction:
             "awarded by University of Ghana\n"
             "Date: 15th June 2024"
         )
-        result = extract_certificate_fields(OcrResult(full_text=text, words=[], mean_confidence=0.8, page_count=1))
+        result = extract_certificate_fields(
+            OcrResult(full_text=text, words=[], mean_confidence=0.8, page_count=1)
+        )
         # Should still find institution via "awarded by" pattern
         assert result.institution is not None
         assert "University of Ghana" in result.institution.value
