@@ -24,7 +24,6 @@ Workflow: Dataset â†’ Analysis â†’ Insights â†’ Report â†’ P
 from __future__ import annotations
 
 import io
-import json
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -539,8 +538,9 @@ class ReportCompositionService:
         if db is None:
             return
         try:
-            from services.report_engine_models import ReportCompositionRecord
             from sqlalchemy import select as sa_select
+
+            from services.report_engine_models import ReportCompositionRecord
 
             existing = db.execute(
                 sa_select(ReportCompositionRecord).where(
@@ -595,8 +595,9 @@ class ReportCompositionService:
         if db is None:
             return None
         try:
-            from services.report_engine_models import ReportCompositionRecord
             from sqlalchemy import select as sa_select
+
+            from services.report_engine_models import ReportCompositionRecord
 
             record = db.execute(
                 sa_select(ReportCompositionRecord).where(
@@ -619,14 +620,19 @@ class ReportCompositionService:
         if db is None:
             return []
         try:
-            from services.report_engine_models import ReportCompositionRecord
             from sqlalchemy import select as sa_select
 
-            records = db.execute(
-                sa_select(ReportCompositionRecord).order_by(
-                    ReportCompositionRecord.created_at.desc()
+            from services.report_engine_models import ReportCompositionRecord
+
+            records = (
+                db.execute(
+                    sa_select(ReportCompositionRecord).order_by(
+                        ReportCompositionRecord.created_at.desc()
+                    )
                 )
-            ).scalars().all()
+                .scalars()
+                .all()
+            )
             return [cls._record_to_composition(r) for r in records]
         except Exception as e:
             logger.warning("Failed to load reports from DB: %s", e)
@@ -641,8 +647,9 @@ class ReportCompositionService:
         if db is None:
             return False
         try:
-            from services.report_engine_models import ReportCompositionRecord
             from sqlalchemy import delete as sa_delete
+
+            from services.report_engine_models import ReportCompositionRecord
 
             result = db.execute(
                 sa_delete(ReportCompositionRecord).where(
@@ -1586,7 +1593,9 @@ class ReportCompositionService:
             elif section.section_type == ReportSectionType.CHART:
                 for chart in section.charts:
                     slide = prs.slides.add_slide(prs.slide_layouts[6])
-                    txBox = slide.shapes.add_textbox(Inches(0.5), Inches(0.3), Inches(12), Inches(0.8))
+                    txBox = slide.shapes.add_textbox(
+                        Inches(0.5), Inches(0.3), Inches(12), Inches(0.8)
+                    )
                     tf = txBox.text_frame
                     p = tf.paragraphs[0]
                     p.text = chart.title

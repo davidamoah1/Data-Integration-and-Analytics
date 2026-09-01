@@ -19,7 +19,6 @@ from services.report_engine import (
     ReportTemplate,
 )
 
-
 # ── Fixtures ────────────────────────────────────────────────────────────
 
 
@@ -190,7 +189,9 @@ class TestSectionManagement:
         chart_section = next(
             s for s in report.sections if s.section_type == ReportSectionType.CHART
         )
-        result = ReportCompositionService.add_chart(report.report_id, chart_section.order, sample_chart)
+        result = ReportCompositionService.add_chart(
+            report.report_id, chart_section.order, sample_chart
+        )
         assert result is not None
         updated_section = next(s for s in result.sections if s.order == chart_section.order)
         assert len(updated_section.charts) >= 1
@@ -350,9 +351,7 @@ class TestAutoGenerate:
         pptx_bytes = ReportCompositionService.export_to_pptx(populated)
         prs = PptxPresentation(io.BytesIO(pptx_bytes))
 
-        chart_count = sum(
-            1 for slide in prs.slides for shape in slide.shapes if shape.has_chart
-        )
+        chart_count = sum(1 for slide in prs.slides for shape in slide.shapes if shape.has_chart)
         assert chart_count > 0, "Auto-generated PPTX should contain real charts"
 
 
