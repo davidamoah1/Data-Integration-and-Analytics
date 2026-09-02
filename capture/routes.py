@@ -9,6 +9,7 @@ from fastapi import (
     APIRouter,
     Depends,
     File,
+    Form,
     HTTPException,
     Query,
     UploadFile,
@@ -16,6 +17,7 @@ from fastapi import (
 )
 from sqlalchemy.orm import Session as DbSession
 
+import config
 from capture.document_types import ALL_DOCUMENT_TYPES, INDUSTRIES
 from capture.ocr_engine import is_ocr_available
 from capture.repositories import CaptureAuditLogRepository
@@ -186,6 +188,136 @@ async def upload_document(
     result = _serialize_document(doc)
     result["job_id"] = job_id
     return result
+
+
+@router.post("/documents/batch-upload", status_code=status.HTTP_202_ACCEPTED)
+async def batch_upload_documents(
+    files: list[UploadFile] = File(...),
+    batch_name: str | None = Form(None),
+    industry: str | None = Form(None),
+    db: DbSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Upload multiple documents in a single request.
+
+    Accepts up to CAPTURE_MAX_BATCH_SIZE files (default 50).
+    Each file is validated individually — invalid files are rejected
+    without preventing valid files from being uploaded.
+
+    Returns structured per-file results so the frontend can show
+    successes and failures independently.
+    """
+    try:
+        org_id = get_current_organization_id(current_user, db)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception("Failed to resolve organization for user_id=%s", current_user["id"])
+        raise HTTPException(status_code=500, detail=f"Organization lookup failed: {e}") from e
+
+    max_batch = getattr(config, "CAPTURE_MAX_BATCH_SIZE", 50)
+    if len(files) > max_batch:
+        raise HTTPException(
+            status_code=413,
+            detail=f"Too many files. Maximum {max_batch} files per batch. "
+            f"Received {len(files)}.",
+        )
+
+    svc = CaptureService(db)
+
+    try:
+        batch = svc.create_batch(
+            org_id, current_user["id"], batch_name or "Document Batch", industry
+        )
+    except Exception as e:
+        logger.exception("Failed to create batch: org_id=%s", org_id)
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Batch creation failed: {e}") from e
+
+    results: list[dict] = []
+    succeeded = 0
+    failed = 0
+
+    for file in files:
+        try:
+            content = await file.read()
+            doc = svc.upload_document(
+                org_id,
+                current_user["id"],
+                file.filename or "document",
+                content,
+                source="web",
+                batch_id=batch.id,
+            )
+        except CaptureError as e:
+            failed += 1
+            results.append(
+                {
+                    "filename": file.filename or "document",
+                    "status": "failed",
+                    "error": str(e),
+                }
+            )
+            logger.warning("File rejected in batch upload: filename=%s error=%s", file.filename, e)
+            continue
+        except Exception:
+            failed += 1
+            logger.exception("Unexpected error uploading file: filename=%s", file.filename)
+            results.append(
+                {
+                    "filename": file.filename or "document",
+                    "status": "failed",
+                    "error": "An unexpected error occurred during upload.",
+                }
+            )
+            continue
+
+        # Enqueue background processing
+        job_id = None
+        try:
+            from jobs.handlers import register_builtin_handlers
+            from jobs.service import JobService, get_registered_types
+
+            if "ocr_document" not in get_registered_types():
+                register_builtin_handlers()
+
+            job_svc = JobService(db)
+            job = await job_svc.create_job(
+                organization_id=org_id,
+                user_id=current_user["id"],
+                job_type="ocr_document",
+                name=f"OCR: {doc.filename}",
+                description=f"Processing document '{doc.filename}'",
+                payload={"document_id": doc.id, "organization_id": org_id},
+                idempotency_key=f"org_{org_id}:ocr_document:doc_{doc.id}",
+            )
+            job_id = job.id
+            db.commit()
+        except Exception as e:
+            logger.warning("Job system unavailable for doc_id=%s, using thread: %s", doc.id, e)
+            import threading
+
+            threading.Thread(target=_process_document_task, args=(doc.id,), daemon=True).start()
+
+        db.refresh(doc)
+        succeeded += 1
+        result = _serialize_document(doc)
+        result["job_id"] = job_id
+        result["status"] = "accepted"
+        results.append(result)
+
+    # Update batch counters
+    batch.total_documents = succeeded
+    db.commit()
+
+    return {
+        "batch_id": batch.id,
+        "batch_name": batch.name,
+        "total": len(files),
+        "accepted": succeeded,
+        "failed": failed,
+        "files": results,
+    }
 
 
 @router.post("/batches/upload-zip", status_code=status.HTTP_201_CREATED)

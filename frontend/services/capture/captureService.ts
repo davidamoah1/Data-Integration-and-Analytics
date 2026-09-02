@@ -82,6 +82,30 @@ export interface CaptureEngineStatus {
   supported_industries: string[];
 }
 
+export interface BatchUploadFileResult {
+  filename: string;
+  status: "accepted" | "failed";
+  error?: string;
+  id?: number;
+  batch_id?: number | null;
+  file_type?: string;
+  document_type?: string | null;
+  document_type_label?: string | null;
+  classification_confidence?: number | null;
+  overall_confidence?: number | null;
+  duplicate_of_id?: number | null;
+  job_id?: number | null;
+}
+
+export interface BatchUploadResult {
+  batch_id: number;
+  batch_name: string;
+  total: number;
+  accepted: number;
+  failed: number;
+  files: BatchUploadFileResult[];
+}
+
 // ─── Service ────────────────────────────────────────────────────
 
 const BASE = "/api/capture";
@@ -108,6 +132,38 @@ export const captureService = {
       formData,
       onProgress,
       { timeout: 120000 },
+    );
+  },
+
+  batchUploadDocuments: (files: File[], batchName?: string, industry?: string) => {
+    const formData = new FormData();
+    for (const file of files) {
+      formData.append("files", file);
+    }
+    if (batchName) formData.append("batch_name", batchName);
+    if (industry) formData.append("industry", industry);
+    return apiClient.upload<BatchUploadResult>(`${BASE}/documents/batch-upload`, formData, {
+      timeout: 300000,
+    });
+  },
+
+  batchUploadWithProgress: (
+    files: File[],
+    onProgress?: (percent: number) => void,
+    batchName?: string,
+    industry?: string,
+  ) => {
+    const formData = new FormData();
+    for (const file of files) {
+      formData.append("files", file);
+    }
+    if (batchName) formData.append("batch_name", batchName);
+    if (industry) formData.append("industry", industry);
+    return apiClient.uploadWithProgress<BatchUploadResult>(
+      `${BASE}/documents/batch-upload`,
+      formData,
+      onProgress,
+      { timeout: 300000 },
     );
   },
 
