@@ -190,6 +190,10 @@ class CaptureService:
         batch_id: int | None = None,
     ) -> CaptureDocument:
         ext = (os.path.splitext(filename)[1] or "").lstrip(".").lower()
+        if ext == "zip":
+            raise CaptureError(
+                "ZIP files must be uploaded as ETL packages via " "POST /api/etl/packages/upload."
+            )
         if ext not in SUPPORTED_EXTENSIONS:
             raise CaptureError(
                 f"Unsupported file type '.{ext}'. Supported: {', '.join(sorted(SUPPORTED_EXTENSIONS))}."
