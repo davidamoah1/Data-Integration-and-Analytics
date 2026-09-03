@@ -27,6 +27,7 @@ import ecosystem.webhooks  # noqa: F401, E402
 import enterprise.models  # noqa: F401, E402
 import enterprise.subscription  # noqa: F401, E402
 import etl.models  # noqa: F401, E402
+import etl.package_models  # noqa: F401, E402
 import jobs.models  # noqa: F401, E402
 import ml.models  # noqa: F401, E402
 import notifications.models  # noqa: F401, E402
