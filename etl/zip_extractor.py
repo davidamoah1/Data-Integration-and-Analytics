@@ -32,14 +32,37 @@ MAX_FILES_PER_DIRECTORY = int(os.getenv("ETL_MAX_FILES_PER_DIR", "5000"))
 
 # Supported file extensions for ETL processing
 SUPPORTED_EXTENSIONS = {
-    "csv", "tsv", "xlsx", "xls", "json", "xml", "ods", "pdf", "txt",
+    "csv",
+    "tsv",
+    "xlsx",
+    "xls",
+    "json",
+    "xml",
+    "ods",
+    "pdf",
+    "txt",
 }
 
 # Extensions that are always rejected
 BLOCKED_EXTENSIONS = {
-    "exe", "bat", "cmd", "sh", "ps1", "com", "scr", "msi",
-    "dll", "so", "dylib", "jar", "class",
-    "py", "rb", "php", "jsp", "asp",
+    "exe",
+    "bat",
+    "cmd",
+    "sh",
+    "ps1",
+    "com",
+    "scr",
+    "msi",
+    "dll",
+    "so",
+    "dylib",
+    "jar",
+    "class",
+    "py",
+    "rb",
+    "php",
+    "jsp",
+    "asp",
 }
 
 # Dangerous path patterns
@@ -165,8 +188,7 @@ def validate_zip(zip_path: str) -> dict:
     if file_size > max_zip_bytes:
         result["valid"] = False
         result["errors"].append(
-            f"ZIP file size {file_size / 1024 / 1024:.1f}MB exceeds "
-            f"maximum {MAX_ZIP_SIZE_MB}MB"
+            f"ZIP file size {file_size / 1024 / 1024:.1f}MB exceeds " f"maximum {MAX_ZIP_SIZE_MB}MB"
         )
         return result
 
@@ -200,17 +222,13 @@ def validate_zip(zip_path: str) -> dict:
                 # Check for absolute paths
                 if os.path.isabs(info.filename) or info.filename.startswith("/"):
                     result["valid"] = False
-                    result["errors"].append(
-                        f"Absolute path in ZIP entry: {info.filename}"
-                    )
+                    result["errors"].append(f"Absolute path in ZIP entry: {info.filename}")
                     return result
 
                 # Check for symlinks (external_attr has symlink flag)
                 if info.external_attr >> 16 & 0o170000 == 0o120000:
                     result["valid"] = False
-                    result["errors"].append(
-                        f"Symlink found in ZIP: {info.filename}"
-                    )
+                    result["errors"].append(f"Symlink found in ZIP: {info.filename}")
                     return result
 
             result["compressed_size"] = total_compressed
@@ -298,7 +316,8 @@ def extract_zip(
                 if ext in BLOCKED_EXTENSIONS:
                     logger.warning(
                         "EXTRACTION_SKIP file=%s reason=blocked_extension ext=%s",
-                        info.filename, ext,
+                        info.filename,
+                        ext,
                     )
                     result.unsupported_files += 1
                     continue
@@ -333,9 +352,7 @@ def extract_zip(
 
                 max_uncompressed = MAX_EXTRACTED_SIZE_MB * 1024 * 1024
                 if total_extracted_size > max_uncompressed:
-                    result.error = (
-                        f"Total extracted size exceeded {MAX_EXTRACTED_SIZE_MB}MB limit"
-                    )
+                    result.error = f"Total extracted size exceeded {MAX_EXTRACTED_SIZE_MB}MB limit"
                     return result
 
                 with open(target_path, "wb") as f:
@@ -378,14 +395,23 @@ def extract_zip(
 
                 logger.info(
                     "FILE_DISCOVERED file=%s ext=%s size=%d checksum=%s supported=%s duplicate=%s",
-                    sanitized, ext, len(extracted_data), checksum[:16], is_supported, is_duplicate,
+                    sanitized,
+                    ext,
+                    len(extracted_data),
+                    checksum[:16],
+                    is_supported,
+                    is_duplicate,
                 )
 
         result.success = True
         logger.info(
             "EXTRACTION_COMPLETED dir=%s files=%d supported=%d unsupported=%d duplicates=%d size=%d",
-            extract_dir, result.total_files, result.supported_files,
-            result.unsupported_files, result.duplicate_files, result.total_size,
+            extract_dir,
+            result.total_files,
+            result.supported_files,
+            result.unsupported_files,
+            result.duplicate_files,
+            result.total_size,
         )
 
     except zipfile.BadZipFile as e:

@@ -74,9 +74,7 @@ class ETLPackage(Base):
     created_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
     updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now(), nullable=False)
 
-    __table_args__ = (
-        Index("ix_etl_packages_org_status", "organization_id", "status"),
-    )
+    __table_args__ = (Index("ix_etl_packages_org_status", "organization_id", "status"),)
 
 
 class ETLPackageFile(Base):

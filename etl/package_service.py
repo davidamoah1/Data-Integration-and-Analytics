@@ -86,7 +86,11 @@ class ETLPackageService:
 
         logger.info(
             "PACKAGE_CREATED package_id=%d org_id=%d filename=%s size=%d checksum=%s",
-            package.id, organization_id, filename, file_size, checksum[:16],
+            package.id,
+            organization_id,
+            filename,
+            file_size,
+            checksum[:16],
         )
         return package
 
@@ -230,7 +234,9 @@ class ETLPackageService:
             logger.error("EXTRACTION_FAILED package_id=%d error=%s", package_id, extraction.error)
             return result
 
-        logger.info("EXTRACTION_COMPLETED package_id=%d files=%d", package_id, extraction.total_files)
+        logger.info(
+            "EXTRACTION_COMPLETED package_id=%d files=%d", package_id, extraction.total_files
+        )
 
         # ── Stage 2: Discovery ────────────────────────────────────────────
         pkg.status = "discovering"
@@ -238,7 +244,9 @@ class ETLPackageService:
         pkg.total_files = extraction.total_files
         self.db.commit()
 
-        logger.info("FILE_DISCOVERY_STARTED package_id=%d files=%d", package_id, extraction.total_files)
+        logger.info(
+            "FILE_DISCOVERY_STARTED package_id=%d files=%d", package_id, extraction.total_files
+        )
 
         # Create file records and map to extracted paths
         file_records: list[ETLPackageFile] = []
@@ -273,7 +281,10 @@ class ETLPackageService:
 
         logger.info(
             "FILE_DISCOVERY_COMPLETED package_id=%d discovered=%d duplicates=%d unsupported=%d",
-            package_id, len(file_records), extraction.duplicate_files, extraction.unsupported_files,
+            package_id,
+            len(file_records),
+            extraction.duplicate_files,
+            extraction.unsupported_files,
         )
 
         # ── Stage 3: Processing (profile + load) ──────────────────────────
@@ -308,7 +319,9 @@ class ETLPackageService:
             except Exception as e:
                 logger.error(
                     "FILE_FAILED package_id=%d file=%s error=%s",
-                    package_id, record.sanitized_filename, e,
+                    package_id,
+                    record.sanitized_filename,
+                    e,
                 )
                 record.status = "failed"
                 record.error_message = str(e)
@@ -348,8 +361,12 @@ class ETLPackageService:
 
         logger.info(
             "PACKAGE_COMPLETED package_id=%d status=%s completed=%d failed=%d duplicates=%d quality=%s",
-            package_id, pkg.status, result["completed"], result["failed"],
-            result["duplicates"], pkg.overall_quality_score,
+            package_id,
+            pkg.status,
+            result["completed"],
+            result["failed"],
+            result["duplicates"],
+            pkg.overall_quality_score,
         )
 
         return result
@@ -433,7 +450,9 @@ class ETLPackageService:
         except Exception as e:
             logger.warning(
                 "FILE_LOAD_FAILED package_id=%d file=%s error=%s — marking as completed without load",
-                package_id, record.sanitized_filename, e,
+                package_id,
+                record.sanitized_filename,
+                e,
             )
             record.rows_loaded = 0
 
@@ -443,8 +462,11 @@ class ETLPackageService:
 
         logger.info(
             "FILE_COMPLETED package_id=%d file=%s rows=%d cols=%d quality=%s",
-            package_id, record.sanitized_filename, record.row_count,
-            record.column_count, record.quality_score,
+            package_id,
+            record.sanitized_filename,
+            record.row_count,
+            record.column_count,
+            record.quality_score,
         )
 
     def _ext_to_connector_type(self, ext: str) -> str:
@@ -540,7 +562,6 @@ class ETLPackageService:
             "transformations_applied": "profile+quality+load",
             "warnings": all_recommendations[:20],
             "errors": [
-                {"file": f.sanitized_filename, "error": f.error_message}
-                for f in failed_files
+                {"file": f.sanitized_filename, "error": f.error_message} for f in failed_files
             ][:50],
         }

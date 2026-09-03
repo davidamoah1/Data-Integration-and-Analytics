@@ -383,12 +383,14 @@ def _handle_etl_package(job_id: int, payload: dict, db: DbSession) -> dict:
         update_job_progress(job_id, 1.0, f"Failed: {result.get('error', 'unknown')}")
     elif status == "completed_with_errors":
         update_job_progress(
-            job_id, 1.0,
+            job_id,
+            1.0,
             f"Completed with {result.get('failed', 0)} errors out of {result.get('total_files', 0)} files",
         )
     else:
         update_job_progress(
-            job_id, 1.0,
+            job_id,
+            1.0,
             f"Completed: {result.get('completed', 0)}/{result.get('total_files', 0)} files",
         )
 

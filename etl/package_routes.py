@@ -150,7 +150,11 @@ async def upload_package(
 
     logger.info(
         "PACKAGE_UPLOAD package_id=%d job_id=%d filename=%s size=%d files=%d",
-        package.id, job.id, file.filename, file_size, validation["file_count"],
+        package.id,
+        job.id,
+        file.filename,
+        file_size,
+        validation["file_count"],
     )
 
     return {

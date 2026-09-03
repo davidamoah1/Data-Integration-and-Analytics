@@ -46,7 +46,9 @@ def upgrade() -> None:
         sa.Column("storage_key", sa.String(1000), nullable=False),
         sa.Column("storage_backend", sa.String(50), nullable=False, server_default="local"),
         sa.Column("checksum", sa.String(64), nullable=False, index=True),
-        sa.Column("file_size_bytes", sa.BigInteger().with_variant(sa.Integer, "sqlite"), nullable=False),
+        sa.Column(
+            "file_size_bytes", sa.BigInteger().with_variant(sa.Integer, "sqlite"), nullable=False
+        ),
         sa.Column("status", sa.String(30), nullable=False, server_default="uploaded", index=True),
         sa.Column("current_stage", sa.String(50), nullable=True),
         sa.Column("total_files", sa.Integer, nullable=False, server_default="0"),
