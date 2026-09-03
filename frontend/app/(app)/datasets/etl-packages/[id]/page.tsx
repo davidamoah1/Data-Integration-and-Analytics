@@ -10,6 +10,7 @@ import {
   AlertCircle,
   RefreshCw,
   Loader2,
+  Download,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -24,10 +25,11 @@ import {
   type ETLPackageProgress,
   type ETLPackageFile,
   type ETLPackageError,
+  type ETLPackageQualityReport,
 } from '@/services/etl/etlPackageService';
 import { formatNumber, formatDate } from '@/lib/utils';
 
-type Tab = 'overview' | 'files' | 'errors';
+type Tab = 'overview' | 'files' | 'errors' | 'quality';
 
 export default function PackageDetailsPage() {
   const params = useParams();
@@ -37,6 +39,7 @@ export default function PackageDetailsPage() {
   const [progress, setProgress] = useState<ETLPackageProgress | null>(null);
   const [files, setFiles] = useState<ETLPackageFile[]>([]);
   const [errors, setErrors] = useState<ETLPackageError[]>([]);
+  const [qualityReport, setQualityReport] = useState<ETLPackageQualityReport | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>('overview');
@@ -64,6 +67,7 @@ export default function PackageDetailsPage() {
             setIsPolling(false);
             loadFiles();
             loadErrors();
+            loadQualityReport();
           }
         } catch {
           // ignore
@@ -84,6 +88,7 @@ export default function PackageDetailsPage() {
       setProgress(p);
       await loadFiles();
       await loadErrors();
+      await loadQualityReport();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load package');
     } finally {
@@ -106,6 +111,31 @@ export default function PackageDetailsPage() {
       setErrors(res.errors);
     } catch {
       // ignore
+    }
+  }
+
+  async function loadQualityReport() {
+    try {
+      const report = await etlPackageService.getQualityReport(packageId);
+      setQualityReport(report);
+    } catch {
+      // ignore
+    }
+  }
+
+  async function handleDownload() {
+    try {
+      const blob = await etlPackageService.download(packageId);
+      const url = window.URL.createObjectURL(blob);
+      const a = window.document.createElement('a');
+      a.href = url;
+      a.download = progress?.filename || `package_${packageId}.zip`;
+      window.document.body.appendChild(a);
+      a.click();
+      window.document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch {
+      toast.error('Failed to download package');
     }
   }
 
@@ -177,6 +207,9 @@ export default function PackageDetailsPage() {
               </div>
             </div>
             <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={handleDownload}>
+                <Download className="h-4 w-4 mr-1" /> Download ZIP
+              </Button>
               {progress.failed_files > 0 && !isActive && (
                 <Button variant="outline" size="sm" onClick={handleRetry}>
                   <RefreshCw className="h-4 w-4 mr-1" /> Retry Failed
@@ -254,6 +287,9 @@ export default function PackageDetailsPage() {
         </TabButton>
         <TabButton active={tab === 'errors'} onClick={() => setTab('errors')}>
           Errors ({errors.length})
+        </TabButton>
+        <TabButton active={tab === 'quality'} onClick={() => setTab('quality')}>
+          Quality
         </TabButton>
       </div>
 
@@ -354,6 +390,62 @@ export default function PackageDetailsPage() {
                     )}
                   </div>
                 ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {tab === 'quality' && (
+        <Card>
+          <CardContent className="py-4">
+            {!qualityReport ? (
+              <p className="text-center text-gray-500 py-8">Quality report not available.</p>
+            ) : (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <StatBox label="Successful" value={qualityReport.successful} color="green" />
+                  <StatBox label="Failed" value={qualityReport.failed} color="red" />
+                  <StatBox label="Duplicates" value={qualityReport.duplicates} color="yellow" />
+                  <StatBox label="Unsupported" value={qualityReport.unsupported} color="gray" />
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <StatBox label="Rows Processed" value={qualityReport.rows_processed} />
+                  <StatBox label="Rows Loaded" value={qualityReport.rows_loaded} color="green" />
+                  <StatBox
+                    label="Quality Score"
+                    value={qualityReport.data_quality_score ?? 0}
+                    color={qualityReport.data_quality_score && qualityReport.data_quality_score >= 80 ? 'green' : 'yellow'}
+                  />
+                </div>
+                {qualityReport.warnings.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">Warnings & Recommendations</h4>
+                    <div className="space-y-2">
+                      {qualityReport.warnings.map((w, i) => (
+                        <div key={i} className="flex items-start gap-2 p-2 rounded border border-yellow-200 bg-yellow-50 text-sm">
+                          <AlertCircle className="h-4 w-4 text-yellow-600 mt-0.5 flex-shrink-0" />
+                          <span>{w}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {qualityReport.errors.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">File Errors</h4>
+                    <div className="space-y-2">
+                      {qualityReport.errors.map((e, i) => (
+                        <div key={i} className="flex items-start gap-2 p-2 rounded border border-red-200 bg-red-50 text-sm">
+                          <XCircle className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
+                          <div>
+                            <span className="font-medium">{e.file}</span>: {e.error}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </CardContent>

@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Package, Search, Plus } from 'lucide-react';
+import { Package, Search, Plus, Download } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -21,27 +21,46 @@ export default function ETLPackagesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('');
   const [showUpload, setShowUpload] = useState(false);
 
-  useEffect(() => {
-    loadPackages();
-  }, []);
-
-  async function loadPackages() {
+  const loadPackages = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await etlPackageService.list(100);
+      const res = await etlPackageService.list(100, 0, {
+        status: statusFilter || undefined,
+        search: search || undefined,
+      });
       setPackages(res?.packages || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load packages');
     } finally {
       setLoading(false);
     }
-  }
+  }, [statusFilter, search]);
 
-  const filtered = packages.filter((p) =>
-    p.filename.toLowerCase().includes(search.toLowerCase()),
-  );
+  useEffect(() => {
+    loadPackages();
+  }, [loadPackages]);
+
+  const handleDownload = async (e: React.MouseEvent, packageId: number, filename: string) => {
+    e.stopPropagation();
+    try {
+      const blob = await etlPackageService.download(packageId);
+      const url = window.URL.createObjectURL(blob);
+      const a = window.document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      window.document.body.appendChild(a);
+      a.click();
+      window.document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch {
+      // ignore download errors
+    }
+  };
+
+  const filtered = packages;
 
   if (loading) {
     return (
@@ -102,6 +121,21 @@ export default function ETLPackagesPage() {
                 className="pl-9"
               />
             </div>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="border rounded-md px-3 py-2 text-sm"
+            >
+              <option value="">All Statuses</option>
+              <option value="uploaded">Uploaded</option>
+              <option value="extracting">Extracting</option>
+              <option value="discovering">Discovering</option>
+              <option value="processing">Processing</option>
+              <option value="completed">Completed</option>
+              <option value="completed_with_errors">Completed with Errors</option>
+              <option value="failed">Failed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
           </div>
 
           <Card>
@@ -110,7 +144,7 @@ export default function ETLPackagesPage() {
                 <p className="text-center text-gray-500 py-8">No packages match your search.</p>
               ) : (
                 <div className="overflow-x-auto">
-                  <Table headers={['Filename', 'Status', 'Files', 'Completed', 'Failed', 'Quality', 'Created']}>
+                  <Table headers={['Filename', 'Status', 'Files', 'Completed', 'Failed', 'Quality', 'Created', '']}>
                       {filtered.map((p) => (
                         <TableRow
                           key={p.id}
@@ -142,6 +176,15 @@ export default function ETLPackagesPage() {
                           </TableCell>
                           <TableCell className="text-sm text-gray-500">
                             {formatDate(p.created_at)}
+                          </TableCell>
+                          <TableCell>
+                            <button
+                              onClick={(e) => handleDownload(e, p.id, p.filename)}
+                              className="text-gray-400 hover:text-gray-600"
+                              title="Download original ZIP"
+                            >
+                              <Download className="h-4 w-4" />
+                            </button>
                           </TableCell>
                         </TableRow>
                       ))}

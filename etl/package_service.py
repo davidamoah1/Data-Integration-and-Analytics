@@ -68,7 +68,28 @@ class ETLPackageService:
         checksum: str,
         file_size: int,
     ) -> ETLPackage:
-        """Create a new ETL package record after ZIP upload."""
+        """Create a new ETL package record after ZIP upload.
+
+        Idempotency: if a package with the same checksum already exists
+        for this organization, return the existing package instead of
+        creating a duplicate.
+        """
+        existing = (
+            self.db.query(ETLPackage)
+            .filter(
+                ETLPackage.organization_id == organization_id,
+                ETLPackage.checksum == checksum,
+            )
+            .first()
+        )
+        if existing:
+            logger.info(
+                "PACKAGE_DUPLICATE_SKIP package_id=%d checksum=%s — returning existing",
+                existing.id,
+                checksum[:16],
+            )
+            return existing
+
         package = ETLPackage(
             organization_id=organization_id,
             uploaded_by=uploaded_by,
@@ -106,17 +127,20 @@ class ETLPackageService:
         )
 
     def list_packages(
-        self, organization_id: int, limit: int = 50, offset: int = 0
+        self,
+        organization_id: int,
+        limit: int = 50,
+        offset: int = 0,
+        status: str | None = None,
+        search: str | None = None,
     ) -> list[ETLPackage]:
-        """List packages for an organization."""
-        return (
-            self.db.query(ETLPackage)
-            .filter(ETLPackage.organization_id == organization_id)
-            .order_by(ETLPackage.created_at.desc())
-            .limit(limit)
-            .offset(offset)
-            .all()
-        )
+        """List packages for an organization with optional filters."""
+        query = self.db.query(ETLPackage).filter(ETLPackage.organization_id == organization_id)
+        if status:
+            query = query.filter(ETLPackage.status == status)
+        if search:
+            query = query.filter(ETLPackage.filename.ilike(f"%{search}%"))
+        return query.order_by(ETLPackage.created_at.desc()).limit(limit).offset(offset).all()
 
     def get_package_files(
         self,
@@ -523,6 +547,23 @@ class ETLPackageService:
 
         logger.info("PACKAGE_CANCELLED package_id=%d", package_id)
         return {"package_id": package_id, "cancelled": True}
+
+    def download_package(
+        self, package_id: int, organization_id: int
+    ) -> tuple[bytes, str, str] | None:
+        """Download the original ZIP file for a package.
+
+        Returns (content, filename, content_type) or None if not found.
+        """
+        pkg = self.get_package(package_id, organization_id)
+        if not pkg:
+            return None
+
+        from storage.storage import get_storage_backend
+
+        storage = get_storage_backend()
+        content = storage.download(pkg.storage_key)
+        return content, pkg.filename, "application/zip"
 
     def get_quality_report(self, package_id: int, organization_id: int) -> dict | None:
         """Generate a quality report for a completed package."""

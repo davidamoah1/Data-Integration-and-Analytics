@@ -1,4 +1,4 @@
-import { apiClient } from '../api/client';
+import { apiClient, getAccessToken } from '../api/client';
 
 export interface ETLPackage {
   id: number;
@@ -104,8 +104,17 @@ export const etlPackageService = {
     });
   },
 
-  async list(limit = 50, offset = 0): Promise<{ packages: ETLPackage[]; count: number }> {
-    return apiClient.get(`/api/etl/packages?limit=${limit}&offset=${offset}`);
+  async list(
+    limit = 50,
+    offset = 0,
+    filters?: { status?: string; search?: string },
+  ): Promise<{ packages: ETLPackage[]; count: number }> {
+    const params = new URLSearchParams();
+    params.set('limit', String(limit));
+    params.set('offset', String(offset));
+    if (filters?.status) params.set('status', filters.status);
+    if (filters?.search) params.set('search', filters.search);
+    return apiClient.get(`/api/etl/packages?${params.toString()}`);
   },
 
   async get(packageId: number): Promise<ETLPackage> {
@@ -142,5 +151,21 @@ export const etlPackageService = {
 
   async cancel(packageId: number): Promise<{ package_id: number; cancelled: boolean }> {
     return apiClient.post(`/api/etl/packages/${packageId}/cancel`);
+  },
+
+  getDownloadUrl(packageId: number): string {
+    return apiClient.getApiUrl() + `/api/etl/packages/${packageId}/download`;
+  },
+
+  async download(packageId: number): Promise<Blob> {
+    const token = getAccessToken();
+    const url = apiClient.getApiUrl() + `/api/etl/packages/${packageId}/download`;
+    const response = await fetch(url, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    if (!response.ok) {
+      throw new Error(`Download failed: ${response.status}`);
+    }
+    return response.blob();
   },
 };

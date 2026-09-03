@@ -65,6 +65,9 @@ services:
         sync: false  # Set to r2, s3, supabase, or local
       - key: ALLOW_LOCAL_STORAGE_IN_PRODUCTION
         sync: false  # Set to 1 only if using local storage
+      # ── Debug (temporary — remove after diagnosing startup issues) ──
+      - key: DEBUG
+        value: "1"
       # ── Rate Limiting ──
       - key: RATE_LIMIT_RPM
         value: 120
@@ -132,6 +135,9 @@ services:
         value: INFO
       - key: LOG_FORMAT
         value: json
+      # ── Debug (temporary — remove after diagnosing startup issues) ──
+      - key: DEBUG
+        value: "1"
       # ── Stale Job Watchdog ──
       - key: JOB_WATCHDOG_INTERVAL_SECONDS
         value: 60

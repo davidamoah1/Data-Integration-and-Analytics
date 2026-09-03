@@ -20,6 +20,7 @@ import os
 import tempfile
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session as DbSession
 
 from audit.service import log_audit_event
@@ -172,13 +173,15 @@ async def upload_package(
 async def list_packages(
     limit: int = Query(default=50, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
+    status: str | None = Query(default=None),
+    search: str | None = Query(default=None),
     db: DbSession = Depends(get_db),
     tenant: dict = Depends(get_tenant_context),
 ):
-    """List ETL packages for the current organization."""
+    """List ETL packages for the current organization with optional filters."""
     org_id = tenant["organization_id"]
     svc = _get_service(db)
-    packages = svc.list_packages(org_id, limit=limit, offset=offset)
+    packages = svc.list_packages(org_id, limit=limit, offset=offset, status=status, search=search)
 
     return {
         "packages": [
@@ -321,6 +324,29 @@ async def get_quality_report(
     if not report:
         raise HTTPException(status_code=404, detail="Package not found")
     return report
+
+
+@router.get("/{package_id}/download")
+async def download_package(
+    package_id: int,
+    db: DbSession = Depends(get_db),
+    tenant: dict = Depends(get_tenant_context),
+):
+    """Download the original ZIP file for a package."""
+    org_id = tenant["organization_id"]
+    svc = _get_service(db)
+    result = svc.download_package(package_id, org_id)
+    if not result:
+        raise HTTPException(status_code=404, detail="Package not found")
+    content, filename, content_type = result
+
+    import io
+
+    return StreamingResponse(
+        io.BytesIO(content),
+        media_type=content_type,
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
 
 
 @router.post("/{package_id}/retry-failed", response_model=dict)

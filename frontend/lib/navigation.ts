@@ -79,6 +79,7 @@ const ALL_NAV_ITEMS: Record<string, NavItem> = {
   assignedTasks: { label: 'Assigned Tasks', href: '/capture/tasks', icon: CheckSquare, order: 2 },
   validation: { label: 'Validation', href: '/capture/review', icon: CheckSquare, order: 3 },
   datasets: { label: 'Datasets', href: '/datasets', icon: Database, permission: 'datasets.view', order: 4 },
+  dataPackages: { label: 'Data Packages', href: '/datasets/etl-packages', icon: Package, permission: 'datasets.view', order: 4.5 },
   analytics: { label: 'Analytics', href: '/analytics', icon: BarChart3, permission: 'analytics.view', order: 5 },
   reports: { label: 'Reports', href: '/reports', icon: FileText, permission: 'reports.view', order: 6 },
   reportBuilder: { label: 'Report Builder', href: '/reports/builder', icon: LayoutTemplate, permission: 'reports.view', order: 6.5 },
@@ -176,6 +177,7 @@ const ROLE_PROFILES: Record<RoleKey, RoleProfile> = {
         ALL_NAV_ITEMS.smartCapture,
         ALL_NAV_ITEMS.certificates,
         ALL_NAV_ITEMS.datasets,
+        ALL_NAV_ITEMS.dataPackages,
         ALL_NAV_ITEMS.analytics,
         ALL_NAV_ITEMS.reports,
         ALL_NAV_ITEMS.reportBuilder,
@@ -214,6 +216,7 @@ const ROLE_PROFILES: Record<RoleKey, RoleProfile> = {
         ALL_NAV_ITEMS.smartCapture,
         ALL_NAV_ITEMS.certificates,
         ALL_NAV_ITEMS.datasets,
+        ALL_NAV_ITEMS.dataPackages,
         ALL_NAV_ITEMS.analytics,
         ALL_NAV_ITEMS.reports,
         ALL_NAV_ITEMS.reportBuilder,
@@ -246,6 +249,7 @@ const ROLE_PROFILES: Record<RoleKey, RoleProfile> = {
       group('Department', [
         ALL_NAV_ITEMS.members,
         ALL_NAV_ITEMS.datasets,
+        ALL_NAV_ITEMS.dataPackages,
         ALL_NAV_ITEMS.reports,
         ALL_NAV_ITEMS.reportBuilder,
       ], 1),
@@ -268,6 +272,7 @@ const ROLE_PROFILES: Record<RoleKey, RoleProfile> = {
       ], 0),
       group('Data', [
         ALL_NAV_ITEMS.datasets,
+        ALL_NAV_ITEMS.dataPackages,
         ALL_NAV_ITEMS.connectors,
         ALL_NAV_ITEMS.scheduler,
         ALL_NAV_ITEMS.backgroundJobs,
@@ -296,6 +301,7 @@ const ROLE_PROFILES: Record<RoleKey, RoleProfile> = {
       ], 0),
       group('Analytics Studio', [
         ALL_NAV_ITEMS.datasets,
+        ALL_NAV_ITEMS.dataPackages,
         ALL_NAV_ITEMS.analytics,
         ALL_NAV_ITEMS.reports,
         ALL_NAV_ITEMS.reportBuilder,
@@ -325,6 +331,7 @@ const ROLE_PROFILES: Record<RoleKey, RoleProfile> = {
         ALL_NAV_ITEMS.reports,
         ALL_NAV_ITEMS.reportBuilder,
         ALL_NAV_ITEMS.datasets,
+        ALL_NAV_ITEMS.dataPackages,
       ], 1),
       group('Intelligence', [
         ALL_NAV_ITEMS.aiAssistant,
@@ -348,6 +355,7 @@ const ROLE_PROFILES: Record<RoleKey, RoleProfile> = {
         ALL_NAV_ITEMS.reports,
         ALL_NAV_ITEMS.reportBuilder,
         ALL_NAV_ITEMS.datasets,
+        ALL_NAV_ITEMS.dataPackages,
       ], 1),
       group('Personal', [
         ALL_NAV_ITEMS.notifications,
@@ -371,6 +379,7 @@ const ROLE_PROFILES: Record<RoleKey, RoleProfile> = {
         ALL_NAV_ITEMS.reports,
         ALL_NAV_ITEMS.reportBuilder,
         ALL_NAV_ITEMS.datasets,
+        ALL_NAV_ITEMS.dataPackages,
       ], 1),
       group('Intelligence', [
         ALL_NAV_ITEMS.aiAssistant,
@@ -397,6 +406,7 @@ const ROLE_PROFILES: Record<RoleKey, RoleProfile> = {
       ], 1),
       group('Data', [
         ALL_NAV_ITEMS.datasets,
+        ALL_NAV_ITEMS.dataPackages,
         ALL_NAV_ITEMS.reports,
         ALL_NAV_ITEMS.reportBuilder,
       ], 2),
@@ -415,6 +425,7 @@ const ROLE_PROFILES: Record<RoleKey, RoleProfile> = {
       ], 0),
       group('Data', [
         ALL_NAV_ITEMS.datasets,
+        ALL_NAV_ITEMS.dataPackages,
         ALL_NAV_ITEMS.reports,
         ALL_NAV_ITEMS.reportBuilder,
       ], 1),
