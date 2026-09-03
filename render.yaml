@@ -13,6 +13,7 @@ services:
     plan: starter
     healthCheckPath: /health
     autoDeploy: true
+    preDeployCommand: alembic upgrade head && python scripts/verify_schema.py
     envVars:
       # ── Application ──
       - key: APP_ENV
