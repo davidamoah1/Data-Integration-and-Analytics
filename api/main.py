@@ -87,6 +87,8 @@ from ecosystem.webhook_routes import webhook_router
 from enterprise.routes import router as enterprise_router
 from etl.logging_config import logger
 from etl.routes import router as etl_router
+from etl.package_routes import router as etl_package_router
+import etl.package_models  # noqa: F401 — register models with Base.metadata
 from jobs.handlers import register_builtin_handlers
 
 # Phase 11 â€” Background Processing & Job Queue
@@ -633,6 +635,7 @@ app.include_router(audit_router)
 app.include_router(audit_enterprise_router)
 app.include_router(database_router)
 app.include_router(etl_router)
+app.include_router(etl_package_router)
 app.include_router(ai_router)
 app.include_router(ai_enterprise_router)
 app.include_router(analytics_router)

@@ -22,8 +22,8 @@ from jobs.repositories import JobRepository
 logger = logging.getLogger(__name__)
 
 # Configurable via environment variables so operators can tune without code changes.
-PENDING_TIMEOUT_SECONDS = int(os.getenv("JOB_PENDING_TIMEOUT_SECONDS", "300"))  # 5 min
-RUNNING_TIMEOUT_SECONDS = int(os.getenv("JOB_RUNNING_TIMEOUT_SECONDS", "1800"))  # 30 min
+PENDING_TIMEOUT_SECONDS = int(os.getenv("JOB_PENDING_TIMEOUT_SECONDS", "600"))  # 10 min
+RUNNING_TIMEOUT_SECONDS = int(os.getenv("JOB_RUNNING_TIMEOUT_SECONDS", "3600"))  # 60 min
 WATCHDOG_INTERVAL_SECONDS = int(os.getenv("JOB_WATCHDOG_INTERVAL_SECONDS", "60"))  # check every 60s
 
 

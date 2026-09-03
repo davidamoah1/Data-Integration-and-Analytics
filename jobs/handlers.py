@@ -55,7 +55,30 @@ def _handle_ocr_document(job_id: int, payload: dict, db: DbSession) -> dict:
         raise ValueError(f"Document {document_id} not found")
 
     update_job_progress(job_id, 0.3, f"Processing document '{doc.filename}'")
-    doc = svc.process_document(document_id)
+
+    # Start a heartbeat thread so the watchdog doesn't kill long-running
+    # OCR jobs. The thread updates the job's heartbeat every 60s while
+    # process_document() is running. It stops when processing completes.
+    import threading
+
+    heartbeat_stop = threading.Event()
+
+    def _heartbeat_loop():
+        from jobs.service import update_heartbeat
+
+        while not heartbeat_stop.wait(timeout=60):
+            try:
+                update_heartbeat(job_id)
+            except Exception:  # nosec B110 — heartbeat must not crash the worker
+                pass
+
+    hb_thread = threading.Thread(target=_heartbeat_loop, daemon=True)
+    hb_thread.start()
+
+    try:
+        doc = svc.process_document(document_id)
+    finally:
+        heartbeat_stop.set()
 
     update_job_progress(job_id, 1.0, f"Document processing complete: {doc.status}")
 
@@ -82,7 +105,28 @@ def _handle_ocr_batch(job_id: int, payload: dict, db: DbSession) -> dict:
         raise ValueError(f"Batch {batch_id} not found")
 
     update_job_progress(job_id, 0.2, f"Processing batch '{batch.name}'")
-    svc.process_batch(batch_id)
+
+    # Heartbeat thread for long-running batch processing
+    import threading
+
+    heartbeat_stop = threading.Event()
+
+    def _heartbeat_loop():
+        from jobs.service import update_heartbeat
+
+        while not heartbeat_stop.wait(timeout=60):
+            try:
+                update_heartbeat(job_id)
+            except Exception:  # nosec B110 — heartbeat must not crash the worker
+                pass
+
+    hb_thread = threading.Thread(target=_heartbeat_loop, daemon=True)
+    hb_thread.start()
+
+    try:
+        svc.process_batch(batch_id)
+    finally:
+        heartbeat_stop.set()
 
     # Refresh to get final counts
     db.refresh(batch)
@@ -294,7 +338,64 @@ def _handle_dataset_workflow(job_id: int, payload: dict, db: DbSession) -> dict:
     }
 
 
-# â”€â”€ Export Handler â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── ETL Package Handler ────────────────────────────────────────────────────
+
+
+def _handle_etl_package(job_id: int, payload: dict, db: DbSession) -> dict:
+    """Process a ZIP package as a background job.
+
+    Payload:
+        package_id: int
+        zip_path: str — temp path to the uploaded ZIP file
+        organization_id: int
+    """
+    import os
+
+    package_id = payload.get("package_id")
+    zip_path = payload.get("zip_path", "")
+    organization_id = payload.get("organization_id")
+
+    if not package_id or not zip_path or not organization_id:
+        raise ValueError("Missing required payload: package_id, zip_path, organization_id")
+
+    update_job_progress(job_id, 0.05, "Starting ZIP extraction")
+
+    from etl.package_service import ETLPackageService
+
+    svc = ETLPackageService(db)
+    update_job_progress(job_id, 0.10, "Extracting ZIP contents")
+
+    result = svc.process_package(
+        package_id=int(package_id),
+        zip_path=zip_path,
+        organization_id=int(organization_id),
+    )
+
+    # Cleanup temp ZIP file
+    try:
+        if os.path.exists(zip_path):
+            os.unlink(zip_path)
+    except OSError:
+        pass
+
+    status = result.get("status", "completed")
+    if status == "failed":
+        update_job_progress(job_id, 1.0, f"Failed: {result.get('error', 'unknown')}")
+    elif status == "completed_with_errors":
+        update_job_progress(
+            job_id, 1.0,
+            f"Completed with {result.get('failed', 0)} errors out of {result.get('total_files', 0)} files",
+        )
+    else:
+        update_job_progress(
+            job_id, 1.0,
+            f"Completed: {result.get('completed', 0)}/{result.get('total_files', 0)} files",
+        )
+
+    return result
+
+
+# ── Export Handler ──────────────────────────────────────────────────────────
 
 
 def _handle_export(job_id: int, payload: dict, db: DbSession) -> dict:
@@ -334,4 +435,5 @@ def register_builtin_handlers() -> None:
     register_handler("data_import", _handle_data_import, TaskPriority.NORMAL)
     register_handler("export", _handle_export, TaskPriority.LOW)
     register_handler("dataset_workflow", _handle_dataset_workflow, TaskPriority.ETL)
-    logger.info("Registered %d built-in job handlers", 7)
+    register_handler("etl_package", _handle_etl_package, TaskPriority.ETL)
+    logger.info("Registered %d built-in job handlers", 8)

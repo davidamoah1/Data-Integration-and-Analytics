@@ -198,6 +198,16 @@ async def upload_certificates(
     duplicates = 0
     review_required = 0
 
+    # Ensure job handlers are registered once before the loop
+    try:
+        from jobs.handlers import register_builtin_handlers
+        from jobs.service import get_registered_types
+
+        if "ocr_document" not in get_registered_types():
+            register_builtin_handlers()
+    except Exception:
+        logger.warning("Could not register job handlers during certificate upload")
+
     for file in files:
         try:
             content = await file.read()
@@ -224,11 +234,7 @@ async def upload_certificates(
             # access the local filesystem.
             job_id = None
             try:
-                from jobs.handlers import register_builtin_handlers
-                from jobs.service import JobService, get_registered_types
-
-                if "ocr_document" not in get_registered_types():
-                    register_builtin_handlers()
+                from jobs.service import JobService
 
                 job_svc = JobService(db)
                 job = await job_svc.create_job(
@@ -297,13 +303,14 @@ async def upload_certificates(
                 }
             )
             logger.exception("Storage error for %s", file.filename)
-        except Exception as e:
+        except Exception:
             failed += 1
+            db.rollback()
             results.append(
                 {
                     "filename": file.filename,
                     "status": "failed",
-                    "error_message": f"Processing error: {e}",
+                    "error_message": "An unexpected error occurred during upload.",
                 }
             )
             logger.exception("Certificate processing failed for %s", file.filename)

@@ -83,9 +83,9 @@ services:
       - key: JOB_WATCHDOG_INTERVAL_SECONDS
         value: 60
       - key: JOB_PENDING_TIMEOUT_SECONDS
-        value: 300
+        value: 600
       - key: JOB_RUNNING_TIMEOUT_SECONDS
-        value: 1800
+        value: 3600
 
   # ── Background Worker Service ────────────────────────────────────
   - type: worker
@@ -135,9 +135,9 @@ services:
       - key: JOB_WATCHDOG_INTERVAL_SECONDS
         value: 60
       - key: JOB_PENDING_TIMEOUT_SECONDS
-        value: 300
+        value: 600
       - key: JOB_RUNNING_TIMEOUT_SECONDS
-        value: 1800
+        value: 3600
 
   # ── Redis (Render Redis) ─────────────────────────────────────
   - type: redis

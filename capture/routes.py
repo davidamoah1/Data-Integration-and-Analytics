@@ -238,13 +238,32 @@ async def batch_upload_documents(
     succeeded = 0
     failed = 0
 
+    # Ensure job handlers are registered once before the loop
+    try:
+        from jobs.handlers import register_builtin_handlers
+        from jobs.service import get_registered_types
+
+        if "ocr_document" not in get_registered_types():
+            register_builtin_handlers()
+    except Exception:
+        logger.warning("Could not register job handlers during batch upload")
+
     for file in files:
+        filename = file.filename or "document"
         try:
+            # Read file content — processed one at a time so memory
+            # is released after each upload_document() call.
             content = await file.read()
+            logger.info(
+                "BATCH_UPLOAD_FILE filename=%s size=%d batch_id=%d",
+                filename,
+                len(content),
+                batch.id,
+            )
             doc = svc.upload_document(
                 org_id,
                 current_user["id"],
-                file.filename or "document",
+                filename,
                 content,
                 source="web",
                 batch_id=batch.id,
@@ -253,19 +272,20 @@ async def batch_upload_documents(
             failed += 1
             results.append(
                 {
-                    "filename": file.filename or "document",
+                    "filename": filename,
                     "status": "failed",
                     "error": str(e),
                 }
             )
-            logger.warning("File rejected in batch upload: filename=%s error=%s", file.filename, e)
+            logger.warning("File rejected in batch upload: filename=%s error=%s", filename, e)
             continue
         except Exception:
             failed += 1
-            logger.exception("Unexpected error uploading file: filename=%s", file.filename)
+            logger.exception("Unexpected error uploading file: filename=%s", filename)
+            db.rollback()
             results.append(
                 {
-                    "filename": file.filename or "document",
+                    "filename": filename,
                     "status": "failed",
                     "error": "An unexpected error occurred during upload.",
                 }
@@ -275,11 +295,7 @@ async def batch_upload_documents(
         # Enqueue background processing
         job_id = None
         try:
-            from jobs.handlers import register_builtin_handlers
-            from jobs.service import JobService, get_registered_types
-
-            if "ocr_document" not in get_registered_types():
-                register_builtin_handlers()
+            from jobs.service import JobService
 
             job_svc = JobService(db)
             job = await job_svc.create_job(
@@ -294,7 +310,9 @@ async def batch_upload_documents(
             job_id = job.id
             db.commit()
         except Exception as e:
-            logger.warning("Job system unavailable for doc_id=%s, using thread: %s", doc.id, e)
+            logger.warning(
+                "Job system unavailable for doc_id=%s, falling back to thread: %s", doc.id, e
+            )
             import threading
 
             threading.Thread(target=_process_document_task, args=(doc.id,), daemon=True).start()
@@ -305,10 +323,25 @@ async def batch_upload_documents(
         result["job_id"] = job_id
         result["status"] = "accepted"
         results.append(result)
+        logger.info(
+            "BATCH_UPLOAD_FILE_DONE filename=%s doc_id=%d job_id=%s batch_id=%d",
+            filename,
+            doc.id,
+            job_id,
+            batch.id,
+        )
 
-    # Update batch counters
-    batch.total_documents = succeeded
+    # Update batch counters — total includes both succeeded and failed
+    batch.total_documents = succeeded + failed
     db.commit()
+
+    logger.info(
+        "BATCH_UPLOAD_COMPLETE batch_id=%d total=%d accepted=%d failed=%d",
+        batch.id,
+        len(files),
+        succeeded,
+        failed,
+    )
 
     return {
         "batch_id": batch.id,

@@ -86,6 +86,20 @@ class JobService:
 
     # â”€â”€ Create â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+    # Per-job-type timeout defaults (seconds). OCR on large
+    # multi-page documents can take 10+ minutes; ETL and report
+    # generation may also be long-running.
+    _JOB_TIMEOUTS: dict[str, int] = {
+        "ocr_document": 1800,  # 30 min — single doc OCR
+        "ocr_batch": 7200,  # 2 hours — batch OCR (up to 50 docs)
+        "etl_run": 3600,  # 1 hour — ETL pipeline
+        "report_gen": 1800,  # 30 min — AI report generation
+        "data_import": 1800,  # 30 min — large file import
+        "export": 1800,  # 30 min — data export
+        "dataset_workflow": 1800,  # 30 min — dataset intelligence
+    }
+    _DEFAULT_TIMEOUT = 600  # 10 min fallback
+
     async def create_job(
         self,
         organization_id: int,
@@ -97,6 +111,7 @@ class JobService:
         payload: dict | None = None,
         max_retries: int = 3,
         idempotency_key: str | None = None,
+        timeout: int | None = None,
     ) -> Job:
         """Create a job record and enqueue it for processing.
 
@@ -153,6 +168,7 @@ class JobService:
         # Enqueue in task queue
         queue = get_task_queue()
         handler, priority = _HANDLERS[job_type]
+        task_timeout = timeout or self._JOB_TIMEOUTS.get(job_type, self._DEFAULT_TIMEOUT)
         task = Task(
             name=f"{job_type}:{job.id}",
             func=_run_job_wrapper,
@@ -160,6 +176,7 @@ class JobService:
             priority=priority,
             metadata={"job_id": job.id, "job_type": job_type},
             max_retries=max_retries,
+            timeout=task_timeout,
         )
         job.queue_task_id = task.id
         self.repo.update(job.id, queue_task_id=task.id)
@@ -318,6 +335,7 @@ class JobService:
         queue = get_task_queue()
         handler, priority = _HANDLERS.get(job.job_type, (None, TaskPriority.NORMAL))
         if handler:
+            task_timeout = self._JOB_TIMEOUTS.get(job.job_type, self._DEFAULT_TIMEOUT)
             task = Task(
                 name=f"{job.job_type}:{job.id}",
                 func=_run_job_wrapper,
@@ -325,6 +343,7 @@ class JobService:
                 priority=priority,
                 metadata={"job_id": job.id, "job_type": job.job_type},
                 max_retries=job.max_retries,
+                timeout=task_timeout,
             )
             self.repo.update(job_id, queue_task_id=task.id)
             self.db.commit()

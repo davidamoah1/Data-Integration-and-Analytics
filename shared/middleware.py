@@ -78,6 +78,15 @@ class RequestSizeLimitMiddleware(BaseHTTPMiddleware):
         self.max_bytes = max_bytes
 
     async def dispatch(self, request: Request, call_next):
+        # The batch upload endpoints accept up to 50 files and are validated
+        # per-file by the route handler. Skip the global body-size check for
+        # these paths so legitimate batch uploads aren't rejected.
+        if (
+            "/api/capture/documents/batch-upload" in request.url.path
+            or "/api/certificates/upload" in request.url.path
+        ):
+            return await call_next(request)
+
         content_length = request.headers.get("content-length")
         if content_length:
             try:

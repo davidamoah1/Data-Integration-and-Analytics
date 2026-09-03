@@ -237,30 +237,105 @@ export default function CaptureUploadPage() {
   const uploadingCount = files.filter((f) => f.status === "uploading").length;
   const processingCount = files.filter((f) => f.status === "processing").length;
 
+  // Track polling state in refs to avoid recreating interval on every render
+  const pollAttemptsRef = useRef<Record<number, number>>({});
+  const pollDelayRef = useRef(POLL_INTERVAL);
+
   // Poll for status updates on processing documents
   useEffect(() => {
-    const processingFiles = files.filter((f) => f.status === "processing" && f.document);
-    if (processingFiles.length === 0) return;
+    const hasProcessing = files.some((f) => f.status === "processing" && f.document);
+    if (!hasProcessing) return;
 
-    const interval = setInterval(async () => {
-      for (const f of processingFiles) {
-        if (!f.document) continue;
+    let cancelled = false;
+    let timeoutId: ReturnType<typeof setTimeout>;
+
+    const poll = async () => {
+      if (cancelled) return;
+
+      // Get current processing docs from latest state
+      const processingDocs = files
+        .filter((f) => f.status === "processing" && f.document)
+        .map((f) => f.document!.id);
+
+      if (processingDocs.length === 0) return;
+
+      for (const docId of processingDocs) {
+        const attempts = (pollAttemptsRef.current[docId] || 0) + 1;
+        pollAttemptsRef.current[docId] = attempts;
+
+        // Max 100 polling attempts (~10 minutes at 6s avg)
+        if (attempts > 100) {
+          setFiles((prev) =>
+            prev.map((pf) =>
+              pf.document?.id === docId
+                ? {
+                    ...pf,
+                    status: "error" as FileStatus,
+                    error: "Processing timed out. Please retry.",
+                  }
+                : pf,
+            ),
+          );
+          continue;
+        }
+
         try {
-          const updated = await captureService.getDocument(f.document.id);
-          const isDone = updated.status === "ready_for_review" || updated.status === "approved" || updated.status === "rejected" || updated.status === "draft";
+          const updated = await captureService.getDocument(docId);
+          if (cancelled) break;
+
+          const isDone =
+            updated.status === "ready_for_review" ||
+            updated.status === "approved" ||
+            updated.status === "rejected" ||
+            updated.status === "draft";
           const isFailed = updated.status === "failed";
-          setFiles((prev) => prev.map((pf) =>
-            pf.document?.id === f.document!.id
-              ? { ...pf, status: isFailed ? "error" : isDone ? "done" : "processing", document: updated, error: isFailed ? updated.error_message || "Processing failed" : undefined }
-              : pf
-          ));
+
+          if (isDone || isFailed) {
+            // Reset attempt counter for this doc
+            delete pollAttemptsRef.current[docId];
+          }
+
+          setFiles((prev) =>
+            prev.map((pf) =>
+              pf.document?.id === docId
+                ? {
+                    ...pf,
+                    status: isFailed
+                      ? ("error" as FileStatus)
+                      : isDone
+                        ? ("done" as FileStatus)
+                        : "processing",
+                    document: updated,
+                    error: isFailed
+                      ? updated.error_message || "Processing failed"
+                      : undefined,
+                  }
+                : pf,
+            ),
+          );
         } catch {
-          // Silently ignore polling errors
+          // Network error — keep polling with backoff
         }
       }
-    }, POLL_INTERVAL);
 
-    return () => clearInterval(interval);
+      // Exponential backoff: 3s → 6s → 12s → 15s (capped)
+      pollDelayRef.current = Math.min(pollDelayRef.current * 2, 15000);
+
+      // Schedule next poll only if there are still processing docs
+      const stillProcessing = files.some((f) => f.status === "processing" && f.document);
+      if (stillProcessing && !cancelled) {
+        timeoutId = setTimeout(poll, pollDelayRef.current);
+      }
+    };
+
+    // Reset backoff on new polling cycle
+    pollDelayRef.current = POLL_INTERVAL;
+    timeoutId = setTimeout(poll, POLL_INTERVAL);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+    };
   }, [files]);
 
   const uploadProgressText = isSubmitting && batchProgress > 0
