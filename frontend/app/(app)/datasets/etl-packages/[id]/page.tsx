@@ -45,6 +45,7 @@ export default function PackageDetailsPage() {
   useEffect(() => {
     if (!packageId) return;
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [packageId]);
 
   useEffect(() => {
@@ -73,6 +74,7 @@ export default function PackageDetailsPage() {
         setIsPolling(false);
       };
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [progress, packageId, isPolling]);
 
   async function loadData() {
