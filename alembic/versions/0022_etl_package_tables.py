@@ -4,10 +4,8 @@ Creates two new tables:
   - etl_packages: Tracks ZIP packages uploaded for bulk ETL processing
   - etl_package_files: Tracks individual files discovered inside each package
 
-Also merges the two existing heads (04fa5fa19727 and c5d6e7f8a9b0).
-
-Revision ID: a1b2c3d4e5f6
-Revises: 04fa5fa19727, c5d6e7f8a9b0
+Revision ID: d7e8f9a0b1c2
+Revises: c5d6e7f8a9b0
 Create Date: 2026-09-15 10:00:00.000000
 """
 
@@ -17,8 +15,8 @@ import sqlalchemy as sa
 
 from alembic import op
 
-revision: str = "a1b2c3d4e5f6"
-down_revision: str | None = ("04fa5fa19727", "c5d6e7f8a9b0")
+revision: str = "d7e8f9a0b1c2"
+down_revision: str | None = "c5d6e7f8a9b0"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
