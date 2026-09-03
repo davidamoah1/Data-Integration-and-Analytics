@@ -23,12 +23,10 @@ from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from sqlalchemy.orm import Session as DbSession
 
 from audit.service import log_audit_event
-from etl.package_models import ETLPackage, ETLPackageFile
 from etl.package_service import ETLPackageService
 from etl.zip_extractor import validate_zip
 from shared.database import get_db
-from shared.dependencies import get_current_user
-from shared.tenant import get_current_organization_id, get_tenant_context
+from shared.tenant import get_tenant_context
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/etl/packages", tags=["ETL Packages"])

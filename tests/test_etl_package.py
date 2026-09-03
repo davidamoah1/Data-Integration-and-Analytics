@@ -17,7 +17,6 @@ import zipfile
 
 import pytest
 
-
 # ── ZIP Extractor Tests ──────────────────────────────────────────────────────
 
 
@@ -274,9 +273,9 @@ class TestETLPackageService:
         from sqlalchemy import create_engine
         from sqlalchemy.orm import sessionmaker
 
-        from shared.database import Base
-        import etl.package_models  # noqa: F401
         import etl.models  # noqa: F401
+        import etl.package_models  # noqa: F401
+        from shared.database import Base
 
         engine = create_engine("sqlite:///:memory:", echo=False)
         Base.metadata.create_all(engine)
@@ -533,9 +532,9 @@ class TestPackageModels:
         from sqlalchemy import create_engine
         from sqlalchemy.orm import sessionmaker
 
-        from shared.database import Base
-        import etl.package_models  # noqa: F401
         import etl.models  # noqa: F401
+        import etl.package_models  # noqa: F401
+        from shared.database import Base
 
         engine = create_engine("sqlite:///:memory:", echo=False)
         Base.metadata.create_all(engine)
@@ -566,9 +565,9 @@ class TestPackageModels:
         from sqlalchemy import create_engine
         from sqlalchemy.orm import sessionmaker
 
-        from shared.database import Base
-        import etl.package_models  # noqa: F401
         import etl.models  # noqa: F401
+        import etl.package_models  # noqa: F401
+        from shared.database import Base
 
         engine = create_engine("sqlite:///:memory:", echo=False)
         Base.metadata.create_all(engine)
@@ -641,10 +640,10 @@ class TestFullPipeline:
         from sqlalchemy import create_engine
         from sqlalchemy.orm import sessionmaker
 
-        from shared.database import Base
-        import etl.package_models  # noqa: F401
         import etl.models  # noqa: F401
+        import etl.package_models  # noqa: F401
         from etl.package_service import ETLPackageService
+        from shared.database import Base
 
         engine = create_engine("sqlite:///:memory:", echo=False)
         Base.metadata.create_all(engine)
@@ -702,10 +701,10 @@ class TestFullPipeline:
         from sqlalchemy import create_engine
         from sqlalchemy.orm import sessionmaker
 
-        from shared.database import Base
-        import etl.package_models  # noqa: F401
         import etl.models  # noqa: F401
+        import etl.package_models  # noqa: F401
         from etl.package_service import ETLPackageService
+        from shared.database import Base
 
         engine = create_engine("sqlite:///:memory:", echo=False)
         Base.metadata.create_all(engine)

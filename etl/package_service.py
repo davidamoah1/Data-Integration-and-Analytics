@@ -15,7 +15,6 @@ Reuses existing ETL infrastructure:
 
 from __future__ import annotations
 
-import hashlib
 import logging
 import os
 import tempfile
@@ -31,11 +30,8 @@ from etl.profiling import DataProfiler
 from etl.quality import DataQualityEngine
 from etl.transformations import TransformationEngine
 from etl.zip_extractor import (
-    ExtractedFile,
-    ExtractionResult,
     cleanup_extraction,
     extract_zip,
-    validate_zip,
 )
 
 logger = logging.getLogger(__name__)

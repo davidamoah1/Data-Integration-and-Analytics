@@ -48,6 +48,7 @@ from shared.middleware import (
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+import etl.package_models  # noqa: F401 — register models with Base.metadata
 from admin.routes import router as admin_router
 from ai.enterprise_routes import router as ai_enterprise_router
 from ai.routes import router as ai_router
@@ -86,9 +87,8 @@ from ecosystem.routes import router as platform_router
 from ecosystem.webhook_routes import webhook_router
 from enterprise.routes import router as enterprise_router
 from etl.logging_config import logger
-from etl.routes import router as etl_router
 from etl.package_routes import router as etl_package_router
-import etl.package_models  # noqa: F401 — register models with Base.metadata
+from etl.routes import router as etl_router
 from jobs.handlers import register_builtin_handlers
 
 # Phase 11 â€” Background Processing & Job Queue
