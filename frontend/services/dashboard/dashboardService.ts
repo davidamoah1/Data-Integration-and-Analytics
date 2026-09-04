@@ -58,4 +58,56 @@ export const dashboardService = {
   async getEtlDashboard(): Promise<unknown> {
     return apiClient.get('/etl/dashboard');
   },
+
+  async getOverview(): Promise<EnterpriseOverview> {
+    return apiClient.get('/analytics/overview');
+  },
 };
+
+export interface OverviewDashboard {
+  id: number;
+  name: string;
+  description: string;
+  theme: string;
+  widget_count: number;
+  widgets: Array<{ id: number; type: string; title: string }>;
+  is_public: boolean;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
+export interface OverviewWorkflow {
+  id: number;
+  workflow_id: string;
+  dataset_name: string;
+  row_count: number;
+  column_count: number;
+  quality_score: number;
+  status: string;
+  created_at: string | null;
+}
+
+export interface OverviewActivity {
+  id: number;
+  action: string;
+  resource_type: string;
+  created_at: string | null;
+}
+
+export interface EnterpriseOverview {
+  members_count: number;
+  departments_count: number;
+  datasets_count: number;
+  dashboards_count: number;
+  total_widgets_count: number;
+  kpis_count: number;
+  total_rows_processed: number;
+  storage_usage_bytes: number;
+  storage_usage_formatted: string;
+  system_health: string;
+  security_tier: string;
+  recent_dashboards: OverviewDashboard[];
+  recent_workflows: OverviewWorkflow[];
+  recent_activity: OverviewActivity[];
+}
+

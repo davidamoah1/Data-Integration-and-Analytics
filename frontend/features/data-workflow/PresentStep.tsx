@@ -80,10 +80,10 @@ const SLIDE_ARCHITECTURES: Record<string, DeckArchitecture> = {
     cadence: 'BLUF Strategic Summary → Executive Scorecard → Primary Metric Drivers → Segment Mix → Risk Flags → Action Plan',
     defaultTitleSuffix: 'Strategic Executive Briefing',
     palette: [
-      { name: 'Navy Midnight', hex: '#0F172A', role: 'Dominant Canvas & Authority Headers', border: 'border-slate-800' },
-      { name: 'Slate Surface', hex: '#1E293B', role: 'KPI Metric Containers & Callout Cards', border: 'border-slate-700' },
-      { name: 'Executive Gold', hex: '#D97706', role: 'Strategic KPI Badges & Primary Accents', border: 'border-amber-600' },
-      { name: 'Corporate Sky', hex: '#0284C7', role: 'Chart Data Series & Key Action Items', border: 'border-sky-600' },
+      { name: 'Navy Midnight', hex: '#0F172A', role: 'Dominant Deep Sapphire Canvas & Framing', border: 'border-slate-800' },
+      { name: 'Slate Surface', hex: '#1E293B', role: 'KPI Metric Containers & Intelligence Cards', border: 'border-slate-700' },
+      { name: 'Electric Sky', hex: '#38BDF8', role: 'Ultra-Crisp Executive Accent & Key Focus Headers', border: 'border-sky-400' },
+      { name: 'Emerald Mint', hex: '#10B981', role: 'Target Milestones & Benchmark Conformance', border: 'border-emerald-500' },
     ],
     slides: [
       {

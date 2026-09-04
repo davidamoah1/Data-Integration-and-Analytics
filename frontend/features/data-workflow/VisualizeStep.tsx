@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
   Save,
@@ -52,6 +53,7 @@ export function VisualizeStep({
   isSaving,
   savedDashboardId,
 }: Props) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<'dashboard' | 'schema'>('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'measure' | 'dimension' | 'temporal'>('all');
@@ -291,14 +293,32 @@ export function VisualizeStep({
                 Data Fields ({allFields.length})
               </Button>
               {!savedDashboardId ? (
-                <Button onClick={onSaveDashboard} disabled={isSaving} size="sm" variant="secondary">
+                <Button onClick={onSaveDashboard} disabled={isSaving} size="sm" variant="secondary" className="shadow-sm">
                   <Save className="mr-1.5 h-3.5 w-3.5" />
                   {isSaving ? 'Saving...' : 'Save Dashboard'}
                 </Button>
               ) : (
-                <Badge variant="default" className="bg-emerald-600 text-white flex items-center gap-1">
-                  <CheckCircle2 className="h-3 w-3" /> Saved
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant="default" className="bg-emerald-600 text-white flex items-center gap-1 py-1 px-2.5 shadow-sm">
+                    <CheckCircle2 className="h-3.5 w-3.5" /> Saved
+                  </Badge>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => router.push(`/analytics/${savedDashboardId}`)}
+                    className="border-emerald-600/40 text-emerald-700 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/50"
+                  >
+                    Open Studio &rarr;
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => router.push('/dashboard')}
+                    className="text-slate-600 hover:text-slate-900 dark:text-slate-400"
+                  >
+                    View Org Dashboard
+                  </Button>
+                </div>
               )}
             </div>
           </div>

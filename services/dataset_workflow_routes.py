@@ -1713,51 +1713,67 @@ def _add_chart_to_slide(
         return {"rendered": False}
 
 
-# ── Presentation Theme Color Palettes ────────────────────────
+# ── Presentation Theme Color Palettes (Harmonious High-Contrast) ───
 THEME_PALETTES = {
     "executive": {
         "tag": "EXECUTIVE BRIEFING // STRATEGY & IMPACT",
-        "primary": (15, 23, 42),       # #0F172A Deep Navy
-        "secondary": (30, 41, 59),     # #1E293B Slate
-        "accent": (217, 119, 6),       # #D97706 Warm Amber/Gold
-        "highlight": (2, 132, 199),    # #0284C7 Blue
-        "bg_card": (248, 250, 252),    # #F8FAFC
-        "text_dark": (15, 23, 42),
-        "text_muted": (100, 116, 139),
-        "card_border": (226, 232, 240),
+        "primary": (15, 23, 42),           # #0F172A Deep Sapphire Navy Canvas
+        "secondary": (30, 41, 59),         # #1E293B Elevated Slate Surface
+        "dark_accent": (56, 189, 248),     # #38BDF8 High-Luminance Sky Blue (ultra-crisp on dark)
+        "dark_sub": (186, 230, 253),       # #BAE6FD Soft Ice Blue (for subtitles on dark)
+        "light_accent": (37, 99, 235),     # #2563EB Royal Blue (for light content slides)
+        "accent": (56, 189, 248),          # Fallback accent
+        "highlight": (16, 185, 129),       # #10B981 Luminous Emerald Green (targets & verified badges)
+        "bg_card": (248, 250, 252),        # #F8FAFC Clean card surface
+        "text_dark": (15, 23, 42),         # #0F172A Deep Obsidian for light slides
+        "text_muted": (71, 85, 105),       # #475569 Crisp Slate (readable, not washed out)
+        "card_border": (226, 232, 240),    # #E2E8F0 Soft border for light slides
+        "card_border_dark": (51, 65, 85),  # #334155 Subtle border on dark slides
     },
     "analytical": {
         "tag": "ANALYTICAL DEEP-DIVE // EMPIRICAL INTELLIGENCE",
-        "primary": (8, 47, 73),        # #082F49 Deep Cobalt
-        "secondary": (15, 23, 42),     # #0F172A
-        "accent": (6, 182, 212),       # #06B6D4 Cyan
-        "highlight": (13, 148, 136),   # #0D9488 Teal
-        "bg_card": (248, 250, 252),    # #F8FAFC
+        "primary": (8, 47, 73),            # #082F49 Deep Marine
+        "secondary": (15, 23, 42),         # #0F172A Elevated Dark Slate
+        "dark_accent": (34, 211, 238),     # #22D3EE Electric Cyan
+        "dark_sub": (165, 243, 252),       # #A5F3FC Soft Cyan
+        "light_accent": (8, 145, 178),     # #0891B2 Deep Cyan
+        "accent": (34, 211, 238),
+        "highlight": (20, 184, 166),       # #14B8A6 Teal
+        "bg_card": (248, 250, 252),        # #F8FAFC
         "text_dark": (15, 23, 42),
         "text_muted": (71, 85, 105),
         "card_border": (203, 213, 225),
+        "card_border_dark": (30, 41, 59),
     },
     "research": {
         "tag": "TECHNICAL RESEARCH // DATA AUDIT",
-        "primary": (24, 24, 27),       # #18181B Obsidian
-        "secondary": (39, 39, 42),     # #27272A
-        "accent": (5, 150, 105),       # #059669 Precision Emerald
-        "highlight": (37, 99, 235),    # #2563EB Blueprint Blue
-        "bg_card": (250, 250, 250),    # #FAFAFA
-        "text_dark": (24, 24, 27),
-        "text_muted": (113, 113, 122),
+        "primary": (17, 24, 39),           # #111827 Obsidian Tech
+        "secondary": (31, 41, 55),         # #1F2937 Cool Slate
+        "dark_accent": (52, 211, 153),     # #34D399 Mint Emerald
+        "dark_sub": (167, 243, 208),       # #A7F3D0 Soft Mint
+        "light_accent": (5, 150, 105),     # #059669 Audit Emerald
+        "accent": (52, 211, 153),
+        "highlight": (59, 130, 246),       # #3B82F6 Precision Blue
+        "bg_card": (250, 250, 250),        # #FAFAFA
+        "text_dark": (17, 24, 39),
+        "text_muted": (75, 85, 99),
         "card_border": (228, 228, 231),
+        "card_border_dark": (55, 65, 81),
     },
     "pitch": {
         "tag": "INVESTOR PITCH // TRACTION & GROWTH",
-        "primary": (9, 9, 11),         # #09090B Pitch Black
-        "secondary": (30, 27, 75),     # #1E1B4B Deep Violet
-        "accent": (124, 58, 237),      # #7C3AED Electric Violet
-        "highlight": (244, 63, 94),    # #F43F5E Rose
-        "bg_card": (251, 251, 254),    # #FBFBFE
+        "primary": (9, 9, 11),             # #09090B Pitch Black
+        "secondary": (24, 24, 27),         # #18181B Dark Zinc
+        "dark_accent": (167, 139, 250),    # #A78BFA Lilac Violet
+        "dark_sub": (221, 214, 254),       # #DDD6FE Soft Lilac
+        "light_accent": (124, 58, 237),    # #7C3AED Electric Violet
+        "accent": (167, 139, 250),
+        "highlight": (244, 63, 94),        # #F43F5E Growth Rose
+        "bg_card": (251, 251, 254),        # #FBFBFE
         "text_dark": (9, 9, 11),
         "text_muted": (107, 114, 128),
         "card_border": (229, 231, 235),
+        "card_border_dark": (49, 46, 129),
     },
 }
 
@@ -1797,12 +1813,16 @@ def _generate_auto_pptx(
 
     c_primary = RGBColor(*theme_cfg["primary"])
     c_secondary = RGBColor(*theme_cfg["secondary"])
-    c_accent = RGBColor(*theme_cfg["accent"])
+    c_dark_accent = RGBColor(*theme_cfg.get("dark_accent", theme_cfg["accent"]))
+    c_dark_sub = RGBColor(*theme_cfg.get("dark_sub", (186, 230, 253)))
+    c_light_accent = RGBColor(*theme_cfg.get("light_accent", theme_cfg["accent"]))
+    c_accent = c_dark_accent
     c_highlight = RGBColor(*theme_cfg["highlight"])
     c_bg_card = RGBColor(*theme_cfg["bg_card"])
     c_text_dark = RGBColor(*theme_cfg["text_dark"])
     c_text_muted = RGBColor(*theme_cfg["text_muted"])
     c_card_border = RGBColor(*theme_cfg["card_border"])
+    c_card_border_dark = RGBColor(*theme_cfg.get("card_border_dark", (51, 65, 85)))
     c_white = RGBColor(255, 255, 255)
     c_light_slate = RGBColor(226, 232, 240)
 
@@ -1838,17 +1858,19 @@ def _generate_auto_pptx(
             # Elegant left vertical accent stripe
             stripe = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(0.8), Inches(1.1), Inches(0.12), Inches(3.8))
             stripe.fill.solid()
-            stripe.fill.fore_color.rgb = c_accent
+            stripe.fill.fore_color.rgb = c_dark_accent
             stripe.line.fill.background()
 
             # Top capsule tag
-            tb_tag = slide.shapes.add_textbox(Inches(1.15), Inches(1.05), Inches(11.0), Inches(0.4))
-            p_tag = tb_tag.text_frame.paragraphs[0]
+            tb_tag = slide.shapes.add_textbox(Inches(1.15), Inches(1.15), Inches(10.5), Inches(0.4))
+            tf_tag = tb_tag.text_frame
+            tf_tag.word_wrap = True
+            p_tag = tf_tag.paragraphs[0]
             run_tag = p_tag.add_run()
             run_tag.text = theme_cfg["tag"]
-            run_tag.font.size = Pt(10.5)
+            run_tag.font.size = Pt(9.5)
             run_tag.font.bold = True
-            run_tag.font.color.rgb = c_accent
+            run_tag.font.color.rgb = c_dark_accent
 
             # Main Title, Subtitle, and Narrative Hook
             tb_main = slide.shapes.add_textbox(Inches(1.15), Inches(1.6), Inches(11.2), Inches(3.3))
@@ -1868,7 +1890,7 @@ def _generate_auto_pptx(
             run_sub.text = slide_subtitle or f"Comprehensive Strategic Intelligence Deck • {clean_ds_name}"
             run_sub.font.size = Pt(16)
             run_sub.font.bold = True
-            run_sub.font.color.rgb = c_accent
+            run_sub.font.color.rgb = c_dark_sub
 
             p_desc = tf_main.add_paragraph()
             run_desc = p_desc.add_run()
@@ -1896,13 +1918,13 @@ def _generate_auto_pptx(
                 mbox = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(mx), Inches(meta_y), Inches(meta_w), Inches(meta_h))
                 mbox.fill.solid()
                 mbox.fill.fore_color.rgb = c_secondary
-                mbox.line.color.rgb = c_accent
+                mbox.line.color.rgb = c_card_border_dark
                 mbox.line.width = Pt(1.0)
 
                 # Top micro-accent stripe on meta card
-                m_stripe = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(mx), Inches(meta_y), Inches(meta_w), Inches(0.06))
+                m_stripe = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(mx), Inches(meta_y), Inches(meta_w), Inches(0.05))
                 m_stripe.fill.solid()
-                m_stripe.fill.fore_color.rgb = c_accent
+                m_stripe.fill.fore_color.rgb = c_dark_accent
                 m_stripe.line.fill.background()
 
                 tb_m = slide.shapes.add_textbox(Inches(mx + 0.18), Inches(meta_y + 0.18), Inches(meta_w - 0.36), Inches(meta_h - 0.36))
@@ -1914,7 +1936,7 @@ def _generate_auto_pptx(
                 run_ml.text = mlbl
                 run_ml.font.size = Pt(8.5)
                 run_ml.font.bold = True
-                run_ml.font.color.rgb = c_accent
+                run_ml.font.color.rgb = RGBColor(148, 163, 184)
 
                 p_mv = tf_m.add_paragraph()
                 run_mv = p_mv.add_run()
@@ -1932,7 +1954,7 @@ def _generate_auto_pptx(
 
             stripe = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(0.8), Inches(0.9), Inches(0.12), Inches(5.8))
             stripe.fill.solid()
-            stripe.fill.fore_color.rgb = c_accent
+            stripe.fill.fore_color.rgb = c_dark_accent
             stripe.line.fill.background()
 
             tb_chdr = slide.shapes.add_textbox(Inches(1.15), Inches(0.85), Inches(11.3), Inches(1.3))
@@ -1944,7 +1966,7 @@ def _generate_auto_pptx(
             run_ctag.text = "GOVERNANCE & APPROVALS // NEXT MILESTONES"
             run_ctag.font.size = Pt(10)
             run_ctag.font.bold = True
-            run_ctag.font.color.rgb = c_accent
+            run_ctag.font.color.rgb = c_dark_accent
 
             p_ct = tf_chdr.add_paragraph()
             run_ct = p_ct.add_run()
@@ -2003,10 +2025,16 @@ def _generate_auto_pptx(
                 hcard = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(hx), Inches(hz_y), Inches(hz_w), Inches(hz_h))
                 hcard.fill.solid()
                 hcard.fill.fore_color.rgb = c_secondary
-                hcard.line.color.rgb = c_accent if hi == 0 else c_card_border
-                hcard.line.width = Pt(1)
+                hcard.line.color.rgb = c_card_border_dark
+                hcard.line.width = Pt(1.0)
 
-                tb_h = slide.shapes.add_textbox(Inches(hx + 0.25), Inches(hz_y + 0.2), Inches(hz_w - 0.5), Inches(hz_h - 0.4))
+                # Top micro-accent stripe on every phase card for cohesive elegance
+                h_stripe = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(hx), Inches(hz_y), Inches(hz_w), Inches(0.06))
+                h_stripe.fill.solid()
+                h_stripe.fill.fore_color.rgb = c_dark_accent
+                h_stripe.line.fill.background()
+
+                tb_h = slide.shapes.add_textbox(Inches(hx + 0.25), Inches(hz_y + 0.22), Inches(hz_w - 0.5), Inches(hz_h - 0.44))
                 tf_h = tb_h.text_frame
                 tf_h.word_wrap = True
 
@@ -2015,7 +2043,7 @@ def _generate_auto_pptx(
                 run_htag.text = htag
                 run_htag.font.size = Pt(8.5)
                 run_htag.font.bold = True
-                run_htag.font.color.rgb = RGBColor(167, 139, 250) if tpl_key == "pitch" else c_accent
+                run_htag.font.color.rgb = c_dark_accent
 
                 p_ht = tf_h.add_paragraph()
                 run_ht = p_ht.add_run()
@@ -2034,12 +2062,13 @@ def _generate_auto_pptx(
                 p_tar = tf_h.add_paragraph()
                 run_tar = p_tar.add_run()
                 run_tar.text = f"\n✔ {htarget}"
-                run_tar.font.size = Pt(10.0)
+                run_tar.font.size = Pt(10.5)
                 run_tar.font.bold = True
-                run_tar.font.color.rgb = RGBColor(52, 211, 153)  # Bright Mint Emerald for high contrast
+                run_tar.font.color.rgb = RGBColor(52, 211, 153)  # Bright Mint Emerald for maximum legibility
 
         # ── 3. Content Slides (Masthead Header & Footer Framing) ───
         else:
+            c_accent = c_light_accent
             # Clean Masthead Header
             tb_hdr = slide.shapes.add_textbox(Inches(0.8), Inches(0.35), Inches(11.7), Inches(0.95))
             tf_hdr = tb_hdr.text_frame

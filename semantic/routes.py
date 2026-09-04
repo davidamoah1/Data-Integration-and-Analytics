@@ -1,4 +1,4 @@
-﻿"""API routes for the Semantic Intelligence Engine."""
+"""API routes for the Semantic Intelligence Engine."""
 
 from __future__ import annotations
 
@@ -363,29 +363,93 @@ async def persist_analysis(
             name=body.dashboard_config.get("title", f"{body.table_name} Dashboard"),
             description=body.dashboard_config.get("subtitle", ""),
             theme=body.industry or "default",
-            layout=body.dashboard_config.get("widgets", []),
+            layout=[],
             is_public=True,
         )
         db.add(dash)
         db.flush()
         created_dashboard_id = dash.id
 
-        # Add widgets
-        for i, widget in enumerate(body.dashboard_config.get("widgets", [])):
+        widgets_to_add: list[dict] = []
+        raw_widgets = body.dashboard_config.get("widgets", [])
+        raw_charts = body.dashboard_config.get("charts", [])
+        raw_kpis = body.dashboard_config.get("kpis", []) or (body.kpis or [])
+
+        # 1. Add KPI metric cards
+        for ki, kpi_item in enumerate(raw_kpis):
+            lbl = kpi_item.get("label") or kpi_item.get("name") or f"KPI 0{ki+1}"
+            val = kpi_item.get("value")
+            widgets_to_add.append({
+                "type": "kpi_card",
+                "title": str(lbl),
+                "configuration": {
+                    "value": val,
+                    "unit": kpi_item.get("unit", ""),
+                    "category": kpi_item.get("category", "general"),
+                    "trend": kpi_item.get("trend", "stable"),
+                },
+                "entity": "kpi",
+                "metric": str(val) if val is not None else "",
+                "available": True,
+            })
+
+        # 2. Add Charts / Widgets
+        if raw_charts:
+            for ci, chart in enumerate(raw_charts):
+                widgets_to_add.append({
+                    "type": chart.get("type", "bar"),
+                    "title": chart.get("title", f"Visualization 0{ci+1}"),
+                    "configuration": {
+                        "chart_type": chart.get("type", "bar"),
+                        "x_axis": chart.get("x_axis"),
+                        "y_axis": chart.get("y_axis"),
+                        "aggregation": chart.get("aggregation", "sum"),
+                        "data": chart.get("data", []),
+                        "reason": chart.get("reason", ""),
+                        "category": chart.get("category", "distribution"),
+                    },
+                    "entity": str(chart.get("x_axis") or "segment"),
+                    "metric": str(chart.get("y_axis") or "measure"),
+                    "available": True,
+                })
+        elif raw_widgets:
+            widgets_to_add.extend(raw_widgets)
+
+        layout_items = []
+        for i, widget in enumerate(widgets_to_add):
+            w_type = widget.get("type", "chart")
+            w_title = widget.get("title", f"Widget {i+1}")
+            w_config = widget.get("configuration") or {
+                "entity": widget.get("entity", ""),
+                "metric": widget.get("metric", ""),
+                "available": widget.get("available", True),
+            }
+
+            # Layout positioning
+            if w_type == "kpi_card":
+                pos = {"x": (i % 4) * 3, "y": 0, "w": 3, "h": 2}
+            else:
+                pos = {"x": (i % 2) * 6, "y": 2 + (i // 2) * 4, "w": 6, "h": 4}
+
             w = DashboardWidget(
                 organization_id=org_id,
                 dashboard_id=dash.id,
-                widget_type=widget.get("type", "chart"),
-                title=widget.get("title", ""),
-                configuration={
-                    "entity": widget.get("entity", ""),
-                    "metric": widget.get("metric", ""),
-                    "available": widget.get("available", False),
-                },
-                position={"x": (i % 4) * 3, "y": (i // 4) * 4, "w": 3, "h": 4},
-                group_name=widget.get("entity", "general"),
+                widget_type=w_type,
+                title=w_title,
+                configuration=w_config,
+                position=pos,
+                group_name=widget.get("entity", "analytics"),
             )
             db.add(w)
+            layout_items.append({
+                "id": i + 1,
+                "type": w_type,
+                "title": w_title,
+                "position": pos,
+                "config": w_config,
+            })
+
+        dash.layout = layout_items
 
     # 2. Create KPIs
     if body.kpis:
