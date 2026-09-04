@@ -1,8 +1,8 @@
 """add approved certificate analytics indexes
 
-Revision ID: a1b2c3d4e5f6
-Revises: 04fa5fa19727
-Create Date: 2026-08-23 10:00:00.000000
+Revision ID: e3f4a5b6c7d8
+Revises: d7e8f9a0b1c2
+Create Date: 2026-09-03 18:00:00.000000
 
 Adds composite indexes to support approved certificate analytics queries.
 All indexes include organization_id as the leading column for tenant isolation.
@@ -12,8 +12,8 @@ from collections.abc import Sequence
 
 from alembic import op
 
-revision: str = "a1b2c3d4e5f6"
-down_revision: str | None = "04fa5fa19727"
+revision: str = "e3f4a5b6c7d8"
+down_revision: str | None = "d7e8f9a0b1c2"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 

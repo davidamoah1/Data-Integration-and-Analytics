@@ -1,7 +1,7 @@
 """widen etl_package_files status column for document statuses
 
 Revision ID: b2c3d4e5f6a7
-Revises: a1b2c3d4e5f6
+Revises: e3f4a5b6c7d8
 Create Date: 2026-09-03 18:30:00.000000
 
 Widens the `status` column on `etl_package_files` from VARCHAR(20) to
@@ -16,7 +16,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "b2c3d4e5f6a7"
-down_revision: str | None = "a1b2c3d4e5f6"
+down_revision: str | None = "e3f4a5b6c7d8"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
