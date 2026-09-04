@@ -1,4 +1,4 @@
-﻿"""Certificate Intelligence API routes.
+"""Certificate Intelligence API routes.
 
 Builds on the existing Smart Data Capture pipeline to provide
 certificate-specific endpoints for:
@@ -2252,6 +2252,76 @@ async def approved_analytics_export_xlsx(
     )
 
 
+@router.get("/approved-analytics/export/pdf")
+async def approved_analytics_export_pdf(
+    certificate_name: str | None = Query(None),
+    certificate_type: str | None = Query(None),
+    issuing_organization: str | None = Query(None),
+    course: str | None = Query(None),
+    recipient: str | None = Query(None),
+    date_from: str | None = Query(None),
+    date_to: str | None = Query(None),
+    year: int | None = Query(None),
+    db: DbSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Generate a clean, professional, publication-grade PDF report with vector bar charts."""
+    from certificates.analytics_service import (
+        ApprovedCertificateAnalyticsService,
+        ApprovedAnalyticsFilters,
+    )
+    from certificates.pdf_report_service import generate_approved_analytics_pdf
+
+    org_id = get_current_organization_id(current_user, db)
+    svc = ApprovedCertificateAnalyticsService(db)
+    filters = ApprovedAnalyticsFilters(
+        certificate_name=certificate_name,
+        certificate_type=certificate_type,
+        issuing_organization=issuing_organization,
+        course=course,
+        recipient=recipient,
+        date_from=date_from,
+        date_to=date_to,
+        year=year,
+    )
+    result = svc.get_summary(org_id, filters)
+
+    if result.total == 0:
+        raise HTTPException(
+            status_code=422,
+            detail="No approved certificates found matching the criteria",
+        )
+
+    filter_dict = {
+        "certificate_name": certificate_name,
+        "certificate_type": certificate_type,
+        "issuing_organization": issuing_organization,
+        "course": course,
+        "recipient": recipient,
+        "date_from": date_from,
+        "date_to": date_to,
+        "year": year,
+    }
+    user_name = current_user.get("full_name") or current_user.get("email") or "Administrator"
+    pdf_bytes = generate_approved_analytics_pdf(result, filter_dict, user_name)
+
+    log_audit_event(
+        db=db,
+        action="certificate.approved_analytics_export_pdf",
+        user_id=current_user["id"],
+        organization_id=org_id,
+        resource_type="certificate",
+        new_values={"count": result.total, "format": "pdf"},
+    )
+    db.commit()
+
+    return StreamingResponse(
+        io.BytesIO(pdf_bytes),
+        media_type="application/pdf",
+        headers={"Content-Disposition": "attachment; filename=approved_certificates_analytics_report.pdf"},
+    )
+
+
 @router.get("/approved-analytics/report")
 async def approved_analytics_report(
     certificate_name: str | None = Query(None),
@@ -2262,6 +2332,7 @@ async def approved_analytics_report(
     date_from: str | None = Query(None),
     date_to: str | None = Query(None),
     year: int | None = Query(None),
+    format: str = Query("json"),
     db: DbSession = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):

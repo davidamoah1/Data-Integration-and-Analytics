@@ -162,9 +162,9 @@ export default function ApprovedCertificateAnalyticsPage() {
     setExporting("report");
     try {
       await approvedAnalyticsService.downloadReport(filters);
-      toast.success("Detailed report with bar charts downloaded successfully");
+      toast.success("PDF report downloaded successfully");
     } catch (err: any) {
-      toast.error(err.message || "Report generation failed");
+      toast.error(err.message || "PDF report generation failed");
     } finally {
       setExporting(null);
     }
@@ -182,63 +182,135 @@ export default function ApprovedCertificateAnalyticsPage() {
 
   return (
     <div className="space-y-6 p-4 sm:p-6 w-full max-w-full overflow-x-hidden">
-      {/* Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0">
-          <h1 className="flex items-center gap-2.5 text-xl sm:text-2xl font-bold text-slate-900">
-            <Award className="h-6 w-6 sm:h-7 sm:w-7 text-indigo-600 shrink-0" />
-            <span className="truncate">Approved Certificate Analytics</span>
-          </h1>
-          <p className="mt-1 text-xs sm:text-sm text-slate-500">
-            Analytics computed exclusively from officially approved certificates
-          </p>
+      {/* Executive Header & Action Toolbar */}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between pb-4 border-b border-slate-200/80">
+        <div>
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-600 shadow-sm">
+              <Award className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
+                  Approved Certificate Analytics
+                </h1>
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 border border-emerald-200">
+                  <CheckCircle2 className="h-3 w-3 text-emerald-600" />
+                  Verified Only
+                </span>
+              </div>
+              <p className="mt-0.5 text-xs sm:text-sm text-slate-500">
+                Official analytics and verified credential distribution computed exclusively from approved records
+              </p>
+            </div>
+          </div>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
+
+        {/* Action Toolbar */}
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* Primary Action: PDF Report */}
+          <Button
+            size="sm"
+            onClick={handleReport}
+            disabled={exporting !== null}
+            className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm font-medium text-xs sm:text-sm h-9 px-3.5"
+            title="Download detailed publication-grade PDF report with vector charts"
+          >
+            {exporting === "report" ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <FileText className="h-4 w-4" />
+            )}
+            <span>PDF Report</span>
+            <span className="rounded bg-indigo-500/40 px-1 py-0.2 text-[10px] uppercase tracking-wider font-semibold">
+              PDF
+            </span>
+          </Button>
+
+          {/* Secondary Data Exports Segment */}
+          <div className="flex items-center rounded-lg border border-slate-200 bg-white p-0.5 shadow-sm">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleExport("xlsx")}
+              disabled={exporting !== null}
+              className="h-8 gap-1.5 px-2.5 text-xs font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-100"
+              title="Export dataset to Excel (.xlsx)"
+            >
+              {exporting === "xlsx" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5 text-slate-500" />}
+              Excel
+            </Button>
+            <div className="h-4 w-px bg-slate-200" />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleExport("csv")}
+              disabled={exporting !== null}
+              className="h-8 gap-1.5 px-2.5 text-xs font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-100"
+              title="Export dataset to CSV"
+            >
+              {exporting === "csv" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5 text-slate-500" />}
+              CSV
+            </Button>
+            <div className="h-4 w-px bg-slate-200" />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handlePresentation}
+              disabled={exporting !== null}
+              className="h-8 gap-1.5 px-2.5 text-xs font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-100"
+              title="Download presentation slides (.pptx)"
+            >
+              {exporting === "pptx" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Presentation className="h-3.5 w-3.5 text-slate-500" />}
+              PowerPoint
+            </Button>
+          </div>
+
+          {/* Filters Toggle */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowFilters(!showFilters)}
+            className={`h-9 gap-1.5 text-xs sm:text-sm ${
+              hasActiveFilters ? "border-indigo-300 bg-indigo-50/60 text-indigo-700 font-semibold" : "text-slate-700"
+            }`}
+          >
+            <Filter className="h-3.5 w-3.5" />
+            Filters
+            {hasActiveFilters && (
+              <Badge variant="default" className="ml-1 bg-indigo-600 px-1.5 py-0 text-[10px] text-white">
+                {Object.values(filters).filter(Boolean).length}
+              </Badge>
+            )}
+          </Button>
+
+          {/* Refresh Button */}
           <Button
             variant="outline"
             size="sm"
             onClick={() => { fetchSummary(); fetchRecords(); }}
             disabled={loading}
-            className="gap-1.5 text-xs sm:text-sm"
+            className="h-9 gap-1.5 text-xs sm:text-sm text-slate-700"
+            title="Refresh analytics data"
           >
-            <RefreshCw className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${loading ? "animate-spin" : ""}`} />
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin text-indigo-600" : ""}`} />
             Refresh
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowFilters(!showFilters)}
-            className="gap-1.5 text-xs sm:text-sm"
-          >
-            <Filter className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-            Filters
-            {hasActiveFilters && (
-              <Badge variant="default" className="ml-1 px-1.5 py-0 text-xs">
-                {Object.values(filters).filter(Boolean).length}
-              </Badge>
-            )}
           </Button>
         </div>
       </div>
 
-      {/* Approved-only dataset notice */}
-      <div className="flex items-start sm:items-center gap-2 text-xs text-slate-500">
-        <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600 mt-0.5 sm:mt-0" />
-        <p className="leading-relaxed">
-          <strong className="font-semibold text-slate-700">Approved-only dataset:</strong> All metrics below are computed
-          exclusively from certificates with status <span className="font-mono font-semibold text-emerald-700">approved</span>. Pending, rejected, and unverified certificates are excluded.
-        </p>
-      </div>
-
       {/* Filters panel */}
       {showFilters && (
-        <Card>
+        <Card className="border-indigo-100/80 bg-slate-50/50 shadow-sm">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-base">Filters</CardTitle>
+              <div className="flex items-center gap-2">
+                <Filter className="h-4 w-4 text-indigo-600" />
+                <CardTitle className="text-sm font-semibold text-slate-800">Dataset Scope Filters</CardTitle>
+              </div>
               {hasActiveFilters && (
-                <Button variant="ghost" size="sm" onClick={clearFilters}>
-                  <X className="h-3 w-3" /> Clear all
+                <Button variant="ghost" size="sm" onClick={clearFilters} className="text-xs text-rose-600 hover:text-rose-700">
+                  <X className="h-3.5 w-3.5 mr-1" /> Reset all
                 </Button>
               )}
             </div>
@@ -338,26 +410,6 @@ export default function ApprovedCertificateAnalyticsPage() {
           </CardContent>
         </Card>
       )}
-
-      {/* Export actions */}
-      <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2">
-        <Button variant="outline" size="sm" onClick={() => handleExport("csv")} disabled={exporting !== null} className="gap-1.5 text-xs sm:text-sm justify-center">
-          {exporting === "csv" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-          CSV
-        </Button>
-        <Button variant="outline" size="sm" onClick={() => handleExport("xlsx")} disabled={exporting !== null} className="gap-1.5 text-xs sm:text-sm justify-center">
-          {exporting === "xlsx" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-          Excel
-        </Button>
-        <Button variant="outline" size="sm" onClick={handleReport} disabled={exporting !== null} className="gap-1.5 text-xs sm:text-sm justify-center">
-          {exporting === "report" ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />}
-          Report
-        </Button>
-        <Button variant="outline" size="sm" onClick={handlePresentation} disabled={exporting !== null} className="gap-1.5 text-xs sm:text-sm justify-center">
-          {exporting === "pptx" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Presentation className="h-4 w-4" />}
-          PowerPoint
-        </Button>
-      </div>
 
       {/* KPI Cards */}
       {loading ? (

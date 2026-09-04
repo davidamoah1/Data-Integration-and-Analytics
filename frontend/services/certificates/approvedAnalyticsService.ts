@@ -163,6 +163,35 @@ export const approvedAnalyticsService = {
     URL.revokeObjectURL(url);
   },
 
+  exportPdf: async (filters?: ApprovedAnalyticsFilters): Promise<void> => {
+    const apiUrl = apiClient.getApiUrl();
+    const token = getAccessToken();
+    const params = new URLSearchParams(buildParams(filters));
+    const qs = params.toString();
+    const response = await fetch(
+      `${apiUrl}${BASE}/export/pdf${qs ? `?${qs}` : ""}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    if (!response.ok) {
+      let errMsg = `PDF export failed: ${response.status}`;
+      try {
+        const parsed = await response.json();
+        if (parsed?.detail) errMsg = parsed.detail;
+      } catch {}
+      throw new Error(errMsg);
+    }
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    const dateStr = new Date().toISOString().slice(0, 10);
+    a.download = `approved_certificates_analytics_report_${dateStr}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  },
+
   getReport: (filters?: ApprovedAnalyticsFilters) =>
     apiClient.get<ApprovedAnalyticsSummary & {
       title: string;
@@ -181,21 +210,8 @@ export const approvedAnalyticsService = {
       insights?: { title?: string; type?: string; text?: string; severity?: string }[];
     }>(`${BASE}/report`, { params: buildParams(filters) }),
 
-  downloadReport: async (filters?: ApprovedAnalyticsFilters) => {
-    const reportData = await approvedAnalyticsService.getReport(filters);
-    const { generateApprovedAnalyticsReportHtml } = await import('@/lib/reports/generateApprovedAnalyticsReportHtml');
-    const html = generateApprovedAnalyticsReportHtml(reportData as any);
-    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    const dateStr = new Date().toISOString().slice(0, 10);
-    a.download = `approved_certificates_analytics_report_${dateStr}.html`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    return reportData;
+  downloadReport: async (filters?: ApprovedAnalyticsFilters): Promise<void> => {
+    await approvedAnalyticsService.exportPdf(filters);
   },
 
   downloadPresentation: async (filters?: ApprovedAnalyticsFilters) => {
