@@ -100,7 +100,7 @@ export const etlPackageService = {
     const formData = new FormData();
     formData.append('file', file);
     return apiClient.uploadWithProgress('/api/etl/packages', formData, onProgress, {
-      timeout: 600000,
+      timeout: 300000, // 5 min — upload only, not processing
     });
   },
 
@@ -122,7 +122,9 @@ export const etlPackageService = {
   },
 
   async getProgress(packageId: number): Promise<ETLPackageProgress> {
-    return apiClient.get(`/api/etl/packages/${packageId}/progress`);
+    return apiClient.get(`/api/etl/packages/${packageId}/progress`, {
+      timeout: 15000, // Short timeout for polling — fail fast to trigger backoff
+    });
   },
 
   async getFiles(

@@ -30,8 +30,10 @@ from etl.profiling import DataProfiler
 from etl.quality import DataQualityEngine
 from etl.transformations import TransformationEngine
 from etl.zip_extractor import (
+    classify_file_type,
     cleanup_extraction,
     extract_zip,
+    verify_magic_bytes,
 )
 
 logger = logging.getLogger(__name__)
@@ -39,8 +41,18 @@ logger = logging.getLogger(__name__)
 # Supported structured data extensions that can be profiled/loaded
 STRUCTURED_EXTENSIONS = {"csv", "tsv", "xlsx", "xls", "json", "xml", "ods"}
 
+# Document/image extensions routed to the capture pipeline
+DOCUMENT_EXTENSIONS = {"pdf", "txt"}
+IMAGE_EXTENSIONS = {"jpg", "jpeg", "png", "tiff", "tif", "bmp"}
+
 # Batch size for file processing to avoid overwhelming resources
 FILE_PROCESSING_BATCH_SIZE = 50
+
+
+def _CERT_DOC_TYPE_KEYS() -> set[str]:
+    """Return the set of certificate document type keys from the capture registry."""
+    from certificates.routes import CERTIFICATE_DOC_TYPES
+    return CERTIFICATE_DOC_TYPES
 
 
 def _utcnow():
@@ -114,6 +126,17 @@ class ETLPackageService:
             checksum[:16],
         )
         return package
+
+    def find_by_checksum(self, organization_id: int, checksum: str) -> ETLPackage | None:
+        """Find a package by checksum for idempotency check."""
+        return (
+            self.db.query(ETLPackage)
+            .filter(
+                ETLPackage.organization_id == organization_id,
+                ETLPackage.checksum == checksum,
+            )
+            .first()
+        )
 
     def get_package(self, package_id: int, organization_id: int) -> ETLPackage | None:
         """Get a package by ID, enforcing tenant isolation."""
@@ -221,6 +244,25 @@ class ETLPackageService:
 
         This is the main background job handler.
         """
+        import time as _time
+
+        t0 = _time.monotonic()
+
+        def _log(stage: str, status: str, **extra) -> None:
+            elapsed_ms = int((_time.monotonic() - t0) * 1000)
+            logger.info(
+                "PACKAGE_PROCESS package_id=%d organization_id=%d filename=%s size=%d "
+                "stage=%s status=%s elapsed_ms=%d%s",
+                package_id,
+                organization_id,
+                pkg.filename if pkg else "?",
+                pkg.file_size_bytes if pkg else 0,
+                stage,
+                status,
+                elapsed_ms,
+                "".join(f" {k}={v}" for k, v in extra.items()),
+            )
+
         pkg = self.get_package(package_id, organization_id)
         if not pkg:
             raise ValueError(f"Package {package_id} not found")
@@ -243,7 +285,7 @@ class ETLPackageService:
         pkg.started_at = _utcnow()
         self.db.commit()
 
-        logger.info("EXTRACTION_STARTED package_id=%d", package_id)
+        _log("extraction", "started")
 
         extract_base = tempfile.gettempdir()
         extraction = extract_zip(zip_path, extract_base, organization_id)
@@ -255,12 +297,10 @@ class ETLPackageService:
             self.db.commit()
             result["status"] = "failed"
             result["error"] = extraction.error
-            logger.error("EXTRACTION_FAILED package_id=%d error=%s", package_id, extraction.error)
+            _log("extraction", "failed", error=extraction.error)
             return result
 
-        logger.info(
-            "EXTRACTION_COMPLETED package_id=%d files=%d", package_id, extraction.total_files
-        )
+        _log("extraction", "completed", files=extraction.total_files)
 
         # ── Stage 2: Discovery ────────────────────────────────────────────
         pkg.status = "discovering"
@@ -268,9 +308,7 @@ class ETLPackageService:
         pkg.total_files = extraction.total_files
         self.db.commit()
 
-        logger.info(
-            "FILE_DISCOVERY_STARTED package_id=%d files=%d", package_id, extraction.total_files
-        )
+        _log("discovery", "started")
 
         # Create file records and map to extracted paths
         file_records: list[ETLPackageFile] = []
@@ -303,23 +341,25 @@ class ETLPackageService:
         pkg.unsupported_files = extraction.unsupported_files
         self.db.commit()
 
-        logger.info(
-            "FILE_DISCOVERY_COMPLETED package_id=%d discovered=%d duplicates=%d unsupported=%d",
-            package_id,
-            len(file_records),
-            extraction.duplicate_files,
-            extraction.unsupported_files,
-        )
+        _log("discovery", "completed", discovered=len(file_records), duplicates=extraction.duplicate_files, unsupported=extraction.unsupported_files)
 
         # ── Stage 3: Processing (profile + load) ──────────────────────────
         pkg.status = "processing"
         pkg.current_stage = "profiling"
         self.db.commit()
 
+        _log("processing", "started")
+
         quality_scores = []
         total_rows_loaded = 0
         total_rows_extracted = 0
         total_rows_rejected = 0
+        document_statuses = {
+            "document_processed",
+            "certificate_detected",
+            "document_extraction_pending",
+            "document_extraction_failed",
+        }
 
         for idx, record in enumerate(file_records):
             if record.status in ("duplicate", "unsupported"):
@@ -336,10 +376,16 @@ class ETLPackageService:
 
             try:
                 self._process_single_file(record, package_id, organization_id, file_path)
-                quality_scores.append(record.quality_score or 0)
+
+                # Only collect quality scores for structured data (not documents)
+                if record.status not in document_statuses and record.quality_score:
+                    quality_scores.append(record.quality_score)
+                if record.status == "failed":
+                    result["failed"] += 1
+                else:
+                    result["completed"] += 1
                 total_rows_loaded += record.rows_loaded or 0
                 total_rows_extracted += record.row_count or 0
-                result["completed"] += 1
             except Exception as e:
                 logger.error(
                     "FILE_FAILED package_id=%d file=%s error=%s",
@@ -373,6 +419,8 @@ class ETLPackageService:
         pkg.completed_at = _utcnow()
         self.db.commit()
 
+        _log("processing", "completed", completed=result["completed"], failed=result["failed"], rows_loaded=total_rows_loaded)
+
         # Cleanup extraction directory
         cleanup_extraction(extraction.extract_dir)
 
@@ -383,32 +431,77 @@ class ETLPackageService:
         result["quality_score"] = pkg.overall_quality_score
         result["status"] = pkg.status
 
-        logger.info(
-            "PACKAGE_COMPLETED package_id=%d status=%s completed=%d failed=%d duplicates=%d quality=%s",
-            package_id,
-            pkg.status,
-            result["completed"],
-            result["failed"],
-            result["duplicates"],
-            pkg.overall_quality_score,
-        )
+        _log("package", pkg.status, completed=result["completed"], failed=result["failed"], quality=pkg.overall_quality_score)
 
         return result
 
     def _process_single_file(
         self, record: ETLPackageFile, package_id: int, organization_id: int, file_path: str
     ) -> None:
-        """Profile and load a single file."""
-        from etl.connectors.connectors import get_connector
+        """Process a single file based on its classification.
 
+        STRUCTURED_DATA → ETL connector pipeline (profile + quality + load)
+        DOCUMENT/IMAGE  → Capture pipeline (PDF text extraction / OCR)
+        """
+        import time as _time
+
+        t0 = _time.monotonic()
         record.status = "processing"
         record.processing_started_at = _utcnow()
         self.db.commit()
 
         ext = record.file_extension
+        filename = record.sanitized_filename
 
         if not file_path or not os.path.exists(file_path):
-            raise FileNotFoundError(f"Extracted file not found: {record.sanitized_filename}")
+            raise FileNotFoundError(f"Extracted file not found: {filename}")
+
+        # ── Classify the file ───────────────────────────────────────────
+        file_category = classify_file_type(filename, file_path)
+
+        # Verify magic bytes for documents and images (security)
+        if file_category in ("DOCUMENT", "IMAGE"):
+            if not verify_magic_bytes(filename, file_path):
+                record.status = "failed"
+                record.error_stage = "validation"
+                record.error_message = (
+                    f"File '{filename}' content does not match its extension "
+                    f"'.{ext}' — magic byte verification failed"
+                )
+                self.db.commit()
+                logger.warning(
+                    "FILE_FAILED package_id=%d file=%s stage=validation "
+                    "error_code=MAGIC_BYTE_MISMATCH elapsed_ms=%d",
+                    package_id, filename, int((_time.monotonic() - t0) * 1000),
+                )
+                return
+
+        # ── Route based on classification ───────────────────────────────
+        if file_category == "STRUCTURED_DATA":
+            self._process_structured_file(record, package_id, organization_id, file_path)
+        elif file_category in ("DOCUMENT", "IMAGE"):
+            self._process_document_file(
+                record, package_id, organization_id, file_path, file_category
+            )
+        else:
+            record.status = "unsupported"
+            record.error_message = f"Unsupported file type: .{ext}"
+            record.error_stage = "classification"
+            self.db.commit()
+            logger.info(
+                "FILE_SKIPPED package_id=%d file=%s reason=unsupported_type ext=%s",
+                package_id, filename, ext,
+            )
+
+    def _process_structured_file(
+        self, record: ETLPackageFile, package_id: int, organization_id: int, file_path: str
+    ) -> None:
+        """Profile and load a structured data file (CSV, XLSX, JSON, etc.)."""
+        from etl.connectors.connectors import get_connector
+
+        ext = record.file_extension
+        record.stage = "profiling"
+        self.db.commit()
 
         # Read data using existing connectors
         source_type = self._ext_to_connector_type(ext)
@@ -492,6 +585,169 @@ class ETLPackageService:
             record.column_count,
             record.quality_score,
         )
+
+    def _process_document_file(
+        self,
+        record: ETLPackageFile,
+        package_id: int,
+        organization_id: int,
+        file_path: str,
+        file_category: str,
+    ) -> None:
+        """Route a document/image file to the capture pipeline.
+
+        PDFs and images are binary files that must NOT be decoded as UTF-8.
+        They are processed through the existing Smart Data Capture pipeline
+        which uses PyMuPDF for PDF text extraction and Tesseract for OCR.
+
+        The file is uploaded to the capture service, then processed through
+        the document intelligence pipeline (OCR → classify → extract fields).
+        """
+        import time as _time
+
+        t0 = _time.monotonic()
+        ext = record.file_extension
+        filename = record.sanitized_filename
+
+        logger.info(
+            "FILE_PROCESSING package_id=%d file=%s detected_type=%s "
+            "mime_type=%s size=%d stage=document_extraction",
+            package_id,
+            filename,
+            file_category,
+            record.mime_type,
+            record.file_size_bytes or 0,
+        )
+
+        record.stage = "document_extraction"
+        self.db.commit()
+
+        try:
+            # Read file as binary — never decode as text
+            with open(file_path, "rb") as f:
+                file_content = f.read()
+
+            # Use existing capture service to upload and process
+            from capture.service import CaptureService
+
+            capture_svc = CaptureService(self.db)
+
+            # Upload to capture pipeline
+            doc = capture_svc.upload_document(
+                organization_id=organization_id,
+                user_id=record.package_id,  # use package_id as actor
+                filename=filename,
+                file_content=file_content,
+                source="etl_package",
+            )
+
+            logger.info(
+                "FILE_DOCUMENT_DETECTED package_id=%d file=%s "
+                "capture_document_id=%d detected_type=%s",
+                package_id,
+                filename,
+                doc.id,
+                file_category,
+            )
+
+            # Attempt to process the document through the capture pipeline
+            try:
+                processed_doc = capture_svc.process_document(doc.id)
+                capture_status = processed_doc.status
+                doc_type = processed_doc.document_type or "unknown"
+                doc_type_label = processed_doc.document_type_label or "Unknown"
+
+                logger.info(
+                    "FILE_DOCUMENT_PROCESSED package_id=%d file=%s "
+                    "capture_document_id=%d status=%s document_type=%s "
+                    "elapsed_ms=%d",
+                    package_id,
+                    filename,
+                    doc.id,
+                    capture_status,
+                    doc_type,
+                    int((_time.monotonic() - t0) * 1000),
+                )
+
+                # Determine the appropriate ETL status
+                if capture_status == "ready_for_review":
+                    if doc_type in _CERT_DOC_TYPE_KEYS():
+                        etl_status = "certificate_detected"
+                    else:
+                        etl_status = "document_processed"
+                elif capture_status == "failed":
+                    etl_status = "document_extraction_failed"
+                else:
+                    etl_status = "document_processed"
+
+                record.status = etl_status
+                record.error_message = None
+                record.error_stage = None
+
+                # Store document metadata
+                record.profile_data = {
+                    "capture_document_id": doc.id,
+                    "document_type": doc_type,
+                    "document_type_label": doc_type_label,
+                    "classification_confidence": processed_doc.classification_confidence,
+                    "processing_status": capture_status,
+                    "file_category": file_category,
+                    "extraction_method": getattr(
+                        processed_doc, "extraction_method", "pdf_text"
+                    ),
+                }
+
+                # For documents, row_count represents extracted fields/records
+                # not tabular rows
+                if hasattr(processed_doc, "fields") and processed_doc.fields:
+                    record.row_count = len(processed_doc.fields)
+                else:
+                    # Count fields from DB
+                    from capture.models import CaptureField
+                    field_count = (
+                        self.db.query(CaptureField)
+                        .filter(CaptureField.document_id == doc.id)
+                        .count()
+                    )
+                    record.row_count = field_count
+
+                record.column_count = 0  # Not applicable for documents
+                record.quality_score = None  # Quality scoring only for structured data
+
+            except Exception as proc_err:
+                logger.warning(
+                    "FILE_DOCUMENT_EXTRACTION_FAILED package_id=%d file=%s "
+                    "capture_document_id=%d error=%s elapsed_ms=%d",
+                    package_id,
+                    filename,
+                    doc.id,
+                    proc_err,
+                    int((_time.monotonic() - t0) * 1000),
+                )
+                record.status = "document_extraction_pending"
+                record.error_message = str(proc_err)
+                record.error_stage = "document_extraction"
+                record.profile_data = {
+                    "capture_document_id": doc.id,
+                    "file_category": file_category,
+                    "processing_status": "pending",
+                }
+
+        except Exception as e:
+            logger.error(
+                "FILE_FAILED package_id=%d file=%s stage=document_upload "
+                "error_code=DOCUMENT_UPLOAD_ERROR error_message=%s elapsed_ms=%d",
+                package_id,
+                filename,
+                e,
+                int((_time.monotonic() - t0) * 1000),
+            )
+            record.status = "failed"
+            record.error_message = str(e)
+            record.error_stage = "document_upload"
+
+        record.completed_at = _utcnow()
+        self.db.commit()
 
     def _ext_to_connector_type(self, ext: str) -> str:
         """Map file extension to connector type."""

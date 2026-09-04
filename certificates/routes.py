@@ -1930,3 +1930,644 @@ async def generate_certificate_presentation(
         media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
         headers={"Content-Disposition": "attachment; filename=certificate_intelligence.pptx"},
     )
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# Approved Certificate Analytics
+# ════════════════════════════════════════════════════════════════════════════
+
+
+@router.get("/approved-analytics/summary")
+async def approved_analytics_summary(
+    certificate_name: str | None = Query(None),
+    certificate_type: str | None = Query(None),
+    issuing_organization: str | None = Query(None),
+    course: str | None = Query(None),
+    recipient: str | None = Query(None),
+    date_from: str | None = Query(None),
+    date_to: str | None = Query(None),
+    year: int | None = Query(None),
+    db: DbSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Analytics summary computed exclusively from approved certificates.
+
+    All aggregations enforce:
+      - organization_id == current org (tenant isolation)
+      - status == "approved"
+      - document_type IN CERTIFICATE_DOC_TYPES
+
+    No rejected, pending, or unverified certificates are included.
+    """
+    from certificates.analytics_service import (
+        ApprovedCertificateAnalyticsService,
+        ApprovedAnalyticsFilters,
+    )
+
+    org_id = get_current_organization_id(current_user, db)
+    svc = ApprovedCertificateAnalyticsService(db)
+    filters = ApprovedAnalyticsFilters(
+        certificate_name=certificate_name,
+        certificate_type=certificate_type,
+        issuing_organization=issuing_organization,
+        course=course,
+        recipient=recipient,
+        date_from=date_from,
+        date_to=date_to,
+        year=year,
+    )
+    result = svc.get_summary(org_id, filters)
+
+    return {
+        "kpis": {
+            "total_approved": result.kpis.total_approved,
+            "unique_recipients": result.kpis.unique_recipients,
+            "certificate_types": result.kpis.certificate_types,
+            "certificate_names": result.kpis.certificate_names,
+            "issuing_organizations": result.kpis.issuing_organizations,
+            "courses": result.kpis.courses,
+            "avg_certs_per_person": result.kpis.avg_certs_per_person,
+            "completed_this_month": result.kpis.completed_this_month,
+            "completed_this_year": result.kpis.completed_this_year,
+            "latest_completion_date": result.kpis.latest_completion_date,
+            "earliest_completion_date": result.kpis.earliest_completion_date,
+        },
+        "data_quality": {
+            "total": result.data_quality.total,
+            "recipient_identified": result.data_quality.recipient_identified,
+            "certificate_name_identified": result.data_quality.certificate_name_identified,
+            "completion_date_identified": result.data_quality.completion_date_identified,
+            "institution_identified": result.data_quality.institution_identified,
+            "certificate_number_identified": result.data_quality.certificate_number_identified,
+            "course_identified": result.data_quality.course_identified,
+        },
+        "by_name": result.by_name,
+        "by_type": result.by_type,
+        "by_issuer": result.by_issuer,
+        "by_course": result.by_course,
+        "trends": result.trends,
+        "recipients": result.recipients,
+        "certs_per_person": result.certs_per_person,
+        "insights": result.insights,
+        "total": result.total,
+    }
+
+
+@router.get("/approved-analytics/records")
+async def approved_analytics_records(
+    certificate_name: str | None = Query(None),
+    certificate_type: str | None = Query(None),
+    issuing_organization: str | None = Query(None),
+    course: str | None = Query(None),
+    recipient: str | None = Query(None),
+    date_from: str | None = Query(None),
+    date_to: str | None = Query(None),
+    year: int | None = Query(None),
+    search: str | None = Query(None),
+    sort_by: str = Query("approved_at"),
+    sort_order: str = Query("desc"),
+    limit: int = Query(50, ge=1, le=500),
+    offset: int = Query(0, ge=0),
+    db: DbSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Paginated approved certificate records for the analytics table."""
+    from certificates.analytics_service import (
+        ApprovedCertificateAnalyticsService,
+        ApprovedAnalyticsFilters,
+    )
+
+    org_id = get_current_organization_id(current_user, db)
+    svc = ApprovedCertificateAnalyticsService(db)
+    filters = ApprovedAnalyticsFilters(
+        certificate_name=certificate_name,
+        certificate_type=certificate_type,
+        issuing_organization=issuing_organization,
+        course=course,
+        recipient=recipient,
+        date_from=date_from,
+        date_to=date_to,
+        year=year,
+    )
+    return svc.get_records(
+        org_id, filters, search, sort_by, sort_order, limit, offset
+    )
+
+
+@router.get("/approved-analytics/filters")
+async def approved_analytics_filters(
+    db: DbSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Available filter values from approved certificates only."""
+    from certificates.analytics_service import ApprovedCertificateAnalyticsService
+
+    org_id = get_current_organization_id(current_user, db)
+    svc = ApprovedCertificateAnalyticsService(db)
+    return svc.get_filter_options(org_id)
+
+
+@router.get("/approved-analytics/export/csv")
+async def approved_analytics_export_csv(
+    certificate_name: str | None = Query(None),
+    certificate_type: str | None = Query(None),
+    issuing_organization: str | None = Query(None),
+    course: str | None = Query(None),
+    recipient: str | None = Query(None),
+    date_from: str | None = Query(None),
+    date_to: str | None = Query(None),
+    year: int | None = Query(None),
+    db: DbSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Export approved certificates as CSV."""
+    from certificates.analytics_service import (
+        ApprovedCertificateAnalyticsService,
+        ApprovedAnalyticsFilters,
+    )
+
+    org_id = get_current_organization_id(current_user, db)
+    svc = ApprovedCertificateAnalyticsService(db)
+    filters = ApprovedAnalyticsFilters(
+        certificate_name=certificate_name,
+        certificate_type=certificate_type,
+        issuing_organization=issuing_organization,
+        course=course,
+        recipient=recipient,
+        date_from=date_from,
+        date_to=date_to,
+        year=year,
+    )
+    result = svc.get_summary(org_id, filters)
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow([
+        "Recipient", "Certificate Name", "Certificate Type",
+        "Course", "Issuing Organization", "Completion Date",
+        "Certificate Number", "Verification Status", "Approved At",
+        "Filename",
+    ])
+    for r in result.records:
+        writer.writerow([
+            r["recipient"], r["certificate_name"], r["certificate_type"],
+            r["course"], r["issuing_organization"], r["completion_date"],
+            r["certificate_number"], r["verification_status"],
+            r["approved_at"] or "", r["filename"],
+        ])
+
+    log_audit_event(
+        db=db,
+        action="certificate.approved_analytics_export_csv",
+        user_id=current_user["id"],
+        organization_id=org_id,
+        resource_type="certificate",
+        new_values={"count": result.total, "format": "csv"},
+    )
+    db.commit()
+
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=approved_certificates.csv"},
+    )
+
+
+@router.get("/approved-analytics/export/xlsx")
+async def approved_analytics_export_xlsx(
+    certificate_name: str | None = Query(None),
+    certificate_type: str | None = Query(None),
+    issuing_organization: str | None = Query(None),
+    course: str | None = Query(None),
+    recipient: str | None = Query(None),
+    date_from: str | None = Query(None),
+    date_to: str | None = Query(None),
+    year: int | None = Query(None),
+    db: DbSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Export approved certificates as XLSX."""
+    from certificates.analytics_service import (
+        ApprovedCertificateAnalyticsService,
+        ApprovedAnalyticsFilters,
+    )
+
+    org_id = get_current_organization_id(current_user, db)
+    svc = ApprovedCertificateAnalyticsService(db)
+    filters = ApprovedAnalyticsFilters(
+        certificate_name=certificate_name,
+        certificate_type=certificate_type,
+        issuing_organization=issuing_organization,
+        course=course,
+        recipient=recipient,
+        date_from=date_from,
+        date_to=date_to,
+        year=year,
+    )
+    result = svc.get_summary(org_id, filters)
+
+    try:
+        import openpyxl
+    except ImportError as e:
+        raise HTTPException(
+            status_code=500,
+            detail="Excel export requires openpyxl. Install with: pip install openpyxl",
+        ) from e
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Approved Certificates"
+    headers = [
+        "Recipient", "Certificate Name", "Certificate Type",
+        "Course", "Issuing Organization", "Completion Date",
+        "Certificate Number", "Verification Status", "Approved At",
+        "Filename",
+    ]
+    ws.append(headers)
+    for r in result.records:
+        ws.append([
+            r["recipient"], r["certificate_name"], r["certificate_type"],
+            r["course"], r["issuing_organization"], r["completion_date"],
+            r["certificate_number"], r["verification_status"],
+            r["approved_at"] or "", r["filename"],
+        ])
+
+    # Auto-fit column widths
+    for col_idx, header in enumerate(headers, 1):
+        max_len = len(header)
+        for row in ws.iter_rows(min_row=2, min_col=col_idx, max_col=col_idx):
+            for cell in row:
+                if cell.value:
+                    max_len = max(max_len, len(str(cell.value)))
+        ws.column_dimensions[ws.cell(row=1, column=col_idx).column_letter].width = min(max_len + 2, 50)
+
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    log_audit_event(
+        db=db,
+        action="certificate.approved_analytics_export_xlsx",
+        user_id=current_user["id"],
+        organization_id=org_id,
+        resource_type="certificate",
+        new_values={"count": result.total, "format": "xlsx"},
+    )
+    db.commit()
+
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment; filename=approved_certificates.xlsx"},
+    )
+
+
+@router.get("/approved-analytics/report")
+async def approved_analytics_report(
+    certificate_name: str | None = Query(None),
+    certificate_type: str | None = Query(None),
+    issuing_organization: str | None = Query(None),
+    course: str | None = Query(None),
+    recipient: str | None = Query(None),
+    date_from: str | None = Query(None),
+    date_to: str | None = Query(None),
+    year: int | None = Query(None),
+    db: DbSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Generate a structured JSON report from approved certificates only."""
+    from certificates.analytics_service import (
+        ApprovedCertificateAnalyticsService,
+        ApprovedAnalyticsFilters,
+    )
+
+    org_id = get_current_organization_id(current_user, db)
+    svc = ApprovedCertificateAnalyticsService(db)
+    filters = ApprovedAnalyticsFilters(
+        certificate_name=certificate_name,
+        certificate_type=certificate_type,
+        issuing_organization=issuing_organization,
+        course=course,
+        recipient=recipient,
+        date_from=date_from,
+        date_to=date_to,
+        year=year,
+    )
+    result = svc.get_summary(org_id, filters)
+
+    if result.total == 0:
+        raise HTTPException(
+            status_code=422,
+            detail="No approved certificates found matching the criteria",
+        )
+
+    report = {
+        "title": "Approved Certificate Analytics Report",
+        "organization_id": org_id,
+        "generated_at": __import__("datetime")
+        .datetime.now(__import__("datetime").timezone.utc)
+        .isoformat(),
+        "generated_by": current_user["id"],
+        "filters": {
+            "certificate_name": certificate_name,
+            "certificate_type": certificate_type,
+            "issuing_organization": issuing_organization,
+            "course": course,
+            "recipient": recipient,
+            "date_from": date_from,
+            "date_to": date_to,
+            "year": year,
+        },
+        "kpis": {
+            "total_approved": result.kpis.total_approved,
+            "unique_recipients": result.kpis.unique_recipients,
+            "certificate_types": result.kpis.certificate_types,
+            "certificate_names": result.kpis.certificate_names,
+            "issuing_organizations": result.kpis.issuing_organizations,
+            "courses": result.kpis.courses,
+            "avg_certs_per_person": result.kpis.avg_certs_per_person,
+            "completed_this_month": result.kpis.completed_this_month,
+            "completed_this_year": result.kpis.completed_this_year,
+            "latest_completion_date": result.kpis.latest_completion_date,
+            "earliest_completion_date": result.kpis.earliest_completion_date,
+        },
+        "data_quality": {
+            "total": result.data_quality.total,
+            "recipient_identified": result.data_quality.recipient_identified,
+            "certificate_name_identified": result.data_quality.certificate_name_identified,
+            "completion_date_identified": result.data_quality.completion_date_identified,
+            "institution_identified": result.data_quality.institution_identified,
+            "certificate_number_identified": result.data_quality.certificate_number_identified,
+            "course_identified": result.data_quality.course_identified,
+        },
+        "breakdowns": {
+            "by_name": result.by_name,
+            "by_type": result.by_type,
+            "by_issuer": result.by_issuer,
+            "by_course": result.by_course,
+            "by_year": result.trends,
+        },
+        "recipients": result.recipients,
+        "certs_per_person": result.certs_per_person,
+        "insights": result.insights,
+        "certificates": result.records,
+    }
+
+    log_audit_event(
+        db=db,
+        action="certificate.approved_report_generated",
+        user_id=current_user["id"],
+        organization_id=org_id,
+        resource_type="certificate",
+        new_values={"total": result.total, "filters": report["filters"]},
+    )
+    db.commit()
+
+    return report
+
+
+@router.get("/approved-analytics/presentation")
+async def approved_analytics_presentation(
+    certificate_name: str | None = Query(None),
+    certificate_type: str | None = Query(None),
+    issuing_organization: str | None = Query(None),
+    course: str | None = Query(None),
+    recipient: str | None = Query(None),
+    date_from: str | None = Query(None),
+    date_to: str | None = Query(None),
+    year: int | None = Query(None),
+    db: DbSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Generate a PowerPoint presentation from approved certificates only."""
+    from certificates.analytics_service import (
+        ApprovedCertificateAnalyticsService,
+        ApprovedAnalyticsFilters,
+    )
+
+    org_id = get_current_organization_id(current_user, db)
+    svc = ApprovedCertificateAnalyticsService(db)
+    filters = ApprovedAnalyticsFilters(
+        certificate_name=certificate_name,
+        certificate_type=certificate_type,
+        issuing_organization=issuing_organization,
+        course=course,
+        recipient=recipient,
+        date_from=date_from,
+        date_to=date_to,
+        year=year,
+    )
+    result = svc.get_summary(org_id, filters)
+
+    if result.total == 0:
+        raise HTTPException(
+            status_code=422,
+            detail="No approved certificates found matching the criteria",
+        )
+
+    try:
+        from pptx import Presentation as PptxPresentation
+        from pptx.chart.data import CategoryChartData
+        from pptx.dml.color import RGBColor
+        from pptx.enum.chart import XL_CHART_TYPE
+        from pptx.util import Inches, Pt
+    except ImportError as e:
+        raise HTTPException(
+            status_code=500,
+            detail="PowerPoint generation requires python-pptx. Install with: pip install python-pptx",
+        ) from e
+
+    prs = PptxPresentation()
+    prs.slide_width = Inches(13.333)
+    prs.slide_height = Inches(7.5)
+
+    DARK_BLUE = RGBColor(0x1B, 0x3A, 0x5C)
+    WHITE = RGBColor(0xFF, 0xFF, 0xFF)
+    DARK_TEXT = RGBColor(0x2C, 0x3E, 0x50)
+    ACCENT = RGBColor(0x25, 0x63, 0xEB)
+    LIGHT_BG = RGBColor(0xF0, 0xF4, 0xF8)
+
+    blank_layout = prs.slide_layouts[6]
+
+    def _add_title_slide():
+        slide = prs.slides.add_slide(blank_layout)
+        bg = slide.background
+        fill = bg.fill
+        fill.solid()
+        fill.fore_color.rgb = DARK_BLUE
+        txBox = slide.shapes.add_textbox(Inches(1), Inches(2.5), Inches(11), Inches(1.5))
+        tf = txBox.text_frame
+        tf.word_wrap = True
+        p = tf.paragraphs[0]
+        p.text = "Approved Certificate Analytics Report"
+        p.font.size = Pt(40)
+        p.font.bold = True
+        p.font.color.rgb = WHITE
+        txBox2 = slide.shapes.add_textbox(Inches(1), Inches(4), Inches(11), Inches(1))
+        tf2 = txBox2.text_frame
+        tf2.word_wrap = True
+        p2 = tf2.paragraphs[0]
+        p2.text = (
+            f"{result.total} approved certificates | "
+            f"{result.kpis.unique_recipients} unique recipients | "
+            f"Generated {__import__('datetime').datetime.now().strftime('%Y-%m-%d')}"
+        )
+        p2.font.size = Pt(20)
+        p2.font.color.rgb = RGBColor(0xAE, 0xC7, 0xE0)
+
+    def _add_summary_slide():
+        slide = prs.slides.add_slide(blank_layout)
+        txBox = slide.shapes.add_textbox(Inches(0.5), Inches(0.3), Inches(12), Inches(0.8))
+        tf = txBox.text_frame
+        p = tf.paragraphs[0]
+        p.text = "Executive Summary"
+        p.font.size = Pt(32)
+        p.font.bold = True
+        p.font.color.rgb = DARK_BLUE
+
+        k = result.kpis
+        metrics_text = (
+            f"Total Approved Certificates: {k.total_approved}\n"
+            f"Unique Recipients: {k.unique_recipients}\n"
+            f"Certificate Types: {k.certificate_types}\n"
+            f"Issuing Organizations: {k.issuing_organizations}\n"
+            f"Average Certs per Person: {k.avg_certs_per_person}\n"
+            f"Completed This Year: {k.completed_this_year}\n"
+            f"Completed This Month: {k.completed_this_month}"
+        )
+        txBox2 = slide.shapes.add_textbox(Inches(0.5), Inches(1.5), Inches(6), Inches(5))
+        tf2 = txBox2.text_frame
+        tf2.word_wrap = True
+        for i, line in enumerate(metrics_text.split("\n")):
+            p = tf2.paragraphs[0] if i == 0 else tf2.add_paragraph()
+            p.text = line
+            p.font.size = Pt(16)
+            p.font.color.rgb = DARK_TEXT
+
+        if result.insights:
+            txBox3 = slide.shapes.add_textbox(Inches(7), Inches(1.5), Inches(6), Inches(5))
+            tf3 = txBox3.text_frame
+            tf3.word_wrap = True
+            p = tf3.paragraphs[0]
+            p.text = "Key Insights"
+            p.font.size = Pt(18)
+            p.font.bold = True
+            p.font.color.rgb = DARK_BLUE
+            for i, insight in enumerate(result.insights):
+                p = tf3.add_paragraph()
+                p.text = f"• {insight}"
+                p.font.size = Pt(14)
+                p.font.color.rgb = DARK_TEXT
+
+    def _add_chart_slide(title, data, chart_type=XL_CHART_TYPE.BAR_CHART):
+        slide = prs.slides.add_slide(blank_layout)
+        txBox = slide.shapes.add_textbox(Inches(0.5), Inches(0.3), Inches(12), Inches(0.8))
+        tf = txBox.text_frame
+        p = tf.paragraphs[0]
+        p.text = title
+        p.font.size = Pt(28)
+        p.font.bold = True
+        p.font.color.rgb = DARK_BLUE
+        if not data:
+            txBox2 = slide.shapes.add_textbox(Inches(2), Inches(3), Inches(8), Inches(1))
+            tf2 = txBox2.text_frame
+            p2 = tf2.paragraphs[0]
+            p2.text = "No data available"
+            p2.font.size = Pt(20)
+            p2.font.color.rgb = RGBColor(0x99, 0x99, 0x99)
+            return
+        chart_data = CategoryChartData()
+        chart_data.categories = list(data.keys())
+        chart_data.add_series("Count", list(data.values()))
+        slide.shapes.add_chart(
+            chart_type, Inches(0.5), Inches(1.5), Inches(12), Inches(5.5), chart_data
+        )
+
+    def _add_data_quality_slide():
+        slide = prs.slides.add_slide(blank_layout)
+        txBox = slide.shapes.add_textbox(Inches(0.5), Inches(0.3), Inches(12), Inches(0.8))
+        tf = txBox.text_frame
+        p = tf.paragraphs[0]
+        p.text = "Data Quality Assessment"
+        p.font.size = Pt(28)
+        p.font.bold = True
+        p.font.color.rgb = DARK_BLUE
+
+        dq = result.data_quality
+        lines = [
+            f"Total Records: {dq.total}",
+            f"Recipient Identified: {dq.recipient_identified} ({dq.recipient_identified / dq.total * 100:.0f}%)" if dq.total else "",
+            f"Certificate Name Identified: {dq.certificate_name_identified}",
+            f"Completion Date Identified: {dq.completion_date_identified}",
+            f"Institution Identified: {dq.institution_identified}",
+            f"Certificate Number Identified: {dq.certificate_number_identified}",
+            f"Course Identified: {dq.course_identified}",
+        ]
+        txBox2 = slide.shapes.add_textbox(Inches(0.5), Inches(1.5), Inches(12), Inches(5))
+        tf2 = txBox2.text_frame
+        tf2.word_wrap = True
+        for i, line in enumerate(lines):
+            if not line:
+                continue
+            p = tf2.paragraphs[0] if i == 0 else tf2.add_paragraph()
+            p.text = line
+            p.font.size = Pt(16)
+            p.font.color.rgb = DARK_TEXT
+
+    def _add_recipients_slide():
+        slide = prs.slides.add_slide(blank_layout)
+        txBox = slide.shapes.add_textbox(Inches(0.5), Inches(0.3), Inches(12), Inches(0.8))
+        tf = txBox.text_frame
+        p = tf.paragraphs[0]
+        p.text = "Top Recipients by Approved Certificates"
+        p.font.size = Pt(28)
+        p.font.bold = True
+        p.font.color.rgb = DARK_BLUE
+        txBox2 = slide.shapes.add_textbox(Inches(0.5), Inches(1.5), Inches(12), Inches(5.5))
+        tf2 = txBox2.text_frame
+        tf2.word_wrap = True
+        for i, r in enumerate(result.recipients[:15]):
+            p = tf2.paragraphs[0] if i == 0 else tf2.add_paragraph()
+            p.text = f"{i + 1}. {r['name']} — {r['approved_certificates']} certificate(s)"
+            p.font.size = Pt(14)
+            p.font.color.rgb = DARK_TEXT
+
+    _add_title_slide()
+    _add_summary_slide()
+
+    top_names = dict(list(result.by_name.items())[:15])
+    if top_names:
+        _add_chart_slide("Top Certificate Names", top_names, XL_CHART_TYPE.BAR_CHART)
+
+    if result.by_type:
+        _add_chart_slide("Certificates by Type", result.by_type, XL_CHART_TYPE.PIE_CHART)
+
+    top_issuers = dict(list(result.by_issuer.items())[:15])
+    if top_issuers:
+        _add_chart_slide("Top Issuing Organizations", top_issuers, XL_CHART_TYPE.BAR_CHART)
+
+    if result.trends:
+        _add_chart_slide("Completion Trends by Year", result.trends, XL_CHART_TYPE.COLUMN_CHART)
+
+    _add_data_quality_slide()
+    _add_recipients_slide()
+
+    output = io.BytesIO()
+    prs.save(output)
+    output.seek(0)
+
+    log_audit_event(
+        db=db,
+        action="certificate.approved_presentation_generated",
+        user_id=current_user["id"],
+        organization_id=org_id,
+        resource_type="certificate",
+        new_values={"total": result.total},
+    )
+    db.commit()
+
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        headers={"Content-Disposition": "attachment; filename=approved_certificates.pptx"},
+    )

@@ -348,23 +348,50 @@ def _handle_etl_package(job_id: int, payload: dict, db: DbSession) -> dict:
         package_id: int
         zip_path: str — temp path to the uploaded ZIP file
         organization_id: int
+
+    If the temp file no longer exists (e.g. after a worker restart),
+    the ZIP is re-downloaded from durable storage.
     """
     import os
+    import tempfile
 
     package_id = payload.get("package_id")
     zip_path = payload.get("zip_path", "")
     organization_id = payload.get("organization_id")
 
-    if not package_id or not zip_path or not organization_id:
-        raise ValueError("Missing required payload: package_id, zip_path, organization_id")
+    if not package_id or not organization_id:
+        raise ValueError("Missing required payload: package_id, organization_id")
 
-    update_job_progress(job_id, 0.05, "Starting ZIP extraction")
+    update_job_progress(job_id, 0.02, "Preparing ZIP file")
+
+    # If the temp file is gone (worker restart), re-download from storage
+    if not zip_path or not os.path.exists(zip_path):
+        update_job_progress(job_id, 0.05, "Recovering ZIP from storage")
+        from etl.package_service import ETLPackageService
+
+        svc = ETLPackageService(db)
+        pkg = svc.get_package(int(package_id), int(organization_id))
+        if not pkg:
+            raise ValueError(f"Package {package_id} not found")
+
+        from storage.storage import get_storage_backend
+
+        storage = get_storage_backend()
+        content = storage.download(pkg.storage_key)
+        tmp_fd, zip_path = tempfile.mkstemp(suffix=".zip")
+        with os.fdopen(tmp_fd, "wb") as f:
+            f.write(content)
+        logger.info(
+            "PACKAGE_ZIP_RECOVERED package_id=%d from storage_key=%s",
+            package_id,
+            pkg.storage_key,
+        )
+
+    update_job_progress(job_id, 0.10, "Extracting ZIP contents")
 
     from etl.package_service import ETLPackageService
 
     svc = ETLPackageService(db)
-    update_job_progress(job_id, 0.10, "Extracting ZIP contents")
-
     result = svc.process_package(
         package_id=int(package_id),
         zip_path=zip_path,

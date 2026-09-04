@@ -95,8 +95,10 @@ class ETLPackageFile(Base):
     checksum = Column(String(64), nullable=True, index=True)
 
     # Processing status: discovered, queued, processing, completed,
-    # failed, skipped, duplicate, unsupported
-    status = Column(String(20), nullable=False, server_default="discovered", index=True)
+    # failed, skipped, duplicate, unsupported,
+    # document_processed, certificate_detected, document_extraction_pending,
+    # document_extraction_failed
+    status = Column(String(40), nullable=False, server_default="discovered", index=True)
 
     # Processing stage: profiling, transformation, validation, loading
     stage = Column(String(50), nullable=True)

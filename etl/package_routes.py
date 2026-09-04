@@ -25,7 +25,6 @@ from sqlalchemy.orm import Session as DbSession
 
 from audit.service import log_audit_event
 from etl.package_service import ETLPackageService
-from etl.zip_extractor import validate_zip
 from shared.database import get_db
 from shared.tenant import get_tenant_context
 
@@ -48,8 +47,13 @@ async def upload_package(
 ):
     """Upload a ZIP package for ETL processing.
 
-    Validates the ZIP, stores it, creates a package record, and enqueues
-    a background job. Returns immediately with a package ID.
+    Streams the uploaded file to a temp file (no full in-memory load),
+    computes the SHA-256 checksum during streaming, persists the ZIP to
+    durable storage, creates a package record, enqueues a background job,
+    and returns immediately.
+
+    ZIP validation is deferred to the background worker to keep the HTTP
+    request fast and avoid Render proxy timeouts on large files.
     """
     current_user = tenant["user"]
     org_id = tenant["organization_id"]
@@ -58,49 +62,84 @@ async def upload_package(
     if not file.filename or not file.filename.lower().endswith(".zip"):
         raise HTTPException(status_code=400, detail="File must be a ZIP archive (.zip)")
 
-    # Read file content
-    content = await file.read()
-    file_size = len(content)
+    # Stream upload to temp file with chunked checksum — avoids loading
+    # the entire ZIP into memory.
+    h = hashlib.sha256()
+    file_size = 0
+    tmp_fd, tmp_path = tempfile.mkstemp(suffix=".zip")
+    try:
+        with os.fdopen(tmp_fd, "wb") as tmp:
+            while True:
+                chunk = await file.read(8192)
+                if not chunk:
+                    break
+                tmp.write(chunk)
+                h.update(chunk)
+                file_size += len(chunk)
+
+                # Early size check to reject oversized files mid-stream
+                if file_size > MAX_ZIP_SIZE:
+                    raise HTTPException(
+                        status_code=413,
+                        detail=f"ZIP file size exceeds maximum "
+                        f"{MAX_ZIP_SIZE / 1024 / 1024:.0f}MB",
+                    )
+    except HTTPException:
+        # Clean up temp file on size violation
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+        raise
+    except Exception:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+        raise
 
     if file_size == 0:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
         raise HTTPException(status_code=400, detail="ZIP file is empty")
 
-    if file_size > MAX_ZIP_SIZE:
-        raise HTTPException(
-            status_code=413,
-            detail=f"ZIP file size {file_size / 1024 / 1024:.1f}MB exceeds maximum "
-            f"{MAX_ZIP_SIZE / 1024 / 1024:.0f}MB",
+    checksum = h.hexdigest()
+
+    # Idempotency check: if a package with the same checksum already exists
+    # for this org, return it without re-storing or creating a new job.
+    svc = _get_service(db)
+    existing = svc.find_by_checksum(org_id, checksum)
+    if existing:
+        # Clean up the temp file — we already have the ZIP stored
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+        logger.info(
+            "PACKAGE_DUPLICATE_SKIP package_id=%d checksum=%s — returning existing",
+            existing.id,
+            checksum[:16],
         )
+        return {
+            "package_id": existing.id,
+            "job_id": existing.job_id,
+            "filename": existing.filename,
+            "status": existing.status,
+            "file_count": existing.total_files,
+            "checksum": checksum,
+            "message": "Package already uploaded. Processing is in progress or complete.",
+        }
 
-    # Compute checksum
-    checksum = hashlib.sha256(content).hexdigest()
-
-    # Save to temp file for validation
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".zip") as tmp:
-        tmp.write(content)
-        tmp_path = tmp.name
-
-    try:
-        # Validate ZIP structure
-        validation = validate_zip(tmp_path)
-        if not validation["valid"]:
-            raise HTTPException(
-                status_code=400,
-                detail=f"ZIP validation failed: {'; '.join(validation['errors'])}",
-            )
-    finally:
-        # Keep the temp file for background processing
-        pass
-
-    # Store the ZIP using storage backend
+    # Store the ZIP using storage backend (streaming, no full in-memory load)
     from storage.storage import get_storage_backend
 
     storage = get_storage_backend()
     storage_key = f"etl/packages/org_{org_id}/{checksum[:16]}/{file.filename}"
-    upload_result = storage.upload(storage_key, content, content_type="application/zip")
+    upload_result = storage.upload_path(storage_key, tmp_path, content_type="application/zip")
 
     # Create package record
-    svc = _get_service(db)
     package = svc.create_package(
         organization_id=org_id,
         uploaded_by=current_user["id"] if current_user else None,
@@ -111,7 +150,7 @@ async def upload_package(
         file_size=file_size,
     )
 
-    # Enqueue background job
+    # Enqueue background job — the worker will validate and extract the ZIP
     from jobs.service import JobService
 
     job_svc = JobService(db)
@@ -143,19 +182,18 @@ async def upload_package(
             "filename": file.filename,
             "size": file_size,
             "checksum": checksum[:16],
-            "file_count": validation["file_count"],
             "job_id": job.id,
         },
     )
     db.commit()
 
     logger.info(
-        "PACKAGE_UPLOAD package_id=%d job_id=%d filename=%s size=%d files=%d",
+        "PACKAGE_UPLOAD package_id=%d job_id=%d filename=%s size=%d checksum=%s",
         package.id,
         job.id,
         file.filename,
         file_size,
-        validation["file_count"],
+        checksum[:16],
     )
 
     return {
@@ -163,7 +201,7 @@ async def upload_package(
         "job_id": job.id,
         "filename": file.filename,
         "status": "uploaded",
-        "file_count": validation["file_count"],
+        "file_count": 0,
         "checksum": checksum,
         "message": "Package uploaded. Processing will begin in the background.",
     }

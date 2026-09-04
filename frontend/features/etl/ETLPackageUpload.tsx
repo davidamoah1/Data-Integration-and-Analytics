@@ -23,42 +23,74 @@ import { cn, formatNumber } from '@/lib/utils';
 
 type UploadStage = 'idle' | 'uploading' | 'processing' | 'done' | 'error';
 
+type ErrorType = 'upload_failed' | 'processing_failed' | 'backend_unavailable' | 'unknown';
+
+const POLL_INITIAL_DELAY_MS = 2000;
+const POLL_MAX_DELAY_MS = 30000;
+const POLL_MAX_CONSECUTIVE_ERRORS = 10;
+
 export function ETLPackageUpload() {
   const router = useRouter();
   const [stage, setStage] = useState<UploadStage>('idle');
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [errorType, setErrorType] = useState<ErrorType | null>(null);
   const [packageId, setPackageId] = useState<number | null>(null);
   const [progress, setProgress] = useState<ETLPackageProgress | null>(null);
   const [dragOver, setDragOver] = useState(false);
+  const [connectionLost, setConnectionLost] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const consecutiveErrorsRef = useRef(0);
+  const pollDelayRef = useRef(POLL_INITIAL_DELAY_MS);
 
   useEffect(() => {
     return () => {
-      if (pollRef.current) clearInterval(pollRef.current);
+      if (pollRef.current) clearTimeout(pollRef.current);
     };
   }, []);
 
   const startPolling = useCallback((id: number) => {
-    if (pollRef.current) clearInterval(pollRef.current);
+    if (pollRef.current) clearTimeout(pollRef.current);
+    consecutiveErrorsRef.current = 0;
+    pollDelayRef.current = POLL_INITIAL_DELAY_MS;
+    setConnectionLost(false);
 
-    pollRef.current = setInterval(async () => {
+    const poll = async () => {
       try {
         const p = await etlPackageService.getProgress(id);
         setProgress(p);
+        consecutiveErrorsRef.current = 0;
+        pollDelayRef.current = POLL_INITIAL_DELAY_MS;
+        setConnectionLost(false);
 
         if (['completed', 'completed_with_errors', 'failed', 'cancelled'].includes(p.status)) {
-          if (pollRef.current) {
-            clearInterval(pollRef.current);
-            pollRef.current = null;
-          }
+          pollRef.current = null;
           setStage('done');
+          return;
         }
+
+        // Schedule next poll with reset delay
+        pollRef.current = setTimeout(poll, pollDelayRef.current);
       } catch {
-        // Silently ignore polling errors — will retry next interval
+        consecutiveErrorsRef.current += 1;
+
+        if (consecutiveErrorsRef.current >= POLL_MAX_CONSECUTIVE_ERRORS) {
+          // Too many consecutive errors — show connection lost but DON'T
+          // change the stage. The package may still be processing.
+          setConnectionLost(true);
+        }
+
+        // Exponential backoff: double the delay, cap at max
+        pollDelayRef.current = Math.min(
+          pollDelayRef.current * 2,
+          POLL_MAX_DELAY_MS,
+        );
+        pollRef.current = setTimeout(poll, pollDelayRef.current);
       }
-    }, 2000);
+    };
+
+    pollRef.current = setTimeout(poll, pollDelayRef.current);
   }, []);
 
   const handleFile = useCallback(
@@ -81,10 +113,16 @@ export function ETLPackageUpload() {
 
         setPackageId(result.package_id);
         setStage('processing');
-        toast.success(`Package uploaded: ${result.file_count} files detected`);
+        toast.success('Package uploaded. Processing started in background.');
         startPolling(result.package_id);
       } catch (err) {
         const msg = err instanceof Error ? err.message : 'Upload failed';
+        // Distinguish upload errors from backend unavailable
+        if (msg.includes('Unable to connect to the server') || msg.includes('timed out')) {
+          setErrorType('backend_unavailable');
+        } else {
+          setErrorType('upload_failed');
+        }
         setError(msg);
         setStage('error');
         toast.error(msg);
@@ -109,7 +147,7 @@ export function ETLPackageUpload() {
       await etlPackageService.cancel(packageId);
       toast.success('Package processing cancelled');
       if (pollRef.current) {
-        clearInterval(pollRef.current);
+        clearTimeout(pollRef.current);
         pollRef.current = null;
       }
       setStage('idle');
@@ -138,10 +176,20 @@ export function ETLPackageUpload() {
     setPackageId(null);
     setProgress(null);
     setError(null);
+    setErrorType(null);
+    setConnectionLost(false);
   }, []);
 
   const processingPercentage = progress?.percentage ?? 0;
   const isProcessing = stage === 'processing' || stage === 'uploading';
+
+  const handleRetryConnection = useCallback(() => {
+    if (!packageId) return;
+    setConnectionLost(false);
+    consecutiveErrorsRef.current = 0;
+    pollDelayRef.current = POLL_INITIAL_DELAY_MS;
+    startPolling(packageId);
+  }, [packageId, startPolling]);
 
   return (
     <div className="w-full max-w-3xl mx-auto">
@@ -216,6 +264,7 @@ export function ETLPackageUpload() {
                     {progress.status === 'extracting' && 'Extracting ZIP contents...'}
                     {progress.status === 'discovering' && 'Discovering files...'}
                     {progress.status === 'processing' && `Processing files — ${progress.current_stage}`}
+                    {progress.status === 'uploaded' && 'Queued for processing...'}
                   </CardDescription>
                 </div>
               </div>
@@ -225,6 +274,18 @@ export function ETLPackageUpload() {
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
+            {connectionLost && (
+              <Alert variant="default" className="border-yellow-300 bg-yellow-50">
+                <AlertCircle className="h-4 w-4 text-yellow-600" />
+                <AlertDescription className="text-yellow-800">
+                  Connection to server lost. Your package is still processing in the background.
+                  <Button variant="link" size="sm" onClick={handleRetryConnection} className="ml-2 p-0">
+                    Retry connection
+                  </Button>
+                </AlertDescription>
+              </Alert>
+            )}
+
             <div className="w-full">
               <div className="flex justify-between text-sm mb-1">
                 <span className="text-gray-600">Progress</span>
@@ -336,11 +397,23 @@ export function ETLPackageUpload() {
           <CardContent className="py-8">
             <div className="flex flex-col items-center text-center">
               <XCircle className="h-10 w-10 text-red-600 mb-4" />
-              <h3 className="text-lg font-semibold">Upload Failed</h3>
-              <p className="mt-1 text-sm text-gray-500">{error}</p>
-              <Button className="mt-4" variant="outline" onClick={handleReset}>
-                Try Again
-              </Button>
+              <h3 className="text-lg font-semibold">
+                {errorType === 'backend_unavailable'
+                  ? 'Server Connection Error'
+                  : 'Upload Failed'}
+              </h3>
+              <p className="mt-1 text-sm text-gray-500 max-w-md">{error}</p>
+              {errorType === 'backend_unavailable' && (
+                <p className="mt-2 text-xs text-gray-400 max-w-md">
+                  The backend may be restarting or under heavy load. Your file was not uploaded.
+                  Please try again once the server is available.
+                </p>
+              )}
+              <div className="flex gap-3 mt-4">
+                <Button variant="outline" onClick={handleReset}>
+                  Try Again
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>

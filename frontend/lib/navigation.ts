@@ -36,6 +36,7 @@ import {
   HardDrive,
   Rocket,
   Award,
+  BarChart2,
   type LucideIcon,
 } from 'lucide-react';
 import { ROLES } from './permissions';
@@ -75,6 +76,7 @@ const ALL_NAV_ITEMS: Record<string, NavItem> = {
 
   smartCapture: { label: 'Smart Data Capture', href: '/capture', icon: ScanLine, order: 0 },
   certificates: { label: 'Certificate Intelligence', href: '/certificates', icon: Award, order: 0.5 },
+  approvedAnalytics: { label: 'Approved Cert Analytics', href: '/certificates/analytics', icon: BarChart2, order: 0.6 },
   captureQueue: { label: 'Capture Queue', href: '/capture/queue', icon: ClipboardList, order: 1 },
   assignedTasks: { label: 'Assigned Tasks', href: '/capture/tasks', icon: CheckSquare, order: 2 },
   validation: { label: 'Validation', href: '/capture/review', icon: CheckSquare, order: 3 },
@@ -176,6 +178,7 @@ const ROLE_PROFILES: Record<RoleKey, RoleProfile> = {
       group('Data', [
         ALL_NAV_ITEMS.smartCapture,
         ALL_NAV_ITEMS.certificates,
+        ALL_NAV_ITEMS.approvedAnalytics,
         ALL_NAV_ITEMS.datasets,
         ALL_NAV_ITEMS.dataPackages,
         ALL_NAV_ITEMS.analytics,
@@ -215,6 +218,7 @@ const ROLE_PROFILES: Record<RoleKey, RoleProfile> = {
       group('Data', [
         ALL_NAV_ITEMS.smartCapture,
         ALL_NAV_ITEMS.certificates,
+        ALL_NAV_ITEMS.approvedAnalytics,
         ALL_NAV_ITEMS.datasets,
         ALL_NAV_ITEMS.dataPackages,
         ALL_NAV_ITEMS.analytics,
@@ -442,6 +446,7 @@ const ROLE_PROFILES: Record<RoleKey, RoleProfile> = {
       group('Capture', [
         ALL_NAV_ITEMS.smartCapture,
         ALL_NAV_ITEMS.certificates,
+        ALL_NAV_ITEMS.approvedAnalytics,
         ALL_NAV_ITEMS.captureQueue,
         ALL_NAV_ITEMS.assignedTasks,
         ALL_NAV_ITEMS.validation,

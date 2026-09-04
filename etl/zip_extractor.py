@@ -32,6 +32,7 @@ MAX_FILES_PER_DIRECTORY = int(os.getenv("ETL_MAX_FILES_PER_DIR", "5000"))
 
 # Supported file extensions for ETL processing
 SUPPORTED_EXTENSIONS = {
+    # Structured data
     "csv",
     "tsv",
     "xlsx",
@@ -39,9 +40,77 @@ SUPPORTED_EXTENSIONS = {
     "json",
     "xml",
     "ods",
+    # Documents
     "pdf",
     "txt",
+    # Images
+    "jpg",
+    "jpeg",
+    "png",
+    "tiff",
+    "tif",
+    "bmp",
 }
+
+# File classification categories
+STRUCTURED_DATA_EXTENSIONS = {"csv", "tsv", "xlsx", "xls", "json", "xml", "ods"}
+DOCUMENT_EXTENSIONS = {"pdf", "txt"}
+IMAGE_EXTENSIONS = {"jpg", "jpeg", "png", "tiff", "tif", "bmp"}
+
+# Magic byte signatures for file type verification
+FILE_MAGIC_BYTES = {
+    "pdf": (b"%PDF",),
+    "jpg": (b"\xff\xd8\xff",),
+    "jpeg": (b"\xff\xd8\xff",),
+    "png": (b"\x89PNG\r\n\x1a\n",),
+    "tiff": (b"II*\x00", b"MM\x00*"),
+    "tif": (b"II*\x00", b"MM\x00*"),
+    "bmp": (b"BM",),
+    "zip": (b"PK\x03\x04",),
+    "xlsx": (b"PK\x03\x04",),
+    "xls": (b"\xd0\xcf\x11\xe0",),
+    "ods": (b"PK\x03\x04",),
+}
+
+
+def classify_file_type(filename: str, file_path: str | None = None) -> str:
+    """Classify a file as STRUCTURED_DATA, DOCUMENT, IMAGE, or ARCHIVE.
+
+    Uses extension first, then verifies with magic bytes when possible.
+    """
+    ext = _get_file_extension(filename)
+    if ext in STRUCTURED_DATA_EXTENSIONS:
+        return "STRUCTURED_DATA"
+    if ext in DOCUMENT_EXTENSIONS:
+        return "DOCUMENT"
+    if ext in IMAGE_EXTENSIONS:
+        return "IMAGE"
+    if ext == "zip":
+        return "ARCHIVE"
+    return "UNKNOWN"
+
+
+def verify_magic_bytes(filename: str, file_path: str) -> bool:
+    """Verify that a file's content matches its extension via magic bytes.
+
+    Returns True if the magic bytes match or if no signature is known.
+    Returns False if the signature is known but does not match.
+    """
+    ext = _get_file_extension(filename)
+    signatures = FILE_MAGIC_BYTES.get(ext)
+    if signatures is None:
+        return True  # No signature to check
+    try:
+        with open(file_path, "rb") as f:
+            header = f.read(16)
+        if len(header) < 4:
+            return False
+        for sig in signatures:
+            if header.startswith(sig):
+                return True
+        return False
+    except (OSError, IOError):
+        return False
 
 # Extensions that are always rejected
 BLOCKED_EXTENSIONS = {
@@ -157,6 +226,12 @@ def _guess_mime_type(filename: str) -> str:
         "ods": "application/vnd.oasis.opendocument.spreadsheet",
         "pdf": "application/pdf",
         "txt": "text/plain",
+        "jpg": "image/jpeg",
+        "jpeg": "image/jpeg",
+        "png": "image/png",
+        "tiff": "image/tiff",
+        "tif": "image/tiff",
+        "bmp": "image/bmp",
     }.get(ext, "application/octet-stream")
 
 

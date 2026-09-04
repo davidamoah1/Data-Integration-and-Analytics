@@ -59,6 +59,44 @@ class StorageBackend(ABC):
         """Upload file data to the storage backend."""
         ...
 
+    def upload_path(
+        self,
+        key: str,
+        file_path: str,
+        content_type: str | None = None,
+    ) -> StorageUploadResult:
+        """Upload a file from a local path (streaming, no full in-memory load).
+
+        Default implementation reads in chunks to avoid loading the
+        entire file into memory. Subclasses may override for more
+        efficient native streaming (e.g. multipart upload to S3/R2).
+        """
+        import hashlib as _hashlib
+
+        full_path = self._full_path(key) if hasattr(self, "_full_path") else None
+        h = _hashlib.sha256()
+        size = 0
+        with open(file_path, "rb") as f:
+            while True:
+                chunk = f.read(8192)
+                if not chunk:
+                    break
+                h.update(chunk)
+                size += len(chunk)
+        checksum = h.hexdigest()
+        # Read the full file for the default upload() call.
+        # Subclasses should override upload_path to avoid this.
+        with open(file_path, "rb") as f:
+            data = f.read()
+        result = self.upload(key, data, content_type=content_type)
+        return StorageUploadResult(
+            key=result.key,
+            bucket=result.bucket,
+            url=result.url,
+            checksum=checksum,
+            size=size,
+        )
+
     @abstractmethod
     def download(self, key: str) -> bytes:
         """Download file data from the storage backend."""
@@ -124,6 +162,34 @@ class LocalFileBackend(StorageBackend):
             url=url,
             checksum=checksum,
             size=len(data),
+        )
+
+    def upload_path(
+        self,
+        key: str,
+        file_path: str,
+        content_type: str | None = None,
+    ) -> StorageUploadResult:
+        """Stream a local file to storage without loading it all into memory."""
+        full_path = self._full_path(key)
+        os.makedirs(os.path.dirname(full_path), exist_ok=True)
+        h = hashlib.sha256()
+        size = 0
+        with open(file_path, "rb") as src, open(full_path, "wb") as dst:
+            while True:
+                chunk = src.read(8192)
+                if not chunk:
+                    break
+                dst.write(chunk)
+                h.update(chunk)
+                size += len(chunk)
+        url = f"{self.base_url}/{key}" if self.base_url else None
+        return StorageUploadResult(
+            key=key,
+            bucket=None,
+            url=url,
+            checksum=h.hexdigest(),
+            size=size,
         )
 
     def download(self, key: str) -> bytes:

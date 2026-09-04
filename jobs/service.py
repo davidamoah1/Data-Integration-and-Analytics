@@ -93,6 +93,7 @@ class JobService:
         "ocr_document": 1800,  # 30 min — single doc OCR
         "ocr_batch": 7200,  # 2 hours — batch OCR (up to 50 docs)
         "etl_run": 3600,  # 1 hour — ETL pipeline
+        "etl_package": 7200,  # 2 hours — ZIP package ETL (extract + process + load)
         "report_gen": 1800,  # 30 min — AI report generation
         "data_import": 1800,  # 30 min — large file import
         "export": 1800,  # 30 min — data export
