@@ -73,7 +73,6 @@ class StorageBackend(ABC):
         """
         import hashlib as _hashlib
 
-        full_path = self._full_path(key) if hasattr(self, "_full_path") else None
         h = _hashlib.sha256()
         size = 0
         with open(file_path, "rb") as f:

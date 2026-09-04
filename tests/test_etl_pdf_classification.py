@@ -18,8 +18,6 @@ import os
 import tempfile
 import zipfile
 
-import pytest
-
 
 def _make_zip(files: dict[str, bytes]) -> str:
     """Create a temp ZIP file from a dict of filename→content."""
@@ -142,8 +140,6 @@ class TestPDFNotDecodedAsUTF8:
 
     def test_pdf_ext_to_connector_type_not_csv(self):
         """Ensure PDF extension does not map to CSV connector type."""
-        from etl.package_service import ETLPackageService
-
         # We can't instantiate the service without a DB session,
         # but we can test the mapping logic directly
         mapping = {
@@ -160,7 +156,7 @@ class TestPDFNotDecodedAsUTF8:
 
     def test_pdf_routed_to_document_not_structured(self, tmp_path):
         """Ensure PDFs are classified as DOCUMENT, not STRUCTURED_DATA."""
-        from etl.zip_extractor import classify_file_type, STRUCTURED_DATA_EXTENSIONS
+        from etl.zip_extractor import STRUCTURED_DATA_EXTENSIONS, classify_file_type
 
         assert "pdf" not in STRUCTURED_DATA_EXTENSIONS
         assert classify_file_type("AI Literacy.pdf") == "DOCUMENT"
@@ -172,37 +168,37 @@ class TestStructuredDataRegression:
     """Ensure structured data files still go through the ETL pipeline."""
 
     def test_csv_still_structured(self):
-        from etl.zip_extractor import classify_file_type, STRUCTURED_DATA_EXTENSIONS
+        from etl.zip_extractor import STRUCTURED_DATA_EXTENSIONS, classify_file_type
         assert "csv" in STRUCTURED_DATA_EXTENSIONS
         assert classify_file_type("data.csv") == "STRUCTURED_DATA"
 
     def test_xlsx_still_structured(self):
-        from etl.zip_extractor import classify_file_type, STRUCTURED_DATA_EXTENSIONS
+        from etl.zip_extractor import STRUCTURED_DATA_EXTENSIONS, classify_file_type
         assert "xlsx" in STRUCTURED_DATA_EXTENSIONS
         assert classify_file_type("report.xlsx") == "STRUCTURED_DATA"
 
     def test_json_still_structured(self):
-        from etl.zip_extractor import classify_file_type, STRUCTURED_DATA_EXTENSIONS
+        from etl.zip_extractor import STRUCTURED_DATA_EXTENSIONS, classify_file_type
         assert "json" in STRUCTURED_DATA_EXTENSIONS
         assert classify_file_type("config.json") == "STRUCTURED_DATA"
 
     def test_xml_still_structured(self):
-        from etl.zip_extractor import classify_file_type, STRUCTURED_DATA_EXTENSIONS
+        from etl.zip_extractor import STRUCTURED_DATA_EXTENSIONS, classify_file_type
         assert "xml" in STRUCTURED_DATA_EXTENSIONS
         assert classify_file_type("data.xml") == "STRUCTURED_DATA"
 
     def test_tsv_still_structured(self):
-        from etl.zip_extractor import classify_file_type, STRUCTURED_DATA_EXTENSIONS
+        from etl.zip_extractor import STRUCTURED_DATA_EXTENSIONS, classify_file_type
         assert "tsv" in STRUCTURED_DATA_EXTENSIONS
         assert classify_file_type("data.tsv") == "STRUCTURED_DATA"
 
     def test_ods_still_structured(self):
-        from etl.zip_extractor import classify_file_type, STRUCTURED_DATA_EXTENSIONS
+        from etl.zip_extractor import STRUCTURED_DATA_EXTENSIONS, classify_file_type
         assert "ods" in STRUCTURED_DATA_EXTENSIONS
         assert classify_file_type("report.ods") == "STRUCTURED_DATA"
 
     def test_xls_still_structured(self):
-        from etl.zip_extractor import classify_file_type, STRUCTURED_DATA_EXTENSIONS
+        from etl.zip_extractor import STRUCTURED_DATA_EXTENSIONS, classify_file_type
         assert "xls" in STRUCTURED_DATA_EXTENSIONS
         assert classify_file_type("legacy.xls") == "STRUCTURED_DATA"
 
@@ -231,7 +227,7 @@ class TestMixedZipPackage:
 
     def test_mixed_zip_extraction(self):
         """A ZIP with CSV + PDF + JPG should extract all files as supported."""
-        from etl.zip_extractor import extract_zip, SUPPORTED_EXTENSIONS
+        from etl.zip_extractor import extract_zip
 
         files = {
             "data.csv": b"a,b,c\n1,2,3\n",
@@ -325,7 +321,8 @@ class TestDocumentStatuses:
 
         # The document_statuses set should contain the expected values
         # We verify by checking the source code contains these strings
-        source = open(ps.__file__).read()
+        with open(ps.__file__) as f:
+            source = f.read()
         assert "document_processed" in source
         assert "certificate_detected" in source
         assert "document_extraction_pending" in source

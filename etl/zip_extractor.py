@@ -105,11 +105,8 @@ def verify_magic_bytes(filename: str, file_path: str) -> bool:
             header = f.read(16)
         if len(header) < 4:
             return False
-        for sig in signatures:
-            if header.startswith(sig):
-                return True
-        return False
-    except (OSError, IOError):
+        return any(header.startswith(sig) for sig in signatures)
+    except OSError:
         return False
 
 # Extensions that are always rejected

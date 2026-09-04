@@ -199,8 +199,8 @@ class TestFilters:
     """Test filter combinations."""
 
     def test_filter_by_certificate_type(self, db_session):
-        doc1 = _create_cert_doc(db_session, doc_type="academic_certificate", status="approved", doc_id=1)
-        doc2 = _create_cert_doc(db_session, doc_type="diploma", status="approved", doc_id=2)
+        _create_cert_doc(db_session, doc_type="academic_certificate", status="approved", doc_id=1)
+        _create_cert_doc(db_session, doc_type="diploma", status="approved", doc_id=2)
         db_session.commit()
 
         svc = ApprovedCertificateAnalyticsService(db_session)

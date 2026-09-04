@@ -1960,8 +1960,8 @@ async def approved_analytics_summary(
     No rejected, pending, or unverified certificates are included.
     """
     from certificates.analytics_service import (
-        ApprovedCertificateAnalyticsService,
         ApprovedAnalyticsFilters,
+        ApprovedCertificateAnalyticsService,
     )
 
     org_id = get_current_organization_id(current_user, db)
@@ -2033,8 +2033,8 @@ async def approved_analytics_records(
 ):
     """Paginated approved certificate records for the analytics table."""
     from certificates.analytics_service import (
-        ApprovedCertificateAnalyticsService,
         ApprovedAnalyticsFilters,
+        ApprovedCertificateAnalyticsService,
     )
 
     org_id = get_current_organization_id(current_user, db)
@@ -2082,8 +2082,8 @@ async def approved_analytics_export_csv(
 ):
     """Export approved certificates as CSV."""
     from certificates.analytics_service import (
-        ApprovedCertificateAnalyticsService,
         ApprovedAnalyticsFilters,
+        ApprovedCertificateAnalyticsService,
     )
 
     org_id = get_current_organization_id(current_user, db)
@@ -2148,8 +2148,8 @@ async def approved_analytics_export_xlsx(
 ):
     """Export approved certificates as XLSX."""
     from certificates.analytics_service import (
-        ApprovedCertificateAnalyticsService,
         ApprovedAnalyticsFilters,
+        ApprovedCertificateAnalyticsService,
     )
 
     org_id = get_current_organization_id(current_user, db)
@@ -2237,8 +2237,8 @@ async def approved_analytics_report(
 ):
     """Generate a structured JSON report from approved certificates only."""
     from certificates.analytics_service import (
-        ApprovedCertificateAnalyticsService,
         ApprovedAnalyticsFilters,
+        ApprovedCertificateAnalyticsService,
     )
 
     org_id = get_current_organization_id(current_user, db)
@@ -2341,8 +2341,8 @@ async def approved_analytics_presentation(
 ):
     """Generate a PowerPoint presentation from approved certificates only."""
     from certificates.analytics_service import (
-        ApprovedCertificateAnalyticsService,
         ApprovedAnalyticsFilters,
+        ApprovedCertificateAnalyticsService,
     )
 
     org_id = get_current_organization_id(current_user, db)
@@ -2384,8 +2384,6 @@ async def approved_analytics_presentation(
     DARK_BLUE = RGBColor(0x1B, 0x3A, 0x5C)
     WHITE = RGBColor(0xFF, 0xFF, 0xFF)
     DARK_TEXT = RGBColor(0x2C, 0x3E, 0x50)
-    ACCENT = RGBColor(0x25, 0x63, 0xEB)
-    LIGHT_BG = RGBColor(0xF0, 0xF4, 0xF8)
 
     blank_layout = prs.slide_layouts[6]
 
@@ -2453,7 +2451,7 @@ async def approved_analytics_presentation(
             p.font.size = Pt(18)
             p.font.bold = True
             p.font.color.rgb = DARK_BLUE
-            for i, insight in enumerate(result.insights):
+            for _i, insight in enumerate(result.insights):
                 p = tf3.add_paragraph()
                 p.text = f"• {insight}"
                 p.font.size = Pt(14)

@@ -49,7 +49,7 @@ IMAGE_EXTENSIONS = {"jpg", "jpeg", "png", "tiff", "tif", "bmp"}
 FILE_PROCESSING_BATCH_SIZE = 50
 
 
-def _CERT_DOC_TYPE_KEYS() -> set[str]:
+def _cert_doc_type_keys() -> set[str]:
     """Return the set of certificate document type keys from the capture registry."""
     from certificates.routes import CERTIFICATE_DOC_TYPES
     return CERTIFICATE_DOC_TYPES
@@ -606,7 +606,6 @@ class ETLPackageService:
         import time as _time
 
         t0 = _time.monotonic()
-        ext = record.file_extension
         filename = record.sanitized_filename
 
         logger.info(
@@ -671,7 +670,7 @@ class ETLPackageService:
 
                 # Determine the appropriate ETL status
                 if capture_status == "ready_for_review":
-                    if doc_type in _CERT_DOC_TYPE_KEYS():
+                    if doc_type in _cert_doc_type_keys():
                         etl_status = "certificate_detected"
                     else:
                         etl_status = "document_processed"
