@@ -1878,7 +1878,7 @@ async def generate_certificate_presentation(
                     name = fa.value
                     break
             p.text = (
-                f"{i + 1}. {d.filename} â€” {a.document_type_label or 'Unknown'}"
+                f"{i + 1}. {d.filename} — {a.document_type_label or 'Unknown'}"
                 f" | Holder: {name or 'N/A'}"
                 f" | Completeness: {a.completeness.completeness_pct:.0f}%"
                 f" | Verification: {a.verification_status}"

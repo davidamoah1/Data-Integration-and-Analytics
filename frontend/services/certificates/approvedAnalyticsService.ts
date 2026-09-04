@@ -223,7 +223,14 @@ export const approvedAnalyticsService = {
       `${apiUrl}${BASE}/presentation${qs ? `?${qs}` : ""}`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
-    if (!response.ok) throw new Error(`Download failed: ${response.status}`);
+    if (!response.ok) {
+      let errMsg = `Download failed: ${response.status}`;
+      try {
+        const parsed = await response.json();
+        if (parsed?.detail) errMsg = parsed.detail;
+      } catch {}
+      throw new Error(errMsg);
+    }
     const blob = await response.blob();
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
