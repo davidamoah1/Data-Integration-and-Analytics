@@ -1409,102 +1409,80 @@ async def run_analysis(
             raise
         except Exception as e:
             logger.exception("Analysis failed for workflow %s: %s", workflow_id, e)
-            raise HTTPException(
-                status_code=500, detail="Analysis failed. Please try again."
-            ) from None
-
-    else:
-        raise HTTPException(status_code=400, detail=f"Invalid mode: {payload.mode}")
-
-
 def _add_chart_to_slide(
     slide,
     chart_spec: dict,
     df,
-    left: float = 1.0,
-    top: float = 2.0,
-    width: float = 11.0,
-    height: float = 5.0,
+    left: float = 0.8,
+    top: float = 1.55,
+    width: float = 11.7,
+    height: float = 4.6,
 ) -> bool:
     """Render an actual chart on a PPTX slide using python-pptx.
 
-    Supports bar_chart, line_chart, and pie_chart specs from the dashboard
-    recommender. Returns True if a chart was added, False otherwise.
+    Supports bar_chart, horizontal_bar, pie_chart, donut_chart, histogram,
+    line_chart, and area_chart specs. Gracefully falls back to precomputed
+    chart_spec['data'] if the DataFrame is missing or column names mismatch.
     """
-    from pptx.chart.data import CategoryChartData
+    from pptx.chart.data import CategoryChartData, XyChartData
     from pptx.enum.chart import XL_CHART_TYPE
     from pptx.util import Inches
 
-    chart_type = chart_spec.get("type", "")
+    raw_type = (chart_spec.get("type") or chart_spec.get("chart_type") or "").lower().replace("-", "_").replace(" ", "_")
+    x_axis = chart_spec.get("x_axis")
+    y_axis = chart_spec.get("y_axis") or chart_spec.get("column")
+    series_name = chart_spec.get("title") or y_axis or "Value"
+
+    categories: list[str] = []
+    values: list[float] = []
+
     try:
-        if chart_type in ("bar_chart", "line_chart"):
-            x_axis = chart_spec.get("x_axis")
-            y_axis = chart_spec.get("y_axis")
-            if not x_axis or not y_axis or df is None:
-                return False
-            if x_axis not in df.columns or y_axis not in df.columns:
-                return False
+        # 1. Try aggregating from in-memory DataFrame
+        if df is not None and x_axis and x_axis in df.columns:
+            if raw_type in ("pie_chart", "pie", "donut_chart", "doughnut"):
+                counts = df[x_axis].value_counts().head(10)
+                categories = [str(c) for c in counts.index.tolist()]
+                values = [float(v) for v in counts.tolist()]
+            elif y_axis and y_axis in df.columns:
+                grouped = df.groupby(x_axis, dropna=False)[y_axis].sum().sort_values(ascending=False)
+                if len(grouped) > 15:
+                    grouped = grouped.head(15)
+                categories = [str(c) for c in grouped.index.tolist()]
+                values = [float(v) for v in grouped.tolist()]
 
-            # Aggregate: sum y by x (handle duplicates)
-            grouped = df.groupby(x_axis, dropna=False)[y_axis].sum().sort_index()
-            # Limit to top 15 categories for readability
-            if len(grouped) > 15:
-                grouped = grouped.nlargest(15)
+        # 2. Fallback to pre-computed chart_spec data
+        if not categories and chart_spec.get("data"):
+            for pt in chart_spec["data"][:15]:
+                cat = pt.get("x") or pt.get("label") or f"Item {len(categories) + 1}"
+                val = pt.get("y") or pt.get("value") or 0
+                categories.append(str(cat))
+                try:
+                    values.append(float(val) if val is not None else 0.0)
+                except (ValueError, TypeError):
+                    values.append(0.0)
 
-            chart_data = CategoryChartData()
-            chart_data.categories = [str(c) for c in grouped.index.tolist()]
-            chart_data.add_series(chart_spec.get("title", y_axis), grouped.tolist())
+        if not categories or not values:
+            return False
 
-            xl_type = (
-                XL_CHART_TYPE.COLUMN_CLUSTERED if chart_type == "bar_chart" else XL_CHART_TYPE.LINE
-            )
-            slide.shapes.add_chart(
-                xl_type,
-                Inches(left),
-                Inches(top),
-                Inches(width),
-                Inches(height),
-                chart_data,
-            )
-            return True
-
-        elif chart_type == "pie_chart":
-            column = chart_spec.get("column")
-            if not column or df is None or column not in df.columns:
-                return False
-
-            counts = df[column].value_counts().head(10)
-            chart_data = CategoryChartData()
-            chart_data.categories = [str(c) for c in counts.index.tolist()]
-            chart_data.add_series(chart_spec.get("title", column), counts.tolist())
-
-            slide.shapes.add_chart(
-                XL_CHART_TYPE.PIE,
-                Inches(left),
-                Inches(top),
-                Inches(width),
-                Inches(height),
-                chart_data,
-            )
-            return True
-
-        elif chart_type == "scatter":
-            x_axis = chart_spec.get("x_axis")
-            y_axis = chart_spec.get("y_axis")
-            if not x_axis or not y_axis or df is None:
-                return False
-            if x_axis not in df.columns or y_axis not in df.columns:
-                return False
-
-            from pptx.chart.data import XyChartData
-
+        # 3. Determine PowerPoint chart type
+        if raw_type in ("donut_chart", "doughnut"):
+            xl_type = XL_CHART_TYPE.DOUGHNUT
+        elif raw_type in ("pie_chart", "pie"):
+            xl_type = XL_CHART_TYPE.PIE
+        elif raw_type in ("horizontal_bar", "bar_horizontal"):
+            xl_type = XL_CHART_TYPE.BAR_CLUSTERED
+        elif raw_type in ("line_chart", "line"):
+            xl_type = XL_CHART_TYPE.LINE
+        elif raw_type in ("area_chart", "area"):
+            xl_type = XL_CHART_TYPE.AREA
+        elif raw_type in ("scatter", "scatter_plot"):
             xy_data = XyChartData()
-            series = xy_data.add_series(chart_spec.get("title", y_axis))
-            for _, row in df[[x_axis, y_axis]].dropna().head(50).iterrows():
-                x_val = float(row[x_axis]) if pd.api.types.is_numeric_dtype(df[x_axis]) else 0
-                y_val = float(row[y_axis])
-                series.add_data_point(x_val, y_val)
-
+            series = xy_data.add_series(series_name)
+            for c, v in zip(categories, values):
+                try:
+                    series.add_data_point(float(c), float(v))
+                except (ValueError, TypeError):
+                    pass
             slide.shapes.add_chart(
                 XL_CHART_TYPE.XY_SCATTER,
                 Inches(left),
@@ -1514,12 +1492,75 @@ def _add_chart_to_slide(
                 xy_data,
             )
             return True
+        else:  # bar_chart, histogram, column
+            xl_type = XL_CHART_TYPE.COLUMN_CLUSTERED
+
+        chart_data = CategoryChartData()
+        chart_data.categories = categories
+        chart_data.add_series(series_name, values)
+
+        slide.shapes.add_chart(
+            xl_type,
+            Inches(left),
+            Inches(top),
+            Inches(width),
+            Inches(height),
+            chart_data,
+        )
+        return True
 
     except Exception:
-        logger.warning("Failed to render chart %s", chart_type, exc_info=True)
+        logger.warning("Failed to render native PPTX chart %s", raw_type, exc_info=True)
         return False
 
-    return False
+
+# ── Presentation Theme Color Palettes ────────────────────────
+THEME_PALETTES = {
+    "executive": {
+        "tag": "EXECUTIVE BRIEFING // STRATEGY & IMPACT",
+        "primary": (15, 23, 42),       # #0F172A Deep Navy
+        "secondary": (30, 41, 59),     # #1E293B Slate
+        "accent": (217, 119, 6),       # #D97706 Warm Amber/Gold
+        "highlight": (2, 132, 199),    # #0284C7 Blue
+        "bg_card": (248, 250, 252),    # #F8FAFC
+        "text_dark": (15, 23, 42),
+        "text_muted": (100, 116, 139),
+        "card_border": (226, 232, 240),
+    },
+    "analytical": {
+        "tag": "ANALYTICAL DEEP-DIVE // EMPIRICAL INTELLIGENCE",
+        "primary": (8, 47, 73),        # #082F49 Deep Cobalt
+        "secondary": (15, 23, 42),     # #0F172A
+        "accent": (6, 182, 212),       # #06B6D4 Cyan
+        "highlight": (13, 148, 136),   # #0D9488 Teal
+        "bg_card": (240, 253, 244),    # #F0FDF4 Soft mint
+        "text_dark": (15, 23, 42),
+        "text_muted": (71, 85, 105),
+        "card_border": (203, 213, 225),
+    },
+    "research": {
+        "tag": "TECHNICAL RESEARCH // DATA AUDIT",
+        "primary": (24, 24, 27),       # #18181B Obsidian
+        "secondary": (39, 39, 42),     # #27272A
+        "accent": (5, 150, 105),       # #059669 Precision Emerald
+        "highlight": (37, 99, 235),    # #2563EB Blueprint Blue
+        "bg_card": (250, 250, 250),    # #FAFAFA
+        "text_dark": (24, 24, 27),
+        "text_muted": (113, 113, 122),
+        "card_border": (228, 228, 231),
+    },
+    "pitch": {
+        "tag": "INVESTOR PITCH // TRACTION & GROWTH",
+        "primary": (9, 9, 11),         # #09090B Pitch Black
+        "secondary": (30, 27, 75),     # #1E1B4B Deep Violet
+        "accent": (124, 58, 237),      # #7C3AED Electric Violet
+        "highlight": (244, 63, 94),    # #F43F5E Rose
+        "bg_card": (251, 251, 254),    # #FBFBFE
+        "text_dark": (9, 9, 11),
+        "text_muted": (107, 114, 128),
+        "card_border": (229, 231, 235),
+    },
+}
 
 
 def _generate_auto_pptx(
@@ -1528,24 +1569,27 @@ def _generate_auto_pptx(
     df,
     dataset_name: str,
     title: str,
+    template: str,
     workflow_id: str,
     current_user: dict,
     org_id: int,
     request: Request,
     db: DbSession,
 ):
-    """Render a PPTX from the canonical PresentationSpecification.
+    """Render a dynamic 16:9 widescreen PPTX with native styling and narrative architecture.
 
-    Uses the SAME chart specifications as the dashboard â€” no independent
-    chart recreation.  Each chart slide uses the placement computed by
-    the PresentationLayoutEngine (validated: no overlaps, no cropping).
+    Dynamically styles colors, cards, headers, footers, charts, and callouts
+    based on the chosen Presentation Theme & Narrative Style.
     """
     import io
+    from datetime import datetime
 
     from fastapi.responses import StreamingResponse
 
     try:
         from pptx import Presentation as PptxPresentation
+        from pptx.dml.color import RGBColor
+        from pptx.enum.shapes import MSO_SHAPE
         from pptx.util import Inches, Pt
     except ImportError:
         raise HTTPException(
@@ -1553,115 +1597,325 @@ def _generate_auto_pptx(
             detail="Presentation generation is not available (python-pptx not installed).",
         ) from None
 
-    # Build a lookup of chart specs by ID from the dashboard
+    tpl_key = (template or "executive").lower().strip()
+    theme_cfg = THEME_PALETTES.get(tpl_key, THEME_PALETTES["executive"])
+
+    c_primary = RGBColor(*theme_cfg["primary"])
+    c_accent = RGBColor(*theme_cfg["accent"])
+    c_highlight = RGBColor(*theme_cfg["highlight"])
+    c_bg_card = RGBColor(*theme_cfg["bg_card"])
+    c_text_dark = RGBColor(*theme_cfg["text_dark"])
+    c_text_muted = RGBColor(*theme_cfg["text_muted"])
+    c_card_border = RGBColor(*theme_cfg["card_border"])
+    c_white = RGBColor(255, 255, 255)
+
     charts_by_id = {c["id"]: c for c in auto_dashboard.get("charts", [])}
+    slides_data = auto_presentation.get("slides", [])
+    total_slides = len(slides_data)
 
     prs = PptxPresentation()
     prs.slide_width = Inches(13.333)
     prs.slide_height = Inches(7.5)
+    blank_layout = prs.slide_layouts[6]
 
     charts_rendered = 0
+    today_str = datetime.now().strftime("%B %d, %Y")
 
-    for slide_data in auto_presentation.get("slides", []):
+    for idx, slide_data in enumerate(slides_data, start=1):
         layout_name = slide_data.get("layout", "bullets")
+        slide = prs.slides.add_slide(blank_layout)
 
-        layout = prs.slide_layouts[0] if layout_name == "title" else prs.slide_layouts[1]
+        slide_title = slide_data.get("title", "")
+        slide_subtitle = slide_data.get("subtitle", "")
+        category_tag = slide_data.get("category_tag") or f"0{idx} // {layout_name.upper()}"
 
-        slide = prs.slides.add_slide(layout)
+        # ── Slide 1 / Title Slide ──────────────────────────────────
+        if layout_name == "title":
+            # Solid primary background
+            bg = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, 0, prs.slide_width, prs.slide_height)
+            bg.fill.solid()
+            bg.fill.fore_color.rgb = c_primary
+            bg.line.fill.background()
 
-        # Set title
-        if slide.shapes.title:
-            slide.shapes.title.text = slide_data.get("title", "")
+            # Left accent vertical stripe
+            stripe = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(0.8), Inches(1.6), Inches(0.18), Inches(4.2))
+            stripe.fill.solid()
+            stripe.fill.fore_color.rgb = c_accent
+            stripe.line.fill.background()
 
-        if layout_name == "kpi":
-            # Render KPI cards as text boxes
-            for card in slide_data.get("kpi_cards", []):
-                placement = card.get("placement", {})
-                x = placement.get("x", 1)
-                y = placement.get("y", 2)
-                w = placement.get("width", 3)
-                h = placement.get("height", 1.5)
+            # Category tag pill
+            tb_tag = slide.shapes.add_textbox(Inches(1.2), Inches(1.6), Inches(11.0), Inches(0.4))
+            p_tag = tb_tag.text_frame.paragraphs[0]
+            p_tag.text = theme_cfg["tag"]
+            p_tag.font.size = Pt(11)
+            p_tag.font.bold = True
+            p_tag.font.color.rgb = c_accent
 
-                txBox = slide.shapes.add_textbox(Inches(x), Inches(y), Inches(w), Inches(h))
-                tf = txBox.text_frame
-                tf.word_wrap = True
-                p = tf.paragraphs[0]
-                p.text = card.get("label", "")
-                p.font.size = Pt(12)
-                p.font.bold = False
-                p2 = tf.add_paragraph()
-                val_str = card.get("value", "")
-                p2.text = str(val_str)
-                p2.font.size = Pt(24)
-                p2.font.bold = True
+            # Main Title & Subtitle
+            tb_main = slide.shapes.add_textbox(Inches(1.2), Inches(2.1), Inches(11.2), Inches(2.5))
+            tf_main = tb_main.text_frame
+            tf_main.word_wrap = True
+            p_main = tf_main.paragraphs[0]
+            p_main.text = slide_title or title
+            p_main.font.size = Pt(36)
+            p_main.font.bold = True
+            p_main.font.color.rgb = c_white
 
-            # Speaker notes
-            notes = slide_data.get("speaker_notes", "")
-            if notes:
-                slide.notes_slide.notes_text_frame.text = notes
+            p_sub = tf_main.add_paragraph()
+            p_sub.text = slide_subtitle or f"Synthesized from {dataset_name} • 16:9 Widescreen"
+            p_sub.font.size = Pt(18)
+            p_sub.font.color.rgb = c_accent
 
-        elif layout_name == "chart":
-            # Render chart using the canonical chart spec
-            chart_id = slide_data.get("chart_id")
-            chart_spec = charts_by_id.get(chart_id, {})
+            # Bottom metadata
+            tb_meta = slide.shapes.add_textbox(Inches(1.2), Inches(5.8), Inches(11.0), Inches(0.4))
+            p_meta = tb_meta.text_frame.paragraphs[0]
+            p_meta.text = f"Dataset: {dataset_name}   |   Date: {today_str}   |   DataFlow Intelligent Analytics"
+            p_meta.font.size = Pt(10)
+            p_meta.font.color.rgb = RGBColor(148, 163, 184)
 
-            # Convert canonical spec to legacy format for _add_chart_to_slide
-            legacy_spec = {
-                "type": chart_spec.get("chart_type", ""),
-                "title": chart_spec.get("title", ""),
-                "x_axis": chart_spec.get("x_axis"),
-                "y_axis": chart_spec.get("y_axis"),
-                "column": chart_spec.get("x_axis"),  # for pie charts
-                "reasoning": chart_spec.get("reason", ""),
-            }
+        # ── Closing Slide ──────────────────────────────────────────
+        elif layout_name == "closing":
+            bg = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, 0, prs.slide_width, prs.slide_height)
+            bg.fill.solid()
+            bg.fill.fore_color.rgb = c_primary
+            bg.line.fill.background()
 
-            placement = slide_data.get("chart_placement", {})
-            left = placement.get("x", 1)
-            top = placement.get("y", 2)
-            width = placement.get("width", 11)
-            height = placement.get("height", 5)
+            stripe = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(0.8), Inches(2.0), Inches(0.18), Inches(3.5))
+            stripe.fill.solid()
+            stripe.fill.fore_color.rgb = c_accent
+            stripe.line.fill.background()
 
-            if df is not None and chart_spec:
-                added = _add_chart_to_slide(
-                    slide,
-                    legacy_spec,
-                    df,
-                    left=left,
-                    top=top,
-                    width=width,
-                    height=height,
+            tb = slide.shapes.add_textbox(Inches(1.2), Inches(2.0), Inches(11.0), Inches(3.0))
+            tf = tb.text_frame
+            tf.word_wrap = True
+            p1 = tf.paragraphs[0]
+            p1.text = slide_title or "Thank You"
+            p1.font.size = Pt(36)
+            p1.font.bold = True
+            p1.font.color.rgb = c_white
+
+            p2 = tf.add_paragraph()
+            p2.text = slide_subtitle or "Questions, Discussion & Next Steps"
+            p2.font.size = Pt(18)
+            p2.font.color.rgb = c_accent
+
+            p3 = tf.add_paragraph()
+            p3.text = f"\nPrepared via DataFlow Analytics Platform • {today_str}"
+            p3.font.size = Pt(11)
+            p3.font.color.rgb = RGBColor(148, 163, 184)
+
+        # ── Standard Content Slide Layout ──────────────────────────
+        else:
+            # Clean Header Banner
+            tb_hdr = slide.shapes.add_textbox(Inches(0.8), Inches(0.35), Inches(11.7), Inches(0.95))
+            tf_hdr = tb_hdr.text_frame
+            tf_hdr.word_wrap = True
+            tf_hdr.margin_left = tf_hdr.margin_top = tf_hdr.margin_right = tf_hdr.margin_bottom = 0
+
+            # Category pill tag
+            p_cat = tf_hdr.paragraphs[0]
+            p_cat.text = category_tag
+            p_cat.font.size = Pt(9)
+            p_cat.font.bold = True
+            p_cat.font.color.rgb = c_accent
+
+            # Slide Title
+            p_t = tf_hdr.add_paragraph()
+            p_t.text = slide_title
+            p_t.font.size = Pt(21)
+            p_t.font.bold = True
+            p_t.font.color.rgb = c_primary
+
+            if slide_subtitle:
+                p_s = tf_hdr.add_paragraph()
+                p_s.text = slide_subtitle
+                p_s.font.size = Pt(10)
+                p_s.font.color.rgb = c_text_muted
+
+            # Top accent divider line
+            div_line = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(0.8), Inches(1.35), Inches(11.7), Inches(0.015))
+            div_line.fill.solid()
+            div_line.fill.fore_color.rgb = c_card_border
+            div_line.line.fill.background()
+
+            # Footer bar
+            tb_foot = slide.shapes.add_textbox(Inches(0.8), Inches(7.0), Inches(11.7), Inches(0.3))
+            tf_foot = tb_foot.text_frame
+            tf_foot.margin_left = tf_foot.margin_top = tf_foot.margin_right = tf_foot.margin_bottom = 0
+            p_foot = tf_foot.paragraphs[0]
+            p_foot.text = f"{dataset_name}  •  {theme_cfg['tag']}"
+            p_foot.font.size = Pt(8.5)
+            p_foot.font.color.rgb = c_text_muted
+
+            # Slide Number on right
+            tb_num = slide.shapes.add_textbox(Inches(11.0), Inches(7.0), Inches(1.5), Inches(0.3))
+            p_num = tb_num.text_frame.paragraphs[0]
+            p_num.text = f"Slide {idx} of {total_slides}"
+            p_num.font.size = Pt(8.5)
+            p_num.font.bold = True
+            p_num.font.color.rgb = c_text_muted
+
+            # Content body dispatch
+            if layout_name == "kpi":
+                cards = slide_data.get("kpi_cards", [])
+                n_cards = min(len(cards), 6)
+                per_row = min(3, n_cards)
+                card_w = 3.65
+                card_h = 2.0
+                gap_x = 0.38
+                gap_y = 0.4
+                total_w = per_row * card_w + (per_row - 1) * gap_x
+                start_x = (13.333 - total_w) / 2
+                start_y = 1.7
+
+                for ci, card in enumerate(cards[:n_cards]):
+                    r = ci // per_row
+                    c = ci % per_row
+                    cx = start_x + c * (card_w + gap_x)
+                    cy = start_y + r * (card_h + gap_y)
+
+                    # Card shape
+                    card_box = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(cx), Inches(cy), Inches(card_w), Inches(card_h))
+                    card_box.fill.solid()
+                    card_box.fill.fore_color.rgb = c_bg_card
+                    card_box.line.color.rgb = c_card_border
+                    card_box.line.width = Pt(1)
+
+                    # Card content
+                    tb_c = slide.shapes.add_textbox(Inches(cx + 0.25), Inches(cy + 0.2), Inches(card_w - 0.5), Inches(card_h - 0.4))
+                    tf_c = tb_c.text_frame
+                    tf_c.word_wrap = True
+
+                    p_lbl = tf_c.paragraphs[0]
+                    p_lbl.text = card.get("label", "Metric").upper()
+                    p_lbl.font.size = Pt(9.5)
+                    p_lbl.font.bold = True
+                    p_lbl.font.color.rgb = c_text_muted
+
+                    p_val = tf_c.add_paragraph()
+                    p_val.text = str(card.get("value", ""))
+                    p_val.font.size = Pt(28)
+                    p_val.font.bold = True
+                    p_val.font.color.rgb = c_primary
+
+                    if card.get("comparison"):
+                        p_cmp = tf_c.add_paragraph()
+                        p_cmp.text = f"▲ {card['comparison']}"
+                        p_cmp.font.size = Pt(9.5)
+                        p_cmp.font.bold = True
+                        p_cmp.font.color.rgb = c_accent
+
+            elif layout_name == "chart":
+                chart_id = slide_data.get("chart_id")
+                chart_spec = charts_by_id.get(chart_id, {})
+
+                chart_rendered = _add_chart_to_slide(
+                    slide=slide,
+                    chart_spec=chart_spec,
+                    df=df,
+                    left=0.8,
+                    top=1.55,
+                    width=11.7,
+                    height=4.6,
                 )
-                if added:
+                if chart_rendered:
                     charts_rendered += 1
                 else:
-                    # Fallback: show caption text
-                    caption = slide_data.get("caption", "")
-                    if caption and len(slide.placeholders) > 1:
-                        slide.placeholders[1].text_frame.text = caption
-            elif slide_data.get("caption") and len(slide.placeholders) > 1:
-                slide.placeholders[1].text_frame.text = slide_data["caption"]
+                    # Fallback text card if chart rendering fails
+                    fallback_box = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.8), Inches(1.6), Inches(11.7), Inches(4.5))
+                    fallback_box.fill.solid()
+                    fallback_box.fill.fore_color.rgb = c_bg_card
+                    fallback_box.line.color.rgb = c_card_border
 
-            # Speaker notes
-            notes = slide_data.get("speaker_notes", "")
-            if notes:
-                slide.notes_slide.notes_text_frame.text = notes
+                    tb_fb = slide.shapes.add_textbox(Inches(1.2), Inches(2.2), Inches(10.9), Inches(3.0))
+                    tf_fb = tb_fb.text_frame
+                    p_fb = tf_fb.paragraphs[0]
+                    p_fb.text = f"Visual Specification: {chart_spec.get('title', 'Chart')}"
+                    p_fb.font.size = Pt(16)
+                    p_fb.font.bold = True
+                    p_fb.font.color.rgb = c_primary
 
-        elif layout_name == "bullets":
-            content = slide_data.get("content", "")
-            if content and len(slide.placeholders) > 1:
-                body = slide.placeholders[1]
-                tf = body.text_frame
-                tf.text = content
-            notes = slide_data.get("speaker_notes", "")
-            if notes:
-                slide.notes_slide.notes_text_frame.text = notes
+                    p_fbd = tf_fb.add_paragraph()
+                    p_fbd.text = chart_spec.get("description", "Empirical chart synthesis completed.")
+                    p_fbd.font.size = Pt(12)
+                    p_fbd.font.color.rgb = c_text_dark
 
-    # Save to BytesIO and return as download
+                # Bottom insight callout banner
+                reason_text = chart_spec.get("reason") or slide_data.get("caption") or ""
+                if reason_text:
+                    callout = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.8), Inches(6.25), Inches(11.7), Inches(0.62))
+                    callout.fill.solid()
+                    callout.fill.fore_color.rgb = c_bg_card
+                    callout.line.color.rgb = c_accent
+                    callout.line.width = Pt(0.75)
+
+                    tb_co = slide.shapes.add_textbox(Inches(1.0), Inches(6.3), Inches(11.3), Inches(0.5))
+                    p_co = tb_co.text_frame.paragraphs[0]
+                    p_co.text = f"💡 Analytical Insight: {reason_text}"
+                    p_co.font.size = Pt(10)
+                    p_co.font.color.rgb = c_text_dark
+
+            elif layout_name == "bullets":
+                # Render clean, spaced card rows
+                items = slide_data.get("bullet_items") or [l for l in slide_data.get("content", "").split("\n\n") if l.strip()]
+                if not items:
+                    items = [slide_data.get("content", "")]
+
+                max_items = min(len(items), 5)
+                row_h = 0.95
+                row_gap = 0.18
+                start_y = 1.65
+
+                for bi, item in enumerate(items[:max_items]):
+                    iy = start_y + bi * (row_h + row_gap)
+
+                    row_box = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.8), Inches(iy), Inches(11.7), Inches(row_h))
+                    row_box.fill.solid()
+                    row_box.fill.fore_color.rgb = c_bg_card
+                    row_box.line.color.rgb = c_card_border
+                    row_box.line.width = Pt(1)
+
+                    # Accent pill on left of card
+                    pill = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(0.8), Inches(iy), Inches(0.12), Inches(row_h))
+                    pill.fill.solid()
+                    pill.fill.fore_color.rgb = c_accent if bi % 2 == 0 else c_highlight
+                    pill.line.fill.background()
+
+                    tb_item = slide.shapes.add_textbox(Inches(1.1), Inches(iy + 0.1), Inches(11.2), Inches(row_h - 0.2))
+                    tf_item = tb_item.text_frame
+                    tf_item.word_wrap = True
+                    p_it = tf_item.paragraphs[0]
+                    clean_text = item.lstrip("• ").lstrip("- ")
+
+                    # Check if there is a colon separator
+                    if ":" in clean_text:
+                        head, body = clean_text.split(":", 1)
+                        p_it.text = f"{head}: "
+                        p_it.font.bold = True
+                        p_it.font.size = Pt(11.5)
+                        p_it.font.color.rgb = c_primary
+
+                        run = p_it.add_run()
+                        run.text = body.strip()
+                        run.font.bold = False
+                        run.font.size = Pt(11)
+                        run.font.color.rgb = c_text_dark
+                    else:
+                        p_it.text = clean_text
+                        p_it.font.size = Pt(11.5)
+                        p_it.font.color.rgb = c_text_dark
+
+        # Speaker notes for every slide
+        notes_text = slide_data.get("speaker_notes", "")
+        if notes_text:
+            slide.notes_slide.notes_text_frame.text = notes_text
+
+    # Save to buffer
     output = io.BytesIO()
     prs.save(output)
     output.seek(0)
 
-    # Record in audit
+    # Record in audit log
     log_audit_event(
         db=db,
         action="dataset_workflow.presentation.generate",
@@ -1670,9 +1924,9 @@ def _generate_auto_pptx(
         resource_type="workflow",
         resource_id=workflow_id,
         new_values={
-            "template": auto_presentation.get("template", "executive"),
+            "template": tpl_key,
             "title": title,
-            "slides": len(prs.slides),
+            "slides": total_slides,
             "charts_rendered": charts_rendered,
             "auto_engine": True,
         },
@@ -1685,7 +1939,7 @@ def _generate_auto_pptx(
         output,
         media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
         headers={
-            "Content-Disposition": f'attachment; filename="{safe_filename}_presentation.pptx"',
+            "Content-Disposition": f'attachment; filename="{safe_filename}_{tpl_key}_presentation.pptx"',
         },
     )
 
@@ -1698,14 +1952,7 @@ async def generate_presentation(
     current_user: dict = Depends(get_current_user),
     db: DbSession = Depends(get_db),
 ):
-    """Generate a PPTX presentation from the workflow results.
-
-    Uses the canonical chart specifications from the AutoEngineOrchestrator
-    (when available) to ensure the PPTX uses the SAME charts as the dashboard.
-    Falls back to legacy chart specs if the auto engine didn't run.
-
-    Returns the file as a downloadable response.
-    """
+    """Generate a dynamic PPTX presentation tailored to the selected theme & narrative style."""
     from fastapi.responses import StreamingResponse
 
     try:
@@ -1720,13 +1967,12 @@ async def generate_presentation(
     state_dict = _get_workflow_state_dict(workflow_id, current_user, db)
     org_id = get_current_organization_id(current_user, db)
 
-    # Try to get the in-memory DataFrame for chart rendering
+    # Try to get in-memory DataFrame
     df = None
     in_memory_state = _orchestrator.get_state(workflow_id)
     if in_memory_state is not None:
         df = in_memory_state.context.get("df")
 
-    # Gather data from workflow stages
     profile = _stage_result(state_dict, WorkflowStage.PROFILED) or {}
     quality = _stage_result(state_dict, WorkflowStage.QUALITY_CHECKED) or {}
     industry = _stage_result(state_dict, WorkflowStage.INDUSTRY_IDENTIFIED) or {}
@@ -1734,20 +1980,47 @@ async def generate_presentation(
     dashboard = _stage_result(state_dict, WorkflowStage.DASHBOARD_READY) or {}
 
     dataset_name = state_dict.get("dataset_name", "Dataset")
-    title = payload.title or f"{dataset_name} — Analysis Presentation"
+    template = payload.template or "executive"
+    title = payload.title or f"{dataset_name} — Strategic Analysis"
 
-    # â”€â”€ Use canonical auto dashboard/presentation if available â”€â”€
     auto_dashboard = dashboard.get("auto_dashboard") if isinstance(dashboard, dict) else None
-    auto_presentation = dashboard.get("auto_presentation") if isinstance(dashboard, dict) else None
 
-    if auto_presentation and auto_dashboard:
-        # Use the canonical presentation specification
+    if auto_dashboard:
+        from services.auto.chart_specification import (
+            ChartSpecification,
+            DashboardSpecification,
+            InsightSpecification,
+            KPISpecification,
+        )
+        from services.auto.presentation_layout_engine import PresentationLayoutEngine
+
+        dashboard_obj = DashboardSpecification(
+            title=title,
+            subtitle=auto_dashboard.get("subtitle", ""),
+            industry=auto_dashboard.get("industry", "general"),
+            dataset_name=dataset_name,
+            kpis=[KPISpecification(**k) for k in auto_dashboard.get("kpis", [])] if auto_dashboard.get("kpis") else [],
+            charts=[ChartSpecification.from_dict(c) for c in auto_dashboard.get("charts", [])] if auto_dashboard.get("charts") else [],
+            insights=[InsightSpecification(**i) for i in auto_dashboard.get("insights", [])] if auto_dashboard.get("insights") else [],
+            recommendations=auto_dashboard.get("recommendations", []),
+        )
+
+        layout_engine = PresentationLayoutEngine()
+        pres_spec = layout_engine.generate_presentation(
+            dashboard=dashboard_obj,
+            template=template,
+            title=title,
+            profile=profile,
+            quality=quality,
+        )
+
         return _generate_auto_pptx(
-            auto_presentation=auto_presentation,
+            auto_presentation=pres_spec.to_dict(),
             auto_dashboard=auto_dashboard,
             df=df,
             dataset_name=dataset_name,
             title=title,
+            template=template,
             workflow_id=workflow_id,
             current_user=current_user,
             org_id=org_id,
@@ -1755,9 +2028,8 @@ async def generate_presentation(
             db=db,
         )
 
-    # â”€â”€ Fallback: Legacy presentation generation â”€â”€
+    # ── Fallback: Legacy presentation generation ──
     from studios.presentation_service import PresentationStudioService
-
     # Get recommended charts from the dashboard stage
     recommended_charts = dashboard.get("recommended_charts", [])
     # Filter to chart types we can render (bar, line, pie, scatter)
@@ -2016,12 +2288,47 @@ async def get_auto_dashboard(
 @router.get("/{workflow_id}/auto-presentation")
 async def get_auto_presentation_spec(
     workflow_id: str,
+    template: str = "executive",
     current_user: dict = Depends(get_current_user),
     db: DbSession = Depends(get_db),
 ):
     """Get the auto-generated presentation specification (slide plan, chart placements, validation)."""
     state_dict = _get_workflow_state_dict(workflow_id, current_user, db)
     dashboard = _stage_result(state_dict, WorkflowStage.DASHBOARD_READY) or {}
+    auto_dashboard = dashboard.get("auto_dashboard") if isinstance(dashboard, dict) else None
+
+    if auto_dashboard:
+        from services.auto.chart_specification import (
+            ChartSpecification,
+            DashboardSpecification,
+            InsightSpecification,
+            KPISpecification,
+        )
+        from services.auto.presentation_layout_engine import PresentationLayoutEngine
+
+        profile = _stage_result(state_dict, WorkflowStage.PROFILED) or {}
+        quality = _stage_result(state_dict, WorkflowStage.QUALITY_CHECKED) or {}
+        dataset_name = state_dict.get("dataset_name", "Dataset")
+
+        dashboard_obj = DashboardSpecification(
+            title=auto_dashboard.get("title", f"{dataset_name} — Strategic Analysis"),
+            subtitle=auto_dashboard.get("subtitle", ""),
+            industry=auto_dashboard.get("industry", "general"),
+            dataset_name=dataset_name,
+            kpis=[KPISpecification(**k) for k in auto_dashboard.get("kpis", [])] if auto_dashboard.get("kpis") else [],
+            charts=[ChartSpecification.from_dict(c) for c in auto_dashboard.get("charts", [])] if auto_dashboard.get("charts") else [],
+            insights=[InsightSpecification(**i) for i in auto_dashboard.get("insights", [])] if auto_dashboard.get("insights") else [],
+            recommendations=auto_dashboard.get("recommendations", []),
+        )
+
+        layout_engine = PresentationLayoutEngine()
+        pres_spec = layout_engine.generate_presentation(
+            dashboard=dashboard_obj,
+            template=template,
+            profile=profile,
+            quality=quality,
+        )
+        return pres_spec.to_dict()
 
     auto_presentation = dashboard.get("auto_presentation") if isinstance(dashboard, dict) else None
     if not auto_presentation:

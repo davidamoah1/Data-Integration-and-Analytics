@@ -79,6 +79,8 @@ export default function DataToDecisionPage() {
   // Present step
   const [isGeneratingPresentation, setIsGeneratingPresentation] = useState(false);
   const [presentationReady, setPresentationReady] = useState(false);
+  const [selectedPresentationTemplate, setSelectedPresentationTemplate] = useState('executive');
+  const [presentationTitle, setPresentationTitle] = useState('');
 
   // === Upload Step ===
   const handleFileSelected = useCallback((f: File) => {
@@ -325,6 +327,8 @@ export default function DataToDecisionPage() {
   const handleGeneratePresentation = useCallback(async (template: string, title: string) => {
     if (!workflowState?.workflow_id) return;
     setIsGeneratingPresentation(true);
+    setSelectedPresentationTemplate(template);
+    setPresentationTitle(title);
     try {
       await workflowService.generatePresentation(workflowState.workflow_id, template, title, true);
       setPresentationReady(true);
@@ -340,10 +344,11 @@ export default function DataToDecisionPage() {
     if (!workflowState?.workflow_id) return;
     setIsGeneratingPresentation(true);
     try {
+      const fallbackTitle = file?.name ? `${file.name} — Strategic Analysis` : 'Dataset Analysis';
       await workflowService.generatePresentation(
         workflowState.workflow_id,
-        'executive',
-        file?.name || 'Dataset Analysis',
+        selectedPresentationTemplate,
+        presentationTitle || fallbackTitle,
         true,
       );
       toast.success('Downloaded PowerPoint presentation');
@@ -352,7 +357,7 @@ export default function DataToDecisionPage() {
     } finally {
       setIsGeneratingPresentation(false);
     }
-  }, [workflowState, file]);
+  }, [workflowState, selectedPresentationTemplate, presentationTitle, file]);
 
   const handleStartOver = useCallback(() => {
     setCurrentStep('upload');
@@ -492,6 +497,8 @@ export default function DataToDecisionPage() {
       {currentStep === 'present' && (
         <PresentStep
           datasetName={file?.name ?? 'Dataset'}
+          workflowId={workflowState?.workflow_id}
+          industry={industry?.industry ?? 'general'}
           onGeneratePresentation={handleGeneratePresentation}
           onDownloadPresentation={handleDownloadPresentationAgain}
           onStartOver={handleStartOver}

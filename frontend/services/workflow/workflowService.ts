@@ -348,8 +348,8 @@ export const workflowService = {
     return await apiClient.get<AutoDashboardSpec>(`${BASE}/${workflowId}/auto-dashboard`);
   },
 
-  async getAutoPresentation(workflowId: string): Promise<AutoPresentationSpec> {
-    return await apiClient.get<AutoPresentationSpec>(`${BASE}/${workflowId}/auto-presentation`);
+  async getAutoPresentation(workflowId: string, template: string = 'executive'): Promise<AutoPresentationSpec> {
+    return await apiClient.get<AutoPresentationSpec>(`${BASE}/${workflowId}/auto-presentation?template=${encodeURIComponent(template)}`);
   },
 
   async explainChart(workflowId: string, chartId: string): Promise<ChartExplanation> {
