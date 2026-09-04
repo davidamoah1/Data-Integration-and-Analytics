@@ -1,4 +1,4 @@
-﻿"""FastAPI routes for the Dataset Intelligence Workflow.
+"""FastAPI routes for the Dataset Intelligence Workflow.
 
 Endpoints:
   POST /dataset-workflow/run          â€” Start a full workflow on an uploaded file
@@ -34,7 +34,10 @@ from etl.file_security import FileValidator
 from governance import classify_dataset
 from services.dataset_workflow import (
     DatasetWorkflowOrchestrator,
+    StageResult,
+    StageStatus,
     WorkflowStage,
+    WorkflowState,
 )
 from services.dataset_workflow_models import DatasetWorkflowRun
 from shared.database import get_db
@@ -140,6 +143,26 @@ class UndoTransformationRequest(BaseModel):
     """Request to undo a previously applied transformation."""
 
     transformation_id: str
+
+
+class ApplyAllTransformationsRequest(BaseModel):
+    """Request to batch apply suggested cleaning fixes."""
+
+    findings: list[dict] | None = None
+
+
+class WorkflowReportRequest(BaseModel):
+    """Request to generate a publication-grade PDF report from workflow results."""
+
+    title: str = "Dataset Analysis Report"
+    organization: str = ""
+    author: str = ""
+    include_executive_summary: bool = True
+    include_data_quality: bool = True
+    include_methodology: bool = True
+    include_visualizations: bool = True
+    include_recommendations: bool = True
+    include_limitations: bool = True
 
 
 class AnalyzeRequest(BaseModel):
@@ -314,23 +337,34 @@ def _rehydrate_workflow_df(workflow_id: str, db: DbSession, org_id: int | None =
         if df.empty:
             return None
 
-        # Re-run the orchestrator to rebuild full in-memory state
-        state = _orchestrator.start(
-            df,
+        # Rebuild full in-memory state directly from DB snapshot
+        row = db.execute(
+            select(DatasetWorkflowRun).where(DatasetWorkflowRun.workflow_id == workflow_id)
+        ).scalar_one_or_none()
+
+        state = WorkflowState(
+            workflow_id=workflow_id,
             dataset_name=filename,
-            admin_confirmed=admin_confirmed,
             created_by=created_by,
             organization_id=org_id,
         )
-        logger.info(
-            "Rehydrated workflow state for %s (new workflow_id=%s, original=%s)",
-            workflow_id,
-            state.workflow_id,
-            workflow_id,
-        )
-        # Register under the ORIGINAL workflow_id so callers can find it
-        state.workflow_id = workflow_id
+        state.context["df"] = df
+        state.context["df_history"] = []
+        state.context["admin_confirmed"] = admin_confirmed
+        if row and row.stages:
+            for stage_name, s_data in row.stages.items():
+                try:
+                    st_enum = WorkflowStage(stage_name)
+                    state.stages[st_enum] = StageResult(
+                        stage=st_enum,
+                        status=StageStatus(s_data.get("status", "completed")),
+                        result=s_data.get("result"),
+                        error=s_data.get("error"),
+                    )
+                except Exception:
+                    pass
         _orchestrator._workflows[workflow_id] = state
+        logger.info("Successfully rehydrated workflow state for %s", workflow_id)
         return state
     except Exception as e:
         logger.warning("Failed to rehydrate workflow %s: %s", workflow_id, e)
@@ -733,18 +767,28 @@ async def apply_cleaning_transformation(
     affected_rows = 0
     description = ""
 
+    # Preserve history snapshot for undo
+    if "df_history" not in state.context:
+        state.context["df_history"] = []
+    state.context["df_history"].append({
+        "id": transformation_id,
+        "df": df.copy(),
+    })
+    if len(state.context["df_history"]) > 15:
+        state.context["df_history"].pop(0)
+
     col = payload.column
 
     if payload.action == "fill_missing" and col:
         before_missing = int(df[col].isna().sum())
         if payload.method == "mean" and df[col].dtype in ("int64", "float64"):
-            fill_val = df[col].mean()
+            fill_val = float(df[col].mean())
             df[col] = df[col].fillna(fill_val)
             description = (
                 f"Filled {before_missing} missing values in '{col}' with mean ({fill_val:.2f})"
             )
         elif payload.method == "median" and df[col].dtype in ("int64", "float64"):
-            fill_val = df[col].median()
+            fill_val = float(df[col].median())
             df[col] = df[col].fillna(fill_val)
             description = (
                 f"Filled {before_missing} missing values in '{col}' with median ({fill_val:.2f})"
@@ -755,14 +799,28 @@ async def apply_cleaning_transformation(
             description = (
                 f"Filled {before_missing} missing values in '{col}' with mode ('{mode_val}')"
             )
+        elif payload.method in ("drop_missing", "drop"):
+            before_len = len(df)
+            df.dropna(subset=[col], inplace=True)
+            state.context["df"] = df
+            affected_rows = before_len - len(df)
+            description = f"Dropped {affected_rows} rows with missing values in '{col}'"
         elif payload.value is not None:
             df[col] = df[col].fillna(payload.value)
             description = (
                 f"Filled {before_missing} missing values in '{col}' with '{payload.value}'"
             )
         else:
-            raise HTTPException(status_code=400, detail="fill_missing requires method or value")
-        affected_rows = before_missing
+            if df[col].dtype in ("int64", "float64"):
+                fill_val = float(df[col].median()) if not pd.isna(df[col].median()) else 0.0
+                df[col] = df[col].fillna(fill_val)
+                description = f"Filled {before_missing} missing values in '{col}' with median ({fill_val:.2f})"
+            else:
+                mode_val = df[col].mode().iloc[0] if not df[col].mode().empty else "Unknown"
+                df[col] = df[col].fillna(mode_val)
+                description = f"Filled {before_missing} missing values in '{col}' with mode ('{mode_val}')"
+        if not affected_rows:
+            affected_rows = before_missing
 
     elif payload.action == "remove_duplicates":
         before_count = len(df)
@@ -814,6 +872,34 @@ async def apply_cleaning_transformation(
         affected_rows = int(df[outlier_col].sum())
         description = f"Flagged {affected_rows} outliers in '{col}'"
 
+    elif payload.action == "cap_outliers" and col:
+        q1 = df[col].quantile(0.25)
+        q3 = df[col].quantile(0.75)
+        iqr = q3 - q1
+        lower = q1 - 1.5 * iqr
+        upper = q3 + 1.5 * iqr
+        outliers = (df[col] < lower) | (df[col] > upper)
+        affected_rows = int(outliers.sum())
+        df[col] = df[col].clip(lower=lower, upper=upper)
+        description = f"Capped {affected_rows} outliers in '{col}' within IQR bounds"
+
+    elif payload.action == "drop_column" and col:
+        if col in df.columns:
+            df.drop(columns=[col], inplace=True)
+            state.context["df"] = df
+            affected_rows = len(df)
+            description = f"Dropped column '{col}'"
+
+    elif payload.action == "drop_missing":
+        before_count = len(df)
+        if col and col in df.columns:
+            df.dropna(subset=[col], inplace=True)
+        else:
+            df.dropna(inplace=True)
+        state.context["df"] = df
+        affected_rows = before_count - len(df)
+        description = f"Dropped {affected_rows} rows with missing values"
+
     else:
         raise HTTPException(status_code=400, detail=f"Unsupported action: {payload.action}")
 
@@ -851,6 +937,208 @@ async def apply_cleaning_transformation(
         "success": True,
         "data": transformation_record,
         "message": description,
+    }
+
+
+@router.post("/{workflow_id}/clean/undo")
+async def undo_cleaning_transformation(
+    workflow_id: str,
+    payload: UndoTransformationRequest,
+    request: Request,
+    current_user: dict = Depends(get_current_user),
+    db: DbSession = Depends(get_db),
+):
+    """Undo a previously applied cleaning transformation and restore the DataFrame state."""
+    _get_workflow_state_dict(workflow_id, current_user, db)
+    org_id = get_current_organization_id(current_user, db)
+
+    state = _orchestrator.get_state(workflow_id)
+    if state is None or state.context.get("df") is None:
+        state = _rehydrate_workflow_df(workflow_id, db, org_id=org_id)
+        if state is None or state.context.get("df") is None:
+            raise HTTPException(
+                status_code=409,
+                detail="Workflow data is not available for undo in this process.",
+            )
+
+    history = state.context.get("df_history", [])
+    target_idx = None
+    for idx, item in enumerate(history):
+        if isinstance(item, dict) and item.get("id") == payload.transformation_id:
+            target_idx = idx
+            break
+
+    restored = False
+    if target_idx is not None:
+        snapshot = history.pop(target_idx)
+        if isinstance(snapshot, dict) and "df" in snapshot:
+            state.context["df"] = snapshot["df"]
+            restored = True
+    elif history:
+        snapshot = history.pop()
+        if isinstance(snapshot, dict) and "df" in snapshot:
+            state.context["df"] = snapshot["df"]
+            restored = True
+        elif isinstance(snapshot, pd.DataFrame):
+            state.context["df"] = snapshot
+            restored = True
+
+    if restored:
+        if hasattr(state, "transformations"):
+            for t in state.transformations:
+                if t.get("id") == payload.transformation_id:
+                    t["undone"] = True
+                    break
+
+        log_audit_event(
+            db=db,
+            action="dataset_workflow.clean.undo",
+            user_id=current_user["id"],
+            organization_id=org_id,
+            resource_type="workflow",
+            resource_id=workflow_id,
+            new_values={"transformation_id": payload.transformation_id},
+            request=request,
+        )
+        db.commit()
+
+        return {"success": True, "message": "Transformation successfully undone"}
+
+    raise HTTPException(status_code=404, detail="Transformation snapshot not found for undo")
+
+
+@router.post("/{workflow_id}/clean/apply-all")
+async def apply_all_cleaning_transformations(
+    workflow_id: str,
+    payload: ApplyAllTransformationsRequest,
+    request: Request,
+    current_user: dict = Depends(get_current_user),
+    db: DbSession = Depends(get_db),
+):
+    """Batch apply all suggested fixes for the workflow dataset."""
+    state_dict = _get_workflow_state_dict(workflow_id, current_user, db)
+    org_id = get_current_organization_id(current_user, db)
+
+    state = _orchestrator.get_state(workflow_id)
+    if state is None or state.context.get("df") is None:
+        state = _rehydrate_workflow_df(workflow_id, db, org_id=org_id)
+        if state is None or state.context.get("df") is None:
+            raise HTTPException(
+                status_code=409,
+                detail="Workflow data is not available for cleaning in this process.",
+            )
+
+    # Determine findings to fix
+    findings = payload.findings
+    if not findings:
+        quality = _stage_result(state_dict, WorkflowStage.QUALITY_CHECKED) or {}
+        findings = quality.get("findings", [])
+
+    fixable = [f for f in findings if f.get("suggested_fix")]
+    applied_list = []
+
+    for f in fixable:
+        chk_name = f.get("check_name", "")
+        col = f.get("column")
+        action = "fill_missing"
+        method = "median"
+        if "duplicate" in chk_name.lower():
+            action = "remove_duplicates"
+            col = None
+        elif "outlier" in chk_name.lower():
+            action = "cap_outliers"
+        elif "type" in chk_name.lower() or "numeric" in chk_name.lower():
+            action = "convert_type"
+        elif "date" in chk_name.lower():
+            action = "parse_dates"
+        elif "category" in chk_name.lower():
+            action = "normalize_categories"
+
+        single_req = ApplyTransformationRequest(
+            check_name=chk_name,
+            column=col,
+            action=action,
+            method=method,
+        )
+        try:
+            res = await apply_cleaning_transformation(
+                workflow_id=workflow_id,
+                payload=single_req,
+                request=request,
+                current_user=current_user,
+                db=db,
+            )
+            applied_list.append(res["data"])
+        except Exception as e:
+            logger.warning("Failed to auto-apply fix for %s: %s", chk_name, e)
+
+    return {
+        "success": True,
+        "data": {
+            "applied_count": len(applied_list),
+            "transformations": applied_list,
+        },
+        "message": f"Successfully applied {len(applied_list)} cleaning fixes",
+    }
+
+
+@router.get("/{workflow_id}/clean/preview")
+async def get_cleaning_preview(
+    workflow_id: str,
+    limit: int = 15,
+    current_user: dict = Depends(get_current_user),
+    db: DbSession = Depends(get_db),
+):
+    """Get live preview of the cleaned DataFrame with updated quality and hygiene metrics."""
+    _get_workflow_state_dict(workflow_id, current_user, db)
+    org_id = get_current_organization_id(current_user, db)
+
+    state = _orchestrator.get_state(workflow_id)
+    if state is None or state.context.get("df") is None:
+        state = _rehydrate_workflow_df(workflow_id, db, org_id=org_id)
+        if state is None or state.context.get("df") is None:
+            raise HTTPException(
+                status_code=409,
+                detail="Workflow data is not available for preview in this process.",
+            )
+
+    df = state.context["df"]
+    total_cells = max(1, len(df) * len(df.columns))
+    total_nulls = int(df.isna().sum().sum())
+    total_dups = int(df.duplicated().sum())
+
+    completeness_pct = max(0.0, 100.0 - (total_nulls / total_cells * 100.0))
+    uniqueness_pct = max(0.0, 100.0 - (total_dups / max(1, len(df)) * 100.0))
+    recomputed_score = round(completeness_pct * 0.6 + uniqueness_pct * 0.4, 1)
+
+    # Convert head records safe for JSON (handle NaN, NaT, Inf)
+    head_df = df.head(limit).copy()
+    cleaned_rows = []
+    for _, row in head_df.iterrows():
+        row_dict = {}
+        for col_name, val in row.items():
+            if pd.isna(val):
+                row_dict[str(col_name)] = None
+            elif isinstance(val, (int, float, str, bool)):
+                row_dict[str(col_name)] = val
+            else:
+                row_dict[str(col_name)] = str(val)
+        cleaned_rows.append(row_dict)
+
+    transformations = getattr(state, "transformations", [])
+
+    return {
+        "success": True,
+        "data": {
+            "row_count": len(df),
+            "column_count": len(df.columns),
+            "columns": [str(c) for c in df.columns],
+            "total_missing": total_nulls,
+            "duplicate_rows": total_dups,
+            "quality_score": recomputed_score,
+            "rows": cleaned_rows,
+            "transformations": transformations,
+        },
     }
 
 
@@ -931,6 +1219,60 @@ async def run_analysis(
             except Exception:
                 pass
 
+        answer = None
+        if payload.question:
+            q = payload.question.strip().lower()
+            numeric_cols = df.select_dtypes(include=["number"]).columns.tolist()
+            matched_col = None
+            for col in df.columns:
+                if str(col).lower() in q:
+                    matched_col = col
+                    break
+
+            if "how many" in q or "count" in q or "total rows" in q or "records" in q:
+                answer = f"The dataset contains {len(df):,} total records across {len(df.columns)} columns."
+            elif "average" in q or "mean" in q:
+                if matched_col and matched_col in numeric_cols:
+                    mean_val = float(df[matched_col].mean())
+                    answer = f"The average {matched_col} is {mean_val:,.2f}."
+                elif numeric_cols:
+                    col_summaries = [f"{c}: {float(df[c].mean()):,.2f}" for c in numeric_cols[:3]]
+                    answer = f"Key averages across numeric fields: {', '.join(col_summaries)}."
+                else:
+                    answer = "No numeric columns are available to calculate averages."
+            elif "max" in q or "highest" in q or "maximum" in q or "top" in q:
+                if matched_col and matched_col in numeric_cols:
+                    max_val = float(df[matched_col].max())
+                    answer = f"The highest recorded {matched_col} is {max_val:,.2f}."
+                elif numeric_cols:
+                    c = numeric_cols[0]
+                    answer = f"The maximum {c} is {float(df[c].max()):,.2f}."
+                else:
+                    answer = "No numeric fields available to find maximum values."
+            elif "min" in q or "lowest" in q or "minimum" in q:
+                if matched_col and matched_col in numeric_cols:
+                    min_val = float(df[matched_col].min())
+                    answer = f"The lowest recorded {matched_col} is {min_val:,.2f}."
+                elif numeric_cols:
+                    c = numeric_cols[0]
+                    answer = f"The minimum {c} is {float(df[c].min()):,.2f}."
+                else:
+                    answer = "No numeric fields available to find minimum values."
+            elif "missing" in q or "null" in q or "empty" in q:
+                missing_cnt = int(df.isna().sum().sum())
+                answer = f"There are {missing_cnt:,} empty/null values across the dataset."
+            else:
+                relevant_insight = None
+                for ins in insights:
+                    text = f"{ins.title} {ins.description}".lower()
+                    if any(w in text for w in q.split() if len(w) > 3):
+                        relevant_insight = ins
+                        break
+                if relevant_insight:
+                    answer = f"{relevant_insight.title} — {relevant_insight.description}"
+                else:
+                    answer = f"Analysis of {len(df):,} records confirms {len(numeric_cols)} key numerical variables and {len(df.columns) - len(numeric_cols)} categorical fields. Primary insight: {insights[0].title if insights else 'Data is cleanly structured'}."
+
         return {
             "success": True,
             "data": {
@@ -939,6 +1281,7 @@ async def run_analysis(
                 "total_insights": len(insights),
                 "industry_analytics": industry_analytics.to_dict() if industry_analytics else None,
                 "question": payload.question,
+                "answer": answer,
             },
         }
 
@@ -953,8 +1296,12 @@ async def run_analysis(
         try:
             if analysis_type == "descriptive":
                 result = svc.descriptive(df, columns)
+                if isinstance(result, dict) and "results" in result:
+                    result["descriptive_stats"] = result["results"]
             elif analysis_type == "correlation":
                 result = svc.correlation(df, columns, method="pearson")
+                if isinstance(result, dict) and "matrix" in result:
+                    result["correlation_matrix"] = result["matrix"]
             elif analysis_type == "ttest":
                 if not columns or len(columns) < 1 or not payload.group_column:
                     raise HTTPException(
@@ -1502,6 +1849,69 @@ async def generate_presentation(
         media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
         headers={
             "Content-Disposition": f'attachment; filename="{safe_filename}_presentation.pptx"',
+        },
+    )
+
+
+@router.post("/{workflow_id}/report")
+async def generate_workflow_report(
+    workflow_id: str,
+    payload: WorkflowReportRequest,
+    request: Request,
+    current_user: dict = Depends(get_current_user),
+    db: DbSession = Depends(get_db),
+):
+    """Generate a publication-grade PDF audit and analysis report from workflow results."""
+    from fastapi.responses import StreamingResponse
+    from services.workflow_report_service import generate_workflow_pdf_report
+
+    state_dict = _get_workflow_state_dict(workflow_id, current_user, db)
+    org_id = get_current_organization_id(current_user, db)
+    dataset_name = state_dict.get("dataset_name", "Dataset")
+
+    # Rehydrate in-memory state if available for transformations
+    in_memory = _orchestrator.get_state(workflow_id)
+    if in_memory and hasattr(in_memory, "transformations"):
+        state_dict["transformations"] = in_memory.transformations
+
+    user_name = current_user.get("full_name") or current_user.get("email") or "DataFlow Analyst"
+
+    try:
+        pdf_bytes = generate_workflow_pdf_report(
+            workflow_state_dict=state_dict,
+            report_config=payload.dict(),
+            current_user_name=user_name,
+        )
+    except Exception as e:
+        logger.exception("Failed to generate workflow PDF report: %s", e)
+        raise HTTPException(
+            status_code=500, detail=f"Failed to generate PDF report: {str(e)}"
+        )
+
+    log_audit_event(
+        db=db,
+        action="dataset_workflow.report.generate",
+        user_id=current_user["id"],
+        organization_id=org_id,
+        resource_type="workflow",
+        resource_id=workflow_id,
+        new_values={
+            "report_title": payload.title,
+            "organization": payload.organization,
+            "include_executive_summary": payload.include_executive_summary,
+            "include_data_quality": payload.include_data_quality,
+            "include_visualizations": payload.include_visualizations,
+        },
+        request=request,
+    )
+    db.commit()
+
+    safe_filename = dataset_name.replace(" ", "_").replace("/", "_")
+    return StreamingResponse(
+        io.BytesIO(pdf_bytes),
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="{safe_filename}_Audit_Report.pdf"',
         },
     )
 

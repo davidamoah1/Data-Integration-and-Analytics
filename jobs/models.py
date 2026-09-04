@@ -1,4 +1,4 @@
-﻿"""ORM models for the background job system."""
+"""ORM models for the background job system."""
 
 from __future__ import annotations
 
@@ -12,6 +12,7 @@ from sqlalchemy import (
     String,
     Text,
 )
+from sqlalchemy.dialects.mysql import LONGTEXT
 
 from shared.database import Base, BigInt
 
@@ -50,13 +51,13 @@ class Job(Base):
     progress_message = Column(String(512), nullable=True)
 
     # Payload â€” JSON-serializable input parameters
-    payload = Column(Text, nullable=True)  # JSON string
+    payload = Column(Text().with_variant(LONGTEXT, "mysql"), nullable=True)  # JSON string
 
     # Result â€” JSON-serializable output (on success)
-    result = Column(Text, nullable=True)  # JSON string
+    result = Column(Text().with_variant(LONGTEXT, "mysql"), nullable=True)  # JSON string
 
     # Error â€” error message (on failure)
-    error = Column(Text, nullable=True)
+    error = Column(Text().with_variant(LONGTEXT, "mysql"), nullable=True)
 
     # Retry tracking
     retries = Column(Integer, nullable=False, default=0)

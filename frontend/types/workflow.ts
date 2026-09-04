@@ -300,3 +300,71 @@ export interface ChartExplanation {
   confidence: number;
   source_analysis: string;
 }
+
+export interface CleaningTransformation {
+  id: string;
+  check_name: string;
+  column: string | null;
+  action: string;
+  method?: string | null;
+  applied_at: string;
+  affected_rows: number;
+  undone: boolean;
+  applied_by?: string;
+}
+
+export interface CleanPreviewData {
+  row_count: number;
+  column_count: number;
+  columns: string[];
+  total_missing: number;
+  duplicate_rows: number;
+  quality_score: number;
+  rows: Array<Record<string, unknown>>;
+  transformations: CleaningTransformation[];
+}
+
+export interface DescriptiveStats {
+  count: number;
+  mean?: number;
+  median?: number;
+  mode?: number | null;
+  std?: number;
+  variance?: number;
+  min?: number;
+  max?: number;
+  range?: number;
+  q1?: number;
+  q3?: number;
+  iqr?: number;
+  skewness?: number;
+  kurtosis?: number;
+  unique?: number;
+  top?: string | null;
+  freq?: number;
+  value_counts?: Record<string, number>;
+}
+
+export interface ProAnalysisResult {
+  analysis_type: string;
+  columns?: string[];
+  results?: Record<string, DescriptiveStats>;
+  matrix?: Record<string, Record<string, number>>;
+  statistic?: number;
+  p_value?: number;
+  significant?: boolean;
+  interpretation?: string;
+  [key: string]: unknown;
+}
+
+export interface ReportConfig {
+  title?: string;
+  organization?: string;
+  author?: string;
+  include_executive_summary?: boolean;
+  include_data_quality?: boolean;
+  include_methodology?: boolean;
+  include_visualizations?: boolean;
+  include_recommendations?: boolean;
+  include_limitations?: boolean;
+}

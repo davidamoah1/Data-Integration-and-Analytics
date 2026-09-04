@@ -1,8 +1,9 @@
-import { apiClient, ApiError } from "@/services/api/client";
+import { apiClient, ApiError, getAccessToken } from "@/services/api/client";
 import type {
   WorkflowState,
   DatasetProfile,
   QualityReport,
+  QualityFinding,
   IndustryResult,
   InsightsResult,
   DashboardRecommendation,
@@ -10,6 +11,9 @@ import type {
   AutoDashboardSpec,
   AutoPresentationSpec,
   ChartExplanation,
+  CleanPreviewData,
+  ProAnalysisResult,
+  ReportConfig,
 } from "@/types/workflow";
 
 const BASE = "/api/dataset-workflow";
@@ -259,6 +263,33 @@ export const workflowService = {
     return await apiClient.post(`${BASE}/${workflowId}/clean/apply`, payload);
   },
 
+  async undoCleaningTransformation(
+    workflowId: string,
+    transformationId: string,
+  ): Promise<{ success: boolean; message: string }> {
+    return await apiClient.post(`${BASE}/${workflowId}/clean/undo`, {
+      transformation_id: transformationId,
+    });
+  },
+
+  async applyAllCleaningTransformations(
+    workflowId: string,
+    findings?: QualityFinding[],
+  ): Promise<{ applied_count: number; transformations: Array<Record<string, unknown>> }> {
+    return await apiClient.post(`${BASE}/${workflowId}/clean/apply-all`, {
+      findings: findings || null,
+    });
+  },
+
+  async getCleaningPreview(
+    workflowId: string,
+    limit = 20,
+  ): Promise<CleanPreviewData> {
+    return await apiClient.get<CleanPreviewData>(
+      `${BASE}/${workflowId}/clean/preview?limit=${limit}`,
+    );
+  },
+
   async getCleaningHistory(
     workflowId: string,
   ): Promise<{ transformations: Array<{ id: string; timestamp: string; action: string; description: string; affected_rows: number; undone: boolean }>; total: number; active: number }> {
@@ -275,8 +306,38 @@ export const workflowService = {
       target_column?: string;
       question?: string;
     },
-  ): Promise<unknown> {
+  ): Promise<any> {
     return await apiClient.post(`${BASE}/${workflowId}/analyze`, payload);
+  },
+
+  async runProAnalysis(
+    workflowId: string,
+    analysisType: string,
+    columns?: string[],
+    groupColumn?: string,
+    targetColumn?: string,
+  ): Promise<ProAnalysisResult> {
+    const res = await apiClient.post<{ mode: string; analysis_type: string; result: ProAnalysisResult }>(
+      `${BASE}/${workflowId}/analyze`,
+      {
+        mode: "pro",
+        analysis_type: analysisType,
+        columns,
+        group_column: groupColumn,
+        target_column: targetColumn,
+      },
+    );
+    return res.result;
+  },
+
+  async askDatasetQuestion(
+    workflowId: string,
+    question: string,
+  ): Promise<{ question: string; answer: string; insights: InsightsResult["insights"] }> {
+    return await apiClient.post(`${BASE}/${workflowId}/analyze`, {
+      mode: "easy",
+      question,
+    });
   },
 
   async getUnderstanding(workflowId: string): Promise<Record<string, unknown>> {
@@ -295,11 +356,76 @@ export const workflowService = {
     return await apiClient.get<ChartExplanation>(`${BASE}/${workflowId}/charts/${chartId}/explain`);
   },
 
+  async generateReportPdf(
+    workflowId: string,
+    config?: ReportConfig,
+    autoDownload = true,
+  ): Promise<Blob> {
+    const apiUrl = apiClient.getApiUrl();
+    const token = getAccessToken();
+    const response = await fetch(`${apiUrl}${BASE}/${workflowId}/report`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify(config || {}),
+    });
+
+    if (!response.ok) {
+      const errText = await response.text().catch(() => "");
+      throw new Error(`Report generation failed (${response.status}): ${errText || response.statusText}`);
+    }
+
+    const blob = await response.blob();
+    if (autoDownload && typeof window !== "undefined") {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      const safeTitle = (config?.title || "Dataset_Analysis").replace(/[^a-zA-Z0-9_-]/g, "_");
+      a.download = `${safeTitle}_Audit_Report.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+    return blob;
+  },
+
   async generatePresentation(
     workflowId: string,
     template: string = "executive",
     title?: string,
+    autoDownload = true,
   ): Promise<Blob> {
-    return await apiClient.post(`${BASE}/${workflowId}/presentation`, { template, title });
+    const apiUrl = apiClient.getApiUrl();
+    const token = getAccessToken();
+    const response = await fetch(`${apiUrl}${BASE}/${workflowId}/presentation`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({ template, title }),
+    });
+
+    if (!response.ok) {
+      const errText = await response.text().catch(() => "");
+      throw new Error(`Presentation generation failed (${response.status}): ${errText || response.statusText}`);
+    }
+
+    const blob = await response.blob();
+    if (autoDownload && typeof window !== "undefined") {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      const safeTitle = (title || "Dataset_Presentation").replace(/[^a-zA-Z0-9_-]/g, "_");
+      a.download = `${safeTitle}_Presentation.pptx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+    return blob;
   },
 };
