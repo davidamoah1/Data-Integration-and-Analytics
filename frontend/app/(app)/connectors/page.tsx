@@ -16,11 +16,27 @@ const categoryIcons: Record<string, any> = {
   api: Code,
 };
 
-const categoryColors: Record<string, string> = {
-  database: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  file: "bg-green-500/10 text-green-400 border-green-500/20",
-  cloud_storage: "bg-purple-500/10 text-purple-400 border-purple-500/20",
-  api: "bg-orange-500/10 text-orange-400 border-orange-500/20",
+const categoryColors: Record<string, { bg: string; text: string; border: string }> = {
+  database: {
+    bg: "bg-blue-50 dark:bg-blue-950/50",
+    text: "text-blue-600 dark:text-blue-400",
+    border: "border-blue-200 dark:border-blue-800",
+  },
+  file: {
+    bg: "bg-emerald-50 dark:bg-emerald-950/50",
+    text: "text-emerald-600 dark:text-emerald-400",
+    border: "border-emerald-200 dark:border-emerald-800",
+  },
+  cloud_storage: {
+    bg: "bg-purple-50 dark:bg-purple-950/50",
+    text: "text-purple-600 dark:text-purple-400",
+    border: "border-purple-200 dark:border-purple-800",
+  },
+  api: {
+    bg: "bg-amber-50 dark:bg-amber-950/50",
+    text: "text-amber-600 dark:text-amber-400",
+    border: "border-amber-200 dark:border-amber-800",
+  },
 };
 
 export default function ConnectorsPage() {
@@ -62,154 +78,204 @@ export default function ConnectorsPage() {
   const categories = ["all", ...Array.from(new Set(types.map((t) => t.category)))];
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold flex items-center gap-2">
-              <Zap className="w-6 h-6 text-yellow-400" />
-              Data Connectors
-            </h1>
-            <p className="text-sm text-gray-400 mt-1">
-              Connect to databases, files, cloud storage, and APIs
-            </p>
-          </div>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+            <Zap className="w-6 h-6 text-amber-500 fill-amber-500/20" />
+            Data Connectors
+          </h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+            Connect to databases, files, cloud storage, and APIs
+          </p>
         </div>
+      </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-4 gap-4 mb-6">
-          <StatCard label="Available Types" value={types.length} icon={Database} color="text-blue-400" />
-          <StatCard label="Active Connectors" value={connectors.filter((c) => c.status === "active").length} icon={CheckCircle2} color="text-green-400" />
-          <StatCard label="Africa-First" value={types.filter((t) => t.is_africa_first).length} icon={Wallet} color="text-orange-400" />
-          <StatCard label="Total Configured" value={connectors.length} icon={Settings} color="text-purple-400" />
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <StatCard
+          label="Available Types"
+          value={types.length}
+          icon={Database}
+          color="text-blue-600 dark:text-blue-400"
+          bg="bg-blue-50 dark:bg-blue-950/50"
+        />
+        <StatCard
+          label="Active Connectors"
+          value={connectors.filter((c) => c.status === "active").length}
+          icon={CheckCircle2}
+          color="text-emerald-600 dark:text-emerald-400"
+          bg="bg-emerald-50 dark:bg-emerald-950/50"
+        />
+        <StatCard
+          label="Africa-First"
+          value={types.filter((t) => t.is_africa_first).length}
+          icon={Wallet}
+          color="text-amber-600 dark:text-amber-400"
+          bg="bg-amber-50 dark:bg-amber-950/50"
+        />
+        <StatCard
+          label="Total Configured"
+          value={connectors.length}
+          icon={Settings}
+          color="text-indigo-600 dark:text-indigo-400"
+          bg="bg-indigo-50 dark:bg-indigo-950/50"
+        />
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search connectors..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 shadow-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:bg-slate-900 dark:border-slate-800 dark:text-white"
+          />
         </div>
+        <select
+          value={filterCategory}
+          onChange={(e) => setFilterCategory(e.target.value)}
+          className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 shadow-sm focus:outline-none focus:border-blue-500 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-200"
+        >
+          {categories.map((c) => (
+            <option key={c} value={c} className="bg-white text-slate-900 dark:bg-slate-900 dark:text-white">
+              {c === "all" ? "All Categories" : c.charAt(0).toUpperCase() + c.slice(1).replace('_', ' ')}
+            </option>
+          ))}
+        </select>
+        <button
+          onClick={() => setShowAfricaOnly(!showAfricaOnly)}
+          className={`px-3.5 py-2 rounded-lg text-sm font-medium border shadow-sm transition-all ${
+            showAfricaOnly
+              ? "bg-amber-50 border-amber-300 text-amber-800 dark:bg-amber-950/40 dark:border-amber-800 dark:text-amber-300"
+              : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-300"
+          }`}
+        >
+          Africa-First
+        </button>
+      </div>
 
-        {/* Filters */}
-        <div className="flex items-center gap-3 mb-6">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-            <input
-              type="text"
-              placeholder="Search connectors..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm focus:outline-none focus:border-white/30"
-            />
-          </div>
-          <select
-            value={filterCategory}
-            onChange={(e) => setFilterCategory(e.target.value)}
-            className="px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm focus:outline-none focus:border-white/30"
-          >
-            {categories.map((c) => (
-              <option key={c} value={c} className="bg-[#1a1a1a]">
-                {c === "all" ? "All Categories" : c.charAt(0).toUpperCase() + c.slice(1)}
-              </option>
-            ))}
-          </select>
-          <button
-            onClick={() => setShowAfricaOnly(!showAfricaOnly)}
-            className={`px-3 py-2 rounded-lg text-sm border transition-colors ${
-              showAfricaOnly
-                ? "bg-orange-500/20 border-orange-500/40 text-orange-400"
-                : "bg-white/5 border-white/10 text-gray-400"
-            }`}
-          >
-            Africa-First
-          </button>
+      {/* Connector Types Grid */}
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
         </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredTypes.map((type) => {
+            const Icon = categoryIcons[type.category] || Code;
+            const catTheme = categoryColors[type.category] || categoryColors.api;
 
-        {/* Connector Types Grid */}
-        {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 animate-spin text-gray-500" />
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredTypes.map((type) => {
-              const Icon = categoryIcons[type.category] || Code;
-              return (
-                <div
-                  key={type.type_code}
-                  className="bg-white/5 border border-white/10 rounded-xl p-5 hover:border-white/30 transition-all group cursor-pointer"
-                >
+            return (
+              <div
+                key={type.type_code}
+                className="group relative flex flex-col justify-between overflow-hidden rounded-xl border border-slate-200/80 bg-white p-5 shadow-sm transition-all hover:border-blue-400 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-blue-500 cursor-pointer"
+              >
+                <div>
                   <div className="flex items-start justify-between mb-3">
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center border ${categoryColors[type.category] || categoryColors.api}`}>
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center border ${catTheme.bg} ${catTheme.text} ${catTheme.border}`}>
                       <Icon className="w-5 h-5" />
                     </div>
                     {type.is_africa_first && (
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30">
+                      <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800">
                         Africa-First
                       </span>
                     )}
                   </div>
-                  <h3 className="font-semibold text-sm mb-1 group-hover:text-white">
+                  <h3 className="font-bold text-sm text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                     {type.display_name}
                   </h3>
-                  <p className="text-xs text-gray-400 line-clamp-2">{type.description}</p>
-                  <div className="flex items-center gap-2 mt-3">
-                    <span className="text-xs text-gray-500 capitalize">{type.category}</span>
-                    {type.region === "africa" && (
-                      <span className="text-xs text-gray-500">• {type.region}</span>
-                    )}
-                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-1">
+                    {type.description}
+                  </p>
                 </div>
-              );
-            })}
-          </div>
-        )}
+                <div className="flex items-center gap-2 mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-400">
+                  <span className="capitalize font-medium text-slate-600 dark:text-slate-400">
+                    {type.category.replace('_', ' ')}
+                  </span>
+                  {type.region === "africa" && (
+                    <span>• {type.region}</span>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
-        {/* Configured Connectors */}
-        {connectors.length > 0 && (
-          <div className="mt-8">
-            <h2 className="text-lg font-semibold mb-4">Your Connectors</h2>
-            <div className="space-y-2">
-              {connectors.map((conn) => (
+      {/* Configured Connectors */}
+      {connectors.length > 0 && (
+        <div className="mt-8 space-y-3">
+          <h2 className="text-lg font-bold text-slate-900 dark:text-white">Your Configured Connectors</h2>
+          <div className="space-y-2">
+            {connectors.map((conn) => {
+              const Icon = categoryIcons[conn.category] || Code;
+              const catTheme = categoryColors[conn.category] || categoryColors.api;
+
+              return (
                 <div
                   key={conn.id}
-                  className="flex items-center justify-between bg-white/5 border border-white/10 rounded-lg px-4 py-3"
+                  className="flex items-center justify-between border border-slate-200/80 bg-white rounded-xl px-4 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-900"
                 >
                   <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center border ${categoryColors[conn.category] || categoryColors.api}`}>
-                      {(() => {
-                        const Icon = categoryIcons[conn.category] || Code;
-                        return <Icon className="w-4 h-4" />;
-                      })()}
+                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center border ${catTheme.bg} ${catTheme.text} ${catTheme.border}`}>
+                      <Icon className="w-4 h-4" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium">{conn.name}</p>
-                      <p className="text-xs text-gray-500">{conn.connector_type}</p>
+                      <p className="text-sm font-semibold text-slate-900 dark:text-white">{conn.name}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">{conn.connector_type}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${
+                    <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full border ${
                       conn.status === "active"
-                        ? "bg-green-500/20 text-green-400"
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800"
                         : conn.status === "error"
-                        ? "bg-red-500/20 text-red-400"
-                        : "bg-gray-500/20 text-gray-400"
+                        ? "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800"
+                        : "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700"
                     }`}>
                       {conn.status}
                     </span>
                   </div>
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
 
-function StatCard({ label, value, icon: Icon, color }: { label: string; value: number; icon: any; color: string }) {
+function StatCard({
+  label,
+  value,
+  icon: Icon,
+  color,
+  bg,
+}: {
+  label: string;
+  value: number;
+  icon: any;
+  color: string;
+  bg: string;
+}) {
   return (
-    <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-xs text-gray-400">{label}</span>
-        <Icon className={`w-4 h-4 ${color}`} />
+    <div className="relative overflow-hidden rounded-xl border border-slate-200/80 bg-white p-5 shadow-sm transition-all hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          {label}
+        </span>
+        <div className={`rounded-lg p-2 ${bg}`}>
+          <Icon className={`w-4 h-4 ${color}`} />
+        </div>
       </div>
-      <p className="text-2xl font-bold">{value}</p>
+      <p className="mt-3 text-3xl font-extrabold text-slate-900 dark:text-white">
+        {value}
+      </p>
     </div>
   );
 }
