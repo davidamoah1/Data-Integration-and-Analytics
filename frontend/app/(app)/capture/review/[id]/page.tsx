@@ -15,6 +15,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Database,
+  Copy,
+  Check,
 } from "lucide-react";
 import {
   captureService,
@@ -24,6 +26,7 @@ import {
 } from "@/services/capture/captureService";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { toast } from "@/components/ui/Toaster";
 
 export default function CaptureReviewDetailPage() {
   const params = useParams();
@@ -37,6 +40,30 @@ export default function CaptureReviewDetailPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [showTypeSelector, setShowTypeSelector] = useState(false);
   const [activeTab, setActiveTab] = useState<"fields" | "tables" | "ocr">("fields");
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+
+  const copyToClipboard = async (text: string, key: string, label: string = "Copied to clipboard") => {
+    if (!text) return;
+    try {
+      if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+      }
+      setCopiedKey(key);
+      setTimeout(() => setCopiedKey(null), 2000);
+      toast.success(label);
+    } catch {
+      toast.error("Failed to copy to clipboard");
+    }
+  };
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -133,21 +160,21 @@ export default function CaptureReviewDetailPage() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Top bar */}
-      <div className="sticky top-0 z-20 border-b border-slate-200 bg-white px-6 py-3 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button onClick={() => router.push("/capture/review")} className="text-slate-400 hover:text-slate-600">
+      <div className="sticky top-0 z-20 border-b border-slate-200 bg-white px-4 sm:px-6 py-3 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <button onClick={() => router.push("/capture/review")} className="text-slate-400 hover:text-slate-600 shrink-0">
               <ArrowLeft size={20} />
             </button>
-            <div>
-              <h1 className="text-sm font-semibold text-slate-800">{doc.filename}</h1>
-              <p className="text-xs text-slate-400">
+            <div className="min-w-0">
+              <h1 className="truncate text-sm font-semibold text-slate-800">{doc.filename}</h1>
+              <p className="truncate text-xs text-slate-400">
                 {doc.document_type_label || "Unclassified"} · {doc.page_count} page{doc.page_count > 1 ? "s" : ""}
                 {doc.overall_confidence !== null && ` · ${Math.round(doc.overall_confidence * 100)}% confidence`}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {doc.status === "failed" && (
               <Button variant="outline" size="sm" onClick={() => handleAction("retry")} disabled={actionLoading} className="gap-1.5">
                 <RotateCcw size={14} /> Retry
@@ -155,24 +182,24 @@ export default function CaptureReviewDetailPage() {
             )}
             {doc.status === "ready_for_review" && (
               <>
-                <Button variant="outline" size="sm" onClick={() => handleAction("draft")} disabled={actionLoading} className="gap-1.5">
+                <Button variant="outline" size="sm" onClick={() => handleAction("draft")} disabled={actionLoading} className="gap-1.5 text-xs">
                   <Save size={14} /> Save Draft
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => handleAction("reject")} disabled={actionLoading} className="gap-1.5 text-red-600 hover:bg-red-50">
+                <Button variant="outline" size="sm" onClick={() => handleAction("reject")} disabled={actionLoading} className="gap-1.5 text-xs text-red-600 hover:bg-red-50">
                   <XCircle size={14} /> Reject
                 </Button>
-                <Button size="sm" onClick={() => handleAction("approve")} disabled={actionLoading} className="gap-1.5 bg-green-600 hover:bg-green-700">
+                <Button size="sm" onClick={() => handleAction("approve")} disabled={actionLoading} className="gap-1.5 text-xs bg-green-600 hover:bg-green-700">
                   <CheckCircle2 size={14} /> Approve
                 </Button>
               </>
             )}
             {doc.status === "draft" && (
-              <Button size="sm" onClick={() => handleAction("approve")} disabled={actionLoading} className="gap-1.5 bg-green-600 hover:bg-green-700">
+              <Button size="sm" onClick={() => handleAction("approve")} disabled={actionLoading} className="gap-1.5 text-xs bg-green-600 hover:bg-green-700">
                 <CheckCircle2 size={14} /> Approve
               </Button>
             )}
             {doc.status === "approved" && (
-              <Button size="sm" onClick={handleExport} disabled={actionLoading} className="gap-1.5 bg-indigo-600 hover:bg-indigo-700">
+              <Button size="sm" onClick={handleExport} disabled={actionLoading} className="gap-1.5 text-xs bg-indigo-600 hover:bg-indigo-700">
                 {actionLoading ? <Loader2 size={14} className="animate-spin" /> : <Database size={14} />}
                 Export to Dataset
               </Button>
@@ -183,7 +210,7 @@ export default function CaptureReviewDetailPage() {
 
       {/* Type confirmation banner */}
       {showTypeSelector && (
-        <div className="border-b border-amber-200 bg-amber-50 px-6 py-3">
+        <div className="border-b border-amber-200 bg-amber-50 px-4 sm:px-6 py-3">
           <div className="flex items-center gap-2 text-sm text-amber-800">
             <AlertTriangle size={16} />
             <span className="font-medium">Document type needs confirmation.</span>
@@ -206,7 +233,7 @@ export default function CaptureReviewDetailPage() {
 
       {/* Duplicate warning */}
       {doc.duplicate_of_id && (
-        <div className="border-b border-orange-200 bg-orange-50 px-6 py-2 text-sm text-orange-800">
+        <div className="border-b border-orange-200 bg-orange-50 px-4 sm:px-6 py-2 text-sm text-orange-800">
           <AlertTriangle size={14} className="mr-1.5 inline" />
           This document may be a duplicate of document #{doc.duplicate_of_id}. Please verify before approving.
         </div>
@@ -234,8 +261,23 @@ export default function CaptureReviewDetailPage() {
           </div>
           {doc.raw_ocr_text && (
             <div className="mt-4">
-              <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Raw OCR Text</h4>
-              <pre className="max-h-64 overflow-y-auto whitespace-pre-wrap rounded-lg border border-slate-200 bg-white p-3 text-xs text-slate-600">
+              <div className="mb-2 flex items-center justify-between">
+                <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-400">Raw OCR Text</h4>
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard(doc.raw_ocr_text || "", "raw-ocr-left", "OCR text copied to clipboard")}
+                  className="rounded p-1 text-slate-400 hover:bg-slate-200 hover:text-slate-700 transition-colors"
+                  title="Copy raw OCR text"
+                  aria-label="Copy raw OCR text"
+                >
+                  {copiedKey === "raw-ocr-left" ? (
+                    <Check size={13} className="text-emerald-600" />
+                  ) : (
+                    <Copy size={13} />
+                  )}
+                </button>
+              </div>
+              <pre className="max-h-64 overflow-y-auto whitespace-pre-wrap rounded-lg border border-slate-200 bg-white p-3 text-xs text-slate-600 font-mono">
                 {doc.raw_ocr_text}
               </pre>
             </div>
@@ -270,11 +312,38 @@ export default function CaptureReviewDetailPage() {
 
           {activeTab === "fields" && (
             <div className="space-y-2">
+              <div className="flex items-center justify-between pb-1">
+                <span className="text-xs text-slate-400">
+                  {fields.length} {fields.length === 1 ? "field" : "fields"}
+                </span>
+                {fields.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const text = fields
+                        .filter((f) => f.value)
+                        .map((f) => `${f.field_label}: ${f.value}`)
+                        .join("\n");
+                      copyToClipboard(text, "all-fields", "All fields copied to clipboard");
+                    }}
+                    className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors"
+                    title="Copy all fields"
+                    aria-label="Copy all fields"
+                  >
+                    {copiedKey === "all-fields" ? (
+                      <Check size={13} className="text-emerald-600" />
+                    ) : (
+                      <Copy size={13} />
+                    )}
+                  </button>
+                )}
+              </div>
+
               {fields.length === 0 ? (
                 <p className="text-sm text-slate-400">No fields extracted.</p>
               ) : (
                 fields.map((field) => (
-                  <div key={field.id} className="rounded-lg border border-slate-100 bg-slate-50 p-3">
+                  <div key={field.id} className="group rounded-lg border border-slate-100 bg-slate-50 p-3 hover:border-slate-200 transition-colors">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-medium text-slate-500">{field.field_label}</span>
                       <div className="flex items-center gap-1.5">
@@ -299,11 +368,28 @@ export default function CaptureReviewDetailPage() {
                         }`}>
                           {Math.round(field.confidence_score * 100)}%
                         </span>
+                        {field.value && (
+                          <button
+                            type="button"
+                            onClick={() => copyToClipboard(field.value || "", `field-${field.id}`, `Copied ${field.field_label}`)}
+                            className="ml-1 rounded p-1 text-slate-400 hover:bg-slate-200 hover:text-slate-700 transition-colors"
+                            title={`Copy ${field.field_label}`}
+                            aria-label={`Copy ${field.field_label}`}
+                          >
+                            {copiedKey === `field-${field.id}` ? (
+                              <Check size={13} className="text-emerald-600" />
+                            ) : (
+                              <Copy size={13} />
+                            )}
+                          </button>
+                        )}
                       </div>
                     </div>
-                    <p className={`mt-1 text-sm ${field.value ? "text-slate-800" : "text-slate-300 italic"}`}>
-                      {field.value || "Not extracted"}
-                    </p>
+                    <div className="mt-1 flex items-start justify-between gap-2">
+                      <p className={`text-sm ${field.value ? "text-slate-800 font-medium" : "text-slate-300 italic"}`}>
+                        {field.value || "Not extracted"}
+                      </p>
+                    </div>
                     {field.validation_message && (
                       <p className="mt-1 text-xs text-amber-600">{field.validation_message}</p>
                     )}
@@ -318,9 +404,29 @@ export default function CaptureReviewDetailPage() {
               {doc.extracted_tables && doc.extracted_tables.length > 0 ? (
                 doc.extracted_tables.map((table: any, idx: number) => (
                   <div key={idx} className="rounded-lg border border-slate-200 overflow-hidden">
-                    <div className="bg-slate-50 px-3 py-2 text-xs font-medium text-slate-500">
-                      <Table2 size={12} className="mr-1 inline" />
-                      Page {table.page} · {table.row_count} rows · {table.estimated_columns} columns
+                    <div className="bg-slate-50 px-3 py-2 text-xs font-medium text-slate-500 flex items-center justify-between">
+                      <div>
+                        <Table2 size={12} className="mr-1 inline" />
+                        Page {table.page} · {table.row_count} rows · {table.estimated_columns} columns
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const headers = (table.headers || []).join("\t");
+                          const rows = (table.rows || []).map((r: any[]) => r.join("\t")).join("\n");
+                          const tsv = headers ? `${headers}\n${rows}` : rows;
+                          copyToClipboard(tsv, `table-${idx}`, "Table data copied to clipboard (TSV)");
+                        }}
+                        className="rounded p-1 text-slate-400 hover:bg-slate-200 hover:text-slate-700 transition-colors"
+                        title="Copy table data (TSV)"
+                        aria-label="Copy table data (TSV)"
+                      >
+                        {copiedKey === `table-${idx}` ? (
+                          <Check size={13} className="text-emerald-600" />
+                        ) : (
+                          <Copy size={13} />
+                        )}
+                      </button>
                     </div>
                     <div className="overflow-x-auto">
                       <table className="w-full text-xs">
@@ -353,9 +459,64 @@ export default function CaptureReviewDetailPage() {
           )}
 
           {activeTab === "ocr" && (
-            <pre className="max-h-[600px] overflow-y-auto whitespace-pre-wrap rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
-              {doc.raw_ocr_text || "No OCR text available."}
-            </pre>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between pb-1">
+                <span className="text-xs text-slate-400">
+                  {doc.raw_ocr_text
+                    ? `${doc.raw_ocr_text.split("\n").map((l: string) => l.trim()).filter(Boolean).length} items detected`
+                    : "Extracted OCR text"}
+                </span>
+                {doc.raw_ocr_text && (
+                  <button
+                    type="button"
+                    onClick={() => copyToClipboard(doc.raw_ocr_text || "", "ocr-all", "All OCR text copied to clipboard")}
+                    className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors"
+                    title="Copy all OCR text"
+                    aria-label="Copy all OCR text"
+                  >
+                    {copiedKey === "ocr-all" ? (
+                      <Check size={13} className="text-emerald-600" />
+                    ) : (
+                      <Copy size={13} />
+                    )}
+                  </button>
+                )}
+              </div>
+
+              {!doc.raw_ocr_text ? (
+                <p className="text-sm text-slate-400">No OCR text available.</p>
+              ) : (
+                <div className="max-h-[600px] overflow-y-auto space-y-1.5 pr-1">
+                  {doc.raw_ocr_text
+                    .split("\n")
+                    .map((line: string) => line.trim())
+                    .filter((line: string) => line.length > 0)
+                    .map((line: string, idx: number) => (
+                      <div
+                        key={idx}
+                        className="group flex items-center justify-between gap-3 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 hover:border-slate-200 hover:bg-slate-100/60 transition-colors"
+                      >
+                        <span className="font-mono text-xs text-slate-800 break-words flex-1">
+                          {line}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => copyToClipboard(line, `ocr-item-${idx}`, "Copied")}
+                          className="shrink-0 rounded p-1 text-slate-400 hover:bg-white hover:text-slate-700 transition-colors"
+                          title="Copy"
+                          aria-label="Copy"
+                        >
+                          {copiedKey === `ocr-item-${idx}` ? (
+                            <Check size={13} className="text-emerald-600" />
+                          ) : (
+                            <Copy size={13} />
+                          )}
+                        </button>
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
           )}
         </div>
 
@@ -368,10 +529,26 @@ export default function CaptureReviewDetailPage() {
             ) : (
               fields.map((field) => (
                 <div key={field.id}>
-                  <label className="mb-1 block text-xs font-medium text-slate-600">
-                    {field.field_label}
-                    {field.is_low_confidence && <span className="ml-1.5 text-amber-500">⚠</span>}
-                  </label>
+                  <div className="mb-1 flex items-center justify-between">
+                    <label className="block text-xs font-medium text-slate-600">
+                      {field.field_label}
+                      {field.is_low_confidence && <span className="ml-1.5 text-amber-500">⚠</span>}
+                    </label>
+                    {field.value && (
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard(field.value || "", `edit-field-${field.id}`, `Copied ${field.field_label}`)}
+                        className="rounded p-0.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors"
+                        title={`Copy ${field.field_label}`}
+                      >
+                        {copiedKey === `edit-field-${field.id}` ? (
+                          <Check size={12} className="text-emerald-600" />
+                        ) : (
+                          <Copy size={12} />
+                        )}
+                      </button>
+                    )}
+                  </div>
                   <Input
                     defaultValue={field.value || ""}
                     onBlur={(e) => {

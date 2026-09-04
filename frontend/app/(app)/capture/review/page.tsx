@@ -40,34 +40,37 @@ export default function CaptureReviewQueuePage() {
   useEffect(() => { load(); }, [load]);
 
   return (
-    <div className="min-h-screen bg-slate-50 py-8">
-      <div className="mx-auto max-w-6xl px-6">
-        <div className="mb-6 flex items-center justify-between">
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-slate-50 py-6 sm:py-8">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+        <div className="mb-6 flex items-center justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Review Queue</h1>
-            <p className="text-sm text-slate-500">Review and approve extracted document data</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Review Queue</h1>
+            <p className="text-xs sm:text-sm text-slate-500">Review and approve extracted document data</p>
           </div>
-          <Button variant="outline" size="sm" onClick={load} className="gap-2">
-            <RefreshCw size={14} /> Refresh
+          <Button variant="outline" size="sm" onClick={load} className="gap-1.5 shrink-0">
+            <RefreshCw size={13} /> Refresh
           </Button>
         </div>
 
         {/* Filter tabs */}
-        <div className="mb-6 flex gap-2">
+        <div className="mb-6 grid grid-cols-3 gap-1 rounded-xl bg-slate-200/75 p-1 border border-slate-200/80 sm:flex sm:w-fit sm:gap-2 sm:bg-transparent sm:border-0 sm:p-0">
           {[
-            { key: "ready_for_review", label: "Pending Review", icon: Clock },
-            { key: "approved", label: "Approved", icon: CheckCircle2 },
-            { key: "failed", label: "Failed", icon: AlertCircle },
+            { key: "ready_for_review", label: "Pending Review", shortLabel: "Pending", icon: Clock },
+            { key: "approved", label: "Approved", shortLabel: "Approved", icon: CheckCircle2 },
+            { key: "failed", label: "Failed", shortLabel: "Failed", icon: AlertCircle },
           ].map((tab) => (
             <button
               key={tab.key}
               onClick={() => setFilter(tab.key)}
-              className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-                filter === tab.key ? "bg-indigo-600 text-white" : "bg-white text-slate-600 hover:bg-slate-100"
+              className={`inline-flex items-center justify-center gap-1.5 rounded-lg py-2 px-1 sm:px-4 text-xs sm:text-sm font-medium transition-all ${
+                filter === tab.key
+                  ? "bg-indigo-600 text-white shadow-sm font-semibold"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-white/60 sm:bg-white sm:border sm:border-slate-200/80 sm:hover:bg-slate-100"
               }`}
             >
-              <tab.icon size={16} />
-              {tab.label}
+              <tab.icon size={14} className="shrink-0" />
+              <span className="hidden sm:inline">{tab.label}</span>
+              <span className="sm:hidden">{tab.shortLabel}</span>
             </button>
           ))}
         </div>
@@ -94,41 +97,76 @@ export default function CaptureReviewQueuePage() {
                 <div
                   key={doc.id}
                   onClick={() => router.push(`/capture/review/${doc.id}`)}
-                  className="group flex cursor-pointer items-center gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+                  className="group relative flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:border-indigo-200 hover:shadow-md cursor-pointer"
                 >
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-slate-100">
-                    {doc.file_type === "pdf" ? (
-                      <span className="text-xs font-bold text-red-500">PDF</span>
-                    ) : (
-                      <span className="text-xs font-bold text-blue-500 uppercase">{doc.file_type}</span>
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-slate-800">{doc.filename}</p>
-                    <div className="mt-1 flex items-center gap-3 text-xs text-slate-400">
-                      <span>{doc.page_count} page{doc.page_count > 1 ? "s" : ""}</span>
-                      {doc.document_type_label && (
-                        <span className="font-medium text-indigo-600">{doc.document_type_label}</span>
-                      )}
-                      {doc.overall_confidence !== null && (
-                        <span className={doc.overall_confidence < 0.75 ? "text-amber-600" : "text-green-600"}>
-                          {Math.round(doc.overall_confidence * 100)}% confidence
-                        </span>
-                      )}
-                      {doc.needs_type_confirmation && (
-                        <span className="text-amber-600 font-medium">Type needs confirmation</span>
-                      )}
-                      {doc.duplicate_of_id && (
-                        <span className="text-orange-600 font-medium">Possible duplicate</span>
+                  <div className="flex items-start gap-3 min-w-0 flex-1">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-slate-100 border border-slate-200/60 font-semibold">
+                      {doc.file_type === "pdf" ? (
+                        <span className="text-xs font-bold text-rose-600">PDF</span>
+                      ) : (
+                        <span className="text-xs font-bold text-sky-600 uppercase">{doc.file_type}</span>
                       )}
                     </div>
-                    {doc.status === "failed" && doc.error_message && (
-                      <p className="mt-1 truncate text-xs text-red-500">{doc.error_message}</p>
-                    )}
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="truncate text-sm font-semibold text-slate-800 group-hover:text-indigo-600 transition-colors">
+                          {doc.filename}
+                        </p>
+                        {/* Mobile status badge */}
+                        <span className={`inline-flex sm:hidden shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-medium ${badge.color}`}>
+                          {badge.label}
+                        </span>
+                      </div>
+
+                      <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-xs text-slate-500">
+                        <span>{doc.page_count} page{doc.page_count > 1 ? "s" : ""}</span>
+                        {doc.document_type_label && (
+                          <>
+                            <span className="text-slate-300">•</span>
+                            <span className="rounded bg-indigo-50 px-1.5 py-0.5 text-[11px] font-medium text-indigo-700">
+                              {doc.document_type_label}
+                            </span>
+                          </>
+                        )}
+                        {doc.overall_confidence !== null && (
+                          <>
+                            <span className="text-slate-300">•</span>
+                            <span className={`font-medium ${doc.overall_confidence < 0.75 ? "text-amber-600" : "text-emerald-600"}`}>
+                              {Math.round(doc.overall_confidence * 100)}% confidence
+                            </span>
+                          </>
+                        )}
+                        {doc.needs_type_confirmation && (
+                          <>
+                            <span className="text-slate-300">•</span>
+                            <span className="rounded bg-amber-50 px-1.5 py-0.5 text-[11px] font-medium text-amber-700 border border-amber-200/60">
+                              Type needs confirmation
+                            </span>
+                          </>
+                        )}
+                        {doc.duplicate_of_id && (
+                          <>
+                            <span className="text-slate-300">•</span>
+                            <span className="rounded bg-rose-50 px-1.5 py-0.5 text-[11px] font-medium text-rose-700 border border-rose-200/60">
+                              Possible duplicate
+                            </span>
+                          </>
+                        )}
+                      </div>
+
+                      {doc.status === "failed" && doc.error_message && (
+                        <p className="mt-1.5 text-xs text-rose-600 break-words line-clamp-2">{doc.error_message}</p>
+                      )}
+                    </div>
                   </div>
-                  <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium ${badge.color}`}>
-                    {badge.label}
-                  </span>
+
+                  {/* Desktop status badge */}
+                  <div className="hidden sm:flex sm:shrink-0 items-center">
+                    <span className={`rounded-full px-3 py-1 text-xs font-medium ${badge.color}`}>
+                      {badge.label}
+                    </span>
+                  </div>
                 </div>
               );
             })}

@@ -161,8 +161,8 @@ export default function ApprovedCertificateAnalyticsPage() {
   const handleReport = async () => {
     setExporting("report");
     try {
-      await approvedAnalyticsService.getReport(filters);
-      toast.success("Report generated");
+      await approvedAnalyticsService.downloadReport(filters);
+      toast.success("Detailed report with bar charts downloaded successfully");
     } catch (err: any) {
       toast.error(err.message || "Report generation failed");
     } finally {
@@ -181,34 +181,36 @@ export default function ApprovedCertificateAnalyticsPage() {
   const totalPages = Math.ceil(recordsTotal / pageSize);
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-4 sm:p-6 w-full max-w-full overflow-x-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="flex items-center gap-2 text-2xl font-bold">
-            <Award className="h-7 w-7 text-indigo-600" />
-            Approved Certificate Analytics
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="flex items-center gap-2.5 text-xl sm:text-2xl font-bold text-slate-900">
+            <Award className="h-6 w-6 sm:h-7 sm:w-7 text-indigo-600 shrink-0" />
+            <span className="truncate">Approved Certificate Analytics</span>
           </h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-xs sm:text-sm text-slate-500">
             Analytics computed exclusively from officially approved certificates
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <Button
             variant="outline"
             size="sm"
             onClick={() => { fetchSummary(); fetchRecords(); }}
             disabled={loading}
+            className="gap-1.5 text-xs sm:text-sm"
           >
-            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+            <RefreshCw className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${loading ? "animate-spin" : ""}`} />
             Refresh
           </Button>
           <Button
             variant="outline"
             size="sm"
             onClick={() => setShowFilters(!showFilters)}
+            className="gap-1.5 text-xs sm:text-sm"
           >
-            <Filter className="h-4 w-4" />
+            <Filter className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             Filters
             {hasActiveFilters && (
               <Badge variant="default" className="ml-1 px-1.5 py-0 text-xs">
@@ -219,14 +221,13 @@ export default function ApprovedCertificateAnalyticsPage() {
         </div>
       </div>
 
-      {/* Approved-only banner */}
-      <div className="flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 px-4 py-2.5 text-sm text-green-700">
-        <CheckCircle2 className="h-4 w-4 flex-shrink-0" />
-        <span>
-          <strong>Approved-only dataset:</strong> All metrics below are computed
-          exclusively from certificates with status <code className="rounded bg-green-100 px-1">approved</code>.
-          Pending, rejected, and unverified certificates are excluded.
-        </span>
+      {/* Approved-only dataset notice */}
+      <div className="flex items-start sm:items-center gap-2 text-xs text-slate-500">
+        <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600 mt-0.5 sm:mt-0" />
+        <p className="leading-relaxed">
+          <strong className="font-semibold text-slate-700">Approved-only dataset:</strong> All metrics below are computed
+          exclusively from certificates with status <span className="font-mono font-semibold text-emerald-700">approved</span>. Pending, rejected, and unverified certificates are excluded.
+        </p>
       </div>
 
       {/* Filters panel */}
@@ -339,20 +340,20 @@ export default function ApprovedCertificateAnalyticsPage() {
       )}
 
       {/* Export actions */}
-      <div className="flex items-center gap-2">
-        <Button variant="outline" size="sm" onClick={() => handleExport("csv")} disabled={exporting !== null}>
+      <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2">
+        <Button variant="outline" size="sm" onClick={() => handleExport("csv")} disabled={exporting !== null} className="gap-1.5 text-xs sm:text-sm justify-center">
           {exporting === "csv" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
           CSV
         </Button>
-        <Button variant="outline" size="sm" onClick={() => handleExport("xlsx")} disabled={exporting !== null}>
+        <Button variant="outline" size="sm" onClick={() => handleExport("xlsx")} disabled={exporting !== null} className="gap-1.5 text-xs sm:text-sm justify-center">
           {exporting === "xlsx" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
           Excel
         </Button>
-        <Button variant="outline" size="sm" onClick={handleReport} disabled={exporting !== null}>
+        <Button variant="outline" size="sm" onClick={handleReport} disabled={exporting !== null} className="gap-1.5 text-xs sm:text-sm justify-center">
           {exporting === "report" ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />}
           Report
         </Button>
-        <Button variant="outline" size="sm" onClick={handlePresentation} disabled={exporting !== null}>
+        <Button variant="outline" size="sm" onClick={handlePresentation} disabled={exporting !== null} className="gap-1.5 text-xs sm:text-sm justify-center">
           {exporting === "pptx" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Presentation className="h-4 w-4" />}
           PowerPoint
         </Button>
@@ -378,7 +379,7 @@ export default function ApprovedCertificateAnalyticsPage() {
           ) : (
             <>
               {/* KPI grid */}
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
+              <div className="grid grid-cols-2 gap-2.5 sm:gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                 <KPICard
                   icon={<Award className="h-5 w-5" />}
                   label="Total Approved"
@@ -539,24 +540,24 @@ export default function ApprovedCertificateAnalyticsPage() {
               )}
 
               {/* Records table */}
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
+              <Card className="overflow-hidden">
+                <CardHeader className="pb-3">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <CardTitle className="text-base">Approved Certificate Records</CardTitle>
-                    <div className="flex items-center gap-2">
-                      <div className="relative">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <div className="relative flex-1 sm:flex-none">
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400" />
                         <Input
                           placeholder="Search..."
                           value={search}
                           onChange={(e) => { setSearch(e.target.value); setPage(0); }}
-                          className="h-9 w-48 pl-8 text-sm"
+                          className="h-9 w-full sm:w-48 pl-8 text-sm"
                         />
                       </div>
                       <Select
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value)}
-                        className="h-9 w-40 text-sm"
+                        className="h-9 flex-1 sm:flex-none sm:w-44 text-sm"
                       >
                         <option value="approved_at">Sort: Approved Date</option>
                         <option value="recipient">Sort: Recipient</option>
@@ -568,6 +569,7 @@ export default function ApprovedCertificateAnalyticsPage() {
                         variant="ghost"
                         size="sm"
                         onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+                        className="shrink-0"
                       >
                         {sortOrder === "desc" ? "↓" : "↑"}
                       </Button>
@@ -693,14 +695,14 @@ function KPICard({
   color: string;
 }) {
   return (
-    <Card>
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-xs font-medium text-slate-500">{label}</p>
-            <p className="mt-1 text-2xl font-bold text-slate-800">{value}</p>
+    <Card className="overflow-hidden">
+      <CardContent className="p-3 sm:p-4">
+        <div className="flex items-start sm:items-center justify-between gap-2">
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-xs font-medium text-slate-500" title={label}>{label}</p>
+            <p className="mt-1 text-lg sm:text-2xl font-bold text-slate-800 truncate">{value}</p>
           </div>
-          <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${COLOR_MAP[color] || COLOR_MAP.indigo}`}>
+          <div className={`flex h-8 w-8 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-lg ${COLOR_MAP[color] || COLOR_MAP.indigo}`}>
             {icon}
           </div>
         </div>
@@ -750,7 +752,7 @@ function BarChart({
                 backgroundColor: CHART_COLORS[i % CHART_COLORS.length],
               }}
             />
-            <span className="mt-1 text-xs text-slate-500">{key}</span>
+            <span className="mt-1 text-xs text-slate-500 truncate max-w-full" title={key}>{key}</span>
           </div>
         ))}
       </div>
@@ -760,8 +762,8 @@ function BarChart({
   return (
     <div className="space-y-2">
       {allEntries.map(([key, val], i) => (
-        <div key={key} className="flex items-center gap-3">
-          <span className="w-40 flex-shrink-0 truncate text-xs text-slate-600" title={key}>
+        <div key={key} className="flex items-center gap-2.5 sm:gap-3">
+          <span className="w-28 sm:w-40 shrink-0 truncate text-xs text-slate-600 font-medium" title={key}>
             {key}
           </span>
           <div className="relative h-6 flex-1 rounded bg-slate-100">
@@ -773,7 +775,7 @@ function BarChart({
               }}
             />
           </div>
-          <span className="w-8 flex-shrink-0 text-right text-xs font-medium text-slate-700">{val}</span>
+          <span className="w-7 sm:w-8 shrink-0 text-right text-xs font-medium text-slate-700">{val}</span>
         </div>
       ))}
     </div>
@@ -796,8 +798,8 @@ function DonutChart({ data }: { data: Record<string, number> }) {
   });
 
   return (
-    <div className="flex items-center gap-6">
-      <div className="relative h-40 w-40 flex-shrink-0">
+    <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-5 sm:gap-6">
+      <div className="relative h-36 w-36 sm:h-40 sm:w-40 shrink-0">
         <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90">
           {segments.map((seg, i) => {
             const circumference = 2 * Math.PI * 40;
@@ -820,17 +822,21 @@ function DonutChart({ data }: { data: Record<string, number> }) {
           })}
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-2xl font-bold text-slate-800">{total}</span>
-          <span className="text-xs text-slate-500">Total</span>
+          <span className="text-xl sm:text-2xl font-bold text-slate-800">{total}</span>
+          <span className="text-[11px] sm:text-xs text-slate-500">Total</span>
         </div>
       </div>
-      <div className="flex-1 space-y-1.5">
+      <div className="w-full sm:flex-1 space-y-2">
         {segments.map((seg) => (
-          <div key={seg.key} className="flex items-center gap-2 text-xs">
-            <span className="h-3 w-3 flex-shrink-0 rounded" style={{ backgroundColor: seg.color }} />
-            <span className="flex-1 truncate text-slate-600" title={seg.key}>{seg.key}</span>
-            <span className="font-medium text-slate-700">{seg.val}</span>
-            <span className="text-slate-400">({seg.pct.toFixed(0)}%)</span>
+          <div key={seg.key} className="flex items-center justify-between gap-2 text-xs">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <span className="h-3 w-3 shrink-0 rounded" style={{ backgroundColor: seg.color }} />
+              <span className="truncate text-slate-600 font-medium" title={seg.key}>{seg.key}</span>
+            </div>
+            <div className="flex items-center gap-1.5 shrink-0 text-right">
+              <span className="font-semibold text-slate-800">{seg.val}</span>
+              <span className="text-slate-400 text-[11px]">({seg.pct.toFixed(0)}%)</span>
+            </div>
           </div>
         ))}
       </div>

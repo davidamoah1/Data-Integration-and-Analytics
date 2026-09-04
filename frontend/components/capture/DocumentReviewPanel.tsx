@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import {
   FileText, CheckCircle2, XCircle, Save, Eye, AlertCircle,
   Loader2, RotateCcw, Database, ChevronRight, AlertTriangle,
+  Copy, Check,
 } from 'lucide-react';
 import {
   captureService,
@@ -57,6 +58,30 @@ export function DocumentReviewPanel({ documentId, onApproved, onRejected }: Docu
   const [saving, setSaving] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [showOcrText, setShowOcrText] = useState(false);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+
+  const copyToClipboard = async (text: string, key: string, label: string = 'Copied to clipboard') => {
+    if (!text) return;
+    try {
+      if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+      setCopiedKey(key);
+      setTimeout(() => setCopiedKey(null), 2000);
+      toast.success(label);
+    } catch {
+      toast.error('Failed to copy to clipboard');
+    }
+  };
 
   const loadDocument = useCallback(async () => {
     try {
@@ -282,8 +307,30 @@ export function DocumentReviewPanel({ documentId, onApproved, onRejected }: Docu
 
       {/* Extracted fields */}
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-base">Extracted Fields ({fields.length})</CardTitle>
+          {fields.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                const text = fields
+                  .filter((f) => f.value)
+                  .map((f) => `${f.field_label}: ${f.value}`)
+                  .join('\n');
+                copyToClipboard(text, 'panel-all-fields', 'All fields copied to clipboard');
+              }}
+              className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
+              title="Copy all fields"
+              aria-label="Copy all fields"
+            >
+              {copiedKey === 'panel-all-fields' ? (
+                <Check size={13} className="text-emerald-600" />
+              ) : (
+                <Copy size={13} />
+              )}
+            </Button>
+          )}
         </CardHeader>
         <CardContent>
           {fields.length === 0 ? (
@@ -353,15 +400,34 @@ export function DocumentReviewPanel({ documentId, onApproved, onRejected }: Docu
                       </>
                     )}
                   </div>
-                  {editingField !== field.id && canReview && (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleEditField(field)}
-                      className="text-xs"
-                    >
-                      Edit
-                    </Button>
+                  {editingField !== field.id && (
+                    <div className="flex items-center gap-1">
+                      {field.value && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => copyToClipboard(field.value || '', `field-${field.id}`, `Copied ${field.field_label}`)}
+                          className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+                          title={`Copy ${field.field_label}`}
+                        >
+                          {copiedKey === `field-${field.id}` ? (
+                            <Check size={12} className="text-emerald-600" />
+                          ) : (
+                            <Copy size={12} />
+                          )}
+                        </Button>
+                      )}
+                      {canReview && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleEditField(field)}
+                          className="text-xs"
+                        >
+                          Edit
+                        </Button>
+                      )}
+                    </div>
                   )}
                 </div>
               ))}
@@ -406,7 +472,7 @@ export function DocumentReviewPanel({ documentId, onApproved, onRejected }: Docu
       {/* OCR text toggle */}
       {doc.raw_ocr_text && (
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <button
               onClick={() => setShowOcrText(!showOcrText)}
               className="flex items-center gap-2 text-left"
@@ -415,12 +481,54 @@ export function DocumentReviewPanel({ documentId, onApproved, onRejected }: Docu
               <CardTitle className="text-base">Raw OCR Text</CardTitle>
               <ChevronRight className={cn('h-4 w-4 text-muted-foreground transition-transform', showOcrText && 'rotate-90')} />
             </button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                copyToClipboard(doc.raw_ocr_text || '', 'panel-ocr-text', 'Raw OCR text copied');
+              }}
+              className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
+              title="Copy all OCR text"
+              aria-label="Copy all OCR text"
+            >
+              {copiedKey === 'panel-ocr-text' ? (
+                <Check size={13} className="text-emerald-600" />
+              ) : (
+                <Copy size={13} />
+              )}
+            </Button>
           </CardHeader>
           {showOcrText && (
             <CardContent>
-              <pre className="max-h-64 overflow-auto whitespace-pre-wrap rounded-lg border bg-muted/30 p-3 text-xs">
-                {doc.raw_ocr_text}
-              </pre>
+              <div className="max-h-64 overflow-auto space-y-1.5 pr-1">
+                {doc.raw_ocr_text
+                  .split('\n')
+                  .map((line: string) => line.trim())
+                  .filter((line: string) => line.length > 0)
+                  .map((line: string, idx: number) => (
+                    <div
+                      key={idx}
+                      className="group flex items-center justify-between gap-2 rounded-lg border bg-muted/20 px-3 py-1.5 transition-colors hover:bg-muted/40"
+                    >
+                      <span className="font-mono text-xs break-words flex-1">{line}</span>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => copyToClipboard(line, `panel-ocr-item-${idx}`, 'Copied')}
+                        className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground shrink-0"
+                        title="Copy"
+                        aria-label="Copy"
+                      >
+                        {copiedKey === `panel-ocr-item-${idx}` ? (
+                          <Check size={12} className="text-emerald-600" />
+                        ) : (
+                          <Copy size={12} />
+                        )}
+                      </Button>
+                    </div>
+                  ))}
+              </div>
             </CardContent>
           )}
         </Card>

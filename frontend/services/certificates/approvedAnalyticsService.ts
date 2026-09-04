@@ -178,7 +178,25 @@ export const approvedAnalyticsService = {
         by_year: Record<string, number>;
       };
       certificates: ApprovedCertificateRecord[];
+      insights?: { title?: string; type?: string; text?: string; severity?: string }[];
     }>(`${BASE}/report`, { params: buildParams(filters) }),
+
+  downloadReport: async (filters?: ApprovedAnalyticsFilters) => {
+    const reportData = await approvedAnalyticsService.getReport(filters);
+    const { generateApprovedAnalyticsReportHtml } = await import('@/lib/reports/generateApprovedAnalyticsReportHtml');
+    const html = generateApprovedAnalyticsReportHtml(reportData as any);
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const dateStr = new Date().toISOString().slice(0, 10);
+    a.download = `approved_certificates_analytics_report_${dateStr}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    return reportData;
+  },
 
   downloadPresentation: async (filters?: ApprovedAnalyticsFilters) => {
     const apiUrl = apiClient.getApiUrl();
