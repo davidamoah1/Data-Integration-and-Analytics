@@ -317,7 +317,7 @@ export const workflowService = {
     groupColumn?: string,
     targetColumn?: string,
   ): Promise<ProAnalysisResult> {
-    const res = await apiClient.post<{ mode: string; analysis_type: string; result: ProAnalysisResult }>(
+    const res = await apiClient.post<any>(
       `${BASE}/${workflowId}/analyze`,
       {
         mode: "pro",
@@ -327,7 +327,7 @@ export const workflowService = {
         target_column: targetColumn,
       },
     );
-    return res.result;
+    return res?.result ?? res?.data?.result ?? res;
   },
 
   async askDatasetQuestion(

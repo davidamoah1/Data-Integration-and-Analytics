@@ -326,34 +326,53 @@ export interface CleanPreviewData {
 
 export interface DescriptiveStats {
   count: number;
-  mean?: number;
-  median?: number;
+  mean?: number | null;
+  median?: number | null;
   mode?: number | null;
-  std?: number;
-  variance?: number;
-  min?: number;
-  max?: number;
-  range?: number;
-  q1?: number;
-  q3?: number;
-  iqr?: number;
-  skewness?: number;
-  kurtosis?: number;
+  std?: number | null;
+  variance?: number | null;
+  min?: number | null;
+  max?: number | null;
+  range?: number | null;
+  q1?: number | null;
+  q3?: number | null;
+  iqr?: number | null;
+  skewness?: number | null;
+  kurtosis?: number | null;
   unique?: number;
   top?: string | null;
   freq?: number;
   value_counts?: Record<string, number>;
+  lower_bound?: number | null;
+  upper_bound?: number | null;
+  outlier_count?: number;
+  outlier_pct?: number;
+  cv?: number | null;
+  sum?: number | null;
+}
+
+export interface CorrelationPair {
+  var1: string;
+  var2: string;
+  correlation: number;
+  strength: 'strong' | 'moderate' | 'weak';
+  direction: 'positive' | 'negative';
 }
 
 export interface ProAnalysisResult {
   analysis_type: string;
   columns?: string[];
   results?: Record<string, DescriptiveStats>;
+  descriptive_stats?: Record<string, DescriptiveStats>;
   matrix?: Record<string, Record<string, number>>;
+  correlation_matrix?: Record<string, Record<string, number>>;
+  strongest_correlations?: CorrelationPair[];
   statistic?: number;
   p_value?: number;
   significant?: boolean;
   interpretation?: string;
+  assumptions?: string[];
+  limitations?: string;
   [key: string]: unknown;
 }
 

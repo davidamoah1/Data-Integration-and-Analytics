@@ -469,6 +469,7 @@ export default function DataToDecisionPage() {
         <VisualizeStep
           dashboard={dashboard}
           autoDashboard={autoDashboard}
+          profile={profile}
           onSaveDashboard={handleSaveDashboard}
           onContinue={() => completeAndAdvance('visualize', 'report')}
           isSaving={isSavingDashboard}

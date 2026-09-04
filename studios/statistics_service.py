@@ -1,8 +1,9 @@
-﻿"""Statistics Engine â€” descriptive, inferential, and advanced statistical analysis."""
+"""Statistics Engine â€” descriptive, inferential, and advanced statistical analysis."""
 
 from __future__ import annotations
 
 import math
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -13,21 +14,36 @@ from sqlalchemy.orm import Session as DbSession
 from studios.models import StatisticalAnalysis
 
 
+def _safe_float(v: Any, default: float | None = None) -> float | None:
+    """Safely convert any value to JSON-compliant float (replacing NaN/Inf with default)."""
+    try:
+        if v is None:
+            return default
+        val = float(v)
+        if math.isnan(val) or math.isinf(val):
+            return default
+        return val
+    except (TypeError, ValueError, OverflowError):
+        return default
+
+
 class StatisticsService:
     """Professional statistical analysis engine."""
 
     def __init__(self, db: DbSession):
-        self.db = self.db = db
+        self.db = db
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-    # Descriptive Statistics
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ══════════════════════════════════════════════════════════════════════════
+    # Descriptive Statistics & Dispersion Bounds
+    # ══════════════════════════════════════════════════════════════════════════
 
     @staticmethod
     def descriptive(df: pd.DataFrame, columns: list[str] | None = None) -> dict:
-        """Compute comprehensive descriptive statistics."""
+        """Compute comprehensive descriptive statistics and dispersion boundaries."""
         if columns is None:
-            columns = df.select_dtypes(include=[np.number]).columns.tolist()
+            columns = [c for c in df.columns if pd.api.types.is_numeric_dtype(df[c])]
+            if not columns:
+                columns = df.columns.tolist()
 
         results = {}
         for col in columns:
@@ -35,27 +51,62 @@ class StatisticsService:
                 continue
             data = df[col].dropna()
 
-            if data.dtype in ("int64", "float64"):
+            if pd.api.types.is_numeric_dtype(data) and len(data) > 0:
+                count_val = int(data.count())
+                mean_val = _safe_float(data.mean())
+                median_val = _safe_float(data.median())
+                mode_series = data.mode()
+                mode_val = _safe_float(mode_series.iloc[0]) if not mode_series.empty else None
+                std_val = _safe_float(data.std(), default=0.0) if count_val > 1 else 0.0
+                var_val = _safe_float(data.var(), default=0.0) if count_val > 1 else 0.0
+                min_val = _safe_float(data.min())
+                max_val = _safe_float(data.max())
+                range_val = _safe_float(max_val - min_val) if (max_val is not None and min_val is not None) else None
+                q1_val = _safe_float(data.quantile(0.25))
+                q3_val = _safe_float(data.quantile(0.75))
+                iqr_val = _safe_float(q3_val - q1_val) if (q3_val is not None and q1_val is not None) else None
+                skew_val = _safe_float(data.skew(), default=0.0) if count_val > 2 else 0.0
+                kurt_val = _safe_float(data.kurtosis(), default=0.0) if count_val > 3 else 0.0
+                sum_val = _safe_float(data.sum())
+                cv_val = _safe_float(std_val / mean_val * 100) if (mean_val and std_val is not None and mean_val != 0) else None
+
+                # Outlier fences (Tukey's IQR method)
+                if q1_val is not None and q3_val is not None and iqr_val is not None:
+                    lower_bound = round(q1_val - 1.5 * iqr_val, 2)
+                    upper_bound = round(q3_val + 1.5 * iqr_val, 2)
+                    outliers = data[(data < lower_bound) | (data > upper_bound)]
+                    outlier_count = int(len(outliers))
+                    outlier_pct = round(outlier_count / max(count_val, 1) * 100, 1)
+                else:
+                    lower_bound = None
+                    upper_bound = None
+                    outlier_count = 0
+                    outlier_pct = 0.0
+
                 results[col] = {
-                    "count": int(data.count()),
-                    "mean": float(data.mean()),
-                    "median": float(data.median()),
-                    "mode": float(data.mode().iloc[0]) if not data.mode().empty else None,
-                    "std": float(data.std()),
-                    "variance": float(data.var()),
-                    "min": float(data.min()),
-                    "max": float(data.max()),
-                    "range": float(data.max() - data.min()),
-                    "q1": float(data.quantile(0.25)),
-                    "q3": float(data.quantile(0.75)),
-                    "iqr": float(data.quantile(0.75) - data.quantile(0.25)),
-                    "skewness": float(data.skew()),
-                    "kurtosis": float(data.kurtosis()),
-                    "sum": float(data.sum()),
-                    "cv": float(data.std() / data.mean() * 100) if data.mean() != 0 else None,
+                    "count": count_val,
+                    "mean": mean_val,
+                    "median": median_val,
+                    "mode": mode_val,
+                    "std": std_val,
+                    "variance": var_val,
+                    "min": min_val,
+                    "max": max_val,
+                    "range": range_val,
+                    "q1": q1_val,
+                    "q3": q3_val,
+                    "iqr": iqr_val,
+                    "skewness": skew_val,
+                    "kurtosis": kurt_val,
+                    "sum": sum_val,
+                    "cv": cv_val,
+                    "lower_bound": lower_bound,
+                    "upper_bound": upper_bound,
+                    "outlier_count": outlier_count,
+                    "outlier_pct": outlier_pct,
                 }
             else:
-                # Categorical
+                # Categorical or non-numeric
                 vc = data.value_counts()
                 results[col] = {
                     "count": int(data.count()),
@@ -63,6 +114,25 @@ class StatisticsService:
                     "top": str(vc.index[0]) if len(vc) > 0 else None,
                     "freq": int(vc.iloc[0]) if len(vc) > 0 else 0,
                     "value_counts": {str(k): int(v) for k, v in vc.head(20).items()},
+                    "mean": None,
+                    "median": None,
+                    "mode": None,
+                    "std": None,
+                    "variance": None,
+                    "min": None,
+                    "max": None,
+                    "range": None,
+                    "q1": None,
+                    "q3": None,
+                    "iqr": None,
+                    "skewness": None,
+                    "kurtosis": None,
+                    "sum": None,
+                    "cv": None,
+                    "lower_bound": None,
+                    "upper_bound": None,
+                    "outlier_count": 0,
+                    "outlier_pct": 0.0,
                 }
 
         return {
@@ -229,28 +299,59 @@ class StatisticsService:
     def correlation(
         df: pd.DataFrame, columns: list[str] | None = None, method: str = "pearson"
     ) -> dict:
-        """Compute correlation matrix."""
+        """Compute correlation matrix with safe NaN handling."""
         if columns is None:
-            columns = df.select_dtypes(include=[np.number]).columns.tolist()
+            columns = [c for c in df.columns if pd.api.types.is_numeric_dtype(df[c])]
 
-        corr_matrix = df[columns].corr(method=method)
+        if not columns or len(columns) < 2:
+            return {
+                "test_name": f"{method.capitalize()} correlation",
+                "test_type": "correlation",
+                "method": method,
+                "correlation_matrix": {},
+                "matrix": {},
+                "strongest_correlations": [],
+                "interpretation": "At least 2 numeric columns are required to compute a bivariate correlation matrix.",
+                "assumptions": ["Linearity (for Pearson)", "No outliers (for Pearson)"],
+                "limitations": "Correlation does not imply causation.",
+            }
+
+        # Filter out columns that are all null or have zero variance
+        valid_cols = []
+        for col in columns:
+            series = df[col].dropna()
+            if len(series) > 1 and series.std() > 0:
+                valid_cols.append(col)
+
+        if len(valid_cols) < 2:
+            valid_cols = columns
+
+        corr_df = df[valid_cols].corr(method=method)
+
+        matrix_dict: dict[str, dict[str, float | None]] = {}
+        for r_col in corr_df.index:
+            matrix_dict[str(r_col)] = {}
+            for c_col in corr_df.columns:
+                val = corr_df.loc[r_col, c_col]
+                matrix_dict[str(r_col)][str(c_col)] = _safe_float(val, default=1.0 if r_col == c_col else 0.0)
 
         # Find strongest correlations
         pairs = []
-        for i in range(len(columns)):
-            for j in range(i + 1, len(columns)):
-                r = corr_matrix.iloc[i, j]
-                if not np.isnan(r):
+        for i in range(len(valid_cols)):
+            for j in range(i + 1, len(valid_cols)):
+                r = corr_df.iloc[i, j]
+                r_clean = _safe_float(r)
+                if r_clean is not None:
                     strength = (
-                        "strong" if abs(r) >= 0.7 else "moderate" if abs(r) >= 0.4 else "weak"
+                        "strong" if abs(r_clean) >= 0.7 else "moderate" if abs(r_clean) >= 0.4 else "weak"
                     )
                     pairs.append(
                         {
-                            "var1": columns[i],
-                            "var2": columns[j],
-                            "correlation": float(r),
+                            "var1": str(valid_cols[i]),
+                            "var2": str(valid_cols[j]),
+                            "correlation": round(r_clean, 4),
                             "strength": strength,
-                            "direction": "positive" if r > 0 else "negative",
+                            "direction": "positive" if r_clean > 0 else "negative",
                         }
                     )
         pairs.sort(key=lambda x: abs(x["correlation"]), reverse=True)
@@ -259,21 +360,22 @@ class StatisticsService:
             "test_name": f"{method.capitalize()} correlation",
             "test_type": "correlation",
             "method": method,
-            "correlation_matrix": corr_matrix.to_dict(),
+            "correlation_matrix": matrix_dict,
+            "matrix": matrix_dict,
             "strongest_correlations": pairs[:10],
             "interpretation": (
-                f"Correlation analysis using {method} method. "
+                f"Correlation analysis using {method} method across {len(valid_cols)} numeric variables. "
                 f"Found {len([p for p in pairs if p['strength'] == 'strong'])} strong correlations. "
-                f"Strongest: {pairs[0]['var1']} and {pairs[0]['var2']} (r={pairs[0]['correlation']:.4f})"
+                f"Strongest: {pairs[0]['var1']} and {pairs[0]['var2']} (r={pairs[0]['correlation']:.4f})."
                 if pairs
-                else "No valid correlations found."
+                else f"Evaluated {len(valid_cols)} columns; no significant linear dependencies observed."
             ),
             "assumptions": [
                 "Linearity (for Pearson)",
                 "Normality (for Pearson)",
                 "No outliers (for Pearson)",
             ],
-            "limitations": "Correlation does not imply causation. Spearman is more robust to outliers and non-linear relationships.",
+            "limitations": "Correlation does not imply causation. Non-linear relationships may exist even when r is low.",
         }
 
     @staticmethod

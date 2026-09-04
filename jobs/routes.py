@@ -1,4 +1,4 @@
-﻿"""FastAPI routes for the background job system.
+"""FastAPI routes for the background job system.
 
 Endpoints:
   - POST   /api/jobs                 â€” Create a new job
@@ -82,11 +82,24 @@ async def create_job(
     return job.to_dict()
 
 
+def _sanitize_floats(obj):
+    if obj is None:
+        return None
+    if isinstance(obj, float):
+        import math
+        return None if (math.isnan(obj) or math.isinf(obj)) else obj
+    if isinstance(obj, dict):
+        return {str(k): _sanitize_floats(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple, set)):
+        return [_sanitize_floats(v) for v in obj]
+    return obj
+
+
 @router.get("")
 async def list_jobs(
-    status: str | None = Query(None),
-    job_type: str | None = Query(None),
-    limit: int = Query(50, ge=1, le=200),
+    status: str | None = None,
+    job_type: str | None = None,
+    limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),
     db: DbSession = Depends(get_db),
     current_user: dict = Depends(get_current_user),
@@ -102,7 +115,7 @@ async def list_jobs(
         limit=limit,
         offset=offset,
     )
-    return {"jobs": [j.to_dict() for j in jobs], "count": len(jobs)}
+    return _sanitize_floats({"jobs": [j.to_dict() for j in jobs], "count": len(jobs)})
 
 
 @router.get("/active")
@@ -114,7 +127,7 @@ async def list_active_jobs(
     org_id = get_current_organization_id(current_user, db)
     svc = JobService(db)
     jobs = svc.list_active(org_id)
-    return {"jobs": [j.to_dict() for j in jobs], "count": len(jobs)}
+    return _sanitize_floats({"jobs": [j.to_dict() for j in jobs], "count": len(jobs)})
 
 
 @router.get("/summary")
@@ -125,7 +138,7 @@ async def job_summary(
     """Get job summary statistics for the organization."""
     org_id = get_current_organization_id(current_user, db)
     svc = JobService(db)
-    return svc.get_summary(org_id)
+    return _sanitize_floats(svc.get_summary(org_id))
 
 
 @router.get("/{job_id}")
@@ -140,7 +153,7 @@ async def get_job(
     job = svc.get_job(job_id, org_id)
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
-    return job.to_dict()
+    return _sanitize_floats(job.to_dict())
 
 
 @router.get("/{job_id}/poll")

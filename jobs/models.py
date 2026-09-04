@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
+from typing import Any
+
 from sqlalchemy import (
     Column,
     DateTime,
@@ -15,6 +17,31 @@ from sqlalchemy import (
 from sqlalchemy.dialects.mysql import LONGTEXT
 
 from shared.database import Base, BigInt
+
+def _safe_json_loads(data: str | None) -> Any:
+    if not data:
+        return None
+    import json
+    import math
+
+    def _clean(obj: Any) -> Any:
+        if obj is None:
+            return None
+        if isinstance(obj, float):
+            if math.isnan(obj) or math.isinf(obj):
+                return None
+            return obj
+        if isinstance(obj, dict):
+            return {k: _clean(v) for k, v in obj.items()}
+        if isinstance(obj, list):
+            return [_clean(v) for v in obj]
+        return obj
+
+    try:
+        parsed = json.loads(data)
+        return _clean(parsed)
+    except Exception:
+        return None
 
 
 class Job(Base):
@@ -88,8 +115,6 @@ class Job(Base):
         return None
 
     def to_dict(self) -> dict:
-        import json
-
         return {
             "id": self.id,
             "organization_id": self.organization_id,
@@ -100,8 +125,8 @@ class Job(Base):
             "status": self.status,
             "progress": self.progress,
             "progress_message": self.progress_message,
-            "payload": json.loads(self.payload) if self.payload else None,
-            "result": json.loads(self.result) if self.result else None,
+            "payload": _safe_json_loads(self.payload),
+            "result": _safe_json_loads(self.result),
             "error": self.error,
             "retries": self.retries,
             "max_retries": self.max_retries,

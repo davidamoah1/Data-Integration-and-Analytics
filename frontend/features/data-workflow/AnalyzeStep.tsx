@@ -1,7 +1,19 @@
 'use client';
 
 import { useState } from 'react';
-import { BarChart3, Brain, Calculator, TrendingUp, MessageSquare, Loader2, Sparkles, AlertCircle, ArrowUpDown } from 'lucide-react';
+import {
+  BarChart3,
+  Brain,
+  Calculator,
+  TrendingUp,
+  MessageSquare,
+  Loader2,
+  Sparkles,
+  AlertCircle,
+  ArrowUpDown,
+  ShieldAlert,
+  Info,
+} from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -32,7 +44,7 @@ export function AnalyzeStep({ workflowId, insights, industry, onAskQuestion, onC
   const [qaHistory, setQaHistory] = useState<QAItem[]>([]);
 
   // Pro mode state
-  const [activeProTool, setActiveProTool] = useState<'descriptive' | 'correlation' | 'outlier' | null>(null);
+  const [activeProTool, setActiveProTool] = useState<'descriptive' | 'correlation' | 'outlier'>('descriptive');
   const [proLoading, setProLoading] = useState(false);
   const [proResult, setProResult] = useState<ProAnalysisResult | null>(null);
   const [proError, setProError] = useState<string | null>(null);
@@ -72,7 +84,7 @@ export function AnalyzeStep({ workflowId, insights, industry, onAskQuestion, onC
     setProLoading(true);
     setProError(null);
     try {
-      const typeParam = testType === 'outlier' ? 'descriptive' : testType;
+      const typeParam = testType === 'outlier' ? 'outlier' : testType;
       const res = await workflowService.runProAnalysis(workflowId, typeParam);
       setProResult(res);
     } catch (err: any) {
@@ -117,7 +129,7 @@ export function AnalyzeStep({ workflowId, insights, industry, onAskQuestion, onC
                 onClick={() => {
                   setMode('pro');
                   if (!proResult && !proLoading) {
-                    handleRunProTest('descriptive');
+                    handleRunProTest(activeProTool || 'descriptive');
                   }
                 }}
                 className={`px-4 py-1.5 text-xs font-semibold rounded-md transition-all ${
@@ -249,43 +261,58 @@ export function AnalyzeStep({ workflowId, insights, industry, onAskQuestion, onC
                 Select Statistical Method
               </CardTitle>
               <CardDescription>
-                Execute exact parametric tests and distributional metrics computed on server-side engine
+                Execute exact parametric tests, bivariate dependency matrices, and dispersion boundaries on server-side engine
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <Button
                   variant={activeProTool === 'descriptive' ? 'default' : 'outline'}
-                  className="justify-start h-auto py-3 px-4 text-left"
+                  className={`justify-start h-auto py-3 px-4 text-left transition-all ${
+                    activeProTool === 'descriptive' ? 'ring-2 ring-primary/20 shadow-sm' : ''
+                  }`}
                   onClick={() => handleRunProTest('descriptive')}
                   disabled={proLoading}
                 >
                   <div>
-                    <div className="font-semibold text-xs">Descriptive Statistics</div>
+                    <div className="font-semibold text-xs flex items-center gap-1.5">
+                      <Calculator className="h-3.5 w-3.5" />
+                      Descriptive Statistics
+                    </div>
                     <div className="text-[10px] opacity-80 mt-0.5">Mean, std, median, IQR, skewness, kurtosis</div>
                   </div>
                 </Button>
 
                 <Button
                   variant={activeProTool === 'correlation' ? 'default' : 'outline'}
-                  className="justify-start h-auto py-3 px-4 text-left"
+                  className={`justify-start h-auto py-3 px-4 text-left transition-all ${
+                    activeProTool === 'correlation' ? 'ring-2 ring-primary/20 shadow-sm' : ''
+                  }`}
                   onClick={() => handleRunProTest('correlation')}
                   disabled={proLoading}
                 >
                   <div>
-                    <div className="font-semibold text-xs">Pearson Correlation Matrix</div>
+                    <div className="font-semibold text-xs flex items-center gap-1.5">
+                      <ArrowUpDown className="h-3.5 w-3.5" />
+                      Pearson Correlation Matrix
+                    </div>
                     <div className="text-[10px] opacity-80 mt-0.5">Bivariate coefficients between numeric columns</div>
                   </div>
                 </Button>
 
                 <Button
                   variant={activeProTool === 'outlier' ? 'default' : 'outline'}
-                  className="justify-start h-auto py-3 px-4 text-left"
+                  className={`justify-start h-auto py-3 px-4 text-left transition-all ${
+                    activeProTool === 'outlier' ? 'ring-2 ring-primary/20 shadow-sm' : ''
+                  }`}
                   onClick={() => handleRunProTest('outlier')}
                   disabled={proLoading}
                 >
                   <div>
-                    <div className="font-semibold text-xs">Outlier & Dispersion Bounds</div>
+                    <div className="font-semibold text-xs flex items-center gap-1.5">
+                      <AlertCircle className="h-3.5 w-3.5" />
+                      Outlier & Dispersion Bounds
+                    </div>
                     <div className="text-[10px] opacity-80 mt-0.5">IQR thresholds, min/max ranges & variances</div>
                   </div>
                 </Button>
@@ -303,134 +330,455 @@ export function AnalyzeStep({ workflowId, insights, industry, onAskQuestion, onC
             </Card>
           )}
 
+          {/* Error Banner with Retry */}
           {proError && (
             <Card className="border-red-200 dark:border-red-900 bg-red-50/50 dark:bg-red-950/20">
-              <CardContent className="py-4 flex items-center gap-3 text-red-600 text-sm">
-                <AlertCircle className="h-5 w-5 shrink-0" />
-                <span>{proError}</span>
+              <CardContent className="py-4 flex items-center justify-between gap-3 text-red-600 dark:text-red-400 text-sm">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="h-5 w-5 shrink-0" />
+                  <span>{proError}</span>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleRunProTest(activeProTool)}
+                  className="border-red-200 hover:bg-red-100 dark:border-red-800 text-xs shrink-0"
+                >
+                  Retry Analysis
+                </Button>
               </CardContent>
             </Card>
           )}
 
-          {/* DESCRIPTIVE STATS TABLE */}
-          {!proLoading && (activeProTool === 'descriptive' || activeProTool === 'outlier') && proResult?.results && (
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-base">
-                      {activeProTool === 'outlier' ? 'Dispersion & Extreme Values' : 'Comprehensive Descriptive Statistics'}
-                    </CardTitle>
-                    <CardDescription>{proResult.interpretation || 'Parametric summary of attributes'}</CardDescription>
+          {/* 1. DESCRIPTIVE STATS TABLE */}
+          {!proLoading && activeProTool === 'descriptive' && proResult?.results && (
+            <div className="space-y-4">
+              {/* Metric Overview Cards */}
+              {(() => {
+                const statsList = Object.entries(proResult.results);
+                const numericVars = statsList.filter(([_, s]) => s.mean != null || s.min != null);
+                const catVars = statsList.filter(([_, s]) => s.mean == null && s.min == null);
+
+                return (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <Card className="p-4 bg-muted/20 border-muted">
+                      <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Total Evaluated Columns</p>
+                      <p className="text-xl font-bold mt-1">{statsList.length}</p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">Attributes analyzed across dataset</p>
+                    </Card>
+                    <Card className="p-4 bg-muted/20 border-muted">
+                      <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Numeric Continuous</p>
+                      <p className="text-xl font-bold mt-1 text-primary">{numericVars.length}</p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">Parametric moments and quantiles computed</p>
+                    </Card>
+                    <Card className="p-4 bg-muted/20 border-muted">
+                      <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Categorical / Text</p>
+                      <p className="text-xl font-bold mt-1 text-foreground">{catVars.length}</p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">Distinct categories & modal distributions</p>
+                    </Card>
                   </div>
-                  <Badge variant="outline" className="text-xs">
-                    {Object.keys(proResult.results).length} columns evaluated
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="rounded-lg border overflow-x-auto">
-                  <table className="w-full text-left text-xs border-collapse">
-                    <thead className="bg-muted/50 border-b font-medium text-muted-foreground">
-                      <tr>
-                        <th className="p-3">Variable</th>
-                        <th className="p-3 text-right">Count</th>
-                        <th className="p-3 text-right">Mean</th>
-                        <th className="p-3 text-right">Median</th>
-                        <th className="p-3 text-right">Std Dev</th>
-                        <th className="p-3 text-right">Min</th>
-                        <th className="p-3 text-right">Max</th>
-                        <th className="p-3 text-right">IQR</th>
-                        <th className="p-3 text-right">Skewness</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border font-mono">
-                      {Object.entries(proResult.results).map(([col, stats]) => (
-                        <tr key={col} className="hover:bg-muted/30 transition-colors">
-                          <td className="p-3 font-sans font-semibold text-foreground">{col}</td>
-                          <td className="p-3 text-right">{stats.count}</td>
-                          <td className="p-3 text-right">{stats.mean != null ? stats.mean.toFixed(2) : '—'}</td>
-                          <td className="p-3 text-right">{stats.median != null ? stats.median.toFixed(2) : '—'}</td>
-                          <td className="p-3 text-right">{stats.std != null ? stats.std.toFixed(2) : '—'}</td>
-                          <td className="p-3 text-right">{stats.min != null ? stats.min.toFixed(2) : '—'}</td>
-                          <td className="p-3 text-right">{stats.max != null ? stats.max.toFixed(2) : '—'}</td>
-                          <td className="p-3 text-right">{stats.iqr != null ? stats.iqr.toFixed(2) : '—'}</td>
-                          <td className="p-3 text-right">{stats.skewness != null ? stats.skewness.toFixed(2) : '—'}</td>
+                );
+              })()}
+
+              <Card>
+                <CardHeader>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <Calculator className="h-4 w-4 text-primary" />
+                        Comprehensive Descriptive Statistics
+                      </CardTitle>
+                      <CardDescription>{proResult.interpretation || 'Summary of central tendency, dispersion, and distribution symmetry'}</CardDescription>
+                    </div>
+                    <Badge variant="outline" className="text-xs self-start sm:self-auto">
+                      {Object.keys(proResult.results).length} columns evaluated
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="rounded-lg border overflow-x-auto">
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead className="bg-muted/50 border-b font-medium text-muted-foreground">
+                        <tr>
+                          <th className="p-3">Variable</th>
+                          <th className="p-3 text-right">Count (N)</th>
+                          <th className="p-3 text-right">Mean</th>
+                          <th className="p-3 text-right">Median</th>
+                          <th className="p-3 text-right">Std Dev</th>
+                          <th className="p-3 text-right">Min</th>
+                          <th className="p-3 text-right">Max</th>
+                          <th className="p-3 text-right">IQR</th>
+                          <th className="p-3 text-center">Skewness & Distribution</th>
+                          <th className="p-3 text-right">Kurtosis</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
+                      </thead>
+                      <tbody className="divide-y divide-border font-mono">
+                        {Object.entries(proResult.results).map(([col, stats]) => {
+                          const isNumeric = stats.mean != null || stats.min != null;
+                          const skew = stats.skewness;
+                          const isRightSkew = skew != null && skew > 0.5;
+                          const isLeftSkew = skew != null && skew < -0.5;
+
+                          return (
+                            <tr key={col} className="hover:bg-muted/30 transition-colors">
+                              <td className="p-3 font-sans font-semibold text-foreground">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="truncate max-w-[160px]" title={col}>{col}</span>
+                                  {!isNumeric && (
+                                    <span className="text-[10px] font-normal text-muted-foreground bg-muted px-1.5 py-0.5 rounded">Cat</span>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="p-3 text-right">{stats.count?.toLocaleString()}</td>
+                              <td className="p-3 text-right">{isNumeric && stats.mean != null ? stats.mean.toFixed(2) : '—'}</td>
+                              <td className="p-3 text-right">{isNumeric && stats.median != null ? stats.median.toFixed(2) : '—'}</td>
+                              <td className="p-3 text-right">{isNumeric && stats.std != null ? stats.std.toFixed(2) : '—'}</td>
+                              <td className="p-3 text-right">{isNumeric && stats.min != null ? stats.min.toFixed(2) : '—'}</td>
+                              <td className="p-3 text-right">{isNumeric && stats.max != null ? stats.max.toFixed(2) : '—'}</td>
+                              <td className="p-3 text-right">{isNumeric && stats.iqr != null ? stats.iqr.toFixed(2) : '—'}</td>
+                              <td className="p-3 text-center font-sans">
+                                {!isNumeric || skew == null ? (
+                                  <span className="text-muted-foreground text-[11px]">—</span>
+                                ) : isRightSkew ? (
+                                  <Badge variant="outline" className="bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-800 text-[10px]">
+                                    Right-skewed (+{skew.toFixed(2)})
+                                  </Badge>
+                                ) : isLeftSkew ? (
+                                  <Badge variant="outline" className="bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border-indigo-300 dark:border-indigo-800 text-[10px]">
+                                    Left-skewed ({skew.toFixed(2)})
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="outline" className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800 text-[10px]">
+                                    Symmetric ({skew.toFixed(2)})
+                                  </Badge>
+                                )}
+                              </td>
+                              <td className="p-3 text-right">
+                                {isNumeric && stats.kurtosis != null ? stats.kurtosis.toFixed(2) : '—'}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           )}
 
-          {/* CORRELATION MATRIX */}
-          {!proLoading && activeProTool === 'correlation' && proResult?.matrix && (
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-base">Pearson Correlation Matrix (r)</CardTitle>
-                    <CardDescription>{proResult.interpretation || 'Bivariate relationships between numeric features'}</CardDescription>
+          {/* 2. PEARSON CORRELATION MATRIX */}
+          {!proLoading && activeProTool === 'correlation' && (proResult?.matrix || proResult?.correlation_matrix) && (
+            <div className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <ArrowUpDown className="h-4 w-4 text-primary" />
+                        Pearson Correlation Matrix (r)
+                      </CardTitle>
+                      <CardDescription>
+                        {proResult.interpretation || 'Bivariate relationships between numeric features (-1.00 to +1.00)'}
+                      </CardDescription>
+                    </div>
+                    <div className="flex items-center gap-3 text-xs">
+                      <span className="flex items-center gap-1.5">
+                        <span className="w-3 h-3 rounded bg-emerald-500/30 border border-emerald-500"></span>
+                        <span className="text-muted-foreground">Positive (+1.0)</span>
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <span className="w-3 h-3 rounded bg-muted/60 border border-border"></span>
+                        <span className="text-muted-foreground">Neutral (0.0)</span>
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <span className="w-3 h-3 rounded bg-rose-500/30 border border-rose-500"></span>
+                        <span className="text-muted-foreground">Negative (-1.0)</span>
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3 text-xs">
-                    <span className="flex items-center gap-1">
-                      <span className="w-3 h-3 rounded bg-emerald-500/20 border border-emerald-500"></span> Positive (+1)
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <span className="w-3 h-3 rounded bg-rose-500/20 border border-rose-500"></span> Negative (-1)
-                    </span>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="rounded-lg border overflow-x-auto">
-                  <table className="w-full text-left text-xs border-collapse font-mono">
-                    <thead className="bg-muted/50 border-b">
-                      <tr>
-                        <th className="p-2.5 font-sans font-semibold text-foreground">Variable</th>
-                        {Object.keys(proResult.matrix).map((col) => (
-                          <th key={col} className="p-2.5 text-center font-sans font-medium whitespace-nowrap">
-                            {col}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border">
-                      {Object.entries(proResult.matrix).map(([rowCol, rowVals]) => (
-                        <tr key={rowCol}>
-                          <td className="p-2.5 font-sans font-semibold text-foreground whitespace-nowrap bg-muted/20">
-                            {rowCol}
-                          </td>
-                          {Object.entries(rowVals).map(([colKey, val]) => {
-                            const num = typeof val === 'number' ? val : 0;
-                            const isPositive = num > 0.3;
-                            const isNegative = num < -0.3;
-                            return (
-                              <td
-                                key={colKey}
-                                className={`p-2.5 text-center font-semibold text-xs ${
-                                  rowCol === colKey
-                                    ? 'bg-muted/60 text-muted-foreground'
-                                    : isPositive
-                                      ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-bold'
-                                      : isNegative
-                                        ? 'bg-rose-500/10 text-rose-700 dark:text-rose-400 font-bold'
-                                        : 'text-muted-foreground'
+                </CardHeader>
+                <CardContent>
+                  {(() => {
+                    const matrix = (proResult.matrix || proResult.correlation_matrix) as Record<string, Record<string, number>>;
+                    const cols = Object.keys(matrix);
+                    if (cols.length === 0) {
+                      return (
+                        <div className="py-8 text-center text-sm text-muted-foreground">
+                          At least 2 numeric columns with variance are required to compute a bivariate correlation matrix.
+                        </div>
+                      );
+                    }
+                    return (
+                      <div className="rounded-lg border overflow-x-auto">
+                        <table className="w-full text-left text-xs border-collapse font-mono">
+                          <thead className="bg-muted/50 border-b">
+                            <tr>
+                              <th className="p-2.5 font-sans font-semibold text-foreground whitespace-nowrap">Variable</th>
+                              {cols.map((col) => (
+                                <th key={col} className="p-2.5 text-center font-sans font-medium whitespace-nowrap" title={col}>
+                                  <span className="truncate max-w-[120px] inline-block">{col}</span>
+                                </th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-border">
+                            {cols.map((rowCol) => (
+                              <tr key={rowCol}>
+                                <td className="p-2.5 font-sans font-semibold text-foreground whitespace-nowrap bg-muted/20" title={rowCol}>
+                                  <span className="truncate max-w-[140px] inline-block">{rowCol}</span>
+                                </td>
+                                {cols.map((colKey) => {
+                                  const rawVal = matrix[rowCol]?.[colKey];
+                                  const num = typeof rawVal === 'number' ? rawVal : null;
+                                  const isDiag = rowCol === colKey;
+                                  const isStrongPos = num != null && num >= 0.7 && !isDiag;
+                                  const isModPos = num != null && num >= 0.3 && num < 0.7 && !isDiag;
+                                  const isStrongNeg = num != null && num <= -0.7 && !isDiag;
+                                  const isModNeg = num != null && num <= -0.3 && num > -0.7 && !isDiag;
+
+                                  return (
+                                    <td
+                                      key={colKey}
+                                      className={`p-2.5 text-center text-xs transition-colors ${
+                                        isDiag
+                                          ? 'bg-muted/60 text-muted-foreground font-medium'
+                                          : isStrongPos
+                                            ? 'bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 font-bold'
+                                            : isModPos
+                                              ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-medium'
+                                              : isStrongNeg
+                                                ? 'bg-rose-500/20 text-rose-800 dark:text-rose-300 font-bold'
+                                                : isModNeg
+                                                  ? 'bg-rose-500/10 text-rose-700 dark:text-rose-400 font-medium'
+                                                  : 'text-muted-foreground'
+                                      }`}
+                                    >
+                                      {num != null ? num.toFixed(2) : '—'}
+                                    </td>
+                                  );
+                                })}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    );
+                  })()}
+                </CardContent>
+              </Card>
+
+              {/* Strongest Bivariate Correlations */}
+              {proResult.strongest_correlations && proResult.strongest_correlations.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-primary" />
+                      Strongest Observed Bivariate Relationships
+                    </CardTitle>
+                    <CardDescription>
+                      Ranked pairs ordered by coefficient absolute magnitude (|r|)
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {proResult.strongest_correlations.map((pair, idx) => {
+                        const isPos = pair.direction === 'positive';
+                        const isStrong = pair.strength === 'strong';
+                        return (
+                          <div
+                            key={idx}
+                            className={`p-3 rounded-lg border flex flex-col justify-between gap-2 ${
+                              isStrong
+                                ? isPos
+                                  ? 'border-emerald-300 bg-emerald-50/30 dark:border-emerald-900 dark:bg-emerald-950/20'
+                                  : 'border-rose-300 bg-rose-50/30 dark:border-rose-900 dark:bg-rose-950/20'
+                                : 'bg-card border-border'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-xs font-semibold truncate" title={`${pair.var1} ↔ ${pair.var2}`}>
+                                {pair.var1} <span className="text-muted-foreground">↔</span> {pair.var2}
+                              </span>
+                              <Badge
+                                className={`text-[10px] font-mono shrink-0 ${
+                                  isPos
+                                    ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-300'
+                                    : 'bg-rose-500/15 text-rose-700 dark:text-rose-400 border-rose-300'
                                 }`}
                               >
-                                {num.toFixed(2)}
-                              </td>
-                            );
-                          })}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                                r = {pair.correlation > 0 ? `+${pair.correlation.toFixed(2)}` : pair.correlation.toFixed(2)}
+                              </Badge>
+                            </div>
+                            <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                              <span className="capitalize">{pair.strength} {pair.direction}</span>
+                              <span className="text-[10px]">
+                                {isStrong ? 'High collinearity risk' : 'Moderate association'}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Statistical Assumptions Note */}
+              <div className="p-3.5 rounded-lg border bg-muted/15 text-xs text-muted-foreground flex items-start gap-2.5">
+                <Info className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                <div>
+                  <span className="font-semibold text-foreground">Statistical Assumptions & Limitations: </span>
+                  Pearson's r measures linear dependence between continuous variables. It is sensitive to extreme outliers and does not establish causation. Non-linear relationships (e.g. polynomial, logarithmic) may exhibit low Pearson r despite strong functional connection.
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
+          )}
+
+          {/* 3. OUTLIER & DISPERSION BOUNDS */}
+          {!proLoading && activeProTool === 'outlier' && proResult?.results && (
+            <div className="space-y-4">
+              {/* KPI Summary Cards */}
+              {(() => {
+                const statsList = Object.entries(proResult.results);
+                const numericStats = statsList.filter(([_, s]) => s.mean != null || s.min != null);
+                const outlierVars = numericStats.filter(([_, s]) => (s.outlier_count || 0) > 0);
+                const totalOutliers = numericStats.reduce((sum, [_, s]) => sum + (s.outlier_count || 0), 0);
+
+                return (
+                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                    <Card className="p-4 bg-muted/20 border-muted">
+                      <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Analyzed Variables</p>
+                      <p className="text-xl font-bold mt-1">{numericStats.length}</p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">Continuous numeric features</p>
+                    </Card>
+                    <Card className="p-4 bg-muted/20 border-muted">
+                      <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Features With Outliers</p>
+                      <p className="text-xl font-bold mt-1 text-amber-600 dark:text-amber-400">
+                        {outlierVars.length} <span className="text-xs font-normal text-muted-foreground">/ {numericStats.length}</span>
+                      </p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">Exceeding Tukey's fences</p>
+                    </Card>
+                    <Card className="p-4 bg-muted/20 border-muted">
+                      <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Total Outlier Points</p>
+                      <p className={`text-xl font-bold mt-1 ${totalOutliers > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                        {totalOutliers}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">Flagged data points</p>
+                    </Card>
+                    <Card className="p-4 bg-muted/20 border-muted">
+                      <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Fence Formulation</p>
+                      <p className="text-sm font-semibold mt-1.5 text-foreground font-mono">Q1/Q3 ± 1.5 × IQR</p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">Standard non-parametric bounds</p>
+                    </Card>
+                  </div>
+                );
+              })()}
+
+              <Card>
+                <CardHeader>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <ShieldAlert className="h-4 w-4 text-primary" />
+                        Outlier & Dispersion Boundaries
+                      </CardTitle>
+                      <CardDescription>
+                        {proResult.interpretation || "Evaluates dispersion metrics, interquartile fences, and extreme anomalous points."}
+                      </CardDescription>
+                    </div>
+                    <Badge variant="outline" className="text-xs self-start sm:self-auto">
+                      {Object.keys(proResult.results).length} features evaluated
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="rounded-lg border overflow-x-auto">
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead className="bg-muted/50 border-b font-medium text-muted-foreground">
+                        <tr>
+                          <th className="p-3">Variable</th>
+                          <th className="p-3 text-right">Count (N)</th>
+                          <th className="p-3 text-right">Std Dev / Variance</th>
+                          <th className="p-3 text-right">Range [Min, Max]</th>
+                          <th className="p-3 text-right">IQR (Q1 – Q3)</th>
+                          <th className="p-3 text-right text-rose-600 dark:text-rose-400">Lower Fence</th>
+                          <th className="p-3 text-right text-rose-600 dark:text-rose-400">Upper Fence</th>
+                          <th className="p-3 text-center">Outliers Flagged</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border font-mono">
+                        {Object.entries(proResult.results).map(([col, stats]) => {
+                          const isNumeric = stats.mean != null || stats.min != null;
+                          const hasOutliers = (stats.outlier_count || 0) > 0;
+                          return (
+                            <tr key={col} className={`hover:bg-muted/30 transition-colors ${hasOutliers ? 'bg-rose-50/20 dark:bg-rose-950/10' : ''}`}>
+                              <td className="p-3 font-sans font-semibold text-foreground">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="truncate max-w-[160px]" title={col}>{col}</span>
+                                  {!isNumeric && (
+                                    <span className="text-[10px] font-normal text-muted-foreground bg-muted px-1.5 py-0.5 rounded">Cat</span>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="p-3 text-right">{stats.count?.toLocaleString()}</td>
+                              <td className="p-3 text-right">
+                                {isNumeric && stats.std != null ? (
+                                  <span>
+                                    {stats.std.toFixed(2)}{' '}
+                                    <span className="text-[10px] text-muted-foreground">
+                                      (v: {stats.variance != null ? stats.variance.toFixed(1) : '—'})
+                                    </span>
+                                  </span>
+                                ) : (
+                                  '—'
+                                )}
+                              </td>
+                              <td className="p-3 text-right">
+                                {isNumeric && stats.min != null && stats.max != null
+                                  ? `[${stats.min.toFixed(1)}, ${stats.max.toFixed(1)}]`
+                                  : '—'}
+                              </td>
+                              <td className="p-3 text-right">
+                                {isNumeric && stats.iqr != null ? (
+                                  <span>
+                                    {stats.iqr.toFixed(2)}{' '}
+                                    <span className="text-[10px] text-muted-foreground">
+                                      ({stats.q1?.toFixed(1)}–{stats.q3?.toFixed(1)})
+                                    </span>
+                                  </span>
+                                ) : (
+                                  '—'
+                                )}
+                              </td>
+                              <td className="p-3 text-right font-semibold text-amber-700 dark:text-amber-400">
+                                {isNumeric && stats.lower_bound != null ? stats.lower_bound.toFixed(2) : '—'}
+                              </td>
+                              <td className="p-3 text-right font-semibold text-amber-700 dark:text-amber-400">
+                                {isNumeric && stats.upper_bound != null ? stats.upper_bound.toFixed(2) : '—'}
+                              </td>
+                              <td className="p-3 text-center">
+                                {!isNumeric ? (
+                                  <span className="text-muted-foreground font-sans text-[11px]">—</span>
+                                ) : hasOutliers ? (
+                                  <Badge className="bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-300 dark:border-rose-800 text-[11px] font-sans font-semibold">
+                                    {stats.outlier_count} ({stats.outlier_pct}%)
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="outline" className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800 text-[11px] font-sans font-medium">
+                                    0 (0.0%)
+                                  </Badge>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           )}
         </div>
       )}

@@ -18,9 +18,12 @@ from __future__ import annotations
 import io
 import json
 import logging
+import math
 import os
 import tempfile
+from typing import Any
 
+import numpy as np
 import pandas as pd
 from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
 from fastapi.responses import JSONResponse
@@ -1164,6 +1167,36 @@ async def get_cleaning_history(
     }
 
 
+def _sanitize_floats_for_json(obj: Any) -> Any:
+    """Recursively replace NaN, Inf, -Inf, and non-serializable types with JSON-safe values."""
+    if obj is None:
+        return None
+    if isinstance(obj, float):
+        if math.isnan(obj) or math.isinf(obj):
+            return None
+        return obj
+    if isinstance(obj, (np.floating,)):
+        val = float(obj)
+        if math.isnan(val) or math.isinf(val):
+            return None
+        return val
+    if isinstance(obj, (np.integer,)):
+        return int(obj)
+    if isinstance(obj, (np.bool_,)):
+        return bool(obj)
+    if isinstance(obj, np.ndarray):
+        return _sanitize_floats_for_json(obj.tolist())
+    if isinstance(obj, pd.Series):
+        return _sanitize_floats_for_json(obj.to_dict())
+    if isinstance(obj, pd.DataFrame):
+        return _sanitize_floats_for_json(obj.to_dict(orient="records"))
+    if isinstance(obj, dict):
+        return {str(k): _sanitize_floats_for_json(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple, set)):
+        return [_sanitize_floats_for_json(v) for v in obj]
+    return obj
+
+
 @router.post("/{workflow_id}/analyze")
 async def run_analysis(
     workflow_id: str,
@@ -1275,14 +1308,14 @@ async def run_analysis(
 
         return {
             "success": True,
-            "data": {
+            "data": _sanitize_floats_for_json({
                 "mode": "easy",
                 "insights": [i.to_dict() for i in insights],
                 "total_insights": len(insights),
                 "industry_analytics": industry_analytics.to_dict() if industry_analytics else None,
                 "question": payload.question,
                 "answer": answer,
-            },
+            }),
         }
 
     elif payload.mode == "pro":
@@ -1294,14 +1327,24 @@ async def run_analysis(
         columns = payload.columns
 
         try:
-            if analysis_type == "descriptive":
+            if analysis_type in ("descriptive", "outlier"):
                 result = svc.descriptive(df, columns)
-                if isinstance(result, dict) and "results" in result:
-                    result["descriptive_stats"] = result["results"]
+                if isinstance(result, dict):
+                    if "results" in result:
+                        result["descriptive_stats"] = result["results"]
+                    if analysis_type == "outlier":
+                        result["analysis_type"] = "outlier"
+                        result["interpretation"] = (
+                            "Dispersion and outlier bounds computed using Tukey's interquartile range "
+                            "(IQR × 1.5 fences) to isolate distributional anomalies."
+                        )
             elif analysis_type == "correlation":
                 result = svc.correlation(df, columns, method="pearson")
-                if isinstance(result, dict) and "matrix" in result:
-                    result["correlation_matrix"] = result["matrix"]
+                if isinstance(result, dict):
+                    if "matrix" in result:
+                        result["correlation_matrix"] = result["matrix"]
+                    if "correlation_matrix" in result and "matrix" not in result:
+                        result["matrix"] = result["correlation_matrix"]
             elif analysis_type == "ttest":
                 if not columns or len(columns) < 1 or not payload.group_column:
                     raise HTTPException(
@@ -1353,12 +1396,13 @@ async def run_analysis(
                     status_code=400, detail=f"Unknown analysis type: {analysis_type}"
                 )
 
+            sanitized_result = _sanitize_floats_for_json(result)
             return {
                 "success": True,
                 "data": {
                     "mode": "pro",
                     "analysis_type": analysis_type,
-                    "result": result,
+                    "result": sanitized_result,
                 },
             }
         except HTTPException:
