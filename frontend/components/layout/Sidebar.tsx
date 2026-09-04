@@ -108,7 +108,7 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="relative flex h-full w-64 flex-col border-r border-sidebar-border bg-white text-sidebar-foreground overflow-hidden">
+    <aside className="relative flex h-full w-64 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground overflow-hidden transition-colors duration-200">
       {/* Dotted mesh background */}
       <div
         aria-hidden="true"
@@ -116,24 +116,24 @@ export function Sidebar() {
       />
 
       {/* Logo */}
-      <div className="relative z-10 flex h-16 items-center gap-2.5 border-b border-sidebar-border bg-white/80 backdrop-blur-xs px-5">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white shadow-sm">
+      <div className="relative z-10 flex h-16 items-center gap-2.5 border-b border-sidebar-border bg-sidebar/90 backdrop-blur-xs px-5 transition-colors">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white shadow-sm shadow-indigo-500/20">
           D
         </div>
-        <span className="text-base font-bold tracking-tight text-slate-900">DataFlow</span>
+        <span className="text-base font-bold tracking-tight text-slate-900 dark:text-white">DataFlow</span>
       </div>
 
       {/* User info */}
       {user && (
-        <div className="relative z-10 border-b border-sidebar-border px-4 py-3 bg-white/70 backdrop-blur-xs">
-          <p className="truncate text-sm font-semibold text-slate-800">{user.full_name}</p>
-          <p className="truncate text-xs text-slate-500">{user.email}</p>
+        <div className="relative z-10 border-b border-sidebar-border px-4 py-3 bg-sidebar/70 backdrop-blur-xs transition-colors">
+          <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-100">{user.full_name}</p>
+          <p className="truncate text-xs text-slate-500 dark:text-slate-400">{user.email}</p>
           {user.roles.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-1">
               {user.roles.slice(0, 2).map((role) => (
                 <span
                   key={role}
-                  className="rounded-md bg-white px-2 py-0.5 text-[10px] font-medium text-slate-600 border border-slate-200 shadow-xs"
+                  className="rounded-md bg-white dark:bg-slate-800/90 px-2 py-0.5 text-[10px] font-medium text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700/60 shadow-xs"
                 >
                   {ROLE_LABELS[role] || role.replace(/_/g, ' ')}
                 </span>
@@ -159,15 +159,17 @@ export function Sidebar() {
                 className={cn(
                   'group flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-xs font-semibold tracking-wide transition-all select-none',
                   hasActiveItem
-                    ? 'bg-indigo-50/90 text-indigo-900 font-bold shadow-xs border border-indigo-100/50 backdrop-blur-xs'
-                    : 'text-slate-600 hover:bg-white/80 hover:text-slate-900',
+                    ? 'bg-indigo-50/90 dark:bg-indigo-950/50 text-indigo-900 dark:text-indigo-200 font-bold shadow-xs border border-indigo-100/50 dark:border-indigo-800/40 backdrop-blur-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-slate-100',
                 )}
               >
                 <div className="flex items-center gap-2.5 min-w-0">
                   <GroupIcon
                     className={cn(
                       'h-4 w-4 shrink-0 transition-colors',
-                      hasActiveItem ? 'text-indigo-600' : 'text-slate-400 group-hover:text-slate-600',
+                      hasActiveItem
+                        ? 'text-indigo-600 dark:text-indigo-400'
+                        : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300',
                     )}
                   />
                   <span className="truncate">{group.label}</span>
@@ -175,15 +177,15 @@ export function Sidebar() {
 
                 <div className="flex items-center gap-1.5 shrink-0">
                   {hasActiveItem && !isOpen && (
-                    <span className="h-1.5 w-1.5 rounded-full bg-indigo-600 ring-2 ring-indigo-100" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400 ring-2 ring-indigo-100 dark:ring-indigo-900" />
                   )}
-                  <span className="rounded bg-slate-100/90 px-1.5 py-0.5 text-[10px] font-medium text-slate-500">
+                  <span className="rounded bg-slate-100/90 dark:bg-slate-800/80 px-1.5 py-0.5 text-[10px] font-medium text-slate-500 dark:text-slate-400 border border-slate-200/50 dark:border-slate-700/50">
                     {group.items.length}
                   </span>
                   <ChevronDown
                     size={14}
                     className={cn(
-                      'text-slate-400 transition-transform duration-200',
+                      'text-slate-400 dark:text-slate-500 transition-transform duration-200',
                       isOpen ? 'rotate-0' : '-rotate-90',
                     )}
                   />
@@ -192,7 +194,7 @@ export function Sidebar() {
 
               {/* Submenu Child Items */}
               {isOpen && (
-                <div className="relative ml-3.5 mt-1 space-y-0.5 border-l border-slate-200 pl-2">
+                <div className="relative ml-3.5 mt-1 space-y-0.5 border-l border-slate-200 dark:border-slate-800 pl-2">
                   {group.items.map((item) => {
                     const isActive = isItemActive(item.href);
                     const Icon = item.icon;
@@ -204,14 +206,16 @@ export function Sidebar() {
                         className={cn(
                           'group flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-xs sm:text-sm font-medium transition-all',
                           isActive
-                            ? 'bg-indigo-50/95 text-indigo-700 font-semibold shadow-xs border border-indigo-100/60 backdrop-blur-xs'
-                            : 'text-slate-600 hover:bg-white/80 hover:text-slate-900',
+                            ? 'bg-indigo-50/95 dark:bg-indigo-600/20 text-indigo-700 dark:text-indigo-300 font-semibold shadow-xs border border-indigo-100/60 dark:border-indigo-500/30 backdrop-blur-xs'
+                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-slate-100',
                         )}
                       >
                         <Icon
                           className={cn(
                             'h-4 w-4 shrink-0 transition-colors',
-                            isActive ? 'text-indigo-600' : 'text-slate-400 group-hover:text-slate-600',
+                            isActive
+                              ? 'text-indigo-600 dark:text-indigo-400'
+                              : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300',
                           )}
                         />
                         <span className="truncate">{item.label}</span>
@@ -226,12 +230,12 @@ export function Sidebar() {
       </nav>
 
       {/* Version */}
-      <div className="relative z-10 border-t border-sidebar-border bg-white/80 backdrop-blur-xs px-5 py-3 text-xs text-slate-500">
+      <div className="relative z-10 border-t border-sidebar-border bg-sidebar/80 backdrop-blur-xs px-5 py-3 text-xs text-slate-500 dark:text-slate-400 transition-colors">
         <div className="flex items-center justify-between gap-1">
-          <span className="shrink-0 text-slate-400">DataFlow v2.0.0</span>
+          <span className="shrink-0 text-slate-400 dark:text-slate-500">DataFlow v2.0.0</span>
           {primaryRole && (
             <span
-              className="truncate text-[11px] font-medium text-slate-600"
+              className="truncate text-[11px] font-medium text-slate-600 dark:text-slate-400"
               title={ROLE_LABELS[primaryRole] || primaryRole}
             >
               {ROLE_LABELS[primaryRole] || primaryRole}
