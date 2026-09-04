@@ -1823,7 +1823,7 @@ async def generate_certificate_presentation(
             p.font.size = Pt(16)
             p.font.color.rgb = DARK_TEXT
 
-    def _add_chart_slide(title: str, data: dict[str, int], chart_type=XL_CHART_TYPE.BAR_CHART):
+    def _add_chart_slide(title: str, data: dict[str, int], chart_type=XL_CHART_TYPE.BAR_CLUSTERED):
         slide = prs.slides.add_slide(blank_layout)
         # Title
         txBox = slide.shapes.add_textbox(Inches(0.5), Inches(0.3), Inches(12), Inches(0.8))
@@ -1891,23 +1891,23 @@ async def generate_certificate_presentation(
     _add_summary_slide()
 
     if analytics.by_type:
-        _add_chart_slide("Certificates by Type", analytics.by_type, XL_CHART_TYPE.BAR_CHART)
+        _add_chart_slide("Certificates by Type", analytics.by_type, XL_CHART_TYPE.BAR_CLUSTERED)
 
     if analytics.by_verification:
-        _add_chart_slide("Verification Status", analytics.by_verification, XL_CHART_TYPE.PIE_CHART)
+        _add_chart_slide("Verification Status", analytics.by_verification, XL_CHART_TYPE.PIE)
 
     if analytics.institutions:
         # Top 10 institutions
         top_inst = dict(
             sorted(analytics.institutions.items(), key=lambda kv: kv[1], reverse=True)[:10]
         )
-        _add_chart_slide("Top Institutions", top_inst, XL_CHART_TYPE.BAR_CHART)
+        _add_chart_slide("Top Institutions", top_inst, XL_CHART_TYPE.BAR_CLUSTERED)
 
     if analytics.qualifications:
         top_qual = dict(
             sorted(analytics.qualifications.items(), key=lambda kv: kv[1], reverse=True)[:10]
         )
-        _add_chart_slide("Qualifications", top_qual, XL_CHART_TYPE.BAR_CHART)
+        _add_chart_slide("Qualifications", top_qual, XL_CHART_TYPE.BAR_CLUSTERED)
 
     _add_certificate_highlights_slide()
 
@@ -2457,7 +2457,7 @@ async def approved_analytics_presentation(
                 p.font.size = Pt(14)
                 p.font.color.rgb = DARK_TEXT
 
-    def _add_chart_slide(title, data, chart_type=XL_CHART_TYPE.BAR_CHART):
+    def _add_chart_slide(title, data, chart_type=XL_CHART_TYPE.BAR_CLUSTERED):
         slide = prs.slides.add_slide(blank_layout)
         txBox = slide.shapes.add_textbox(Inches(0.5), Inches(0.3), Inches(12), Inches(0.8))
         tf = txBox.text_frame
@@ -2535,17 +2535,17 @@ async def approved_analytics_presentation(
 
     top_names = dict(list(result.by_name.items())[:15])
     if top_names:
-        _add_chart_slide("Top Certificate Names", top_names, XL_CHART_TYPE.BAR_CHART)
+        _add_chart_slide("Top Certificate Names", top_names, XL_CHART_TYPE.BAR_CLUSTERED)
 
     if result.by_type:
-        _add_chart_slide("Certificates by Type", result.by_type, XL_CHART_TYPE.PIE_CHART)
+        _add_chart_slide("Certificates by Type", result.by_type, XL_CHART_TYPE.PIE)
 
     top_issuers = dict(list(result.by_issuer.items())[:15])
     if top_issuers:
-        _add_chart_slide("Top Issuing Organizations", top_issuers, XL_CHART_TYPE.BAR_CHART)
+        _add_chart_slide("Top Issuing Organizations", top_issuers, XL_CHART_TYPE.BAR_CLUSTERED)
 
     if result.trends:
-        _add_chart_slide("Completion Trends by Year", result.trends, XL_CHART_TYPE.COLUMN_CHART)
+        _add_chart_slide("Completion Trends by Year", result.trends, XL_CHART_TYPE.COLUMN_CLUSTERED)
 
     _add_data_quality_slide()
     _add_recipients_slide()
