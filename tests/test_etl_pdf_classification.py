@@ -33,7 +33,9 @@ def _make_zip(files: dict[str, bytes]) -> str:
 
 
 # Minimal valid PDF content (starts with %PDF magic bytes)
-MINIMAL_PDF = b"%PDF-1.4\n1 0 obj\n<< /Type /Catalog >>\nendobj\ntrailer\n<< /Root 1 0 R >>\n%%EOF\n"
+MINIMAL_PDF = (
+    b"%PDF-1.4\n1 0 obj\n<< /Type /Catalog >>\nendobj\ntrailer\n<< /Root 1 0 R >>\n%%EOF\n"
+)
 
 # Minimal JPEG content (starts with \xff\xd8\xff magic bytes)
 MINIMAL_JPEG = b"\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x00\x00\x01\x00\x01\x00\x00\xff\xd9"
@@ -47,42 +49,52 @@ class TestFileClassification:
 
     def test_csv_is_structured_data(self):
         from etl.zip_extractor import classify_file_type
+
         assert classify_file_type("data.csv") == "STRUCTURED_DATA"
 
     def test_xlsx_is_structured_data(self):
         from etl.zip_extractor import classify_file_type
+
         assert classify_file_type("report.xlsx") == "STRUCTURED_DATA"
 
     def test_json_is_structured_data(self):
         from etl.zip_extractor import classify_file_type
+
         assert classify_file_type("config.json") == "STRUCTURED_DATA"
 
     def test_pdf_is_document(self):
         from etl.zip_extractor import classify_file_type
+
         assert classify_file_type("certificate.pdf") == "DOCUMENT"
 
     def test_txt_is_document(self):
         from etl.zip_extractor import classify_file_type
+
         assert classify_file_type("notes.txt") == "DOCUMENT"
 
     def test_jpg_is_image(self):
         from etl.zip_extractor import classify_file_type
+
         assert classify_file_type("photo.jpg") == "IMAGE"
 
     def test_png_is_image(self):
         from etl.zip_extractor import classify_file_type
+
         assert classify_file_type("screenshot.png") == "IMAGE"
 
     def test_tiff_is_image(self):
         from etl.zip_extractor import classify_file_type
+
         assert classify_file_type("scan.tiff") == "IMAGE"
 
     def test_zip_is_archive(self):
         from etl.zip_extractor import classify_file_type
+
         assert classify_file_type("bundle.zip") == "ARCHIVE"
 
     def test_unknown_extension(self):
         from etl.zip_extractor import classify_file_type
+
         assert classify_file_type("file.xyz") == "UNKNOWN"
 
 
@@ -91,30 +103,35 @@ class TestMagicByteVerification:
 
     def test_valid_pdf_magic_bytes(self, tmp_path):
         from etl.zip_extractor import verify_magic_bytes
+
         p = tmp_path / "test.pdf"
         p.write_bytes(MINIMAL_PDF)
         assert verify_magic_bytes("test.pdf", str(p)) is True
 
     def test_invalid_pdf_magic_bytes(self, tmp_path):
         from etl.zip_extractor import verify_magic_bytes
+
         p = tmp_path / "fake.pdf"
         p.write_bytes(b"This is not a PDF, just text")
         assert verify_magic_bytes("fake.pdf", str(p)) is False
 
     def test_valid_jpeg_magic_bytes(self, tmp_path):
         from etl.zip_extractor import verify_magic_bytes
+
         p = tmp_path / "photo.jpg"
         p.write_bytes(MINIMAL_JPEG)
         assert verify_magic_bytes("photo.jpg", str(p)) is True
 
     def test_valid_png_magic_bytes(self, tmp_path):
         from etl.zip_extractor import verify_magic_bytes
+
         p = tmp_path / "image.png"
         p.write_bytes(MINIMAL_PNG)
         assert verify_magic_bytes("image.png", str(p)) is True
 
     def test_no_signature_returns_true(self, tmp_path):
         from etl.zip_extractor import verify_magic_bytes
+
         p = tmp_path / "data.csv"
         p.write_bytes(b"a,b,c\n1,2,3\n")
         # CSV has no magic byte signature, so it returns True
@@ -169,36 +186,43 @@ class TestStructuredDataRegression:
 
     def test_csv_still_structured(self):
         from etl.zip_extractor import STRUCTURED_DATA_EXTENSIONS, classify_file_type
+
         assert "csv" in STRUCTURED_DATA_EXTENSIONS
         assert classify_file_type("data.csv") == "STRUCTURED_DATA"
 
     def test_xlsx_still_structured(self):
         from etl.zip_extractor import STRUCTURED_DATA_EXTENSIONS, classify_file_type
+
         assert "xlsx" in STRUCTURED_DATA_EXTENSIONS
         assert classify_file_type("report.xlsx") == "STRUCTURED_DATA"
 
     def test_json_still_structured(self):
         from etl.zip_extractor import STRUCTURED_DATA_EXTENSIONS, classify_file_type
+
         assert "json" in STRUCTURED_DATA_EXTENSIONS
         assert classify_file_type("config.json") == "STRUCTURED_DATA"
 
     def test_xml_still_structured(self):
         from etl.zip_extractor import STRUCTURED_DATA_EXTENSIONS, classify_file_type
+
         assert "xml" in STRUCTURED_DATA_EXTENSIONS
         assert classify_file_type("data.xml") == "STRUCTURED_DATA"
 
     def test_tsv_still_structured(self):
         from etl.zip_extractor import STRUCTURED_DATA_EXTENSIONS, classify_file_type
+
         assert "tsv" in STRUCTURED_DATA_EXTENSIONS
         assert classify_file_type("data.tsv") == "STRUCTURED_DATA"
 
     def test_ods_still_structured(self):
         from etl.zip_extractor import STRUCTURED_DATA_EXTENSIONS, classify_file_type
+
         assert "ods" in STRUCTURED_DATA_EXTENSIONS
         assert classify_file_type("report.ods") == "STRUCTURED_DATA"
 
     def test_xls_still_structured(self):
         from etl.zip_extractor import STRUCTURED_DATA_EXTENSIONS, classify_file_type
+
         assert "xls" in STRUCTURED_DATA_EXTENSIONS
         assert classify_file_type("legacy.xls") == "STRUCTURED_DATA"
 
@@ -254,16 +278,19 @@ class TestSupportedExtensions:
 
     def test_all_structured_types_supported(self):
         from etl.zip_extractor import SUPPORTED_EXTENSIONS
+
         for ext in ("csv", "tsv", "xlsx", "xls", "json", "xml", "ods"):
             assert ext in SUPPORTED_EXTENSIONS, f"{ext} should be supported"
 
     def test_all_document_types_supported(self):
         from etl.zip_extractor import SUPPORTED_EXTENSIONS
+
         for ext in ("pdf", "txt"):
             assert ext in SUPPORTED_EXTENSIONS, f"{ext} should be supported"
 
     def test_all_image_types_supported(self):
         from etl.zip_extractor import SUPPORTED_EXTENSIONS
+
         for ext in ("jpg", "jpeg", "png", "tiff", "tif", "bmp"):
             assert ext in SUPPORTED_EXTENSIONS, f"{ext} should be supported"
 
@@ -331,6 +358,7 @@ class TestDocumentStatuses:
     def test_model_status_column_widened(self):
         """Verify the status column can hold long document status strings."""
         from etl.package_models import ETLPackageFile
+
         # The status column should be String(40) to accommodate
         # 'document_extraction_pending' (28 chars)
         status_col = ETLPackageFile.__table__.c.status

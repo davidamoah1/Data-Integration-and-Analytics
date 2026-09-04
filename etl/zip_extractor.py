@@ -109,6 +109,7 @@ def verify_magic_bytes(filename: str, file_path: str) -> bool:
     except OSError:
         return False
 
+
 # Extensions that are always rejected
 BLOCKED_EXTENSIONS = {
     "exe",

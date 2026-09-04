@@ -2049,9 +2049,7 @@ async def approved_analytics_records(
         date_to=date_to,
         year=year,
     )
-    return svc.get_records(
-        org_id, filters, search, sort_by, sort_order, limit, offset
-    )
+    return svc.get_records(org_id, filters, search, sort_by, sort_order, limit, offset)
 
 
 @router.get("/approved-analytics/filters")
@@ -2102,19 +2100,35 @@ async def approved_analytics_export_csv(
 
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow([
-        "Recipient", "Certificate Name", "Certificate Type",
-        "Course", "Issuing Organization", "Completion Date",
-        "Certificate Number", "Verification Status", "Approved At",
-        "Filename",
-    ])
+    writer.writerow(
+        [
+            "Recipient",
+            "Certificate Name",
+            "Certificate Type",
+            "Course",
+            "Issuing Organization",
+            "Completion Date",
+            "Certificate Number",
+            "Verification Status",
+            "Approved At",
+            "Filename",
+        ]
+    )
     for r in result.records:
-        writer.writerow([
-            r["recipient"], r["certificate_name"], r["certificate_type"],
-            r["course"], r["issuing_organization"], r["completion_date"],
-            r["certificate_number"], r["verification_status"],
-            r["approved_at"] or "", r["filename"],
-        ])
+        writer.writerow(
+            [
+                r["recipient"],
+                r["certificate_name"],
+                r["certificate_type"],
+                r["course"],
+                r["issuing_organization"],
+                r["completion_date"],
+                r["certificate_number"],
+                r["verification_status"],
+                r["approved_at"] or "",
+                r["filename"],
+            ]
+        )
 
     log_audit_event(
         db=db,
@@ -2178,19 +2192,33 @@ async def approved_analytics_export_xlsx(
     ws = wb.active
     ws.title = "Approved Certificates"
     headers = [
-        "Recipient", "Certificate Name", "Certificate Type",
-        "Course", "Issuing Organization", "Completion Date",
-        "Certificate Number", "Verification Status", "Approved At",
+        "Recipient",
+        "Certificate Name",
+        "Certificate Type",
+        "Course",
+        "Issuing Organization",
+        "Completion Date",
+        "Certificate Number",
+        "Verification Status",
+        "Approved At",
         "Filename",
     ]
     ws.append(headers)
     for r in result.records:
-        ws.append([
-            r["recipient"], r["certificate_name"], r["certificate_type"],
-            r["course"], r["issuing_organization"], r["completion_date"],
-            r["certificate_number"], r["verification_status"],
-            r["approved_at"] or "", r["filename"],
-        ])
+        ws.append(
+            [
+                r["recipient"],
+                r["certificate_name"],
+                r["certificate_type"],
+                r["course"],
+                r["issuing_organization"],
+                r["completion_date"],
+                r["certificate_number"],
+                r["verification_status"],
+                r["approved_at"] or "",
+                r["filename"],
+            ]
+        )
 
     # Auto-fit column widths
     for col_idx, header in enumerate(headers, 1):
@@ -2199,7 +2227,9 @@ async def approved_analytics_export_xlsx(
             for cell in row:
                 if cell.value:
                     max_len = max(max_len, len(str(cell.value)))
-        ws.column_dimensions[ws.cell(row=1, column=col_idx).column_letter].width = min(max_len + 2, 50)
+        ws.column_dimensions[ws.cell(row=1, column=col_idx).column_letter].width = min(
+            max_len + 2, 50
+        )
 
     output = io.BytesIO()
     wb.save(output)
@@ -2494,7 +2524,11 @@ async def approved_analytics_presentation(
         dq = result.data_quality
         lines = [
             f"Total Records: {dq.total}",
-            f"Recipient Identified: {dq.recipient_identified} ({dq.recipient_identified / dq.total * 100:.0f}%)" if dq.total else "",
+            (
+                f"Recipient Identified: {dq.recipient_identified} ({dq.recipient_identified / dq.total * 100:.0f}%)"
+                if dq.total
+                else ""
+            ),
             f"Certificate Name Identified: {dq.certificate_name_identified}",
             f"Completion Date Identified: {dq.completion_date_identified}",
             f"Institution Identified: {dq.institution_identified}",

@@ -75,9 +75,7 @@ def _approved_cert_query(org_id: int):
     )
 
 
-def _load_field_map(
-    db: DbSession, doc_ids: list[int]
-) -> dict[int, dict[str, str]]:
+def _load_field_map(db: DbSession, doc_ids: list[int]) -> dict[int, dict[str, str]]:
     """Batch-load all fields for the given document IDs.
 
     Returns {document_id: {field_name: value}}.
@@ -85,9 +83,7 @@ def _load_field_map(
     if not doc_ids:
         return {}
     rows = (
-        db.execute(
-            select(CaptureField).where(CaptureField.document_id.in_(doc_ids))
-        )
+        db.execute(select(CaptureField).where(CaptureField.document_id.in_(doc_ids)))
         .scalars()
         .all()
     )
@@ -279,10 +275,7 @@ class ApprovedCertificateAnalyticsService:
 
         # Apply field-level filters
         if filters:
-            docs = [
-                d for d in docs
-                if filters.applies_to_doc(d, field_maps.get(d.id, {}))
-            ]
+            docs = [d for d in docs if filters.applies_to_doc(d, field_maps.get(d.id, {}))]
 
         total = len(docs)
         now = datetime.now(timezone.utc)
@@ -396,8 +389,7 @@ class ApprovedCertificateAnalyticsService:
         # Top recipients
         top_recipients = sorted(recipient_counts.items(), key=lambda kv: kv[1], reverse=True)[:20]
         recipients_list = [
-            {"name": name, "approved_certificates": count}
-            for name, count in top_recipients
+            {"name": name, "approved_certificates": count} for name, count in top_recipients
         ]
 
         # Insights
@@ -409,20 +401,24 @@ class ApprovedCertificateAnalyticsService:
         records = []
         for doc in docs:
             fm = field_maps.get(doc.id, {})
-            records.append({
-                "id": doc.id,
-                "recipient": _pick_field(fm, RECIPIENT_FIELDS) or NOT_AVAILABLE,
-                "certificate_name": _pick_field(fm, CERT_NAME_FIELDS) or NOT_AVAILABLE,
-                "certificate_type": doc.document_type_label or doc.document_type or NOT_AVAILABLE,
-                "course": _pick_field(fm, COURSE_FIELDS) or NOT_AVAILABLE,
-                "issuing_organization": _pick_field(fm, INSTITUTION_FIELDS) or NOT_AVAILABLE,
-                "completion_date": _pick_field(fm, DATE_FIELDS) or NOT_AVAILABLE,
-                "certificate_number": _pick_field(fm, CERT_NUMBER_FIELDS) or NOT_AVAILABLE,
-                "verification_status": doc.verification_status,
-                "approved_at": doc.approved_at.isoformat() if doc.approved_at else None,
-                "batch_id": doc.batch_id,
-                "filename": doc.filename,
-            })
+            records.append(
+                {
+                    "id": doc.id,
+                    "recipient": _pick_field(fm, RECIPIENT_FIELDS) or NOT_AVAILABLE,
+                    "certificate_name": _pick_field(fm, CERT_NAME_FIELDS) or NOT_AVAILABLE,
+                    "certificate_type": doc.document_type_label
+                    or doc.document_type
+                    or NOT_AVAILABLE,
+                    "course": _pick_field(fm, COURSE_FIELDS) or NOT_AVAILABLE,
+                    "issuing_organization": _pick_field(fm, INSTITUTION_FIELDS) or NOT_AVAILABLE,
+                    "completion_date": _pick_field(fm, DATE_FIELDS) or NOT_AVAILABLE,
+                    "certificate_number": _pick_field(fm, CERT_NUMBER_FIELDS) or NOT_AVAILABLE,
+                    "verification_status": doc.verification_status,
+                    "approved_at": doc.approved_at.isoformat() if doc.approved_at else None,
+                    "batch_id": doc.batch_id,
+                    "filename": doc.filename,
+                }
+            )
 
         return ApprovedAnalyticsResult(
             kpis=kpis,
@@ -484,7 +480,9 @@ class ApprovedCertificateAnalyticsService:
             curr_year_count = by_year[years[-1]]
             if prev_year_count > 0:
                 change = round((curr_year_count - prev_year_count) / prev_year_count * 100, 1)
-                direction = "increased" if change > 0 else "decreased" if change < 0 else "remained stable"
+                direction = (
+                    "increased" if change > 0 else "decreased" if change < 0 else "remained stable"
+                )
                 insights.append(
                     f"Approved certificates {direction} by {abs(change)}% comparing {years[-2]} ({prev_year_count}) vs {years[-1]} ({curr_year_count})."
                 )
@@ -512,7 +510,13 @@ class ApprovedCertificateAnalyticsService:
         offset: int = 0,
     ) -> dict[str, Any]:
         """Get paginated approved certificate records."""
-        allowed_sort = {"approved_at", "recipient", "certificate_name", "issuing_organization", "completion_date"}
+        allowed_sort = {
+            "approved_at",
+            "recipient",
+            "certificate_name",
+            "issuing_organization",
+            "completion_date",
+        }
         if sort_by not in allowed_sort:
             sort_by = "approved_at"
         if sort_order not in ("asc", "desc"):
@@ -525,11 +529,19 @@ class ApprovedCertificateAnalyticsService:
         if search:
             search_lower = search.lower()
             records = [
-                r for r in records
-                if any(search_lower in str(r.get(k, "")).lower() for k in (
-                    "recipient", "certificate_name", "certificate_type",
-                    "issuing_organization", "course", "certificate_number",
-                ))
+                r
+                for r in records
+                if any(
+                    search_lower in str(r.get(k, "")).lower()
+                    for k in (
+                        "recipient",
+                        "certificate_name",
+                        "certificate_type",
+                        "issuing_organization",
+                        "course",
+                        "certificate_number",
+                    )
+                )
             ]
 
         # Sort
@@ -537,10 +549,13 @@ class ApprovedCertificateAnalyticsService:
         if sort_by == "approved_at":
             records.sort(key=lambda r: r.get("approved_at") or "", reverse=reverse)
         else:
-            records.sort(key=lambda r: r.get(sort_by, "").lower() if r.get(sort_by) else "zzz", reverse=reverse)
+            records.sort(
+                key=lambda r: r.get(sort_by, "").lower() if r.get(sort_by) else "zzz",
+                reverse=reverse,
+            )
 
         total = len(records)
-        page = records[offset:offset + limit]
+        page = records[offset : offset + limit]
 
         return {
             "records": page,

@@ -52,6 +52,7 @@ FILE_PROCESSING_BATCH_SIZE = 50
 def _cert_doc_type_keys() -> set[str]:
     """Return the set of certificate document type keys from the capture registry."""
     from certificates.routes import CERTIFICATE_DOC_TYPES
+
     return CERTIFICATE_DOC_TYPES
 
 
@@ -341,7 +342,13 @@ class ETLPackageService:
         pkg.unsupported_files = extraction.unsupported_files
         self.db.commit()
 
-        _log("discovery", "completed", discovered=len(file_records), duplicates=extraction.duplicate_files, unsupported=extraction.unsupported_files)
+        _log(
+            "discovery",
+            "completed",
+            discovered=len(file_records),
+            duplicates=extraction.duplicate_files,
+            unsupported=extraction.unsupported_files,
+        )
 
         # ── Stage 3: Processing (profile + load) ──────────────────────────
         pkg.status = "processing"
@@ -419,7 +426,13 @@ class ETLPackageService:
         pkg.completed_at = _utcnow()
         self.db.commit()
 
-        _log("processing", "completed", completed=result["completed"], failed=result["failed"], rows_loaded=total_rows_loaded)
+        _log(
+            "processing",
+            "completed",
+            completed=result["completed"],
+            failed=result["failed"],
+            rows_loaded=total_rows_loaded,
+        )
 
         # Cleanup extraction directory
         cleanup_extraction(extraction.extract_dir)
@@ -431,7 +444,13 @@ class ETLPackageService:
         result["quality_score"] = pkg.overall_quality_score
         result["status"] = pkg.status
 
-        _log("package", pkg.status, completed=result["completed"], failed=result["failed"], quality=pkg.overall_quality_score)
+        _log(
+            "package",
+            pkg.status,
+            completed=result["completed"],
+            failed=result["failed"],
+            quality=pkg.overall_quality_score,
+        )
 
         return result
 
@@ -472,7 +491,9 @@ class ETLPackageService:
                 logger.warning(
                     "FILE_FAILED package_id=%d file=%s stage=validation "
                     "error_code=MAGIC_BYTE_MISMATCH elapsed_ms=%d",
-                    package_id, filename, int((_time.monotonic() - t0) * 1000),
+                    package_id,
+                    filename,
+                    int((_time.monotonic() - t0) * 1000),
                 )
                 return
 
@@ -490,7 +511,9 @@ class ETLPackageService:
             self.db.commit()
             logger.info(
                 "FILE_SKIPPED package_id=%d file=%s reason=unsupported_type ext=%s",
-                package_id, filename, ext,
+                package_id,
+                filename,
+                ext,
             )
 
     def _process_structured_file(
@@ -691,9 +714,7 @@ class ETLPackageService:
                     "classification_confidence": processed_doc.classification_confidence,
                     "processing_status": capture_status,
                     "file_category": file_category,
-                    "extraction_method": getattr(
-                        processed_doc, "extraction_method", "pdf_text"
-                    ),
+                    "extraction_method": getattr(processed_doc, "extraction_method", "pdf_text"),
                 }
 
                 # For documents, row_count represents extracted fields/records
@@ -703,6 +724,7 @@ class ETLPackageService:
                 else:
                     # Count fields from DB
                     from capture.models import CaptureField
+
                     field_count = (
                         self.db.query(CaptureField)
                         .filter(CaptureField.document_id == doc.id)
