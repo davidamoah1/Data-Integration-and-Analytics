@@ -1,4 +1,4 @@
-﻿"""Data Drift Detector.
+"""Data Drift Detector.
 
 Detects statistical distribution changes between two datasets or
 between two time periods within the same dataset. Uses:
@@ -152,7 +152,7 @@ class DriftDetector:
             return DriftResult(
                 drift_detected=False,
                 drift_score=0.0,
-                summary="No date column found â€” cannot detect time drift.",
+                summary="No date column found - cannot detect time drift.",
             )
 
         df_temp = df.copy()

@@ -1,4 +1,4 @@
-﻿"""Quality Intelligence Engine.
+"""Quality Intelligence Engine.
 
 Orchestrates all quality checks, drift detection, and schema monitoring
 into a single composite quality score with recommendations.
@@ -280,7 +280,7 @@ class QualityEngine:
         for f in findings:
             if f.severity in (Severity.CRITICAL, Severity.ERROR):
                 recommendations.append(
-                    f"[{f.severity.value.upper()}] {f.message} â€” {f.suggested_fix}"
+                    f"[{f.severity.value.upper()}] {f.message} - {f.suggested_fix}"
                 )
 
         # From drift
@@ -288,14 +288,14 @@ class QualityEngine:
             drifted = [c for c in drift_result.drifted_columns if c.drift_detected]
             for c in drifted[:3]:
                 recommendations.append(
-                    f"[DRIFT] {c.message} â€” Investigate upstream data source changes."
+                    f"[DRIFT] {c.message} - Investigate upstream data source changes."
                 )
 
         # From schema changes
         if schema_result and schema_result.changes_detected:
             for c in schema_result.changes:
                 if c.severity == "error":
-                    recommendations.append(f"[SCHEMA] {c.message} â€” {c.impact}")
+                    recommendations.append(f"[SCHEMA] {c.message} - {c.impact}")
 
         # Deduplicate
         seen = set()
@@ -320,7 +320,7 @@ class QualityEngine:
         infos = sum(1 for f in findings if f.severity == Severity.INFO)
 
         parts = [
-            f"Data Quality Score: {score.overall:.1f}/100 ({score.traffic_light} â€” Grade {score.grade})",
+            f"Data Quality Score: {score.overall:.1f}/100 ({score.traffic_light} - Grade {score.grade})",
             f"Findings: {errors} error(s), {warnings} warning(s), {infos} info(s)",
         ]
 
