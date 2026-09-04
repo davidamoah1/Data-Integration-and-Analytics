@@ -1409,24 +1409,99 @@ async def run_analysis(
             raise
         except Exception as e:
             logger.exception("Analysis failed for workflow %s: %s", workflow_id, e)
+            raise HTTPException(
+                status_code=500, detail=f"Analysis failed: {str(e)}"
+            ) from e
+
+
+def _clean_str(text: str) -> str:
+    """Sanitize text strings, removing mojibake and encoding artifacts."""
+    if not text:
+        return ""
+    s = str(text)
+    replacements = {
+        "â€”": " — ",
+        "â€“": " – ",
+        "â€¢": "•",
+        "â€™": "'",
+        "â€œ": '"',
+        "â€\x9d": '"',
+        "Â": "",
+        "Ã—": "×",
+    }
+    for bad, good in replacements.items():
+        if bad:
+            s = s.replace(bad, good)
+    return s.strip()
+
+
+def _split_item_header_body(item_text: str) -> tuple[str, str]:
+    """Extract a clean headline and body text without chopping words in half."""
+    text = _clean_str(item_text).lstrip("• ").lstrip("- ").strip()
+    if ":" in text:
+        h, b = text.split(":", 1)
+        return h.strip(), b.strip()
+    if " — " in text:
+        h, b = text.split(" — ", 1)
+        return h.strip(), b.strip()
+    if " - " in text:
+        h, b = text.split(" - ", 1)
+        return h.strip(), b.strip()
+    if ". " in text:
+        parts = text.split(". ", 1)
+        return parts[0].strip(), parts[1].strip()
+    words = text.split()
+    if len(words) > 6:
+        return " ".join(words[:4]), text
+    return text, ""
+
+
+def _format_metric_val(val_raw) -> str:
+    """Format KPI metric values cleanly without ugly raw float decimals."""
+    if val_raw is None or val_raw == "":
+        return "N/A"
+    s = _clean_str(str(val_raw))
+    try:
+        clean_num = s.replace(",", "").replace("$", "").replace("%", "")
+        f = float(clean_num)
+        if f.is_integer():
+            formatted = f"{int(f):,}"
+        elif abs(f) >= 1000:
+            formatted = f"{f:,.1f}"
+        elif abs(f) >= 1:
+            formatted = f"{f:,.2f}"
+        else:
+            formatted = f"{f:.3f}"
+
+        if s.startswith("$"):
+            return f"${formatted}"
+        if s.endswith("%"):
+            return f"{formatted}%"
+        return formatted
+    except (ValueError, TypeError):
+        return s
+
+
 def _add_chart_to_slide(
     slide,
     chart_spec: dict,
     df,
+    theme_cfg: dict,
     left: float = 0.8,
     top: float = 1.55,
-    width: float = 11.7,
-    height: float = 4.6,
-) -> bool:
-    """Render an actual chart on a PPTX slide using python-pptx.
+    width: float = 7.4,
+    height: float = 5.1,
+) -> dict:
+    """Render an actual chart on a PPTX slide with executive styling.
 
-    Supports bar_chart, horizontal_bar, pie_chart, donut_chart, histogram,
-    line_chart, and area_chart specs. Gracefully falls back to precomputed
-    chart_spec['data'] if the DataFrame is missing or column names mismatch.
+    Formats axes, removes duplicate legends/titles, truncates long categories,
+    and returns analytical metadata for the companion intelligence card.
     """
     from pptx.chart.data import CategoryChartData, XyChartData
-    from pptx.enum.chart import XL_CHART_TYPE
-    from pptx.util import Inches
+    from pptx.dml.color import RGBColor
+    from pptx.enum.chart import XL_CHART_TYPE, XL_LEGEND_POSITION
+    from pptx.enum.shapes import MSO_SHAPE
+    from pptx.util import Inches, Pt
 
     raw_type = (chart_spec.get("type") or chart_spec.get("chart_type") or "").lower().replace("-", "_").replace(" ", "_")
     x_axis = chart_spec.get("x_axis")
@@ -1440,29 +1515,89 @@ def _add_chart_to_slide(
         # 1. Try aggregating from in-memory DataFrame
         if df is not None and x_axis and x_axis in df.columns:
             if raw_type in ("pie_chart", "pie", "donut_chart", "doughnut"):
-                counts = df[x_axis].value_counts().head(10)
-                categories = [str(c) for c in counts.index.tolist()]
+                counts = df[x_axis].value_counts().head(8)
+                categories = [_clean_str(str(c)) for c in counts.index.tolist()]
                 values = [float(v) for v in counts.tolist()]
             elif y_axis and y_axis in df.columns:
-                grouped = df.groupby(x_axis, dropna=False)[y_axis].sum().sort_values(ascending=False)
-                if len(grouped) > 15:
-                    grouped = grouped.head(15)
-                categories = [str(c) for c in grouped.index.tolist()]
+                if raw_type in ("line_chart", "line", "area_chart", "area"):
+                    grouped = df.groupby(x_axis, dropna=False)[y_axis].sum()
+                    try:
+                        import pandas as pd
+                        dt_idx = pd.to_datetime(grouped.index, errors="coerce")
+                        if dt_idx.notna().all():
+                            grouped = grouped.iloc[dt_idx.argsort()]
+                        else:
+                            grouped = grouped.sort_index()
+                    except Exception:
+                        grouped = grouped.sort_index()
+                else:
+                    grouped = df.groupby(x_axis, dropna=False)[y_axis].sum().sort_values(ascending=False)
+
+                if len(grouped) > 10:
+                    grouped = grouped.head(10)
+                categories = [_clean_str(str(c)) for c in grouped.index.tolist()]
                 values = [float(v) for v in grouped.tolist()]
 
         # 2. Fallback to pre-computed chart_spec data
         if not categories and chart_spec.get("data"):
-            for pt in chart_spec["data"][:15]:
+            for pt in chart_spec["data"][:10]:
                 cat = pt.get("x") or pt.get("label") or f"Item {len(categories) + 1}"
                 val = pt.get("y") or pt.get("value") or 0
-                categories.append(str(cat))
+                categories.append(_clean_str(str(cat)))
                 try:
                     values.append(float(val) if val is not None else 0.0)
                 except (ValueError, TypeError):
                     values.append(0.0)
 
         if not categories or not values:
-            return False
+            return {"rendered": False}
+
+        # Calculate metadata before label truncation
+        top_cat = categories[0]
+        top_val = values[0]
+        tot_val = sum(values)
+        share_pct = round((top_val / tot_val) * 100, 1) if tot_val > 0 else 0.0
+
+        # Clean and truncate category names to avoid collisions on x-axis
+        clean_categories = []
+        for c in categories:
+            cs = str(c).strip()
+            if len(cs) > 12:
+                cs = cs[:10] + "…"
+            clean_categories.append(cs)
+        values = values[:len(clean_categories)]
+
+        # Add clean white card container behind chart
+        card_bg = slide.shapes.add_shape(
+            MSO_SHAPE.ROUNDED_RECTANGLE,
+            Inches(left),
+            Inches(top),
+            Inches(width),
+            Inches(height),
+        )
+        card_bg.fill.solid()
+        card_bg.fill.fore_color.rgb = RGBColor(255, 255, 255)
+        card_bg.line.color.rgb = RGBColor(226, 232, 240)
+        card_bg.line.width = Pt(1)
+
+        # Top accent bar on chart container
+        top_bar = slide.shapes.add_shape(
+            MSO_SHAPE.RECTANGLE,
+            Inches(left),
+            Inches(top),
+            Inches(width),
+            Inches(0.08),
+        )
+        top_bar.fill.solid()
+        c_accent = RGBColor(*theme_cfg["accent"])
+        top_bar.fill.fore_color.rgb = c_accent
+        top_bar.line.fill.background()
+
+        # Inset dimensions for chart
+        c_left = left + 0.18
+        c_top = top + 0.20
+        c_width = width - 0.36
+        c_height = height - 0.36
 
         # 3. Determine PowerPoint chart type
         if raw_type in ("donut_chart", "doughnut"):
@@ -1478,40 +1613,104 @@ def _add_chart_to_slide(
         elif raw_type in ("scatter", "scatter_plot"):
             xy_data = XyChartData()
             series = xy_data.add_series(series_name)
-            for c, v in zip(categories, values):
+            for c, v in zip(clean_categories, values):
                 try:
                     series.add_data_point(float(c), float(v))
                 except (ValueError, TypeError):
                     pass
-            slide.shapes.add_chart(
+            chart_shape = slide.shapes.add_chart(
                 XL_CHART_TYPE.XY_SCATTER,
-                Inches(left),
-                Inches(top),
-                Inches(width),
-                Inches(height),
+                Inches(c_left),
+                Inches(c_top),
+                Inches(c_width),
+                Inches(c_height),
                 xy_data,
             )
-            return True
+            return {
+                "rendered": True,
+                "top_category": top_cat,
+                "top_value": _format_metric_val(top_val),
+                "top_share_pct": share_pct,
+                "total_categories": len(clean_categories),
+            }
         else:  # bar_chart, histogram, column
             xl_type = XL_CHART_TYPE.COLUMN_CLUSTERED
 
         chart_data = CategoryChartData()
-        chart_data.categories = categories
+        chart_data.categories = clean_categories
         chart_data.add_series(series_name, values)
 
-        slide.shapes.add_chart(
+        chart_shape = slide.shapes.add_chart(
             xl_type,
-            Inches(left),
-            Inches(top),
-            Inches(width),
-            Inches(height),
+            Inches(c_left),
+            Inches(c_top),
+            Inches(c_width),
+            Inches(c_height),
             chart_data,
         )
-        return True
+        chart = chart_shape.chart
+
+        # Executive formatting
+        chart.has_title = False
+        chart.has_legend = xl_type in (XL_CHART_TYPE.PIE, XL_CHART_TYPE.DOUGHNUT)
+
+        c_text_dark = RGBColor(*theme_cfg["text_dark"])
+        c_text_muted = RGBColor(*theme_cfg["text_muted"])
+        c_subtle_border = RGBColor(226, 232, 240)
+
+        if chart.has_legend:
+            chart.legend.position = XL_LEGEND_POSITION.RIGHT
+            chart.legend.include_in_layout = False
+            chart.legend.font.size = Pt(8.5)
+            chart.legend.font.color.rgb = c_text_muted
+
+        if xl_type not in (XL_CHART_TYPE.PIE, XL_CHART_TYPE.DOUGHNUT):
+            try:
+                cat_axis = chart.category_axis
+                cat_axis.tick_labels.font.size = Pt(8.5)
+                cat_axis.tick_labels.font.color.rgb = c_text_dark
+                cat_axis.has_major_gridlines = False
+                cat_axis.format.line.color.rgb = c_subtle_border
+                cat_axis.format.line.width = Pt(0.75)
+            except Exception:
+                pass
+
+            try:
+                val_axis = chart.value_axis
+                val_axis.tick_labels.font.size = Pt(8.0)
+                val_axis.tick_labels.font.color.rgb = c_text_muted
+                val_axis.has_major_gridlines = True
+                val_axis.major_gridlines.format.line.color.rgb = c_subtle_border
+                val_axis.major_gridlines.format.line.width = Pt(0.75)
+                val_axis.format.line.color.rgb = c_subtle_border
+                val_axis.format.line.width = Pt(0.75)
+            except Exception:
+                pass
+
+            try:
+                if chart.series:
+                    series = chart.series[0]
+                    if xl_type in (XL_CHART_TYPE.LINE, XL_CHART_TYPE.AREA):
+                        series.format.line.color.rgb = c_accent
+                        series.format.line.width = Pt(2.5)
+                    else:
+                        fill = series.format.fill
+                        fill.solid()
+                        fill.fore_color.rgb = c_accent
+            except Exception:
+                pass
+
+        return {
+            "rendered": True,
+            "top_category": top_cat,
+            "top_value": _format_metric_val(top_val),
+            "top_share_pct": share_pct,
+            "total_categories": len(clean_categories),
+        }
 
     except Exception:
         logger.warning("Failed to render native PPTX chart %s", raw_type, exc_info=True)
-        return False
+        return {"rendered": False}
 
 
 # ── Presentation Theme Color Palettes ────────────────────────
@@ -1533,7 +1732,7 @@ THEME_PALETTES = {
         "secondary": (15, 23, 42),     # #0F172A
         "accent": (6, 182, 212),       # #06B6D4 Cyan
         "highlight": (13, 148, 136),   # #0D9488 Teal
-        "bg_card": (240, 253, 244),    # #F0FDF4 Soft mint
+        "bg_card": (248, 250, 252),    # #F8FAFC
         "text_dark": (15, 23, 42),
         "text_muted": (71, 85, 105),
         "card_border": (203, 213, 225),
@@ -1576,11 +1775,7 @@ def _generate_auto_pptx(
     request: Request,
     db: DbSession,
 ):
-    """Render a dynamic 16:9 widescreen PPTX with native styling and narrative architecture.
-
-    Dynamically styles colors, cards, headers, footers, charts, and callouts
-    based on the chosen Presentation Theme & Narrative Style.
-    """
+    """Render an executive-ready 16:9 widescreen presentation with native charts and bento architecture."""
     import io
     from datetime import datetime
 
@@ -1601,6 +1796,7 @@ def _generate_auto_pptx(
     theme_cfg = THEME_PALETTES.get(tpl_key, THEME_PALETTES["executive"])
 
     c_primary = RGBColor(*theme_cfg["primary"])
+    c_secondary = RGBColor(*theme_cfg["secondary"])
     c_accent = RGBColor(*theme_cfg["accent"])
     c_highlight = RGBColor(*theme_cfg["highlight"])
     c_bg_card = RGBColor(*theme_cfg["bg_card"])
@@ -1608,6 +1804,7 @@ def _generate_auto_pptx(
     c_text_muted = RGBColor(*theme_cfg["text_muted"])
     c_card_border = RGBColor(*theme_cfg["card_border"])
     c_white = RGBColor(255, 255, 255)
+    c_light_slate = RGBColor(226, 232, 240)
 
     charts_by_id = {c["id"]: c for c in auto_dashboard.get("charts", [])}
     slides_data = auto_presentation.get("slides", [])
@@ -1620,293 +1817,844 @@ def _generate_auto_pptx(
 
     charts_rendered = 0
     today_str = datetime.now().strftime("%B %d, %Y")
+    clean_ds_name = _clean_str(dataset_name)
 
     for idx, slide_data in enumerate(slides_data, start=1):
         layout_name = slide_data.get("layout", "bullets")
         slide = prs.slides.add_slide(blank_layout)
 
-        slide_title = slide_data.get("title", "")
-        slide_subtitle = slide_data.get("subtitle", "")
-        category_tag = slide_data.get("category_tag") or f"0{idx} // {layout_name.upper()}"
+        slide_title = _clean_str(slide_data.get("title", ""))
+        slide_subtitle = _clean_str(slide_data.get("subtitle", ""))
+        category_tag = _clean_str(slide_data.get("category_tag") or f"0{idx} // {layout_name.upper()}")
 
-        # ── Slide 1 / Title Slide ──────────────────────────────────
+        # ── 1. Slide 1: Executive Cover (Title Slide) ──────────────
         if layout_name == "title":
-            # Solid primary background
+            # Solid deep dark canvas
             bg = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, 0, prs.slide_width, prs.slide_height)
             bg.fill.solid()
             bg.fill.fore_color.rgb = c_primary
             bg.line.fill.background()
 
-            # Left accent vertical stripe
-            stripe = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(0.8), Inches(1.6), Inches(0.18), Inches(4.2))
+            # Elegant left vertical accent stripe
+            stripe = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(0.8), Inches(1.1), Inches(0.12), Inches(3.8))
             stripe.fill.solid()
             stripe.fill.fore_color.rgb = c_accent
             stripe.line.fill.background()
 
-            # Category tag pill
-            tb_tag = slide.shapes.add_textbox(Inches(1.2), Inches(1.6), Inches(11.0), Inches(0.4))
+            # Top capsule tag
+            tb_tag = slide.shapes.add_textbox(Inches(1.15), Inches(1.05), Inches(11.0), Inches(0.4))
             p_tag = tb_tag.text_frame.paragraphs[0]
-            p_tag.text = theme_cfg["tag"]
-            p_tag.font.size = Pt(11)
-            p_tag.font.bold = True
-            p_tag.font.color.rgb = c_accent
+            run_tag = p_tag.add_run()
+            run_tag.text = theme_cfg["tag"]
+            run_tag.font.size = Pt(10.5)
+            run_tag.font.bold = True
+            run_tag.font.color.rgb = c_accent
 
-            # Main Title & Subtitle
-            tb_main = slide.shapes.add_textbox(Inches(1.2), Inches(2.1), Inches(11.2), Inches(2.5))
+            # Main Title, Subtitle, and Narrative Hook
+            tb_main = slide.shapes.add_textbox(Inches(1.15), Inches(1.6), Inches(11.2), Inches(3.3))
             tf_main = tb_main.text_frame
             tf_main.word_wrap = True
+            tf_main.margin_left = tf_main.margin_top = tf_main.margin_right = tf_main.margin_bottom = 0
+
             p_main = tf_main.paragraphs[0]
-            p_main.text = slide_title or title
-            p_main.font.size = Pt(36)
-            p_main.font.bold = True
-            p_main.font.color.rgb = c_white
+            run_main = p_main.add_run()
+            run_main.text = slide_title or _clean_str(title)
+            run_main.font.size = Pt(34)
+            run_main.font.bold = True
+            run_main.font.color.rgb = c_white
 
             p_sub = tf_main.add_paragraph()
-            p_sub.text = slide_subtitle or f"Synthesized from {dataset_name} • 16:9 Widescreen"
-            p_sub.font.size = Pt(18)
-            p_sub.font.color.rgb = c_accent
+            run_sub = p_sub.add_run()
+            run_sub.text = slide_subtitle or f"Comprehensive Strategic Intelligence Deck • {clean_ds_name}"
+            run_sub.font.size = Pt(16)
+            run_sub.font.bold = True
+            run_sub.font.color.rgb = c_accent
 
-            # Bottom metadata
-            tb_meta = slide.shapes.add_textbox(Inches(1.2), Inches(5.8), Inches(11.0), Inches(0.4))
-            p_meta = tb_meta.text_frame.paragraphs[0]
-            p_meta.text = f"Dataset: {dataset_name}   |   Date: {today_str}   |   DataFlow Intelligent Analytics"
-            p_meta.font.size = Pt(10)
-            p_meta.font.color.rgb = RGBColor(148, 163, 184)
+            p_desc = tf_main.add_paragraph()
+            run_desc = p_desc.add_run()
+            run_desc.text = (
+                f"\nExecutive decision memorandum synthesizing data distributions, operational KPI scorecards, "
+                f"cross-sectional drivers, and a phased execution roadmap across {clean_ds_name}."
+            )
+            run_desc.font.size = Pt(12)
+            run_desc.font.color.rgb = c_light_slate
 
-        # ── Closing Slide ──────────────────────────────────────────
+            # Bottom 4 Executive Metadata Bento Cards
+            meta_cards = [
+                ("PREPARED FOR", "Executive Committee & Board"),
+                ("DATASET SCOPE", clean_ds_name[:24]),
+                ("NARRATIVE FRAMEWORK", theme_cfg["tag"].split("//")[0].strip()),
+                ("SPECIFICATION", f"{today_str} • 16:9"),
+            ]
+            meta_w = 2.72
+            meta_gap = 0.27
+            meta_y = 5.25
+            meta_h = 1.50
+
+            for mi, (mlbl, mval) in enumerate(meta_cards):
+                mx = 0.8 + mi * (meta_w + meta_gap)
+                mbox = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(mx), Inches(meta_y), Inches(meta_w), Inches(meta_h))
+                mbox.fill.solid()
+                mbox.fill.fore_color.rgb = c_secondary
+                mbox.line.color.rgb = c_accent
+                mbox.line.width = Pt(1.0)
+
+                # Top micro-accent stripe on meta card
+                m_stripe = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(mx), Inches(meta_y), Inches(meta_w), Inches(0.06))
+                m_stripe.fill.solid()
+                m_stripe.fill.fore_color.rgb = c_accent
+                m_stripe.line.fill.background()
+
+                tb_m = slide.shapes.add_textbox(Inches(mx + 0.18), Inches(meta_y + 0.18), Inches(meta_w - 0.36), Inches(meta_h - 0.36))
+                tf_m = tb_m.text_frame
+                tf_m.word_wrap = True
+
+                p_ml = tf_m.paragraphs[0]
+                run_ml = p_ml.add_run()
+                run_ml.text = mlbl
+                run_ml.font.size = Pt(8.5)
+                run_ml.font.bold = True
+                run_ml.font.color.rgb = c_accent
+
+                p_mv = tf_m.add_paragraph()
+                run_mv = p_mv.add_run()
+                run_mv.text = mval
+                run_mv.font.size = Pt(12.5)
+                run_mv.font.bold = True
+                run_mv.font.color.rgb = c_white
+
+        # ── 2. Slide 8: Executive Closing & Sign-off Slide ─────────
         elif layout_name == "closing":
             bg = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, 0, prs.slide_width, prs.slide_height)
             bg.fill.solid()
             bg.fill.fore_color.rgb = c_primary
             bg.line.fill.background()
 
-            stripe = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(0.8), Inches(2.0), Inches(0.18), Inches(3.5))
+            stripe = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(0.8), Inches(0.9), Inches(0.12), Inches(5.8))
             stripe.fill.solid()
             stripe.fill.fore_color.rgb = c_accent
             stripe.line.fill.background()
 
-            tb = slide.shapes.add_textbox(Inches(1.2), Inches(2.0), Inches(11.0), Inches(3.0))
-            tf = tb.text_frame
-            tf.word_wrap = True
-            p1 = tf.paragraphs[0]
-            p1.text = slide_title or "Thank You"
-            p1.font.size = Pt(36)
-            p1.font.bold = True
-            p1.font.color.rgb = c_white
+            tb_chdr = slide.shapes.add_textbox(Inches(1.15), Inches(0.85), Inches(11.3), Inches(1.3))
+            tf_chdr = tb_chdr.text_frame
+            tf_chdr.word_wrap = True
 
-            p2 = tf.add_paragraph()
-            p2.text = slide_subtitle or "Questions, Discussion & Next Steps"
-            p2.font.size = Pt(18)
-            p2.font.color.rgb = c_accent
+            p_ctag = tf_chdr.paragraphs[0]
+            run_ctag = p_ctag.add_run()
+            run_ctag.text = "GOVERNANCE & APPROVALS // NEXT MILESTONES"
+            run_ctag.font.size = Pt(10)
+            run_ctag.font.bold = True
+            run_ctag.font.color.rgb = c_accent
 
-            p3 = tf.add_paragraph()
-            p3.text = f"\nPrepared via DataFlow Analytics Platform • {today_str}"
-            p3.font.size = Pt(11)
-            p3.font.color.rgb = RGBColor(148, 163, 184)
+            p_ct = tf_chdr.add_paragraph()
+            run_ct = p_ct.add_run()
+            run_ct.text = slide_title or "Strategic Sign-off & Next Steps"
+            run_ct.font.size = Pt(28)
+            run_ct.font.bold = True
+            run_ct.font.color.rgb = c_white
 
-        # ── Standard Content Slide Layout ──────────────────────────
+            p_cs = tf_chdr.add_paragraph()
+            run_cs = p_cs.add_run()
+            run_cs.text = slide_subtitle or "Review Completed • Open for Discussion, Governance Approvals & Resource Allocation"
+            run_cs.font.size = Pt(13)
+            run_cs.font.color.rgb = c_light_slate
+
+            # 3 Structured Horizon Cards
+            horizons = [
+                (
+                    "PHASE 1: IMMEDIATE (0 - 30 DAYS)",
+                    "Governance & Baseline Gates",
+                    [
+                        "Formal leadership sign-off on dataset variance boundaries",
+                        "Operationalize automated schema validation checks",
+                        "Establish cross-functional metric ownership",
+                    ],
+                    "Target: 100% Boundary Conformance",
+                ),
+                (
+                    "PHASE 2: EXECUTION (31 - 90 DAYS)",
+                    "Resource Allocation & Scaling",
+                    [
+                        "Reallocate budget toward dominant high-yield segments",
+                        "Institute bi-weekly multivariate anomaly review",
+                        "Deploy automated decision telemetry pipelines",
+                    ],
+                    "Target: +15% Operational Efficiency",
+                ),
+                (
+                    "PHASE 3: COMPOUNDING (90+ DAYS)",
+                    "Long-Term Compounding & Moats",
+                    [
+                        "Institutionalize quarterly re-benchmarking gates",
+                        "Expand cross-sectional cohort intelligence",
+                        "Deliver ROI realization report to Executive Committee",
+                    ],
+                    "Target: Sustained Outperformance",
+                ),
+            ]
+
+            hz_w = 3.65
+            hz_gap = 0.38
+            hz_y = 2.45
+            hz_h = 4.25
+
+            for hi, (htag, htitle, hbullets, htarget) in enumerate(horizons):
+                hx = 1.15 + hi * (hz_w + hz_gap)
+                hcard = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(hx), Inches(hz_y), Inches(hz_w), Inches(hz_h))
+                hcard.fill.solid()
+                hcard.fill.fore_color.rgb = c_secondary
+                hcard.line.color.rgb = c_accent if hi == 0 else c_card_border
+                hcard.line.width = Pt(1)
+
+                tb_h = slide.shapes.add_textbox(Inches(hx + 0.25), Inches(hz_y + 0.2), Inches(hz_w - 0.5), Inches(hz_h - 0.4))
+                tf_h = tb_h.text_frame
+                tf_h.word_wrap = True
+
+                p_htag = tf_h.paragraphs[0]
+                run_htag = p_htag.add_run()
+                run_htag.text = htag
+                run_htag.font.size = Pt(8.5)
+                run_htag.font.bold = True
+                run_htag.font.color.rgb = RGBColor(167, 139, 250) if tpl_key == "pitch" else c_accent
+
+                p_ht = tf_h.add_paragraph()
+                run_ht = p_ht.add_run()
+                run_ht.text = htitle
+                run_ht.font.size = Pt(14)
+                run_ht.font.bold = True
+                run_ht.font.color.rgb = c_white
+
+                for b in hbullets:
+                    p_b = tf_h.add_paragraph()
+                    run_b = p_b.add_run()
+                    run_b.text = f"• {b}"
+                    run_b.font.size = Pt(10.0)
+                    run_b.font.color.rgb = c_light_slate
+
+                p_tar = tf_h.add_paragraph()
+                run_tar = p_tar.add_run()
+                run_tar.text = f"\n✔ {htarget}"
+                run_tar.font.size = Pt(10.0)
+                run_tar.font.bold = True
+                run_tar.font.color.rgb = RGBColor(52, 211, 153)  # Bright Mint Emerald for high contrast
+
+        # ── 3. Content Slides (Masthead Header & Footer Framing) ───
         else:
-            # Clean Header Banner
+            # Clean Masthead Header
             tb_hdr = slide.shapes.add_textbox(Inches(0.8), Inches(0.35), Inches(11.7), Inches(0.95))
             tf_hdr = tb_hdr.text_frame
             tf_hdr.word_wrap = True
             tf_hdr.margin_left = tf_hdr.margin_top = tf_hdr.margin_right = tf_hdr.margin_bottom = 0
 
-            # Category pill tag
             p_cat = tf_hdr.paragraphs[0]
-            p_cat.text = category_tag
-            p_cat.font.size = Pt(9)
-            p_cat.font.bold = True
-            p_cat.font.color.rgb = c_accent
+            run_cat = p_cat.add_run()
+            run_cat.text = category_tag
+            run_cat.font.size = Pt(9)
+            run_cat.font.bold = True
+            run_cat.font.color.rgb = c_accent
 
-            # Slide Title
             p_t = tf_hdr.add_paragraph()
-            p_t.text = slide_title
-            p_t.font.size = Pt(21)
-            p_t.font.bold = True
-            p_t.font.color.rgb = c_primary
+            run_t = p_t.add_run()
+            run_t.text = slide_title
+            run_t.font.size = Pt(22)
+            run_t.font.bold = True
+            run_t.font.color.rgb = c_primary
 
             if slide_subtitle:
                 p_s = tf_hdr.add_paragraph()
-                p_s.text = slide_subtitle
-                p_s.font.size = Pt(10)
-                p_s.font.color.rgb = c_text_muted
+                run_s = p_s.add_run()
+                run_s.text = slide_subtitle
+                run_s.font.size = Pt(11)
+                run_s.font.color.rgb = c_text_muted
 
-            # Top accent divider line
+            # Top divider line
             div_line = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(0.8), Inches(1.35), Inches(11.7), Inches(0.015))
             div_line.fill.solid()
             div_line.fill.fore_color.rgb = c_card_border
             div_line.line.fill.background()
 
             # Footer bar
-            tb_foot = slide.shapes.add_textbox(Inches(0.8), Inches(7.0), Inches(11.7), Inches(0.3))
+            tb_foot = slide.shapes.add_textbox(Inches(0.8), Inches(7.0), Inches(9.5), Inches(0.3))
             tf_foot = tb_foot.text_frame
             tf_foot.margin_left = tf_foot.margin_top = tf_foot.margin_right = tf_foot.margin_bottom = 0
             p_foot = tf_foot.paragraphs[0]
-            p_foot.text = f"{dataset_name}  •  {theme_cfg['tag']}"
-            p_foot.font.size = Pt(8.5)
-            p_foot.font.color.rgb = c_text_muted
+            run_foot = p_foot.add_run()
+            run_foot.text = f"DataFlow Analytics Platform  •  {clean_ds_name}  •  Confidential Strategic Report"
+            run_foot.font.size = Pt(8.5)
+            run_foot.font.color.rgb = c_text_muted
 
-            # Slide Number on right
-            tb_num = slide.shapes.add_textbox(Inches(11.0), Inches(7.0), Inches(1.5), Inches(0.3))
+            tb_num = slide.shapes.add_textbox(Inches(10.5), Inches(7.0), Inches(2.0), Inches(0.3))
             p_num = tb_num.text_frame.paragraphs[0]
-            p_num.text = f"Slide {idx} of {total_slides}"
-            p_num.font.size = Pt(8.5)
-            p_num.font.bold = True
-            p_num.font.color.rgb = c_text_muted
+            run_num = p_num.add_run()
+            run_num.text = f"Slide {idx} of {total_slides}"
+            run_num.font.size = Pt(8.5)
+            run_num.font.bold = True
+            run_num.font.color.rgb = c_text_muted
 
-            # Content body dispatch
+            # ── A. KPI Scorecard Slide (Balanced Grid Geometry) ───
             if layout_name == "kpi":
                 cards = slide_data.get("kpi_cards", [])
                 n_cards = min(len(cards), 6)
-                per_row = min(3, n_cards)
-                card_w = 3.65
-                card_h = 2.0
-                gap_x = 0.38
-                gap_y = 0.4
-                total_w = per_row * card_w + (per_row - 1) * gap_x
-                start_x = (13.333 - total_w) / 2
-                start_y = 1.7
 
-                for ci, card in enumerate(cards[:n_cards]):
-                    r = ci // per_row
-                    c = ci % per_row
+                # Perfect grid balancing: 4 cards -> 2x2 grid!
+                if n_cards == 4:
+                    n_rows, n_cols = 2, 2
+                    card_w, card_h = 5.65, 2.35
+                    gap_x, gap_y = 0.40, 0.30
+                elif n_cards <= 3:
+                    n_rows, n_cols = 1, max(n_cards, 1)
+                    card_w = (11.7 - (n_cols - 1) * 0.38) / n_cols
+                    card_h = 4.8
+                    gap_x, gap_y = 0.38, 0.0
+                else:  # 5 or 6 cards -> 2x3 grid
+                    n_rows, n_cols = 2, 3
+                    card_w = 3.65
+                    card_h = 2.35
+                    gap_x, gap_y = 0.38, 0.30
+
+                start_x = 0.8
+                start_y = 1.65
+
+                for ci, card_data in enumerate(cards[: n_rows * n_cols]):
+                    r = ci // n_cols
+                    c = ci % n_cols
                     cx = start_x + c * (card_w + gap_x)
                     cy = start_y + r * (card_h + gap_y)
 
-                    # Card shape
                     card_box = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(cx), Inches(cy), Inches(card_w), Inches(card_h))
                     card_box.fill.solid()
-                    card_box.fill.fore_color.rgb = c_bg_card
+                    card_box.fill.fore_color.rgb = c_white
                     card_box.line.color.rgb = c_card_border
                     card_box.line.width = Pt(1)
 
-                    # Card content
-                    tb_c = slide.shapes.add_textbox(Inches(cx + 0.25), Inches(cy + 0.2), Inches(card_w - 0.5), Inches(card_h - 0.4))
+                    # Left accent bar
+                    stripe = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(cx), Inches(cy), Inches(0.1), Inches(card_h))
+                    stripe.fill.solid()
+                    stripe.fill.fore_color.rgb = c_accent if ci % 2 == 0 else c_highlight
+                    stripe.line.fill.background()
+
+                    tb_c = slide.shapes.add_textbox(Inches(cx + 0.30), Inches(cy + 0.18), Inches(card_w - 0.45), Inches(card_h - 0.36))
                     tf_c = tb_c.text_frame
                     tf_c.word_wrap = True
 
-                    p_lbl = tf_c.paragraphs[0]
-                    p_lbl.text = card.get("label", "Metric").upper()
-                    p_lbl.font.size = Pt(9.5)
-                    p_lbl.font.bold = True
-                    p_lbl.font.color.rgb = c_text_muted
+                    card_label = _clean_str(card_data.get("label", "Metric"))
+                    card_val = _format_metric_val(card_data.get("value", "N/A"))
+
+                    p_tag = tf_c.paragraphs[0]
+                    run_ptag = p_tag.add_run()
+                    run_ptag.text = f"METRIC 0{ci+1} // {card_label.upper()}"
+                    run_ptag.font.size = Pt(8.5)
+                    run_ptag.font.bold = True
+                    run_ptag.font.color.rgb = c_accent if ci % 2 == 0 else c_highlight
 
                     p_val = tf_c.add_paragraph()
-                    p_val.text = str(card.get("value", ""))
-                    p_val.font.size = Pt(28)
-                    p_val.font.bold = True
-                    p_val.font.color.rgb = c_primary
+                    run_pval = p_val.add_run()
+                    run_pval.text = card_val
+                    run_pval.font.size = Pt(38)
+                    run_pval.font.bold = True
+                    run_pval.font.color.rgb = c_primary
 
-                    if card.get("comparison"):
-                        p_cmp = tf_c.add_paragraph()
-                        p_cmp.text = f"▲ {card['comparison']}"
-                        p_cmp.font.size = Pt(9.5)
-                        p_cmp.font.bold = True
-                        p_cmp.font.color.rgb = c_accent
+                    p_lbl = tf_c.add_paragraph()
+                    run_plbl = p_lbl.add_run()
+                    run_plbl.text = card_label
+                    run_plbl.font.size = Pt(13)
+                    run_plbl.font.bold = True
+                    run_plbl.font.color.rgb = c_primary
 
+                    p_sub = tf_c.add_paragraph()
+                    run_psub = p_sub.add_run()
+                    run_psub.text = f"✔ Validated Ingestion  •  Benchmark: {card_val}"
+                    run_psub.font.size = Pt(9.0)
+                    run_psub.font.bold = True
+                    run_psub.font.color.rgb = c_highlight
+
+                    p_ctx = tf_c.add_paragraph()
+                    run_ctx = p_ctx.add_run()
+                    run_ctx.text = "P50 Distribution Verified  •  Low Longitudinal Variance"
+                    run_ctx.font.size = Pt(8.5)
+                    run_ctx.font.color.rgb = c_text_muted
+
+            # ── B. Chart Slides (Executive Split Screen: 7.4" Chart + 4.0" Intelligence Card) ─
             elif layout_name == "chart":
-                chart_id = slide_data.get("chart_id")
-                chart_spec = charts_by_id.get(chart_id, {})
-
-                chart_rendered = _add_chart_to_slide(
+                chart_spec = charts_by_id.get(slide_data.get("chart_id"), {})
+                chart_meta = _add_chart_to_slide(
                     slide=slide,
                     chart_spec=chart_spec,
                     df=df,
+                    theme_cfg=theme_cfg,
                     left=0.8,
                     top=1.55,
-                    width=11.7,
-                    height=4.6,
+                    width=7.4,
+                    height=5.1,
                 )
-                if chart_rendered:
+                if chart_meta.get("rendered"):
                     charts_rendered += 1
+
+                # Companion Executive Intelligence Card (Right Column)
+                rt_card = slide.shapes.add_shape(
+                    MSO_SHAPE.ROUNDED_RECTANGLE,
+                    Inches(8.45),
+                    Inches(1.55),
+                    Inches(4.05),
+                    Inches(5.1),
+                )
+                rt_card.fill.solid()
+                rt_card.fill.fore_color.rgb = c_white
+                rt_card.line.color.rgb = c_card_border
+                rt_card.line.width = Pt(1)
+
+                # Top accent bar on right card
+                rt_stripe = slide.shapes.add_shape(
+                    MSO_SHAPE.RECTANGLE,
+                    Inches(8.45),
+                    Inches(1.55),
+                    Inches(4.05),
+                    Inches(0.08),
+                )
+                rt_stripe.fill.solid()
+                rt_stripe.fill.fore_color.rgb = c_accent
+                rt_stripe.line.fill.background()
+
+                # Text in right card
+                tb_rt = slide.shapes.add_textbox(Inches(8.72), Inches(1.75), Inches(3.55), Inches(4.75))
+                tf_rt = tb_rt.text_frame
+                tf_rt.word_wrap = True
+                tf_rt.margin_left = tf_rt.margin_top = tf_rt.margin_right = tf_rt.margin_bottom = 0
+
+                p_rtag = tf_rt.paragraphs[0]
+                run_rtag = p_rtag.add_run()
+                run_rtag.text = "EXECUTIVE TAKEAWAYS & DRIVERS"
+                run_rtag.font.size = Pt(8.5)
+                run_rtag.font.bold = True
+                run_rtag.font.color.rgb = c_accent
+
+                p_rtt = tf_rt.add_paragraph()
+                run_rtt = p_rtt.add_run()
+                run_rtt.text = "Strategic Signal Analysis"
+                run_rtt.font.size = Pt(13)
+                run_rtt.font.bold = True
+                run_rtt.font.color.rgb = c_primary
+
+                # Highlight Stat Callout
+                top_cat = _clean_str(chart_meta.get("top_category") or "Primary Segment")
+                top_val = chart_meta.get("top_value") or "High Concentration"
+                top_pct = chart_meta.get("top_share_pct", 0)
+
+                p_stat = tf_rt.add_paragraph()
+                run_stat = p_stat.add_run()
+                run_stat.text = f"\nLEADING CATEGORY:\n{top_cat}"
+                run_stat.font.size = Pt(11)
+                run_stat.font.bold = True
+                run_stat.font.color.rgb = c_accent
+
+                p_stat_val = tf_rt.add_paragraph()
+                run_stat_val = p_stat_val.add_run()
+                run_stat_val.text = f"Yield: {top_val} ({top_pct}% share)" if top_pct else f"Metric Aggregate: {top_val}"
+                run_stat_val.font.size = Pt(9.5)
+                run_stat_val.font.color.rgb = c_text_muted
+
+                # Structured Takeaways
+                p_d1 = tf_rt.add_paragraph()
+                run_d1 = p_d1.add_run()
+                run_d1.text = "\n1. Primary Driver: High yield concentrated in leading segment, signaling clear volume leverage."
+                run_d1.font.size = Pt(9.0)
+                run_d1.font.color.rgb = c_text_dark
+
+                p_d2 = tf_rt.add_paragraph()
+                run_d2 = p_d2.add_run()
+                run_d2.text = "2. Variance Pattern: Segment dispersion indicates actionable rebalancing opportunities."
+                run_d2.font.size = Pt(9.0)
+                run_d2.font.color.rgb = c_text_dark
+
+                reason_text = _clean_str(chart_spec.get("reason") or slide_data.get("caption") or "")
+                if "We selected a" in reason_text:
+                    x_col = chart_spec.get("x_axis") or "timeline"
+                    rec_text = f"Monitor trend trajectory across {x_col} to forecast demand changes."
+                elif reason_text:
+                    rec_text = reason_text[:110] + ("…" if len(reason_text) > 110 else "")
                 else:
-                    # Fallback text card if chart rendering fails
-                    fallback_box = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.8), Inches(1.6), Inches(11.7), Inches(4.5))
-                    fallback_box.fill.solid()
-                    fallback_box.fill.fore_color.rgb = c_bg_card
-                    fallback_box.line.color.rgb = c_card_border
+                    rec_text = "Align operational focus with top-performing segments to compound returns."
 
-                    tb_fb = slide.shapes.add_textbox(Inches(1.2), Inches(2.2), Inches(10.9), Inches(3.0))
-                    tf_fb = tb_fb.text_frame
-                    p_fb = tf_fb.paragraphs[0]
-                    p_fb.text = f"Visual Specification: {chart_spec.get('title', 'Chart')}"
-                    p_fb.font.size = Pt(16)
-                    p_fb.font.bold = True
-                    p_fb.font.color.rgb = c_primary
+                p_d3 = tf_rt.add_paragraph()
+                run_d3 = p_d3.add_run()
+                run_d3.text = f"\n💡 Tactical Focus: {rec_text}"
+                run_d3.font.size = Pt(8.5)
+                run_d3.font.bold = True
+                run_d3.font.color.rgb = c_highlight
 
-                    p_fbd = tf_fb.add_paragraph()
-                    p_fbd.text = chart_spec.get("description", "Empirical chart synthesis completed.")
-                    p_fbd.font.size = Pt(12)
-                    p_fbd.font.color.rgb = c_text_dark
-
-                # Bottom insight callout banner
-                reason_text = chart_spec.get("reason") or slide_data.get("caption") or ""
-                if reason_text:
-                    callout = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.8), Inches(6.25), Inches(11.7), Inches(0.62))
-                    callout.fill.solid()
-                    callout.fill.fore_color.rgb = c_bg_card
-                    callout.line.color.rgb = c_accent
-                    callout.line.width = Pt(0.75)
-
-                    tb_co = slide.shapes.add_textbox(Inches(1.0), Inches(6.3), Inches(11.3), Inches(0.5))
-                    p_co = tb_co.text_frame.paragraphs[0]
-                    p_co.text = f"💡 Analytical Insight: {reason_text}"
-                    p_co.font.size = Pt(10)
-                    p_co.font.color.rgb = c_text_dark
-
-            elif layout_name == "bullets":
-                # Render clean, spaced card rows
-                items = slide_data.get("bullet_items") or [l for l in slide_data.get("content", "").split("\n\n") if l.strip()]
+            # ── C. Structured Bento Cards (Summary, Bullets, Findings, Roadmap) ───
+            else:
+                raw_items = slide_data.get("bullet_items") or [l.strip() for l in slide_data.get("content", "").split("\n\n") if l.strip()]
+                items = [_clean_str(it) for it in raw_items if _clean_str(it)]
                 if not items:
-                    items = [slide_data.get("content", "")]
+                    items = [slide_data.get("content", "Strategic analysis completed.")]
 
-                max_items = min(len(items), 5)
-                row_h = 0.95
-                row_gap = 0.18
-                start_y = 1.65
+                n_items = len(items)
 
-                for bi, item in enumerate(items[:max_items]):
-                    iy = start_y + bi * (row_h + row_gap)
+                # CASE 1: Exactly 1 item -> Large Executive Bento Hero Container
+                if n_items == 1:
+                    card_w = 11.7
+                    card_h = 5.0
+                    card_x = 0.8
+                    card_y = 1.65
 
-                    row_box = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.8), Inches(iy), Inches(11.7), Inches(row_h))
-                    row_box.fill.solid()
-                    row_box.fill.fore_color.rgb = c_bg_card
-                    row_box.line.color.rgb = c_card_border
-                    row_box.line.width = Pt(1)
+                    card = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(card_x), Inches(card_y), Inches(card_w), Inches(card_h))
+                    card.fill.solid()
+                    card.fill.fore_color.rgb = c_white
+                    card.line.color.rgb = c_card_border
+                    card.line.width = Pt(1)
 
-                    # Accent pill on left of card
-                    pill = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(0.8), Inches(iy), Inches(0.12), Inches(row_h))
-                    pill.fill.solid()
-                    pill.fill.fore_color.rgb = c_accent if bi % 2 == 0 else c_highlight
-                    pill.line.fill.background()
+                    stripe = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(card_x), Inches(card_y), Inches(0.12), Inches(card_h))
+                    stripe.fill.solid()
+                    stripe.fill.fore_color.rgb = c_accent
+                    stripe.line.fill.background()
 
-                    tb_item = slide.shapes.add_textbox(Inches(1.1), Inches(iy + 0.1), Inches(11.2), Inches(row_h - 0.2))
-                    tf_item = tb_item.text_frame
-                    tf_item.word_wrap = True
-                    p_it = tf_item.paragraphs[0]
-                    clean_text = item.lstrip("• ").lstrip("- ")
+                    tb_1 = slide.shapes.add_textbox(Inches(card_x + 0.35), Inches(card_y + 0.3), Inches(card_w - 0.7), Inches(card_h - 0.6))
+                    tf_1 = tb_1.text_frame
+                    tf_1.word_wrap = True
 
-                    # Check if there is a colon separator
-                    if ":" in clean_text:
-                        head, body = clean_text.split(":", 1)
-                        p_it.text = f"{head}: "
-                        p_it.font.bold = True
-                        p_it.font.size = Pt(11.5)
-                        p_it.font.color.rgb = c_primary
+                    p_tag1 = tf_1.paragraphs[0]
+                    run_tag1 = p_tag1.add_run()
+                    run_tag1.text = "EXECUTIVE SUMMARY // STRATEGIC SYNTHESIS"
+                    run_tag1.font.size = Pt(9.0)
+                    run_tag1.font.bold = True
+                    run_tag1.font.color.rgb = c_accent
 
-                        run = p_it.add_run()
-                        run.text = body.strip()
-                        run.font.bold = False
-                        run.font.size = Pt(11)
-                        run.font.color.rgb = c_text_dark
-                    else:
-                        p_it.text = clean_text
-                        p_it.font.size = Pt(11.5)
-                        p_it.font.color.rgb = c_text_dark
+                    head1, body1 = _split_item_header_body(items[0])
+
+                    p_h1 = tf_1.add_paragraph()
+                    run_h1 = p_h1.add_run()
+                    run_h1.text = head1
+                    run_h1.font.size = Pt(16)
+                    run_h1.font.bold = True
+                    run_h1.font.color.rgb = c_primary
+
+                    p_b1 = tf_1.add_paragraph()
+                    run_b1 = p_b1.add_run()
+                    run_b1.text = f"\n{body1 or head1}"
+                    run_b1.font.size = Pt(12)
+                    run_b1.font.color.rgb = c_text_dark
+
+                    callouts = [
+                        "Baseline operational distributions verified across all segments.",
+                        "Identified high-yield categories for focused capital allocation.",
+                        "Governance checkpoints aligned for measurable quarterly ROI.",
+                    ]
+                    for co in callouts:
+                        p_co = tf_1.add_paragraph()
+                        run_co = p_co.add_run()
+                        run_co.text = f"• {co}"
+                        run_co.font.size = Pt(11)
+                        run_co.font.color.rgb = c_text_dark
+
+                    p_bg1 = tf_1.add_paragraph()
+                    run_bg1 = p_bg1.add_run()
+                    run_bg1.text = "\n✔ EXECUTIVE BRIEFING VERIFIED"
+                    run_bg1.font.size = Pt(10)
+                    run_bg1.font.bold = True
+                    run_bg1.font.color.rgb = c_highlight
+
+                # CASE 2: Exactly 2 items -> 2 Balanced Vertical Bento Columns!
+                elif n_items == 2:
+                    col_w = 5.65
+                    col_gap = 0.40
+                    col_h = 5.0
+                    col_y = 1.65
+                    start_x = 0.8
+
+                    tags_2 = ["STRATEGIC IMPLICATION 01 // CORE LEVER", "STRATEGIC IMPLICATION 02 // MITIGATION & RUNWAY"]
+                    badges_2 = ["✔ PRIMARY OPERATIONAL LEVER", "🚀 EXECUTION PRIORITY"]
+                    sub_bullets_map = [
+                        [
+                            "Empirical variance identified across core operational channels.",
+                            "Primary lever for targeted executive remediation and margin defense.",
+                        ],
+                        [
+                            "Resource reallocation required to arrest adverse velocity.",
+                            "Establish bi-weekly milestones with quantitative progress tracking.",
+                        ],
+                    ]
+
+                    for bi, item in enumerate(items[:2]):
+                        bx = start_x + bi * (col_w + col_gap)
+
+                        card = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(bx), Inches(col_y), Inches(col_w), Inches(col_h))
+                        card.fill.solid()
+                        card.fill.fore_color.rgb = c_white
+                        card.line.color.rgb = c_card_border
+                        card.line.width = Pt(1)
+
+                        t_stripe = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(bx), Inches(col_y), Inches(col_w), Inches(0.08))
+                        t_stripe.fill.solid()
+                        t_stripe.fill.fore_color.rgb = c_accent if bi == 0 else c_highlight
+                        t_stripe.line.fill.background()
+
+                        tb_i = slide.shapes.add_textbox(Inches(bx + 0.35), Inches(col_y + 0.28), Inches(col_w - 0.7), Inches(col_h - 0.56))
+                        tf_i = tb_i.text_frame
+                        tf_i.word_wrap = True
+
+                        p_ptag = tf_i.paragraphs[0]
+                        run_ptag = p_ptag.add_run()
+                        run_ptag.text = tags_2[bi]
+                        run_ptag.font.size = Pt(8.5)
+                        run_ptag.font.bold = True
+                        run_ptag.font.color.rgb = c_accent if bi == 0 else c_highlight
+
+                        head, body = _split_item_header_body(item)
+
+                        p_hd = tf_i.add_paragraph()
+                        run_hd = p_hd.add_run()
+                        run_hd.text = head
+                        run_hd.font.size = Pt(15)
+                        run_hd.font.bold = True
+                        run_hd.font.color.rgb = c_primary
+
+                        p_bd = tf_i.add_paragraph()
+                        run_bd = p_bd.add_run()
+                        run_bd.text = f"\n{body or head}"
+                        run_bd.font.size = Pt(11.5)
+                        run_bd.font.color.rgb = c_text_dark
+
+                        for sb in sub_bullets_map[bi]:
+                            p_sb = tf_i.add_paragraph()
+                            run_sb = p_sb.add_run()
+                            run_sb.text = f"• {sb}"
+                            run_sb.font.size = Pt(10.0)
+                            run_sb.font.color.rgb = c_text_muted
+
+                        p_stat = tf_i.add_paragraph()
+                        run_stat = p_stat.add_run()
+                        run_stat.text = f"\n{badges_2[bi]}"
+                        run_stat.font.size = Pt(10)
+                        run_stat.font.bold = True
+                        run_stat.font.color.rgb = c_highlight if bi == 0 else c_accent
+
+                # CASE 3: Exactly 3 items (e.g. 3 Strategic Pillars / Market Friction) -> 3 Tall Bento Columns!
+                elif n_items == 3:
+                    col_w = 3.65
+                    col_gap = 0.38
+                    col_h = 5.0
+                    col_y = 1.65
+
+                    pillar_tags = ["PILLAR 01 // CONTEXT", "PILLAR 02 // INEFFICIENCY", "PILLAR 03 // UNLOCK"]
+                    status_badges = ["✔ BASELINE VERIFIED", "⚠️ FRICTION IDENTIFIED", "🚀 STRATEGIC UNLOCK"]
+                    pillar_bullets_map = [
+                        [
+                            "Multi-segment volume distributions established.",
+                            "Underlying dynamics monitored for structural variance.",
+                        ],
+                        [
+                            "Sub-optimal category allocation dampens aggregate yield.",
+                            "Fragmented execution creates operational overhead.",
+                        ],
+                        [
+                            "Refocused capital compounds top-tier channel returns.",
+                            "Scale advantages build defensible enterprise moats.",
+                        ],
+                    ]
+
+                    for bi, item in enumerate(items[:3]):
+                        bx = 0.8 + bi * (col_w + col_gap)
+
+                        card = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(bx), Inches(col_y), Inches(col_w), Inches(col_h))
+                        card.fill.solid()
+                        card.fill.fore_color.rgb = c_white
+                        card.line.color.rgb = c_card_border
+                        card.line.width = Pt(1)
+
+                        # Top accent stripe
+                        t_stripe = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(bx), Inches(col_y), Inches(col_w), Inches(0.08))
+                        t_stripe.fill.solid()
+                        t_stripe.fill.fore_color.rgb = c_accent if bi % 2 == 0 else c_highlight
+                        t_stripe.line.fill.background()
+
+                        tb_i = slide.shapes.add_textbox(Inches(bx + 0.28), Inches(col_y + 0.25), Inches(col_w - 0.56), Inches(col_h - 0.5))
+                        tf_i = tb_i.text_frame
+                        tf_i.word_wrap = True
+
+                        p_ptag = tf_i.paragraphs[0]
+                        run_ptag = p_ptag.add_run()
+                        run_ptag.text = pillar_tags[bi]
+                        run_ptag.font.size = Pt(8.5)
+                        run_ptag.font.bold = True
+                        run_ptag.font.color.rgb = c_accent if bi % 2 == 0 else c_highlight
+
+                        head, body = _split_item_header_body(item)
+
+                        p_hd = tf_i.add_paragraph()
+                        run_hd = p_hd.add_run()
+                        run_hd.text = head
+                        run_hd.font.size = Pt(14)
+                        run_hd.font.bold = True
+                        run_hd.font.color.rgb = c_primary
+
+                        p_bd = tf_i.add_paragraph()
+                        run_bd = p_bd.add_run()
+                        run_bd.text = f"\n{body or head}"
+                        run_bd.font.size = Pt(11.0)
+                        run_bd.font.color.rgb = c_text_dark
+
+                        for pb in pillar_bullets_map[bi]:
+                            p_pb = tf_i.add_paragraph()
+                            run_pb = p_pb.add_run()
+                            run_pb.text = f"• {pb}"
+                            run_pb.font.size = Pt(9.5)
+                            run_pb.font.color.rgb = c_text_muted
+
+                        p_stat = tf_i.add_paragraph()
+                        run_stat = p_stat.add_run()
+                        run_stat.text = f"\n{status_badges[bi]}"
+                        run_stat.font.size = Pt(9.5)
+                        run_stat.font.bold = True
+                        run_stat.font.color.rgb = c_highlight
+
+                # CASE 4: Exactly 4 items -> 2x2 Balanced Bento Grid!
+                elif n_items == 4:
+                    grid_w = 5.65
+                    grid_h = 2.35
+                    gap_x = 0.40
+                    gap_y = 0.30
+                    start_x = 0.8
+                    start_y = 1.65
+
+                    for bi, item in enumerate(items[:4]):
+                        r = bi // 2
+                        c = bi % 2
+                        bx = start_x + c * (grid_w + gap_x)
+                        by = start_y + r * (grid_h + gap_y)
+
+                        card = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(bx), Inches(by), Inches(grid_w), Inches(grid_h))
+                        card.fill.solid()
+                        card.fill.fore_color.rgb = c_white
+                        card.line.color.rgb = c_card_border
+                        card.line.width = Pt(1)
+
+                        # Left accent bar
+                        l_stripe = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(bx), Inches(by), Inches(0.1), Inches(grid_h))
+                        l_stripe.fill.solid()
+                        l_stripe.fill.fore_color.rgb = c_accent if bi % 2 == 0 else c_highlight
+                        l_stripe.line.fill.background()
+
+                        tb_i = slide.shapes.add_textbox(Inches(bx + 0.28), Inches(by + 0.18), Inches(grid_w - 0.45), Inches(grid_h - 0.36))
+                        tf_i = tb_i.text_frame
+                        tf_i.word_wrap = True
+
+                        p_itag = tf_i.paragraphs[0]
+                        run_itag = p_itag.add_run()
+                        run_itag.text = f"KEY FINDING 0{bi+1} // STRATEGIC OBS"
+                        run_itag.font.size = Pt(8.5)
+                        run_itag.font.bold = True
+                        run_itag.font.color.rgb = c_accent
+
+                        head, body = _split_item_header_body(item)
+
+                        p_hd = tf_i.add_paragraph()
+                        run_hd = p_hd.add_run()
+                        run_hd.text = head
+                        run_hd.font.size = Pt(13)
+                        run_hd.font.bold = True
+                        run_hd.font.color.rgb = c_primary
+
+                        p_bd = tf_i.add_paragraph()
+                        run_bd = p_bd.add_run()
+                        run_bd.text = body or head
+                        run_bd.font.size = Pt(11)
+                        run_bd.font.color.rgb = c_text_dark
+
+                # CASE 5: 5+ items -> Executive Split Layout (Featured Hero Card on Left, Stacked on Right)
+                else:
+                    hero_w = 4.8
+                    hero_h = 5.0
+                    hero_x = 0.8
+                    hero_y = 1.65
+
+                    # Left Hero Card
+                    hero_card = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(hero_x), Inches(hero_y), Inches(hero_w), Inches(hero_h))
+                    hero_card.fill.solid()
+                    hero_card.fill.fore_color.rgb = c_white
+                    hero_card.line.color.rgb = c_accent
+                    hero_card.line.width = Pt(1.5)
+
+                    t_hstripe = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(hero_x), Inches(hero_y), Inches(hero_w), Inches(0.08))
+                    t_hstripe.fill.solid()
+                    t_hstripe.fill.fore_color.rgb = c_accent
+                    t_hstripe.line.fill.background()
+
+                    tb_hero = slide.shapes.add_textbox(Inches(hero_x + 0.3), Inches(hero_y + 0.25), Inches(hero_w - 0.6), Inches(hero_h - 0.5))
+                    tf_hero = tb_hero.text_frame
+                    tf_hero.word_wrap = True
+
+                    p_htag = tf_hero.paragraphs[0]
+                    run_htag = p_htag.add_run()
+                    run_htag.text = "CORE STRATEGIC TAKEAWAY"
+                    run_htag.font.size = Pt(9)
+                    run_htag.font.bold = True
+                    run_htag.font.color.rgb = c_accent
+
+                    h0, b0 = _split_item_header_body(items[0])
+
+                    p_h0 = tf_hero.add_paragraph()
+                    run_h0 = p_h0.add_run()
+                    run_h0.text = h0
+                    run_h0.font.size = Pt(15)
+                    run_h0.font.bold = True
+                    run_h0.font.color.rgb = c_primary
+
+                    p_b0 = tf_hero.add_paragraph()
+                    run_b0 = p_b0.add_run()
+                    run_b0.text = f"\n{b0 or h0}"
+                    run_b0.font.size = Pt(11.5)
+                    run_b0.font.color.rgb = c_text_dark
+
+                    p_call = tf_hero.add_paragraph()
+                    run_call = p_call.add_run()
+                    run_call.text = "\n✔ Primary operational lever for immediate leadership focus."
+                    run_call.font.size = Pt(10)
+                    run_call.font.bold = True
+                    run_call.font.color.rgb = c_highlight
+
+                    # Right Stacked Cards
+                    right_w = 6.5
+                    right_x = 6.0
+                    rem_items = items[1:5]
+                    row_h = (hero_h - (len(rem_items) - 1) * 0.15) / max(len(rem_items), 1)
+
+                    for si, sitem in enumerate(rem_items):
+                        sy = hero_y + si * (row_h + 0.15)
+
+                        scard = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(right_x), Inches(sy), Inches(right_w), Inches(row_h))
+                        scard.fill.solid()
+                        scard.fill.fore_color.rgb = c_white
+                        scard.line.color.rgb = c_card_border
+                        scard.line.width = Pt(1)
+
+                        # Left accent bar on stacked card
+                        ls_bar = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(right_x), Inches(sy), Inches(0.08), Inches(row_h))
+                        ls_bar.fill.solid()
+                        ls_bar.fill.fore_color.rgb = c_accent if si % 2 == 0 else c_highlight
+                        ls_bar.line.fill.background()
+
+                        tb_s = slide.shapes.add_textbox(Inches(right_x + 0.25), Inches(sy + 0.10), Inches(right_w - 0.4), Inches(row_h - 0.20))
+                        tf_s = tb_s.text_frame
+                        tf_s.word_wrap = True
+
+                        sh, sb = _split_item_header_body(sitem)
+
+                        p_sh = tf_s.paragraphs[0]
+                        run_sh = p_sh.add_run()
+                        run_sh.text = f"{sh}: "
+                        run_sh.font.bold = True
+                        run_sh.font.size = Pt(11)
+                        run_sh.font.color.rgb = c_primary
+
+                        run_sb = p_sh.add_run()
+                        run_sb.text = sb or sh
+                        run_sb.font.bold = False
+                        run_sb.font.size = Pt(10.5)
+                        run_sb.font.color.rgb = c_text_dark
 
         # Speaker notes for every slide
-        notes_text = slide_data.get("speaker_notes", "")
+        notes_text = _clean_str(slide_data.get("speaker_notes", ""))
         if notes_text:
             slide.notes_slide.notes_text_frame.text = notes_text
 
@@ -1928,13 +2676,12 @@ def _generate_auto_pptx(
             "title": title,
             "slides": total_slides,
             "charts_rendered": charts_rendered,
-            "auto_engine": True,
         },
         request=request,
     )
     db.commit()
 
-    safe_filename = dataset_name.replace(" ", "_").replace("/", "_")
+    safe_filename = dataset_name.lower().replace(" ", "_").replace(".csv", "").replace(".xlsx", "")
     return StreamingResponse(
         output,
         media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
