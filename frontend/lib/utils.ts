@@ -83,3 +83,23 @@ export function getInitials(name: string | undefined | null): string {
     .join('')
     .toUpperCase();
 }
+
+/**
+ * Cleans up double-encoded or legacy mojibake characters (e.g. â€” -> —, â€¢ -> •)
+ */
+export function cleanMojibake(text: string | undefined | null): string {
+  if (!text) return '';
+  return text
+    .replace(/â€”/g, '—')
+    .replace(/â€“/g, '–')
+    .replace(/â€¦/g, '…')
+    .replace(/â€¢/g, '•')
+    .replace(/â€˜/g, "'")
+    .replace(/â€™/g, "'")
+    .replace(/â€œ/g, '"')
+    .replace(/â€/g, '"')
+    .replace(/âš ï¸ /g, '⚠️')
+    .replace(/âœ…/g, '✅')
+    .replace(/â†’/g, '→')
+    .replace(/â†/g, '←');
+}

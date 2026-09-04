@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Input } from '@/components/ui/Input';
+import { cleanMojibake } from '@/lib/utils';
 
 interface Props {
   onGeneratePresentation: (template: string, title: string) => Promise<void>;
@@ -48,7 +49,7 @@ export function PresentStep({
   datasetName,
 }: Props) {
   const [selectedTemplate, setSelectedTemplate] = useState('executive');
-  const [title, setTitle] = useState(`${datasetName} — Strategic Analysis`);
+  const [title, setTitle] = useState(`${cleanMojibake(datasetName)} — Strategic Analysis`);
 
   const handleGenerate = () => {
     onGeneratePresentation(selectedTemplate, title);

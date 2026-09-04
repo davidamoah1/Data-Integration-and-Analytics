@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { SlideChart } from '@/components/reports/SlideChart';
+import { cleanMojibake } from '@/lib/utils';
 import type { DashboardRecommendation, AutoDashboardSpec, ChartSpec } from '@/types/workflow';
 
 interface Props {
@@ -53,7 +54,7 @@ export function VisualizeStep({
               </div>
               <div>
                 <p className="font-semibold text-base">
-                  {autoDashboard?.title || 'Automated Intelligence Dashboard'}
+                  {cleanMojibake(autoDashboard?.title) || 'Automated Intelligence Dashboard'}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   Sector: <span className="capitalize font-medium text-foreground">{industryName}</span> &bull;{' '}
@@ -126,9 +127,9 @@ export function VisualizeStep({
                   <CardHeader className="pb-2">
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <CardTitle className="text-sm font-semibold">{chart.title}</CardTitle>
+                        <CardTitle className="text-sm font-semibold">{cleanMojibake(chart.title)}</CardTitle>
                         {chart.description && (
-                          <CardDescription className="text-xs mt-0.5">{chart.description}</CardDescription>
+                          <CardDescription className="text-xs mt-0.5">{cleanMojibake(chart.description)}</CardDescription>
                         )}
                       </div>
                       <Badge variant="outline" className="text-[10px] uppercase font-mono shrink-0">
@@ -138,7 +139,7 @@ export function VisualizeStep({
                   </CardHeader>
                   <CardContent className="pt-2">
                     {chart.data && chart.data.length > 0 ? (
-                      <div className="rounded-lg border bg-muted/10 p-2">
+                      <div className="w-full overflow-hidden">
                         <SlideChart
                           chartType={chart.chart_type}
                           data={chart.data as any}
@@ -155,7 +156,7 @@ export function VisualizeStep({
                     {chart.reason && (
                       <div className="mt-3 flex items-start gap-1.5 text-[11px] text-muted-foreground bg-muted/30 p-2 rounded">
                         <Info className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
-                        <span>{chart.reason}</span>
+                        <span>{cleanMojibake(chart.reason)}</span>
                       </div>
                     )}
                   </CardContent>

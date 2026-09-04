@@ -1,4 +1,4 @@
-﻿"""Reporting & Presentation Engine â€” Phase 8.
+"""Reporting & Presentation Engine — Phase 8.
 
 Builds executive-ready reports with:
   - Professional PDF export (cover page, TOC, sections, charts, tables)
@@ -318,7 +318,7 @@ class ReportTemplateFactory:
                 ReportSection(
                     section_type=ReportSectionType.COVER,
                     title=title,
-                    content=f"{org_name} â€” Executive Report",
+                    content=f"{org_name} — Executive Report",
                     order=0,
                     page_break=True,
                 ),
@@ -377,7 +377,7 @@ class ReportTemplateFactory:
                 ReportSection(
                     section_type=ReportSectionType.COVER,
                     title=title,
-                    content=f"{org_name} â€” Analytical Report",
+                    content=f"{org_name} — Analytical Report",
                     order=0,
                     page_break=True,
                 ),
@@ -420,7 +420,7 @@ class ReportTemplateFactory:
                 ),
                 ReportSection(
                     section_type=ReportSectionType.APPENDIX,
-                    title="Appendix â€” Raw Data",
+                    title="Appendix — Raw Data",
                     order=8,
                     page_break=True,
                 ),
@@ -447,7 +447,7 @@ class ReportTemplateFactory:
                 ReportSection(
                     section_type=ReportSectionType.COVER,
                     title=title,
-                    content=f"{org_name} â€” Research Report",
+                    content=f"{org_name} — Research Report",
                     order=0,
                     page_break=True,
                 ),

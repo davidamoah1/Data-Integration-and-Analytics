@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Input } from '@/components/ui/Input';
+import { cleanMojibake } from '@/lib/utils';
 import type { ReportConfig } from '@/types/workflow';
 
 interface Props {
@@ -28,7 +29,7 @@ export function ReportStep({
   hasDownloadedReport = false,
 }: Props) {
   const [config, setConfig] = useState<ReportConfig>({
-    title: `${datasetName} — Decision Audit Report`,
+    title: `${cleanMojibake(datasetName)} — Decision Audit Report`,
     organization: '',
     author: '',
     include_executive_summary: true,

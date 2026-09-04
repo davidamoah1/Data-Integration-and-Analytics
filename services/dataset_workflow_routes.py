@@ -1690,7 +1690,7 @@ async def generate_presentation(
     dashboard = _stage_result(state_dict, WorkflowStage.DASHBOARD_READY) or {}
 
     dataset_name = state_dict.get("dataset_name", "Dataset")
-    title = payload.title or f"{dataset_name} â€” Analysis Presentation"
+    title = payload.title or f"{dataset_name} — Analysis Presentation"
 
     # â”€â”€ Use canonical auto dashboard/presentation if available â”€â”€
     auto_dashboard = dashboard.get("auto_dashboard") if isinstance(dashboard, dict) else None

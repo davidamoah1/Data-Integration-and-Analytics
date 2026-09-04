@@ -1,4 +1,4 @@
-﻿"""Visualization Intelligence Engine â€” the single canonical entry point.
+"""Visualization Intelligence Engine — the single canonical entry point.
 
 This is the ONE authoritative visualization service. Every visualization-
 producing workflow (dashboard, report, presentation, studios) must call
@@ -160,7 +160,7 @@ class VisualizationIntelligenceEngine:
 
         # 8. Generate dashboard layout
         dashboard = self.dashboard_layout_engine.generate_layout(
-            title=f"{dataset_name} â€” Dashboard",
+            title=f"{dataset_name} — Dashboard",
             subtitle=f"Auto-generated from {dataset_name} ({industry} industry)",
             industry=industry,
             dataset_name=dataset_name,

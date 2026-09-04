@@ -1,4 +1,4 @@
-﻿"""Presentation Layout Engine.
+"""Presentation Layout Engine.
 
 Automatically determines:
   - Number of slides
@@ -244,9 +244,9 @@ class PresentationLayoutEngine:
         content_lines = []
         for insight in top_insights:
             icon = (
-                "âš ï¸"
+                "⚠️"
                 if insight.severity == "critical"
-                else "âœ…" if insight.severity == "positive" else "â€¢"
+                else "✅" if insight.severity == "positive" else "•"
             )
             content_lines.append(f"{icon} {insight.title}: {insight.description}")
 
@@ -263,7 +263,7 @@ class PresentationLayoutEngine:
         self, recommendations: list[str], slide_number: int
     ) -> dict[str, Any]:
         """Create a recommendations slide."""
-        content = "\n".join(f"â€¢ {r}" for r in recommendations[:6])
+        content = "\n".join(f"• {r}" for r in recommendations[:6])
         return {
             "slide_number": slide_number,
             "layout": "bullets",
