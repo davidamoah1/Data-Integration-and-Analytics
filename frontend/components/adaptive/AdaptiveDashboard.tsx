@@ -109,27 +109,28 @@ export function AdaptiveDashboard() {
   return (
     <div className="space-y-8">
       {/* ── 1. Executive Masthead Header ───────────────────────── */}
-      <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 p-6 text-white shadow-xl dark:border-slate-800 md:p-8">
+      <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 md:p-8">
+        <div className="absolute left-0 top-0 h-1.5 w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-500" />
         <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2.5">
-              <Badge variant="outline" className="border-sky-400/40 bg-sky-500/10 text-sky-300 font-semibold">
-                <Cpu className="mr-1 h-3 w-3 text-sky-400" />
+              <Badge variant="outline" className="border-blue-200 bg-blue-50/80 text-blue-700 font-semibold dark:border-blue-900/50 dark:bg-blue-950/40 dark:text-blue-300">
+                <Cpu className="mr-1.5 h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
                 INTELLIGENT COMMAND CENTER
               </Badge>
-              <Badge variant="outline" className="border-emerald-400/40 bg-emerald-500/10 text-emerald-300">
-                <CheckCircle2 className="mr-1 h-3 w-3 text-emerald-400" />
+              <Badge variant="outline" className="border-emerald-200 bg-emerald-50/80 text-emerald-700 font-medium dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-300">
+                <CheckCircle2 className="mr-1.5 h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
                 SOC-2 TYPE II CERTIFIED
               </Badge>
-              <Badge variant="outline" className="border-slate-600 bg-slate-800/80 text-slate-300">
-                <ShieldCheck className="mr-1 h-3 w-3 text-indigo-400" />
+              <Badge variant="outline" className="border-slate-200 bg-slate-100/80 text-slate-700 font-medium dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                <ShieldCheck className="mr-1.5 h-3.5 w-3.5 text-slate-500 dark:text-slate-400" />
                 {orgName}
               </Badge>
             </div>
-            <h1 className="text-2xl font-extrabold tracking-tight text-white md:text-3xl">
+            <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white md:text-3xl">
               Welcome, {firstName}
             </h1>
-            <p className="max-w-2xl text-sm text-slate-300 md:text-base">
+            <p className="max-w-2xl text-sm text-slate-600 dark:text-slate-400 md:text-base">
               Autonomous telemetry, executive scorecards, and continuous data pipelines operating at 100% capacity.
             </p>
           </div>
@@ -137,7 +138,7 @@ export function AdaptiveDashboard() {
           <div className="flex flex-wrap items-center gap-3">
             <Button
               onClick={() => router.push('/data-to-decision')}
-              className="bg-sky-500 font-semibold text-slate-950 shadow-lg shadow-sky-500/20 hover:bg-sky-400"
+              className="bg-blue-600 font-semibold text-white shadow-sm hover:bg-blue-700 transition-all"
             >
               <Sparkles className="mr-2 h-4 w-4" />
               New Data Workflow
@@ -145,17 +146,13 @@ export function AdaptiveDashboard() {
             <Button
               variant="outline"
               onClick={() => router.push('/analytics')}
-              className="border-slate-600 bg-slate-800/60 text-white hover:bg-slate-700/80 hover:text-white"
+              className="border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900 shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
             >
-              <BarChart3 className="mr-2 h-4 w-4 text-sky-400" />
+              <BarChart3 className="mr-2 h-4 w-4 text-blue-600 dark:text-blue-400" />
               Analytics Studio
             </Button>
           </div>
         </div>
-
-        {/* Subtle decorative background mesh */}
-        <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-sky-500/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-16 right-32 h-64 w-64 rounded-full bg-indigo-500/10 blur-3xl" />
       </div>
 
       {/* ── 2. Executive Metric Bento Grid (4 Live Bento Cards) ── */}
