@@ -19,7 +19,7 @@
     "@ducanh2912/next-pwa": "^10.2.9",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
-    "lucide-react": "^0.417.0",
+    "lucide-react": "^1.38.0",
     "next": "16.3.2",
     "react": "19.2.8",
     "react-dom": "19.2.8",
